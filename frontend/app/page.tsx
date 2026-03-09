@@ -108,7 +108,7 @@ function ClipCard({ clip, selected, onSelect }: {
         <div onClick={(e) => e.stopPropagation()}>
           <div className="bg-black">
             <video controls className="w-full" style={{ maxHeight: 260, display: "block" }}>
-              <source src={`http://localhost:8000${clip.mp4}`} type="video/mp4" />
+              <source src={`${process.env.NEXT_PUBLIC_API_URL || ""}${clip.mp4}`} type="video/mp4" />
             </video>
           </div>
           <div className="px-4 py-4 space-y-4">
@@ -126,12 +126,12 @@ function ClipCard({ clip, selected, onSelect }: {
               <p className="text-xs mt-2" style={{ color: "#007aff" }}>{clip.hashtags}</p>
             </div>
             <div className="flex gap-2 pt-1">
-              <a href={`http://localhost:8000${clip.mp4}`} download
+              <a href={`${process.env.NEXT_PUBLIC_API_URL || ""}${clip.mp4}`} download
                 className="flex-1 text-center py-2.5 rounded-xl text-xs font-semibold text-white"
                 style={{ background: "#007aff" }}>
                 MP4 İndir
               </a>
-              <a href={`http://localhost:8000${clip.srt}`} download
+              <a href={`${process.env.NEXT_PUBLIC_API_URL || ""}${clip.srt}`} download
                 className="flex-1 text-center py-2.5 rounded-xl text-xs font-semibold"
                 style={{ background: "#f2f2f7", color: "#3a3a3c", border: "1px solid rgba(0,0,0,0.06)" }}>
                 SRT İndir
@@ -169,7 +169,7 @@ function AnalysisPanel({ clip, result, logs, loading, progress, currentStep }: {
             <span className="text-xs font-bold uppercase tracking-wider" style={{color: "#1c1c1e"}}>Analiz Raporu</span>
           </div>
           <a 
-            href={`http://localhost:8000${result.pdf}`} 
+            href={`${process.env.NEXT_PUBLIC_API_URL || ""}${result.pdf}`} 
             download 
             className="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm"
             style={{ background: "#30d158" }}
@@ -422,7 +422,7 @@ export default function Home() {
       }
     } catch {
       addLog("Backend'e bağlanılamadı.", "error");
-      setError("Backend'e bağlanılamadı. localhost:8000 çalışıyor mu?");
+      setError("Backend'e bağlanılamadı. Backend bağlantı hatası?");
       setLoading(false);
     }
   };
