@@ -24,7 +24,7 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
     print("[Downloader] Video indiriliyor...")
     mp4_cmd = [
         "yt-dlp", "--no-warnings", "--cookies", "cookies.txt",
-        "-f", "bv*+ba/b",
+        "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
         "--merge-output-format", "mp4",
         "-o", str(job_dir / "source.%(ext)s"),
         url,
