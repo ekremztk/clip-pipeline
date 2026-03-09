@@ -15,7 +15,7 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
     mp3_path = str(job_dir / "audio.mp3")
 
     # ── Get title ─────────────────────────────────────────
-    info_cmd = ["yt-dlp", "--no-warnings", "--print", "title", "--no-download", url]
+    info_cmd = ["yt-dlp", "--no-warnings", "--cookies", "cookies.txt", "--print", "title", "--no-download", url]
     result = subprocess.run(info_cmd, capture_output=True, text=True)
     title = sanitize(result.stdout.strip()) if result.returncode == 0 else "video"
     print(f"[Downloader] Başlık: {title}")
@@ -23,8 +23,8 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
     # ── Download video ────────────────────────────────────
     print("[Downloader] Video indiriliyor...")
     mp4_cmd = [
-        "yt-dlp", "--no-warnings",
-        "-S", "res:1080,ext:mp4,codec:avc",
+        "yt-dlp", "--no-warnings", "--cookies", "cookies.txt",
+        "-f", "bv*+ba/b",
         "--merge-output-format", "mp4",
         "-o", str(job_dir / "source.%(ext)s"),
         url,
