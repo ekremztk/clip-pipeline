@@ -22,3 +22,6 @@ scenedetect[opencv]
 # Yüz takibi - auto reframe
 mediapipe
 opencv-python
+
+# PDF rapor
+reportlab
