@@ -1,0 +1,12 @@
+{
+  "font": "Montserrat-Bold",
+  "base_color": "white",
+  "highlight_color": "yellow",
+  "base_size": 72,
+  "highlight_scale": 1.4,
+  "animation": "pop",
+  "position": "lower_third",
+  "words_per_line": 3,
+  "background_box": true,
+  "background_opacity": 0.5
+}

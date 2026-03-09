@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Output
+backend/output/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# Mac
+.DS_Store
