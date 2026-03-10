@@ -54,7 +54,7 @@ def transcribe(audio_path: str, language: str = "tr") -> dict:
         # Model yükle — large-v2 en iyi Türkçe desteği sunar
         # CPU için compute_type="int8" kullan (Mac + Railway uyumlu)
         model = whisperx.load_model(
-            "large-v2",
+            "medium",
             device="cpu",
             compute_type="int8",
             language=language
