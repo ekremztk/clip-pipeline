@@ -141,10 +141,10 @@ def _transcribe_chunked(client, audio_path: str, language: str) -> dict:
 
 
 def _parse_groq_response(response, offset: float = 0.0) -> dict:
-    """Groq API yanıtını standart formata çevirir."""
+    """Groq API yanıtını standart formata çevirir (Gelişmiş Garantili Metin Okuyucu)."""
     segments = []
 
-    # Groq API bazen Obje bazen Sözlük (Dict) döner. İkisini de kapsayan garantili okuma:
+    # Groq API bazen Obje bazen Sözlük (Dict) döner.
     if isinstance(response, dict):
         raw_segments = response.get("segments", [])
         raw_words = response.get("words", [])
@@ -208,10 +208,6 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
         }]
 
     return {"segments": segments}
-        
-    except Exception as e:
-        print(f"[Transcriber] ❌ Groq Error: {e}")
-        return {"segments": []}
 
 
 def _fallback_transcribe(audio_path: str) -> dict:
