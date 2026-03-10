@@ -71,7 +71,7 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
     # Adım 2: Geniş Kapsamlı Formatla İndirme (Senin orijinal yaklaşımın)
     mp4_cmd =[
         "yt-dlp", "--no-warnings",
-        "-f", "bestvideo+bestaudio/best",
+        "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
         "--merge-output-format", "mp4",
         "-o", str(job_dir / "source.%(ext)s")
     ] + cookie_args + success_strategy["bypass_args"] + [url]
