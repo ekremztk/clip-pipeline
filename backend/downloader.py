@@ -32,10 +32,15 @@ def download_video(url: str, job_id: str):
         # Ana indirme komutu - Bot engeline karşı Android İstemcisi taklidi
         download_cmd =[
             "yt-dlp",
-            "--rm-cache-dir", # Eski engellenmiş önbellekleri temizler
-            "--extractor-args", "youtube:player_client=android,ios,web", # Bypass argümanı
-            "--user-agent", "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.79 Mobile Safari/537.36",
+            "--rm-cache-dir",
+            "--extractor-args", "youtube:player_client=tv", # TV yüksek kalite ve bypass sağlar
+            "--user-agent", "Mozilla/5.0 (SmartHub; SMART-TV; U; Linux/SmartTV+2015; Maple2012) AppleWebKit/537.42+ (KHTML, like Gecko) TV Safari/537.42+",
+            
+            # AMATÖR OLMAYAN ÇÖZÜM: Limit yok. En iyi video ve en iyi sesi bul, mp4 olarak birleştir.
+            # Eğer ayrık stream yoksa en iyi tekil mp4'ü al, o da yoksa bulduğun en iyisini al.
             "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+            "--merge-output-format", "mp4",
+            
             "-o", video_path,
             url
         ]
