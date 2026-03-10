@@ -5,9 +5,14 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# KENDİ COBALT API URL'Nİ BURAYA YAZACAKSIN (Adım 2'de anlattım)
-# Şimdilik halka açık sunucuyu (tarayıcı maskesiyle) kullanıyor.
-COBALT_API_URL = os.getenv("COBALT_API_URL", "cobalt-production-9619.up.railway.app")
+# URL'ni çevresel değişkenden veya direkt kod içinden alıyoruz
+RAW_COBALT_URL = os.getenv("COBALT_API_URL", "cobalt-production-9619.up.railway.app")
+
+# KENDİ KENDİNİ İYİLEŞTİRME: Eğer URL'nin başında http/https yoksa otomatik olarak ekle!
+if not RAW_COBALT_URL.startswith("http"):
+    COBALT_API_URL = f"https://{RAW_COBALT_URL}"
+else:
+    COBALT_API_URL = RAW_COBALT_URL
 
 def download_video(url: str, job_id: str):
     job_dir = f"jobs/{job_id}"
@@ -17,19 +22,17 @@ def download_video(url: str, job_id: str):
     audio_path = os.path.join(job_dir, "audio.mp3")
     video_title = "YouTube Video"
 
-    logger.info(f"[Downloader] 🚀 SADECE Cobalt API ile indirme başlatılıyor: {url}")
+    logger.info(f"[Downloader] 🚀 SADECE Kendi Cobalt API'miz ile indirme başlatılıyor: {url}")
+    logger.info(f"[Downloader] 🔗 API Adresi: {COBALT_API_URL}")
     
     try:
-        # Public API'yi bot olmadığımıza ikna eden kusursuz maske
+        # Kendi sunucumuz olduğu için maskeye gerek yok, sadece temel API kuralları yeterli.
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "Origin": "https://cobalt.tools",
-            "Referer": "https://cobalt.tools/"
+            "User-Agent": "ClipPipeline-Worker/1.0"
         }
         
-        # Cobalt v7 API formatı
         payload = {
             "url": url,
             "videoQuality": "1080",
@@ -41,12 +44,11 @@ def download_video(url: str, job_id: str):
         resp.raise_for_status()
         data = resp.json()
         
-        # API bize indirme linki veriyor
         download_url = data.get("url")
         if not download_url:
             raise RuntimeError(f"Cobalt API indirme linki vermedi. Yanıt: {data}")
             
-        logger.info("[Downloader] 📥 Cobalt API indirme linkini buldu (Bypass Başarılı!), MP4 çekiliyor...")
+        logger.info("[Downloader] 📥 Kendi API'miz indirme linkini buldu! MP4 sunucumuza çekiliyor...")
         
         # Linkten videoyu sunucumuza (Railway) indir
         with requests.get(download_url, stream=True, timeout=60) as r:
@@ -55,13 +57,16 @@ def download_video(url: str, job_id: str):
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
                     
-        logger.info("[Downloader] ✅ Cobalt API ile HD video başarıyla indirildi.")
+        logger.info("[Downloader] ✅ Özel Cobalt API ile HD video başarıyla indirildi.")
 
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"[Downloader] ❌ API HTTP Hatası: {http_err.response.text}")
+        raise RuntimeError(f"Video indirilemedi. API Hatası: {http_err.response.status_code}") from http_err
     except Exception as e:
-        logger.error(f"[Downloader] ❌ Cobalt API indirme hatası: {e}")
-        raise RuntimeError("Video indirilemedi. Bağlantı reddedildi.") from e
+        logger.error(f"[Downloader] ❌ İndirme sırasında beklenmeyen hata: {e}")
+        raise RuntimeError("Video indirilemedi. Bağlantı kurulamadı.") from e
 
-    # --- Sesi Çıkartma (Aşama 1'in transkript modülünü bozmamak için) ---
+    # --- Sesi Çıkartma ---
     logger.info("[Downloader] 🎵 MP3 ayrıştırılıyor...")
     try:
         ffmpeg_cmd =[
