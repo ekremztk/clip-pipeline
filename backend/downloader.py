@@ -6,41 +6,29 @@ import requests
 logger = logging.getLogger(__name__)
 
 def download_video(url: str, job_id: str):
-    """
-    Çift Katmanlı (Bypass + Fallback) İndirme Mimarisini kullanarak
-    YouTube videolarını güvenli bir şekilde indirir.
-    """
-    # 1. Klasör hazırlığı
-    # Mevcut pipeline yapını bozmamak için job_id üzerinden ilerliyoruz
     job_dir = f"jobs/{job_id}"
     os.makedirs(job_dir, exist_ok=True)
     
     video_path = os.path.join(job_dir, "video.mp4")
     audio_path = os.path.join(job_dir, "audio.mp3")
-    
-    video_title = "YouTube Video" # Fallback varsayılan başlık
+    video_title = "YouTube Video"
 
-    # --- KATMAN A: Optimize Edilmiş yt-dlp (Mobil Bypass) ---
-    logger.info(f"[Downloader] 🚀 Katman A (Mobil Cihaz Bypass) deneniyor: {url}")
+    # --- KATMAN A: iOS Bypass (DRM'siz, Yüksek Kalite, Bot Engeli Aşma) ---
+    logger.info(f"[Downloader] 🚀 Katman A (iOS Bypass - DRM'siz YÜKSEK KALİTE) deneniyor: {url}")
     try:
-        # Önce başlığı almayı deneyelim
-        title_cmd =["yt-dlp", "--get-title", "--extractor-args", "youtube:player_client=android", url]
+        title_cmd =["yt-dlp", "--get-title", "--extractor-args", "youtube:player_client=ios", url]
         title_result = subprocess.run(title_cmd, capture_output=True, text=True)
         if title_result.returncode == 0 and title_result.stdout.strip():
             video_title = title_result.stdout.strip()
 
-        # Ana indirme komutu - Bot engeline karşı Android İstemcisi taklidi
+        # KALİTE GÜNCELLEMESİ: iOS İstemcisi ve Safari User-Agent
         download_cmd =[
             "yt-dlp",
             "--rm-cache-dir",
-            "--extractor-args", "youtube:player_client=tv", # TV yüksek kalite ve bypass sağlar
-            "--user-agent", "Mozilla/5.0 (SmartHub; SMART-TV; U; Linux/SmartTV+2015; Maple2012) AppleWebKit/537.42+ (KHTML, like Gecko) TV Safari/537.42+",
-            
-            # AMATÖR OLMAYAN ÇÖZÜM: Limit yok. En iyi video ve en iyi sesi bul, mp4 olarak birleştir.
-            # Eğer ayrık stream yoksa en iyi tekil mp4'ü al, o da yoksa bulduğun en iyisini al.
+            "--extractor-args", "youtube:player_client=ios", # iOS: DRM içermez, yüksek kalite verir
+            "--user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
             "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
             "--merge-output-format", "mp4",
-            
             "-o", video_path,
             url
         ]
@@ -49,16 +37,15 @@ def download_video(url: str, job_id: str):
         if result.returncode != 0:
             raise RuntimeError(f"yt-dlp red yedi: {result.stderr}")
             
-        logger.info("[Downloader] ✅ Katman A ile indirme başarılı.")
+        logger.info("[Downloader] ✅ Katman A ile YÜKSEK KALİTELİ indirme başarılı.")
 
     except Exception as e:
         logger.warning(f"[Downloader] ⚠️ Katman A başarısız oldu. Hata: {e}")
-        logger.info("[Downloader] 🔄 Katman B (Fallback API) devreye giriyor! Sistem kurtarılıyor...")
+        logger.info("[Downloader] 🔄 Katman B (Cobalt API v7 Fallback) devreye giriyor! Sistem kurtarılıyor...")
         
-        # --- KATMAN B: Fallback (Cobalt API) ---
+        # --- KATMAN B: Fallback (Cobalt API v7 Güncel Sürüm) ---
         try:
-            # Alternatif açık kaynak API'den direkt indirme linki istiyoruz
-            api_url = "https://api.cobalt.tools/api/json"
+            api_url = "https://api.cobalt.tools/"  # v7 ile uç nokta güncellendi (artık /api/json yok)
             headers = {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
@@ -66,40 +53,40 @@ def download_video(url: str, job_id: str):
             }
             payload = {
                 "url": url,
-                "vCodec": "h264",
-                "vQuality": "1080",
-                "isAudioOnly": False
+                "videoQuality": "1080", # v7 parametre güncellemesi
+                "filenamePattern": "classic"
             }
             
             resp = requests.post(api_url, json=payload, headers=headers, timeout=20)
             resp.raise_for_status()
             data = resp.json()
             
-            if data.get("status") in ["redirect", "stream", "success"]:
-                download_url = data.get("url")
-                logger.info("[Downloader] 📥 Fallback API'den taze link alındı, dosya aktarılıyor...")
+            # v7 sürümü direkt olarak url döndürebilir veya status = success olabilir
+            download_url = data.get("url")
+            
+            if download_url:
+                logger.info("[Downloader] 📥 Fallback API'den taze HD link alındı, dosya aktarılıyor...")
                 
                 with requests.get(download_url, stream=True, timeout=30) as r:
                     r.raise_for_status()
                     with open(video_path, 'wb') as f:
                         for chunk in r.iter_content(chunk_size=8192):
                             f.write(chunk)
-                logger.info("[Downloader] ✅ Katman B (Fallback) ile indirme başarılı.")
+                logger.info("[Downloader] ✅ Katman B (Fallback) ile HD indirme başarılı.")
             else:
-                raise RuntimeError("Fallback API link üretemedi.")
+                raise RuntimeError("Fallback API v7 link üretemedi. Yanıt: " + str(data))
                 
         except Exception as fallback_e:
-            logger.error(f"[Downloader] ❌ Tüm indirme yöntemleri (A ve B) başarısız oldu! Hata: {fallback_e}")
-            raise RuntimeError("Video indirilemedi. YouTube çok sert bir kısıtlama uyguluyor olabilir.") from fallback_e
+            logger.error(f"[Downloader] ❌ Tüm indirme yöntemleri başarısız oldu! Hata: {fallback_e}")
+            raise RuntimeError("Video indirilemedi. Bypass mekanizmaları aşılamadı.") from fallback_e
 
-    # 3. Sesi Çıkartma (Whisper Transkripti İçin)
+    # --- 3. Sesi Çıkartma (Whisper Transkripti İçin) ---
     logger.info("[Downloader] 🎵 Groq Whisper API için MP3 ayrıştırılıyor...")
     try:
-        # İndirme işlemi A veya B hangi yöntemle yapılmış olursa olsun FFmpeg bunu dönüştürecektir
         ffmpeg_cmd =[
             "ffmpeg", "-i", video_path, 
             "-q:a", "0", "-map", "a", 
-            audio_path, "-y" # -y dosya varsa üzerine yazar
+            audio_path, "-y"
         ]
         subprocess.run(ffmpeg_cmd, capture_output=True, text=True, check=True)
         logger.info("[Downloader] ✅ MP3 ayrıştırma başarılı.")
