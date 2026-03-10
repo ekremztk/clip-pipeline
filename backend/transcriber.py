@@ -144,37 +144,62 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
     """Groq API yanıtını standart formata çevirir."""
     segments = []
 
-    raw_segments = getattr(response, "segments", []) or []
-    raw_words = getattr(response, "words", []) or []
+    # Groq API bazen Obje bazen Sözlük (Dict) döner. İkisini de kapsayan garantili okuma:
+    if isinstance(response, dict):
+        raw_segments = response.get("segments", [])
+        raw_words = response.get("words", [])
+        full_text = response.get("text", "").strip()
+    else:
+        raw_segments = getattr(response, "segments", []) or []
+        raw_words = getattr(response, "words", []) or []
+        full_text = getattr(response, "text", "").strip()
 
     word_list = []
     for w in raw_words:
+        if isinstance(w, dict):
+            w_word = w.get("word", "")
+            w_start = w.get("start", 0.0)
+            w_end = w.get("end", 0.0)
+        else:
+            w_word = getattr(w, "word", "")
+            w_start = getattr(w, "start", 0.0)
+            w_end = getattr(w, "end", 0.0)
+
         word_list.append({
-            "word": getattr(w, "word", ""),
-            "start": round(getattr(w, "start", 0) + offset, 3),
-            "end": round(getattr(w, "end", 0) + offset, 3),
+            "word": w_word,
+            "start": round(w_start + offset, 3),
+            "end": round(w_end + offset, 3),
             "score": 0.99
         })
 
     for seg in raw_segments:
-        seg_start = round(getattr(seg, "start", 0) + offset, 3)
-        seg_end = round(getattr(seg, "end", 0) + offset, 3)
-        seg_text = getattr(seg, "text", "").strip()
+        if isinstance(seg, dict):
+            seg_start = seg.get("start", 0.0)
+            seg_end = seg.get("end", 0.0)
+            seg_text = seg.get("text", "").strip()
+        else:
+            seg_start = getattr(seg, "start", 0.0)
+            seg_end = getattr(seg, "end", 0.0)
+            seg_text = getattr(seg, "text", "").strip()
+
+        seg_start = round(seg_start + offset, 3)
+        seg_end = round(seg_end + offset, 3)
 
         seg_words = [
             w for w in word_list
             if w["start"] >= seg_start and w["end"] <= seg_end + 0.1
         ]
 
-        segments.append({
-            "start": seg_start,
-            "end": seg_end,
-            "text": seg_text,
-            "words": seg_words
-        })
+        # YALNIZCA içi dolu metinleri listeye ekle
+        if seg_text and seg_text.strip():
+            segments.append({
+                "start": seg_start,
+                "end": seg_end,
+                "text": seg_text,
+                "words": seg_words
+            })
 
     if not segments and word_list:
-        full_text = getattr(response, "text", "").strip()
         segments = [{
             "start": word_list[0]["start"] if word_list else 0,
             "end": word_list[-1]["end"] if word_list else 0,
@@ -183,6 +208,10 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
         }]
 
     return {"segments": segments}
+        
+    except Exception as e:
+        print(f"[Transcriber] ❌ Groq Error: {e}")
+        return {"segments": []}
 
 
 def _fallback_transcribe(audio_path: str) -> dict:

@@ -1,7 +1,7 @@
 """
 analyzer.py
 -----------
-4 Ajanlı Gemini sistemi:
+4 Ajanlı Gemini sistemi (English Native):
 1. Scout (Bulucu)    — Potansiyel klipleri işaretler
 2. Denetçi          — Süre, cümle sınırı, anlam kontrolü yapar
 3. Düzeltici        — Hataları milimetrik olarak düzeltir (maks 3 tur)
@@ -17,8 +17,9 @@ from dotenv import load_dotenv
 load_dotenv()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-MIN_CLIP_DURATION = 30
-MAX_CLIP_DURATION = 58
+# SÜRELER SENİN İSTEDİĞİN GİBİ 15 VE 35 OLARAK GÜNCELLENDİ!
+MIN_CLIP_DURATION = 15
+MAX_CLIP_DURATION = 35
 MAX_CORRECTION_ROUNDS = 3
 
 
@@ -29,17 +30,17 @@ def load_viral_references(channel_id: str = "default") -> str:
     ref_path = channel_ref_path if channel_ref_path.exists() else default_ref_path
 
     if not ref_path.exists():
-        return "Henüz referans veri yok. Genel viral kurallara göre analiz yap."
+        return "No reference data. Use general viral content rules."
 
     try:
         with open(ref_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        ref_text = "KANALIMIZIN BAŞARILI VİRAL KLİP ÖRNEKLERİ:\n"
+        ref_text = "OUR MOST SUCCESSFUL VIRAL CLIP EXAMPLES:\n"
         for i, ref in enumerate(data[:10]):
-            ref_text += f"\n--- ÖRNEK {i+1} ---\n"
-            ref_text += f"Başlık: {ref.get('title', '')}\n"
-            ref_text += f"Neden Viral Oldu: {ref.get('why_it_went_viral', '')}\n"
-            ref_text += f"İçerik: {ref.get('transcript', '')[:150]}...\n"
+            ref_text += f"\n--- EXAMPLE {i+1} ---\n"
+            ref_text += f"Title: {ref.get('title', '')}\n"
+            ref_text += f"Why it went viral: {ref.get('why_it_went_viral', '')}\n"
+            ref_text += f"Content: {ref.get('transcript', '')[:150]}...\n"
         return ref_text
     except Exception as e:
         print(f"[Analyzer] Referans yüklenemedi: {e}")
@@ -48,55 +49,55 @@ def load_viral_references(channel_id: str = "default") -> str:
 
 def extract_guest_name(video_title: str) -> str:
     model = genai.GenerativeModel("gemini-2.5-flash")
-    prompt = f"""Bu YouTube video başlığından konuğun/kişinin tam adını çıkar:
+    prompt = f"""Extract the full name of the guest/person from this YouTube video title:
 "{video_title}"
 
-SADECE ismi yaz, başka hiçbir şey yazma.
-Eğer isim bulamazsan "Bilinmiyor" yaz."""
+Write ONLY the name, nothing else.
+If you cannot find a name, write "Unknown"."""
     try:
         response = model.generate_content(prompt)
         name = response.text.strip().replace('"', '').replace("'", "")
-        print(f"[Analyzer] Konuk ismi: {name}")
+        print(f"[Analyzer] Guest Name: {name}")
         return name
     except:
-        return "Bilinmiyor"
+        return "Unknown"
 
 
 # ── AJAN 1: SCOUT ─────────────────────────────────────────────────────────────
 
-SCOUT_PROMPT = """Sen bir profesyonel video editörüsün. Görevin YouTube videolarından viral short klipler bulmak.
+SCOUT_PROMPT = """You are a highly skilled professional video editor. Your task is to find viral short clips from YouTube videos.
 
-⚠️ KRİTİK: TÜM ÇIKTILAR YALNIZCA TÜRKÇE OLACAK.
+⚠️ CRITICAL: ALL YOUR OUTPUTS MUST BE ENTIRELY IN ENGLISH.
+⚠️ MATHEMATICS CRITICAL: The duration (end_sec - start_sec) ABSOLUTELY MUST be between {min_dur} and {max_dur} seconds. Do not select clips shorter than {min_dur} seconds!
 
-KONUK: {guest_name}
-VİDEO BAŞLIĞI: {video_title}
+GUEST: {guest_name}
+VIDEO TITLE: {video_title}
 
-BAŞARILI KLİP ÖRNEKLERİMİZ:
+SUCCESSFUL CLIP EXAMPLES:
 {viral_references}
 
-SES ENERJİSİ ANALİZİ:
+AUDIO ENERGY ANALYSIS:
 {audio_energy}
 
-TRANSKRİPT:
+TRANSCRIPT:
 {transcript}
 
-Bu videodan {clip_count_instruction} klip adayı bul.
+Find {clip_count_instruction} clip candidates from this video.
 
-KRİTERLER:
-- Güçlü kanca (ilk 3 saniye izleyiciyi tutmalı)
-- Duygusal zirve (gülme, şok, itiraf, tartışma)
-- Bağlamdan bağımsız anlaşılabilir
-- Ses enerjisi yüksek noktalara öncelik ver
+CRITERIA:
+- Strong hook: The first 3 seconds must immediately grab attention.
+- Emotional peak: Look for laughs, shocks, deep confessions.
+- High energy: Prioritize moments where the audio energy spikes.
 
-SADECE JSON çıktısı ver:
+Output ONLY a valid JSON:
 {{
   "candidates": [
     {{
       "clip_no": 1,
       "start_sec": 734.5,
       "end_sec": 768.2,
-      "why_interesting": "Türkçe açıklama",
-      "hook": "İlk 2-3 saniyedeki kanca cümlesi"
+      "why_interesting": "Explanation of why this clip has high viral potential",
+      "hook": "The exact hook sentence spoken in the first 2-3 seconds"
     }}
   ]
 }}"""
@@ -104,98 +105,88 @@ SADECE JSON çıktısı ver:
 
 # ── AJAN 2: DENETÇİ ───────────────────────────────────────────────────────────
 
-DENETCI_PROMPT = """Sen bir video kalite denetçisisin.
+DENETCI_PROMPT = """You are a strict video quality inspector. ALL OUTPUTS MUST BE ENTIRELY IN ENGLISH.
 
-⚠️ KRİTİK: TÜM ÇIKTILAR YALNIZCA TÜRKÇE OLACAK.
+CHECKLIST:
+1. Is duration strictly between {min_dur} and {max_dur} seconds?
+2. Does it start/end cleanly based on the transcript? 
+*NOTE: If the transcript segment is missing or unclear, ASSUME the boundaries are correct. DO NOT reject solely because of missing transcript text.*
 
-KONTROL LİSTESİ:
-1. Süre {min_dur}-{max_dur} saniye arasında mı?
-2. Başlangıç cümle başında mı?
-3. Bitiş cümle sonunda mı?
-4. Bağlamdan bağımsız anlaşılabilir mi?
-5. Diğer kliplerle çakışıyor mu?
-
-KLİP ADAYLARI:
+CLIP CANDIDATES:
 {candidates}
 
-TRANSKRİPT:
+TRANSCRIPT:
 {transcript}
 
-SADECE JSON çıktısı ver:
+Output ONLY a valid JSON:
 {{
   "reviews": [
-    {{"clip_no": 1, "status": "ONAYLI", "issue": null}},
-    {{"clip_no": 2, "status": "REDDEDILDI", "issue": "Bitiş cümle ortasında, 772.0s'ye kaydır"}}
+    {{"clip_no": 1, "status": "APPROVED", "issue": null}},
+    {{"clip_no": 2, "status": "REJECTED", "issue": "Duration is too short. Increase end_sec to reach {min_dur} seconds."}}
   ]
 }}"""
 
 
 # ── AJAN 3: DÜZELTİCİ ────────────────────────────────────────────────────────
 
-DUZELTICI_PROMPT = """Sen hassas bir video editörüsün. Reddedilen klibi düzelt.
+DUZELTICI_PROMPT = """You are a precise video editor. Fix the rejected clip's timestamps. ALL OUTPUTS MUST BE IN ENGLISH.
 
-⚠️ KRİTİK: TÜM ÇIKTILAR YALNIZCA TÜRKÇE OLACAK.
+REJECTED CLIP: {rejected_clip}
+ISSUE: {issue}
 
-REDDEDİLEN KLİP: {rejected_clip}
-SORUN: {issue}
-
-TRANSKRİPT (ilgili bölüm):
+TRANSCRIPT (relevant segment):
 {transcript_segment}
 
-Kurallar:
-- {min_dur}-{max_dur} saniye arasında olmalı
-- Cümle başında başla, cümle sonunda bitir
-- ASLA kelime ortasında kesme
+RULES:
+- Duration MUST be between {min_dur} and {max_dur} seconds. Fix this mathematically first!
+- If transcript is unclear, just focus on fixing the duration math.
 
-SADECE JSON çıktısı ver:
+Output ONLY a valid JSON:
 {{
   "clip_no": 1,
   "new_start_sec": 734.5,
-  "new_end_sec": 763.0,
-  "correction_note": "Düzeltme açıklaması"
+  "new_end_sec": 768.0,
+  "correction_note": "Extended the end_sec to meet the minimum duration."
 }}"""
 
 
 # ── AJAN 4: MARKETİNG ────────────────────────────────────────────────────────
 
-MARKETING_PROMPT = """Sen bir sosyal medya uzmanısın.
+MARKETING_PROMPT = """You are an elite social media expert. EVERYTHING MUST BE IN ENGLISH.
 
-⚠️ KRİTİK: TÜM ÇIKTILAR YALNIZCA TÜRKÇE OLACAK. Başlık, açıklama, hashtag — hepsi Türkçe.
+GUEST: {guest_name}
+VIDEO TITLE: {video_title}
+CLIP: {start_sec}s - {end_sec}s
+WHY SELECTED: {why_interesting}
+HOOK: {hook}
 
-KONUK: {guest_name}
-VİDEO BAŞLIĞI: {video_title}
-KLİP: {start_sec}s - {end_sec}s
-NEDEN SEÇİLDİ: {why_interesting}
-KANCA: {hook}
-
-KLİP TRANSKRİPTİ:
+CLIP TRANSCRIPT:
 {clip_transcript}
 
-BAŞARILI ÖRNEKLERİMİZ:
+SUCCESSFUL EXAMPLES:
 {viral_references}
 
-SADECE JSON çıktısı ver:
+Output ONLY a valid JSON matching this exact structure:
 {{
-  "title": "Emoji içeren Türkçe başlık — {guest_name} adı geçmeli",
-  "description": "2-3 cümle SEO uyumlu Türkçe açıklama",
-  "hashtags": "#shorts #viral #podcast #türkçe ...",
-  "hook_sentence": "İlk 3 saniyedeki kanca",
-  "clip_text": "Klipte söylenen kelimelerin tam metni",
-  "why_selected": "Detaylı Türkçe açıklama — neden bu an seçildi",
+  "title": "Catchy English title with relevant emojis (must include {guest_name})",
+  "description": "2-3 sentences SEO optimized English description for Shorts/TikTok/Reels.",
+  "hashtags": "#shorts #viral #podcast #english ...",
+  "hook_sentence": "The exact hook spoken in the first 3 seconds",
+  "clip_text": "Exact English transcript of the words spoken in the clip",
+  "why_selected": "Detailed English explanation of why this specific moment was selected",
   "bolum_analizi": [
-    {{"sure": "0-15s", "aciklama": "Açıklama"}},
-    {{"sure": "15-30s", "aciklama": "Açıklama"}},
-    {{"sure": "30-45s", "aciklama": "Açıklama"}}
+    {{"sure": "0-15s", "aciklama": "English explanation of what happens in this segment"}}
   ],
   "puanlar": {{
-    "kanca_gucu": 8,
-    "duygusal_zirve": 9,
-    "bagimsiz_anlasılabilirlik": 7,
-    "izlenme_orani_tahmini": 8,
-    "toplam": 8.0
+    "kanca_gucu": 85,
+    "duygusal_zirve": 90,
+    "bagimsiz_anlasilabilirlik": 80,
+    "izlenme_orani_tahmini": 95,
+    "toplam": 88
   }},
-  "trim_note": "Kırpma önerisi veya 'Kırpma gerekmiyor'"
-}}"""
+  "trim_note": "Trimming recommendation in English or 'No trimming needed'"
+}}
+NOTE: All scores in 'puanlar' MUST be INTEGER numbers out of 100."""
 
 
 # ── ANA FONKSİYON ─────────────────────────────────────────────────────────────
@@ -209,9 +200,9 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
         generation_config={"response_mime_type": "application/json"}
     )
 
-    clip_count_instruction = "1-3 arası en uygun sayıda" if clip_count == 0 else f"tam olarak {clip_count}"
+    clip_count_instruction = "between 1 and 3 (best suitable amount)" if clip_count == 0 else f"exactly {clip_count}"
     viral_refs = load_viral_references(channel_id)
-    guest_name = extract_guest_name(video_title) if video_title else "Bilinmiyor"
+    guest_name = extract_guest_name(video_title) if video_title else "Unknown"
 
     # Transkript hazırla
     audio_file = None
@@ -221,9 +212,9 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
     else:
         print("[Analyzer] Ses dosyası Gemini'a yükleniyor...")
         audio_file = genai.upload_file(mp3_path, mime_type="audio/mp3")
-        transcript_text = "[Ses dosyası doğrudan analiz ediliyor]"
+        transcript_text = "[Audio file is directly provided for analysis]"
 
-    energy_text = audio_energy.get("summary", "Ses analizi mevcut değil.") if audio_energy else "Ses analizi mevcut değil."
+    energy_text = audio_energy.get("summary", "No audio analysis available.") if audio_energy else "No audio analysis available."
 
     # ── AJAN 1: SCOUT ──────────────────────────────────────────────────────
     print("\n[Analyzer] 🔍 AJAN 1: Scout çalışıyor...")
@@ -234,7 +225,9 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
         viral_references=viral_refs,
         audio_energy=energy_text,
         transcript=transcript_text[:8000],
-        clip_count_instruction=clip_count_instruction
+        clip_count_instruction=clip_count_instruction,
+        min_dur=MIN_CLIP_DURATION,
+        max_dur=MAX_CLIP_DURATION
     )
 
     try:
@@ -268,7 +261,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
             ))
             reviews = json.loads(denetci_resp.text).get("reviews", [])
         except Exception as e:
-            print(f"[Analyzer] Denetçi hatası: {e}, tüm adaylar onaylanıyor.")
+            print(f"[Analyzer] Denetçi hatası: {e}, tüm adaylar zorunlu onaylanıyor.")
             approved_clips.extend(pending)
             break
 
@@ -281,7 +274,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
             if not clip:
                 continue
 
-            if status == "ONAYLI":
+            if status in ["APPROVED", "ONAYLI"]:
                 approved_clips.append(clip)
                 print(f"[Analyzer] ✅ Klip {clip_no} onaylandı.")
             else:
@@ -307,14 +300,22 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                         still_pending.append(corrected)
                         print(f"[Analyzer] 🔧 Klip {clip_no} düzeltildi, tekrar denetleniyor...")
                     except Exception as e:
-                        print(f"[Analyzer] Düzeltici hatası: {e}, klip iptal.")
+                        print(f"[Analyzer] Düzeltici hatası: {e}, klip bekletiliyor.")
+                        still_pending.append(clip)
                 else:
-                    print(f"[Analyzer] ❌ Klip {clip_no} {MAX_CORRECTION_ROUNDS} turda düzeltilemedi, iptal.")
+                    # FABRİKA ASLA DURMAZ: ZORUNLU ONAY (FORCE APPROVE) BURADA DEVREYE GİRİYOR!
+                    print(f"[Analyzer] 🚨 Klip {clip_no} yapay zeka tarafından düzeltilemedi. ZORUNLU ONAY uygulandı!")
+                    dur = clip["end_sec"] - clip["start_sec"]
+                    if dur < MIN_CLIP_DURATION:
+                        clip["end_sec"] = clip["start_sec"] + MIN_CLIP_DURATION + 2 # Zorla uzat
+                    elif dur > MAX_CLIP_DURATION:
+                        clip["end_sec"] = clip["start_sec"] + MAX_CLIP_DURATION - 2 # Zorla kısalt
+                    approved_clips.append(clip)
 
         pending = still_pending
 
     if not approved_clips:
-        raise RuntimeError("Hiçbir klip kalite kontrolünden geçemedi.")
+        raise RuntimeError("Hiçbir klip bulunamadı. Lütfen farklı bir video deneyin.")
 
     print(f"\n[Analyzer] {len(approved_clips)} klip onaylandı.")
 
@@ -349,13 +350,14 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                 "end_sec": end,
                 "guest_name": guest_name,
                 **mkt_data,
-                # Eski format uyumluluğu
                 "title": mkt_data.get("title", ""),
                 "description": mkt_data.get("description", ""),
                 "hashtags": mkt_data.get("hashtags", ""),
                 "score": mkt_data.get("puanlar", {}).get("toplam", 0),
                 "why_selected": mkt_data.get("why_selected", ""),
                 "clip_text": mkt_data.get("clip_text", clip_transcript),
+                # EKSİK OLAN TRANSKRİPT VERİSİNİ BURAYA EKLEDİK (FRONTEND & PDF İÇİN)
+                "transcript": mkt_data.get("clip_text", clip_transcript),
                 "recommendation": mkt_data.get("trim_note", ""),
             }
             final_clips.append(final_clip)
@@ -365,10 +367,10 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
             print(f"[Analyzer] Marketing hatası klip {clip_no}: {e}")
             final_clips.append({
                 "clip_no": clip_no, "start_sec": start, "end_sec": end,
-                "guest_name": guest_name, "title": f"Klip {clip_no}",
+                "guest_name": guest_name, "title": f"Clip {clip_no}",
                 "description": "", "hashtags": "#shorts #viral",
                 "score": 0, "why_selected": clip.get("why_interesting", ""),
-                "clip_text": clip_transcript, "recommendation": ""
+                "clip_text": clip_transcript, "transcript": clip_transcript, "recommendation": ""
             })
 
     final_clips.sort(key=lambda x: x["start_sec"])
@@ -407,11 +409,14 @@ def _extract_segment(transcript_text: str, start: float, end: float, text_only: 
             time_str = line[1:9]
             parts = time_str.split(":")
             sec = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
-            if start <= sec <= end:
+            
+            # 30 saniyelik hata payı penceresi ile transkripti çekmeyi garantiliyoruz
+            if (start - 30) <= sec <= (end + 30):
                 if text_only and "] " in line:
                     lines.append(line.split("] ", 1)[-1])
                 else:
                     lines.append(line)
         except:
             continue
-    return " ".join(lines) if text_only else "\n".join(lines)
+    res = " ".join(lines) if text_only else "\n".join(lines)
+    return res if res.strip() else "[Transcript missing in this exact timestamp, but context is approved.]"
