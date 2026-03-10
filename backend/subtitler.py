@@ -24,7 +24,7 @@ def load_style_config(channel_id: str = "default") -> dict:
     channel_style = BASE_DIR / "channels" / channel_id / "style.json"
     default_style = BASE_DIR / "default_style.json"
 
-    for path in [channel_style, default_style]:
+    for path in[channel_style, default_style]:
         if path.exists():
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -42,7 +42,7 @@ def load_style_config(channel_id: str = "default") -> dict:
 
 def generate_subtitles(clip_paths: list[str], job_id: str,
                        transcript: dict = None, channel_id: str = "default") -> list[str]:
-    srt_paths = []
+    srt_paths =[]
 
     for clip_path in clip_paths:
         clip_path_obj = Path(clip_path)
@@ -76,8 +76,8 @@ def _from_whisperx(clip_path: str, transcript: dict, channel_id: str) -> str:
     wpl = style.get("words_per_line", 3)
 
     words = []
-    for seg in transcript.get("segments", []):
-        for wd in seg.get("words", []):
+    for seg in transcript.get("segments",[]):
+        for wd in seg.get("words",[]):
             ws = wd.get("start", seg.get("start", 0))
             we = wd.get("end", seg.get("end", 0))
             if ws >= clip_start_sec and we <= clip_end_sec:
@@ -90,7 +90,7 @@ def _from_whisperx(clip_path: str, transcript: dict, channel_id: str) -> str:
     if not words:
         return _from_gemini(clip_path)
 
-    srt_lines = []
+    srt_lines =[]
     block_no = 1
     for i in range(0, len(words), wpl):
         group = words[i:i + wpl]
@@ -99,7 +99,7 @@ def _from_whisperx(clip_path: str, transcript: dict, channel_id: str) -> str:
             continue
         s = group[0]["start"]
         e = group[-1]["end"]
-        srt_lines += [str(block_no), f"{seconds_to_srt_time(s)} --> {seconds_to_srt_time(e)}", text, ""]
+        srt_lines +=[str(block_no), f"{seconds_to_srt_time(s)} --> {seconds_to_srt_time(e)}", text, ""]
         block_no += 1
 
     return "\n".join(srt_lines)
@@ -116,7 +116,7 @@ def _get_clip_start(clip_path: str) -> float:
 
 
 def _get_duration(clip_path: str) -> float:
-    cmd = ["ffprobe", "-v", "quiet", "-show_entries", "format=duration", "-of", "json", clip_path]
+    cmd =["ffprobe", "-v", "quiet", "-show_entries", "format=duration", "-of", "json", clip_path]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode == 0:
         return float(json.loads(result.stdout)["format"]["duration"])
@@ -124,25 +124,30 @@ def _get_duration(clip_path: str) -> float:
 
 
 def _from_gemini(clip_path: str) -> str:
-    import google.generativeai as genai
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+    from google import genai
+    from google.genai import types
 
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     audio_path = str(Path(clip_path).with_suffix(".tmp.mp3"))
     try:
-        subprocess.run(
-            ["ffmpeg", "-y", "-i", clip_path, "-vn", "-acodec", "libmp3lame", "-q:a", "4", audio_path],
+        subprocess.run(["ffmpeg", "-y", "-i", clip_path, "-vn", "-acodec", "libmp3lame", "-q:a", "4", audio_path],
             capture_output=True
         )
         duration = _get_duration(clip_path)
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        af = genai.upload_file(audio_path, mime_type="audio/mp3")
+        af = client.files.upload(file=audio_path)
 
         prompt = f"""Bu sesi transkribe et. Süre: {duration:.1f}s.
-SADECE JSON array döndür:
-[{{"start": 0.0, "end": 2.5, "text": "kelimeler"}}, ...]
+SADECE JSON array döndür:[{{"start": 0.0, "end": 2.5, "text": "kelimeler"}}, ...]
 Her blok 3-5 kelime, Türkçe konuşmayı Türkçe yaz."""
 
-        raw = model.generate_content([af, prompt]).text.strip()
+        json_config = types.GenerateContentConfig(response_mime_type="application/json")
+        res = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[af, prompt],
+            config=json_config
+        )
+
+        raw = res.text.strip()
         if "```" in raw:
             for part in raw.split("```"):
                 p = part.strip().lstrip("json").strip()
@@ -154,14 +159,14 @@ Her blok 3-5 kelime, Türkçe konuşmayı Türkçe yaz."""
                     continue
 
         blocks = json.loads(raw)
-        lines = []
+        lines =[]
         for i, b in enumerate(blocks, 1):
             t = b["text"].strip()
             if t:
-                lines += [str(i), f"{seconds_to_srt_time(b['start'])} --> {seconds_to_srt_time(b['end'])}", t, ""]
+                lines +=[str(i), f"{seconds_to_srt_time(b['start'])} --> {seconds_to_srt_time(b['end'])}", t, ""]
 
         try:
-            genai.delete_file(af.name)
+            client.files.delete(name=af.name)
         except:
             pass
         return "\n".join(lines)
@@ -187,7 +192,7 @@ def burn_subtitles(video_path: str, srt_path: str,
         f"BorderStyle=1,Outline=3,Shadow=1,Alignment=2,MarginV=80"
     )
 
-    cmd = [
+    cmd =[
         "ffmpeg", "-y", "-i", video_path,
         "-vf", f"subtitles={srt_path}:force_style='{force_style}'",
         "-c:a", "copy", "-preset", "fast", output_path

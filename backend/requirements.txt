@@ -2,11 +2,11 @@ fastapi==0.135.1
 uvicorn==0.41.0
 python-dotenv==1.2.2
 yt-dlp>=2026.3.3
-google-generativeai==0.8.6
+google-genai
 openai==2.26.0
 ffmpeg-python==0.2.0
 
-# Groq Whisper API - hızlı bulut transkript (WhisperX'ten 30x hızlı)
+# Groq Whisper API - hızlı bulut transkript
 groq
 
 # Ses analizi - enerji haritası

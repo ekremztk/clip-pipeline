@@ -10,12 +10,14 @@ analyzer.py
 
 import os
 import json
-import google.generativeai as genai
 from pathlib import Path
 from dotenv import load_dotenv
 
+# YENİ NESİL GOOGLE GENAI SDK İÇE AKTARILIYOR
+from google import genai
+from google.genai import types
+
 load_dotenv()
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # SÜRELER SENİN İSTEDİĞİN GİBİ 15 VE 35 OLARAK GÜNCELLENDİ!
 MIN_CLIP_DURATION = 15
@@ -48,14 +50,17 @@ def load_viral_references(channel_id: str = "default") -> str:
 
 
 def extract_guest_name(video_title: str) -> str:
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     prompt = f"""Extract the full name of the guest/person from this YouTube video title:
 "{video_title}"
 
 Write ONLY the name, nothing else.
 If you cannot find a name, write "Unknown"."""
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
         name = response.text.strip().replace('"', '').replace("'", "")
         print(f"[Analyzer] Guest Name: {name}")
         return name
@@ -91,7 +96,7 @@ CRITERIA:
 
 Output ONLY a valid JSON:
 {{
-  "candidates": [
+  "candidates":[
     {{
       "clip_no": 1,
       "start_sec": 734.5,
@@ -120,7 +125,7 @@ TRANSCRIPT:
 
 Output ONLY a valid JSON:
 {{
-  "reviews": [
+  "reviews":[
     {{"clip_no": 1, "status": "APPROVED", "issue": null}},
     {{"clip_no": 2, "status": "REJECTED", "issue": "Duration is too short. Increase end_sec to reach {min_dur} seconds."}}
   ]
@@ -174,7 +179,7 @@ Output ONLY a valid JSON matching this exact structure:
   "hook_sentence": "The exact hook spoken in the first 3 seconds",
   "clip_text": "Exact English transcript of the words spoken in the clip",
   "why_selected": "Detailed English explanation of why this specific moment was selected",
-  "bolum_analizi": [
+  "bolum_analizi":[
     {{"sure": "0-15s", "aciklama": "English explanation of what happens in this segment"}}
   ],
   "puanlar": {{
@@ -195,10 +200,8 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                   transcript: dict = None, audio_energy: dict = None,
                   channel_id: str = "default") -> list[dict]:
 
-    model = genai.GenerativeModel(
-        "gemini-2.5-flash",
-        generation_config={"response_mime_type": "application/json"}
-    )
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+    json_config = types.GenerateContentConfig(response_mime_type="application/json")
 
     clip_count_instruction = "between 1 and 3 (best suitable amount)" if clip_count == 0 else f"exactly {clip_count}"
     viral_refs = load_viral_references(channel_id)
@@ -211,7 +214,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
         print(f"[Analyzer] WhisperX transkripti kullanılıyor.")
     else:
         print("[Analyzer] Ses dosyası Gemini'a yükleniyor...")
-        audio_file = genai.upload_file(mp3_path, mime_type="audio/mp3")
+        audio_file = client.files.upload(file=mp3_path)
         transcript_text = "[Audio file is directly provided for analysis]"
 
     energy_text = audio_energy.get("summary", "No audio analysis available.") if audio_energy else "No audio analysis available."
@@ -232,9 +235,17 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
 
     try:
         if audio_file:
-            scout_resp = model.generate_content([audio_file, scout_prompt])
+            scout_resp = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[audio_file, scout_prompt],
+                config=json_config
+            )
         else:
-            scout_resp = model.generate_content(scout_prompt)
+            scout_resp = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=scout_prompt,
+                config=json_config
+            )
         candidates = json.loads(scout_resp.text).get("candidates", [])
         print(f"[Analyzer] Scout {len(candidates)} aday buldu.")
     except Exception as e:
@@ -243,7 +254,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
     # ── AJAN 2 & 3: DENETÇİ + DÜZELTİCİ ─────────────────────────────────
     print("\n[Analyzer] 🔎 AJAN 2 & 3: Denetçi + Düzeltici çalışıyor...")
 
-    approved_clips = []
+    approved_clips =[]
     pending = candidates.copy()
 
     for round_no in range(1, MAX_CORRECTION_ROUNDS + 1):
@@ -253,19 +264,24 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
         print(f"[Analyzer] Tur {round_no}/{MAX_CORRECTION_ROUNDS} — {len(pending)} klip kontrol ediliyor...")
 
         try:
-            denetci_resp = model.generate_content(DENETCI_PROMPT.format(
+            denetci_prompt = DENETCI_PROMPT.format(
                 min_dur=MIN_CLIP_DURATION,
                 max_dur=MAX_CLIP_DURATION,
                 candidates=json.dumps(pending, ensure_ascii=False, indent=2),
                 transcript=transcript_text[:4000]
-            ))
-            reviews = json.loads(denetci_resp.text).get("reviews", [])
+            )
+            denetci_resp = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=denetci_prompt,
+                config=json_config
+            )
+            reviews = json.loads(denetci_resp.text).get("reviews",[])
         except Exception as e:
             print(f"[Analyzer] Denetçi hatası: {e}, tüm adaylar zorunlu onaylanıyor.")
             approved_clips.extend(pending)
             break
 
-        still_pending = []
+        still_pending =[]
         for review in reviews:
             clip_no = review.get("clip_no")
             status = review.get("status", "")
@@ -285,13 +301,18 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                     segment = _extract_segment(transcript_text, start - 5, end + 5)
 
                     try:
-                        duz_resp = model.generate_content(DUZELTICI_PROMPT.format(
+                        duz_prompt = DUZELTICI_PROMPT.format(
                             rejected_clip=json.dumps(clip, ensure_ascii=False),
                             issue=issue,
                             transcript_segment=segment,
                             min_dur=MIN_CLIP_DURATION,
                             max_dur=MAX_CLIP_DURATION
-                        ))
+                        )
+                        duz_resp = client.models.generate_content(
+                            model="gemini-2.5-flash",
+                            contents=duz_prompt,
+                            config=json_config
+                        )
                         duz_data = json.loads(duz_resp.text)
                         corrected = clip.copy()
                         corrected["start_sec"] = duz_data.get("new_start_sec", start)
@@ -303,13 +324,12 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                         print(f"[Analyzer] Düzeltici hatası: {e}, klip bekletiliyor.")
                         still_pending.append(clip)
                 else:
-                    # FABRİKA ASLA DURMAZ: ZORUNLU ONAY (FORCE APPROVE) BURADA DEVREYE GİRİYOR!
                     print(f"[Analyzer] 🚨 Klip {clip_no} yapay zeka tarafından düzeltilemedi. ZORUNLU ONAY uygulandı!")
                     dur = clip["end_sec"] - clip["start_sec"]
                     if dur < MIN_CLIP_DURATION:
-                        clip["end_sec"] = clip["start_sec"] + MIN_CLIP_DURATION + 2 # Zorla uzat
+                        clip["end_sec"] = clip["start_sec"] + MIN_CLIP_DURATION + 2
                     elif dur > MAX_CLIP_DURATION:
-                        clip["end_sec"] = clip["start_sec"] + MAX_CLIP_DURATION - 2 # Zorla kısalt
+                        clip["end_sec"] = clip["start_sec"] + MAX_CLIP_DURATION - 2
                     approved_clips.append(clip)
 
         pending = still_pending
@@ -322,7 +342,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
     # ── AJAN 4: MARKETİNG ────────────────────────────────────────────────
     print("\n[Analyzer] 📣 AJAN 4: Marketing çalışıyor...")
 
-    final_clips = []
+    final_clips =[]
     for clip in approved_clips:
         clip_no = clip.get("clip_no", 0)
         start = clip.get("start_sec", 0)
@@ -332,7 +352,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
         print(f"[Analyzer] Klip {clip_no} için içerik üretiliyor ({start:.0f}s-{end:.0f}s)...")
 
         try:
-            mkt_resp = model.generate_content(MARKETING_PROMPT.format(
+            mkt_prompt = MARKETING_PROMPT.format(
                 guest_name=guest_name,
                 video_title=video_title,
                 start_sec=start,
@@ -341,7 +361,12 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                 hook=clip.get("hook", ""),
                 clip_transcript=clip_transcript,
                 viral_references=viral_refs[:2000]
-            ))
+            )
+            mkt_resp = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=mkt_prompt,
+                config=json_config
+            )
             mkt_data = json.loads(mkt_resp.text)
 
             final_clip = {
@@ -356,7 +381,6 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
                 "score": mkt_data.get("puanlar", {}).get("toplam", 0),
                 "why_selected": mkt_data.get("why_selected", ""),
                 "clip_text": mkt_data.get("clip_text", clip_transcript),
-                # EKSİK OLAN TRANSKRİPT VERİSİNİ BURAYA EKLEDİK (FRONTEND & PDF İÇİN)
                 "transcript": mkt_data.get("clip_text", clip_transcript),
                 "recommendation": mkt_data.get("trim_note", ""),
             }
@@ -377,7 +401,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
 
     try:
         if audio_file:
-            genai.delete_file(audio_file.name)
+            client.files.delete(name=audio_file.name)
     except:
         pass
 
@@ -389,7 +413,7 @@ def analyze_audio(mp3_path: str, clip_count: int, video_title: str = "",
 
 def _format_transcript(transcript: dict) -> str:
     segments = transcript.get("segments", [])
-    lines = []
+    lines =[]
     for seg in segments:
         start = seg.get("start", 0)
         text = seg.get("text", "").strip()
@@ -401,7 +425,7 @@ def _format_transcript(transcript: dict) -> str:
 
 
 def _extract_segment(transcript_text: str, start: float, end: float, text_only: bool = False) -> str:
-    lines = []
+    lines =[]
     for line in transcript_text.split('\n'):
         try:
             if not line.startswith("["):
@@ -410,7 +434,6 @@ def _extract_segment(transcript_text: str, start: float, end: float, text_only: 
             parts = time_str.split(":")
             sec = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
             
-            # 30 saniyelik hata payı penceresi ile transkripti çekmeyi garantiliyoruz
             if (start - 30) <= sec <= (end + 30):
                 if text_only and "] " in line:
                     lines.append(line.split("] ", 1)[-1])
