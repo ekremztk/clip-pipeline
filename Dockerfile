@@ -15,6 +15,7 @@ WORKDIR /app
 
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade yt-dlp
 
 # Sadece backend klasörünü kopyala
 COPY backend/ .
