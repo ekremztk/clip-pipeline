@@ -4,6 +4,7 @@ Her job için profesyonel bir PDF analiz raporu oluşturur.
 """
 
 from pathlib import Path
+import re
 from datetime import datetime
 
 from reportlab.lib.pagesizes import A4
@@ -32,6 +33,12 @@ C_YELLOW    = colors.HexColor("#FF9F0A")
 C_RED       = colors.HexColor("#FF453A")
 C_BLUE_SOFT = colors.HexColor("#EAF3FF")
 C_CARD      = colors.white
+
+def clean_for_pdf(text):
+    if not text: return ""
+    # Emojileri ve PDF'in Helvetica fontunu bozacak karakterleri siler
+    # Sadece harfler, sayılar, Türkçe karakterler ve temel noktalama işaretleri kalır
+    return re.sub(r'[^\w\s,.\-!?"\'ğüşöçıİĞÜŞÖÇ&:;%()\[\]/]', '', str(text))
 
 
 def score_color(score):
@@ -331,7 +338,7 @@ def build_clip_section(story, styles, clip, index):
     ]))
     elements.append(clip_header)
     elements.append(Spacer(1, 2*mm))
-    elements.append(Paragraph(clip["title"], styles["clip_title"]))
+    elements.append(Paragraph(clean_for_pdf(clip["title"]), styles["clip_title"]))
     elements.append(Spacer(1, 2*mm))
 
     # Score bar
@@ -369,7 +376,7 @@ def build_clip_section(story, styles, clip, index):
     for label, value in fields:
         if value:
             elements.append(Paragraph(label, styles["section_head"]))
-            elements.append(Paragraph(value, styles["body"]))
+            elements.append(Paragraph(clean_for_pdf(value), styles["body"]))
             elements.append(Spacer(1, 1*mm))
 
     # Publish block
@@ -381,11 +388,11 @@ def build_clip_section(story, styles, clip, index):
 
     publish_data = [
         [Paragraph("<b>Başlık</b>", styles["body_small"]),
-         Paragraph(clip["title"], styles["body_small"])],
+         Paragraph(clean_for_pdf(clip["title"]), styles["body_small"])],
         [Paragraph("<b>Açıklama</b>", styles["body_small"]),
-         Paragraph(clip["description"], styles["body_small"])],
+         Paragraph(clean_for_pdf(clip["description"]), styles["body_small"])],
         [Paragraph("<b>Hashtag</b>", styles["body_small"]),
-         Paragraph(f'<font color="#007AFF">{clip["hashtags"]}</font>', styles["body_small"])],
+         Paragraph(f'<font color="#007AFF">{clean_for_pdf(clip["hashtags"])}</font>', styles["body_small"])],
     ]
     pub_table = Table(publish_data, colWidths=[22*mm, 128*mm])
     pub_table.setStyle(TableStyle([
