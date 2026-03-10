@@ -1,5 +1,3 @@
-# backend/downloader.py
-
 import os
 import subprocess
 import json
@@ -10,10 +8,6 @@ from pathlib import Path
 _YTDLP_UPDATED = False
 
 def _ensure_ytdlp_updated():
-    """
-    Sistem her ayağa kalktığında yt-dlp'nin en güncel sürümde olduğundan
-    emin olur. YouTube API değişikliklerine karşı otonom koruma sağlar.
-    """
     global _YTDLP_UPDATED
     if not _YTDLP_UPDATED:
         print("[Downloader] 🛠️ Self-Healing: yt-dlp sürümü kontrol ediliyor ve güncelleniyor...")
@@ -22,46 +16,57 @@ def _ensure_ytdlp_updated():
         print("[Downloader] 🛠️ Self-Healing: yt-dlp güncel!")
 
 def download_video(url: str, job_id: str) -> tuple[str, str, str]:
-    # İndirme işleminden önce daima güncel miyiz diye kontrol et (Sadece ilk çalışmada günceller)
     _ensure_ytdlp_updated()
 
     job_dir = Path("output") / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     cookie_path = Path("cookies.txt")
+    has_cookies = cookie_path.exists() and cookie_path.stat().st_size > 0
 
     print(f"[Downloader] {job_id} için video bilgileri alınmaya çalışılıyor...")
 
-    # ── HATA TOLERANSI: STRATEJİLER ──
+    # ── MİMARİ GÜNCELLEME: ÇEREZLİ VE ÇEREZSİZ (ANONİM) İZOLASYON ──
     strategies =[
         {
-            "name": "Strateji 1: Orijinal Karma (android,ios,web)",
-            "bypass_args":["--extractor-args", "youtube:player_client=android,ios,web"]
+            "name": "Strateji 1: Çerezli + Karma İstemci (android,ios,web)",
+            "bypass_args": ["--extractor-args", "youtube:player_client=android,ios,web"],
+            "use_cookies": True
         },
         {
-            "name": "Strateji 2: Sadece Mobil İstemci (ios)",
-            "bypass_args":["--extractor-args", "youtube:player_client=ios"]
+            "name": "Strateji 2: Çerezli + TV İstemcisi",
+            "bypass_args":["--extractor-args", "youtube:player_client=tv"],
+            "use_cookies": True
         },
         {
-            "name": "Strateji 3: Saf İstemci (Bypass Yok)",
-            "bypass_args":[]
+            "name": "Strateji 3: ÇEREZSİZ (Anonim) + Mobil İstemci + Cache Temizliği",
+            "bypass_args":["--extractor-args", "youtube:player_client=ios,android", "--rm-cache-dir"],
+            "use_cookies": False
+        },
+        {
+            "name": "Strateji 4: ÇEREZSİZ (Anonim) + Saf İstemci + Cache Temizliği",
+            "bypass_args": ["--rm-cache-dir"],
+            "use_cookies": False
         }
     ]
-
-    # Çerezleri ayarla
-    cookie_args =[]
-    if cookie_path.exists() and cookie_path.stat().st_size > 0:
-        cookie_args = ["--cookies", str(cookie_path)]
-        print("[Downloader] 🍪 cookies.txt bulundu, yetkilendirme kullanılıyor.")
 
     info = None
     video_title = "Bilinmeyen Video"
     success_strategy = None
 
+    # Adım 1: Sadece JSON Bilgisi Çek
     for attempt, strat in enumerate(strategies, 1):
-        print(f"[Downloader] 🔄 Deneme {attempt}/3 - {strat['name']}")
+        print(f"[Downloader] 🔄 Deneme {attempt}/4 - {strat['name']}")
         
-        info_cmd =["yt-dlp", "--no-warnings", "--dump-json"] + cookie_args + strat["bypass_args"] + [url]
-        info_result = subprocess.run(info_cmd, capture_output=True, text=True)
+        cmd_args = ["yt-dlp", "--no-warnings", "--dump-json"]
+        
+        # Eğer bu strateji cookie kullanıyorsa ekle, kullanmıyorsa zehirli cookie'yi at!
+        if strat["use_cookies"] and has_cookies:
+            cmd_args.extend(["--cookies", str(cookie_path)])
+            
+        cmd_args.extend(strat["bypass_args"])
+        cmd_args.append(url)
+        
+        info_result = subprocess.run(cmd_args, capture_output=True, text=True)
         
         if info_result.returncode == 0:
             try:
@@ -77,17 +82,24 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
         time.sleep(2)
 
     if not success_strategy:
-        raise RuntimeError(f"Video bilgileri alınamadı. Bot engeli veya sürüm uyuşmazlığı. Son hata: {info_result.stderr.strip()}")
+        raise RuntimeError(f"Video bilgileri hiçbir stratejiyle alınamadı. Son hata: {info_result.stderr.strip()}")
 
     print(f"[Downloader] 📥 Video indiriliyor (Kazanan: {success_strategy['name']})...")
     
-    # SENİN ÖNERDİĞİN ESNEK FORMAT DİZİLİMİ KULLANILIYOR
+    # Adım 2: Kazanılan Strateji ile İndirme
     mp4_cmd =[
         "yt-dlp", "--no-warnings",
         "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
         "--merge-output-format", "mp4",
         "-o", str(job_dir / "source.%(ext)s")
-    ] + cookie_args + success_strategy["bypass_args"] + [url]
+    ]
+    
+    # İndirme aşamasında da sadece strateji cookie izin veriyorsa ekle
+    if success_strategy["use_cookies"] and has_cookies:
+        mp4_cmd.extend(["--cookies", str(cookie_path)])
+        
+    mp4_cmd.extend(success_strategy["bypass_args"])
+    mp4_cmd.append(url)
 
     mp4_result = subprocess.run(mp4_cmd, capture_output=True, text=True)
     if mp4_result.returncode != 0:
