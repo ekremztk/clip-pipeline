@@ -1,6 +1,6 @@
 FROM python:3.11-slim-bookworm
 
-# reportlab'ın derlenebilmesi için gerekli olan build-essential ve diğer kütüphaneler eklendi
+# Gerekli sistem paketleri ve FFmpeg kütüphane geliştirme paketleri
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsndfile1 \
@@ -9,15 +9,26 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg-dev \
     zlib1g-dev \
+    # Yeni eklenenler: torchcodec ve ffmpeg bağımlılıkları için
+    libavcodec-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libswresample-dev \
+    libswscale-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Önce bağımlılıkları yükle
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+# yt-dlp ve sorun çıkaran torch kütüphaneleri için ek önlem
 RUN pip install --no-cache-dir --upgrade yt-dlp
 
-# Sadece backend klasörünü kopyala
+# NOT: Eğer hata devam ederse, requirements.txt içindeki torch sürümünü 
+# kontrol etmeliyiz. Şu anki hatan torch ve torchcodec uyuşmazlığı.
+
 COPY backend/ .
 RUN mkdir -p output
 
