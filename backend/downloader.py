@@ -1,5 +1,3 @@
-# backend/downloader.py
-
 import os
 import subprocess
 import json
@@ -13,41 +11,42 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
 
     print(f"[Downloader] {job_id} için video bilgileri alınmaya çalışılıyor...")
 
-    # ── HATA TOLERANSI: FORMAT VE BOT ODAKLI STRATEJİLER ──
-    # Loglardan anladığımız üzere cookie'lerimiz bot korumasını geçiyor! 
-    # Ancak karmaşık client taklitleri format uyuşmazlığı yaratıyor.
+    # ── HATA TOLERANSI: ORİJİNAL BYPASS + ALTERNATİFLER ──
+    # Orijinal projedeki en iyi çalışan taktikleri (android,ios,web) 
+    # fallback zinciriyle birleştirdik.
     strategies =[
         {
-            "name": "Strateji 1: Varsayılan İstemci + Cookies (En güvenlisi)",
-            "bypass_args": [],
-            "use_cookies": True
+            "name": "Strateji 1: Orijinal Karma (android,ios,web)",
+            "bypass_args":["--extractor-args", "youtube:player_client=android,ios,web"]
         },
         {
-            "name": "Strateji 2: Android İstemcisi + Cookies",
-            "bypass_args": ["--extractor-args", "youtube:player_client=android"],
-            "use_cookies": True
+            "name": "Strateji 2: TV & Web Alternatifi",
+            "bypass_args":["--extractor-args", "youtube:player_client=tv,web"]
         },
         {
-            "name": "Strateji 3: iOS İstemcisi + Cookies",
-            "bypass_args":["--extractor-args", "youtube:player_client=ios"],
-            "use_cookies": True
+            "name": "Strateji 3: Saf İstemci (Argümansız)",
+            "bypass_args":[]
         }
     ]
+
+    # Çerezleri ayarla
+    cookie_args =[]
+    if cookie_path.exists() and cookie_path.stat().st_size > 0:
+        cookie_args = ["--cookies", str(cookie_path)]
+        print("[Downloader] 🍪 cookies.txt bulundu, yetkilendirme kullanılıyor.")
+    else:
+        print("[Downloader] ⚠️ Uyarı: cookies.txt bulunamadı!")
 
     info = None
     video_title = "Bilinmeyen Video"
     success_strategy = None
 
+    # Adım 1: Sadece JSON Bilgisi Çek (Format dayatması YOK!)
     for attempt, strat in enumerate(strategies, 1):
         print(f"[Downloader] 🔄 Deneme {attempt}/3 - {strat['name']}")
         
-        cookie_args = []
-        if strat["use_cookies"] and cookie_path.exists() and cookie_path.stat().st_size > 0:
-            cookie_args = ["--cookies", str(cookie_path)]
-            
-        # --dump-json sırasında format hatası (Requested format is not available)
-        # almamak için arama formatını "best" olarak rahatlatıyoruz.
-        info_cmd =["yt-dlp", "--no-warnings", "--dump-json", "-f", "best"] + cookie_args + strat["bypass_args"] + [url]
+        # DİKKAT: Burada -f kullanmıyoruz. Sadece meta verilerini çekiyoruz.
+        info_cmd =["yt-dlp", "--no-warnings", "--dump-json"] + cookie_args + strat["bypass_args"] + [url]
         
         info_result = subprocess.run(info_cmd, capture_output=True, text=True)
         
@@ -65,28 +64,23 @@ def download_video(url: str, job_id: str) -> tuple[str, str, str]:
         time.sleep(2)
 
     if not success_strategy:
-        raise RuntimeError(f"Video bilgileri alınamadı. Son hata: {info_result.stderr.strip()}")
+        raise RuntimeError(f"Video bilgileri alınamadı (Bot veya Format engeli). Son hata: {info_result.stderr.strip()}")
 
-    print(f"[Downloader] 📥 Video indiriliyor (Kazanan Strateji: {success_strategy['name']})...")
+    print(f"[Downloader] 📥 Video indiriliyor (Kazanan: {success_strategy['name']})...")
     
-    # Formatı esnettik: "bestvideo+bestaudio/best" diyerek uzantı zorlamasını kaldırdık.
-    # --merge-output-format mp4 sayesinde yt-dlp her halükarda onu mp4'e paketleyecek.
+    # Adım 2: Geniş Kapsamlı Formatla İndirme (Senin orijinal yaklaşımın)
     mp4_cmd =[
         "yt-dlp", "--no-warnings",
         "-f", "bestvideo+bestaudio/best",
         "--merge-output-format", "mp4",
         "-o", str(job_dir / "source.%(ext)s")
-    ]
-    
-    if success_strategy["use_cookies"] and cookie_path.exists():
-        mp4_cmd += ["--cookies", str(cookie_path)]
-        
-    mp4_cmd += success_strategy["bypass_args"] + [url]
+    ] + cookie_args + success_strategy["bypass_args"] + [url]
 
     mp4_result = subprocess.run(mp4_cmd, capture_output=True, text=True)
     if mp4_result.returncode != 0:
         raise RuntimeError(f"Video dosyası indirilemedi: {mp4_result.stderr}")
 
+    # Dosya Yolu Doğrulaması
     mp4_path = str(job_dir / "source.mp4")
     if not os.path.exists(mp4_path):
         files = list(job_dir.glob("source.*"))
