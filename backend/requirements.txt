@@ -6,10 +6,8 @@ google-generativeai==0.8.3
 openai==1.51.0
 ffmpeg-python==0.2.0
 
-# WhisperX - hassas kelime bazlı transkript
-whisperx
-torch
-torchaudio
+# Groq Whisper API - hızlı bulut transkript (WhisperX'ten 30x hızlı)
+groq
 
 # Ses analizi - enerji haritası
 librosa
