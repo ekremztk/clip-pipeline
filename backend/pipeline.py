@@ -1,8 +1,8 @@
 """
 pipeline.py
 -----------
-Tüm modülleri birbirine bağlar.
-Sıra: İndir → Transkript → Ses Analizi → AI Analiz → Kes → Reframe → Altyazı → Rapor
+Sıra: İndir → Transkript → Ses Analizi → AI Analiz (İngilizce) → Yatay Kesim → Rapor
+NOT: Dikey yapma ve Altyazı ekleme işlemleri Aşama 2 (Editör) için devredışı bırakıldı.
 """
 
 import traceback
@@ -12,11 +12,12 @@ from transcriber import transcribe
 from audio_analyzer import analyze_energy
 from analyzer import analyze_audio
 from cutter import cut_clips
-# from reframer import reframe_to_vertical, is_already_vertical
-# from subtitler import generate_subtitles, burn_subtitles
 from pdf_reporter import write_pdf_report
 from metadata import write_metadata
 
+# Aşama 2 modülleri şimdilik import edilmiyor (Sunucuyu yormamak için)
+# from reframer import reframe_to_vertical, is_already_vertical
+# from subtitler import generate_subtitles, burn_subtitles
 
 def update(job_id: str, status: str, step: str, progress: int):
     jobs[job_id]["status"] = status
@@ -33,7 +34,7 @@ def run_pipeline(job_id: str, url: str, clip_count: int, channel_id: str = "defa
         # ── AŞAMA 1A: WhisperX Transkript ────────────────────────────────────
         update(job_id, "running", "Ses transkribe ediliyor (WhisperX)...", 15)
         try:
-            transcript = transcribe(mp3_path, language="tr")
+            transcript = transcribe(mp3_path, language="en") # Hedef içerik İngilizce olduğu için
         except Exception as e:
             print(f"[Pipeline] Transkript hatası: {e}, devam ediliyor...")
             transcript = None
@@ -47,7 +48,7 @@ def run_pipeline(job_id: str, url: str, clip_count: int, channel_id: str = "defa
             audio_energy = None
 
         # ── AŞAMA 2: 4 Ajanlı AI Analizi ─────────────────────────────────────
-        update(job_id, "running", "AI analizi yapılıyor (4 ajanlı sistem)...", 35)
+        update(job_id, "running", "AI analizi yapılıyor (İngilizce 4 ajan)...", 35)
         clips_data = analyze_audio(
             mp3_path=mp3_path,
             clip_count=clip_count,
@@ -60,42 +61,15 @@ def run_pipeline(job_id: str, url: str, clip_count: int, channel_id: str = "defa
         if not clips_data:
             raise RuntimeError("AI bu videoda viral klip bulamadı.")
 
-        # ── AŞAMA 3: Video Kesme ──────────────────────────────────────────────
-        update(job_id, "running", "Klipler kesiliyor...", 55)
+        # ── AŞAMA 3: Video Kesme (Orijinal 16:9 Formatında) ───────────────────
+        update(job_id, "running", "Klipler orijinal yatay formatta kesiliyor...", 55)
         clip_paths = cut_clips(mp4_path, clips_data, job_id)
 
-        # ── AŞAMA 4: Dikey Format (9:16) ──────────────────────────────────────
-        # update(job_id, "running", "9:16 dikey formata çevriliyor...", 68)
-        # vertical_paths = []
-        # for clip_path in clip_paths:
-        #     if is_already_vertical(clip_path):
-        #         print(f"[Pipeline] Zaten dikey: {clip_path}")
-        #         vertical_paths.append(clip_path)
-        #     else:
-        #         vertical_path = clip_path.replace(".mp4", "_vertical.mp4")
-        #         result = reframe_to_vertical(clip_path, vertical_path)
-        #         vertical_paths.append(result)
-
-        # ── AŞAMA 5: Altyazı Üretimi ─────────────────────────────────────────
-        # update(job_id, "running", "Altyazılar oluşturuluyor...", 78)
-        # srt_paths = generate_subtitles(
-        #     vertical_paths, job_id,
-        #     transcript=transcript,
-        #     channel_id=channel_id
-        # )
-
-        # ── AŞAMA 5B: Altyazı Yakma (burn-in) ────────────────────────────────
-        # update(job_id, "running", "Altyazılar videoya ekleniyor...", 85)
-        # final_paths = []
-        # for i, (vpath, srt_path) in enumerate(zip(vertical_paths, srt_paths)):
-        #     final_path = vpath.replace("_vertical.mp4", "_final.mp4").replace(".mp4", "_final.mp4")
-        #     if final_path == vpath:
-        #         final_path = vpath.replace(".mp4", "_subtitled.mp4")
-        #     burned = burn_subtitles(vpath, srt_path, final_path, channel_id)
-        #     final_paths.append(burned)
+        # ── AŞAMA 4 & 5 İPTAL EDİLDİ (Editör Aşamasında Yapılacak) ───────────
+        # Dikey Formata Çevirme ve Altyazı Ekleme Kodları buradan kaldırıldı.
 
         # ── AŞAMA 6: Raporlar ────────────────────────────────────────────────
-        update(job_id, "running", "Raporlar hazırlanıyor...", 95)
+        update(job_id, "running", "İngilizce raporlar hazırlanıyor...", 90)
         write_pdf_report(clips_data, job_id, video_title)
         write_metadata(clips_data, job_id, video_title)
 
@@ -123,9 +97,10 @@ def run_pipeline(job_id: str, url: str, clip_count: int, channel_id: str = "defa
                     "bolum_analizi": clips_data[i].get("bolum_analizi", []),
                     "puanlar": clips_data[i].get("puanlar", {}),
                     "guest_name": clips_data[i].get("guest_name", ""),
-                    # Sadece Kesilmiş Ham Video (16:9)
+                    
+                    # Artık dikey/altyazılı final videosu yerine, direkt ham yatay kesimi (clip_paths) sunuyoruz
                     "mp4": f"/output/{job_id}/{_basename(clip_paths[i])}",
-                    "srt": "", # Artık otomatik altyazı üretmiyoruz
+                    "srt": "", # Otomatik altyazı yok
                 }
                 for i in range(len(clips_data))
             ],
@@ -136,7 +111,6 @@ def run_pipeline(job_id: str, url: str, clip_count: int, channel_id: str = "defa
         jobs[job_id]["error"] = str(e)
         jobs[job_id]["step"] = f"Hata: {str(e)[:80]}"
         traceback.print_exc()
-
 
 def _basename(path: str) -> str:
     from pathlib import Path
