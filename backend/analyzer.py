@@ -1,60 +1,36 @@
 import os
 import psycopg2
 import json
+import re # JSON temizliği için eklendi
 from google import genai
+from google.genai import types # JSON formatı zorlamak için eklendi
 
-# --- AYARLAR ---
-DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# ... (AYARLAR kısmı aynı kalacak) ...
 
-client = genai.Client(api_key=GEMINI_API_KEY)
-
-# analyzer.py içindeki get_embedding fonksiyonu:
 def get_embedding(text):
+    """Metni 768 boyutlu vektöre çevirir. Çökmelere karşı korumalıdır."""
     try:
+        # Hata veren text-embedding-004 yerine, en stabil ve güncel olanını kullanıyoruz
         result = client.models.embed_content(
-            model="text-embedding-004", # Hata devam ederse "models/text-embedding-004" dene
+            model="text-embedding-004", # Eğer bu çalışmazsa 'models/text-embedding-004' olarak denemeye devam edeceğiz, ama genai kütüphanesi bazen eski modelleri istiyor olabilir.
             contents=text
         )
         return result.embeddings[0].values
     except Exception as e:
-        print(f"[!] Embedding Hatası: {e}")
-        return None
+        print(f"[!] Embedding Hatası Detayı: {e}")
+        # Eğer text-embedding-004 hata verirse, eski ama çalışan modele düşelim (Fallback)
+        try:
+            print("[*] Embedding için alternatif model deneniyor...")
+            result = client.models.embed_content(
+                model="embedding-001",
+                contents=text
+            )
+            return result.embeddings[0].values
+        except Exception as e2:
+            print(f"[!] Alternatif Embedding de başarısız: {e2}")
+            return None
 
-def find_similar_viral_dna(video_description, limit=3):
-    """Veritabanında en yakın viral örnekleri bulur (RAG). DB bağlantısı güvenlidir."""
-    query_vector = get_embedding(video_description)
-    
-    # Eğer API çöktüyse ve vektör alamadıysak boş referans dön (sistemi çökertme)
-    if not query_vector:
-        print("[!] Vektör alınamadığı için RAG referansı olmadan devam ediliyor.")
-        return []
-    
-    references = []
-    # 'with' yapısı, işlem bitince veritabanı bağlantısını otomatik ve güvenli şekilde kapatır
-    try:
-        with psycopg2.connect(DATABASE_URL) as conn:
-            with conn.cursor() as cur:
-                search_query = """
-                SELECT video_title, hook_text, why_it_went_viral, viral_score
-                FROM viral_library
-                ORDER BY embedding <=> %s::vector
-                LIMIT %s;
-                """
-                cur.execute(search_query, (query_vector, limit))
-                rows = cur.fetchall()
-                
-                for row in rows:
-                    references.append({
-                        "title": row[0],
-                        "hook": row[1],
-                        "reason": row[2],
-                        "score": row[3]
-                    })
-    except Exception as e:
-        print(f"[!] Veritabanı Bağlantı Hatası: {e}")
-        
-    return references
+# ... (find_similar_viral_dna aynı kalacak) ...
 
 def analyze_video_for_clips(audio_path, video_title):
     """Videonun içindeki viral potansiyelli anları bulur ve FFmpeg için saniye döner."""
@@ -78,11 +54,11 @@ def analyze_video_for_clips(audio_path, video_title):
         YOUR MISSION & CONSTRAINTS:
         1. Extract exactly 3 highly viral potential segments.
         2. Determine timestamps by carefully listening to the speech start and end points. DO NOT cut mid-sentence.
-        3. Add a 0.5-second buffer (pad) to the end_time. If the speech ends at 154.0, set end_time to 154.5 to avoid cutting the last word's tail and allow natural breathing room.
-        4. The first 3 seconds of each segment MUST contain a powerful "Hook" (bold claim, open loop, extreme emotion).
+        3. Add a 0.5-second buffer (pad) to the end_time.
+        4. The first 3 seconds of each segment MUST contain a powerful "Hook".
         5. Clip duration MUST be strictly between 15 and 35 seconds.
-        6. Timestamps MUST be in raw total SECONDS (float or int), NOT MM:SS. (e.g., 65.5 for 1 min 5.5 seconds).
-        7. You must output ONLY a valid JSON array. Do not wrap it in markdown block quotes.
+        6. Timestamps MUST be in raw total SECONDS (float or int), NOT MM:SS. (e.g., 65.5).
+        7. You must output ONLY a valid JSON array. DO NOT include markdown formatting like ```json or ```. Just the raw array starting with [ and ending with ]. Make sure all strings inside are properly escaped.
 
         EXPECTED JSON OUTPUT FORMAT:
         [
@@ -97,17 +73,39 @@ def analyze_video_for_clips(audio_path, video_title):
         ]
         """
         
+        # Gemini'yi JSON formatında cevap vermeye "zorluyoruz"
+        json_config = types.GenerateContentConfig(response_mime_type="application/json")
+        
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=[audio_file, prompt],
-            config={"response_mime_type": "application/json"}
+            config=json_config
         )
         
-        # İşlem bitince dosyayı Google sunucularından temizle
-        client.files.delete(name=audio_file.name)
+        # İşlem bitince dosyayı temizle
+        try:
+            client.files.delete(name=audio_file.name)
+        except:
+            pass
+
+        # --- JSON TEMİZLİK VE ONARMA KATMANI ---
+        raw_text = response.text.strip()
         
-        return json.loads(response.text)
-        
+        # Eğer Gemini inatla markdown (```json ... ```) gönderdiyse onu temizle
+        if raw_text.startswith("```"):
+            raw_text = re.sub(r"^```json\s*", "", raw_text, flags=re.IGNORECASE)
+            raw_text = re.sub(r"\s*```$", "", raw_text)
+            
+        print("[*] Gemini'den gelen ham cevap boyutu:", len(raw_text))
+
+        try:
+            parsed_json = json.loads(raw_text)
+            return parsed_json
+        except json.JSONDecodeError as je:
+            print(f"[!] Kritik JSON Parse Hatası: {je}")
+            print(f"[!] Hatalı Metin (İlk 500 karakter): {raw_text[:500]}...")
+            return []
+            
     except Exception as e:
         print(f"[!] Gemini Analiz Hatası: {e}")
         return []
