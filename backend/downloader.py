@@ -50,9 +50,20 @@ def download_video(url: str, job_id: str):
             raise RuntimeError(f"Cobalt link dönmedi: {data}")
 
         # 2. Dosyayı İndir
-        logger.info("[Downloader] 📥 Video dosyası çekiliyor...")
-        with requests.get(download_url, stream=True, timeout=120) as r:
-            r.raise_for_status()
+        logger.info(f"[Downloader] 📥 İndirme Linki Alındı (Gizli URL): {download_url.split('?')[0]}...")
+        
+        # YouTube ve Cobalt'ı kandırmak için Gerçek Tarayıcı (Browser) Kimliği
+        download_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Referer": "https://www.youtube.com/",
+            "Accept": "video/webm,video/mp4,application/octet-stream,*/*"
+        }
+
+        with requests.get(download_url, stream=True, timeout=120, headers=download_headers) as r:
+            if not r.ok:
+                logger.error(f"[Downloader] İndirme URL'sine erişilemedi. HTTP Kodu: {r.status_code}")
+                r.raise_for_status()
+                
             with open(video_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     if chunk:
@@ -62,11 +73,11 @@ def download_video(url: str, job_id: str):
         file_size = os.path.getsize(video_path)
         logger.info(f"[Downloader] Dosya indirildi. Boyut: {file_size / (1024*1024):.2f} MB")
         
-        if file_size < 1000: # 1KB'dan küçükse video olamaz, muhtemelen hata sayfasıdır
+        if file_size < 100000: # Dosya 100KB'dan küçükse kesin hatalıdır (Limit artırıldı)
             with open(video_path, 'r', errors='ignore') as f:
                 content = f.read(500)
-            logger.error(f"[Downloader] Bozuk dosya içeriği: {content}")
-            raise RuntimeError("İndirilen dosya geçerli bir video değil (çok küçük).")
+            logger.error(f"[Downloader] İnen Hatalı/Boş Dosya İçeriği: '{content}'")
+            raise RuntimeError(f"İndirilen dosya geçerli bir video değil. Boyut: {file_size} bytes")
 
     except Exception as e:
         logger.error(f"[Downloader] İndirme başarısız: {str(e)}")
