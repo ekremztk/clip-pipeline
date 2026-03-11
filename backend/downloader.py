@@ -21,54 +21,62 @@ def download_video(url: str, job_id: str):
     video_path = job_dir / "video.mp4"
     audio_path = job_dir / "audio.mp3"
     
-    # Çerez dosyası kontrolü
+    # Çerez dosyası kontrolü (OAuth2 varken ikinci planda kalır ama yedek iyidir)
     cookie_path = "cookies.txt"
-    if not os.path.exists(cookie_path):
-        logger.warning(f"⚠️ {cookie_path} bulunamadı! İndirme başarısız olabilir.")
 
-    # yt-dlp Ayarları: Daha esnek ve hata toleranslı
+    # yt-dlp Ayarları: OAuth2 ve TV İstemcisi Odaklı
     ydl_opts = {
+        # --- OAuth2 Yapılandırması ---
+        'username': 'oauth2',
+        'password': '', # Boş bırakılır, etkileşimli giriş yapılır
+        
         'cookiefile': cookie_path if os.path.exists(cookie_path) else None,
-        # En iyi kaliteyi seç, mp4 bulamazsan herhangi bir formatı indir ve mp4'e çevir
         'format': 'bestvideo+bestaudio/best',
         'outtmpl': str(job_dir / "video.%(ext)s"),
         'merge_output_format': 'mp4',
         'quiet': False,
         'no_warnings': False,
-        # Çerezlerle çakışmaması için istemci kısıtlamalarını kaldırdık veya web ağırlıklı yaptık
+        
         'extractor_args': {
             'youtube': {
-                'player_client': ['web', 'mweb'], # Cookies ile en uyumlu istemciler
+                # OAuth2 için en stabil istemciler TV ve TVHTML5'tir
+                'player_client': ['tv', 'tvhtml5', 'android', 'web'],
+                'skip': ['dash', 'hls']
             }
         },
-        # Hata anında indirmeyi durdurma, format hatası alırsan esneklik sağla
+        'nocheckcertificate': True,
         'ignoreerrors': False,
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            logger.info(f"[Downloader] İndirme başlatıldı: {url}")
+            logger.info(f"[Downloader] 📺 OAuth2 (Cihaz Girişi) ile indirme başlatıldı: {url}")
+            
+            # extract_info aşamasında eğer ilk giriş ise terminale/loglara kod basacaktır
             info = ydl.extract_info(url, download=True)
             
-            # İndirilen dosyanın adını tam olarak bul (uzantı değişmiş olabilir)
             downloaded_file = ydl.prepare_filename(info)
-            # Eğer uzantı mp4 değilse ffmpeg ile çevrilmiş halini kontrol et
-            actual_video_path = downloaded_file.rsplit('.', 1)[0] + ".mp4"
             
-            # Dosya adını video.mp4 olarak sabitle
+            # Uzantı ne olursa olsun video.mp4'e sabitle
             if os.path.exists(downloaded_file) and downloaded_file != str(video_path):
-                os.rename(downloaded_file, str(video_path))
+                # Eğer indirilen dosya mp4 değilse ffmpeg ile convert et
+                if not downloaded_file.endswith(".mp4"):
+                    logger.info(f"[Downloader] 🔄 Format dönüştürülüyor ({downloaded_file} -> mp4)")
+                    subprocess.run(["ffmpeg", "-y", "-i", downloaded_file, str(video_path)], check=True)
+                    os.remove(downloaded_file)
+                else:
+                    os.rename(downloaded_file, str(video_path))
             
             video_title = info.get('title', 'YouTube Video')
 
         logger.info(f"✅ Video hazır: {video_path}")
 
-        # 2. Sesi Çıkartma (FFmpeg ile MP3'e zorla)
+        # 2. Sesi Çıkartma
         logger.info("[Downloader] 🎵 FFmpeg ile MP3 ayrıştırılıyor...")
         ffmpeg_cmd = [
             "ffmpeg", "-y",
             "-i", str(video_path),
-            "-vn", # Sadece ses
+            "-vn",
             "-acodec", "libmp3lame",
             "-q:a", "2",
             str(audio_path)
@@ -80,7 +88,4 @@ def download_video(url: str, job_id: str):
 
     except Exception as e:
         logger.error(f"[Downloader] Kritik Hata: {str(e)}")
-        # Eğer format hatası devam ederse, kullanıcıya daha anlamlı bir hata dön
-        if "Requested format is not available" in str(e):
-            raise RuntimeError("YouTube bu video için uygun format sağlamadı. Lütfen çerezlerinizi güncelleyin.")
-        raise RuntimeError(f"Video indirme hatası: {e}")
+        raise RuntimeError(f"Video indirme hatası (OAuth2): {e}")
