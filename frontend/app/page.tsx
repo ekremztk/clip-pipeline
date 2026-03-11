@@ -149,7 +149,7 @@ export default function IndustrialPipeline() {
               {/* DRAG & DROP ZONE */}
               <div 
                 onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
+                className={`relative overflow-hidden border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
               >
                 <Icons.Upload />
                 <p className="text-sm font-medium text-gray-600">{file ? file.name : "Videonuzu buraya sürükleyin"}</p>
