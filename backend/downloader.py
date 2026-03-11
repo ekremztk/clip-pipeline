@@ -15,14 +15,13 @@ def download_video(url: str, job_id: str):
     logger.info(f"[Downloader] 🚀 Pytubefix (PO_Token Mimarisi) ile indirme başlıyor: {url}")
     
     try:
-        # use_po_token=True: YouTube'un son bot korumasını (403 hatalarını) aşar
-        # client='WEB': Masaüstü tarayıcı gibi davranır
-        yt = YouTube(url, client='WEB', use_po_token=True)
+        # use_po_token kaldırıldı (Konsol sorusu iptal edildi)
+        # ANDROID_VR veya ANDROID istemcisi YouTube'un bot kontrolünden sessizce geçer
+        yt = YouTube(url, client='ANDROID')
         video_title = yt.title
         logger.info(f"[Downloader] Video bulundu: {video_title}")
 
-        # Progressive (Ses ve Görüntü birleşik) en yüksek çözünürlüğü seçer. 
-        # (Shorts/Reels için ideal ve Railway CPU'su için en hafif yöntemdir)
+        # En yüksek progressive (ses+görüntü) kaliteyi çeker (Genelde 720p'dir, Shorts için mükemmeldir)
         stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
         
         if not stream:
