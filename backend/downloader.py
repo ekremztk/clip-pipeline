@@ -20,8 +20,8 @@ def download_video(url: str, job_id: str):
     audio_path = os.path.join(job_dir, "audio.mp3")
     
     # Bright Data Proxy Bilgilerin (Curl komutundan türetildi)
-    proxy_user = "brd-customer-hl_f27914bd-zone-youtube_downloader"
-    proxy_pass = "04cfjdel6c13"
+    proxy_user = "brd-customer-hl_f27914bd-zone-clip_downloader"
+    proxy_pass = "5ar3ts21fohe"
     proxy_host = "brd.superproxy.io"
     proxy_port = "33335"
     
