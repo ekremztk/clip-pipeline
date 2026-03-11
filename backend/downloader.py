@@ -35,8 +35,6 @@ def download_video(url: str, job_id: str):
         
         payload = {
             "url": url,
-            "videoQuality": "1080",
-            "filenamePattern": "classic"
         }
         
         # API'ye İstek At
