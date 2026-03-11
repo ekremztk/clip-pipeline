@@ -1,9 +1,8 @@
 """
-analyzer.py (V1.5 - Full Context + Schema Validation)
-------------------------------------------------------
+analyzer.py (V1.5.1 - Embedding Fix + Schema Validation)
+---------------------------------------------------------
 RAG + Gemini 2.5 Flash ile viral klip analizi.
-Artık transkript ve ses enerji verisi de Gemini'ye gönderiliyor.
-Çıktı, zorunlu schema validation'dan geçiriliyor.
+Embedding modeli uyumluluk düzeltmesi uygulandı.
 """
 
 import os
@@ -17,11 +16,18 @@ from google.genai import types
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
 
-# Klip süre limitleri (saniye)
 MIN_CLIP_DURATION = 15
 MAX_CLIP_DURATION = 35
 
 client = genai.Client(api_key=GEMINI_API_KEY)
+
+# Embedding modelleri — sırayla denenir
+EMBEDDING_MODELS = [
+    "text-embedding-004",
+    "models/text-embedding-004",
+    "embedding-001",
+    "models/embedding-001",
+]
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -29,33 +35,33 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 # ══════════════════════════════════════════════════════════════════════
 
 def get_embedding(text):
-    """Metni 768 boyutlu vektöre çevirir. Çökmelere karşı korumalıdır."""
-    try:
-        result = client.models.embed_content(
-            model="text-embedding-004",
-            contents=text
-        )
-        return result.embeddings[0].values
-    except Exception as e:
-        print(f"[!] Embedding Hatası: {e}")
+    """Metni 768 boyutlu vektöre çevirir. Birden fazla model dener."""
+    for model_name in EMBEDDING_MODELS:
         try:
-            print("[*] Embedding için 'models/text-embedding-004' deneniyor...")
             result = client.models.embed_content(
-                model="models/text-embedding-004",
+                model=model_name,
                 contents=text
             )
+            print(f"[Analyzer] ✅ Embedding başarılı: {model_name}")
             return result.embeddings[0].values
-        except Exception as e2:
-            print(f"[!] Alternatif Embedding de başarısız: {e2}")
-            return None
+        except Exception as e:
+            print(f"[Analyzer] ⚠️ Embedding hatası ({model_name}): {e}")
+            continue
+    
+    print("[Analyzer] ❌ Tüm embedding modelleri başarısız.")
+    return None
 
 
 def find_similar_viral_dna(video_description, limit=3):
-    """Veritabanında en yakın viral örnekleri bulur (RAG). DB bağlantısı güvenlidir."""
+    """Veritabanında en yakın viral örnekleri bulur (RAG)."""
+    if not DATABASE_URL:
+        print("[Analyzer] ⚠️ DATABASE_URL tanımlı değil, RAG atlanıyor.")
+        return []
+    
     query_vector = get_embedding(video_description)
     
     if not query_vector:
-        print("[!] Vektör alınamadığı için RAG referansı olmadan devam ediliyor.")
+        print("[Analyzer] ⚠️ Vektör alınamadı, RAG referansı olmadan devam ediliyor.")
         return []
     
     references = []
@@ -79,40 +85,28 @@ def find_similar_viral_dna(video_description, limit=3):
                         "score": row[3]
                     })
     except Exception as e:
-        print(f"[!] Veritabanı Bağlantı Hatası: {e}")
+        print(f"[Analyzer] ⚠️ Veritabanı Bağlantı Hatası: {e}")
         
     return references
 
 
 # ══════════════════════════════════════════════════════════════════════
-# SCHEMA VALIDATION - Gemini Çıktı Koruması
+# SCHEMA VALIDATION
 # ══════════════════════════════════════════════════════════════════════
 
 def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
-    """
-    Gemini'den dönen klip listesini doğrular.
-    Geçersiz klipleri loglar ve listeden çıkarır. Pipeline çökmez.
-    
-    Kontroller:
-    - Zorunlu alanlar mevcut mu (start_time, end_time, hook_text, virality_score)
-    - start_time < end_time mi
-    - Süre MIN_CLIP_DURATION - MAX_CLIP_DURATION arasında mı
-    - virality_score 0-100 arası mı
-    - start_time ve end_time sayısal mı
-    """
+    """Gemini'den dönen klip listesini doğrular."""
     validated = []
     
     for i, clip in enumerate(clips_raw):
         clip_label = f"Klip {i+1}"
         
-        # --- Zorunlu alan kontrolü ---
         required_fields = ["start_time", "end_time", "hook_text", "virality_score"]
         missing = [f for f in required_fields if f not in clip or clip[f] is None]
         if missing:
             print(f"[Validation] ⚠️ {clip_label} REDDEDILDI — Eksik alanlar: {missing}")
             continue
         
-        # --- Sayısal değer kontrolü ---
         try:
             start = float(clip["start_time"])
             end = float(clip["end_time"])
@@ -121,11 +115,9 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
             print(f"[Validation] ⚠️ {clip_label} REDDEDILDI — Sayısal dönüşüm hatası: {e}")
             continue
         
-        # --- Mantık kontrolleri ---
         duration = end - start
         
         if start < 0:
-            print(f"[Validation] ⚠️ {clip_label} — start_time negatif ({start}), 0'a düzeltildi.")
             start = 0.0
             clip["start_time"] = start
             duration = end - start
@@ -135,27 +127,22 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
             continue
         
         if end > video_duration:
-            print(f"[Validation] ⚠️ {clip_label} — end_time ({end}) video süresini ({video_duration}) aşıyor, kırpıldı.")
             end = video_duration
             clip["end_time"] = end
             duration = end - start
         
         if duration < MIN_CLIP_DURATION:
-            print(f"[Validation] ⚠️ {clip_label} REDDEDILDI — Süre çok kısa ({duration:.1f}s < {MIN_CLIP_DURATION}s)")
+            print(f"[Validation] ⚠️ {clip_label} REDDEDILDI — Süre çok kısa ({duration:.1f}s)")
             continue
         
         if duration > MAX_CLIP_DURATION + 10:
-            # 10 saniye tolerans veriyoruz çünkü cutter.py kendi padding/trim mantığını uygulayacak
             print(f"[Validation] ⚠️ {clip_label} — Süre uzun ({duration:.1f}s), cutter kırpacak.")
         
         if not (0 <= score <= 100):
-            print(f"[Validation] ⚠️ {clip_label} — Skor sınır dışı ({score}), 50'ye sabitlendi.")
             clip["virality_score"] = 50
         
-        # --- Hook kontrolü ---
         hook = str(clip.get("hook_text", "")).strip()
         if len(hook) < 3:
-            print(f"[Validation] ⚠️ {clip_label} — Hook çok kısa, devam ediliyor.")
             clip["hook_text"] = "Hook belirlenemedi"
         
         validated.append(clip)
@@ -172,25 +159,14 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
 def analyze_video_for_clips(audio_path: str, video_title: str, 
                             transcript_text: str = "", 
                             energy_summary: str = "") -> list:
-    """
-    Videonun içindeki viral potansiyelli anları bulur.
+    """Videonun içindeki viral potansiyelli anları bulur."""
     
-    Parametreler:
-    - audio_path: Gemini'ye gönderilecek ses dosyası
-    - video_title: Video başlığı + açıklama bağlamı
-    - transcript_text: Groq/Gemini transkript çıktısı (opsiyonel, zenginleştirme)
-    - energy_summary: Librosa enerji analizi özeti (opsiyonel, zenginleştirme)
-    """
-    
-    # --- RAG Hafıza Taraması ---
-    print(f"[Analyzer] '{video_title}' için RAG hafızası taranıyor...")
+    print(f"[Analyzer] '{video_title[:80]}...' için RAG hafızası taranıyor...")
     refs = find_similar_viral_dna(video_title)
     ref_text = json.dumps(refs, ensure_ascii=False) if refs else "Referans bulunamadı, genel viral kurallarını uygula."
 
-    # --- Transkript bölümü ---
     transcript_block = ""
     if transcript_text and len(transcript_text.strip()) > 50:
-        # Gemini'nin context window'unu aşmamak için ilk 15000 karakter
         truncated = transcript_text[:15000]
         transcript_block = f"""
         TRANSCRIPT (Word-level timestamps from Whisper):
@@ -198,11 +174,9 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         {"[...TRUNCATED...]" if len(transcript_text) > 15000 else ""}
         
         IMPORTANT: Use this transcript to find EXACT sentence boundaries. 
-        Do NOT cut mid-sentence. Your start_time should begin at the start of a sentence 
-        and end_time should end at the completion of a sentence.
+        Do NOT cut mid-sentence.
         """
     
-    # --- Enerji analizi bölümü ---
     energy_block = ""
     if energy_summary and len(energy_summary.strip()) > 20:
         energy_block = f"""
@@ -211,10 +185,9 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         
         IMPORTANT: Energy peaks indicate emotional moments (laughter, shouting, excitement).
         Prioritize clips that OVERLAP with these high-energy timestamps.
-        Silence zones are natural cut points — prefer starting/ending clips near silences.
+        Silence zones are natural cut points.
         """
 
-    # --- Gemini Prompt ---
     print("[Analyzer] Gemini 2.5 Flash ile klip noktaları analiz ediliyor...")
     try:
         audio_file = client.files.upload(file=audio_path)
@@ -268,7 +241,6 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         ]
         """
         
-        # JSON formatına zorlama
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         
         response = client.models.generate_content(
@@ -277,16 +249,13 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
             config=json_config
         )
         
-        # Dosya temizliği
         try:
             client.files.delete(name=audio_file.name)
         except:
             pass
 
-        # --- JSON TEMİZLİK VE ONARMA KATMANI ---
         raw_text = response.text.strip()
         
-        # Markdown bloklarını temizle
         if raw_text.startswith("```"):
             raw_text = re.sub(r"^```json\s*", "", raw_text, flags=re.IGNORECASE)
             raw_text = re.sub(r"\s*```$", "", raw_text)
@@ -300,7 +269,6 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
             print(f"[Analyzer] Hatalı Metin (İlk 500 karakter): {raw_text[:500]}...")
             return []
         
-        # --- SCHEMA VALIDATION ---
         validated = validate_clips(parsed_json)
         return validated
             
