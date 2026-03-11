@@ -9,16 +9,16 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+# analyzer.py içindeki get_embedding fonksiyonu:
 def get_embedding(text):
-    """Metni 768 boyutlu vektöre çevirir. Çökmelere karşı korumalıdır."""
     try:
         result = client.models.embed_content(
-            model="text-embedding-004",
+            model="text-embedding-004", # Hata devam ederse "models/text-embedding-004" dene
             contents=text
         )
         return result.embeddings[0].values
     except Exception as e:
-        print(f"[!] API veya Ağ Hatası (Embedding): {e}")
+        print(f"[!] Embedding Hatası: {e}")
         return None
 
 def find_similar_viral_dna(video_description, limit=3):

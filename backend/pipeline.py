@@ -61,7 +61,11 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
                     "index": i + 1,
                     "hook": clips_data[i].get("hook_text"),
                     "score": clips_data[i].get("virality_score"),
-                    "path": clip_paths[i]
+                    # Yeni eklenen iki satır:
+                    "psychological_trigger": clips_data[i].get("psychological_trigger"),
+                    "rag_reference_used": clips_data[i].get("rag_reference_used"),
+                    
+                    "path": f"/{clip_paths[i]}" 
                 } for i in range(len(clip_paths))
             ]
         }
