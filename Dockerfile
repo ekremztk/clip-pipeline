@@ -1,6 +1,7 @@
 FROM python:3.11-slim-bookworm
 
-# Gerekli sistem paketleri ve FFmpeg kütüphane geliştirme paketleri
+# 1. Gerekli sistem paketleri
+# libgl1 ve libglib2.0-0 -> OpenCV (PySceneDetect) için şarttır
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsndfile1 \
@@ -9,28 +10,29 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg-dev \
     zlib1g-dev \
-    # Yeni eklenenler: torchcodec ve ffmpeg bağımlılıkları için
     libavcodec-dev \
     libavformat-dev \
     libavutil-dev \
     libswresample-dev \
     libswscale-dev \
     pkg-config \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Önce bağımlılıkları yükle
+# 2. Önce bağımlılıkları yükle (Cache avantajı için)
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-# yt-dlp ve sorun çıkaran torch kütüphaneleri için ek önlem
 RUN pip install --no-cache-dir --upgrade yt-dlp
 
-# NOT: Eğer hata devam ederse, requirements.txt içindeki torch sürümünü 
-# kontrol etmeliyiz. Şu anki hatan torch ve torchcodec uyuşmazlığı.
-
+# 3. Kodları kopyala ve gerekli klasörleri oluştur
 COPY backend/ .
-RUN mkdir -p output
+RUN mkdir -p output temp_uploads
+
+# 4. Railway ve Docker için dosya izinlerini ayarla
+RUN chmod -R 777 output temp_uploads
 
 EXPOSE 8080
 
