@@ -1,10 +1,11 @@
+import os
 import psycopg2
 import json
 from google import genai
 
 # --- AYARLAR ---
-GEMINI_API_KEY = "BURAYA_API_KEY"
-DATABASE_URL = "POSTGRESQL_PUBLIC_URL_BURAYA"
+DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 

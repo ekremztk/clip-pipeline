@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 # .env dosyasındaki değişkenleri yükle
 load_dotenv()
 
+DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-DATABASE_URL = os.getenv("DATABASE_PUBLIC_URL")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
