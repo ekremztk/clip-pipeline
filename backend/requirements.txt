@@ -1,27 +1,29 @@
+# --- Web & API ---
 fastapi==0.135.1
 uvicorn==0.41.0
 python-dotenv==1.2.2
-yt-dlp>=2026.3.3
+
+# --- Database & RAG (KRİTİK EKLEME) ---
+psycopg2-binary
+pgvector
+
+# --- AI & Models ---
 google-genai
-openai==2.26.0
-ffmpeg-python==0.2.0
-pytubefix>=10.3.8
-
-
-# Groq Whisper API - hızlı bulut transkript
 groq
+openai==2.26.0
 
-# Ses analizi - enerji haritası
+# --- Video & Audio Processing ---
+ffmpeg-python==0.2.0
+scenedetect[opencv]
 librosa
 soundfile
 numpy
 
-# Sahne tespiti - doğal cut noktaları
-scenedetect[opencv]
+# --- YouTube Tools (Local Hunter/Trainer İçin Gerekli) ---
+yt-dlp>=2026.3.3
+pytubefix>=10.3.8
 
-# Yüz takibi - auto reframe
+# --- Modül 2 Hazırlık (Görsel & Edit) ---
 mediapipe
 opencv-python
-
-# PDF rapor
 reportlab

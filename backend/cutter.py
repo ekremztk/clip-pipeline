@@ -4,6 +4,7 @@ cutter.py
 FFmpeg ile video kesme.
 PySceneDetect ile en yakın doğal sahne geçişine snap yapar.
 Dosya adına _start_XXX ekler (subtitler.py için).
+Mac işlemcisine (threads 0 & ultrafast) optimize edilmiştir.
 """
 
 import subprocess
@@ -90,12 +91,14 @@ def cut_clips(mp4_path: str, clips_data: list[dict], job_id: str) -> list[str]:
     scene_cuts = get_scene_cuts(mp4_path)
 
     for i, clip in enumerate(clips_data):
-        # Dosya adına start zamanını ekle (subtitler.py kullanacak)
+        # Gemini promptundan gelen yeni JSON anahtarlarını okuyoruz (start_time, end_time)
         try:
-            raw_start = float(clip.get("start_sec", 0))
-            raw_end = float(clip.get("end_sec", 30))
+            raw_start = float(clip.get("start_time", 0))
+            raw_end = float(clip.get("end_time", 30))
+            hook_text = clip.get("hook_text", "klip")
         except (ValueError, TypeError):
             raw_start, raw_end = 0.0, 30.0
+            hook_text = "klip"
 
         # Mantıksız değer kontrolü
         if raw_start < 0 or raw_start >= video_duration:
@@ -123,12 +126,15 @@ def cut_clips(mp4_path: str, clips_data: list[dict], job_id: str) -> list[str]:
             duration = min(MIN_TOTAL, video_duration - start)
             end = start + duration
 
-        # Dosya adına başlangıç zamanını ekle
+        # Dosya adı oluşturma (subtitler.py'nin bozulmaması için _start_XXX korunuyor)
+        # Gemini'nin hook cümlesini de klasörde anlaşılır olsun diye araya sıkıştırıyoruz
+        safe_hook = "".join(c for c in hook_text if c.isalnum() or c in (' ', '_')).rstrip().replace(" ", "_")[:20]
         start_tag = f"_start_{int(raw_start)}"
-        out_path = str(job_dir / f"clip_{str(i+1).zfill(2)}{start_tag}.mp4")
+        out_path = str(job_dir / f"clip_{str(i+1).zfill(2)}_{safe_hook}{start_tag}.mp4")
 
-        print(f"[Cutter] Klip {i+1}: {start:.1f}s → {end:.1f}s ({duration:.1f}s)")
+        print(f"[Cutter] Klip {i+1} İşleniyor: {start:.1f}s → {end:.1f}s ({duration:.1f}s)")
 
+        # Mac hızlandırması eklenmiş FFmpeg komutu
         cmd = [
             "ffmpeg", "-y",
             "-ss", str(start),
@@ -138,9 +144,10 @@ def cut_clips(mp4_path: str, clips_data: list[dict], job_id: str) -> list[str]:
             "-map", "0:v:0",
             "-map", "0:a:0",
             "-c:v", "libx264",
+            "-preset", "ultrafast",   # Mac işlemcisini hızlandırır
+            "-crf", "18",             # Kayıpsız kalite
+            "-threads", "0",          # Tüm işlemci çekirdeklerini kullanır
             "-c:a", "aac",
-            "-preset", "fast",
-            "-crf", "18",
             out_path
         ]
 
