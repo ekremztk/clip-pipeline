@@ -1,12 +1,9 @@
 import os
 import subprocess
 import logging
-import requests
+from pytubefix import YouTube
 
 logger = logging.getLogger(__name__)
-
-# Kendi banlı Railway sunucumuz yerine Resmi/Public Cobalt API kullanıyoruz
-COBALT_API_URL = "https://api.cobalt.tools"
 
 def download_video(url: str, job_id: str):
     job_dir = f"output/{job_id}" 
@@ -14,59 +11,33 @@ def download_video(url: str, job_id: str):
     
     video_path = os.path.join(job_dir, "video.mp4")
     audio_path = os.path.join(job_dir, "audio.mp3")
-    video_title = "YouTube Video"
-
-    logger.info(f"[Downloader] 🚀 Resmi Cobalt API (Public) üzerinden indirme: {url}")
+    
+    logger.info(f"[Downloader] 🚀 Pytubefix (PO_Token Mimarisi) ile indirme başlıyor: {url}")
     
     try:
-        # Resmi sunucunun bizi bot sanmaması için gerçekçi tarayıcı başlıkları (Headers)
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Origin": "https://cobalt.tools",
-            "Referer": "https://cobalt.tools/"
-        }
-        
-        payload = {
-            "url": url,
-            "videoQuality": "1080"
-        }
-        
-        # 1. API'den Link İste
-        logger.info("[Downloader] ⏳ Cobalt API'den proxy linki bekleniyor...")
-        resp = requests.post(COBALT_API_URL, json=payload, headers=headers, timeout=30)
-        
-        if not resp.ok:
-            logger.error(f"[Downloader] Public Cobalt API Hatası ({resp.status_code}): {resp.text}")
-            resp.raise_for_status()
+        # use_po_token=True: YouTube'un son bot korumasını (403 hatalarını) aşar
+        # client='WEB': Masaüstü tarayıcı gibi davranır
+        yt = YouTube(url, client='WEB', use_po_token=True)
+        video_title = yt.title
+        logger.info(f"[Downloader] Video bulundu: {video_title}")
 
-        data = resp.json()
-        download_url = data.get("url")
+        # Progressive (Ses ve Görüntü birleşik) en yüksek çözünürlüğü seçer. 
+        # (Shorts/Reels için ideal ve Railway CPU'su için en hafif yöntemdir)
+        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
         
-        if not download_url:
-            raise RuntimeError(f"Cobalt public sunucusu link dönmedi: {data}")
+        if not stream:
+            raise RuntimeError("Uygun MP4 video akışı bulunamadı!")
 
-        # 2. Dosyayı İndir
-        logger.info(f"[Downloader] 📥 İndirme Linki Alındı (Public Proxy): {download_url.split('?')[0]}...")
+        logger.info(f"[Downloader] 📥 Video indiriliyor (Çözünürlük: {stream.resolution})...")
         
-        download_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Accept": "*/*"
-        }
-
-        with requests.get(download_url, stream=True, timeout=120, headers=download_headers) as r:
-            r.raise_for_status()
-            with open(video_path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-
+        # Dosyayı indir
+        stream.download(output_path=job_dir, filename="video.mp4")
+        
         # 3. Dosya Doğrulama
         file_size = os.path.getsize(video_path)
-        logger.info(f"[Downloader] ✅ Dosya indirildi. Boyut: {file_size / (1024*1024):.2f} MB")
+        logger.info(f"[Downloader] ✅ Video başarıyla indirildi. Boyut: {file_size / (1024*1024):.2f} MB")
         
-        if file_size < 100000: # 100KB altıysa sahte veridir (0 bytes vb.)
+        if file_size < 100000: # 100KB altıysa sahte veridir
             raise RuntimeError(f"İndirilen dosya geçerli bir video değil. Boyut: {file_size} bytes")
 
     except Exception as e:

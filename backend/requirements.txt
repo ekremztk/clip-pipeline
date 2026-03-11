@@ -5,6 +5,8 @@ yt-dlp>=2026.3.3
 google-genai
 openai==2.26.0
 ffmpeg-python==0.2.0
+pytubefix>=10.3.8
+
 
 # Groq Whisper API - hızlı bulut transkript
 groq
