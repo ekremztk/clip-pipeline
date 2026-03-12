@@ -275,9 +275,16 @@ export default function PrognotStudio() {
   const loadHistoryJob = async (jobIdToLoad: string) => {
     try {
       const res = await fetch(`${BACKEND_URL}/status/${jobIdToLoad}`);
-      const data = await res.json();
-      setStatus(data);
-      setAppState("success");
+      const data: JobStatus = await res.json();
+      if (data.status === "done" && data.result?.clips?.length) {
+        setStatus(data);
+        setJobId(jobIdToLoad);
+        setAppState("success");
+        setLogs([`[GEÇMİŞ] "${data.result.original_title}" yüklendi — ${data.result.clips_count} klip`]);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        console.warn("Job done değil veya klip yok:", data.status);
+      }
     } catch (e) {
       console.error("History detail failed", e);
     }
@@ -285,7 +292,10 @@ export default function PrognotStudio() {
 
   const backendUrl = (path: string) => `${BACKEND_URL.replace(/\/$/, "")}${path}`;
 
-  const clips = status?.result?.clips || [];
+  const clips = status?.result?.clips?.map(c => ({
+    ...c,
+    index: c.index ?? c.clip_index ?? 0,
+  })) || [];
 
   // ═══════════════════════════════════════════════════════════════════════════
   // RENDER
