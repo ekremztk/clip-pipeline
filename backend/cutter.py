@@ -16,10 +16,13 @@ MAX_TOTAL = 61       # PADDING dahil maksimum
 MIN_TOTAL = 5        # Minimum klip süresi
 
 try:
-    from scenedetect import VideoManager, SceneManager
-    from scenedetect.detectors import ContentDetector
+    from scenedetect import open_video, SceneManager  # type: ignore
+    from scenedetect.detectors import ContentDetector  # type: ignore
     SCENEDETECT_AVAILABLE = True
 except ImportError:
+    open_video = None
+    SceneManager = None
+    ContentDetector = None
     SCENEDETECT_AVAILABLE = False
     print("[Cutter] ⚠️ PySceneDetect kurulu değil. pip install scenedetect[opencv]")
 
@@ -38,15 +41,12 @@ def get_scene_cuts(mp4_path: str) -> list[float]:
         return []
 
     try:
-        video_manager = VideoManager([mp4_path])
-        scene_manager = SceneManager()
-        scene_manager.add_detector(ContentDetector(threshold=30.0))
+        video = open_video(mp4_path)  # type: ignore
+        scene_manager = SceneManager()  # type: ignore
+        scene_manager.add_detector(ContentDetector(threshold=30.0))  # type: ignore
 
-        video_manager.set_downscale_factor()
-        video_manager.start()
-        scene_manager.detect_scenes(frame_source=video_manager)
+        scene_manager.detect_scenes(video=video)
         scene_list = scene_manager.get_scene_list()
-        video_manager.release()
 
         # Her sahnenin başlangıç zamanını saniye olarak al
         cuts = [scene[0].get_seconds() for scene in scene_list]
@@ -123,12 +123,12 @@ def cut_clips(mp4_path: str, clips_data: list[dict], job_id: str) -> list[str]:
             end = start + MAX_TOTAL
             duration = MAX_TOTAL
         if duration < MIN_TOTAL:
-            duration = min(MIN_TOTAL, video_duration - start)
+            duration = min(float(MIN_TOTAL), video_duration - start)
             end = start + duration
 
         # Dosya adı oluşturma (subtitler.py'nin bozulmaması için _start_XXX korunuyor)
         # Gemini'nin hook cümlesini de klasörde anlaşılır olsun diye araya sıkıştırıyoruz
-        safe_hook = "".join(c for c in hook_text if c.isalnum() or c in (' ', '_')).rstrip().replace(" ", "_")[:20]
+        safe_hook = "".join(c for c in hook_text if c.isalnum() or c in (' ', '_')).rstrip().replace(" ", "_")[:20]  # type: ignore[index]
         start_tag = f"_start_{int(raw_start)}"
         out_path = str(job_dir / f"clip_{str(i+1).zfill(2)}_{safe_hook}{start_tag}.mp4")
 
@@ -153,7 +153,7 @@ def cut_clips(mp4_path: str, clips_data: list[dict], job_id: str) -> list[str]:
 
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            raise RuntimeError(f"Klip {i+1} kesilirken FFmpeg hatası:\n{result.stderr[:300]}")
+            raise RuntimeError(f"Klip {i+1} kesilirken FFmpeg hatası:\n{result.stderr[:300]}")  # type: ignore[index]
 
         clip_paths.append(out_path)
 

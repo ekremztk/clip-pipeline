@@ -7,17 +7,17 @@ import re
 from pathlib import Path
 from datetime import datetime
 
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.units import mm
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
-from reportlab.platypus import (
+from reportlab.lib.pagesizes import A4  # type: ignore[import-untyped]
+from reportlab.lib import colors  # type: ignore[import-untyped]
+from reportlab.lib.units import mm  # type: ignore[import-untyped]
+from reportlab.lib.styles import ParagraphStyle  # type: ignore[import-untyped]
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT  # type: ignore[import-untyped]
+from reportlab.platypus import (  # type: ignore[import-untyped]
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     HRFlowable, PageBreak, KeepTogether
 )
-from reportlab.pdfgen import canvas as rl_canvas
-from reportlab.lib.utils import simpleSplit
+from reportlab.pdfgen import canvas as rl_canvas  # type: ignore[import-untyped]
+from reportlab.lib.utils import simpleSplit  # type: ignore[import-untyped]
 
 
 # ── PDF İÇİN EMOJİ/ÖZEL KARAKTER TEMİZLEYİCİ ──────────────────────────────────
@@ -223,7 +223,7 @@ def build_summary_table(story, styles, clips_data):
         title_clean = clean_for_pdf(clip.get("title", ""))
         rows.append([
             str(i + 1),
-            title_clean[:52] + ("..." if len(title_clean) > 52 else ""),
+            title_clean[:52] + ("..." if len(title_clean) > 52 else ""),  # type: ignore[index]
             f"{format_time(clip['start_sec'])} → {format_time(clip['end_sec'])}",
             str(score) if score else "—",
             score_label(score),

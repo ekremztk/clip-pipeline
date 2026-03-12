@@ -10,9 +10,10 @@ import math
 from pathlib import Path
 
 try:
-    from groq import Groq
+    from groq import Groq  # type: ignore[import-not-found]
     GROQ_AVAILABLE = True
 except ImportError:
+    Groq = None
     GROQ_AVAILABLE = False
     print("[Transcriber] ⚠️ Groq kurulu değil. pip install groq ile kur.")
 
@@ -20,7 +21,7 @@ except ImportError:
 GROQ_MAX_BYTES = 25 * 1024 * 1024  # 25MB
 
 
-def transcribe(audio_path: str, language: str = "tr") -> dict:
+def transcribe(audio_path: str, language: str | None = None) -> dict:
     if not GROQ_AVAILABLE:
         print("[Transcriber] Groq kurulu değil, Gemini fallback...")
         return _fallback_transcribe(audio_path)
@@ -33,7 +34,7 @@ def transcribe(audio_path: str, language: str = "tr") -> dict:
     print(f"[Transcriber] Groq Whisper başlatılıyor... ({audio_path})")
 
     try:
-        client = Groq(api_key=api_key)
+        client = Groq(api_key=api_key)  # type: ignore[misc]
         file_size = Path(audio_path).stat().st_size
 
         if file_size <= GROQ_MAX_BYTES:
@@ -59,14 +60,14 @@ def transcribe(audio_path: str, language: str = "tr") -> dict:
         return _fallback_transcribe(audio_path)
 
 
-def _transcribe_single(client, audio_path: str, language: str) -> dict:
+def _transcribe_single(client, audio_path: str, language: str | None) -> dict:
     print("[Transcriber] Groq'a gönderiliyor...")
 
     with open(audio_path, "rb") as f:
         response = client.audio.transcriptions.create(
             file=(Path(audio_path).name, f),
             model="whisper-large-v3-turbo",
-            language=language,
+            **({"language": language} if language else {}),
             response_format="verbose_json",
             timestamp_granularities=["word", "segment"]
         )
@@ -74,7 +75,7 @@ def _transcribe_single(client, audio_path: str, language: str) -> dict:
     return _parse_groq_response(response, offset=0.0)
 
 
-def _transcribe_chunked(client, audio_path: str, language: str) -> dict:
+def _transcribe_chunked(client, audio_path: str, language: str | None) -> dict:
     import subprocess
     import tempfile
 
@@ -115,11 +116,11 @@ def _transcribe_chunked(client, audio_path: str, language: str) -> dict:
                 chunk_segs = chunk_result.get("segments",[])
 
                 for seg in chunk_segs:
-                    seg["start"] = round(seg.get("start", 0) + start_time, 3)
-                    seg["end"] = round(seg.get("end", 0) + start_time, 3)
+                    seg["start"] = round(seg.get("start", 0) + start_time, 3)  # type: ignore[call-overload]
+                    seg["end"] = round(seg.get("end", 0) + start_time, 3)  # type: ignore[call-overload]
                     for w in seg.get("words", []):
-                        w["start"] = round(w.get("start", 0) + start_time, 3)
-                        w["end"] = round(w.get("end", 0) + start_time, 3)
+                        w["start"] = round(w.get("start", 0) + start_time, 3)  # type: ignore[call-overload]
+                        w["end"] = round(w.get("end", 0) + start_time, 3)  # type: ignore[call-overload]
 
                 all_segments.extend(chunk_segs)
             except Exception as e:
@@ -153,8 +154,8 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
 
         word_list.append({
             "word": w_word,
-            "start": round(w_start + offset, 3),
-            "end": round(w_end + offset, 3),
+            "start": round(float(w_start + offset), 3),  # type: ignore[call-overload]
+            "end": round(float(w_end + offset), 3),  # type: ignore[call-overload]
             "score": 0.99
         })
 
@@ -168,8 +169,8 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
             seg_end = getattr(seg, "end", 0.0)
             seg_text = getattr(seg, "text", "").strip()
 
-        seg_start = round(seg_start + offset, 3)
-        seg_end = round(seg_end + offset, 3)
+        seg_start = round(float(seg_start + offset), 3)  # type: ignore[call-overload]
+        seg_end = round(float(seg_end + offset), 3)  # type: ignore[call-overload]
 
         seg_words =[
             w for w in word_list
@@ -197,9 +198,9 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
 
 def _fallback_transcribe(audio_path: str) -> dict:
     """YENİ MİMARİ: google-genai kullanılarak transkript üretimi"""
-    from google import genai
-    from google.genai import types
-    from dotenv import load_dotenv
+    from google import genai  # type: ignore
+    from google.genai import types  # type: ignore
+    from dotenv import load_dotenv  # type: ignore
     load_dotenv()
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -229,7 +230,7 @@ Zaman damgaları yaklaşık olabilir, her segment 5-10 saniye olsun."""
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model="gemini-2.5-flash",
             contents=[audio_file, prompt],
             config=json_config
         )

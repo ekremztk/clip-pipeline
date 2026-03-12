@@ -6,11 +6,11 @@ DATABASE_URL tanımlı değilse Supabase connection string otomatik oluşturulur
 """
 
 import os
-import psycopg2
+import psycopg2  # type: ignore
 import json
 import re
-from google import genai
-from google.genai import types
+from google import genai  # type: ignore
+from google.genai import types  # type: ignore
 
 # --- AYARLAR ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -57,7 +57,7 @@ def get_embedding(text):
     return None
 
 
-def find_similar_viral_dna(video_description, limit=3):
+def find_similar_viral_dna(video_description, channel_id: str = "speedy_cast", limit=3):
     """Veritabanında en yakın viral örnekleri bulur (RAG)."""
     if not DATABASE_URL:
         print("[Analyzer] ⚠️ DATABASE_URL tanımlı değil, RAG atlanıyor.")
@@ -74,10 +74,11 @@ def find_similar_viral_dna(video_description, limit=3):
                 search_query = """
                 SELECT video_title, hook_text, why_it_went_viral, viral_score
                 FROM viral_library
+                WHERE channel_id = %s
                 ORDER BY embedding <=> %s::vector
                 LIMIT %s;
                 """
-                cur.execute(search_query, (query_vector, limit))
+                cur.execute(search_query, (channel_id, query_vector, limit))
                 rows = cur.fetchall()
                 for row in rows:
                     references.append({
@@ -150,15 +151,28 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
 
 def analyze_video_for_clips(audio_path: str, video_title: str, 
                             transcript_text: str = "", 
-                            energy_summary: str = "") -> list:
+                            energy_summary: str = "",
+                            channel_id: str = "speedy_cast") -> list:
     
+    # Kanal config yükle (dinamik — yeni kanal ekleyince bu kod değişmez)
+    from channels.channel_registry import get_channel_config
+    ch_config = get_channel_config(channel_id)
+    if ch_config:
+        ch_min = ch_config.MIN_CLIP_DURATION
+        ch_max = ch_config.MAX_CLIP_DURATION
+        ch_system_prompt = ch_config.SYSTEM_PROMPT
+    else:
+        ch_min = MIN_CLIP_DURATION
+        ch_max = MAX_CLIP_DURATION
+        ch_system_prompt = ""
+
     print(f"[Analyzer] RAG hafızası taranıyor...")
-    refs = find_similar_viral_dna(video_title)
+    refs = find_similar_viral_dna(video_title, channel_id=channel_id)
     ref_text = json.dumps(refs, ensure_ascii=False) if refs else "Referans bulunamadı, genel viral kurallarını uygula."
 
     transcript_block = ""
     if transcript_text and len(transcript_text.strip()) > 50:
-        truncated = transcript_text[:15000]
+        truncated = transcript_text[:15000]  # type: ignore[index]
         transcript_block = f"""
         TRANSCRIPT (Word-level timestamps from Whisper):
         {truncated}
@@ -183,7 +197,10 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
     try:
         audio_file = client.files.upload(file=audio_path)
         
+        channel_context = f"\nCHANNEL CONTEXT:\n{ch_system_prompt}\n" if ch_system_prompt else ""
+        
         prompt = f"""
+        {channel_context}
         You are an elite Viral Video Architect and TikTok/Shorts Retention Algorithm Expert. 
         Your sole purpose is to analyze long-form video content and extract the absolute best 
         15-35 second segments optimized to go viral.
@@ -206,7 +223,7 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         2. Use transcript timestamps for EXACT sentence boundaries. Do NOT cut mid-sentence.
         3. Add 0.5s buffer to end_time.
         4. First 3 seconds MUST contain a powerful "Hook".
-        5. Duration MUST be 15-35 seconds.
+        5. Duration MUST be {ch_min}-{ch_max} seconds.
         6. Timestamps in raw SECONDS (float/int), NOT MM:SS.
         7. Output ONLY valid JSON array, no markdown.
         8. Prioritize segments overlapping with energy peaks.
@@ -233,14 +250,14 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model="gemini-2.5-flash",
             contents=[audio_file, prompt],
             config=json_config
         )
         
         try:
             client.files.delete(name=audio_file.name)
-        except:
+        except Exception:
             pass
 
         raw_text = response.text.strip()

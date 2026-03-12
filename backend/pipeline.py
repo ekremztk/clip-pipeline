@@ -10,9 +10,9 @@ import subprocess
 import traceback
 from pathlib import Path
 
-from database import create_job, update_job, save_clips, get_job
-from analyzer import analyze_video_for_clips
-from cutter import cut_clips
+from database import create_job, update_job, save_clips, get_job  # type: ignore[import-not-found]
+from analyzer import analyze_video_for_clips  # type: ignore[import-not-found]
+from cutter import cut_clips  # type: ignore[import-not-found]
 
 
 def update(job_id: str, status: str, step: str, progress: int):
@@ -21,7 +21,7 @@ def update(job_id: str, status: str, step: str, progress: int):
 
 
 def build_clip_result(clip_raw: dict, clip_path: str, index: int, 
-                      report_item: dict = None, transcript: dict = None) -> dict:
+                      report_item: dict | None = None, transcript: dict | None = None) -> dict:
     """Tek bir klip için frontend'e gönderilecek sonuç objesini oluşturur."""
     result = {
         "index": index,
@@ -48,7 +48,7 @@ def build_clip_result(clip_raw: dict, clip_path: str, index: int,
     
     if not result["transcript_excerpt"] and transcript and transcript.get("segments"):
         try:
-            from transcriber import get_words_in_range
+            from transcriber import get_words_in_range  # type: ignore[import-not-found]
             start = float(clip_raw.get("start_time", 0))
             end = float(clip_raw.get("end_time", 30))
             words = get_words_in_range(transcript, start, end)
@@ -74,8 +74,8 @@ def _extract_segment_text(transcript: dict, start_sec: float, end_sec: float) ->
     return " ".join(texts)
 
 
-def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_description: str):
-    audio_path = f"temp_{job_id}.m4a"
+def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_description: str = "", channel_id: str = "speedy_cast"):
+    audio_path = f"temp_{job_id}.wav"
     transcript = None
     
     try:
@@ -86,7 +86,7 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         
         command = [
             "ffmpeg", "-y", "-i", local_mp4_path,
-            "-vn", "-acodec", "copy", audio_path
+            "-vn", "-c:a", "aac", "-b:a", "128k", audio_path
         ]
         result = subprocess.run(command, capture_output=True, text=True)
         if result.returncode != 0:
@@ -99,8 +99,10 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         update(job_id, "running", "Konuşma metne dönüştürülüyor (Whisper)...", 15)
         transcript_text = ""
         try:
-            from transcriber import transcribe, format_transcript_for_gemini
-            transcript = transcribe(audio_path)
+            from transcriber import transcribe, format_transcript_for_gemini  # type: ignore[import-not-found]
+            # Dil tespiti: başlık İngilizce kelime içeriyorsa None (auto-detect), yoksa "tr"
+            detected_lang = None  # Whisper otomatik algılasın — en doğru sonuç verir
+            transcript = transcribe(audio_path, language=detected_lang)
             if transcript and transcript.get("segments"):
                 transcript_text = format_transcript_for_gemini(transcript)
                 print(f"[Pipeline] ✅ Transkript hazır: {len(transcript['segments'])} segment")
@@ -115,7 +117,7 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         update(job_id, "running", "Ses enerji haritası çıkarılıyor (Librosa)...", 25)
         energy_summary = ""
         try:
-            from audio_analyzer import analyze_energy
+            from audio_analyzer import analyze_energy  # type: ignore[import-not-found]
             energy_data = analyze_energy(audio_path)
             if energy_data and energy_data.get("summary"):
                 energy_summary = energy_data["summary"]
@@ -133,7 +135,8 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
             audio_path=audio_path,
             video_title=full_context,
             transcript_text=transcript_text,
-            energy_summary=energy_summary
+            energy_summary=energy_summary,
+            channel_id=channel_id
         )
         if not clips_data:
             raise RuntimeError("Yapay zeka bu videoda kriterlere uygun viral klip bulamadı.")
@@ -156,7 +159,7 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         pdf_path = None
         
         try:
-            from report_builder import build_report_data
+            from report_builder import build_report_data  # type: ignore[import-not-found]
             report_data = build_report_data(clips_data, transcript)
             print(f"[Pipeline] ✅ Rapor verisi hazırlandı")
         except Exception as e:
@@ -164,14 +167,14 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         
         if report_data:
             try:
-                from metadata import write_metadata
+                from metadata import write_metadata  # type: ignore[import-not-found]
                 metadata_path = write_metadata(report_data, job_id, video_title)
                 print(f"[Pipeline] ✅ Metadata TXT: {metadata_path}")
             except Exception as e:
                 print(f"[Pipeline] ⚠️ Metadata TXT hatası: {e}")
             
             try:
-                from pdf_reporter import write_pdf_report
+                from pdf_reporter import write_pdf_report  # type: ignore[import-not-found]
                 pdf_path = write_pdf_report(report_data, job_id, video_title)
                 print(f"[Pipeline] ✅ PDF Rapor: {pdf_path}")
             except Exception as e:
@@ -183,7 +186,7 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         
         result_clips = []
         for i in range(len(clip_paths)):
-            report_item = report_data[i] if report_data and i < len(report_data) else None
+            report_item = report_data[i] if report_data and i < len(report_data) else None  # type: ignore[index]
             clip_result = build_clip_result(
                 clip_raw=clips_data[i],
                 clip_path=clip_paths[i],
