@@ -71,7 +71,8 @@ async def upload_and_process(
     background_tasks: BackgroundTasks,
     video: UploadFile = File(...),
     title: str = Form(...),
-    description: str = Form(None)
+    description: str = Form(None),
+    channel_id: str = Form(default="speedy_cast")
 ):
     """Dosyayı alır ve işleme hattını başlatır."""
     job_id = str(uuid.uuid4())
@@ -80,7 +81,8 @@ async def upload_and_process(
         job_id=job_id,
         video_title=title,
         video_description=description or "",
-        user_id=None
+        user_id=None,
+        channel_id=channel_id
     )
     
     safe_filename = video.filename.replace(" ", "_").replace("(", "").replace(")", "")
@@ -97,7 +99,8 @@ async def upload_and_process(
             job_id, 
             str(job_upload_path), 
             title, 
-            description if description else ""
+            description if description else "",
+            channel_id
         )
         
         return {"job_id": job_id, "message": "Yükleme başarılı, analiz başlatıldı."}
@@ -105,6 +108,12 @@ async def upload_and_process(
     except Exception as e:
         update_job(job_id, status="error", error_message=f"Sunucuya yazma hatası: {str(e)}")
         return JSONResponse(status_code=500, content={"error": "Dosya sunucuya kaydedilemedi."})
+
+
+@app.get("/jobs")
+async def get_jobs(channel_id: str = "speedy_cast"):
+    """Kanala ait geçmiş işleri getirir."""
+    return get_user_jobs(channel_id=channel_id)
 
 
 @app.get("/status/{job_id}")
@@ -279,3 +288,6 @@ async def health():
     client = get_client()
     db_status = "connected" if client else "fallback (in-memory)"
     return {"ok": True, "database": db_status}
+@app.get("/test_deploy_v2")
+async def test_deploy():
+    return {"deployed": True, "version": "v2_with_jobs"}
