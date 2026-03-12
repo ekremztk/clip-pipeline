@@ -13,7 +13,7 @@ import {
   ChevronUp,
   Lock,
   RefreshCw,
-  Dna,
+  Zap,
   Sparkles,
   FileText,
   Brain,
@@ -136,7 +136,7 @@ function ViralityBadge({ score }: { score: number }) {
 function DnaBadge() {
   return (
     <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 text-xs font-medium border border-cyan-500/30">
-      <Dna className="w-3 h-3" />
+      <Zap className="w-3 h-3" />
       DNA Match
     </div>
   );
@@ -180,9 +180,9 @@ export default function PrognotStudio() {
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/history`);
+      const res = await fetch(`${BACKEND_URL}/jobs?channel_id=speedy_cast`);
       const data = await res.json();
-      setHistoryJobs(data.jobs || []);
+      setHistoryJobs(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error("History load failed", e);
     }
@@ -251,6 +251,7 @@ export default function PrognotStudio() {
     formData.append("video", file);
     formData.append("title", title);
     formData.append("description", description);
+    formData.append("channel_id", "speedy_cast");
     try {
       const res = await fetch(`${BACKEND_URL}/upload`, { method: "POST", body: formData });
       const data = await res.json();
@@ -273,7 +274,7 @@ export default function PrognotStudio() {
 
   const loadHistoryJob = async (jobIdToLoad: string) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/history/${jobIdToLoad}`);
+      const res = await fetch(`${BACKEND_URL}/status/${jobIdToLoad}`);
       const data = await res.json();
       setStatus(data);
       setAppState("success");
@@ -339,11 +340,10 @@ export default function PrognotStudio() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                isDragging
-                  ? "border-cyan-400 bg-cyan-400/5 glow-cyan"
-                  : "border-purple-500/50 bg-[#111111] hover:border-purple-500 hover:glow-purple"
-              }`}
+              className={`relative border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${isDragging
+                ? "border-cyan-400 bg-cyan-400/5 glow-cyan"
+                : "border-purple-500/50 bg-[#111111] hover:border-purple-500 hover:glow-purple"
+                }`}
             >
               <Upload className={`w-16 h-16 mb-4 ${isDragging ? "text-cyan-400" : "text-purple-500"}`} />
               <h2 className="text-xl font-semibold text-white mb-2">
@@ -393,11 +393,10 @@ export default function PrognotStudio() {
             <button
               onClick={startProcessing}
               disabled={!file || !title}
-              className={`w-full mt-6 py-4 rounded-xl font-bold text-sm transition-all ${
-                file && title
-                  ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white hover:opacity-90 glow-purple"
-                  : "bg-gray-800 text-gray-500 cursor-not-allowed"
-              }`}
+              className={`w-full mt-6 py-4 rounded-xl font-bold text-sm transition-all ${file && title
+                ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white hover:opacity-90 glow-purple"
+                : "bg-gray-800 text-gray-500 cursor-not-allowed"
+                }`}
             >
               🚀 Analizi Başlat
             </button>
@@ -421,9 +420,8 @@ export default function PrognotStudio() {
               <div className="px-6 py-4">
                 <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      appState === "error" ? "bg-red-500" : "progress-shimmer"
-                    }`}
+                    className={`h-full rounded-full transition-all duration-500 ${appState === "error" ? "bg-red-500" : "progress-shimmer"
+                      }`}
                     style={{ width: `${status?.progress || 0}%` }}
                   />
                 </div>
