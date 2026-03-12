@@ -22,6 +22,7 @@ try:
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
+    Client = None  # type: ignore
     print("[Database] ⚠️ supabase-py kurulu değil. pip install supabase")
 
 # --- BAĞLANTI ---
@@ -62,7 +63,7 @@ def get_client() -> Optional[Client]:
 # ══════════════════════════════════════════════════════════════════════
 
 def create_job(job_id: str, video_title: str, video_description: str = "",
-               user_id: str = None) -> dict:
+               user_id: str = None, channel_id: str = "speedy_cast") -> dict:
     """Yeni iş kaydı oluşturur."""
     job_data = {
         "id": job_id,
@@ -71,6 +72,7 @@ def create_job(job_id: str, video_title: str, video_description: str = "",
         "status": "uploading",
         "step": "Dosya sunucuya yazılıyor...",
         "progress": 5,
+        "channel_id": channel_id,
     }
     
     if user_id:
@@ -148,7 +150,7 @@ def get_job(job_id: str) -> Optional[dict]:
     return None
 
 
-def save_clips(job_id: str, clips: list[dict]):
+def save_clips(job_id: str, clips: list[dict], channel_id: str = "speedy_cast"):
     """Klip sonuçlarını veritabanına kaydeder."""
     client = get_client()
     if not client:
@@ -174,6 +176,7 @@ def save_clips(job_id: str, clips: list[dict]):
             "transcript_excerpt": clip.get("transcript_excerpt", ""),
             "audio_energy_note": clip.get("audio_energy_note", ""),
             "trim_note": clip.get("trim_note", ""),
+            "channel_id": channel_id,
         })
     
     try:
@@ -186,21 +189,23 @@ def save_clips(job_id: str, clips: list[dict]):
             _fallback_jobs[job_id]["result"] = {"clips": clips}
 
 
-def get_user_jobs(user_id: str, limit: int = 20) -> list[dict]:
+def get_user_jobs(user_id: str = None, channel_id: str = "speedy_cast", limit: int = 20) -> list[dict]:
     """Kullanıcının tüm job'larını getirir (geçmiş projeler)."""
     client = get_client()
     if not client:
         return []
     
     try:
-        result = (
+        query = (
             client.table("jobs")
             .select("id, video_title, status, progress, created_at, updated_at, metadata_path, pdf_path")
-            .eq("user_id", user_id)
+            .eq("channel_id", channel_id)
             .order("created_at", desc=True)
             .limit(limit)
-            .execute()
         )
+        if user_id:
+            query = query.eq("user_id", user_id)
+        result = query.execute()
         return result.data if result.data else []
     except Exception as e:
         print(f"[Database] ⚠️ User jobs hatası: {e}")
