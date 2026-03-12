@@ -38,10 +38,8 @@ MAX_RETRIES = 3
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 EMBEDDING_MODELS = [
-    "text-embedding-004",
-    "models/text-embedding-004",
-    "embedding-001",
-    "models/embedding-001",
+    "gemini-embedding-001",
+    "models/gemini-embedding-001",
 ]
 
 # MIME type mapping
@@ -247,7 +245,7 @@ def analyze_viral_dna(audio_path: str, video_title: str, view_count: int) -> dic
                 )
                 
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.1-pro-preview",
                     contents=[audio_part, prompt],
                     config=json_config
                 )
@@ -258,7 +256,7 @@ def analyze_viral_dna(audio_path: str, video_title: str, view_count: int) -> dic
                 time.sleep(8)  # Büyük dosya için daha uzun bekleme
                 
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.1-pro-preview",
                     contents=[audio_file, prompt],
                     config=json_config
                 )
@@ -309,11 +307,21 @@ def analyze_viral_dna(audio_path: str, video_title: str, view_count: int) -> dic
 
 def get_embedding(text: str) -> list | None:
     for model_name in EMBEDDING_MODELS:
-        try:
-            result = client.models.embed_content(model=model_name, contents=text)
-            return result.embeddings[0].values
-        except:
-            continue
+        for attempt in range(3):
+            try:
+                result = client.models.embed_content(model=model_name, contents=text)
+                values = result.embeddings[0].values
+                # list'e çevir (bazen özel tip dönebilir)
+                return list(values)
+            except Exception as e:
+                error_str = str(e)
+                print(f"  [!] Embedding hatası ({model_name}, deneme {attempt+1}): {e}")
+                if '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str:
+                    print(f"  [!] Rate limit, 30s bekleniyor...")
+                    time.sleep(30)
+                    continue
+                break  # Farklı model dene
+    print("  [!] Tüm embedding denemeleri başarısız.")
     return None
 
 

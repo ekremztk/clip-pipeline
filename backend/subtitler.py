@@ -142,7 +142,7 @@ Her blok 3-5 kelime, Türkçe konuşmayı Türkçe yaz."""
 
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         res = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-pro-preview",
             contents=[af, prompt],
             config=json_config
         )

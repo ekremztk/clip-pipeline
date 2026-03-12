@@ -24,10 +24,8 @@ MAX_CLIP_DURATION = 35
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 EMBEDDING_MODELS = [
-    "text-embedding-004",
-    "models/text-embedding-004",
-    "embedding-001",
-    "models/embedding-001",
+    "gemini-embedding-001",
+    "models/gemini-embedding-001",
 ]
 
 
@@ -38,16 +36,22 @@ EMBEDDING_MODELS = [
 def get_embedding(text):
     """Metni 768 boyutlu vektöre çevirir. Birden fazla model dener."""
     for model_name in EMBEDDING_MODELS:
-        try:
-            result = client.models.embed_content(
-                model=model_name,
-                contents=text
-            )
-            print(f"[Analyzer] ✅ Embedding başarılı: {model_name}")
-            return result.embeddings[0].values
-        except Exception as e:
-            print(f"[Analyzer] ⚠️ Embedding hatası ({model_name}): {e}")
-            continue
+        for attempt in range(3):
+            try:
+                result = client.models.embed_content(
+                    model=model_name,
+                    contents=text
+                )
+                print(f"[Analyzer] ✅ Embedding başarılı: {model_name} ({len(result.embeddings[0].values)} boyut)")
+                return list(result.embeddings[0].values)
+            except Exception as e:
+                error_str = str(e)
+                print(f"[Analyzer] ⚠️ Embedding hatası ({model_name}, deneme {attempt+1}): {e}")
+                if '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str:
+                    import time
+                    time.sleep(30)
+                    continue
+                break
     
     print("[Analyzer] ❌ Tüm embedding modelleri başarısız.")
     return None
@@ -229,7 +233,7 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-pro-preview",
             contents=[audio_file, prompt],
             config=json_config
         )

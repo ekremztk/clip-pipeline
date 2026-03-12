@@ -229,7 +229,7 @@ Zaman damgaları yaklaşık olabilir, her segment 5-10 saniye olsun."""
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-pro-preview",
             contents=[audio_file, prompt],
             config=json_config
         )
