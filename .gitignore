@@ -1,8 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+
+# Backend
 backend/.env
 backend/output/
 backend/__pycache__/
 backend/youtube_cookies.txt
+backend/venv/
+backend/temp_uploads/
+backend/temp_hunter/
+backend/tools/__pycache__/
+backend/channels/__pycache__/
+
+# Frontend
 frontend/node_modules/
 frontend/.next/
-backend/venv/
-.env
+frontend/.env.local
+
+# Mac
+.DS_Store
+
+# Logs
+*.log
