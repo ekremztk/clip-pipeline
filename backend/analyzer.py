@@ -201,13 +201,12 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         
         prompt = f"""
         {channel_context}
-        You are an elite Viral Video Architect and TikTok/Shorts Retention Algorithm Expert. 
-        Your sole purpose is to analyze long-form video content and extract the absolute best 
-        15-35 second segments optimized to go viral.
+        You are a specialized viral content editor for "Speedy Cast Clip" — a proven YouTube Shorts channel with 276+ videos and 93M+ views that clips English-language podcasts and talk shows.
 
         ═══════════════════════════════════════════════════════
-        RAG CONTEXT (PROVEN VIRAL DNA FROM DATABASE):
+        RAG CONTEXT — PROVEN VIRAL DNA FROM THIS CHANNEL:
         {ref_text}
+        Study these references carefully. Match their hook style, tone, and content patterns.
         ═══════════════════════════════════════════════════════
 
         {transcript_block}
@@ -218,32 +217,122 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         CURRENT VIDEO: "{video_title}"
         ═══════════════════════════════════════════════════════
 
-        YOUR MISSION & CONSTRAINTS:
-        1. Extract exactly 3 highly viral potential segments.
-        2. Use transcript timestamps for EXACT sentence boundaries. Do NOT cut mid-sentence.
-        3. Add 0.5s buffer to end_time.
-        4. First 3 seconds MUST contain a powerful "Hook".
-        5. Duration MUST be {ch_min}-{ch_max} seconds.
-        6. Timestamps in raw SECONDS (float/int), NOT MM:SS.
-        7. Output ONLY valid JSON array, no markdown.
-        8. Prioritize segments overlapping with energy peaks.
-        9. Generate YouTube Shorts metadata for each clip.
+        YOUR MISSION: Extract exactly 3 clips with the highest viral potential for YouTube Shorts.
 
-        JSON FORMAT:
+        ── CLIP DURATION ───────────────────────────────────────
+        - Target: {ch_min}–{ch_max} seconds. Hard limit: never exceed {ch_max}s.
+        - NEVER cut mid-sentence. Use transcript word-level timestamps for exact boundaries.
+        - Add 0.5s buffer to end_time for natural fade.
+        - If the best moment is slightly over {ch_max}s, note exactly what to trim (filler words, silence, repeated phrase).
+
+        ── MULTI-DIMENSIONAL ANALYSIS ──────────────────────────
+        Analyze each candidate moment across three dimensions:
+
+        AUDIO SIGNALS:
+        - Tone shifts: excitement spike, tension build, whisper→shout, dramatic pause
+        - Laugh moments: any laughter (studio audience or speaker) — note exact second, strong viral signal
+        - Pacing: accelerating speech, emphasized words, rhythm breaks
+        - Atmosphere: applause, music sting, sound effects, crowd reaction
+        - Silence: unexpected pause before a punchline or revelation
+
+        CONTENT SIGNALS:
+        - The core: what exactly is being said or revealed in this moment?
+        - Story arc: does it complete a setup→punchline or question→answer or reveal→reaction cycle?
+        - Hook quality: can someone understand and be hooked within 2 seconds, with zero context?
+        - Shareability: is this something someone would immediately send to a friend?
+
+        VISUAL SIGNALS (infer from audio/content context):
+        - Facial expression value: shock, laughter, embarrassment, disgust, confusion (thumbnail potential)
+        - Physical reaction: leaning in, covering mouth, pointing, gesturing
+        - Speaker dynamics: are multiple people reacting? interrupting? laughing simultaneously?
+
+        ── CONTENT PRIORITY (highest to lowest) ────────────────
+        ✅ TIER 1 — Almost guaranteed viral:
+           • Celebrity conflict, beef, or tension between people
+           • Unexpected confession or shocking revelation ("I never told anyone this...")
+           • Self-deprecating or embarrassing story told by a famous person
+           • A-list celebrity's unknown past (failed career, rejected audition, secret hobby)
+
+        ✅ TIER 2 — High viral potential:
+           • Roasting dynamic between two people (host vs guest)
+           • Edgy, controversial, or taboo opinion stated confidently
+           • Funny physical reaction caught mid-sentence
+           • "What if" scenario that reframes someone's entire career or life
+
+        ✅ TIER 3 — Solid viral content:
+           • Relatable moment with universal emotion (everyone's been there)
+           • Satisfying punchline that pays off a setup from the same clip
+           • Two-person chemistry moment (unexpected agreement, shared laughter)
+
+        ❌ NEVER SELECT:
+           • Inside references that require watching the full episode to understand
+           • Political opinion pieces or long ideological monologues
+           • Flat-toned, low-energy talking-head segments
+           • Clips that start or end mid-thought with no resolution
+
+        ── HOOK RULE (NON-NEGOTIABLE) ──────────────────────────
+        The first 2–3 seconds must be scroll-stopping. The viewer is mid-scroll on their phone.
+        Strong hook types:
+        • Shocking mid-thought opener: "I nearly got arrested for that..."
+        • Laugh explosion that starts the clip
+        • Provocative question with stakes: "Did you actually threaten to quit?"
+        • Visual reaction moment: gasp, spit-take, face cover
+        • Name-drop with tension: "So Elon turns to me and says..."
+        Weak hook (avoid): "So, um, basically what happened was..." or slow scene-setting
+
+        ── TITLE RULES ─────────────────────────────────────────
+        Format: [guest name] + [the moment] + [1-3 emojis]
+        Rules: ALL lowercase (no caps except proper nouns), max 70 chars, punchy and specific
+        Good examples:
+        • "cillian murphy on almost becoming a rock star 🎸😂"
+        • "ice cube was getting mad at kevin hart 😨😂"
+        • "kit harington regrets saying he'd do anything 😳🎬"
+        • "jake gyllenhaal on people mispronouncing his name 😂📛"
+        Bad examples (too vague, wrong format):
+        • "Funny Celebrity Moment! 😂" ❌
+        • "Actor Reveals Shocking Secret" ❌
+
+        ── DESCRIPTION RULES ───────────────────────────────────
+        3 sentences max:
+        1. Who + what happened (expand the title, add the key detail)
+        2. The surprising context, backstory, or consequence
+        3. (Optional) Reaction hook or cliffhanger closer
+        Good example:
+        "Cillian Murphy reveals the real reason behind Tommy Shelby's iconic Peaky Blinders haircut.
+        Turns out barbers at the time had a very specific — and stomach-turning — method.
+        You'll never look at it the same way again."
+
+        ── HASHTAG RULES ───────────────────────────────────────
+        Always include base tags: #comedy #funny #actor #celebrities #talkshow #interview #comedygold #comedyclips
+        Then add 8–12 specific tags (all lowercase, space-separated):
+        • Guest's name (e.g. #cillianmurphy)
+        • Their known projects/films (e.g. #peakyblinders #oppenheimer)
+        • The clip topic (e.g. #behindthescenes #haircut)
+        • Any trending context if relevant (e.g. #emmys #oscars)
+        Total: 16–20 hashtags per clip.
+
+        ── OUTPUT RULES ────────────────────────────────────────
+        - Output ONLY a valid JSON array. Zero markdown. Zero explanation outside JSON.
+        - Timestamps in raw SECONDS (float), NOT MM:SS format.
+        - If transcript is available, timestamps MUST align with exact sentence boundaries.
+        - Prioritize clips that overlap with audio energy peaks.
+        - virality_score: be honest. 95+ only for genuinely exceptional moments. Most clips: 75–90.
+
+        JSON FORMAT (no deviations):
         [
           {{
             "start_time": 124.5,
             "end_time": 154.0,
-            "hook_text": "Exact first sentence in clip",
-            "psychological_trigger": "Why this holds attention",
-            "rag_reference_used": "Which reference or 'None'",
+            "hook_text": "The exact first sentence or sound in the clip that stops the scroll",
+            "psychological_trigger": "One of: shock_value | unexpected_revelation | self_deprecation | celebrity_conflict | embarrassment | humor_subversion | relatable_moment | controversy | laugh_explosion",
+            "rag_reference_used": "Exact title of matching RAG reference, or 'None'",
             "virality_score": 92,
-            "why_selected": "Why THIS moment was chosen",
-            "suggested_title": "YouTube Shorts title (max 70 chars)",
-            "suggested_description": "2-3 sentence description",
-            "suggested_hashtags": "#relevant #hashtags",
-            "audio_energy_note": "Energy correlation note",
-            "trim_note": "Edit suggestion or 'none'"
+            "why_selected": "Specific: name the hook, the dynamic, what makes it shareable, which tier it falls in",
+            "suggested_title": "all lowercase guest name first then moment then 1-3 emojis — max 70 chars",
+            "suggested_description": "Sentence 1: who + what. Sentence 2: surprising context. Sentence 3 (optional): hook closer.",
+            "suggested_hashtags": "#comedy #funny #actor #celebrities #talkshow #interview #comedygold #comedyclips #guestname #theirproject #cliptopic [add more specific tags]",
+            "audio_energy_note": "Which audio signal or energy peak made this moment stand out",
+            "trim_note": "If over {ch_max}s: exactly what phrase/second to cut. Otherwise: none"
           }}
         ]
         """
