@@ -1,5 +1,6 @@
 FROM python:3.11-slim-bookworm
 
+#
 # 1. Gerekli sistem paketleri
 # libgl1 ve libglib2.0-0 -> OpenCV (PySceneDetect) için şarttır
 RUN apt-get update && apt-get install -y \
