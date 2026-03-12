@@ -1,6 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Upload,
+  Settings,
+  Play,
+  X,
+  Download,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  RefreshCw,
+  Dna,
+  Sparkles,
+  FileText,
+  Brain,
+  BarChart3,
+  Database,
+  Plus,
+} from "lucide-react";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -20,7 +40,6 @@ type ClipResult = {
   why_selected?: string;
   transcript_excerpt?: string;
   audio_energy_note?: string;
-  // DB'den gelen (geçmiş projeler)
   id?: number;
   clip_index?: number;
   real_views?: number | null;
@@ -57,69 +76,10 @@ type HistoryJob = {
   pdf_path?: string | null;
 };
 
-type ModalTab = "video" | "analysis" | "metadata" | "transcript" | "feedback";
-type PageMode = "new" | "history";
-
-// ─── İKONLAR ─────────────────────────────────────────────────────────────────
-const Icons = {
-  Menu: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  ),
-  Upload: () => (
-    <svg className="w-10 h-10 text-blue-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-    </svg>
-  ),
-  Play: () => (
-    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-      <path d="M4 4l12 6-12 6V4z" />
-    </svg>
-  ),
-  Close: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  ),
-  Download: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-    </svg>
-  ),
-  Copy: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-    </svg>
-  ),
-  Check: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-    </svg>
-  ),
-  FileText: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  ),
-  Trash: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-  ),
-  Plus: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-    </svg>
-  ),
-  Clock: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-};
+type AppState = "idle" | "uploading" | "processing" | "success" | "error";
 
 // ─── YARDIMCI COMPONENTS ─────────────────────────────────────────────────────
+
 function CopyButton({ text, label }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
@@ -137,25 +97,48 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button onClick={handleCopy} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-gray-100 hover:bg-gray-200 text-gray-600">
-      {copied ? <Icons.Check /> : <Icons.Copy />}
+    <button
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10"
+    >
+      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
       {copied ? "Kopyalandı" : label || "Kopyala"}
     </button>
   );
 }
 
-function ScoreBadge({ score, size = "md" }: { score: number; size?: "sm" | "md" | "lg" }) {
-  const bg = score >= 85 ? "from-green-400 to-green-600" : score >= 70 ? "from-yellow-400 to-yellow-600" : "from-red-400 to-red-600";
-  const cls = size === "lg" ? "w-16 h-16 text-xl" : size === "sm" ? "w-8 h-8 text-xs" : "w-12 h-12 text-base";
-  return <div className={`${cls} rounded-2xl flex items-center justify-center font-bold text-white shadow-lg bg-gradient-to-br ${bg}`}>{score}</div>;
+function StatusBadge({ state }: { state: AppState }) {
+  const config = {
+    idle: { text: "Hazır", bg: "bg-gray-600", textColor: "text-gray-300" },
+    uploading: { text: "Yükleniyor", bg: "bg-blue-600", textColor: "text-blue-100" },
+    processing: { text: "Analiz Ediliyor", bg: "bg-purple-600", textColor: "text-purple-100" },
+    success: { text: "Tamamlandı", bg: "bg-green-600", textColor: "text-green-100" },
+    error: { text: "Hata", bg: "bg-red-600", textColor: "text-red-100" },
+  };
+  const { text, bg, textColor } = config[state];
+  return (
+    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${bg} ${textColor}`}>
+      {text}
+    </span>
+  );
 }
 
-function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: string; label: string }) {
+function ViralityBadge({ score }: { score: number }) {
+  const gradient = score >= 85 ? "from-red-500 to-orange-500" : score >= 70 ? "from-orange-500 to-yellow-500" : "from-yellow-500 to-green-500";
   return (
-    <button onClick={onClick} className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${active ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"}`}>
-      <span>{icon}</span>
-      <span className="hidden sm:inline">{label}</span>
-    </button>
+    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r ${gradient} text-white text-xs font-bold`}>
+      <Sparkles className="w-3 h-3" />
+      {score}
+    </div>
+  );
+}
+
+function DnaBadge() {
+  return (
+    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 text-xs font-medium border border-cyan-500/30">
+      <Dna className="w-3 h-3" />
+      DNA Match
+    </div>
   );
 }
 
@@ -171,37 +154,27 @@ function formatDate(dateStr: string) {
 // ═════════════════════════════════════════════════════════════════════════════
 // ANA COMPONENT
 // ═════════════════════════════════════════════════════════════════════════════
-export default function IndustrialPipeline() {
+export default function PrognotStudio() {
   // --- Yeni Proje State ---
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<JobStatus | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [appState, setAppState] = useState<AppState>("idle");
   const [logs, setLogs] = useState<string[]>([]);
 
   // --- UI State ---
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedClip, setSelectedClip] = useState<ClipResult | null>(null);
-  const [activeTab, setActiveTab] = useState<ModalTab>("video");
-  const [pageMode, setPageMode] = useState<PageMode>("new");
+  const [historyExpanded, setHistoryExpanded] = useState(false);
 
   // --- Geçmiş Projeler State ---
   const [historyJobs, setHistoryJobs] = useState<HistoryJob[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [selectedHistoryJob, setSelectedHistoryJob] = useState<JobStatus | null>(null);
-  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
-
-  // --- Feedback State ---
-  const [feedbackViews, setFeedbackViews] = useState("");
-  const [feedbackRetention, setFeedbackRetention] = useState("");
-  const [feedbackSwipeRate, setFeedbackSwipeRate] = useState("");
-  const [feedbackLoading, setFeedbackLoading] = useState(false);
-  const [feedbackResult, setFeedbackResult] = useState<{ score: number; flywheel: boolean } | null>(null);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Geçmiş Projeleri Yükle ─────────────────────────────────────────────────
   const loadHistory = useCallback(async () => {
@@ -235,9 +208,15 @@ export default function IndustrialPipeline() {
               return prev;
             });
           }
-          if (data.status === "done" || data.status === "error") {
-            setLoading(false);
-            loadHistory(); // İşlem bitince sidebar'ı güncelle
+          if (data.status === "running") {
+            setAppState("processing");
+          }
+          if (data.status === "done") {
+            setAppState("success");
+            loadHistory();
+          }
+          if (data.status === "error") {
+            setAppState("error");
           }
         } catch (e) {
           console.error("Status check failed", e);
@@ -251,29 +230,22 @@ export default function IndustrialPipeline() {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  useEffect(() => {
-    if (selectedClip) {
-      setActiveTab("video");
-      setFeedbackResult(null);
-      setFeedbackViews("");
-      setFeedbackRetention("");
-      setFeedbackSwipeRate("");
-    }
-  }, [selectedClip]);
-
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
   const handleDragLeave = () => setIsDragging(false);
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault(); setIsDragging(false);
+    e.preventDefault();
+    setIsDragging(false);
     if (e.dataTransfer.files?.length) setFile(e.dataTransfer.files[0]);
   };
 
   const startProcessing = async () => {
-    if (!file || !title) return alert("Dosya ve Başlık zorunludur!");
-    setPageMode("new");
-    setLoading(true);
-    setLogs(["Sistem başlatılıyor...", "Dosya sunucuya transfer ediliyor..."]);
+    if (!file || !title) return;
+    setAppState("uploading");
+    setLogs(["[SİSTEM] Pipeline başlatılıyor...", "[UPLOAD] Dosya sunucuya transfer ediliyor..."]);
     setStatus({ status: "uploading", step: "Yükleniyor...", progress: 5, result: null, error: null });
     const formData = new FormData();
     formData.append("video", file);
@@ -284,474 +256,587 @@ export default function IndustrialPipeline() {
       const data = await res.json();
       setJobId(data.job_id);
     } catch {
-      alert("Bağlantı Hatası: Railway sunucusu yanıt vermiyor.");
-      setLoading(false);
+      setAppState("error");
+      setLogs((prev) => [...prev, "[HATA] Bağlantı hatası: Sunucu yanıt vermiyor."]);
     }
   };
 
-  const loadHistoryDetail = async (jobIdToLoad: string) => {
-    setPageMode("history");
-    setSelectedHistoryId(jobIdToLoad);
-    setSelectedHistoryJob(null);
+  const resetForm = () => {
+    setFile(null);
+    setTitle("");
+    setDescription("");
+    setJobId(null);
+    setStatus(null);
+    setAppState("idle");
+    setLogs([]);
+  };
+
+  const loadHistoryJob = async (jobIdToLoad: string) => {
     try {
       const res = await fetch(`${BACKEND_URL}/history/${jobIdToLoad}`);
       const data = await res.json();
-      setSelectedHistoryJob(data);
+      setStatus(data);
+      setAppState("success");
     } catch (e) {
       console.error("History detail failed", e);
     }
   };
 
-  const deleteProject = async (jobIdToDelete: string) => {
-    if (!confirm("Bu projeyi ve tüm kliplerini silmek istediğinize emin misiniz?")) return;
-    try {
-      await fetch(`${BACKEND_URL}/delete/${jobIdToDelete}`, { method: "DELETE" });
-      loadHistory();
-      if (selectedHistoryId === jobIdToDelete) {
-        setPageMode("new");
-        setSelectedHistoryJob(null);
-      }
-    } catch (e) {
-      console.error("Delete failed", e);
-    }
-  };
-
-  const submitFeedback = async () => {
-    if (!selectedClip?.id) {
-      alert("Bu klip henüz veritabanına kaydedilmemiş. Geçmiş projelerden açın.");
-      return;
-    }
-    setFeedbackLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/feedback`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clip_id: selectedClip.id,
-          job_id: selectedHistoryId || jobId,
-          views: feedbackViews ? parseInt(feedbackViews) : null,
-          retention: feedbackRetention ? parseFloat(feedbackRetention) : null,
-          swipe_rate: feedbackSwipeRate ? parseFloat(feedbackSwipeRate) : null,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFeedbackResult({ score: data.feedback_score, flywheel: data.flywheel_added });
-      }
-    } catch (e) {
-      console.error("Feedback failed", e);
-    }
-    setFeedbackLoading(false);
-  };
-
   const backendUrl = (path: string) => `${BACKEND_URL.replace(/\/$/, "")}${path}`;
 
-  // Hangi klip listesini gösteriyoruz?
-  const activeResult = pageMode === "history" ? selectedHistoryJob?.result : status?.result;
-  const activeStatus = pageMode === "history" ? selectedHistoryJob : status;
+  const clips = status?.result?.clips || [];
 
   // ═══════════════════════════════════════════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="flex h-screen bg-[#F8F9FA] text-gray-800 font-sans overflow-hidden">
-      {/* ── SIDEBAR ────────────────────────────────────────────────────────── */}
-      <div className={`bg-gray-900 text-white transition-all duration-300 flex flex-col ${isSidebarOpen ? "w-72" : "w-20"}`}>
-        <div className="h-20 flex items-center justify-between px-6 border-b border-gray-800 shrink-0">
-          {isSidebarOpen && <span className="font-extrabold text-xl tracking-wider">PROGNOT<span className="text-blue-500">.AI</span></span>}
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white transition"><Icons.Menu /></button>
-        </div>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* ── TOP NAVBAR ─────────────────────────────────────────────────────── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-white">PROGNOT</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-cyan-400 bg-clip-text text-transparent">
+              STUDIO
+            </span>
+          </div>
 
-        <div className="p-4 space-y-2 shrink-0">
-          {/* Yeni Proje Butonu */}
-          <button
-            onClick={() => { setPageMode("new"); setSelectedHistoryId(null); setSelectedHistoryJob(null); }}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition cursor-pointer ${pageMode === "new" ? "bg-blue-600/20 text-blue-400" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}
-          >
-            <Icons.Plus />
-            {isSidebarOpen && <span className="font-bold text-sm">Yeni Proje</span>}
-          </button>
-        </div>
+          {/* Channel Tabs */}
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-600/20 text-purple-400 border border-purple-500/30 glow-purple text-sm font-medium">
+              <span>🎬</span>
+              <span>Speedy Cast Clip</span>
+            </button>
+            <button
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed"
+              title="Yakında"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
 
-        {/* Geçmiş Projeler */}
-        {isSidebarOpen && (
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
-            <div className="flex items-center justify-between mb-3 mt-2">
-              <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Geçmiş Projeler</span>
-              <button onClick={loadHistory} className="text-gray-500 hover:text-white transition p-1">
-                <svg className={`w-3.5 h-3.5 ${historyLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
-            </div>
-
-            {historyJobs.length === 0 && !historyLoading && (
-              <p className="text-xs text-gray-600 text-center py-4">Henüz proje yok</p>
-            )}
-
-            <div className="space-y-1.5">
-              {historyJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className={`group relative rounded-xl p-3 cursor-pointer transition-all ${selectedHistoryId === job.id ? "bg-gray-700/80 ring-1 ring-blue-500/40" : "hover:bg-gray-800"}`}
-                  onClick={() => loadHistoryDetail(job.id)}
-                >
-                  <p className="text-xs font-semibold text-gray-200 truncate pr-6">{job.video_title}</p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${job.status === "done" ? "bg-green-400" : job.status === "error" ? "bg-red-400" : "bg-yellow-400"}`} />
-                    <span className="text-[10px] text-gray-500">{formatDate(job.created_at)}</span>
-                  </div>
-                  {/* Silme butonu */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); deleteProject(job.id); }}
-                    className="absolute top-2.5 right-2 opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition"
-                  >
-                    <Icons.Trash />
-                  </button>
-                </div>
-              ))}
+          {/* Right Side */}
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all">
+              <Settings className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+              <span className="w-2 h-2 rounded-full bg-green-500 pulse-live" />
+              <span className="text-xs font-medium text-green-400">Live</span>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </nav>
 
-      {/* ── ANA İÇERİK ────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
-        <header className="h-20 bg-white border-b border-gray-200 flex items-center px-10 justify-between sticky top-0 z-10">
-          <h1 className="text-2xl font-bold text-gray-800">
-            {pageMode === "new" ? "Yeni Proje Oluştur" : (selectedHistoryJob?.result?.original_title || "Proje Detayı")}
-          </h1>
-          <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full border border-gray-200">V2.0 ENDÜSTRİYEL</span>
-        </header>
+      {/* ── MAIN CONTENT ───────────────────────────────────────────────────── */}
+      <main className="pt-24 pb-16 px-6 max-w-7xl mx-auto">
+        {/* ── SECTION 1: UPLOAD AREA ───────────────────────────────────────── */}
+        {appState === "idle" && (
+          <section className="slide-in mb-12">
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                isDragging
+                  ? "border-cyan-400 bg-cyan-400/5 glow-cyan"
+                  : "border-purple-500/50 bg-[#111111] hover:border-purple-500 hover:glow-purple"
+              }`}
+            >
+              <Upload className={`w-16 h-16 mb-4 ${isDragging ? "text-cyan-400" : "text-purple-500"}`} />
+              <h2 className="text-xl font-semibold text-white mb-2">
+                {file ? file.name : "Videoyu buraya bırak"}
+              </h2>
+              <p className="text-sm text-gray-500">
+                veya dosya seç • MP4, MOV desteklenir
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/mp4,video/quicktime,video/mov"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+            </div>
 
-        <div className="p-10 max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8">
-
-          {/* ── SOL PANEL ──────────────────────────────────────────────────── */}
-          {pageMode === "new" && (
-            <div className="xl:col-span-4 space-y-6">
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <h2 className="text-sm font-bold text-gray-400 tracking-widest uppercase mb-6">Medya Yükle</h2>
-                <div
-                  onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
-                  className={`relative overflow-hidden border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
-                >
-                  <Icons.Upload />
-                  <p className="text-sm font-medium text-gray-600">{file ? file.name : "Videonuzu buraya sürükleyin"}</p>
-                  <p className="text-xs text-gray-400 mt-2">veya tıklayıp seçin (MP4/MP3)</p>
-                  <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                </div>
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-2">VİDEO BAŞLIĞI (Zorunlu)</label>
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Örn: Joe Rogan - Elon Musk" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-2">AÇIKLAMA / BAĞLAM (Opsiyonel)</label>
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="AI'a videonun içeriği hakkında ipucu ver..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm h-24 resize-none focus:ring-2 focus:ring-blue-500 outline-none transition" />
-                  </div>
-                  <button onClick={startProcessing} disabled={loading || !file || !title} className={`w-full py-4 rounded-xl font-bold text-sm transition-all ${loading || !file || !title ? "bg-gray-200 text-gray-400" : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/30"}`}>
-                    {loading ? "SİSTEM ÇALIŞIYOR..." : "VİRAL ANALİZİ BAŞLAT"}
-                  </button>
-                </div>
+            {/* Input Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  Video Başlığı <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Örn: Joe Rogan - Elon Musk Röportajı"
+                  className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:border-purple-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  Açıklama <span className="text-gray-600">(Opsiyonel)</span>
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Videonun içeriği hakkında kısa bilgi..."
+                  className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:border-purple-500 transition-all"
+                />
               </div>
             </div>
-          )}
 
-          {/* ── SAĞ PANEL ──────────────────────────────────────────────────── */}
-          <div className={pageMode === "new" ? "xl:col-span-8 space-y-6" : "xl:col-span-12 space-y-6"}>
+            {/* Submit Button */}
+            <button
+              onClick={startProcessing}
+              disabled={!file || !title}
+              className={`w-full mt-6 py-4 rounded-xl font-bold text-sm transition-all ${
+                file && title
+                  ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white hover:opacity-90 glow-purple"
+                  : "bg-gray-800 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              🚀 Analizi Başlat
+            </button>
+          </section>
+        )}
 
-            {/* Log Terminali (sadece yeni proje modunda) */}
-            {pageMode === "new" && (loading || status) && (
-              <div className="bg-[#0D1117] rounded-3xl border border-gray-800 p-6 shadow-xl overflow-hidden">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                  </div>
-                  <span className="text-xs font-mono text-gray-400">Prognot İşlem Günlüğü | %{activeStatus?.progress || 0}</span>
+        {/* ── SECTION 2: LIVE ANALYSIS TERMINAL ────────────────────────────── */}
+        {(appState === "uploading" || appState === "processing" || appState === "error") && (
+          <section className="slide-in mb-12">
+            <div className="bg-[#111111] rounded-2xl border border-white/5 overflow-hidden">
+              {/* Terminal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-5 h-5 text-purple-500" />
+                  <span className="font-semibold text-white">Pipeline Terminali</span>
                 </div>
-                <div className="w-full bg-gray-800 h-1.5 rounded-full mb-4 overflow-hidden">
-                  <div className="bg-blue-500 h-full transition-all duration-500 ease-out" style={{ width: `${activeStatus?.progress || 0}%` }} />
-                </div>
-                <div className="h-40 overflow-y-auto font-mono text-xs text-green-400 space-y-2 pr-2">
-                  {logs.map((log, i) => (
-                    <div key={i} className="flex gap-3 opacity-80 hover:opacity-100 transition">
-                      <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span>
-                      <span>{log}</span>
-                    </div>
-                  ))}
-                  {loading && <div className="animate-pulse">_</div>}
-                  <div ref={logsEndRef} />
-                </div>
+                <StatusBadge state={appState} />
               </div>
-            )}
 
-            {/* Rapor İndirme + Başlık */}
-            {activeResult && (
-              <div className="flex flex-wrap items-center gap-3">
-                <h3 className="text-xl font-bold text-gray-800 flex-1">
-                  {pageMode === "history" ? "Proje Klipleri" : "Gelişmiş AI Seçimleri"}{" "}
-                  <span className="text-blue-600">({activeResult.clips.length} Klip)</span>
-                </h3>
-                {activeResult.pdf_path && (
-                  <a href={backendUrl(activeResult.pdf_path)} download className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition">
-                    <Icons.FileText /> PDF Rapor
-                  </a>
-                )}
-                {activeResult.metadata_path && (
-                  <a href={backendUrl(activeResult.metadata_path)} download className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-600 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-100 transition">
-                    <Icons.FileText /> Metadata TXT
-                  </a>
-                )}
+              {/* Progress Bar */}
+              <div className="px-6 py-4">
+                <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      appState === "error" ? "bg-red-500" : "progress-shimmer"
+                    }`}
+                    style={{ width: `${status?.progress || 0}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {status?.step || "Başlatılıyor..."}
+                </p>
               </div>
-            )}
 
-            {/* Klip Kartları */}
-            {activeResult?.clips && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeResult.clips.map((clip, idx) => {
-                  const clipData = { ...clip, index: clip.index || clip.clip_index || idx + 1 };
+              {/* Terminal Output */}
+              <div className="bg-black rounded-xl mx-6 mb-6 p-4 h-64 max-h-96 overflow-y-auto font-mono text-xs">
+                {logs.map((log, i) => {
+                  const isError = log.toLowerCase().includes("hata") || log.toLowerCase().includes("error");
+                  const isWarning = log.toLowerCase().includes("uyarı") || log.toLowerCase().includes("warning");
+                  const color = isError ? "text-red-500" : isWarning ? "text-yellow-500" : "text-green-500";
                   return (
-                    <div key={clipData.index} onClick={() => setSelectedClip(clipData)} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group">
-                      <div className="aspect-[9/16] bg-gray-900 relative flex items-center justify-center overflow-hidden">
-                        <video src={backendUrl(clipData.path)} className="absolute w-full h-full object-cover opacity-50 group-hover:opacity-80 transition" />
-                        <div className="z-10 w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition">
-                          <Icons.Play />
-                        </div>
-                        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
-                          <span className={`text-xs font-bold ${clipData.score >= 85 ? "text-green-400" : clipData.score >= 70 ? "text-yellow-400" : "text-red-400"}`}>{clipData.score}/100</span>
-                        </div>
-                        {clipData.feedback_score && (
-                          <div className="absolute top-3 left-3 bg-emerald-600/80 backdrop-blur-md px-2 py-1 rounded-lg">
-                            <span className="text-[10px] font-bold text-white">GERÇEK: {clipData.feedback_score}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-5">
-                        <div className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-1">KLİP #{clipData.index}</div>
-                        {clipData.suggested_title ? (
-                          <p className="text-sm font-bold text-gray-800 line-clamp-2 mb-2">{clipData.suggested_title}</p>
-                        ) : (
-                          <p className="text-sm font-semibold text-gray-800 line-clamp-2 italic mb-2">&ldquo;{clipData.hook}&rdquo;</p>
-                        )}
-                        {clipData.why_selected && <p className="text-xs text-gray-500 line-clamp-2">{clipData.why_selected}</p>}
-                      </div>
+                    <div key={i} className={`${color} mb-1`}>
+                      {log}
                     </div>
                   );
                 })}
+                {appState === "processing" && (
+                  <span className="text-green-500 animate-pulse">_</span>
+                )}
+                <div ref={logsEndRef} />
               </div>
-            )}
 
-            {/* Geçmiş proje yükleniyor */}
-            {pageMode === "history" && !selectedHistoryJob && selectedHistoryId && (
-              <div className="flex items-center justify-center py-20">
-                <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
-              </div>
-            )}
+              {/* Error Retry Button */}
+              {appState === "error" && (
+                <div className="px-6 pb-6">
+                  <button
+                    onClick={resetForm}
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Tekrar Dene
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
-            {/* Boş durum */}
-            {pageMode === "history" && selectedHistoryJob && !activeResult && (
-              <div className="text-center py-20 text-gray-400">
-                <p className="text-4xl mb-3">📁</p>
-                <p className="text-sm">Bu proje henüz tamamlanmamış veya klip üretilmemiş.</p>
+        {/* ── SECTION 3: CLIP RESULTS ──────────────────────────────────────── */}
+        {appState === "success" && clips.length > 0 && (
+          <section className="slide-in mb-12">
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎯</span>
+                <h2 className="text-xl font-bold text-white">Bulunan Klipler</h2>
+                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-semibold rounded-full">
+                  {clips.length}
+                </span>
               </div>
+              <button
+                onClick={resetForm}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+              >
+                + Yeni Video
+              </button>
+            </div>
+
+            {/* Clips Horizontal Scroll */}
+            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              {clips.map((clip, idx) => {
+                const clipData = { ...clip, index: clip.index || clip.clip_index || idx + 1 };
+                return (
+                  <div
+                    key={clipData.index}
+                    onClick={() => setSelectedClip(clipData)}
+                    className="min-w-[300px] max-w-[300px] bg-[#111111] rounded-2xl border border-white/5 overflow-hidden cursor-pointer card-hover group"
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative aspect-video bg-[#0a0a0a]">
+                      <video
+                        src={backendUrl(clipData.path)}
+                        className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-all">
+                          <Play className="w-5 h-5 text-white ml-0.5" fill="white" />
+                        </div>
+                      </div>
+                      {/* Badges */}
+                      <div className="absolute top-3 right-3 flex flex-col gap-2">
+                        <ViralityBadge score={clipData.score} />
+                        {clipData.rag_reference_used && clipData.rag_reference_used.toLowerCase() !== "none" && (
+                          <DnaBadge />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-4">
+                      <p className="text-sm text-gray-300 italic line-clamp-2 mb-2">
+                        &ldquo;{clipData.hook}&rdquo;
+                      </p>
+                      {clipData.suggested_title && (
+                        <p className="text-xs text-gray-500 line-clamp-1">{clipData.suggested_title}</p>
+                      )}
+                      {clipData.suggested_hashtags && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {clipData.suggested_hashtags.split(" ").slice(0, 3).map((tag, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-4 pb-4">
+                      <button className="w-full py-2 text-xs font-medium text-purple-400 hover:text-purple-300 transition-all">
+                        Detayları Gör →
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ── SECTION 4: PAST PROJECTS ─────────────────────────────────────── */}
+        <section className="mb-12">
+          <button
+            onClick={() => setHistoryExpanded(!historyExpanded)}
+            className="w-full flex items-center justify-between p-4 bg-[#111111] rounded-2xl border border-white/5 hover:border-white/10 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📁</span>
+              <span className="font-semibold text-white">Geçmiş Projeler</span>
+              <span className="px-2 py-0.5 bg-white/5 text-gray-400 text-xs rounded-full">
+                {historyJobs.length}
+              </span>
+            </div>
+            {historyExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-500" />
             )}
+          </button>
+
+          {historyExpanded && (
+            <div className="mt-4 bg-[#111111] rounded-2xl border border-white/5 overflow-hidden slide-in">
+              {historyLoading ? (
+                <div className="p-8 text-center">
+                  <RefreshCw className="w-6 h-6 text-gray-500 animate-spin mx-auto" />
+                </div>
+              ) : historyJobs.length === 0 ? (
+                <div className="p-12 text-center">
+                  <FileText className="w-12 h-12 text-gray-700 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">Henüz proje yok</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">
+                          Video Başlığı
+                        </th>
+                        <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">
+                          Tarih
+                        </th>
+                        <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">
+                          Durum
+                        </th>
+                        <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4">
+                          İşlem
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historyJobs.map((job) => (
+                        <tr key={job.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-all">
+                          <td className="px-6 py-4">
+                            <span className="text-sm text-white font-medium">{job.video_title}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm text-gray-400">{formatDate(job.created_at)}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {job.status === "done" ? (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">
+                                <Check className="w-3 h-3" />
+                                Tamamlandı
+                              </span>
+                            ) : job.status === "running" ? (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-medium">
+                                <RefreshCw className="w-3 h-3 animate-spin" />
+                                İşleniyor
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-medium">
+                                <X className="w-3 h-3" />
+                                Hata
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => loadHistoryJob(job.id)}
+                              className="text-sm font-medium text-purple-400 hover:text-purple-300 transition-all"
+                            >
+                              Sonuçları Yükle
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* ── PLACEHOLDER SECTIONS (LOCKED) ────────────────────────────────── */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative p-6 bg-[#111111] rounded-2xl border border-white/5 locked-card">
+            <div className="absolute top-4 right-4">
+              <Lock className="w-5 h-5 text-gray-600" />
+            </div>
+            <div className="flex items-center gap-3 mb-3">
+              <Brain className="w-8 h-8 text-purple-500/50" />
+              <h3 className="text-lg font-semibold text-gray-400">RAG Kütüphanesi</h3>
+            </div>
+            <p className="text-sm text-gray-600">Viral DNA veritabanını görüntüle ve yönet</p>
+            <span className="inline-block mt-4 px-3 py-1 bg-white/5 text-gray-500 text-xs rounded-full">
+              Yakında
+            </span>
           </div>
-        </div>
-      </div>
+
+          <div className="relative p-6 bg-[#111111] rounded-2xl border border-white/5 locked-card">
+            <div className="absolute top-4 right-4">
+              <Lock className="w-5 h-5 text-gray-600" />
+            </div>
+            <div className="flex items-center gap-3 mb-3">
+              <BarChart3 className="w-8 h-8 text-cyan-500/50" />
+              <h3 className="text-lg font-semibold text-gray-400">Kanal Analitikleri</h3>
+            </div>
+            <p className="text-sm text-gray-600">Klip performans raporları</p>
+            <span className="inline-block mt-4 px-3 py-1 bg-white/5 text-gray-500 text-xs rounded-full">
+              Yakında
+            </span>
+          </div>
+        </section>
+      </main>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          KLİP DETAY MODALI (5 SEKMELİ)
+          KLİP DETAY MODALI
           ═══════════════════════════════════════════════════════════════════════ */}
       {selectedClip && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row relative">
-            <button onClick={() => setSelectedClip(null)} className="absolute top-4 right-4 z-50 p-2 bg-black/10 hover:bg-black/20 rounded-full transition"><Icons.Close /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#111111] rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row relative border border-white/10">
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedClip(null)}
+              className="absolute top-4 right-4 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
 
-            {/* Sol: Video */}
+            {/* Left: Video Player */}
             <div className="md:w-5/12 bg-black flex items-center justify-center">
               <video controls autoPlay className="w-full max-h-[90vh] object-contain">
                 <source src={backendUrl(selectedClip.path)} type="video/mp4" />
               </video>
             </div>
 
-            {/* Sağ: Sekmeli İçerik */}
+            {/* Right: Details */}
             <div className="md:w-7/12 flex flex-col overflow-hidden">
-              <div className="flex items-center gap-4 px-8 pt-8 pb-4">
-                <ScoreBadge score={selectedClip.score} size="lg" />
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-xl font-extrabold text-gray-800 truncate">{selectedClip.suggested_title || `Klip #${selectedClip.index}`}</h2>
-                  <p className="text-sm text-gray-500">Viral Potansiyel: {selectedClip.score}/100</p>
+              {/* Header */}
+              <div className="p-6 border-b border-white/5">
+                <div className="flex items-center gap-4">
+                  {/* Virality Score Ring */}
+                  <div className="relative w-20 h-20">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        fill="none"
+                        stroke="#1a1a1a"
+                        strokeWidth="6"
+                      />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        fill="none"
+                        stroke={selectedClip.score >= 85 ? "#22c55e" : selectedClip.score >= 70 ? "#eab308" : "#ef4444"}
+                        strokeWidth="6"
+                        strokeDasharray={`${(selectedClip.score / 100) * 226} 226`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">
+                      {selectedClip.score}
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">
+                      {selectedClip.suggested_title || `Klip #${selectedClip.index}`}
+                    </h2>
+                    <p className="text-sm text-gray-500">Viral Potansiyel Skoru</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-1 px-8 pb-4 border-b border-gray-100 overflow-x-auto">
-                <TabButton active={activeTab === "video"} onClick={() => setActiveTab("video")} icon="🎬" label="Video" />
-                <TabButton active={activeTab === "analysis"} onClick={() => setActiveTab("analysis")} icon="🧠" label="Analiz" />
-                <TabButton active={activeTab === "metadata"} onClick={() => setActiveTab("metadata")} icon="📋" label="Yayın" />
-                <TabButton active={activeTab === "transcript"} onClick={() => setActiveTab("transcript")} icon="📝" label="Transkript" />
-                <TabButton active={activeTab === "feedback"} onClick={() => setActiveTab("feedback")} icon="📊" label="Performans" />
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {/* Why Selected */}
+                {selectedClip.why_selected && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                      Neden Seçildi
+                    </h3>
+                    <p className="text-sm text-gray-300 leading-relaxed bg-white/5 p-4 rounded-xl">
+                      {selectedClip.why_selected}
+                    </p>
+                  </div>
+                )}
+
+                {/* Psychological Trigger */}
+                {selectedClip.psychological_trigger && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-3">
+                      🧠 Psikolojik Tetikleyici
+                    </h3>
+                    <span className="inline-block px-3 py-1.5 bg-purple-500/20 text-purple-300 text-sm rounded-lg border border-purple-500/30">
+                      {selectedClip.psychological_trigger}
+                    </span>
+                  </div>
+                )}
+
+                {/* RAG Reference */}
+                {selectedClip.rag_reference_used && selectedClip.rag_reference_used.toLowerCase() !== "none" && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-3">
+                      🧬 RAG Referansı
+                    </h3>
+                    <div className="p-4 bg-cyan-500/10 rounded-xl border-l-4 border-cyan-500">
+                      <p className="text-sm text-cyan-200 italic">&ldquo;{selectedClip.rag_reference_used}&rdquo;</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Transcript */}
+                {selectedClip.transcript_excerpt && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Transkript
+                      </h3>
+                      <CopyButton text={selectedClip.transcript_excerpt} />
+                    </div>
+                    <div className="p-4 bg-black rounded-xl font-mono text-xs text-gray-400 max-h-40 overflow-y-auto">
+                      {selectedClip.transcript_excerpt}
+                    </div>
+                  </div>
+                )}
+
+                {/* Metadata */}
+                <div className="space-y-4">
+                  {selectedClip.suggested_title && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Önerilen Başlık</span>
+                        <CopyButton text={selectedClip.suggested_title} />
+                      </div>
+                      <p className="text-sm text-white bg-white/5 p-3 rounded-lg">{selectedClip.suggested_title}</p>
+                    </div>
+                  )}
+                  {selectedClip.suggested_description && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Önerilen Açıklama</span>
+                        <CopyButton text={selectedClip.suggested_description} />
+                      </div>
+                      <p className="text-sm text-gray-300 bg-white/5 p-3 rounded-lg">{selectedClip.suggested_description}</p>
+                    </div>
+                  )}
+                  {selectedClip.suggested_hashtags && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Hashtagler</span>
+                        <CopyButton text={selectedClip.suggested_hashtags} />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClip.suggested_hashtags.split(" ").map((tag, i) => (
+                          <span key={i} className="px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-8 py-6">
-
-                {/* SEKME 1: Video & Hook */}
-                {activeTab === "video" && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-3 flex items-center gap-2"><span>🎣</span> HOOK</h3>
-                      <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                        <p className="text-lg font-medium text-gray-800 italic">&ldquo;{selectedClip.hook}&rdquo;</p>
-                      </div>
-                    </div>
-                    {selectedClip.why_selected && (
-                      <div>
-                        <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-3 flex items-center gap-2"><span>🎯</span> NEDEN SEÇİLDİ?</h3>
-                        <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">{selectedClip.why_selected}</p>
-                      </div>
-                    )}
-                    <a href={backendUrl(selectedClip.path)} download className="w-full flex items-center justify-center gap-2 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition shadow-xl shadow-gray-900/20">
-                      <Icons.Download /> HAM DOSYAYI İNDİR
-                    </a>
-                  </div>
-                )}
-
-                {/* SEKME 2: AI Analizi */}
-                {activeTab === "analysis" && (
-                  <div className="space-y-6">
-                    {selectedClip.psychological_trigger && (
-                      <div>
-                        <h3 className="text-xs font-bold text-blue-500 tracking-widest uppercase mb-3">🧠 PSİKOLOJİK TETİKLEYİCİ</h3>
-                        <p className="text-sm text-gray-700 bg-blue-50/50 p-4 rounded-xl border border-blue-100">{selectedClip.psychological_trigger}</p>
-                      </div>
-                    )}
-                    {selectedClip.rag_reference_used && selectedClip.rag_reference_used.toLowerCase() !== "none" && (
-                      <div>
-                        <h3 className="text-xs font-bold text-purple-500 tracking-widest uppercase mb-3">📚 RAG REFERANSI</h3>
-                        <p className="text-sm text-gray-600 bg-purple-50/50 p-4 rounded-xl border border-purple-100">
-                          Referans: <span className="font-semibold text-gray-800 block mt-1">{selectedClip.rag_reference_used}</span>
-                        </p>
-                      </div>
-                    )}
-                    {selectedClip.audio_energy_note && (
-                      <div>
-                        <h3 className="text-xs font-bold text-orange-500 tracking-widest uppercase mb-3">🎵 ENERJİ ANALİZİ</h3>
-                        <p className="text-sm text-gray-700 bg-orange-50/50 p-4 rounded-xl border border-orange-100">{selectedClip.audio_energy_note}</p>
-                      </div>
-                    )}
-                    {!selectedClip.psychological_trigger && !selectedClip.rag_reference_used && (
-                      <div className="text-center py-12 text-gray-400"><p className="text-4xl mb-3">🧠</p><p className="text-sm">Detaylı analiz mevcut değil.</p></div>
-                    )}
-                  </div>
-                )}
-
-                {/* SEKME 3: Yayın Metadatası */}
-                {activeTab === "metadata" && (
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase">📌 BAŞLIK</h3>
-                        {selectedClip.suggested_title && <CopyButton text={selectedClip.suggested_title} />}
-                      </div>
-                      <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                        <p className="text-base font-bold text-gray-800">{selectedClip.suggested_title || "Üretilmedi"}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase">📝 AÇIKLAMA</h3>
-                        {selectedClip.suggested_description && <CopyButton text={selectedClip.suggested_description} />}
-                      </div>
-                      <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                        <p className="text-sm text-gray-700 leading-relaxed">{selectedClip.suggested_description || "Üretilmedi"}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase">#️⃣ HASHTAGLER</h3>
-                        {selectedClip.suggested_hashtags && <CopyButton text={selectedClip.suggested_hashtags} />}
-                      </div>
-                      <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-                        <p className="text-sm text-blue-600 font-medium">{selectedClip.suggested_hashtags || "Üretilmedi"}</p>
-                      </div>
-                    </div>
-                    {selectedClip.suggested_title && selectedClip.suggested_description && (
-                      <CopyButton text={[selectedClip.suggested_title, "", selectedClip.suggested_description, "", selectedClip.suggested_hashtags].join("\n")} label="Tümünü Kopyala" />
-                    )}
-                  </div>
-                )}
-
-                {/* SEKME 4: Transkript */}
-                {activeTab === "transcript" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase">📝 TRANSKRİPT</h3>
-                      {selectedClip.transcript_excerpt && <CopyButton text={selectedClip.transcript_excerpt} />}
-                    </div>
-                    {selectedClip.transcript_excerpt ? (
-                      <div className="p-5 bg-gray-50 border border-gray-100 rounded-xl">
-                        <p className="text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">{selectedClip.transcript_excerpt}</p>
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 text-gray-400"><p className="text-4xl mb-3">📝</p><p className="text-sm">Transkript mevcut değil.</p></div>
-                    )}
-                  </div>
-                )}
-
-                {/* SEKME 5: Performans Bildir (Data Flywheel) */}
-                {activeTab === "feedback" && (
-                  <div className="space-y-6">
-                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 rounded-xl">
-                      <h3 className="text-sm font-bold text-emerald-700 mb-1">Data Flywheel Sistemi</h3>
-                      <p className="text-xs text-emerald-600 leading-relaxed">
-                        Klibi yayınladıktan sonra gerçek performans metriklerini girin. Skor yeterince yüksekse 
-                        bu klibin başarı formülü otomatik olarak RAG hafızasına eklenir ve gelecekteki kesimler daha akıllı olur.
-                      </p>
-                    </div>
-
-                    {/* Zaten geri bildirim verilmişse */}
-                    {(selectedClip.feedback_submitted_at || feedbackResult) && (
-                      <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                            {feedbackResult?.score ?? selectedClip.feedback_score ?? "?"}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-emerald-800">Gerçek Dünya Skoru</p>
-                            {(feedbackResult?.flywheel) && (
-                              <p className="text-xs text-emerald-600 mt-0.5">✅ RAG kütüphanesine eklendi!</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Form */}
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2">İZLENME SAYISI</label>
-                        <input type="number" value={feedbackViews} onChange={(e) => setFeedbackViews(e.target.value)} placeholder="Örn: 15000" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2">ORTALAMA İZLENME SÜRESİ / RETENTION (%)</label>
-                        <input type="number" step="0.1" value={feedbackRetention} onChange={(e) => setFeedbackRetention(e.target.value)} placeholder="Örn: 45.5" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2">GEÇİLME ORANI / SWIPE RATE (%)</label>
-                        <input type="number" step="0.1" value={feedbackSwipeRate} onChange={(e) => setFeedbackSwipeRate(e.target.value)} placeholder="Örn: 22.3 (düşük = iyi)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition" />
-                      </div>
-                      <button
-                        onClick={submitFeedback}
-                        disabled={feedbackLoading || (!feedbackViews && !feedbackRetention && !feedbackSwipeRate)}
-                        className={`w-full py-4 rounded-xl font-bold text-sm transition-all ${feedbackLoading || (!feedbackViews && !feedbackRetention && !feedbackSwipeRate) ? "bg-gray-200 text-gray-400" : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/30"}`}
-                      >
-                        {feedbackLoading ? "KAYDEDİLİYOR..." : "PERFORMANSI KAYDET"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
+              {/* Download Button */}
+              <div className="p-6 border-t border-white/5">
+                <a
+                  href={backendUrl(selectedClip.path)}
+                  download
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-purple-600 to-cyan-500 text-white rounded-xl font-semibold hover:opacity-90 transition-all"
+                >
+                  <Download className="w-5 h-5" />
+                  Klibi İndir
+                </a>
               </div>
             </div>
           </div>
