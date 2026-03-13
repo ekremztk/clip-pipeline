@@ -17,6 +17,7 @@ openai==2.26.0
 ffmpeg-python==0.2.0
 scenedetect[opencv]
 librosa
+soundfile>=0.12.1
 soundfile
 numpy
 
