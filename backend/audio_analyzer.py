@@ -42,9 +42,20 @@ def analyze_energy(audio_path: str, top_n: int = 10) -> dict:
 
     print(f"[AudioAnalyzer] Ses analizi başlıyor... ({audio_path})")
 
+    # Geçici WAV dosyası (Librosa/soundfile M4A'da sorun çıkarıyor)
+    temp_wav = f"{audio_path}_temp.wav"
+    
     try:
-        # Sesi yükle — mono, 16kHz yeterli
-        y, sr = librosa.load(audio_path, sr=16000, mono=True)
+        import subprocess
+        # FFMPEG ile 16kHz Mono WAV'a çevir (hızlı ve sessiz)
+        subprocess.run([
+            "ffmpeg", "-y", "-i", audio_path, 
+            "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", 
+            temp_wav
+        ], capture_output=True, check=True)
+        
+        # Sesi yükle — mono, 16kHz yeterli (WAV olduğu için soundfile sorunsuz okur)
+        y, sr = librosa.load(temp_wav, sr=16000, mono=True)
         duration = librosa.get_duration(y=y, sr=sr)
         
         print(f"[AudioAnalyzer] Süre: {duration:.0f}s, Sample rate: {sr}Hz")
@@ -130,6 +141,14 @@ def analyze_energy(audio_path: str, top_n: int = 10) -> dict:
     except Exception as e:
         print(f"[AudioAnalyzer] Hata: {e}")
         return _empty_result()
+    
+    finally:
+        import os
+        if os.path.exists(temp_wav):
+            try:
+                os.remove(temp_wav)
+            except Exception as e:
+                print(f"[AudioAnalyzer] Geçici WAV dosyası silinirken hata: {e}")
 
 
 def _energy_description(energy: float) -> str:

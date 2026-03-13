@@ -6,6 +6,7 @@ DATABASE_URL tanımlı değilse Supabase connection string otomatik oluşturulur
 """
 
 import os
+import tempfile
 import psycopg2  # type: ignore
 import json
 import re
@@ -15,15 +16,30 @@ from google.genai import types  # type: ignore
 # --- AYARLAR ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+GCP_PROJECT = os.getenv("GCP_PROJECT")
+GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
+GCP_CREDENTIALS_JSON = os.getenv("GCP_CREDENTIALS_JSON")
+
+if GCP_CREDENTIALS_JSON:
+    fd, path = tempfile.mkstemp(suffix=".json")
+    with os.fdopen(fd, 'w') as f:
+        f.write(GCP_CREDENTIALS_JSON)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
+
+if GCP_PROJECT:
+    client = genai.Client(vertexai=True, project=GCP_PROJECT, location=GCP_LOCATION)
+else:
+    client = genai.Client(api_key=GEMINI_API_KEY)
+
 # RAG veritabanı bağlantısı: Önce DATABASE_URL, yoksa Supabase
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
 
 MIN_CLIP_DURATION = 15
 MAX_CLIP_DURATION = 35
 
-client = genai.Client(api_key=GEMINI_API_KEY)
-
 EMBEDDING_MODELS = [
+    "text-embedding-004",
+    "text-embedding-005",
     "gemini-embedding-001",
     "models/gemini-embedding-001",
 ]

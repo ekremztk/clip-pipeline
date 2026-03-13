@@ -7,6 +7,7 @@ Groq Whisper API tabanlı hızlı transkript modülü.
 import os
 import json
 import math
+import time
 from pathlib import Path
 
 try:
@@ -19,45 +20,62 @@ except ImportError:
 
 
 GROQ_MAX_BYTES = 25 * 1024 * 1024  # 25MB
+GROQ_MAX_RETRIES = 3
+GROQ_RETRY_BASE_DELAY = 2  # saniye — exponential: 2, 4, 8
 
 
 def transcribe(audio_path: str, language: str | None = None) -> dict:
     if not GROQ_AVAILABLE:
         print("[Transcriber] Groq kurulu değil, Gemini fallback...")
-        return _fallback_transcribe(audio_path)
+        return _fallback_transcribe(audio_path, language)
 
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         print("[Transcriber] GROQ_API_KEY bulunamadı, Gemini fallback...")
-        return _fallback_transcribe(audio_path)
+        return _fallback_transcribe(audio_path, language)
 
     print(f"[Transcriber] Groq Whisper başlatılıyor... ({audio_path})")
 
-    try:
-        client = Groq(api_key=api_key)  # type: ignore[misc]
-        file_size = Path(audio_path).stat().st_size
+    client = Groq(api_key=api_key)  # type: ignore[misc]
+    file_size = Path(audio_path).stat().st_size
+    last_error = None
 
-        if file_size <= GROQ_MAX_BYTES:
-            result = _transcribe_single(client, audio_path, language)
-        else:
-            print(f"[Transcriber] Dosya büyük ({file_size // 1024 // 1024}MB), parçalanıyor...")
-            result = _transcribe_chunked(client, audio_path, language)
+    for attempt in range(1, GROQ_MAX_RETRIES + 1):
+        try:
+            if file_size <= GROQ_MAX_BYTES:
+                result = _transcribe_single(client, audio_path, language)
+            else:
+                print(f"[Transcriber] Dosya büyük ({file_size // 1024 // 1024}MB), parçalanıyor...")
+                result = _transcribe_chunked(client, audio_path, language)
 
-        segments = result.get("segments", [])
-        full_text = " ".join([s.get("text", "").strip() for s in segments])
+            segments = result.get("segments", [])
+            full_text = " ".join([s.get("text", "").strip() for s in segments])
 
-        print(f"[Transcriber] ✅ Groq tamamlandı. {len(segments)} segment, {len(full_text.split())} kelime.")
+            print(f"[Transcriber] ✅ Groq tamamlandı. {len(segments)} segment, {len(full_text.split())} kelime.")
 
-        return {
-            "segments": segments,
-            "full_text": full_text,
-            "language": language
-        }
+            return {
+                "segments": segments,
+                "full_text": full_text,
+                "language": language
+            }
 
-    except Exception as e:
-        print(f"[Transcriber] Groq hatası: {e}")
-        print("[Transcriber] Gemini fallback'e geçiliyor...")
-        return _fallback_transcribe(audio_path)
+        except Exception as e:
+            last_error = e
+            error_str = str(e)
+            # 500+ sunucu hatalarında retry, client hatalarında (400, 401, 413) direkt fallback
+            is_server_error = "500" in error_str or "502" in error_str or "503" in error_str or "Internal Server Error" in error_str
+            
+            if is_server_error and attempt < GROQ_MAX_RETRIES:
+                delay = GROQ_RETRY_BASE_DELAY ** attempt
+                print(f"[Transcriber] ⚠️ Groq 500 hatası (deneme {attempt}/{GROQ_MAX_RETRIES}): {e}")
+                print(f"[Transcriber] {delay}s sonra tekrar denenecek...")
+                time.sleep(delay)
+            else:
+                break
+
+    print(f"[Transcriber] Groq hatası ({GROQ_MAX_RETRIES} deneme sonrası): {last_error}")
+    print("[Transcriber] Gemini fallback'e geçiliyor...")
+    return _fallback_transcribe(audio_path, language)
 
 
 def _transcribe_single(client, audio_path: str, language: str | None) -> dict:
@@ -196,36 +214,54 @@ def _parse_groq_response(response, offset: float = 0.0) -> dict:
     return {"segments": segments}
 
 
-def _fallback_transcribe(audio_path: str) -> dict:
+def _fallback_transcribe(audio_path: str, language: str | None = None) -> dict:
     """YENİ MİMARİ: google-genai kullanılarak transkript üretimi"""
+    import tempfile
     from google import genai  # type: ignore
     from google.genai import types  # type: ignore
     from dotenv import load_dotenv  # type: ignore
     load_dotenv()
 
     api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("[Transcriber] GEMINI_API_KEY yok, boş transkript döndürülüyor.")
-        return {"segments":[], "full_text": "", "language": "tr"}
+    gcp_project = os.environ.get("GCP_PROJECT")
+    gcp_location = os.environ.get("GCP_LOCATION", "us-central1")
+    gcp_json = os.environ.get("GCP_CREDENTIALS_JSON")
 
-    client = genai.Client(api_key=api_key)
+    if not api_key and not gcp_project:
+        print("[Transcriber] GEMINI_API_KEY veya GCP_PROJECT yok, boş transkript döndürülüyor.")
+        return {"segments":[], "full_text": "", "language": language or "en"}
+
+    if gcp_json:
+        fd, path = tempfile.mkstemp(suffix=".json")
+        with os.fdopen(fd, 'w') as f:
+            f.write(gcp_json)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
+
+    if gcp_project:
+        client = genai.Client(vertexai=True, project=gcp_project, location=gcp_location)
+    else:
+        client = genai.Client(api_key=api_key)
+
     print("[Transcriber] Gemini fallback transkript başlıyor...")
 
     try:
         audio_file = client.files.upload(file=audio_path)
 
-        prompt = """Bu ses dosyasını tamamen transkribe et.
+        lang_instruction = f"The native language of the audio is '{language}'. Transcribe exactly in this language. " if language else "Auto-detect the language and transcribe exactly in the original spoken language. "
 
-SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma:
-{
+        prompt = f"""Transcribe this audio file completely.
+{lang_instruction}DO NOT translate to any other language, keep the exact original language spoken.
+
+RESPOND ONLY WITH THIS EXACT JSON FORMAT, write absolutely nothing else:
+{{
+  "language": "detected or provided language code (e.g. en, tr)",
   "segments":[
-    {"start": 0.0, "end": 5.0, "text": "konuşulan cümle", "words": []},
-    ...
+    {{"start": 0.0, "end": 5.0, "text": "spoken sentence here", "words": []}}
   ],
-  "full_text": "tüm metin tek parça"
-}
+  "full_text": "entire text in one piece"
+}}
 
-Zaman damgaları yaklaşık olabilir, her segment 5-10 saniye olsun."""
+Timestamps can be approximate, keep each segment around 5-10 seconds."""
 
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         
@@ -242,7 +278,8 @@ Zaman damgaları yaklaşık olabilir, her segment 5-10 saniye olsun."""
                 raw = raw[4:]
 
         data = json.loads(raw.strip())
-        data["language"] = "tr"
+        if "language" not in data:
+            data["language"] = language or "en"
 
         try:
             client.files.delete(name=audio_file.name)
@@ -254,7 +291,7 @@ Zaman damgaları yaklaşık olabilir, her segment 5-10 saniye olsun."""
 
     except Exception as e:
         print(f"[Transcriber] Fallback da başarısız: {e}")
-        return {"segments":[], "full_text": "", "language": "tr"}
+        return {"segments":[], "full_text": "", "language": language or "en"}
 
 
 def format_transcript_for_gemini(transcript: dict) -> str:

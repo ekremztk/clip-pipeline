@@ -75,7 +75,7 @@ def _extract_segment_text(transcript: dict, start_sec: float, end_sec: float) ->
 
 
 def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_description: str = "", channel_id: str = "speedy_cast"):
-    audio_path = f"temp_{job_id}.wav"
+    audio_path = f"temp_{job_id}.m4a"
     transcript = None
     
     try:
@@ -86,7 +86,8 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         
         command = [
             "ffmpeg", "-y", "-i", local_mp4_path,
-            "-vn", "-c:a", "aac", "-b:a", "128k", audio_path
+            "-vn", "-c:a", "aac", "-b:a", "128k",
+            "-movflags", "+faststart", audio_path
         ]
         result = subprocess.run(command, capture_output=True, text=True)
         if result.returncode != 0:
