@@ -104,6 +104,13 @@ def find_similar_viral_dna(video_description, channel_id: str = "speedy_cast", l
     except Exception as e:
         print(f"[Analyzer] ⚠️ RAG DB Hatası: {e}")
         
+    if references:
+        print(f"[Analyzer] RAG Sorgusu: {len(references)} referans bulundu.")
+        for i, ref in enumerate(references, 1):
+            print(f"  {i}. {ref['title']}")
+    else:
+        print("[Analyzer] RAG Sorgusu: Hiç referans bulunamadı.")
+        
     return references
 
 
@@ -159,6 +166,9 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
             duration = end - start
         if duration < MIN_CLIP_DURATION:
             print(f"[Validation] ⚠️ {label} REDDEDILDI — Çok kısa ({duration:.1f}s)")
+            continue
+        if duration > MAX_CLIP_DURATION:
+            print(f"[Validation] ⚠️ {label} REDDEDILDI — Çok uzun ({duration:.1f}s)")
             continue
         if not (0 <= score <= 100):
             clip["virality_score"] = 50

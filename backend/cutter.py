@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 PADDING = 1.5        # saniye — başa ve sona eklenir
+MAX_CLIP_DURATION = 35 # Snap sonrası maksimum klip süresi
 MAX_TOTAL = 61       # PADDING dahil maksimum
 MIN_TOTAL = 5        # Minimum klip süresi
 
@@ -111,6 +112,11 @@ def cut_clips(mp4_path: str, clips_data: list[dict], job_id: str) -> list[str]:
         # PySceneDetect snap
         snapped_start = snap_to_scene(raw_start, scene_cuts, window=2.0)
         snapped_end = snap_to_scene(raw_end, scene_cuts, window=2.0)
+
+        # Snap sonrası klip süresi MAX_CLIP_DURATION'ı aşıyorsa end_time'ı kırp
+        if snapped_end - snapped_start > MAX_CLIP_DURATION:
+            print(f"[Cutter] ⚠️ Snap sonrası süre çok uzun ({(snapped_end - snapped_start):.1f}s), end_time kırpılıyor.")
+            snapped_end = snapped_start + MAX_CLIP_DURATION
 
         # Padding ekle
         start = max(0.0, snapped_start - PADDING)
