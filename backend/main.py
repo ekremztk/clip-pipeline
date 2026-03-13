@@ -7,7 +7,7 @@ Yeni: POST /feedback — klip performans geri bildirimi + otomatik RAG kaydı
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Form, Request
+from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Form, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
@@ -20,7 +20,7 @@ import shutil
 from pathlib import Path
 
 from pipeline import run_pipeline
-from database import create_job, get_job, get_user_jobs, delete_job, update_job, submit_clip_feedback, get_client
+from database import create_job, get_job, get_user_jobs, update_job, submit_clip_feedback, get_client
 
 app = FastAPI()
 
@@ -155,19 +155,34 @@ async def get_history_detail(job_id: str):
     return job
 
 
-@app.delete("/delete/{job_id}")
-async def delete_project(job_id: str):
-    """Projeyi ve dosyalarını siler."""
-    job_dir = OUTPUT_DIR / job_id
-    if job_dir.exists():
-        shutil.rmtree(job_dir)
-        print(f"[API] Disk temizlendi: {job_dir}")
-    
-    success = delete_job(job_id)
-    if success:
-        return {"message": "Proje silindi", "job_id": job_id}
-    else:
-        return JSONResponse(status_code=500, content={"error": "Silme işlemi başarısız"})
+@app.delete("/jobs/{job_id}")
+async def delete_job(job_id: str):
+    try:
+        # 1. & 2. Supabase silme işlemleri
+        client = get_client()
+        if client:
+            client.table("clips").delete().eq("job_id", job_id).execute()
+            client.table("jobs").delete().eq("id", job_id).execute()
+            
+        # 3. state.py in-memory store'dan silme
+        try:
+            import state
+            if hasattr(state, "jobs"):
+                state.jobs.pop(job_id, None)
+        except ImportError:
+            pass
+            
+        # 4. output/{job_id}/ klasörünü silme
+        job_dir = OUTPUT_DIR / job_id
+        if job_dir.exists():
+            shutil.rmtree(job_dir)
+            print(f"[API] Disk temizlendi: {job_dir}")
+            
+        # 5. Başarı dönüşü
+        return {"deleted": True, "job_id": job_id}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/feedback")
