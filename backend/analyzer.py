@@ -97,6 +97,21 @@ def find_similar_viral_dna(video_description, channel_id: str = "speedy_cast", l
 # SCHEMA VALIDATION
 # ══════════════════════════════════════════════════════════════════════
 
+def _parse_timestamp(val) -> float:
+    """MM:SS veya SS formatındaki timestamp'i float saniyeye çevirir."""
+    try:
+        s = str(val).strip()
+        if ":" in s:
+            parts = s.split(":")
+            if len(parts) == 2:
+                return float(parts[0]) * 60 + float(parts[1])
+            elif len(parts) == 3:
+                return float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+        return float(s)
+    except Exception:
+        return 0.0
+
+
 def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
     validated = []
     for i, clip in enumerate(clips_raw):
@@ -109,8 +124,8 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
             continue
         
         try:
-            start = float(clip["start_time"])
-            end = float(clip["end_time"])
+            start = _parse_timestamp(clip.get("start_time", 0))
+            end = _parse_timestamp(clip.get("end_time", 0))
             score = int(clip["virality_score"])
         except (ValueError, TypeError) as e:
             print(f"[Validation] ⚠️ {label} REDDEDILDI — {e}")
