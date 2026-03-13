@@ -48,7 +48,7 @@ EMBEDDING_MODELS = [
 # ══════════════════════════════════════════════════════════════════════
 
 def get_embedding(text):
-    """Metni 768 boyutlu vektöre çevirir. Birden fazla model dener."""
+    """Metni 3072 boyutlu vektöre çevirir. Birden fazla model dener."""
     for model_name in EMBEDDING_MODELS:
         for attempt in range(3):
             try:
@@ -233,6 +233,8 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         """
 
     print("[Analyzer] Gemini 2.5 Flash ile analiz ediliyor...")
+    blob = None
+    audio_file = None
     try:
         channel_context = f"\nCHANNEL CONTEXT:\n{ch_system_prompt}\n" if ch_system_prompt else ""
         
@@ -408,14 +410,6 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
             config=json_config
         )
         
-        try:
-            if GCP_PROJECT and GCS_BUCKET_NAME:
-                blob.delete()
-            elif not GCP_PROJECT:
-                client.files.delete(name=audio_file.name)
-        except Exception as e:
-            print(f"[Analyzer] Ses dosyası silinirken hata oluştu: {e}")
-
         raw_text = response.text.strip()
         if raw_text.startswith("```"):
             raw_text = re.sub(r"^```json\s*", "", raw_text, flags=re.IGNORECASE)
@@ -434,3 +428,11 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
     except Exception as e:
         print(f"[Analyzer] ❌ Gemini Hatası: {e}")
         return []
+    finally:
+        try:
+            if blob is not None:
+                blob.delete()
+            if audio_file is not None:
+                client.files.delete(name=audio_file.name)
+        except Exception as e:
+            print(f"[Analyzer] Ses dosyası silinirken hata oluştu: {e}")

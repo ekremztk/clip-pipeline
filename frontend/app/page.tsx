@@ -20,6 +20,7 @@ import {
   BarChart3,
   Database,
   Plus,
+  Trash2,
 } from "lucide-react";
 
 const BACKEND_URL =
@@ -175,6 +176,7 @@ export default function PrognotStudio() {
 
   const logsEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const terminalContainerRef = useRef<HTMLDivElement>(null);
 
   // ── Geçmiş Projeleri Yükle ─────────────────────────────────────────────────
   const loadHistory = useCallback(async () => {
@@ -227,10 +229,24 @@ export default function PrognotStudio() {
   }, [jobId, status, loadHistory]);
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (terminalContainerRef.current) {
+      terminalContainerRef.current.scrollTop = terminalContainerRef.current.scrollHeight;
+    }
   }, [logs]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
+  const deleteHistoryJob = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Bu geçmiş projesini silmek istediğinize emin misiniz?")) {
+      try {
+        await fetch(`${BACKEND_URL}/jobs/${id}`, { method: "DELETE" });
+        loadHistory();
+      } catch (err) {
+        console.error("Delete job failed", err);
+      }
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -352,16 +368,32 @@ export default function PrognotStudio() {
               onClick={() => fileInputRef.current?.click()}
               className={`relative border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${isDragging
                 ? "border-cyan-400 bg-cyan-400/5 glow-cyan"
-                : "border-purple-500/50 bg-[#111111] hover:border-purple-500 hover:glow-purple"
+                : file
+                  ? "border-green-500 bg-green-500/5"
+                  : "border-purple-500/50 bg-[#111111] hover:border-purple-500 hover:glow-purple"
                 }`}
             >
-              <Upload className={`w-16 h-16 mb-4 ${isDragging ? "text-cyan-400" : "text-purple-500"}`} />
-              <h2 className="text-xl font-semibold text-white mb-2">
-                {file ? file.name : "Videoyu buraya bırak"}
-              </h2>
-              <p className="text-sm text-gray-500">
-                veya dosya seç • MP4, MOV desteklenir
-              </p>
+              {file ? (
+                <>
+                  <Check className="w-16 h-16 mb-4 text-green-500" />
+                  <h2 className="text-xl font-semibold text-white mb-2">
+                    {file.name}
+                  </h2>
+                  <p className="text-sm text-green-400 font-medium">
+                    {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Upload className={`w-16 h-16 mb-4 ${isDragging ? "text-cyan-400" : "text-purple-500"}`} />
+                  <h2 className="text-xl font-semibold text-white mb-2">
+                    Videoyu buraya bırak
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    veya dosya seç • MP4, MOV desteklenir
+                  </p>
+                </>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -404,7 +436,7 @@ export default function PrognotStudio() {
               onClick={startProcessing}
               disabled={!file || !title}
               className={`w-full mt-6 py-4 rounded-xl font-bold text-sm transition-all ${file && title
-                ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white hover:opacity-90 glow-purple"
+                ? "bg-gradient-to-r from-green-500 to-green-600 text-white hover:opacity-90 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
                 : "bg-gray-800 text-gray-500 cursor-not-allowed"
                 }`}
             >
@@ -441,7 +473,7 @@ export default function PrognotStudio() {
               </div>
 
               {/* Terminal Output */}
-              <div className="bg-black rounded-xl mx-6 mb-6 p-4 h-64 max-h-96 overflow-y-auto font-mono text-xs">
+              <div ref={terminalContainerRef} className="bg-black rounded-xl mx-6 mb-6 p-4 h-64 max-h-96 overflow-y-auto font-mono text-xs scroll-smooth">
                 {logs.map((log, i) => {
                   const isError = log.toLowerCase().includes("hata") || log.toLowerCase().includes("error");
                   const isWarning = log.toLowerCase().includes("uyarı") || log.toLowerCase().includes("warning");
@@ -486,12 +518,32 @@ export default function PrognotStudio() {
                   {clips.length}
                 </span>
               </div>
-              <button
-                onClick={resetForm}
-                className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
-              >
-                + Yeni Video
-              </button>
+              <div className="flex items-center gap-3">
+                {status?.result?.pdf_path && (
+                  <button
+                    onClick={() => window.open(backendUrl(status.result!.pdf_path!), "_blank")}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all border border-red-500/30"
+                  >
+                    <FileText className="w-4 h-4" />
+                    PDF Rapor İndir
+                  </button>
+                )}
+                {status?.result?.metadata_path && (
+                  <button
+                    onClick={() => window.open(backendUrl(status.result!.metadata_path!), "_blank")}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-all border border-cyan-500/30"
+                  >
+                    <Database className="w-4 h-4" />
+                    Metadata İndir
+                  </button>
+                )}
+                <button
+                  onClick={resetForm}
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  + Yeni Video
+                </button>
+              </div>
             </div>
 
             {/* Clips Horizontal Scroll */}
@@ -634,12 +686,21 @@ export default function PrognotStudio() {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <button
-                              onClick={() => loadHistoryJob(job.id)}
-                              className="text-sm font-medium text-purple-400 hover:text-purple-300 transition-all"
-                            >
-                              Sonuçları Yükle
-                            </button>
+                            <div className="flex items-center gap-4">
+                              <button
+                                onClick={() => loadHistoryJob(job.id)}
+                                className="text-sm font-medium text-purple-400 hover:text-purple-300 transition-all"
+                              >
+                                Sonuçları Yükle
+                              </button>
+                              <button
+                                onClick={(e) => deleteHistoryJob(job.id, e)}
+                                className="p-1 text-gray-500 hover:text-red-500 transition-all rounded hover:bg-white/5"
+                                title="Sil"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
