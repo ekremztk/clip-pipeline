@@ -19,6 +19,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GCP_PROJECT = os.getenv("GCP_PROJECT")
 GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
 GCP_CREDENTIALS_JSON = os.getenv("GCP_CREDENTIALS_JSON")
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
 
 if GCP_CREDENTIALS_JSON:
     fd, path = tempfile.mkstemp(suffix=".json")
@@ -38,10 +39,7 @@ MIN_CLIP_DURATION = 15
 MAX_CLIP_DURATION = 35
 
 EMBEDDING_MODELS = [
-    "text-embedding-004",
-    "text-embedding-005",
     "gemini-embedding-001",
-    "models/gemini-embedding-001",
 ]
 
 
@@ -226,8 +224,6 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
 
     print("[Analyzer] Gemini 2.5 Flash ile analiz ediliyor...")
     try:
-        audio_file = client.files.upload(file=audio_path)
-        
         channel_context = f"\nCHANNEL CONTEXT:\n{ch_system_prompt}\n" if ch_system_prompt else ""
         
         prompt = f"""
@@ -368,17 +364,47 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         ]
         """
         
+        import mimetypes
+        
+        if GCP_PROJECT and GCS_BUCKET_NAME:
+            print("[Analyzer] Ses dosyası GCS bucket'ına yükleniyor...")
+            from google.cloud import storage
+            storage_client = storage.Client(project=GCP_PROJECT)
+            bucket = storage_client.bucket(GCS_BUCKET_NAME)
+            blob_name = f"audios/{os.path.basename(audio_path)}"
+            blob = bucket.blob(blob_name)
+            blob.upload_from_filename(audio_path)
+            audio_uri = f"gs://{GCS_BUCKET_NAME}/{blob_name}"
+            
+            mime_type, _ = mimetypes.guess_type(audio_path)
+            audio_part = types.Part.from_uri(file_uri=audio_uri, mime_type=mime_type or "audio/mp3")
+            contents = [audio_part, prompt]
+        elif GCP_PROJECT:
+            print("[Analyzer] GCS_BUCKET_NAME tanımlı değil. Inline Data kullanılıyor (Dikkat: 20MB sınırı!)...")
+            with open(audio_path, "rb") as f:
+                audio_bytes = f.read()
+            mime_type, _ = mimetypes.guess_type(audio_path)
+            audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type or "audio/mp3")
+            contents = [audio_part, prompt]
+        else:
+            print("[Analyzer] Gemini Developer API File API kullanılarak yükleniyor...")
+            audio_file = client.files.upload(file=audio_path)
+            contents = [audio_file, prompt]
+            
         json_config = types.GenerateContentConfig(response_mime_type="application/json")
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=[audio_file, prompt],
+            contents=contents,
             config=json_config
         )
         
         try:
-            client.files.delete(name=audio_file.name)
-        except Exception:
-            pass
+            if GCP_PROJECT and GCS_BUCKET_NAME:
+                blob.delete()
+            elif not GCP_PROJECT:
+                client.files.delete(name=audio_file.name)
+        except Exception as e:
+            print(f"[Analyzer] Ses dosyası silinirken hata oluştu: {e}")
 
         raw_text = response.text.strip()
         if raw_text.startswith("```"):

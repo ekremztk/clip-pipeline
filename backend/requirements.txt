@@ -10,6 +10,7 @@ supabase
 
 # --- AI & Models ---
 google-genai
+google-cloud-storage
 groq
 openai==2.26.0
 
