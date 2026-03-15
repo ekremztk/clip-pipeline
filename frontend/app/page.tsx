@@ -11,7 +11,6 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  Lock,
   RefreshCw,
   Zap,
   Sparkles,
@@ -21,6 +20,7 @@ import {
   Database,
   Plus,
   Trash2,
+  TrendingUp,
 } from "lucide-react";
 
 const BACKEND_URL =
@@ -152,9 +152,406 @@ function formatDate(dateStr: string) {
   }
 }
 
+// ─── GENOME & HEALTH TYPES ───────────────────────────────────────────────────
+type GenomeData = {
+  version_id?: number;
+  mode?: string;
+  calculated_at?: string;
+  tier_thresholds?: { tier5?: number; tier4?: number; tier3?: number };
+  golden_duration?: { min?: number; max?: number; avg?: number };
+  content_type_weights?: Record<string, number>;
+};
+
+type HealthData = {
+  status?: "green" | "yellow" | "red";
+  override_rate?: number;
+  signal_accuracy?: number;
+  drift_alerts?: { rule_key?: string }[];
+  stale_feedback_count?: number;
+};
+
+// ─── GENOME CARD ──────────────────────────────────────────────────────────────
+function GenomeCard({ channelId }: { channelId: string }) {
+  const [data, setData] = useState<GenomeData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const load = async () => {
+    if (open) { setOpen(false); return; }
+    setOpen(true);
+    if (data || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/backend/v2/genome/${channelId}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      setData(json);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const modeBadge = (mode?: string) => {
+    const cfg: Record<string, { color: string; label: string }> = {
+      real:      { color: "bg-green-500/20 text-green-400 border-green-500/30",  label: "Real" },
+      bootstrap: { color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", label: "Bootstrap" },
+      proxy:     { color: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",    label: "Proxy" },
+    };
+    const m = (mode || "real").toLowerCase();
+    const { color, label } = cfg[m] || cfg["real"];
+    return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${color}`}>{label}</span>;
+  };
+
+  const fmtDate = (d?: string) => {
+    if (!d) return "—";
+    try { return new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }); }
+    catch { return d; }
+  };
+
+  const weights = data?.content_type_weights ? Object.entries(data.content_type_weights).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
+
+  return (
+    <div className="bg-[#111111] rounded-2xl border border-white/5 overflow-hidden">
+      <button
+        onClick={load}
+        className="w-full flex items-center gap-3 p-6 hover:bg-white/[0.02] transition-all text-left"
+      >
+        <Brain className="w-8 h-8 text-purple-500 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-semibold text-white">Channel Genome</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Tier thresholds, golden duration & content weights</p>
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+      </button>
+
+      {open && (
+        <div className="px-6 pb-6 border-t border-white/5 pt-4">
+          {loading && <p className="text-sm text-gray-500">Loading...</p>}
+          {error && <p className="text-sm text-gray-500">No data yet</p>}
+          {data && !loading && (
+            <div className="space-y-4">
+              {/* Version + Mode */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {modeBadge(data.mode)}
+                {data.version_id != null && <span className="text-xs text-gray-500">v{data.version_id}</span>}
+                {data.calculated_at && <span className="text-xs text-gray-600">{fmtDate(data.calculated_at)}</span>}
+              </div>
+
+              {/* Tier Thresholds */}
+              {data.tier_thresholds && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Tier Thresholds</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["tier5", "tier4", "tier3"] as const).map((t) => (
+                      <div key={t} className="bg-black/30 rounded-lg p-2 text-center">
+                        <p className="text-xs text-gray-500">{t.toUpperCase()}</p>
+                        <p className="text-sm font-bold text-white mt-0.5">{data.tier_thresholds![t]?.toLocaleString() ?? "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Golden Duration */}
+              {data.golden_duration && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Golden Duration</p>
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                    <span className="text-sm text-white">
+                      {Math.round(data.golden_duration.min ?? 0)}s – {Math.round(data.golden_duration.max ?? 0)}s
+                    </span>
+                    <span className="text-xs text-gray-500">(avg {Math.round(data.golden_duration.avg ?? 0)}s)</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Content Type Weights */}
+              {weights.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Content Type Weights</p>
+                  <div className="space-y-1.5">
+                    {weights.map(([ctype, w]) => (
+                      <div key={ctype}>
+                        <div className="flex justify-between text-xs mb-0.5">
+                          <span className="text-gray-400 capitalize">{ctype.replace(/_/g, " ")}</span>
+                          <span className="text-gray-300">{(w * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full"
+                            style={{ width: `${Math.min(w * 100, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── HEALTH CARD ──────────────────────────────────────────────────────────────
+function HealthCard({ channelId }: { channelId: string }) {
+  const [data, setData] = useState<HealthData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const load = async () => {
+    if (open) { setOpen(false); return; }
+    setOpen(true);
+    if (data || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/backend/v2/health/${channelId}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      setData(json);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statusDot = (s?: string) => {
+    const cfg: Record<string, string> = {
+      green:  "bg-green-500",
+      yellow: "bg-yellow-400",
+      red:    "bg-red-500",
+    };
+    return <span className={`inline-block w-2.5 h-2.5 rounded-full ${cfg[s || "green"] || cfg.green} flex-shrink-0`} />;
+  };
+
+  const pct = (v?: number) => v != null ? `${(v * 100).toFixed(1)}%` : "—";
+
+  return (
+    <div className="bg-[#111111] rounded-2xl border border-white/5 overflow-hidden">
+      <button
+        onClick={load}
+        className="w-full flex items-center gap-3 p-6 hover:bg-white/[0.02] transition-all text-left"
+      >
+        <BarChart3 className="w-8 h-8 text-cyan-500 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-semibold text-white">System Health</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Override rate, signal accuracy & drift alerts</p>
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+      </button>
+
+      {open && (
+        <div className="px-6 pb-6 border-t border-white/5 pt-4">
+          {loading && <p className="text-sm text-gray-500">Loading...</p>}
+          {error && <p className="text-sm text-gray-500">No data yet</p>}
+          {data && !loading && (
+            <div className="space-y-4">
+              {/* Status */}
+              <div className="flex items-center gap-2">
+                {statusDot(data.status)}
+                <span className="text-sm font-semibold text-white capitalize">{data.status ?? "—"}</span>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-black/30 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Override Rate</p>
+                  <p className="text-lg font-bold text-white">{pct(data.override_rate)}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Signal Accuracy</p>
+                  <p className="text-lg font-bold text-white">{pct(data.signal_accuracy)}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Stale Feedback</p>
+                  <p className="text-lg font-bold text-white">{data.stale_feedback_count ?? 0}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Drift Alerts</p>
+                  <p className="text-lg font-bold text-white">{data.drift_alerts?.length ?? 0}</p>
+                </div>
+              </div>
+
+              {/* Drift Alert Keys */}
+              {data.drift_alerts && data.drift_alerts.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-2">Drift Keys</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {data.drift_alerts.map((a, i) => (
+                      <span key={i} className="px-2 py-0.5 bg-yellow-500/10 text-yellow-400 text-xs rounded border border-yellow-500/20">
+                        {a.rule_key ?? `alert-${i + 1}`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── PERFORMANCE MODAL ───────────────────────────────────────────────────────
+type PerformanceFormData = {
+  views: string;
+  views_48h: string;
+  views_7d: string;
+  avg_watch_pct: string;
+  first_3s_retention: string;
+  swipe_away_rate: string;
+};
+
+function PerformanceModal({
+  clip,
+  jobId,
+  onClose,
+  onSuccess,
+  onError,
+}: {
+  clip: ClipResult;
+  jobId: string;
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: () => void;
+}) {
+  const [form, setForm] = useState<PerformanceFormData>({
+    views: "",
+    views_48h: "",
+    views_7d: "",
+    avg_watch_pct: "",
+    first_3s_retention: "",
+    swipe_away_rate: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const fields: { key: keyof PerformanceFormData; label: string; placeholder: string }[] = [
+    { key: "views", label: "Total Views", placeholder: "Total views" },
+    { key: "views_48h", label: "Views in First 48h", placeholder: "Views in first 48h" },
+    { key: "views_7d", label: "Views in 7 Days", placeholder: "Views in 7 days" },
+    { key: "avg_watch_pct", label: "Avg Watch %", placeholder: "Avg watch %" },
+    { key: "first_3s_retention", label: "First 3s Retention %", placeholder: "First 3s retention %" },
+    { key: "swipe_away_rate", label: "Swipe Away Rate %", placeholder: "Swipe away rate %" },
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const clipId = clip.id ?? clip.clip_index ?? clip.index;
+    try {
+      const res = await fetch(`/api/backend/v2/feedback/${clipId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clip_id: clipId,
+          job_id: jobId,
+          views: form.views ? Number(form.views) : undefined,
+          views_48h: form.views_48h ? Number(form.views_48h) : undefined,
+          views_7d: form.views_7d ? Number(form.views_7d) : undefined,
+          avg_watch_pct: form.avg_watch_pct ? Number(form.avg_watch_pct) : undefined,
+          first_3s_retention: form.first_3s_retention ? Number(form.first_3s_retention) : undefined,
+          swipe_rate: form.swipe_away_rate ? Number(form.swipe_away_rate) : undefined,
+        }),
+      });
+      if (res.ok) {
+        onSuccess();
+        onClose();
+      } else {
+        onError();
+      }
+    } catch {
+      onError();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[#141414] rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-green-400" />
+            <span className="font-semibold text-white">Update Performance</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all"
+          >
+            <X className="w-4 h-4 text-gray-400" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {fields.map(({ key, label, placeholder }) => (
+              <div key={key}>
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                  {label}
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={form[key]}
+                  onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                  placeholder={placeholder}
+                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-green-500/60 focus:outline-none transition-all"
+                />
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full mt-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-600 to-emerald-500 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_rgba(34,197,94,0.2)]"
+          >
+            {submitting ? "Submitting..." : "Submit Performance Data"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function Toast({ type, onDone }: { type: "success" | "error"; onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 3500);
+    return () => clearTimeout(t);
+  }, [onDone]);
+  return (
+    <div
+      className={`fixed bottom-6 right-6 z-[70] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium transition-all ${
+        type === "success"
+          ? "bg-green-600/90 text-white border border-green-500/40"
+          : "bg-red-600/90 text-white border border-red-500/40"
+      }`}
+    >
+      {type === "success" ? (
+        <><Check className="w-5 h-5" /> Performance data saved successfully!</>
+      ) : (
+        <><X className="w-5 h-5" /> Failed to save performance data. Try again.</>
+      )}
+    </div>
+  );
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // ANA COMPONENT
-// ═════════════════════════════════════════════════════════════════════════════
+// =════════════════════════════════════════════════════════════════════════════
 export default function PrognotStudio() {
   // --- Yeni Proje State ---
   const [file, setFile] = useState<File | null>(null);
@@ -169,6 +566,8 @@ export default function PrognotStudio() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedClip, setSelectedClip] = useState<ClipResult | null>(null);
   const [historyExpanded, setHistoryExpanded] = useState(false);
+  const [showPerfModal, setShowPerfModal] = useState(false);
+  const [toast, setToast] = useState<"success" | "error" | null>(null);
 
   // --- Geçmiş Projeler State ---
   const [historyJobs, setHistoryJobs] = useState<HistoryJob[]>([]);
@@ -712,35 +1111,10 @@ export default function PrognotStudio() {
           )}
         </section>
 
-        {/* ── PLACEHOLDER SECTIONS (LOCKED) ────────────────────────────────── */}
+        {/* ── ACTIVE INFO CARDS ─────────────────────────────────────────────── */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative p-6 bg-[#111111] rounded-2xl border border-white/5 locked-card">
-            <div className="absolute top-4 right-4">
-              <Lock className="w-5 h-5 text-gray-600" />
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <Brain className="w-8 h-8 text-purple-500/50" />
-              <h3 className="text-lg font-semibold text-gray-400">RAG Kütüphanesi</h3>
-            </div>
-            <p className="text-sm text-gray-600">Viral DNA veritabanını görüntüle ve yönet</p>
-            <span className="inline-block mt-4 px-3 py-1 bg-white/5 text-gray-500 text-xs rounded-full">
-              Yakında
-            </span>
-          </div>
-
-          <div className="relative p-6 bg-[#111111] rounded-2xl border border-white/5 locked-card">
-            <div className="absolute top-4 right-4">
-              <Lock className="w-5 h-5 text-gray-600" />
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <BarChart3 className="w-8 h-8 text-cyan-500/50" />
-              <h3 className="text-lg font-semibold text-gray-400">Kanal Analitikleri</h3>
-            </div>
-            <p className="text-sm text-gray-600">Klip performans raporları</p>
-            <span className="inline-block mt-4 px-3 py-1 bg-white/5 text-gray-500 text-xs rounded-full">
-              Yakında
-            </span>
-          </div>
+          <GenomeCard channelId="speedy_cast" />
+          <HealthCard channelId="speedy_cast" />
         </section>
       </main>
 
@@ -896,8 +1270,15 @@ export default function PrognotStudio() {
                 </div>
               </div>
 
-              {/* Download Button */}
-              <div className="p-6 border-t border-white/5">
+              {/* Footer Buttons */}
+              <div className="p-6 border-t border-white/5 space-y-3">
+                <button
+                  onClick={() => setShowPerfModal(true)}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-green-600/20 text-green-400 rounded-xl font-semibold hover:bg-green-600/30 transition-all border border-green-500/30"
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  Update Performance
+                </button>
                 <a
                   href={backendUrl(selectedClip.path)}
                   download
@@ -911,6 +1292,20 @@ export default function PrognotStudio() {
           </div>
         </div>
       )}
+
+      {/* Performance Modal */}
+      {selectedClip && showPerfModal && jobId && (
+        <PerformanceModal
+          clip={selectedClip}
+          jobId={jobId}
+          onClose={() => setShowPerfModal(false)}
+          onSuccess={() => setToast("success")}
+          onError={() => setToast("error")}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && <Toast type={toast} onDone={() => setToast(null)} />}
     </div>
   );
 }
