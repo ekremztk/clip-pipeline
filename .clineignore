@@ -1,0 +1,46 @@
+# Dependencies & Environments
+node_modules/
+frontend/node_modules/
+.venv/
+venv/
+env/
+
+# Version Control & IDE
+.git/
+.vscode/
+.idea/
+.DS_Store
+
+# Python & Build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+dist/
+build/
+
+# Frontend Build
+frontend/.next/
+frontend/out/
+
+# Media & Large Files (Kritik!)
+output/
+temp/
+*.mp4
+*.m4a
+*.wav
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# Security & Logs
+.env
+*.log
+service-account.json
+
+# Supabase & Railway
+.railway/
+supabase/.branches/
+supabase/.temp/

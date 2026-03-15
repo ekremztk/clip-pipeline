@@ -3,6 +3,13 @@
 > Son güncelleme: Mart 2026 | Versiyon: 3.1 (Intelligence Engine Geçişi)
 
 ---
+## 0. AKTİF MCP ARAÇLARI
+- GitHub MCP: Repo işlemleri için kullan
+- Supabase MCP: DB sorguları için kullan  
+- Context7: Kütüphane dokümantasyonu için "use context7" yaz
+- Sequential Thinking: Büyük mimari kararlar için kullan "Bu mimari kararı sequential thinking ile analiz et" komutu çalıştır"
+
+---
 
 ## 1. PROJENİN KİMLİĞİ
 
