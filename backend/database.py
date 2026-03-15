@@ -308,3 +308,124 @@ def _format_job_for_frontend(job: dict, clips_db: list) -> dict:
         "result": result,
         "error": job.get("error_message"),
     }
+
+
+# ====== GENOME CRUD ======
+def get_active_genome(channel_id):
+    """channel_genome tablosundan is_active=true olanı döndür"""
+    client = get_client()
+    if not client:
+        return None
+    try:
+        res = client.table("channel_genome").select("*").eq("channel_id", channel_id).eq("is_active", True).execute()
+        return res.data[0] if res.data else None
+    except Exception as e:
+        print(f"[Database] ⚠️ get_active_genome hatası: {e}")
+        return None
+
+def save_genome_record(channel_id, data, version_id):
+    """Yeni genome kaydı ekle"""
+    client = get_client()
+    if not client:
+        return None
+    try:
+        record = {
+            "channel_id": channel_id,
+            "version_id": version_id,
+            "data": data,
+            "is_active": True
+        }
+        res = client.table("channel_genome").insert(record).execute()
+        return res.data
+    except Exception as e:
+        print(f"[Database] ⚠️ save_genome_record hatası: {e}")
+        return None
+
+def deactivate_all_genomes(channel_id):
+    """Tüm genome versiyonlarını is_active=false yap"""
+    client = get_client()
+    if not client:
+        return None
+    try:
+        res = client.table("channel_genome").update({"is_active": False}).eq("channel_id", channel_id).execute()
+        return res.data
+    except Exception as e:
+        print(f"[Database] ⚠️ deactivate_all_genomes hatası: {e}")
+        return None
+
+
+# ====== CORRELATION CRUD ======
+def get_correlation_rules_db(channel_id):
+    client = get_client()
+    if not client:
+        return []
+    try:
+        res = client.table("correlation_rules").select("*").eq("channel_id", channel_id).execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"[Database] ⚠️ get_correlation_rules_db hatası: {e}")
+        return []
+
+def upsert_correlation_rule(channel_id, rule_type, rule_key, data):
+    client = get_client()
+    if not client:
+        return None
+    try:
+        record = {
+            "channel_id": channel_id,
+            "rule_type": rule_type,
+            "rule_key": rule_key,
+            "data": data
+        }
+        res = client.table("correlation_rules").upsert(record).execute()
+        return res.data
+    except Exception as e:
+        print(f"[Database] ⚠️ upsert_correlation_rule hatası: {e}")
+        return None
+
+
+# ====== CELEBRITY CRUD ======
+def get_celebrities(channel_id=None):
+    client = get_client()
+    if not client:
+        return []
+    try:
+        query = client.table("celebrities").select("*")
+        if channel_id:
+            query = query.eq("channel_id", channel_id)
+        res = query.execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"[Database] ⚠️ get_celebrities hatası: {e}")
+        return []
+
+def upsert_celebrity(name, tier="unknown", multiplier=1.0, aliases=None):
+    client = get_client()
+    if not client:
+        return None
+    try:
+        record = {
+            "name": name,
+            "tier": tier,
+            "multiplier": multiplier,
+            "aliases": aliases or []
+        }
+        res = client.table("celebrities").upsert(record).execute()
+        return res.data
+    except Exception as e:
+        print(f"[Database] ⚠️ upsert_celebrity hatası: {e}")
+        return None
+
+
+# ====== HEALTH ======
+def get_override_stats(channel_id):
+    """clips tablosundan override_flag sayısını döndür"""
+    client = get_client()
+    if not client:
+        return 0
+    try:
+        res = client.table("clips").select("id").eq("channel_id", channel_id).eq("override_flag", True).execute()
+        return len(res.data) if res.data else 0
+    except Exception as e:
+        print(f"[Database] ⚠️ get_override_stats hatası: {e}")
+        return 0
