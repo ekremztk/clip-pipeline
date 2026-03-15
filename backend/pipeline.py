@@ -117,14 +117,62 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
         # ═══════════════════════════════════════════════════════════════
         update(job_id, "running", "Ses enerji haritası çıkarılıyor (Librosa)...", 25)
         energy_summary = ""
+        energy_data = {}
         try:
             from audio_analyzer import analyze_energy  # type: ignore[import-not-found]
-            energy_data = analyze_energy(audio_path)
+            energy_data = analyze_energy(audio_path) or {}
             if energy_data and energy_data.get("summary"):
                 energy_summary = energy_data["summary"]
                 print(f"[Pipeline] ✅ Enerji analizi hazır")
         except Exception as e:
             print(f"[Pipeline] ⚠️ Enerji analizi hatası: {e}")
+
+        # ═══════════════════════════════════════════════════════════════
+        # ADIM 3.5: Genome Yükle (K0)
+        # ═══════════════════════════════════════════════════════════════
+        update(job_id, "running", "Kanal genomu yükleniyor...", 28)
+        genome_data = {}
+        try:
+            from genome import get_genome  # type: ignore[import-not-found]
+            genome_data = get_genome(channel_id) or {}
+            if genome_data:
+                print(f"[Pipeline] ✅ Genome yüklendi: v{genome_data.get('version_id', '?')}")
+            else:
+                print("[Pipeline] ⚠️ Genome bulunamadı, varsayılan değerlerle devam")
+        except Exception as e:
+            print(f"[Pipeline] ⚠️ Genome hatası: {e}")
+
+        # ═══════════════════════════════════════════════════════════════
+        # ADIM 3.6: Korelasyon Kuralları (K1)
+        # ═══════════════════════════════════════════════════════════════
+        update(job_id, "running", "Korelasyon kuralları yükleniyor...", 30)
+        signal_weights = {}
+        try:
+            from correlation import get_signal_weights  # type: ignore[import-not-found]
+            signal_weights = get_signal_weights(channel_id) or {}
+            print(f"[Pipeline] ✅ {len(signal_weights)} sinyal ağırlığı yüklendi")
+        except Exception as e:
+            print(f"[Pipeline] ⚠️ Korelasyon hatası: {e}")
+
+        # ═══════════════════════════════════════════════════════════════
+        # ADIM 3.7: Segment Skorlama (K2)
+        # ═══════════════════════════════════════════════════════════════
+        update(job_id, "running", "Segment skorlama yapılıyor...", 33)
+        scored_segments = None
+        try:
+            from scorer import score_segments  # type: ignore[import-not-found]
+            scored_segments = score_segments(
+                transcript_data=transcript,
+                energy_data=energy_data if energy_summary else {},
+                genome=genome_data,
+                signal_weights=signal_weights
+            )
+            if scored_segments:
+                print(f"[Pipeline] ✅ {len(scored_segments)} segment skorlandı")
+            else:
+                print("[Pipeline] ⚠️ Skorlama başarısız, Gemini tam analiz yapacak")
+        except Exception as e:
+            print(f"[Pipeline] ⚠️ Scorer hatası: {e}")
 
         # ═══════════════════════════════════════════════════════════════
         # ADIM 4: RAG + Gemini Analizi
@@ -137,7 +185,10 @@ def run_pipeline(job_id: str, local_mp4_path: str, video_title: str, video_descr
             video_title=full_context,
             transcript_text=transcript_text,
             energy_summary=energy_summary,
-            channel_id=channel_id
+            channel_id=channel_id,
+            scored_segments=scored_segments,
+            genome_data=genome_data,
+            signal_weights=signal_weights
         )
         if not clips_data:
             raise RuntimeError("Yapay zeka bu videoda kriterlere uygun viral klip bulamadı.")
