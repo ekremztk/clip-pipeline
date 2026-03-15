@@ -54,18 +54,51 @@ def analyze_energy(audio_path: str, top_n: int = 10) -> dict:
             temp_wav
         ], capture_output=True, check=True)
         
-        # Sesi yükle — mono, 16kHz yeterli (WAV olduğu için soundfile sorunsuz okur)
-        y, sr = librosa.load(temp_wav, sr=16000, mono=True)
-        duration = librosa.get_duration(y=y, sr=sr)
-        
+        # Süreyi librosa ile al (dosyayı tam yüklemeden)
+        sr = 16000
+        try:
+            duration = librosa.get_duration(path=temp_wav)
+        except TypeError:
+            # Eski librosa sürümleri için
+            duration = librosa.get_duration(filename=temp_wav)
+            
         print(f"[AudioAnalyzer] Süre: {duration:.0f}s, Sample rate: {sr}Hz")
 
         # ── 1. RMS Enerji ─────────────────────────────────────────
-        # Her 1 saniyelik pencerede ortalama ses enerjisi
         frame_length = sr  # 1 saniye
         hop_length = sr // 2  # 0.5 saniye adım
         
-        rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
+        import gc
+        all_rms = []
+        
+        if duration > 600:
+            print("[AudioAnalyzer] Video uzun (>10dk), 5 dakikalık bloklar halinde işleniyor...")
+            block_duration = 300
+            for start_sec in range(0, int(duration) + 1, block_duration):
+                y_block, _ = librosa.load(temp_wav, sr=sr, mono=True, offset=start_sec, duration=block_duration)
+                if len(y_block) == 0:
+                    break
+                rms_block = librosa.feature.rms(y=y_block, frame_length=frame_length, hop_length=hop_length)[0]
+                all_rms.append(rms_block)
+                del y_block
+                gc.collect()
+            
+            if all_rms:
+                rms = np.concatenate(all_rms)
+            else:
+                rms = np.array([])
+        else:
+            y, _ = librosa.load(temp_wav, sr=sr, mono=True)
+            if len(y) > 0:
+                rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
+            else:
+                rms = np.array([])
+            del y
+            gc.collect()
+
+        if len(rms) == 0:
+            return _empty_result()
+
         times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop_length)
 
         # Normalize et (0-1 arası)
@@ -128,12 +161,43 @@ def analyze_energy(audio_path: str, top_n: int = 10) -> dict:
 
         print(f"[AudioAnalyzer] ✅ {len(energy_peaks)} enerji zirvesi, {len(silence_zones)} sessizlik bölgesi bulundu.")
 
+        # ── 3.5. Windows (30 Saniyelik Pencereler) ────────────────
+        windows = []
+        window_size = 30  # saniye
+        for start_sec in range(0, int(duration), window_size):
+            end_sec = min(start_sec + window_size, float(duration))
+            start_idx = librosa.time_to_frames(start_sec, sr=sr, hop_length=hop_length)
+            end_idx = librosa.time_to_frames(end_sec, sr=sr, hop_length=hop_length)
+            
+            # Bu aralıktaki RMS değerlerini al
+            window_rms = rms_normalized[start_idx:end_idx]
+            
+            if len(window_rms) > 0:
+                windows.append({
+                    "start": start_sec,
+                    "end": end_sec,
+                    "rms_mean": float(window_rms.mean()),
+                    "rms_max": float(window_rms.max()),
+                    "rms_spike": bool(window_rms.max() > rms_normalized.mean() * 1.5),
+                    "silence_ratio": float(np.sum(window_rms < 0.1) / len(window_rms))
+                })
+            else:
+                windows.append({
+                    "start": start_sec,
+                    "end": end_sec,
+                    "rms_mean": 0.0,
+                    "rms_max": 0.0,
+                    "rms_spike": False,
+                    "silence_ratio": 0.0
+                })
+
         # ── 4. Gemini için özet metin ─────────────────────────────
         summary = _build_summary(energy_peaks, silence_zones, duration)
 
         return {
             "energy_peaks": energy_peaks,
             "silence_zones": silence_zones,
+            "windows": windows,
             "duration": round(duration, 1),
             "summary": summary
         }
@@ -191,6 +255,7 @@ def _empty_result() -> dict:
     return {
         "energy_peaks": [],
         "silence_zones": [],
+        "windows": [],
         "duration": 0,
         "summary": "Ses analizi yapılamadı."
     }
