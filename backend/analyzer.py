@@ -180,6 +180,44 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
         validated.append(clip)
         print(f"[Validation] ✅ {label} ONAYLANDI — {start:.1f}s→{end:.1f}s ({duration:.1f}s) Skor: {clip['virality_score']}")
     
+    # CONTENT_TYPE ENUM KONTROL
+    from correlation import CONTENT_TYPES
+    for clip in validated:
+        if clip.get("content_type") not in CONTENT_TYPES:
+            clip["content_type"] = "other"
+            
+    # HOOK_ANATOMY DEFAULT
+    for clip in validated:
+        if "hook_anatomy" not in clip or not isinstance(clip.get("hook_anatomy"), dict):
+            clip["hook_anatomy"] = {
+                "subject": "", "verb_type": "unknown",
+                "tension": "", "pattern_id": "unknown",
+                "celebrity_names": []
+            }
+
+    # OVERLAP CHECK
+    to_remove = set()
+    for i in range(len(validated)):
+        for j in range(i + 1, len(validated)):
+            clip_a = validated[i]
+            clip_b = validated[j]
+            start_a = float(clip_a.get("start_time", 0))
+            end_a = float(clip_a.get("end_time", 0))
+            start_b = float(clip_b.get("start_time", 0))
+            end_b = float(clip_b.get("end_time", 0))
+            dur_a = end_a - start_a
+            dur_b = end_b - start_b
+            overlap = max(0.0, min(end_a, end_b) - max(start_a, start_b))
+            min_dur = min(dur_a, dur_b) if min(dur_a, dur_b) > 0 else 1
+            overlap_pct = overlap / min_dur
+            if overlap_pct > 0.30:
+                # Dusuk skorluyu ele
+                score_a = int(clip_a.get("virality_score", 0))
+                score_b = int(clip_b.get("virality_score", 0))
+                to_remove.add(j if score_a >= score_b else i)
+    
+    validated = [c for idx, c in enumerate(validated) if idx not in to_remove]
+    
     print(f"[Validation] Sonuç: {len(validated)}/{len(clips_raw)} klip doğrulandı.")
     return validated
 
@@ -191,7 +229,10 @@ def validate_clips(clips_raw: list, video_duration: float = 99999.0) -> list:
 def analyze_video_for_clips(audio_path: str, video_title: str, 
                             transcript_text: str = "", 
                             energy_summary: str = "",
-                            channel_id: str = "speedy_cast") -> list:
+                            channel_id: str = "speedy_cast",
+                            scored_segments: list | None = None,
+                            genome_data: dict | None = None,
+                            signal_weights: dict | None = None) -> list:
     
     # Kanal config yükle (dinamik — yeni kanal ekleyince bu kod değişmez)
     from channels.channel_registry import get_channel_config
@@ -204,6 +245,36 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         ch_min = MIN_CLIP_DURATION
         ch_max = MAX_CLIP_DURATION
         ch_system_prompt = ""
+
+    if scored_segments and len(scored_segments) > 0:
+        filtered_lines = []
+        keep_ranges = [(seg.get("start", 0), seg.get("end", 0)) for seg in scored_segments if seg.get("score", 0) >= 60]
+        
+        if keep_ranges:
+            for line in transcript_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    if line.startswith("[") and "]" in line:
+                        time_str = line[1:line.find("]")]
+                        parts = time_str.split(':')
+                        if len(parts) == 3:
+                            h, m, s = map(int, parts)
+                            line_sec = h * 3600 + m * 60 + s
+                        elif len(parts) == 2:
+                            m, s = map(int, parts)
+                            line_sec = m * 60 + s
+                        else:
+                            line_sec = float(time_str)
+                            
+                        if any(start - 5 <= line_sec <= end + 5 for start, end in keep_ranges):
+                            filtered_lines.append(line)
+                    else:
+                        filtered_lines.append(line)
+                except Exception:
+                    filtered_lines.append(line)
+            transcript_text = "\n".join(filtered_lines)
 
     print(f"[Analyzer] RAG hafızası taranıyor...")
     refs = find_similar_viral_dna(video_title, channel_id=channel_id)
@@ -233,6 +304,29 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         """
 
     print("[Analyzer] Gemini 2.5 Flash ile analiz ediliyor...")
+    
+    genome_block = ""
+    if genome_data:
+        try:
+            gold_avg = float(genome_data.get("golden_duration", {}).get("avg", 30))
+        except (ValueError, TypeError):
+            gold_avg = 30.0
+            
+        genome_block = f"""
+        GENOME DATA:
+        - Golden duration range: {max(15, int(gold_avg-5))}s - {int(gold_avg+5)}s
+        - This channel's top content types: celebrity_conflict 31%, hot_take 24%"""
+        
+    signal_block = ""
+    if signal_weights:
+        signal_block = """
+        SIGNAL WEIGHTS:
+        - reveals/exposes verbs have 78% Tier4+ rate, thinks/feels only 18%"""
+        
+    prompt_injections = f"{genome_block}\n{signal_block}".strip()
+    if prompt_injections:
+        prompt_injections = f"\n\n        ═══════════════════════════════════════════════════════\n        INTELLIGENCE LAYER DATA:\n        {prompt_injections}\n        ═══════════════════════════════════════════════════════"
+    
     blob = None
     audio_file = None
     try:
@@ -241,6 +335,7 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         prompt = f"""
         {channel_context}
         You are a specialized viral content editor for "Speedy Cast Clip" — a proven YouTube Shorts channel with 276+ videos and 93M+ views that clips English-language podcasts and talk shows.
+INTELLIGENCE_LAYER_PLACEHOLDER
 
         ═══════════════════════════════════════════════════════
         RAG CONTEXT — PROVEN VIRAL DNA FROM THIS CHANNEL:
@@ -357,12 +452,24 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
         - Prioritize clips that overlap with audio energy peaks.
         - virality_score: be honest. 95+ only for genuinely exceptional moments. Most clips: 75–90.
 
+        EVERYTHING IN ENGLISH. All hook_text, suggested_title, suggested_description, suggested_hashtags = ENGLISH ONLY. (This is an English-language podcast clipping channel.)
+
+        MANDATORY: content_type must be EXACTLY one of this list: celebrity_conflict, hot_take, funny_reaction, emotional_reveal, unexpected_answer, relatable_moment, controversial_opinion, storytelling, educational_insight. NO OTHER VALUE.
+
         JSON FORMAT (no deviations):
         [
           {{
             "start_time": 124.5,
             "end_time": 154.0,
             "hook_text": "The exact first sentence or sound in the clip that stops the scroll",
+            "content_type": "One of: celebrity_conflict | hot_take | funny_reaction | emotional_reveal | unexpected_answer | relatable_moment | controversial_opinion | storytelling | educational_insight",
+            "hook_anatomy": {{
+              "subject": "Person name",
+              "verb_type": "reveals | exposes | admits | confronts | ...",
+              "tension": "Core tension phrase",
+              "pattern_id": "One of: celebrity_conflict_reveal | question_hook | physical_action_hook | number_stat_hook | emotional_reveal_hook | controversy_hook",
+              "celebrity_names": ["Name1", "Name2"]
+            }},
             "psychological_trigger": "One of: shock_value | unexpected_revelation | self_deprecation | celebrity_conflict | embarrassment | humor_subversion | relatable_moment | controversy | laugh_explosion",
             "rag_reference_used": "Exact title of matching RAG reference, or 'None'",
             "virality_score": 92,
@@ -375,6 +482,8 @@ def analyze_video_for_clips(audio_path: str, video_title: str,
           }}
         ]
         """
+        
+        prompt = prompt.replace("INTELLIGENCE_LAYER_PLACEHOLDER", prompt_injections)
         
         import mimetypes
         
