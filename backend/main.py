@@ -306,3 +306,111 @@ async def health():
 @app.get("/test_deploy_v2")
 async def test_deploy():
     return {"deployed": True, "version": "v2_with_jobs"}
+
+# =============================================
+# V3.1 INTELLIGENCE ENGINE ENDPOINTS
+# =============================================
+
+# --- Pydantic Models ---
+class FeedbackV2Request(BaseModel):
+    clip_id: int
+    job_id: str
+    views: Optional[int] = None
+    views_48h: Optional[int] = None
+    views_7d: Optional[int] = None
+    retention: Optional[float] = None
+    avg_watch_pct: Optional[float] = None
+    first_3s_retention: Optional[float] = None
+    swipe_rate: Optional[float] = None
+
+# --- Genome ---
+@app.get("/v2/genome/{channel_id}")
+async def get_genome_endpoint(channel_id: str):
+    try:
+        from genome import get_genome
+        data = get_genome(channel_id)
+        if not data:
+            return {"error": "Genome not found", "channel_id": channel_id}
+        return data
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/v2/genome/{channel_id}/recalculate")
+async def recalculate_genome(channel_id: str):
+    try:
+        from genome import calculate_genome, save_genome
+        data = calculate_genome(channel_id)
+        if data:
+            save_genome(channel_id, data)
+        return {"success": bool(data), "genome": data}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/v2/genome/{channel_id}/rollback/{version_id}")
+async def rollback_genome(channel_id: str, version_id: int):
+    try:
+        from genome import rollback_genome as rb
+        result = rb(channel_id, version_id)
+        return {"success": result}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# --- Feedback V2 ---
+@app.post("/v2/feedback/{clip_id}")
+async def submit_feedback_v2(clip_id: int, req: FeedbackV2Request):
+    try:
+        from feedback import process_feedback
+        result = process_feedback(
+            clip_id=clip_id,
+            views=req.views,
+            retention=req.retention,
+            swipe_rate=req.swipe_rate,
+            views_48h=req.views_48h,
+            views_7d=req.views_7d
+        )
+        return {"success": True, "result": result}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/v2/feedback/bulk-import")
+async def bulk_import_feedback():
+    # TODO: CSV/JSON import
+    return {"message": "Not implemented yet"}
+
+# --- Correlation ---
+@app.get("/v2/correlation/{channel_id}")
+async def get_correlation(channel_id: str):
+    try:
+        from correlation import get_correlation_rules
+        rules = get_correlation_rules(channel_id)
+        return {"channel_id": channel_id, "rules": rules or []}
+    except Exception as e:
+        return {"error": str(e)}
+
+# --- Health ---
+@app.get("/v2/health/{channel_id}")
+async def get_health(channel_id: str):
+    try:
+        from health import generate_health_report
+        report = generate_health_report(channel_id)
+        return report or {"status": "unknown", "error": "No data"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+# --- Celebrity Registry ---
+@app.get("/v2/celebrity-registry")
+async def get_celebrities():
+    try:
+        from database import get_celebrities
+        return {"celebrities": get_celebrities() or []}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/v2/celebrity-registry")
+async def add_celebrity(name: str, tier: str = "unknown"):
+    try:
+        from database import upsert_celebrity
+        result = upsert_celebrity(name=name, tier=tier)
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
