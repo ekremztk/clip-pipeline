@@ -1,0 +1,226 @@
+from datetime import datetime, timezone
+import time
+import os
+import traceback
+
+from app.config import settings
+from app.services.supabase_client import get_client
+from app.models.enums import JobStatus, StepStatus
+from app.services import storage
+
+
+def update_job(job_id: str, **kwargs) -> None:
+    """
+    Updates jobs table in Supabase with given kwargs.
+    Accepted fields: status, current_step, current_step_number, progress_pct, 
+    clip_count, error_message, started_at, completed_at
+    """
+    try:
+        supabase = get_client()
+        valid_fields = {
+            "status", "current_step", "current_step_number", "progress_pct",
+            "clip_count", "error_message", "started_at", "completed_at"
+        }
+        update_data = {k: v for k, v in kwargs.items() if k in valid_fields}
+        
+        if not update_data:
+            return
+            
+        supabase.table("jobs").update(update_data).eq("id", job_id).execute()
+        print(f"[Orchestrator] Updated job {job_id} with {update_data}")
+    except Exception as e:
+        print(f"[Orchestrator] Error updating job {job_id}: {e}")
+
+
+def log_step(job_id: str, step_number: int, step_name: str, status: str,
+             input_summary: dict | None = None, output_summary: dict | None = None,
+             duration_ms: int | None = None, error_message: str | None = None) -> None:
+    """
+    Inserts a row into pipeline_audit_log table.
+    try/except, never raises (logging must not break pipeline)
+    """
+    try:
+        supabase = get_client()
+        log_data = {
+            "job_id": job_id,
+            "step_number": step_number,
+            "step_name": step_name,
+            "status": status,
+            "input_summary": input_summary or {},
+            "output_summary": output_summary or {},
+            "error_message": error_message,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        if duration_ms is not None:
+            log_data["duration_ms"] = duration_ms
+            
+        supabase.table("pipeline_audit_log").insert(log_data).execute()
+        print(f"[Orchestrator] Logged step {step_name} for job {job_id}: {status}")
+    except Exception as e:
+        print(f"[Orchestrator] Error logging step {step_name} for job {job_id}: {e}")
+
+
+def run_pipeline(job_id: str, video_path: str, video_title: str,
+                 guest_name: str | None = None, channel_id: str = "speedy_cast") -> None:
+    """
+    Main pipeline function called by the worker.
+    Runs steps exactly as defined.
+    """
+    audio_path = None
+    try:
+        started_at = datetime.now(timezone.utc).isoformat()
+        update_job(
+            job_id=job_id,
+            status=JobStatus.PROCESSING.value,
+            started_at=started_at,
+            current_step_number=0,
+            progress_pct=0,
+            current_step="initializing"
+        )
+        
+        steps = [
+            (1, "s01_audio_extract", 10),
+            (2, "s02_transcribe", 20),
+            (3, "s03_speaker_id", 28),
+            (4, "s04_labeled_transcript", 36),
+            (5, "s05_energy_map", 44),
+            (6, "s06_video_analysis", 52),
+            (7, "s07_context_build", 58),
+            (8, "s07b_humor_map", 64),
+            (9, "s07c_signal_fusion", 70),
+            (10, "s08_clip_finder", 80),
+            (11, "s09_quality_gate", 88),
+            (12, "s09b_clip_strategy", 92),
+            (13, "s10_precision_cut", 96),
+            (14, "s11_export", 100)
+        ]
+        
+        # State variables to pass between steps
+        transcript_data = None
+        speaker_data = None
+        labeled_transcript = None
+        energy_data = None
+        visual_events = None
+        context = None
+        channel_dna = {}
+        humor_moments = None
+        fused_timeline = None
+        
+        for step_number, step_name, progress_pct in steps:
+            step_start_time = time.time()
+            log_step(job_id, step_number, step_name, StepStatus.STARTED.value)
+            
+            update_job(
+                job_id=job_id,
+                current_step=step_name,
+                current_step_number=step_number,
+                progress_pct=progress_pct
+            )
+            
+            try:
+                if step_number == 1:
+                    from app.pipeline.steps import s01_audio_extract
+                    audio_path = s01_audio_extract.run(video_path, job_id)
+                elif step_number == 2:
+                    from app.pipeline.steps import s02_transcribe
+                    transcript_data = s02_transcribe.run(audio_path, job_id)
+                elif step_number == 3:
+                    from app.pipeline.steps import s03_speaker_id
+                    speaker_data = s03_speaker_id.run(transcript_data, job_id)
+                    update_job(job_id=job_id, status="awaiting_speaker_confirm")
+                    # Pipeline pauses here — resumes after /confirm-speakers
+                    # For now continue automatically
+                elif step_number == 4:
+                    from app.pipeline.steps import s04_labeled_transcript
+                    predicted_map = speaker_data.get("predicted_map", {}) if speaker_data else {}
+                    labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, guest_name)
+                elif step_number == 5:
+                    from app.pipeline.steps import s05_energy_map
+                    energy_data = s05_energy_map.run(audio_path, job_id)
+                elif step_number == 6:
+                    from app.pipeline.steps import s06_video_analysis
+                    visual_events = s06_video_analysis.run(video_path, job_id)
+                elif step_number == 7:
+                    from app.pipeline.steps import s07_context_build
+                    context = s07_context_build.run(guest_name, channel_id, video_title)
+                elif step_number == 8:
+                    from app.pipeline.steps import s07b_humor_map
+                    supabase = get_client()
+                    channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
+                    if channel_res.data and len(channel_res.data) > 0:
+                        channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    humor_moments = s07b_humor_map.run(labeled_transcript, channel_dna, job_id)
+                elif step_number == 9:
+                    from app.pipeline.steps import s07c_signal_fusion
+                    fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_data, visual_events, humor_moments, job_id)
+                elif step_number == 10:
+                    # TODO: s08_clip_finder
+                    pass
+                elif step_number == 11:
+                    # TODO: s09_quality_gate
+                    pass
+                elif step_number == 12:
+                    # TODO: s09b_clip_strategy
+                    pass
+                elif step_number == 13:
+                    # TODO: s10_precision_cut
+                    pass
+                elif step_number == 14:
+                    # TODO: s11_export
+                    pass
+                    
+                duration_ms = int((time.time() - step_start_time) * 1000)
+                log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
+                
+            except Exception as e:
+                error_msg = str(e)
+                print(f"[Orchestrator] Error in step {step_name}: {error_msg}")
+                traceback.print_exc()
+                
+                duration_ms = int((time.time() - step_start_time) * 1000)
+                log_step(
+                    job_id=job_id,
+                    step_number=step_number,
+                    step_name=step_name,
+                    status=StepStatus.FAILED.value,
+                    duration_ms=duration_ms,
+                    error_message=error_msg
+                )
+                
+                update_job(
+                    job_id=job_id,
+                    status=JobStatus.FAILED.value,
+                    error_message=f"Step {step_name} failed: {error_msg}"
+                )
+                return  # Return early on any step failure
+                
+        # After all steps complete
+        completed_at = datetime.now(timezone.utc).isoformat()
+        update_job(
+            job_id=job_id,
+            status=JobStatus.COMPLETED.value,
+            progress_pct=100,
+            completed_at=completed_at,
+            current_step="finished",
+            current_step_number=len(steps)
+        )
+        print(f"[Orchestrator] Job {job_id} pipeline completed successfully.")
+        
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[Orchestrator] Pipeline execution failed unexpectedly: {error_msg}")
+        traceback.print_exc()
+        update_job(
+            job_id=job_id,
+            status=JobStatus.FAILED.value,
+            error_message=f"Pipeline critical failure: {error_msg}"
+        )
+    finally:
+        for path in [audio_path, video_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                    print(f"[Orchestrator] Cleaned up {path}")
+                except Exception as e:
+                    print(f"[Orchestrator] Error cleaning up {path}: {e}")
