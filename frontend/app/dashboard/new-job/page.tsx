@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Upload, CheckCircle2, AlertCircle, Clock } from "lucide-react";
@@ -21,6 +21,7 @@ type Job = {
 export default function NewJobPage() {
     const router = useRouter();
     const { channels, activeChannelId, setActiveChannelId } = useChannel();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [isDragging, setIsDragging] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -109,15 +110,26 @@ export default function NewJobPage() {
 
             <div className="space-y-6">
                 {/* Dropzone */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".mp4,.mov,.webm,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setFile(file);
+                    }}
+                />
                 <div
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center text-center transition-colors ${isDragging
-                            ? "border-[#7c3aed] bg-[#7c3aed]/10"
-                            : file
-                                ? "border-green-500/50 bg-green-500/5"
-                                : "border-[#7c3aed]/30 bg-[#0d0d0d] hover:border-[#7c3aed]/50 hover:bg-white/[0.02]"
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${isDragging
+                        ? "border-[#7c3aed] bg-[#7c3aed]/10"
+                        : file
+                            ? "border-green-500/50 bg-green-500/5"
+                            : "border-[#7c3aed]/30 bg-[#0d0d0d] hover:border-[#7c3aed]/50 hover:bg-white/[0.02]"
                         }`}
                 >
                     {file ? (
@@ -197,8 +209,8 @@ export default function NewJobPage() {
                     whileHover={!isSubmitting && file && title ? { scale: 1.02 } : {}}
                     whileTap={!isSubmitting && file && title ? { scale: 0.98 } : {}}
                     className={`w-full py-3 rounded text-sm font-semibold transition-all flex items-center justify-center gap-2 ${file && title && !isSubmitting
-                            ? "bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white shadow-lg shadow-[#7c3aed]/20"
-                            : "bg-[#1a1a1a] text-[#6b7280] cursor-not-allowed border border-white/[0.06]"
+                        ? "bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white shadow-lg shadow-[#7c3aed]/20"
+                        : "bg-[#1a1a1a] text-[#6b7280] cursor-not-allowed border border-white/[0.06]"
                         }`}
                     disabled={!file || !title || isSubmitting}
                 >
