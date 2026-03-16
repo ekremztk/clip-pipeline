@@ -69,10 +69,10 @@ export default function NewJobPage() {
         setSubmitError("");
 
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("video", file);
         formData.append("title", title);
-        if (guestName) formData.append("guest_name", guestName);
         formData.append("channel_id", activeChannelId);
+        if (guestName) formData.append("guest_name", guestName);
 
         try {
             const res = await fetch(`${API}/jobs`, {
