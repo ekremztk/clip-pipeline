@@ -17,7 +17,8 @@ async def lifespan(app: FastAPI):
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     yield
 
-from app.api.websocket.progress import router as ws_progress_router
+from app.api.routes import jobs, clips, speakers, downloads, channels, feedback
+from app.api.websocket import progress
 
 app = FastAPI(
     title="Prognot Clip Pipeline",
@@ -37,7 +38,13 @@ app.add_middleware(
 settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/output", StaticFiles(directory=str(settings.OUTPUT_DIR)), name="output")
 
-app.include_router(ws_progress_router)
+app.include_router(jobs.router)
+app.include_router(clips.router)
+app.include_router(speakers.router)
+app.include_router(downloads.router)
+app.include_router(channels.router)
+app.include_router(feedback.router)
+app.include_router(progress.router)
 
 @app.get("/health")
 async def health_check():
