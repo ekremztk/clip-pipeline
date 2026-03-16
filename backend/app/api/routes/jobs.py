@@ -21,6 +21,7 @@ async def create_job(
     guest_name: Optional[str] = Form(None),
     channel_id: str = Form("speedy_cast")
 ):
+    channel_id = channel_id.replace("-", "_")
     try:
         if not video.content_type.startswith("video/"):
             raise HTTPException(status_code=400, detail="Uploaded file is not a video.")
@@ -100,6 +101,7 @@ async def get_job(job_id: str):
 
 @router.get("")
 async def list_jobs(channel_id: str = "speedy_cast", limit: int = 20):
+    channel_id = channel_id.replace("-", "_")
     try:
         supabase = get_client()
         

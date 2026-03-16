@@ -19,19 +19,27 @@ def run(video_path: str, job_id: str) -> list[dict]:
         cleaned = re.sub(r'[\x00-\x1f]', '', cleaned)
         cleaned = cleaned.strip()
         
+        # Parse result safely
         try:
-            visual_events = json.loads(cleaned)
+            result = json.loads(cleaned) if cleaned and cleaned != "{}" else {}
         except json.JSONDecodeError as json_err:
             print(f"[S06] Error parsing JSON: {json_err}")
             print(f"[S06] Raw response snippet: {cleaned[:200]}")
-            return []
-            
-        if not isinstance(visual_events, list):
-            print(f"[S06] Expected list, got {type(visual_events)}")
-            return []
-            
-        print(f"[S06] Found {len(visual_events)} visual events for job {job_id}")
-        return visual_events
+            result = {}
+
+        # result can be dict or list — handle both
+        if isinstance(result, list):
+            events = result
+        elif isinstance(result, dict):
+            events = result.get("events", result.get("visual_events", []))
+        else:
+            events = []
+
+        print(f"[S06] Found {len(events)} visual events for job {job_id}")
+        
+        # We return the list directly to maintain compatibility with s07c_signal_fusion 
+        # which expects visual_events to be a list, rather than {"visual_events": events}
+        return events
         
     except Exception as e:
         print(f"[S06] Error during video analysis: {e}")

@@ -15,7 +15,7 @@ def run(cut_results: list, job_id: str) -> list:
     
     supabase = get_client()
 
-    for clip in cut_results:
+    for index, clip in enumerate(cut_results):
         try:
             input_path = clip.get("video_landscape_path")
             
@@ -50,6 +50,7 @@ def run(cut_results: list, job_id: str) -> list:
 
             # 4. Update clips table in Supabase
             clip_data = {
+                "clip_index": index,
                 "id": str(uuid.uuid4()),
                 "job_id": job_id,
                 "channel_id": clip.get("channel_id", "speedy_cast"),

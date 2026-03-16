@@ -10,6 +10,9 @@ async def get_clips(
     channel_id: Optional[str] = None,
     limit: int = 20
 ):
+    if channel_id:
+        channel_id = channel_id.replace("-", "_")
+        
     try:
         print(f"[ClipsRoute] Fetching clips (job_id={job_id}, channel_id={channel_id}, limit={limit})")
         supabase = get_client()

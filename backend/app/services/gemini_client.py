@@ -157,9 +157,9 @@ def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 
 
 def analyze_video(video_path: str, prompt: str) -> str:
     try:
-        import base64
         from google import genai
         from google.genai import types
+        import os
         
         client = genai.Client(
             vertexai=True,
@@ -167,23 +167,23 @@ def analyze_video(video_path: str, prompt: str) -> str:
             location=settings.GCP_LOCATION
         )
         
-        with open(video_path, "rb") as f:
-            video_bytes = f.read()
+        file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
+        print(f"[GeminiClient] Video size: {file_size_mb:.1f}MB, uploading...")
         
-        # If file is too large (>20MB), skip video analysis
-        file_size_mb = len(video_bytes) / (1024 * 1024)
-        if file_size_mb > 20:
-            print(f"[GeminiClient] Video too large ({file_size_mb:.1f}MB) for inline analysis, skipping")
-            return "{}"
+        # Upload file using Vertex AI Files API
+        uploaded_file = client.files.upload(
+            file=video_path,
+            config=types.UploadFileConfig(mime_type="video/mp4")
+        )
         
-        video_b64 = base64.b64encode(video_bytes).decode("utf-8")
+        print(f"[GeminiClient] File uploaded: {uploaded_file.name}")
         
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL_PRO,
             contents=[
                 types.Content(parts=[
-                    types.Part.from_bytes(
-                        data=video_bytes,
+                    types.Part.from_uri(
+                        file_uri=uploaded_file.uri,
                         mime_type="video/mp4"
                     ),
                     types.Part.from_text(text=prompt)
@@ -191,7 +191,13 @@ def analyze_video(video_path: str, prompt: str) -> str:
             ]
         )
         
-        return str(response.text) if response.text else "{}"
+        # Clean up uploaded file
+        try:
+            client.files.delete(name=uploaded_file.name)
+        except Exception:
+            pass
+        
+        return response.text or "{}"
         
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")
