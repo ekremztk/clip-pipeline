@@ -2,6 +2,7 @@ import json
 import os
 import re
 import time
+import tempfile
 from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
@@ -15,10 +16,14 @@ def get_gemini_client() -> genai.Client:
     global _gemini_client
     if _gemini_client is None:
         try:
-            if not settings.GEMINI_API_KEY:
-                raise ValueError("GEMINI_API_KEY is not set in config.")
-            _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            print("[GeminiClient] Initialized client successfully.")
+            if settings.GCP_CREDENTIALS_JSON:
+                fd, temp_file_path = tempfile.mkstemp(suffix=".json")
+                with os.fdopen(fd, 'w') as f:
+                    f.write(settings.GCP_CREDENTIALS_JSON)
+                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_file_path
+                
+            _gemini_client = genai.Client(vertexai=True, project=settings.GCP_PROJECT, location=settings.GCP_LOCATION)
+            print(f"[GeminiClient] Vertex AI initialized for project {settings.GCP_PROJECT}")
         except Exception as e:
             print(f"[GeminiClient] Error initializing client: {e}")
             raise
@@ -58,9 +63,11 @@ def _retry_logic(operation_func, *args, **kwargs) -> Any:
                 print(f"[GeminiClient] Error in operation: {e}")
                 raise
 
-def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: bool = False) -> str:
+def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: bool = False, model: Optional[str] = None) -> str:
     """Internal implementation for text and json generation."""
     client = get_gemini_client()
+    if model is None:
+        model = settings.GEMINI_MODEL_FLASH
     
     config_kwargs = {}
     if system:
@@ -73,7 +80,7 @@ def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: boo
     
     def do_generate() -> str:
         response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
+            model=model,
             contents=prompt,
             config=config,
         )
@@ -81,25 +88,25 @@ def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: boo
         
     return str(_retry_logic(do_generate))
 
-def generate(prompt: str, system: Optional[str] = None) -> str:
+def generate(prompt: str, system: Optional[str] = None, model: Optional[str] = None) -> str:
     """
     Generate text from a prompt.
     Retries on 429 (30s, 60s, then raise).
     """
     try:
-        return str(_generate_internal(prompt, system=system, json_mode=False))
+        return str(_generate_internal(prompt, system=system, json_mode=False, model=model))
     except Exception as e:
         print(f"[GeminiClient] Error in generate: {e}")
         raise
 
-def generate_json(prompt: str, system: Optional[str] = None) -> Dict[str, Any]:
+def generate_json(prompt: str, system: Optional[str] = None, model: Optional[str] = None) -> Dict[str, Any]:
     """
     Generate JSON from a prompt.
     Retries on 429 (30s, 60s, then raise).
     Strips markdown formatting and parses JSON.
     """
     try:
-        raw_text = _generate_internal(prompt, system=system, json_mode=True)
+        raw_text = _generate_internal(prompt, system=system, json_mode=True, model=model)
         if not raw_text:
             raise ValueError("Empty response received.")
             
@@ -148,11 +155,13 @@ def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 
     print(f"[GeminiClient] Error: Timeout polling file {file_name} after {max_attempts} attempts.")
     raise RuntimeError(f"Timeout waiting for file {file_name} to become active")
 
-def analyze_video(video_path: str, prompt: str) -> str:
+def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> str:
     """
     Uploads a video, waits for processing, and generates text based on it.
     Deletes the uploaded file afterward.
     """
+    if model is None:
+        model = settings.GEMINI_MODEL_FLASH
     uploaded_file = None
     try:
         if not os.path.exists(video_path):
@@ -168,7 +177,7 @@ def analyze_video(video_path: str, prompt: str) -> str:
         
         def do_generate() -> str:
             response = client.models.generate_content(
-                model=settings.GEMINI_MODEL,
+                model=model,
                 contents=[uploaded_file, prompt]
             )
             return str(response.text)
@@ -189,13 +198,15 @@ def analyze_video(video_path: str, prompt: str) -> str:
             except Exception as e:
                 print(f"[GeminiClient] Error deleting file {uploaded_file.name}: {e}")
 
-def analyze_audio(audio_path: str, prompt: str) -> str:
+def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> str:
     """
     Analyzes an audio file.
     If < 20MB, uses inline bytes.
     If >= 20MB, uploads via Files API and polls.
     Deletes uploaded file if used.
     """
+    if model is None:
+        model = settings.GEMINI_MODEL_FLASH
     uploaded_file = None
     try:
         if not os.path.exists(audio_path):
@@ -225,7 +236,7 @@ def analyze_audio(audio_path: str, prompt: str) -> str:
             
             def do_generate_inline() -> str:
                 response = client.models.generate_content(
-                    model=settings.GEMINI_MODEL,
+                    model=model,
                     contents=[audio_part, prompt]
                 )
                 return str(response.text)
@@ -243,7 +254,7 @@ def analyze_audio(audio_path: str, prompt: str) -> str:
             
             def do_generate_uploaded() -> str:
                 response = client.models.generate_content(
-                    model=settings.GEMINI_MODEL,
+                    model=model,
                     contents=[uploaded_file, prompt]
                 )
                 return str(response.text)

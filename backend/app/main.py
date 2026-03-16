@@ -17,6 +17,8 @@ async def lifespan(app: FastAPI):
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     yield
 
+from app.api.websocket.progress import router as ws_progress_router
+
 app = FastAPI(
     title="Prognot Clip Pipeline",
     lifespan=lifespan
@@ -34,6 +36,8 @@ app.add_middleware(
 # Ensure OUTPUT_DIR exists before mounting to prevent StaticFiles from throwing RuntimeError
 settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/output", StaticFiles(directory=str(settings.OUTPUT_DIR)), name="output")
+
+app.include_router(ws_progress_router)
 
 @app.get("/health")
 async def health_check():
