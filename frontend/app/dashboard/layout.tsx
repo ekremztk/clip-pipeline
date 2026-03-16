@@ -21,7 +21,8 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type Channel = {
     id: string;
-    name: string;
+    display_name: string;
+    [key: string]: any;
 };
 
 export const ChannelContext = createContext<{
@@ -41,25 +42,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const [channels, setChannels] = useState<Channel[]>([]);
-    const [activeChannelId, setActiveChannelId] = useState<string>("speedy_cast");
+    const [selectedChannel, setSelectedChannel] = useState<any>(null);
 
     useEffect(() => {
         const fetchChannels = async () => {
             try {
                 const res = await fetch(`${API}/channels`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setChannels(data);
-                    if (data.length > 0 && !data.find((c: Channel) => c.id === activeChannelId)) {
-                        setActiveChannelId(data[0].id);
-                    }
+                const data = await res.json();
+                const list = Array.isArray(data) ? data : data.channels || [];
+                setChannels(list);
+
+                // Restore last selected channel from localStorage
+                const saved = localStorage.getItem('selectedChannelId');
+                if (saved && list.find((c: any) => c.id === saved)) {
+                    setSelectedChannel(list.find((c: any) => c.id === saved));
+                } else if (list.length > 0) {
+                    setSelectedChannel(list[0]);
+                    localStorage.setItem('selectedChannelId', list[0].id);
                 }
             } catch (err) {
-                console.error("Failed to fetch channels", err);
+                console.error('Failed to fetch channels', err);
             }
         };
         fetchChannels();
     }, []);
+
+    const handleChannelChange = (channelId: string) => {
+        const ch = channels.find((c: any) => c.id === channelId);
+        if (ch) {
+            setSelectedChannel(ch);
+            localStorage.setItem('selectedChannelId', channelId);
+        }
+    };
 
     const navItems = [
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -71,7 +85,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ] as const;
 
     return (
-        <ChannelContext.Provider value={{ channels, activeChannelId, setActiveChannelId }}>
+        <ChannelContext.Provider value={{
+            channels,
+            activeChannelId: selectedChannel?.id || "speedy_cast",
+            setActiveChannelId: handleChannelChange
+        }}>
             <div className="min-h-screen bg-[#000000] text-[#e5e5e5] font-sans flex">
                 {/* ─── SIDEBAR ──────────────────────────────────────────────────────── */}
                 <aside
@@ -156,19 +174,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             {/* Channel Selector Pill */}
                             <div className="relative">
                                 <select
-                                    value={activeChannelId}
-                                    onChange={(e) => setActiveChannelId(e.target.value)}
+                                    value={selectedChannel?.id || ''}
+                                    onChange={(e) => handleChannelChange(e.target.value)}
                                     className="appearance-none flex items-center gap-2 pl-4 pr-10 py-1.5 rounded-full border border-[#7c3aed] bg-transparent text-sm font-medium hover:bg-[#7c3aed]/10 transition-colors text-[#e5e5e5] cursor-pointer focus:outline-none"
                                 >
                                     {channels.length > 0 ? (
-                                        channels.map((c) => (
-                                            <option key={c.id} value={c.id} className="bg-[#0d0d0d]">
-                                                {c.name}
+                                        channels.map((ch: any) => (
+                                            <option key={ch.id} value={ch.id} className="bg-[#0d0d0d]">
+                                                {ch.display_name}
                                             </option>
                                         ))
                                     ) : (
-                                        <option value="speedy_cast" className="bg-[#0d0d0d]">
-                                            Speedy Cast
+                                        <option value="" disabled className="bg-[#0d0d0d]">
+                                            No channels
                                         </option>
                                     )}
                                 </select>
