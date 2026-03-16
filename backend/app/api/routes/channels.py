@@ -1,8 +1,22 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel
 from app.services.supabase_client import get_client
 from app.services import storage
+import sys
+import os
+
+# Add backend directory to sys.path
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if backend_dir not in sys.path:
+    sys.path.append(backend_dir)
+
+# Ignore missing imports during Pyre checks; functions are dynamically loaded during runtime
+import importlib
+try:
+    onboarding_worker = importlib.import_module("workers.onboarding_worker")
+except Exception:
+    onboarding_worker = None
 
 router = APIRouter(prefix="/channels", tags=["channels"])
 
@@ -19,6 +33,10 @@ class YouTubeConnect(BaseModel):
     youtube_channel_id: str
     access_token: str
     refresh_token: str
+
+class OnboardExistingRequest(BaseModel):
+    youtube_channel_id: str
+    youtube_api_key: str
 
 @router.get("")
 async def list_channels():
@@ -100,6 +118,103 @@ async def connect_youtube(channel_id: str, data: YouTubeConnect):
         return {"connected": True, "channel_id": channel_id}
     except Exception as e:
         print(f"[ChannelsRoute] Error connecting YouTube: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{channel_id}/onboard/existing")
+async def onboard_existing_channel(channel_id: str, request: OnboardExistingRequest, background_tasks: BackgroundTasks):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+            
+        channel = result.data[0]
+        if channel.get("onboarding_status") == "ready":
+            raise HTTPException(status_code=400, detail="Channel onboarding already complete")
+            
+        update_data = {
+            "youtube_channel_id": request.youtube_channel_id
+        }
+        supabase.table("channels").update(update_data).eq("id", channel_id).execute()
+        
+        import importlib
+        workers_mod = importlib.import_module("workers.onboarding_worker")
+
+        background_tasks.add_task(
+            workers_mod.run_existing_channel_onboarding,
+            channel_id,
+            request.youtube_channel_id,
+            request.youtube_api_key
+        )
+        
+        return {"started": True, "channel_id": channel_id, "type": "existing"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error starting existing channel onboarding: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{channel_id}/onboard/new")
+async def onboard_new_channel(
+    channel_id: str,
+    background_tasks: BackgroundTasks,
+    files: Optional[List[UploadFile]] = File(None)
+):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+            
+        reference_clip_paths = []
+        if files:
+            for file in files:
+                file_bytes = await file.read()
+                path = storage.save_upload(file_bytes, file.filename, f"onboard_ref_{channel_id}")
+                reference_clip_paths.append(path)
+                
+        import importlib
+        workers_mod = importlib.import_module("workers.onboarding_worker")
+
+        background_tasks.add_task(
+            workers_mod.run_new_channel_onboarding,
+            channel_id,
+            reference_clip_paths
+        )
+        
+        return {
+            "started": True,
+            "channel_id": channel_id,
+            "type": "new",
+            "reference_clips_count": len(reference_clip_paths)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error starting new channel onboarding: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{channel_id}/onboarding-status")
+async def get_onboarding_status(channel_id: str):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("id, onboarding_status, channel_dna").eq("id", channel_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+            
+        channel = result.data[0]
+        return {
+            "channel_id": channel_id,
+            "onboarding_status": channel.get("onboarding_status"),
+            "channel_dna": channel.get("channel_dna")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error getting onboarding status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{channel_id}/references")
