@@ -5,17 +5,7 @@ from app.models.schemas import SpeakerConfirmRequest
 
 router = APIRouter(prefix="/jobs", tags=["speakers"])
 
-def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
-    try:
-        supabase = get_client()
-        supabase.table("jobs").update({
-            "status": "processing",
-            "current_step": "s04_labeled_transcript"
-        }).eq("id", job_id).execute()
-        print(f"[Speakers] Resuming pipeline from s04 for job {job_id}")
-        # The actual resume logic will be wired in Phase 5 Step 5.7
-    except Exception as e:
-        print(f"[Speakers] Error in resume_pipeline_from_s04: {e}")
+from workers.video_worker import resume_pipeline_from_s04
 
 @router.post("/{job_id}/confirm-speakers")
 async def confirm_speakers(job_id: str, request: SpeakerConfirmRequest, background_tasks: BackgroundTasks):
