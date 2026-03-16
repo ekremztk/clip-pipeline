@@ -12,21 +12,23 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  TrendingDown,
   Play,
   Download,
   Clock,
   CheckCircle,
   XCircle,
   Loader2,
-  Sparkles,
   Plus,
   Upload,
   X,
   Copy,
   Check,
   RefreshCw,
-  Dna,
   FileText,
+  ArrowRight,
+  User,
+  ChevronDown,
 } from "lucide-react";
 
 const BACKEND_URL =
@@ -76,10 +78,11 @@ type HistoryJob = {
 };
 
 type AppState = "idle" | "uploading" | "processing" | "success" | "error";
+type ActivePage = "dashboard" | "newjob" | "library" | "performance" | "memory" | "settings";
 
 // ─── HELPER COMPONENTS ──────────────────────────────────────────────────────
 
-function AnimatedNumber({ value, duration = 1500 }: { value: number; duration?: number }) {
+function AnimatedNumber({ value, duration = 1000 }: { value: number; duration?: number }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -103,127 +106,6 @@ function AnimatedNumber({ value, duration = 1500 }: { value: number; duration?: 
   return <span>{count.toLocaleString()}</span>;
 }
 
-function CircularProgress({ value, size = 80, strokeWidth = 6 }: { value: number; size?: number; strokeWidth?: number }) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (value / 100) * circumference;
-
-  return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg className="circular-progress" width={size} height={size}>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="#1f1f2e"
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="url(#progress-gradient)"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="transition-all duration-1000 ease-out"
-          style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
-        />
-        <defs>
-          <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#7c3aed" />
-            <stop offset="100%" stopColor="#06b6d4" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold text-white">{value}%</span>
-      </div>
-    </div>
-  );
-}
-
-function Sparkline({ data }: { data: number[] }) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-  const width = 100;
-  const height = 30;
-  const points = data.map((d, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - ((d - min) / range) * height;
-    return `${x},${y}`;
-  }).join(" ");
-
-  return (
-    <svg width={width} height={height} className="overflow-visible">
-      <defs>
-        <linearGradient id="sparkline-fill" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon
-        points={`0,${height} ${points} ${width},${height}`}
-        fill="url(#sparkline-fill)"
-      />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#7c3aed"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MiniLineChart() {
-  const data = [30, 45, 35, 60, 55, 70, 65, 80, 75, 90, 85, 95];
-  const width = 320;
-  const height = 120;
-  const padding = 10;
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-
-  const points = data.map((d, i) => {
-    const x = padding + (i / (data.length - 1)) * (width - padding * 2);
-    const y = padding + (1 - (d - min) / range) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(" ");
-
-  const areaPoints = `${padding},${height - padding} ${points} ${width - padding},${height - padding}`;
-
-  return (
-    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#7c3aed" />
-          <stop offset="100%" stopColor="#06b6d4" />
-        </linearGradient>
-      </defs>
-      <polygon points={areaPoints} fill="url(#chart-gradient)" />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="url(#line-gradient)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { icon: React.ReactNode; bg: string; text: string }> = {
     processing: { icon: <Loader2 className="w-3 h-3 animate-spin" />, bg: "bg-purple-500/20", text: "text-purple-400" },
@@ -236,29 +118,10 @@ function StatusBadge({ status }: { status: string }) {
   const { icon, bg, text } = config[status] || config.processing;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium ${bg} ${text}`}>
       {icon}
       {status === "running" ? "Processing" : status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
-  );
-}
-
-function ViralityBadge({ score }: { score: number }) {
-  const gradient = score >= 85 ? "from-red-500 to-orange-500" : score >= 70 ? "from-orange-500 to-yellow-500" : "from-yellow-500 to-green-500";
-  return (
-    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r ${gradient} text-white text-xs font-bold`}>
-      <Sparkles className="w-3 h-3" />
-      {score}
-    </div>
-  );
-}
-
-function DnaBadge() {
-  return (
-    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 text-xs font-medium border border-cyan-500/30">
-      <Dna className="w-3 h-3" />
-      DNA
-    </div>
   );
 }
 
@@ -281,11 +144,37 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-all bg-[#141414] hover:bg-[#1a1a1a] text-[#e5e5e5] border border-[rgba(255,255,255,0.06)]"
     >
       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
       {copied ? "Copied" : label || "Copy"}
     </button>
+  );
+}
+
+function MiniSparkline({ data, positive }: { data: number[]; positive: boolean }) {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const width = 60;
+  const height = 20;
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((d - min) / range) * height;
+    return `${x},${y}`;
+  }).join(" ");
+
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <polyline
+        points={points}
+        fill="none"
+        stroke={positive ? "#22c55e" : "#ef4444"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -295,17 +184,16 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
 export default function PrognotStudio() {
   // --- State ---
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeNav, setActiveNav] = useState("dashboard");
-  const [showNewJobModal, setShowNewJobModal] = useState(false);
+  const [activePage, setActivePage] = useState<ActivePage>("dashboard");
 
   // --- Job State ---
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [selectedChannel, setSelectedChannel] = useState("speedy-cast");
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<JobStatus | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
-  const [logs, setLogs] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedClip, setSelectedClip] = useState<ClipResult | null>(null);
 
@@ -339,16 +227,11 @@ export default function PrognotStudio() {
           const res = await fetch(`${BACKEND_URL}/status/${jobId}`);
           const data = await res.json();
           setStatus(data);
-          if (data.step) {
-            setLogs((prev) => {
-              if (prev[prev.length - 1] !== data.step) return [...prev, data.step];
-              return prev;
-            });
-          }
           if (data.status === "running") setAppState("processing");
           if (data.status === "done") {
             setAppState("success");
             loadHistory();
+            setActivePage("library");
           }
           if (data.status === "error") setAppState("error");
         } catch (e) {
@@ -374,31 +257,28 @@ export default function PrognotStudio() {
   const startProcessing = async () => {
     if (!file || !title) return;
     setAppState("uploading");
-    setLogs(["[SYSTEM] Pipeline starting...", "[UPLOAD] Transferring file to server..."]);
     setStatus({ status: "uploading", step: "Uploading...", progress: 5, result: null, error: null });
     const formData = new FormData();
     formData.append("video", file);
     formData.append("title", title);
-    formData.append("description", description);
+    formData.append("guest_name", guestName);
+    formData.append("channel", selectedChannel);
     try {
       const res = await fetch(`${BACKEND_URL}/upload`, { method: "POST", body: formData });
       const data = await res.json();
       setJobId(data.job_id);
-      setShowNewJobModal(false);
     } catch {
       setAppState("error");
-      setLogs((prev) => [...prev, "[ERROR] Connection failed: Server not responding."]);
     }
   };
 
   const resetForm = () => {
     setFile(null);
     setTitle("");
-    setDescription("");
+    setGuestName("");
     setJobId(null);
     setStatus(null);
     setAppState("idle");
-    setLogs([]);
   };
 
   const loadHistoryJob = async (jobIdToLoad: string) => {
@@ -407,7 +287,7 @@ export default function PrognotStudio() {
       const data = await res.json();
       setStatus(data);
       setAppState("success");
-      setActiveNav("library");
+      setActivePage("library");
     } catch (e) {
       console.error("History detail failed", e);
     }
@@ -421,9 +301,8 @@ export default function PrognotStudio() {
   const thisMonthViews = 12847;
   const avgPerformance = 78;
   const pipelineCost = 24.50;
-  const sparklineData = [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45];
 
-  // ── Active Jobs (running jobs from history) ─────────────────────────────────
+  // ── Active Jobs ─────────────────────────────────────────────────────────────
   const activeJobs = historyJobs.filter(j => j.status === "running" || j.status === "processing");
   if (appState === "processing" || appState === "uploading") {
     activeJobs.unshift({
@@ -436,66 +315,61 @@ export default function PrognotStudio() {
     });
   }
 
-  // ── Recent Clips (last 4 from all completed jobs) ───────────────────────────
+  // ── Recent Clips ────────────────────────────────────────────────────────────
   const recentClips = clips.slice(0, 4);
 
   // ── Navigation Items ────────────────────────────────────────────────────────
   const navItems = [
-    { id: "dashboard", icon: Zap, label: "Dashboard" },
-    { id: "newjob", icon: Film, label: "New Clip Job" },
-    { id: "library", icon: FolderOpen, label: "Clip Library" },
-    { id: "performance", icon: BarChart3, label: "Performance" },
-    { id: "memory", icon: Brain, label: "Channel Memory" },
-    { id: "settings", icon: Settings, label: "Channel Settings" },
+    { id: "dashboard" as ActivePage, icon: Zap, label: "Dashboard" },
+    { id: "newjob" as ActivePage, icon: Film, label: "New Clip Job" },
+    { id: "library" as ActivePage, icon: FolderOpen, label: "Clip Library" },
+    { id: "performance" as ActivePage, icon: BarChart3, label: "Performance" },
+    { id: "memory" as ActivePage, icon: Brain, label: "Channel Memory" },
+    { id: "settings" as ActivePage, icon: Settings, label: "Channel Settings" },
+  ];
+
+  const channels = [
+    { id: "speedy-cast", name: "Speedy Cast Clip" },
+    { id: "tech-talks", name: "Tech Talks" },
+    { id: "podcast-clips", name: "Podcast Clips" },
   ];
 
   // ═══════════════════════════════════════════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex relative">
-      {/* Background Orbs */}
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
-
+    <div className="min-h-screen bg-black text-[#e5e5e5] flex">
       {/* ── SIDEBAR ──────────────────────────────────────────────────────────── */}
       <aside
-        className={`fixed left-0 top-0 bottom-0 bg-[#0d0d14]/80 backdrop-blur-xl border-r border-white/5 z-40 flex flex-col transition-all duration-300 ease-in-out ${sidebarCollapsed ? "w-[72px]" : "w-[260px]"}`}
+        className={`fixed left-0 top-0 bottom-0 bg-black border-r border-[rgba(255,255,255,0.06)] z-40 flex flex-col transition-all duration-300 ${sidebarCollapsed ? "w-[60px]" : "w-[240px]"}`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/5">
+        <div className="h-14 flex items-center justify-between px-3 border-b border-[rgba(255,255,255,0.06)]">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-1 animate-fadeIn">
-              <span className="text-xl font-bold text-white">PROGNOT</span>
-              <span className="text-xl font-bold gradient-text-purple">STUDIO</span>
+              <span className="text-lg font-bold text-white">PROGNOT</span>
+              <span className="text-lg font-bold text-[#7c3aed]">STUDIO</span>
             </div>
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all"
+            className="p-1.5 rounded hover:bg-[#0d0d0d] text-[#6b7280] hover:text-white transition-all"
           >
             {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-2 space-y-0.5">
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => {
-                if (item.id === "newjob") {
-                  setShowNewJobModal(true);
-                } else {
-                  setActiveNav(item.id);
-                }
-              }}
-              className={`sidebar-item w-full ${activeNav === item.id ? "active" : ""}`}
+              onClick={() => setActivePage(item.id)}
+              className={`sidebar-item w-full ${activePage === item.id ? "active" : ""}`}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
               {!sidebarCollapsed && (
-                <span className="text-sm font-medium whitespace-nowrap overflow-hidden animate-fadeIn">
+                <span className="text-sm whitespace-nowrap overflow-hidden animate-fadeIn">
                   {item.label}
                 </span>
               )}
@@ -507,387 +381,378 @@ export default function PrognotStudio() {
       {/* ── MAIN CONTENT ─────────────────────────────────────────────────────── */}
       <main
         className="flex-1 transition-all duration-300"
-        style={{ marginLeft: sidebarCollapsed ? 72 : 260 }}
+        style={{ marginLeft: sidebarCollapsed ? 60 : 240 }}
       >
         {/* Top Bar */}
-        <header className="h-16 bg-[#0d0d14]/60 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="h-14 bg-black border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between px-6 sticky top-0 z-30">
           {/* Channel Selector */}
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-600/20 text-purple-400 border border-purple-500/30 text-sm font-medium hover:bg-purple-600/30 transition-all">
-              <Film className="w-4 h-4" />
+          <div className="relative">
+            <button className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#0d0d0d] border border-[rgba(255,255,255,0.06)] text-sm text-[#e5e5e5] hover:bg-[#141414] transition-all">
+              <Film className="w-4 h-4 text-[#7c3aed]" />
               <span>Speedy Cast Clip</span>
+              <ChevronDown className="w-3.5 h-3.5 text-[#6b7280]" />
             </button>
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
-            <button className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-purple-500 rounded-full" />
+          <div className="flex items-center gap-3">
+            <button className="p-2 rounded hover:bg-[#0d0d0d] text-[#6b7280] hover:text-white transition-all relative">
+              <Bell className="w-[18px] h-[18px]" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#7c3aed] rounded-full" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-[#0d0d0d] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-xs font-medium text-white">
               SC
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <div className="p-6 relative z-10">
-          <div className="space-y-6">
-            {/* ── ROW 1: STATS CARDS ─────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Total Clips */}
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "0ms" }}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Total Clips</p>
-                    <p className="text-3xl font-bold text-white mt-1">
-                      <AnimatedNumber value={totalClips || 47} />
-                    </p>
-                    <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      +12 this week
-                    </p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-purple-500/10">
-                    <Film className="w-5 h-5 text-purple-400" />
-                  </div>
-                </div>
-              </div>
+        <div className="p-6">
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* DASHBOARD PAGE */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {activePage === "dashboard" && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Page Title */}
+              <h1 className="text-2xl font-bold text-white">Dashboard</h1>
 
-              {/* This Month Views */}
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "100ms" }}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">This Month Views</p>
-                    <p className="text-3xl font-bold text-white mt-1">
-                      <AnimatedNumber value={thisMonthViews} />
-                    </p>
-                    <div className="mt-2">
-                      <Sparkline data={sparklineData} />
+              {/* Stats Cards Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Total Clips */}
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "0ms" }}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[13px] uppercase tracking-wider text-[#6b7280]">Total Clips</p>
+                      <p className="text-[36px] font-bold text-white mt-1 font-geist">
+                        <AnimatedNumber value={totalClips || 47} />
+                      </p>
+                      <p className="text-sm text-green-500 mt-1 flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        +12%
+                      </p>
+                    </div>
+                    <div className="p-2 rounded bg-[#141414]">
+                      <Film className="w-4 h-4 text-[#6b7280]" />
                     </div>
                   </div>
-                  <div className="p-2 rounded-lg bg-cyan-500/10">
-                    <TrendingUp className="w-5 h-5 text-cyan-400" />
-                  </div>
                 </div>
-              </div>
 
-              {/* Avg Performance */}
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "200ms" }}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Avg Performance</p>
-                    <div className="mt-2">
-                      <CircularProgress value={avgPerformance} />
-                    </div>
-                  </div>
-                  <div className="p-2 rounded-lg bg-green-500/10">
-                    <Sparkles className="w-5 h-5 text-green-400" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Pipeline Cost */}
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "300ms" }}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Pipeline Cost</p>
-                    <p className="text-3xl font-bold text-white mt-1">
-                      ${pipelineCost.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">This billing cycle</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-orange-500/10">
-                    <Zap className="w-5 h-5 text-orange-400" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── ROW 2: ACTIVE JOBS ────────────────────────────────────────── */}
-            {(activeJobs.length > 0 || appState === "processing" || appState === "uploading") && (
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "400ms" }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <h3 className="text-lg font-semibold text-white">Active Jobs</h3>
-                </div>
-                <div className="space-y-4">
-                  {activeJobs.map((job) => (
-                    <div key={job.id} className="p-4 rounded-xl bg-white/5 border border-white/5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                            <Film className="w-5 h-5 text-purple-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-white">{job.video_title}</p>
-                            <p className="text-xs text-gray-500">{status?.step || "Processing..."}</p>
-                          </div>
-                        </div>
-                        <StatusBadge status={job.status} />
-                      </div>
-                      <div className="relative h-2 rounded-full bg-[#1a1a2e] overflow-hidden">
-                        <div
-                          className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full progress-shimmer transition-all duration-500"
-                          style={{ width: `${job.progress}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-gray-500">Progress</span>
-                        <span className="text-xs text-white font-medium">{job.progress}%</span>
+                {/* This Month Views */}
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "50ms" }}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[13px] uppercase tracking-wider text-[#6b7280]">This Month Views</p>
+                      <p className="text-[36px] font-bold text-white mt-1 font-geist">
+                        <AnimatedNumber value={thisMonthViews} />
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-sm text-green-500 flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3" />
+                          +8%
+                        </p>
+                        <MiniSparkline data={[30, 35, 45, 40, 55, 50, 60]} positive />
                       </div>
                     </div>
-                  ))}
+                    <div className="p-2 rounded bg-[#141414]">
+                      <BarChart3 className="w-4 h-4 text-[#6b7280]" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Avg Performance */}
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "100ms" }}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[13px] uppercase tracking-wider text-[#6b7280]">Avg Performance</p>
+                      <p className="text-[36px] font-bold text-white mt-1 font-geist">{avgPerformance}%</p>
+                      <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
+                        <TrendingDown className="w-3 h-3" />
+                        -3%
+                      </p>
+                    </div>
+                    <div className="p-2 rounded bg-[#141414]">
+                      <Zap className="w-4 h-4 text-[#6b7280]" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pipeline Cost */}
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "150ms" }}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[13px] uppercase tracking-wider text-[#6b7280]">Pipeline Cost</p>
+                      <p className="text-[36px] font-bold text-white mt-1 font-geist">
+                        ${pipelineCost.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-[#6b7280] mt-1">This billing cycle</p>
+                    </div>
+                    <div className="p-2 rounded bg-[#141414]">
+                      <Clock className="w-4 h-4 text-[#6b7280]" />
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* ── ROW 3: TWO COLUMNS ────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Clips */}
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "500ms" }}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Recent Clips</h3>
-                  <button
-                    onClick={() => setActiveNav("library")}
-                    className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
-                  >
-                    View All
-                  </button>
-                </div>
-                {recentClips.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {recentClips.map((clip, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedClip(clip)}
-                        className="group relative aspect-video rounded-xl overflow-hidden bg-[#1a1a2e] hover:ring-2 hover:ring-purple-500/50 transition-all"
-                      >
-                        <video
-                          src={backendUrl(clip.path)}
-                          className="w-full h-full object-cover"
-                          muted
-                          playsInline
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                            <Play className="w-5 h-5 text-white fill-white" />
+              {/* Active Jobs */}
+              {activeJobs.length > 0 && (
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "200ms" }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <h3 className="text-[13px] uppercase tracking-wider text-[#6b7280]">Active Jobs</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {activeJobs.map((job) => (
+                      <div key={job.id} className="p-4 rounded-lg bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded bg-[#0d0d0d] flex items-center justify-center">
+                              <Film className="w-4 h-4 text-[#7c3aed]" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-white">{job.video_title}</p>
+                              <p className="text-xs text-[#6b7280]">{status?.step || "Processing..."}</p>
+                            </div>
                           </div>
+                          <StatusBadge status={job.status} />
                         </div>
-                        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                          <ViralityBadge score={clip.score} />
-                          {clip.rag_reference_used && <DnaBadge />}
+                        <div className="relative h-1.5 rounded-full bg-[#1a1a1a] overflow-hidden">
+                          <div
+                            className="absolute left-0 top-0 h-full bg-[#7c3aed] rounded-full progress-shimmer transition-all duration-500"
+                            style={{ width: `${job.progress}%` }}
+                          />
                         </div>
-                      </button>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-[#6b7280]">Progress</span>
+                          <span className="text-xs text-white">{job.progress}%</span>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                    <Film className="w-12 h-12 mb-3 opacity-50" />
-                    <p className="text-sm">No clips yet</p>
+                </div>
+              )}
+
+              {/* Two Column Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Recent Clips */}
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "250ms" }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[13px] uppercase tracking-wider text-[#6b7280]">Recent Clips</h3>
                     <button
-                      onClick={() => setShowNewJobModal(true)}
-                      className="mt-3 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                      onClick={() => setActivePage("library")}
+                      className="text-xs text-white hover:text-[#e5e5e5] transition-colors flex items-center gap-1"
                     >
-                      Create your first clip
+                      View All <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
-                )}
-              </div>
-
-              {/* Channel Performance Chart */}
-              <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "600ms" }}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Channel Performance</h3>
-                  <select className="text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                    <option>Last 7 days</option>
-                    <option>Last 30 days</option>
-                    <option>Last 90 days</option>
-                  </select>
-                </div>
-                <MiniLineChart />
-                <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/5">
-                  <div>
-                    <p className="text-xs text-gray-500">Total Views</p>
-                    <p className="text-lg font-bold text-white">24.8K</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Avg. Watch Time</p>
-                    <p className="text-lg font-bold text-white">2:34</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Engagement</p>
-                    <p className="text-lg font-bold text-white">4.2%</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── ROW 4: HISTORY TABLE ──────────────────────────────────────── */}
-            <div className="card-gradient-border p-5 animate-fadeInUp" style={{ animationDelay: "700ms" }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Past Projects</h3>
-                <button
-                  onClick={loadHistory}
-                  className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${historyLoading ? "animate-spin" : ""}`} />
-                  Refresh
-                </button>
-              </div>
-              {historyJobs.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-white/5">
-                        <th className="pb-3 font-medium">Title</th>
-                        <th className="pb-3 font-medium">Status</th>
-                        <th className="pb-3 font-medium">Created</th>
-                        <th className="pb-3 font-medium text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {historyJobs.slice(0, 5).map((job) => (
-                        <tr key={job.id} className="group">
-                          <td className="py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                                <FileText className="w-4 h-4 text-purple-400" />
-                              </div>
-                              <span className="text-sm text-white">{job.video_title}</span>
+                  {recentClips.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {recentClips.map((clip, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedClip(clip)}
+                          className="group relative aspect-video rounded-lg overflow-hidden bg-[#141414] hover:bg-[#1a1a1a] transition-all"
+                        >
+                          <video
+                            src={backendUrl(clip.path)}
+                            className="w-full h-full object-cover"
+                            muted
+                            playsInline
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-9 h-9 rounded-full bg-black/50 flex items-center justify-center">
+                              <Play className="w-4 h-4 text-white fill-white" />
                             </div>
-                          </td>
-                          <td className="py-3">
-                            <StatusBadge status={job.status} />
-                          </td>
-                          <td className="py-3">
-                            <span className="text-sm text-gray-400">
-                              {new Date(job.created_at).toLocaleDateString()}
+                          </div>
+                          <div className="absolute bottom-2 left-2">
+                            <span className="text-xs font-medium text-white bg-[#7c3aed] px-1.5 py-0.5 rounded">
+                              {clip.score}
                             </span>
-                          </td>
-                          <td className="py-3 text-right">
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Film className="w-10 h-10 mb-3 text-[#6b7280]" />
+                      <p className="text-sm text-[#6b7280]">No clips yet</p>
+                      <button
+                        onClick={() => setActivePage("newjob")}
+                        className="mt-3 text-sm text-white hover:text-[#e5e5e5] transition-colors flex items-center gap-1"
+                      >
+                        Create your first clip <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Recent Jobs */}
+                <div className="card p-5 animate-fadeInUp" style={{ animationDelay: "300ms" }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[13px] uppercase tracking-wider text-[#6b7280]">Recent Jobs</h3>
+                    <button
+                      onClick={loadHistory}
+                      className="flex items-center gap-1 text-xs text-[#6b7280] hover:text-white transition-colors"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${historyLoading ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                  {historyJobs.length > 0 ? (
+                    <div className="space-y-2">
+                      {historyJobs.slice(0, 5).map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-[#141414] hover:bg-[#1a1a1a] transition-all group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-[#0d0d0d] flex items-center justify-center">
+                              <FileText className="w-3.5 h-3.5 text-[#6b7280]" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-[#e5e5e5]">{job.video_title}</p>
+                              <p className="text-xs text-[#6b7280]">
+                                {new Date(job.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <StatusBadge status={job.status} />
                             {job.status === "done" && (
                               <button
                                 onClick={() => loadHistoryJob(job.id)}
-                                className="text-xs text-purple-400 hover:text-purple-300 transition-colors opacity-0 group-hover:opacity-100"
+                                className="text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity"
                               >
-                                Load Results
+                                Load
                               </button>
                             )}
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <FolderOpen className="w-10 h-10 mb-3 text-[#6b7280]" />
+                      <p className="text-sm text-[#6b7280]">No jobs yet</p>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-                  <FolderOpen className="w-10 h-10 mb-2 opacity-50" />
-                  <p className="text-sm">No past projects</p>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
-        </div>
-      </main>
+          )}
 
-      {/* ── NEW JOB MODAL ─────────────────────────────────────────────────────── */}
-      {showNewJobModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowNewJobModal(false)}
-          />
-          <div className="relative w-full max-w-lg bg-[#0d0d14] rounded-2xl border border-white/10 overflow-hidden animate-scaleIn">
-            <div className="flex items-center justify-between p-4 border-b border-white/5">
-              <h2 className="text-lg font-semibold text-white">New Clip Job</h2>
-              <button
-                onClick={() => setShowNewJobModal(false)}
-                className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4">
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* NEW CLIP JOB PAGE */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {activePage === "newjob" && (
+            <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
+              {/* Page Title */}
+              <h1 className="text-2xl font-bold text-white">New Clip Job</h1>
+
               {/* Upload Zone */}
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                  isDragging
-                    ? "border-cyan-500 bg-cyan-500/10"
-                    : file
-                    ? "border-green-500/50 bg-green-500/5"
-                    : "border-white/10 hover:border-purple-500/50"
-                }`}
-              >
-                {file ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <CheckCircle className="w-6 h-6 text-green-400" />
-                    <span className="text-sm text-white">{file.name}</span>
-                    <button
-                      onClick={() => setFile(null)}
-                      className="p-1 rounded hover:bg-white/10 text-gray-400"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+              <div className="card p-6">
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`relative border-2 border-dashed rounded-lg p-10 text-center transition-all ${
+                    isDragging
+                      ? "border-[#7c3aed] bg-[#7c3aed]/5"
+                      : file
+                      ? "border-green-500/50 bg-green-500/5"
+                      : "border-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.2)]"
+                  }`}
+                >
+                  {file ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <span className="text-sm text-[#e5e5e5]">{file.name}</span>
+                      <button
+                        onClick={() => setFile(null)}
+                        className="p-1 rounded hover:bg-[#141414] text-[#6b7280]"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 mx-auto mb-3 text-[#6b7280]" />
+                      <p className="text-sm text-[#e5e5e5] mb-1">Drag and drop your video here</p>
+                      <p className="text-xs text-[#6b7280] mb-4">or</p>
+                      <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#141414] hover:bg-[#1a1a1a] text-[#e5e5e5] text-sm cursor-pointer transition-colors border border-[rgba(255,255,255,0.06)]">
+                        <Plus className="w-4 h-4" />
+                        Browse Files
+                        <input
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])}
+                        />
+                      </label>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div className="card p-6 space-y-5">
+                {/* Video Title */}
+                <div>
+                  <label className="block text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">
+                    Video Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter video title..."
+                    className="w-full px-4 py-3 rounded-lg bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#e5e5e5] placeholder-[#6b7280] text-sm transition-all"
+                  />
+                </div>
+
+                {/* Guest Name */}
+                <div>
+                  <label className="block text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">
+                    Guest Name <span className="text-[#6b7280] text-xs normal-case">(optional)</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b7280]" />
+                    <input
+                      type="text"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      placeholder="Enter guest name..."
+                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#e5e5e5] placeholder-[#6b7280] text-sm transition-all"
+                    />
                   </div>
-                ) : (
-                  <>
-                    <Upload className="w-10 h-10 mx-auto mb-3 text-gray-500" />
-                    <p className="text-sm text-gray-400 mb-2">
-                      Drag and drop your video here
-                    </p>
-                    <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium cursor-pointer transition-colors">
-                      <Plus className="w-4 h-4" />
-                      Browse Files
-                      <input
-                        type="file"
-                        accept="video/*"
-                        className="hidden"
-                        onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])}
-                      />
-                    </label>
-                  </>
-                )}
-              </div>
+                </div>
 
-              {/* Title Input */}
-              <div>
-                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
-                  Video Title
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter video title..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                />
-              </div>
-
-              {/* Description Input */}
-              <div>
-                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
-                  Description (Optional)
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter video description..."
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all resize-none"
-                />
+                {/* Channel Select */}
+                <div>
+                  <label className="block text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">
+                    Channel
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedChannel}
+                      onChange={(e) => setSelectedChannel(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#e5e5e5] text-sm appearance-none cursor-pointer transition-all"
+                    >
+                      {channels.map((ch) => (
+                        <option key={ch.id} value={ch.id}>
+                          {ch.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b7280] pointer-events-none" />
+                  </div>
+                </div>
               </div>
 
               {/* Submit Button */}
               <button
                 onClick={startProcessing}
                 disabled={!file || !title || appState === "uploading"}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-purple-500/25 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-lg bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
               >
                 {appState === "uploading" ? (
                   <>
@@ -901,27 +766,125 @@ export default function PrognotStudio() {
                   </>
                 )}
               </button>
+
+              {/* Recent Jobs Section */}
+              {historyJobs.length > 0 && (
+                <div className="card p-5">
+                  <h3 className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-4">Recent Jobs</h3>
+                  <div className="space-y-2">
+                    {historyJobs.slice(0, 3).map((job) => (
+                      <div
+                        key={job.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-[#141414] hover:bg-[#1a1a1a] transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-4 h-4 text-[#6b7280]" />
+                          <span className="text-sm text-[#e5e5e5]">{job.video_title}</span>
+                        </div>
+                        <StatusBadge status={job.status} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* LIBRARY PAGE */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {activePage === "library" && (
+            <div className="space-y-6 animate-fadeIn">
+              <h1 className="text-2xl font-bold text-white">Clip Library</h1>
+
+              {clips.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {clips.map((clip, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedClip(clip)}
+                      className="group card overflow-hidden text-left"
+                    >
+                      <div className="relative aspect-video bg-[#141414]">
+                        <video
+                          src={backendUrl(clip.path)}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                            <Play className="w-5 h-5 text-white fill-white" />
+                          </div>
+                        </div>
+                        <div className="absolute top-2 right-2">
+                          <span className="text-xs font-medium text-white bg-[#7c3aed] px-2 py-0.5 rounded">
+                            {clip.score}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <p className="text-sm text-[#e5e5e5] line-clamp-2">{clip.hook}</p>
+                        <p className="text-xs text-[#6b7280] mt-1">Clip #{clip.index + 1}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="card p-12 flex flex-col items-center justify-center">
+                  <Film className="w-12 h-12 mb-4 text-[#6b7280]" />
+                  <p className="text-[#6b7280] mb-4">No clips yet</p>
+                  <button
+                    onClick={() => setActivePage("newjob")}
+                    className="text-white hover:text-[#e5e5e5] transition-colors flex items-center gap-1"
+                  >
+                    Create your first clip <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* OTHER PAGES (Placeholder) */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {(activePage === "performance" || activePage === "memory" || activePage === "settings") && (
+            <div className="space-y-6 animate-fadeIn">
+              <h1 className="text-2xl font-bold text-white">
+                {activePage === "performance" && "Performance"}
+                {activePage === "memory" && "Channel Memory"}
+                {activePage === "settings" && "Channel Settings"}
+              </h1>
+              <div className="card p-12 flex flex-col items-center justify-center">
+                <div className="w-12 h-12 mb-4 rounded-lg bg-[#141414] flex items-center justify-center">
+                  {activePage === "performance" && <BarChart3 className="w-6 h-6 text-[#6b7280]" />}
+                  {activePage === "memory" && <Brain className="w-6 h-6 text-[#6b7280]" />}
+                  {activePage === "settings" && <Settings className="w-6 h-6 text-[#6b7280]" />}
+                </div>
+                <p className="text-[#6b7280]">Coming soon</p>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </main>
 
       {/* ── CLIP DETAIL MODAL ────────────────────────────────────────────────── */}
       {selectedClip && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/80"
             onClick={() => setSelectedClip(null)}
           />
-          <div className="relative w-full max-w-5xl max-h-[90vh] bg-[#0d0d14] rounded-2xl border border-white/10 overflow-hidden animate-scaleIn">
-            <div className="flex items-center justify-between p-4 border-b border-white/5">
+          <div className="relative w-full max-w-5xl max-h-[90vh] bg-[#0d0d0d] rounded-lg border border-[rgba(255,255,255,0.06)] overflow-hidden animate-scaleIn">
+            <div className="flex items-center justify-between p-4 border-b border-[rgba(255,255,255,0.06)]">
               <div className="flex items-center gap-3">
-                <ViralityBadge score={selectedClip.score} />
-                {selectedClip.rag_reference_used && <DnaBadge />}
+                <span className="text-sm font-medium text-white bg-[#7c3aed] px-2 py-0.5 rounded">
+                  Score: {selectedClip.score}
+                </span>
               </div>
               <button
                 onClick={() => setSelectedClip(null)}
-                className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                className="p-2 rounded hover:bg-[#141414] text-[#6b7280] hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -938,83 +901,60 @@ export default function PrognotStudio() {
               </div>
 
               {/* Details */}
-              <div className="p-6 space-y-6 overflow-y-auto">
-                {/* Viral Score Ring */}
-                <div className="flex items-center gap-6">
-                  <CircularProgress value={selectedClip.score} size={100} strokeWidth={8} />
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Virality Score</p>
-                    <p className="text-2xl font-bold text-white">{selectedClip.score}/100</p>
-                    <p className="text-xs text-gray-400 mt-1">Top {100 - selectedClip.score}% potential</p>
-                  </div>
-                </div>
-
+              <div className="p-6 space-y-5 overflow-y-auto">
                 {/* Hook */}
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Hook</p>
-                  <p className="text-white font-medium">{selectedClip.hook}</p>
+                  <p className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">Hook</p>
+                  <p className="text-[#e5e5e5]">{selectedClip.hook}</p>
                 </div>
 
                 {/* Why Selected */}
                 {selectedClip.why_selected && (
                   <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Why Selected</p>
-                    <p className="text-sm text-gray-300">{selectedClip.why_selected}</p>
+                    <p className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">Why Selected</p>
+                    <p className="text-[#e5e5e5] text-sm">{selectedClip.why_selected}</p>
                   </div>
                 )}
 
                 {/* Psychological Trigger */}
                 {selectedClip.psychological_trigger && (
                   <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Psychological Trigger</p>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/20 text-purple-400 text-sm">
-                      <Brain className="w-4 h-4" />
+                    <p className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">Psychological Trigger</p>
+                    <span className="inline-block px-2 py-1 rounded bg-[#141414] text-sm text-[#e5e5e5]">
                       {selectedClip.psychological_trigger}
                     </span>
                   </div>
                 )}
 
-                {/* RAG Reference */}
-                {selectedClip.rag_reference_used && (
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">DNA Reference</p>
-                    <blockquote className="pl-4 border-l-2 border-cyan-500 text-sm text-gray-300 italic">
-                      {selectedClip.rag_reference_used}
-                    </blockquote>
-                  </div>
-                )}
-
-                {/* Suggested Content */}
+                {/* Suggested Title */}
                 {selectedClip.suggested_title && (
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Suggested Title</p>
+                    <p className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">Suggested Title</p>
+                    <div className="flex items-start gap-2">
+                      <p className="text-[#e5e5e5] text-sm flex-1">{selectedClip.suggested_title}</p>
                       <CopyButton text={selectedClip.suggested_title} />
                     </div>
-                    <p className="text-sm text-white bg-white/5 p-3 rounded-lg">{selectedClip.suggested_title}</p>
                   </div>
                 )}
 
+                {/* Hashtags */}
                 {selectedClip.suggested_hashtags && (
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Hashtags</p>
+                    <p className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">Hashtags</p>
+                    <div className="flex items-start gap-2">
+                      <p className="text-[#e5e5e5] text-sm flex-1">{selectedClip.suggested_hashtags}</p>
                       <CopyButton text={selectedClip.suggested_hashtags} />
                     </div>
-                    <p className="text-sm text-cyan-400">{selectedClip.suggested_hashtags}</p>
                   </div>
                 )}
 
                 {/* Transcript */}
                 {selectedClip.transcript_excerpt && (
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Transcript</p>
-                      <CopyButton text={selectedClip.transcript_excerpt} />
+                    <p className="text-[13px] uppercase tracking-wider text-[#6b7280] mb-2">Transcript</p>
+                    <div className="p-3 rounded-lg bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+                      <p className="text-sm text-[#e5e5e5] whitespace-pre-wrap">{selectedClip.transcript_excerpt}</p>
                     </div>
-                    <p className="text-sm text-gray-400 bg-white/5 p-3 rounded-lg font-mono">
-                      {selectedClip.transcript_excerpt}
-                    </p>
                   </div>
                 )}
 
@@ -1022,9 +962,9 @@ export default function PrognotStudio() {
                 <a
                   href={backendUrl(selectedClip.path)}
                   download
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/25 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium transition-colors"
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className="w-4 h-4" />
                   Download Clip
                 </a>
               </div>
