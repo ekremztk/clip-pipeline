@@ -93,11 +93,24 @@ export default function NewJobPage() {
             setTitle("");
             setGuestName("");
 
-            // Switch back to dashboard to see progress
-            router.push("/dashboard");
-        } catch (err) {
+            // Handle possible job statuses
+            switch (data.status) {
+                case 'queued':
+                case 'processing':
+                    router.push('/dashboard');
+                    break;
+                case 'awaiting_speaker_confirm':
+                    router.push(`/dashboard/speakers/${data.id}`);
+                    break;
+                case 'failed':
+                    setSubmitError('Pipeline failed. Please try again.');
+                    break;
+                default:
+                    router.push('/dashboard');
+            }
+        } catch (err: any) {
             console.error(err);
-            setSubmitError("Failed to start processing. Please try again.");
+            setSubmitError(err.message || "Failed to start processing. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

@@ -163,19 +163,41 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_data, visual_events, humor_moments, job_id)
                 elif step_number == 10:
                     from app.pipeline.steps import s08_clip_finder
-                    video_duration_s = energy_data.get("duration", 0.0) if energy_data else 0.0
+                    
+                    # Ensure channel exists
+                    supabase = get_client()
+                    channel_resp = supabase.table("channels").select("*").eq("id", channel_id).single().execute()
+                    channel = channel_resp.data if channel_resp.data else {}
+                    
+                    video_duration_s = energy_data.get("duration_s", energy_data.get("duration", 0.0)) if energy_data else 0.0
+                    
+                    # S08 - Clip Finder
                     s08_result = s08_clip_finder.run(
                         fused_timeline,
                         labeled_transcript,
                         context,
-                        channel_dna,
+                        channel.get("channel_dna", channel_dna) if channel else channel_dna,
                         video_duration_s,
                         job_id
                     )
-                    selected_clips = s08_result.get("selected_clips", [])
-                    evaluated_clips = s08_result.get("evaluated_clips", [])
+
+                    # Extract clips from result dict
+                    if isinstance(s08_result, dict):
+                        # s08_clip_finder returns keys "selected" and "evaluated"
+                        selected_clips = s08_result.get("selected_clips", s08_result.get("selected", []))
+                        evaluated_clips = s08_result.get("evaluated_clips", s08_result.get("evaluated", []))
+                    elif isinstance(s08_result, list):
+                        selected_clips = s08_result
+                        evaluated_clips = s08_result
+                    else:
+                        selected_clips = []
+                        evaluated_clips = []
+
+                    print(f"[Orchestrator] S08 returned {len(selected_clips)} selected clips")
+                    
                 elif step_number == 11:
                     from app.pipeline.steps import s09_quality_gate
+                    # S09 - Quality Gate (pass selected_clips)
                     quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)
                 elif step_number == 12:
                     from app.pipeline.steps import s09b_clip_strategy
