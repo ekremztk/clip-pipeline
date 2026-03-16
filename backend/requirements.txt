@@ -2,6 +2,7 @@
 fastapi==0.135.1
 uvicorn==0.41.0
 python-dotenv==1.2.2
+python-multipart
 
 # --- Database & RAG ---
 psycopg2-binary
@@ -10,24 +11,12 @@ supabase
 
 # --- AI & Models ---
 google-genai
-google-cloud-storage
-groq
-openai==2.26.0
+deepgram-sdk
 
 # --- Video & Audio Processing ---
-ffmpeg-python==0.2.0
-scenedetect[opencv]
 librosa
-soundfile>=0.12.1
 soundfile
 numpy
 
 # --- YouTube Tools ---
 yt-dlp>=2026.3.3
-pytubefix>=10.3.8
-
-# --- Modül 2 Hazırlık (Görsel & Edit) ---
-mediapipe
-opencv-python
-reportlab
-python-multipart
