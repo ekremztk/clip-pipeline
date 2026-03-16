@@ -69,19 +69,24 @@ export default function NewJobPage() {
         setSubmitError("");
 
         const formData = new FormData();
-        formData.append("video", file);
+        formData.append("file", file);
         formData.append("title", title);
         if (guestName) formData.append("guest_name", guestName);
         formData.append("channel_id", activeChannelId);
 
         try {
-            // NOTE: Using /upload based on previous API structure
-            const res = await fetch(`${API}/upload`, {
+            const res = await fetch(`${API}/jobs`, {
                 method: "POST",
                 body: formData,
             });
 
-            if (!res.ok) throw new Error("Failed to start job");
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.detail || "Failed to start job");
+            }
+
+            const data = await res.json();
+            if (!data.id) throw new Error("No job ID returned");
 
             // Clear form
             setFile(null);
