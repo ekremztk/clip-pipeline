@@ -155,20 +155,21 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     from app.pipeline.steps import s07c_signal_fusion
                     fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_data, visual_events, humor_moments, job_id)
                 elif step_number == 10:
-                    # TODO: s08_clip_finder
-                    pass
+                    from app.pipeline.steps import s08_clip_finder
+                    # s08_clip_finder expected returns: selected_clips, evaluated_clips
+                    selected_clips, evaluated_clips = s08_clip_finder.run(fused_timeline, labeled_transcript, context, job_id)
                 elif step_number == 11:
-                    # TODO: s09_quality_gate
-                    pass
+                    from app.pipeline.steps import s09_quality_gate
+                    quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)
                 elif step_number == 12:
-                    # TODO: s09b_clip_strategy
-                    pass
+                    from app.pipeline.steps import s09b_clip_strategy
+                    strategy_results = s09b_clip_strategy.run(quality_results, evaluated_clips, channel_dna, job_id)
                 elif step_number == 13:
-                    # TODO: s10_precision_cut
-                    pass
+                    from app.pipeline.steps import s10_precision_cut
+                    cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
                 elif step_number == 14:
-                    # TODO: s11_export
-                    pass
+                    from app.pipeline.steps import s11_export
+                    exported_clips = s11_export.run(cut_results, job_id)
                     
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -197,13 +198,15 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 
         # After all steps complete
         completed_at = datetime.now(timezone.utc).isoformat()
+        clip_count = len(exported_clips) if 'exported_clips' in locals() and exported_clips else 0
         update_job(
             job_id=job_id,
             status=JobStatus.COMPLETED.value,
             progress_pct=100,
             completed_at=completed_at,
             current_step="finished",
-            current_step_number=len(steps)
+            current_step_number=len(steps),
+            clip_count=clip_count
         )
         print(f"[Orchestrator] Job {job_id} pipeline completed successfully.")
         

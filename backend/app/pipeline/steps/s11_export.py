@@ -1,0 +1,97 @@
+import os
+import subprocess
+import traceback
+from app.config import settings
+from app.services.supabase_client import get_client
+
+def run(cut_results: list, job_id: str) -> list:
+    """
+    Step 11: Export
+    This is the final step — produces the highest quality 16:9 MP4 output files.
+    """
+    print(f"[S11] Starting export for {len(cut_results)} clips. Job ID: {job_id}")
+    exported_clips = []
+    
+    supabase = get_client()
+
+    for clip in cut_results:
+        try:
+            input_path = clip.get("video_landscape_path")
+            
+            # 1. Verify video_landscape_path exists and file size > 0
+            if not input_path or not os.path.exists(input_path) or os.path.getsize(input_path) == 0:
+                print(f"[S11] Error: Input video missing or empty for clip {clip.get('clip_index', 'unknown')}. Skipping.")
+                continue
+
+            # 2. Re-encode for maximum quality output
+            base, ext = os.path.splitext(input_path)
+            output_path = f"{base}_final{ext}"
+            
+            print(f"[S11] Re-encoding {input_path} to {output_path}")
+            
+            # FFmpeg command:
+            # ffmpeg -y -i {input_path} -c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k -movflags +faststart -pix_fmt yuv420p {output_path}
+            ffmpeg_cmd = [
+                "ffmpeg", "-y", "-i", input_path,
+                "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+                "-c:a", "aac", "-b:a", "320k",
+                "-movflags", "+faststart",
+                "-pix_fmt", "yuv420p",
+                output_path
+            ]
+            
+            subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+            # 3. Verify output file exists and size > 0
+            if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+                print(f"[S11] Error: Output video missing or empty for clip {clip.get('clip_index', 'unknown')}. Skipping.")
+                continue
+
+            # 4. Update clips table in Supabase
+            clip_data = {
+                "job_id": job_id,
+                "channel_id": clip.get("channel_id", "speedy_cast"),
+                "clip_index": clip.get("posting_order", clip.get("clip_index")),
+                "start_time": clip.get("start_time"),
+                "end_time": clip.get("end_time"),
+                "duration_s": clip.get("duration_s"),
+                "hook_text": clip.get("hook_text"),
+                "content_type": clip.get("content_type"),
+                "guest_name": clip.get("guest_name"),
+                "confidence": clip.get("overall_confidence"),
+                "standalone_score": clip.get("standalone_score"),
+                "hook_score": clip.get("hook_score"),
+                "arc_score": clip.get("arc_score"),
+                "channel_fit_score": clip.get("channel_fit_score"),
+                "thinking_steps": clip.get("thinking_steps", {}),
+                "suggested_title": clip.get("suggested_title", clip.get("hook_text")),
+                "clip_strategy_role": clip.get("clip_strategy_role"),
+                "posting_order": clip.get("posting_order"),
+                "video_landscape_path": output_path,
+                "standalone_result": clip.get("standalone_result"),
+                "quality_status": clip.get("quality_status", "passed")
+            }
+            
+            insert_result = supabase.table("clips").insert(clip_data).execute()
+            
+            if not insert_result.data:
+                print(f"[S11] Error: Failed to insert clip {clip.get('clip_index', 'unknown')} into Supabase.")
+                continue
+                
+            clip_id = insert_result.data[0].get("id")
+            print(f"[S11] Successfully exported and inserted clip {clip.get('clip_index', 'unknown')} with ID {clip_id}")
+            
+            # 5. Add to result
+            exported_clips.append({
+                "clip_id": clip_id,
+                "final_path": output_path,
+                "export_status": "success"
+            })
+            
+        except Exception as e:
+            print(f"[S11] Error processing clip {clip.get('clip_index', 'unknown')}: {e}")
+            traceback.print_exc()
+            continue
+
+    print(f"[S11] Summary: {len(exported_clips)} clips exported successfully.")
+    return exported_clips
