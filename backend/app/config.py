@@ -17,7 +17,7 @@ class Settings:
     
     # Pipeline constants
     MIN_CLIP_DURATION = 15
-    MAX_CLIP_DURATION = 90
+    MAX_CLIP_DURATION = 50
     CLIPS_PER_VIDEO = 7
     FFMPEG_CRF = 18
     FFMPEG_PRESET = "slow"
