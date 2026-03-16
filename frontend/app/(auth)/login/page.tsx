@@ -18,24 +18,29 @@ export default function LoginPage() {
     const [message, setMessage] = useState<string | null>(null);
 
     // Password strength logic
-    const getPasswordStrength = (pass: string) => {
-        let score = 0;
-        if (!pass) return 0;
-        if (pass.length > 8) score += 1;
-        if (/[A-Z]/.test(pass)) score += 1;
-        if (/[0-9]/.test(pass)) score += 1;
-        if (/[^A-Za-z0-9]/.test(pass)) score += 1;
-        return score;
+    const getStrength = (password: string) => {
+        if (password.length === 0) return 0;
+        const hasUpper = /[A-Z]/.test(password);
+        const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+        const hasSpecialOrUpper = hasUpper || hasSpecial;
+
+        if (hasSpecialOrUpper && password.length >= 6) return 4;  // strong (green)
+        if (hasSpecialOrUpper && password.length >= 4) return 3;  // good (yellow)
+        if (password.length >= 8) return 4;  // strong if long enough (green)
+        if (password.length >= 6) return 3;  // medium
+        if (password.length >= 3) return 2;  // weak
+        return 1;  // very weak
     };
 
-    const strength = getPasswordStrength(password);
+    const strength = getStrength(password);
 
     const getStrengthColor = (index: number) => {
         if (strength === 0) return "bg-white/10";
         if (strength === 1) return index === 0 ? "bg-red-500" : "bg-white/10";
         if (strength === 2) return index < 2 ? "bg-orange-500" : "bg-white/10";
         if (strength === 3) return index < 3 ? "bg-yellow-500" : "bg-white/10";
-        return "bg-green-500";
+        if (strength === 4) return index < 4 ? "bg-green-500" : "bg-white/10";
+        return "bg-white/10";
     };
 
     const validateForm = () => {
@@ -173,19 +178,22 @@ export default function LoginPage() {
             </div>
 
             {/* Main Card */}
-            <div className="relative z-10 w-full max-w-[420px] bg-[#0d0d0d]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-10 shadow-2xl animate-fade-in-up">
+            <div
+                className="relative z-10 w-full max-w-[420px] bg-[#0d0d0d]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-2xl animate-fade-in-up"
+                style={{ transition: 'all 0.3s ease' }}
+            >
 
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <div className="flex items-center justify-center gap-1.5 mb-2 tracking-tight">
-                        <span className="text-white text-2xl font-bold">PROGNOT</span>
-                        <span className="text-[#7c3aed] text-2xl font-bold">STUDIO</span>
+                <div className="text-center mb-4 py-4">
+                    <div className="flex items-center justify-center gap-1.5 mb-1 tracking-tight">
+                        <span className="text-white text-xl font-bold">PROGNOT</span>
+                        <span className="text-[#7c3aed] text-xl font-bold">STUDIO</span>
                     </div>
                     <p className="text-[#6b7280] text-sm">AI-powered viral clip extraction</p>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex mb-8 border-b border-white/[0.06]">
+                <div className="flex mb-6 border-b border-white/[0.06]">
                     <button
                         onClick={() => {
                             if (activeTab !== "signin") {
@@ -226,12 +234,12 @@ export default function LoginPage() {
                     {activeTab === "signin" ? (
                         <motion.div
                             key="signin"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
                         >
-                            <form onSubmit={handleSignIn} className="space-y-4">
+                            <form onSubmit={handleSignIn} className="space-y-3">
                                 <div>
                                     <label className="block text-xs font-medium text-[#6b7280] mb-1.5">Email</label>
                                     <input
@@ -239,7 +247,7 @@ export default function LoginPage() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         disabled={loading}
-                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
+                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2 text-sm h-10 text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
                                         placeholder="you@example.com"
                                         required
                                     />
@@ -254,7 +262,7 @@ export default function LoginPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         disabled={loading}
-                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
+                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2 text-sm h-10 text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -267,7 +275,7 @@ export default function LoginPage() {
                                     whileTap={!loading ? { scale: 0.99 } : {}}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full h-[44px] bg-gradient-to-r from-purple-700 to-purple-500 text-white rounded-lg text-sm font-semibold transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+                                    className="w-full h-[40px] bg-gradient-to-r from-purple-700 to-purple-500 text-white rounded-lg text-sm font-semibold transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
                                 >
                                     {loading ? (
                                         <>
@@ -281,12 +289,12 @@ export default function LoginPage() {
                     ) : (
                         <motion.div
                             key="signup"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
                         >
-                            <form onSubmit={handleSignUp} className="space-y-4">
+                            <form onSubmit={handleSignUp} className="space-y-3">
                                 <div>
                                     <label className="block text-xs font-medium text-[#6b7280] mb-1.5">Full Name</label>
                                     <input
@@ -294,7 +302,7 @@ export default function LoginPage() {
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
                                         disabled={loading}
-                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
+                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2 text-sm h-10 text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
                                         placeholder="John Doe"
                                         required
                                     />
@@ -306,7 +314,7 @@ export default function LoginPage() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         disabled={loading}
-                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
+                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2 text-sm h-10 text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
                                         placeholder="you@example.com"
                                         required
                                     />
@@ -318,7 +326,7 @@ export default function LoginPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         disabled={loading}
-                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
+                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2 text-sm h-10 text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
                                         placeholder="••••••••"
                                         required
                                         minLength={8}
@@ -337,7 +345,7 @@ export default function LoginPage() {
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         disabled={loading}
-                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
+                                        className="w-full bg-[#141414] border border-white/[0.08] rounded-lg px-4 py-2 text-sm h-10 text-[#e5e5e5] placeholder-[#6b7280] focus:outline-none focus:border-[#7c3aed] transition-colors disabled:opacity-50"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -365,7 +373,7 @@ export default function LoginPage() {
                                     whileTap={!loading ? { scale: 0.99 } : {}}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full h-[44px] bg-gradient-to-r from-purple-700 to-purple-500 text-white rounded-lg text-sm font-semibold transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+                                    className="w-full h-[40px] bg-gradient-to-r from-purple-700 to-purple-500 text-white rounded-lg text-sm font-semibold transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
                                 >
                                     {loading ? (
                                         <>
@@ -380,7 +388,7 @@ export default function LoginPage() {
                 </AnimatePresence>
 
                 {/* Divider */}
-                <div className="flex items-center gap-3 my-6">
+                <div className="flex items-center gap-3 my-4">
                     <div className="flex-1 h-px bg-white/[0.06]"></div>
                     <span className="text-xs text-[#6b7280]">or</span>
                     <div className="flex-1 h-px bg-white/[0.06]"></div>
@@ -392,7 +400,7 @@ export default function LoginPage() {
                     whileTap={!loading ? { scale: 0.99 } : {}}
                     onClick={handleGoogleSignIn}
                     disabled={loading}
-                    className="w-full h-[44px] bg-[#141414] border border-white/[0.1] text-[#e5e5e5] rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-[40px] bg-[#141414] border border-white/[0.1] text-[#e5e5e5] rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                         <path
