@@ -79,7 +79,7 @@ def update_channel_averages(channel_id: str) -> None:
         supabase = get_client()
         
         # Query clips
-        response = supabase.table("clips").select("views_7d").eq("channel_id", channel_id).eq("feedback_status", "final_7d").not_.is_("views_7d", "null").execute()
+        response = supabase.table("clips").select("views_7d").eq("channel_id", channel_id).eq("feedback_status", "final_7d").not_("views_7d", "is", "null").execute()
         
         clips = response.data
         if not clips:

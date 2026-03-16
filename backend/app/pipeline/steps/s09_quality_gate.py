@@ -11,28 +11,7 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
     print(f"[S09] Starting quality gate for job {job_id} with {len(selected_clips)} clips")
     
     # Pre-process labeled transcript lines for faster lookup
-    # labeled_transcript is a string with lines like "[00:00:15.500] Speaker 1: Hello"
-    # Wait, the instruction says:
-    # "Extract clip transcript from labeled_transcript (lines where timestamp is between recommended_start and recommended_end)"
-    # A generic approach to extract lines between start and end seconds:
     transcript_lines = labeled_transcript.strip().split("\n") if labeled_transcript else []
-    
-    parsed_transcript = []
-    for line in transcript_lines:
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            # Parse timestamp e.g. [00:00:15.500]
-            if line.startswith("[") and "]" in line:
-                ts_str = line[1:line.find("]")]
-                parts = ts_str.split(":")
-                if len(parts) == 3:
-                    h, m, s = parts
-                    total_seconds = int(h) * 3600 + int(m) * 60 + float(s)
-                    parsed_transcript.append({"time": total_seconds, "text": line})
-        except Exception as e:
-            pass # Ignore malformed lines
     
     results = []
     
@@ -41,6 +20,31 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
     fixable_count = 0
     failed_count = 0
     
+    def parse_timestamp(ts: str) -> float:
+        try:
+            parts = ts.strip().split(":")
+            if len(parts) == 3:
+                return int(parts[0]) * 3600 + int(parts[1]) * 60 + float(parts[2])
+            elif len(parts) == 2:
+                return int(parts[0]) * 60 + float(parts[1])
+            else:
+                return float(parts[0])
+        except:
+            return 0.0
+
+    parsed_transcript = []
+    for line in transcript_lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            if line.startswith("[") and "]" in line:
+                ts_str = line[1:line.find("]")]
+                total_seconds = parse_timestamp(ts_str)
+                parsed_transcript.append({"time": total_seconds, "text": line})
+        except Exception as e:
+            pass # Ignore malformed lines
+
     # We need a quick lookup map for evaluated_clips by candidate_id
     eval_map = {c.get("candidate_id"): c for c in evaluated_clips if "candidate_id" in c}
     
@@ -89,8 +93,9 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
             # Extract transcript segment
             clip_transcript_lines = []
             for item in parsed_transcript:
-                if start <= item["time"] <= end:
-                    clip_transcript_lines.append(item["text"])
+                if isinstance(item, dict) and "time" in item and "text" in item:
+                    if start <= item["time"] <= end:
+                        clip_transcript_lines.append(item["text"])
             
             clip_transcript_str = "\n".join(str(x) for x in clip_transcript_lines)
             

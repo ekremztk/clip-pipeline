@@ -10,15 +10,25 @@ def run(audio_path: str, job_id: str) -> dict:
     try:
         result = transcribe(audio_path)
         
-        # Check if the transcription returned an empty transcript
-        if not result or not result.get("transcript"):
-            raise RuntimeError("Transcription returned empty transcript")
-            
-        word_count = len(result.get("words", []))
-        duration = result.get("duration", 0.0)
+        channels = result.get("results", {}).get("channels", [])
+        if not channels:
+            raise RuntimeError("Deepgram returned no channels")
+        alternative = channels[0].get("alternatives", [{}])[0]
+        transcript_text = alternative.get("transcript", "")
+        words = alternative.get("words", [])
+        utterances = result.get("results", {}).get("utterances", [])
+        duration = result.get("metadata", {}).get("duration", 0)
+        
+        word_count = len(words)
         
         print(f"[S02] Transcription completed. Word count: {word_count}, duration: {duration}s")
-        return result
+        return {
+            "transcript": transcript_text,
+            "words": words,
+            "utterances": utterances,
+            "duration": duration,
+            "raw_response": result
+        }
         
     except Exception as e:
         print(f"[S02] Error: {e}")

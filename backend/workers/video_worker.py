@@ -98,11 +98,11 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     labeled_transcript = s04_labeled_transcript.run(transcript_data, confirmed_speaker_map, guest_name)
                 elif step_number == 5:
                     from app.pipeline.steps import s05_energy_map
-                    if os.path.exists(audio_path):
-                        energy_map = s05_energy_map.run(audio_path, job_id)
-                    else:
-                        print(f"[Worker] Audio path {audio_path} not found, gracefully skipping/failing s05 inside logic if needed")
-                        energy_map = s05_energy_map.run(audio_path, job_id)
+                    if not os.path.exists(audio_path):
+                        print(f"[Worker] Audio file missing, re-extracting...")
+                        from app.pipeline.steps import s01_audio_extract
+                        audio_path = s01_audio_extract.run(video_path, job_id)
+                    energy_map = s05_energy_map.run(audio_path, job_id)
                 elif step_number == 6:
                     from app.pipeline.steps import s06_video_analysis
                     visual_events = s06_video_analysis.run(video_path, job_id)
@@ -120,7 +120,17 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_map, visual_events, humor_moments, job_id)
                 elif step_number == 10:
                     from app.pipeline.steps import s08_clip_finder
-                    selected_clips, evaluated_clips = s08_clip_finder.run(fused_timeline, labeled_transcript, context, job_id)
+                    video_duration_s = energy_map.get("duration", 0.0) if energy_map else 0.0
+                    s08_result = s08_clip_finder.run(
+                        fused_timeline,
+                        labeled_transcript,
+                        context,
+                        channel_dna,
+                        video_duration_s,
+                        job_id
+                    )
+                    selected_clips = s08_result.get("selected_clips", [])
+                    evaluated_clips = s08_result.get("evaluated_clips", [])
                 elif step_number == 11:
                     from app.pipeline.steps import s09_quality_gate
                     quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)

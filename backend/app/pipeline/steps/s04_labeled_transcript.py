@@ -30,7 +30,9 @@ def run(transcript_data: dict, speaker_map: dict, guest_name: str | None = None)
                 continue
                 
             speaker_id = str(utt.get("speaker", ""))
-            if not speaker_id and "SPEAKER_" not in speaker_id:
+            if speaker_id is None or speaker_id == "":
+                pass
+            elif "SPEAKER_" not in speaker_id:
                 # Format to SPEAKER_X if it's just an integer
                 speaker_id = f"SPEAKER_{speaker_id}"
                 

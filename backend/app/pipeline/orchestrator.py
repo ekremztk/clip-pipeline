@@ -120,6 +120,21 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 elif step_number == 3:
                     from app.pipeline.steps import s03_speaker_id
                     speaker_data = s03_speaker_id.run(transcript_data, job_id)
+                    
+                    supabase = get_client()
+                    transcript_raw = transcript_data.get("raw_response", {}) if isinstance(transcript_data, dict) else {}
+                    words = transcript_data.get("words", []) if isinstance(transcript_data, dict) else []
+                    s_map = speaker_data.get("speaker_map", {}) if isinstance(speaker_data, dict) else {}
+
+                    supabase.table("transcripts").upsert({
+                        "job_id": job_id,
+                        "raw_response": transcript_raw,
+                        "labeled_transcript": "",
+                        "word_timestamps": words,
+                        "speaker_map": s_map,
+                        "speaker_confirmed": False
+                    }).execute()
+                    
                     update_job(job_id=job_id, status="awaiting_speaker_confirm")
                     # Pipeline pauses here — resumes after /confirm-speakers
                     # For now continue automatically
@@ -148,8 +163,17 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_data, visual_events, humor_moments, job_id)
                 elif step_number == 10:
                     from app.pipeline.steps import s08_clip_finder
-                    # s08_clip_finder expected returns: selected_clips, evaluated_clips
-                    selected_clips, evaluated_clips = s08_clip_finder.run(fused_timeline, labeled_transcript, context, job_id)
+                    video_duration_s = energy_data.get("duration", 0.0) if energy_data else 0.0
+                    s08_result = s08_clip_finder.run(
+                        fused_timeline,
+                        labeled_transcript,
+                        context,
+                        channel_dna,
+                        video_duration_s,
+                        job_id
+                    )
+                    selected_clips = s08_result.get("selected_clips", [])
+                    evaluated_clips = s08_result.get("evaluated_clips", [])
                 elif step_number == 11:
                     from app.pipeline.steps import s09_quality_gate
                     quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)

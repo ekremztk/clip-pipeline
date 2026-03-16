@@ -1,0 +1,3933 @@
+==================== backend/app/config.py ====================
+import os
+from pathlib import Path
+
+class Settings:
+    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+    GCP_PROJECT: str = os.getenv("GCP_PROJECT", "")
+    GCP_LOCATION: str = os.getenv("GCP_LOCATION", "us-central1")
+    GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
+    GEMINI_MODEL_PRO: str = "gemini-2.5-pro"
+    GEMINI_MODEL_FLASH: str = "gemini-2.5-flash"
+    DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    FRONTEND_URL = os.getenv("FRONTEND_URL")
+    
+    # Path variables
+    OUTPUT_DIR = Path("output")
+    UPLOAD_DIR = Path("temp_uploads")
+    
+    # Pipeline constants
+    MIN_CLIP_DURATION = 15
+    MAX_CLIP_DURATION = 50
+    CLIPS_PER_VIDEO = 7
+    FFMPEG_CRF = 18
+    FFMPEG_PRESET = "slow"
+
+settings = Settings()
+
+==================== END backend/app/config.py ====================
+
+==================== backend/app/main.py ====================
+from dotenv import load_dotenv
+
+# Load .env variables at the top
+load_dotenv()
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
+
+from app.config import settings
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create directories on startup if they don't exist
+    settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    yield
+
+from app.api.routes import jobs, clips, speakers, downloads, channels, feedback
+from app.api.websocket import progress
+
+app = FastAPI(
+    title="Prognot Clip Pipeline",
+    lifespan=lifespan
+)
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Ensure OUTPUT_DIR exists before mounting to prevent StaticFiles from throwing RuntimeError
+settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/output", StaticFiles(directory=str(settings.OUTPUT_DIR)), name="output")
+
+app.include_router(jobs.router)
+app.include_router(clips.router)
+app.include_router(speakers.router)
+app.include_router(downloads.router)
+app.include_router(channels.router)
+app.include_router(feedback.router)
+app.include_router(progress.router)
+
+@app.get("/health")
+async def health_check():
+    return {
+        "ok": True,
+        "version": "2.0.0",
+        "environment": settings.ENVIRONMENT
+    }
+
+==================== END backend/app/main.py ====================
+
+==================== backend/app/models/enums.py ====================
+from enum import Enum
+
+class JobStatus(str, Enum):
+    QUEUED = "queued"
+    PROCESSING = "processing"
+    AWAITING_SPEAKER_CONFIRM = "awaiting_speaker_confirm"
+    ANALYZING = "analyzing"
+    CUTTING = "cutting"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    PARTIAL = "partial"
+
+class ContentType(str, Enum):
+    REVELATION = "revelation"
+    DEBATE = "debate"
+    HUMOR = "humor"
+    INSIGHT = "insight"
+    EMOTIONAL = "emotional"
+    CONTROVERSIAL = "controversial"
+    STORYTELLING = "storytelling"
+    CELEBRITY_CONFLICT = "celebrity_conflict"
+    HOT_TAKE = "hot_take"
+    FUNNY_REACTION = "funny_reaction"
+    UNEXPECTED_ANSWER = "unexpected_answer"
+    RELATABLE_MOMENT = "relatable_moment"
+    EDUCATIONAL_INSIGHT = "educational_insight"
+
+class ClipStrategyRole(str, Enum):
+    LAUNCH = "launch"
+    VIRAL = "viral"
+    FAN_SERVICE = "fan_service"
+    CONTEXT_BUILDER = "context_builder"
+
+class FeedbackStatus(str, Enum):
+    PENDING = "pending"
+    PRELIMINARY_48H = "preliminary_48h"
+    FINAL_7D = "final_7d"
+
+class OnboardingStatus(str, Enum):
+    SETUP = "setup"
+    CONNECTING = "connecting"
+    SCANNING = "scanning"
+    ANALYZING = "analyzing"
+    READY = "ready"
+
+class StepStatus(str, Enum):
+    STARTED = "started"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+class SignalPriority(str, Enum):
+    TRIPLE = "TRIPLE"
+    DUAL = "DUAL"
+    SINGLE = "SINGLE"
+
+==================== END backend/app/models/enums.py ====================
+
+==================== backend/app/models/schemas.py ====================
+from typing import Optional, Dict, List
+from datetime import datetime
+from uuid import UUID
+from pydantic import BaseModel, Field
+
+from app.models.enums import (
+    JobStatus, 
+    SignalPriority, 
+    ClipStrategyRole, 
+    ContentType, 
+    StepStatus,
+    FeedbackStatus,
+    OnboardingStatus
+)
+
+class SpeakerInfo(BaseModel):
+    role: str
+    name: Optional[str] = None
+
+class SpeakerConfirmRequest(BaseModel):
+    speaker_map: Dict[str, SpeakerInfo]
+
+class ClipCandidate(BaseModel):
+    candidate_id: int
+    timestamp: str
+    reason: str
+    signal: str
+    strength: int = Field(ge=1, le=10)
+
+class ClipScore(BaseModel):
+    candidate_id: int
+    recommended_start: float
+    recommended_end: float
+    duration_s: float
+    hook_text: str
+    standalone_score: float
+    hook_score: float
+    arc_score: float
+    channel_fit_score: float
+    content_type: str
+    thinking_steps: List[str]
+    needs_context_prefix: bool
+    overall_confidence: float
+
+class FusedSignalEntry(BaseModel):
+    timestamp_start: float
+    timestamp_end: float
+    transcript: str
+    sentiment_score: Optional[float] = None
+    energy_level: Optional[float] = None
+    visual_event: Optional[str] = None
+    humor_type: Optional[str] = None
+    priority: SignalPriority
+    signals_count: int
+
+class JobCreateRequest(BaseModel):
+    video_title: str
+    guest_name: Optional[str] = None
+    channel_id: str = "speedy_cast"
+
+class JobResponse(BaseModel):
+    id: UUID
+    status: JobStatus
+    current_step: Optional[str] = None
+    progress_pct: int
+    clip_count: int
+    error_message: Optional[str] = None
+    created_at: datetime
+
+class ClipResponse(BaseModel):
+    id: UUID
+    clip_index: int
+    hook_text: Optional[str] = None
+    content_type: Optional[str] = None
+    confidence: Optional[float] = None
+    standalone_score: Optional[float] = None
+    hook_score: Optional[float] = None
+    arc_score: Optional[float] = None
+    clip_strategy_role: Optional[str] = None
+    posting_order: Optional[int] = None
+    suggested_title: Optional[str] = None
+    video_landscape_path: Optional[str] = None
+    duration_s: float
+    created_at: datetime
+
+==================== END backend/app/models/schemas.py ====================
+
+==================== backend/app/services/supabase_client.py ====================
+from supabase import create_client, Client
+from app.config import settings
+
+_supabase_client = None
+
+def get_client() -> Client | None:
+    global _supabase_client
+    
+    if _supabase_client is not None:
+        return _supabase_client
+        
+    try:
+        url = settings.SUPABASE_URL
+        key = settings.SUPABASE_SERVICE_KEY
+        
+        if not url or not key:
+            print("[SupabaseClient] Error: SUPABASE_URL or SUPABASE_SERVICE_KEY is missing.")
+            return None
+            
+        _supabase_client = create_client(url, key)
+        print("[SupabaseClient] Successfully connected to Supabase.")
+        return _supabase_client
+    except Exception as e:
+        print(f"[SupabaseClient] Error: {e}")
+        return None
+
+def get_db_url() -> str | None:
+    try:
+        url = settings.DATABASE_URL
+        if not url:
+            print("[SupabaseClient] Error: DATABASE_URL is missing.")
+            return None
+        return url
+    except Exception as e:
+        print(f"[SupabaseClient] Error retrieving DATABASE_URL: {e}")
+        return None
+
+==================== END backend/app/services/supabase_client.py ====================
+
+==================== backend/app/services/storage.py ====================
+import os
+from app.config import settings
+
+OUTPUT_DIR = str(settings.OUTPUT_DIR)
+UPLOAD_DIR = str(settings.UPLOAD_DIR)
+
+def init_dirs() -> None:
+    """Creates OUTPUT_DIR and UPLOAD_DIR if they don't exist."""
+    try:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        print(f"[Storage] Initialized directories: {OUTPUT_DIR}, {UPLOAD_DIR}")
+    except Exception as e:
+        print(f"[Storage] Error initializing directories: {e}")
+
+def save_upload(file_bytes: bytes, filename: str, job_id: str) -> str:
+    """Saves uploaded file to UPLOAD_DIR/{job_id}_{filename}."""
+    try:
+        file_path = os.path.join(UPLOAD_DIR, f"{job_id}_{filename}")
+        with open(file_path, "wb") as f:
+            f.write(file_bytes)
+        print(f"[Storage] Saved upload to {file_path}")
+        return file_path
+    except Exception as e:
+        print(f"[Storage] Error saving upload: {e}")
+        return ""
+
+def get_job_output_dir(job_id: str) -> str:
+    """Creates OUTPUT_DIR/{job_id}/ if not exists and returns the directory path."""
+    try:
+        job_dir = os.path.join(OUTPUT_DIR, job_id)
+        os.makedirs(job_dir, exist_ok=True)
+        print(f"[Storage] Created job output directory: {job_dir}")
+        return job_dir
+    except Exception as e:
+        print(f"[Storage] Error getting job output dir: {e}")
+        return ""
+
+def cleanup_temp_files(*paths: str) -> None:
+    """Deletes each file in paths if it exists, silently ignores missing."""
+    try:
+        for path in paths:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                    print(f"[Storage] Deleted temp file: {path}")
+                except Exception as e:
+                    print(f"[Storage] Error deleting {path}: {e}")
+    except Exception as e:
+        print(f"[Storage] Error in cleanup_temp_files: {e}")
+
+def get_output_url(file_path: str) -> str:
+    """Converts local file path like 'output/abc123/clip_01.mp4' to URL path."""
+    try:
+        normalized_path = file_path.replace("\\", "/")
+        if not normalized_path.startswith("/"):
+            normalized_path = "/" + normalized_path
+        print(f"[Storage] Generated output URL: {normalized_path}")
+        return normalized_path
+    except Exception as e:
+        print(f"[Storage] Error generating output URL: {e}")
+        return ""
+
+==================== END backend/app/services/storage.py ====================
+
+==================== backend/app/services/gemini_client.py ====================
+import json
+import os
+import re
+import time
+import tempfile
+from typing import Dict, Any, Optional
+from google import genai
+from google.genai import types
+from google.genai.errors import APIError
+from app.config import settings
+
+_gemini_client: Optional[genai.Client] = None
+
+def get_gemini_client() -> genai.Client:
+    """Lazy initialization of the Gemini client."""
+    global _gemini_client
+    if _gemini_client is None:
+        try:
+            if settings.GCP_CREDENTIALS_JSON:
+                fd, temp_file_path = tempfile.mkstemp(suffix=".json")
+                with os.fdopen(fd, 'w') as f:
+                    f.write(settings.GCP_CREDENTIALS_JSON)
+                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_file_path
+                
+            _gemini_client = genai.Client(vertexai=True, project=settings.GCP_PROJECT, location=settings.GCP_LOCATION)
+            print(f"[GeminiClient] Vertex AI initialized for project {settings.GCP_PROJECT}")
+        except Exception as e:
+            print(f"[GeminiClient] Error initializing client: {e}")
+            raise
+    return _gemini_client
+
+def _retry_logic(operation_func, *args, **kwargs) -> Any:
+    """
+    Helper to execute an operation with retry logic for rate limits.
+    Max 3 attempts total.
+    1st failure: sleep 30s
+    2nd failure: sleep 60s
+    3rd failure: raise RuntimeError
+    """
+    delays = [30, 60]
+    for attempt in range(3):
+        try:
+            return operation_func(*args, **kwargs)
+        except Exception as e:
+            error_str = str(e)
+            is_rate_limit = False
+            
+            # Check for 429 in Exception (APIError typically)
+            if getattr(e, "code", None) == 429:
+                is_rate_limit = True
+            elif "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                is_rate_limit = True
+                
+            if is_rate_limit and attempt < 2:
+                delay = delays[attempt]
+                print(f"[GeminiClient] Rate limit hit (attempt {attempt + 1}/3). Sleeping for {delay}s...")
+                time.sleep(delay)
+            else:
+                if attempt == 2 and is_rate_limit:
+                    print(f"[GeminiClient] Error: Rate limit exhausted after 3 attempts.")
+                    raise RuntimeError(f"Rate limit exhausted: {e}")
+                
+                print(f"[GeminiClient] Error in operation: {e}")
+                raise
+
+def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: bool = False, model: Optional[str] = None) -> str:
+    """Internal implementation for text and json generation."""
+    client = get_gemini_client()
+    if model is None:
+        model = settings.GEMINI_MODEL_FLASH
+    
+    config_kwargs = {}
+    if system:
+        config_kwargs["system_instruction"] = system
+        
+    if json_mode:
+        config_kwargs["response_mime_type"] = "application/json"
+        
+    config = types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
+    
+    def do_generate() -> str:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=config,
+        )
+        return str(response.text)
+        
+    return str(_retry_logic(do_generate))
+
+def generate(prompt: str, system: Optional[str] = None, model: Optional[str] = None) -> str:
+    """
+    Generate text from a prompt.
+    Retries on 429 (30s, 60s, then raise).
+    """
+    try:
+        return str(_generate_internal(prompt, system=system, json_mode=False, model=model))
+    except Exception as e:
+        print(f"[GeminiClient] Error in generate: {e}")
+        raise
+
+def generate_json(prompt: str, system: Optional[str] = None, model: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Generate JSON from a prompt.
+    Retries on 429 (30s, 60s, then raise).
+    Strips markdown formatting and parses JSON.
+    """
+    try:
+        raw_text = _generate_internal(prompt, system=system, json_mode=True, model=model)
+        if not raw_text:
+            raise ValueError("Empty response received.")
+            
+        # Strip ```json wrappers
+        cleaned = str(raw_text).strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        if cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+            
+        cleaned = cleaned.strip()
+        
+        # Clean control chars
+        cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned)
+        
+        return json.loads(cleaned)
+    except Exception as e:
+        print(f"[GeminiClient] Error in generate_json: {e}")
+        raise ValueError(f"Failed to generate or parse JSON: {e}")
+
+def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 30, delay: int = 3):
+    """Polls a file until its state becomes ACTIVE."""
+    print(f"[GeminiClient] Polling file {file_name} for ACTIVE state...")
+    for attempt in range(max_attempts):
+        try:
+            file_info = client.files.get(name=file_name)
+            state = file_info.state.name if hasattr(file_info.state, "name") else str(file_info.state)
+            
+            if state == "ACTIVE":
+                print(f"[GeminiClient] File {file_name} is ACTIVE.")
+                return True
+            elif state == "FAILED":
+                print(f"[GeminiClient] Error: File {file_name} processing failed.")
+                raise RuntimeError(f"File processing failed for {file_name}")
+                
+            print(f"[GeminiClient] File state is {state}. Waiting {delay}s... ({attempt + 1}/{max_attempts})")
+            time.sleep(delay)
+        except Exception as e:
+            print(f"[GeminiClient] Error polling file {file_name}: {e}")
+            if "not found" in str(e).lower():
+                raise
+            time.sleep(delay)
+            
+    print(f"[GeminiClient] Error: Timeout polling file {file_name} after {max_attempts} attempts.")
+    raise RuntimeError(f"Timeout waiting for file {file_name} to become active")
+
+def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> str:
+    """
+    Uploads a video, waits for processing, and generates text based on it.
+    Deletes the uploaded file afterward.
+    """
+    if model is None:
+        model = settings.GEMINI_MODEL_FLASH
+    uploaded_file = None
+    try:
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Video file not found: {video_path}")
+            
+        client = get_gemini_client()
+        
+        print(f"[GeminiClient] Uploading video {video_path}...")
+        uploaded_file = client.files.upload(file=video_path)
+        print(f"[GeminiClient] Uploaded as {uploaded_file.name}")
+        
+        _poll_file_active(client, uploaded_file.name)
+        
+        def do_generate() -> str:
+            response = client.models.generate_content(
+                model=model,
+                contents=[uploaded_file, prompt]
+            )
+            return str(response.text)
+            
+        print(f"[GeminiClient] Generating content for video...")
+        result = _retry_logic(do_generate)
+        return str(result)
+        
+    except Exception as e:
+        print(f"[GeminiClient] Error in analyze_video: {e}")
+        raise RuntimeError(f"analyze_video failed: {e}")
+    finally:
+        if uploaded_file:
+            try:
+                print(f"[GeminiClient] Deleting uploaded file {uploaded_file.name}...")
+                client = get_gemini_client()
+                client.files.delete(name=uploaded_file.name)
+            except Exception as e:
+                print(f"[GeminiClient] Error deleting file {uploaded_file.name}: {e}")
+
+def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> str:
+    """
+    Analyzes an audio file.
+    If < 20MB, uses inline bytes.
+    If >= 20MB, uploads via Files API and polls.
+    Deletes uploaded file if used.
+    """
+    if model is None:
+        model = settings.GEMINI_MODEL_FLASH
+    uploaded_file = None
+    try:
+        if not os.path.exists(audio_path):
+            raise FileNotFoundError(f"Audio file not found: {audio_path}")
+            
+        file_size_mb = os.path.getsize(audio_path) / (1024 * 1024)
+        client = get_gemini_client()
+        
+        if file_size_mb < 20:
+            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB < 20MB. Using inline bytes.")
+            with open(audio_path, "rb") as f:
+                audio_bytes = f.read()
+            
+            # Use the correct MIME type based on extension, assuming common audio formats
+            mime_type = "audio/mp3"
+            ext = os.path.splitext(audio_path)[1].lower()
+            if ext == ".m4a":
+                mime_type = "audio/m4a"
+            elif ext == ".wav":
+                mime_type = "audio/wav"
+            elif ext == ".ogg":
+                mime_type = "audio/ogg"
+            elif ext == ".mp4":
+                mime_type = "audio/mp4"
+                
+            audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
+            
+            def do_generate_inline() -> str:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=[audio_part, prompt]
+                )
+                return str(response.text)
+                
+            print(f"[GeminiClient] Generating content for inline audio...")
+            result = _retry_logic(do_generate_inline)
+            return str(result)
+            
+        else:
+            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Using Files API.")
+            uploaded_file = client.files.upload(file=audio_path)
+            print(f"[GeminiClient] Uploaded as {uploaded_file.name}")
+            
+            _poll_file_active(client, uploaded_file.name)
+            
+            def do_generate_uploaded() -> str:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=[uploaded_file, prompt]
+                )
+                return str(response.text)
+                
+            print(f"[GeminiClient] Generating content for uploaded audio...")
+            result = _retry_logic(do_generate_uploaded)
+            return str(result)
+            
+    except Exception as e:
+        print(f"[GeminiClient] Error in analyze_audio: {e}")
+        raise RuntimeError(f"analyze_audio failed: {e}")
+    finally:
+        if uploaded_file:
+            try:
+                print(f"[GeminiClient] Deleting uploaded file {uploaded_file.name}...")
+                client = get_gemini_client()
+                client.files.delete(name=uploaded_file.name)
+            except Exception as e:
+                print(f"[GeminiClient] Error deleting file {uploaded_file.name}: {e}")
+
+def embed_content(text: str) -> list[float]:
+    """
+    Generate an embedding vector for the given text using Gemini's text embedding model.
+    Retries on 429 (30s, 60s, then raise).
+    """
+    try:
+        client = get_gemini_client()
+        
+        def do_embed() -> list[float]:
+            result = client.models.embed_content(
+                model="text-embedding-004",
+                contents=text
+            )
+            return result.embeddings[0].values
+            
+        return _retry_logic(do_embed)
+    except Exception as e:
+        print(f"[GeminiClient] Error in embed_content: {e}")
+        raise ValueError(f"Failed to generate embedding: {e}")
+
+==================== END backend/app/services/gemini_client.py ====================
+
+==================== backend/app/services/deepgram_client.py ====================
+from app.config import settings
+import httpx
+
+def transcribe(audio_path: str) -> dict:
+    try:
+        with open(audio_path, "rb") as f:
+            audio_data = f.read()
+
+        headers = {
+            "Authorization": f"Token {settings.DEEPGRAM_API_KEY}",
+            "Content-Type": "audio/mp4"
+        }
+
+        params = {
+            "model": "nova-2",
+            "diarize": "true",
+            "sentiment": "true",
+            "punctuate": "true",
+            "utterances": "true",
+            "words": "true",
+            "language": "en"
+        }
+
+        response = httpx.post(
+            "https://api.deepgram.com/v1/listen",
+            headers=headers,
+            params=params,
+            content=audio_data,
+            timeout=300.0
+        )
+
+        response.raise_for_status()
+        return response.json()
+
+    except Exception as e:
+        print(f"[Deepgram] Transcription failed: {e}")
+        raise
+
+==================== END backend/app/services/deepgram_client.py ====================
+
+==================== backend/app/pipeline/orchestrator.py ====================
+from datetime import datetime, timezone
+import time
+import os
+import traceback
+
+from app.config import settings
+from app.services.supabase_client import get_client
+from app.models.enums import JobStatus, StepStatus
+from app.services import storage
+
+
+def update_job(job_id: str, **kwargs) -> None:
+    """
+    Updates jobs table in Supabase with given kwargs.
+    Accepted fields: status, current_step, current_step_number, progress_pct, 
+    clip_count, error_message, started_at, completed_at
+    """
+    try:
+        supabase = get_client()
+        valid_fields = {
+            "status", "current_step", "current_step_number", "progress_pct",
+            "clip_count", "error_message", "started_at", "completed_at"
+        }
+        update_data = {k: v for k, v in kwargs.items() if k in valid_fields}
+        
+        if not update_data:
+            return
+            
+        supabase.table("jobs").update(update_data).eq("id", job_id).execute()
+        print(f"[Orchestrator] Updated job {job_id} with {update_data}")
+    except Exception as e:
+        print(f"[Orchestrator] Error updating job {job_id}: {e}")
+
+
+from app.utils.audit_logger import log_pipeline_step
+
+def log_step(job_id: str, step_number: int, step_name: str, status: str,
+             input_summary: dict | None = None, output_summary: dict | None = None,
+             duration_ms: int | None = None, error_message: str | None = None) -> None:
+    """
+    Inserts a row into pipeline_audit_log table.
+    Delegates to audit_logger.py
+    """
+    log_pipeline_step(
+        job_id=job_id,
+        step_number=step_number,
+        step_name=step_name,
+        status=status,
+        input_summary=input_summary,
+        output_summary=output_summary,
+        duration_ms=duration_ms,
+        error_message=error_message
+    )
+
+
+def run_pipeline(job_id: str, video_path: str, video_title: str,
+                 guest_name: str | None = None, channel_id: str = "speedy_cast") -> None:
+    """
+    Main pipeline function called by the worker.
+    Runs steps exactly as defined.
+    """
+    audio_path = None
+    try:
+        started_at = datetime.now(timezone.utc).isoformat()
+        update_job(
+            job_id=job_id,
+            status=JobStatus.PROCESSING.value,
+            started_at=started_at,
+            current_step_number=0,
+            progress_pct=0,
+            current_step="initializing"
+        )
+        
+        steps = [
+            (1, "s01_audio_extract", 10),
+            (2, "s02_transcribe", 20),
+            (3, "s03_speaker_id", 28),
+            (4, "s04_labeled_transcript", 36),
+            (5, "s05_energy_map", 44),
+            (6, "s06_video_analysis", 52),
+            (7, "s07_context_build", 58),
+            (8, "s07b_humor_map", 64),
+            (9, "s07c_signal_fusion", 70),
+            (10, "s08_clip_finder", 80),
+            (11, "s09_quality_gate", 88),
+            (12, "s09b_clip_strategy", 92),
+            (13, "s10_precision_cut", 96),
+            (14, "s11_export", 100)
+        ]
+        
+        # State variables to pass between steps
+        transcript_data = None
+        speaker_data = None
+        labeled_transcript = None
+        energy_data = None
+        visual_events = None
+        context = None
+        channel_dna = {}
+        humor_moments = None
+        fused_timeline = None
+        
+        for step_number, step_name, progress_pct in steps:
+            step_start_time = time.time()
+            log_step(job_id, step_number, step_name, StepStatus.STARTED.value)
+            
+            update_job(
+                job_id=job_id,
+                current_step=step_name,
+                current_step_number=step_number,
+                progress_pct=progress_pct
+            )
+            
+            try:
+                if step_number == 1:
+                    from app.pipeline.steps import s01_audio_extract
+                    audio_path = s01_audio_extract.run(video_path, job_id)
+                elif step_number == 2:
+                    from app.pipeline.steps import s02_transcribe
+                    transcript_data = s02_transcribe.run(audio_path, job_id)
+                elif step_number == 3:
+                    from app.pipeline.steps import s03_speaker_id
+                    speaker_data = s03_speaker_id.run(transcript_data, job_id)
+                    update_job(job_id=job_id, status="awaiting_speaker_confirm")
+                    # Pipeline pauses here — resumes after /confirm-speakers
+                    # For now continue automatically
+                elif step_number == 4:
+                    from app.pipeline.steps import s04_labeled_transcript
+                    predicted_map = speaker_data.get("predicted_map", {}) if speaker_data else {}
+                    labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, guest_name)
+                elif step_number == 5:
+                    from app.pipeline.steps import s05_energy_map
+                    energy_data = s05_energy_map.run(audio_path, job_id)
+                elif step_number == 6:
+                    from app.pipeline.steps import s06_video_analysis
+                    visual_events = s06_video_analysis.run(video_path, job_id)
+                elif step_number == 7:
+                    from app.pipeline.steps import s07_context_build
+                    context = s07_context_build.run(guest_name, channel_id, video_title)
+                elif step_number == 8:
+                    from app.pipeline.steps import s07b_humor_map
+                    supabase = get_client()
+                    channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
+                    if channel_res.data and len(channel_res.data) > 0:
+                        channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    humor_moments = s07b_humor_map.run(labeled_transcript, channel_dna, job_id)
+                elif step_number == 9:
+                    from app.pipeline.steps import s07c_signal_fusion
+                    fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_data, visual_events, humor_moments, job_id)
+                elif step_number == 10:
+                    from app.pipeline.steps import s08_clip_finder
+                    # s08_clip_finder expected returns: selected_clips, evaluated_clips
+                    selected_clips, evaluated_clips = s08_clip_finder.run(fused_timeline, labeled_transcript, context, job_id)
+                elif step_number == 11:
+                    from app.pipeline.steps import s09_quality_gate
+                    quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)
+                elif step_number == 12:
+                    from app.pipeline.steps import s09b_clip_strategy
+                    strategy_results = s09b_clip_strategy.run(quality_results, evaluated_clips, channel_dna, job_id)
+                elif step_number == 13:
+                    from app.pipeline.steps import s10_precision_cut
+                    cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
+                elif step_number == 14:
+                    from app.pipeline.steps import s11_export
+                    exported_clips = s11_export.run(cut_results, job_id)
+                    
+                duration_ms = int((time.time() - step_start_time) * 1000)
+                log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
+                
+            except Exception as e:
+                error_msg = str(e)
+                print(f"[Orchestrator] Error in step {step_name}: {error_msg}")
+                traceback.print_exc()
+                
+                duration_ms = int((time.time() - step_start_time) * 1000)
+                log_step(
+                    job_id=job_id,
+                    step_number=step_number,
+                    step_name=step_name,
+                    status=StepStatus.FAILED.value,
+                    duration_ms=duration_ms,
+                    error_message=error_msg
+                )
+                
+                update_job(
+                    job_id=job_id,
+                    status=JobStatus.FAILED.value,
+                    error_message=f"Step {step_name} failed: {error_msg}"
+                )
+                return  # Return early on any step failure
+                
+        # After all steps complete
+        completed_at = datetime.now(timezone.utc).isoformat()
+        clip_count = len(exported_clips) if 'exported_clips' in locals() and exported_clips else 0
+        update_job(
+            job_id=job_id,
+            status=JobStatus.COMPLETED.value,
+            progress_pct=100,
+            completed_at=completed_at,
+            current_step="finished",
+            current_step_number=len(steps),
+            clip_count=clip_count
+        )
+        print(f"[Orchestrator] Job {job_id} pipeline completed successfully.")
+        
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[Orchestrator] Pipeline execution failed unexpectedly: {error_msg}")
+        traceback.print_exc()
+        update_job(
+            job_id=job_id,
+            status=JobStatus.FAILED.value,
+            error_message=f"Pipeline critical failure: {error_msg}"
+        )
+    finally:
+        for path in [audio_path, video_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                    print(f"[Orchestrator] Cleaned up {path}")
+                except Exception as e:
+                    print(f"[Orchestrator] Error cleaning up {path}: {e}")
+
+==================== END backend/app/pipeline/orchestrator.py ====================
+
+==================== backend/app/pipeline/steps/s01_audio_extract.py ====================
+import subprocess
+import os
+
+def run(video_path: str, job_id: str) -> str:
+    """
+    Extracts audio from a video file using FFmpeg.
+    Returns the path to the extracted audio file.
+    """
+    audio_path = f"temp_{job_id}.m4a"
+    print(f"[S01] Starting audio extraction from {video_path} to {audio_path}")
+    
+    command = [
+        "ffmpeg",
+        "-y",
+        "-i", video_path,
+        "-vn",
+        "-c:a", "aac",
+        "-b:a", "128k",
+        "-movflags", "+faststart",
+        audio_path
+    ]
+    
+    try:
+        process = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        if process.returncode != 0:
+            error_msg = f"[S01] FFmpeg failed with exit code {process.returncode}:\n{process.stderr}"
+            print(error_msg)
+            raise RuntimeError(error_msg)
+            
+        if not os.path.exists(audio_path):
+            error_msg = f"[S01] FFmpeg succeeded but output file {audio_path} not found."
+            print(error_msg)
+            raise RuntimeError(error_msg)
+            
+        print(f"[S01] Successfully extracted audio to {audio_path}")
+        return audio_path
+        
+    except Exception as e:
+        print(f"[S01] Error during audio extraction: {e}")
+        raise
+
+==================== END backend/app/pipeline/steps/s01_audio_extract.py ====================
+
+==================== backend/app/pipeline/steps/s02_transcribe.py ====================
+from app.services.deepgram_client import transcribe
+
+def run(audio_path: str, job_id: str) -> dict:
+    """
+    Step 02: Transcribe
+    Calls Deepgram to transcribe the audio file and returns structured data.
+    """
+    print(f"[S02] Starting transcription for job {job_id}, audio: {audio_path}")
+    
+    try:
+        result = transcribe(audio_path)
+        
+        # Check if the transcription returned an empty transcript
+        if not result or not result.get("transcript"):
+            raise RuntimeError("Transcription returned empty transcript")
+            
+        word_count = len(result.get("words", []))
+        duration = result.get("duration", 0.0)
+        
+        print(f"[S02] Transcription completed. Word count: {word_count}, duration: {duration}s")
+        return result
+        
+    except Exception as e:
+        print(f"[S02] Error: {e}")
+        raise
+
+==================== END backend/app/pipeline/steps/s02_transcribe.py ====================
+
+==================== backend/app/pipeline/steps/s03_speaker_id.py ====================
+def run(transcript_data: dict, job_id: str) -> dict:
+    """
+    Step 03: Speaker ID
+    Analyzes diarization output to identify who is the host and who is the guest.
+    """
+    print(f"[S03] Starting speaker identification for job {job_id}")
+    
+    try:
+        utterances = transcript_data.get("utterances", [])
+        
+        speaker_stats = {}
+        for utterance in utterances:
+            speaker = utterance.get("speaker", "UNKNOWN")
+            start = utterance.get("start", 0.0)
+            end = utterance.get("end", 0.0)
+            duration = end - start
+            
+            if speaker not in speaker_stats:
+                speaker_stats[speaker] = {"duration": 0.0, "utterance_count": 0}
+            
+            speaker_stats[speaker]["duration"] += duration
+            speaker_stats[speaker]["utterance_count"] += 1
+            
+        print(f"[S03] Found {len(speaker_stats)} speakers")
+        
+        predicted_map = {}
+        needs_confirmation = True
+        
+        if len(speaker_stats) == 1:
+            speaker = list(speaker_stats.keys())[0]
+            predicted_map[speaker] = {"role": "guest", "name": None}
+            needs_confirmation = False
+            print(f"[S03] Only one speaker found, assigned as guest")
+        elif len(speaker_stats) >= 2:
+            # Sort speakers by duration, descending
+            sorted_speakers = sorted(speaker_stats.items(), key=lambda x: x[1]["duration"], reverse=True)
+            
+            # The speaker with MORE duration is guest, LESS duration is host
+            # sorted_speakers[0] is the one with the most duration
+            guest_speaker = sorted_speakers[0][0]
+            predicted_map[guest_speaker] = {"role": "guest", "name": None}
+            
+            host_speaker = sorted_speakers[1][0]
+            predicted_map[host_speaker] = {"role": "host", "name": None}
+            
+            # For any remaining speakers, assign them as unknown roles
+            for i in range(2, len(sorted_speakers)):
+                speaker = sorted_speakers[i][0]
+                predicted_map[speaker] = {"role": "unknown", "name": None}
+                
+            print(f"[S03] Heuristic prediction: {guest_speaker} = guest, {host_speaker} = host")
+            
+        return {
+            "speaker_stats": speaker_stats,
+            "predicted_map": predicted_map,
+            "needs_confirmation": needs_confirmation
+        }
+        
+    except Exception as e:
+        print(f"[S03] Error: {e}")
+        raise
+
+==================== END backend/app/pipeline/steps/s03_speaker_id.py ====================
+
+==================== backend/app/pipeline/steps/s04_labeled_transcript.py ====================
+def run(transcript_data: dict, speaker_map: dict, guest_name: str | None = None) -> str:
+    """
+    s04: Merges transcript data with speaker map to create a labeled transcript.
+    
+    Args:
+        transcript_data: dict from s02 containing 'words' or 'utterances' with text and timestamps
+        speaker_map: dict mapping speaker IDs to roles and names (e.g., {"SPEAKER_0": {"role": "guest", "name": "Elon Musk"}})
+        guest_name: optional string to use for guest speaker label
+        
+    Returns:
+        Full labeled transcript as a single string
+    """
+    try:
+        if not transcript_data:
+            raise RuntimeError("transcript_data is empty")
+            
+        # Get utterances from transcript_data
+        utterances = transcript_data.get("utterances", [])
+        if not utterances:
+            # If no utterances, maybe we can try to fall back to words, but usually Deepgram returns utterances.
+            # Let's assume Deepgram format with utterances.
+            raise RuntimeError("No utterances found in transcript_data")
+            
+        labeled_lines = []
+        count = 0
+        
+        for utt in utterances:
+            text = utt.get("transcript", "").strip()
+            if not text:
+                continue
+                
+            speaker_id = str(utt.get("speaker", ""))
+            if not speaker_id and "SPEAKER_" not in speaker_id:
+                # Format to SPEAKER_X if it's just an integer
+                speaker_id = f"SPEAKER_{speaker_id}"
+                
+            # Parse speaker info
+            speaker_info = speaker_map.get(speaker_id, {})
+            role = speaker_info.get("role", "UNKNOWN").upper()
+            name = speaker_info.get("name", "")
+            
+            # Override guest name if provided and role is GUEST
+            if role == "GUEST" and guest_name:
+                name = guest_name
+                
+            # Format speaker label
+            if name:
+                speaker_label = f"{role} ({name})"
+            else:
+                speaker_label = role
+                
+            # Format timestamp MM:SS.s
+            start_sec = float(utt.get("start", 0.0))
+            minutes = int(start_sec // 60)
+            seconds = start_sec % 60
+            timestamp = f"[{minutes:02d}:{seconds:04.1f}]"
+            
+            # Format sentiment
+            sentiment_str = ""
+            sentiment_score = utt.get("sentiment", 0.0)
+            if sentiment_score is not None:
+                try:
+                    score = float(sentiment_score)
+                    if abs(score) > 0.3:
+                        sentiment_str = f" [sentiment:{score:.2f}]"
+                except (ValueError, TypeError):
+                    pass
+                    
+            line = f"{timestamp} {speaker_label}:{sentiment_str} {text}"
+            labeled_lines.append(line)
+            count += 1
+            
+        result_str = "\n".join(labeled_lines)
+        print(f"[S04] Generated labeled transcript with {count} utterances")
+        return result_str
+        
+    except RuntimeError as re:
+        raise re
+    except Exception as e:
+        print(f"[S04] Error: {e}")
+        # Reraise so orchestrator knows it failed, or return empty string?
+        # Requirements say: "Full try/except, raises RuntimeError if transcript_data is empty"
+        # We should probably raise so the pipeline step fails properly.
+        raise RuntimeError(f"Failed to generate labeled transcript: {e}")
+
+==================== END backend/app/pipeline/steps/s04_labeled_transcript.py ====================
+
+==================== backend/app/pipeline/steps/s05_energy_map.py ====================
+import os
+import gc
+import subprocess
+import numpy as np
+
+try:
+    import librosa
+    LIBROSA_AVAILABLE = True
+except ImportError:
+    LIBROSA_AVAILABLE = False
+    print("[S05] Warning: Librosa not installed.")
+
+def run(audio_path: str, job_id: str) -> dict:
+    """
+    Analyzes audio energy using Librosa RMS.
+    
+    Returns:
+    {
+        "energy_peaks": [{"time": float, "energy": float, "type": str}],
+        "silence_zones": [{"start": float, "end": float, "duration": float}],
+        "windows": [{"start": float, "end": float, "rms_mean": float, "rms_max": float, "rms_spike": bool}],
+        "duration": float,
+        "summary": str
+    }
+    """
+    if not LIBROSA_AVAILABLE:
+        print(f"[S05] Librosa not available, skipping energy map for job {job_id}")
+        return _empty_result()
+
+    print(f"[S05] Starting audio energy analysis for {job_id}...")
+
+    # Temp WAV file for Librosa (M4A causes issues with soundfile)
+    temp_wav = f"{audio_path}_temp_{job_id}.wav"
+    
+    try:
+        # 1. Convert to 16kHz Mono WAV using FFmpeg
+        subprocess.run([
+            "ffmpeg", "-y", "-i", audio_path, 
+            "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", 
+            temp_wav
+        ], capture_output=True, check=True)
+        
+        # 2. Get duration
+        sr = 16000
+        try:
+            duration = librosa.get_duration(path=temp_wav)
+        except TypeError:
+            # For older librosa versions
+            duration = librosa.get_duration(filename=temp_wav)
+            
+        print(f"[S05] Duration: {duration:.0f}s, Sample rate: {sr}Hz")
+
+        # 3. Calculate RMS Energy
+        frame_length = sr  # 1 second
+        hop_length = sr // 2  # 0.5 second step
+        
+        all_rms = []
+        
+        # Process in blocks if video is > 10 minutes (600s) to avoid memory issues
+        if duration > 600:
+            print("[S05] Audio is longer than 600s, processing in 300s blocks...")
+            block_duration = 300
+            for start_sec in range(0, int(duration) + 1, block_duration):
+                y_block, _ = librosa.load(temp_wav, sr=sr, mono=True, offset=start_sec, duration=block_duration)
+                if len(y_block) == 0:
+                    break
+                rms_block = librosa.feature.rms(y=y_block, frame_length=frame_length, hop_length=hop_length)[0]
+                all_rms.append(rms_block)
+                del y_block
+                gc.collect()
+            
+            if all_rms:
+                rms = np.concatenate(all_rms)
+            else:
+                rms = np.array([])
+        else:
+            y, _ = librosa.load(temp_wav, sr=sr, mono=True)
+            if len(y) > 0:
+                rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
+            else:
+                rms = np.array([])
+            del y
+            gc.collect()
+
+        if len(rms) == 0:
+            print("[S05] Warning: RMS calculation returned empty array.")
+            return _empty_result()
+
+        times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop_length)
+
+        # Normalize RMS (0-1)
+        rms_max_val = rms.max()
+        if rms_max_val > 0:
+            rms_normalized = rms / rms_max_val
+        else:
+            rms_normalized = rms
+
+        # 4. Find Energy Peaks
+        # Find peaks above 85th percentile
+        threshold = np.percentile(rms_normalized, 85)
+        peak_indices = []
+        
+        i = 0
+        while i < len(rms_normalized):
+            if rms_normalized[i] >= threshold:
+                # Find the highest point in this 10-second window
+                window_end = min(i + 20, len(rms_normalized))
+                peak_idx = i + np.argmax(rms_normalized[i:window_end])
+                peak_indices.append(int(peak_idx))
+                i = window_end
+            else:
+                i += 1
+
+        # Get top 10 peaks
+        peak_indices.sort(key=lambda idx: rms_normalized[idx], reverse=True)
+        peak_indices = peak_indices[:10]
+        peak_indices.sort()  # Sort chronologically
+
+        energy_peaks = []
+        for idx in peak_indices:
+            t = float(times[idx])
+            e = float(rms_normalized[idx])
+            energy_peaks.append({
+                "time": round(t, 1),
+                "energy": round(e, 2),
+                "type": _energy_type(e)
+            })
+
+        # 5. Find Silence Zones
+        # Find regions below 15th percentile
+        silence_threshold = np.percentile(rms_normalized, 15)
+        silence_zones = []
+        in_silence = False
+        silence_start = 0.0
+
+        for idx, (t, e) in enumerate(zip(times, rms_normalized)):
+            if e <= silence_threshold and not in_silence:
+                in_silence = True
+                silence_start = float(t)
+            elif e > silence_threshold and in_silence:
+                in_silence = False
+                silence_duration = float(t) - silence_start
+                if silence_duration >= 0.5:  # Minimum 0.5s duration
+                    silence_zones.append({
+                        "start": round(silence_start, 1),
+                        "end": round(float(t), 1),
+                        "duration": round(silence_duration, 1)
+                    })
+        
+        # Also check if it ends in silence
+        if in_silence:
+            t_end = float(times[-1])
+            silence_duration = t_end - silence_start
+            if silence_duration >= 0.5:
+                silence_zones.append({
+                    "start": round(silence_start, 1),
+                    "end": round(t_end, 1),
+                    "duration": round(silence_duration, 1)
+                })
+
+        print(f"[S05] Found {len(energy_peaks)} energy peaks and {len(silence_zones)} silence zones.")
+
+        # 6. Windows (30-second windows)
+        windows = []
+        window_size = 30  # seconds
+        for start_sec in range(0, int(duration), window_size):
+            end_sec = min(start_sec + window_size, float(duration))
+            start_idx = librosa.time_to_frames(start_sec, sr=sr, hop_length=hop_length)
+            end_idx = librosa.time_to_frames(end_sec, sr=sr, hop_length=hop_length)
+            
+            # Get RMS values for this window
+            window_rms = rms_normalized[start_idx:end_idx]
+            
+            if len(window_rms) > 0:
+                mean_val = float(window_rms.mean())
+                max_val = float(window_rms.max())
+                rms_mean_all = float(rms_normalized.mean())
+                windows.append({
+                    "start": float(start_sec),
+                    "end": float(end_sec),
+                    "rms_mean": mean_val,
+                    "rms_max": max_val,
+                    "rms_spike": bool(max_val > rms_mean_all * 1.5)
+                })
+            else:
+                windows.append({
+                    "start": float(start_sec),
+                    "end": float(end_sec),
+                    "rms_mean": 0.0,
+                    "rms_max": 0.0,
+                    "rms_spike": False
+                })
+
+        # 7. Summary text for Gemini
+        summary = _build_summary(energy_peaks, silence_zones, duration)
+
+        return {
+            "energy_peaks": energy_peaks,
+            "silence_zones": silence_zones,
+            "windows": windows,
+            "duration": round(duration, 1),
+            "summary": summary
+        }
+
+    except Exception as e:
+        print(f"[S05] Error during energy analysis: {e}")
+        return _empty_result()
+    
+    finally:
+        if os.path.exists(temp_wav):
+            try:
+                os.remove(temp_wav)
+            except Exception as e:
+                print(f"[S05] Error removing temporary WAV file: {e}")
+
+
+def _energy_type(energy: float) -> str:
+    if energy >= 0.90:
+        return "Very high energy (shouting/laughing)"
+    elif energy >= 0.75:
+        return "High energy (excited)"
+    elif energy >= 0.60:
+        return "Medium-high energy (active speaking)"
+    else:
+        return "Normal energy"
+
+
+def _build_summary(peaks: list, silences: list, duration: float) -> str:
+    """Human-readable summary for Gemini context."""
+    lines = []
+    lines.append(f"VIDEO DURATION: {duration:.0f} seconds ({duration/60:.1f} minutes)")
+    lines.append("")
+    lines.append("MOST ENERGETIC MOMENTS (high viral potential):")
+    
+    for peak in peaks[:8]:  # Show top 8
+        h = int(peak["time"] // 3600)
+        m = int((peak["time"] % 3600) // 60)
+        s = int(peak["time"] % 60)
+        timestamp = f"{h:02}:{m:02}:{s:02}"
+        lines.append(f"  - {timestamp} | Energy: {peak['energy']:.0%} | {peak['type']}")
+    
+    lines.append("")
+    lines.append(f"NATURAL CUT POINTS (silences): {len(silences)} zones detected")
+    
+    if silences:
+        for sil in silences[:5]:  # Show first 5
+            lines.append(f"  - {sil['start']:.1f}s to {sil['end']:.1f}s ({sil['duration']:.1f}s silence)")
+    
+    return "\n".join(lines)
+
+
+def _empty_result() -> dict:
+    return {
+        "energy_peaks": [],
+        "silence_zones": [],
+        "windows": [],
+        "duration": 0.0,
+        "summary": "Audio analysis failed or skipped."
+    }
+
+==================== END backend/app/pipeline/steps/s05_energy_map.py ====================
+
+==================== backend/app/pipeline/steps/s06_video_analysis.py ====================
+import json
+import re
+
+from app.services.gemini_client import analyze_video
+from app.pipeline.prompts.video_visual import PROMPT
+
+def run(video_path: str, job_id: str) -> list[dict]:
+    """
+    Sends the video to Gemini for visual analysis.
+    Finds visual events like facial expressions, body language, and reactions.
+    """
+    print(f"[S06] Starting video analysis for job {job_id}")
+    try:
+        raw_response = analyze_video(video_path, PROMPT)
+        
+        # Strip code block wrappers and clean up any control characters
+        cleaned = re.sub(r'```json', '', raw_response, flags=re.IGNORECASE)
+        cleaned = re.sub(r'```', '', cleaned)
+        cleaned = re.sub(r'[\x00-\x1f]', '', cleaned)
+        cleaned = cleaned.strip()
+        
+        try:
+            visual_events = json.loads(cleaned)
+        except json.JSONDecodeError as json_err:
+            print(f"[S06] Error parsing JSON: {json_err}")
+            print(f"[S06] Raw response snippet: {cleaned[:200]}")
+            return []
+            
+        if not isinstance(visual_events, list):
+            print(f"[S06] Expected list, got {type(visual_events)}")
+            return []
+            
+        print(f"[S06] Found {len(visual_events)} visual events for job {job_id}")
+        return visual_events
+        
+    except Exception as e:
+        print(f"[S06] Error during video analysis: {e}")
+        return []
+
+==================== END backend/app/pipeline/steps/s06_video_analysis.py ====================
+
+==================== backend/app/pipeline/steps/s07_context_build.py ====================
+from datetime import datetime, timezone, timedelta
+from app.config import settings
+from app.services.supabase_client import get_client
+from app.services.gemini_client import generate_json, embed_content
+
+def get_guest_profile(guest_name: str) -> dict:
+    """
+    Retrieves or generates a profile for the guest.
+    1. Check guest_profiles table first.
+    2. If found and not expired, return cached.
+    3. Else, use Gemini to generate one and cache it.
+    """
+    try:
+        if not guest_name:
+            return {}
+            
+        supabase = get_client()
+        normalized_name = guest_name.strip().lower()
+        
+        # Check cache
+        response = supabase.table("guest_profiles").select("*").eq("normalized_name", normalized_name).execute()
+        
+        if response.data:
+            profile = response.data[0]
+            expires_at_str = profile.get("expires_at")
+            if expires_at_str:
+                # Naive parse, compare with current utc
+                # Usually isoformat
+                expires_at = datetime.fromisoformat(expires_at_str.replace("Z", "+00:00"))
+                if expires_at > datetime.now(timezone.utc):
+                    print(f"[S07] Using cached profile for {guest_name}")
+                    return profile.get("profile_data", {})
+                    
+        print(f"[S07] Generating new profile for {guest_name}")
+        prompt = (
+            f"Research this person: {guest_name}. Return JSON with:\n"
+            f"profile_summary (1 sentence who they are),\n"
+            f"recent_topics (list of their recent news/topics, last 30 days),\n"
+            f"viral_moments (list of their known viral moments or quotes),\n"
+            f"controversies (list of any controversial topics),\n"
+            f"expertise_areas (list of their expertise)"
+        )
+        
+        system_instruction = "You are a helpful assistant that outputs ONLY valid JSON."
+        profile_data = generate_json(prompt, system=system_instruction)
+        
+        if not profile_data:
+            return {}
+            
+        expires_at = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+        
+        # Upsert into database
+        upsert_data = {
+            "normalized_name": normalized_name,
+            "original_name": guest_name,
+            "profile_data": profile_data,
+            "expires_at": expires_at,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        if response.data:
+            # Update
+            supabase.table("guest_profiles").update(upsert_data).eq("normalized_name", normalized_name).execute()
+        else:
+            # Insert
+            supabase.table("guest_profiles").insert(upsert_data).execute()
+            
+        return profile_data
+        
+    except Exception as e:
+        print(f"[S07] Error in get_guest_profile: {e}")
+        return {}
+
+def get_channel_memory(channel_id: str) -> str:
+    """
+    Retrieves channel memory: success/fail counts, top types, duration, gaps.
+    """
+    try:
+        if not channel_id:
+            return ""
+            
+        supabase = get_client()
+        ninety_days_ago = (datetime.now(timezone.utc) - timedelta(days=90)).isoformat()
+        thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        
+        # Fetch last 90 days clips for this channel
+        response = supabase.table("clips").select("content_type, success_score, duration, created_at").eq("channel_id", channel_id).gte("created_at", ninety_days_ago).execute()
+        
+        clips = response.data
+        if not clips:
+            return "Channel memory: No recent clips found."
+            
+        successful_clips = []
+        failed_clips = []
+        
+        # Consider score > 7.0 as successful for this analysis
+        for clip in clips:
+            score = clip.get("success_score", 0)
+            if score >= 7.0:
+                successful_clips.append(clip)
+            else:
+                failed_clips.append(clip)
+                
+        num_success = len(successful_clips)
+        num_failed = len(failed_clips)
+        
+        type_counts = {}
+        total_duration = 0
+        
+        for clip in successful_clips:
+            ctype = clip.get("content_type", "unknown")
+            type_counts[ctype] = type_counts.get(ctype, 0) + 1
+            total_duration += clip.get("duration", 0)
+            
+        sorted_types = sorted(type_counts.items(), key=lambda x: x[1], reverse=True)
+        top_types = sorted_types[:3]
+        
+        avg_duration = total_duration / num_success if num_success > 0 else 0
+        
+        # Gap analysis (last 30 days)
+        recent_type_counts = {}
+        for clip in clips:
+            if clip.get("created_at") >= thirty_days_ago:
+                ctype = clip.get("content_type", "unknown")
+                recent_type_counts[ctype] = recent_type_counts.get(ctype, 0) + 1
+                
+        # Find underrepresented from a known list of types if possible, or just the lowest of the ones we've done
+        gap_types = "None"
+        if recent_type_counts:
+            sorted_recent = sorted(recent_type_counts.items(), key=lambda x: x[1])
+            gap_types = f"{sorted_recent[0][0]} underrepresented" if sorted_recent else "None"
+            
+        # Format strings
+        top_types_str = ", ".join([f"{k} ({v} clips)" for k, v in top_types]) if top_types else "None"
+        
+        summary = (
+            f"Channel memory (last 90 days):\n"
+            f"- {num_success} successful clips, {num_failed} failed clips\n"
+            f"- Top performing types: {top_types_str}\n"
+            f"- Avg successful clip duration: {avg_duration:.1f}s\n"
+            f"- Content gap (last 30 days): {gap_types}"
+        )
+        return summary
+        
+    except Exception as e:
+        print(f"[S07] Error in get_channel_memory: {e}")
+        return ""
+
+def get_rag_context(channel_id: str, query_text: str, limit: int = 3) -> str:
+    """
+    Queries reference_clips using pgvector cosine similarity.
+    """
+    try:
+        if not query_text or not channel_id:
+            return ""
+            
+        supabase = get_client()
+        
+        # Generate embedding
+        embedding = embed_content(query_text)
+        
+        # We need to call a Postgres function to do vector similarity search.
+        # Assuming there's a function named 'match_reference_clips' or similar.
+        # Let's use the RPC call. If it doesn't exist, we might have to just do a direct query if possible,
+        # but supabase client requires RPC for vector search.
+        # The requirements say "Query reference_clips table using pgvector cosine similarity"
+        # We will assume 'match_reference_clips' function exists:
+        # create function match_reference_clips(query_embedding vector(768), match_threshold float, match_count int, p_channel_id text)
+        response = supabase.rpc(
+            "match_reference_clips",
+            {
+                "query_embedding": embedding,
+                "match_threshold": 0.0, # Get closest regardless of threshold, or some low threshold
+                "match_count": limit,
+                "p_channel_id": channel_id
+            }
+        ).execute()
+        
+        if not response.data:
+            return ""
+            
+        results = ["Similar successful clips from this channel:"]
+        for i, clip in enumerate(response.data, 1):
+            hook = clip.get("hook", "N/A")
+            ctype = clip.get("content_type", "N/A")
+            what_worked = clip.get("what_worked", "N/A")
+            results.append(f"{i}. Hook: '{hook}' | Type: {ctype} | What worked: {what_worked}")
+            
+        return "\n".join(results)
+        
+    except Exception as e:
+        print(f"[S07] Error in get_rag_context: {e}")
+        return ""
+
+def run(guest_name: str, channel_id: str, video_title: str) -> dict:
+    """
+    Builds the full context package for Gemini analysis.
+    """
+    try:
+        print(f"[S07] Building context for guest: {guest_name}, channel: {channel_id}")
+        
+        profile = get_guest_profile(guest_name) if guest_name else {}
+        memory = get_channel_memory(channel_id)
+        
+        query_text = f"Title: {video_title}"
+        if guest_name:
+            query_text += f", Guest: {guest_name}"
+            
+        rag = get_rag_context(channel_id, query_text)
+        
+        context_package = {
+            "guest_profile": profile,
+            "channel_memory": memory,
+            "rag_context": rag
+        }
+        
+        print("[S07] Context build complete")
+        return context_package
+        
+    except Exception as e:
+        print(f"[S07] Critical error in run: {e}")
+        return {
+            "guest_profile": {},
+            "channel_memory": "",
+            "rag_context": ""
+        }
+
+==================== END backend/app/pipeline/steps/s07_context_build.py ====================
+
+==================== backend/app/pipeline/steps/s07b_humor_map.py ====================
+from app.services.gemini_client import generate_json
+from app.pipeline.prompts.humor_map import PROMPT
+
+def run(labeled_transcript: str, channel_dna: dict, job_id: str) -> list[dict]:
+    """
+    Uses Gemini to find humor moments in the transcript, 
+    including subtle types that audio energy cannot detect.
+    """
+    try:
+        print(f"[S07B] Starting humor map for {job_id}...")
+        
+        # Extract humor profile
+        humor_profile = channel_dna.get("humor_profile", {})
+        style = humor_profile.get("style", "general")
+        triggers = humor_profile.get("triggers", [])
+        
+        # Truncate transcript to 12000 chars
+        truncated_transcript = labeled_transcript[:12000]
+        
+        # Build prompt
+        prompt = PROMPT
+        prompt = prompt.replace("TRANSCRIPT_PLACEHOLDER", truncated_transcript)
+        prompt = prompt.replace("STYLE_PLACEHOLDER", str(style))
+        prompt = prompt.replace("TRIGGERS_PLACEHOLDER", str(triggers))
+        
+        # Call Gemini
+        result = generate_json(prompt)
+        
+        # Parse result
+        # Assuming the result is a list of humor moments or a dict with a list
+        if isinstance(result, list):
+            humor_moments = result
+        elif isinstance(result, dict) and "moments" in result:
+            humor_moments = result["moments"]
+        else:
+            humor_moments = []
+            
+        print(f"[S07B] Found {len(humor_moments)} humor moments for {job_id}")
+        return humor_moments
+        
+    except Exception as e:
+        print(f"[S07B] Error: {e}")
+        return []
+
+==================== END backend/app/pipeline/steps/s07b_humor_map.py ====================
+
+==================== backend/app/pipeline/steps/s07c_signal_fusion.py ====================
+import re
+from typing import List, Dict, Any, Optional
+
+def run(labeled_transcript: str, energy_data: dict, visual_events: list, humor_moments: list, job_id: str) -> List[Dict[str, Any]]:
+    """
+    Fuses multiple signals (transcript, energy, visuals, humor) into 5-second windows.
+    Returns a list of windows sorted by priority (TRIPLE, DUAL, SINGLE).
+    """
+    try:
+        # 1. Parse labeled_transcript lines
+        # Pattern: [MM:SS.s] SPEAKER: [sentiment:X.XX] Text
+        # or [MM:SS.s] SPEAKER: Text
+        pattern = re.compile(r'\[(\d+):(\d+\.\d+)\]\s+\w.*?:\s*(?:\[sentiment:([-\d.]+)\])?\s*(.+)')
+        
+        parsed_utterances: List[Dict[str, Any]] = []
+        max_timestamp: float = 0.0
+        
+        for line in labeled_transcript.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+                
+            match = pattern.search(line)
+            if match:
+                mm = float(match.group(1))
+                ss = float(match.group(2))
+                timestamp_seconds = float(mm * 60 + ss)
+                
+                sentiment_str = match.group(3)
+                sentiment_score: Optional[float] = float(sentiment_str) if sentiment_str else None
+                
+                text = str(match.group(4).strip())
+                
+                parsed_utterances.append({
+                    "timestamp": timestamp_seconds,
+                    "sentiment_score": sentiment_score,
+                    "text": text
+                })
+                
+                if timestamp_seconds > max_timestamp:
+                    max_timestamp = timestamp_seconds
+                    
+        # 2. Build 5-second windows
+        windows: List[Dict[str, Any]] = []
+        
+        # Ensure energy_data is a dict
+        if not isinstance(energy_data, dict):
+            energy_data = {}
+            
+        energy_peaks: list = energy_data.get("energy_peaks", [])
+        
+        # Ensure visual_events and humor_moments are lists
+        if not isinstance(visual_events, list):
+            visual_events = []
+            
+        if not isinstance(humor_moments, list):
+            humor_moments = []
+            
+        total_windows: int = 0
+        triple_count: int = 0
+        dual_count: int = 0
+        
+        start: float = 0.0
+        while start <= max_timestamp:
+            end: float = start + 5.0
+            
+            # Transcript hit
+            window_texts: List[str] = []
+            window_sentiments: List[float] = []
+            for u in parsed_utterances:
+                u_timestamp = float(str(u["timestamp"]))
+                if start <= u_timestamp <= end:
+                    window_texts.append(str(u["text"]))
+                    u_sentiment = u["sentiment_score"]
+                    if u_sentiment is not None:
+                        window_sentiments.append(float(str(u_sentiment)))
+                        
+            transcript_hit = len(window_texts) > 0
+            transcript_str = " ".join(window_texts) if transcript_hit else ""
+            avg_sentiment: Optional[float] = float(sum(window_sentiments)) / len(window_sentiments) if window_sentiments else None
+            
+            # Energy hit
+            energy_hit_val: Optional[float] = None
+            for e in energy_peaks:
+                if isinstance(e, dict):
+                    e_time = e.get("time")
+                    e_energy = e.get("energy")
+                    if e_time is not None and e_energy is not None:
+                        try:
+                            f_time = float(str(e_time))
+                            f_energy = float(str(e_energy))
+                            if start <= f_time <= end and f_energy >= 0.75:
+                                energy_hit_val = f_energy
+                                break
+                        except ValueError:
+                            pass
+                            
+            energy_hit = energy_hit_val is not None
+            
+            # Visual hit
+            visual_hit_val: Optional[str] = None
+            for v in visual_events:
+                if isinstance(v, dict):
+                    v_time = v.get("timestamp")
+                    if v_time is not None:
+                        try:
+                            f_v_time = float(str(v_time))
+                            if start <= f_v_time <= end:
+                                visual_hit_val = str(v.get("event") or v.get("description") or str(v))
+                                break
+                        except ValueError:
+                            pass
+            
+            visual_hit = visual_hit_val is not None
+            
+            # Humor hit
+            humor_hit_val: Optional[str] = None
+            for h in humor_moments:
+                if isinstance(h, dict):
+                    h_time = h.get("timestamp")
+                    h_conf = h.get("confidence")
+                    if h_time is not None and h_conf is not None:
+                        try:
+                            f_h_time = float(str(h_time))
+                            f_h_conf = float(str(h_conf))
+                            if start <= f_h_time <= end and f_h_conf >= 0.6:
+                                humor_hit_val = str(h.get("humor_type") or h.get("type") or "Humor")
+                                break
+                        except ValueError:
+                            pass
+                            
+            humor_hit = humor_hit_val is not None
+            
+            # Count signals
+            signals_count: int = int(transcript_hit) + int(energy_hit) + int(visual_hit) + int(humor_hit)
+            
+            if signals_count > 0:
+                priority = "SINGLE"
+                if signals_count >= 3:
+                    priority = "TRIPLE"
+                    triple_count += 1
+                elif signals_count == 2:
+                    priority = "DUAL"
+                    dual_count += 1
+                    
+                windows.append({
+                    "timestamp_start": float(start),
+                    "timestamp_end": float(end),
+                    "transcript": transcript_str,
+                    "sentiment_score": avg_sentiment,
+                    "energy_level": energy_hit_val,
+                    "visual_event": visual_hit_val,
+                    "humor_type": humor_hit_val,
+                    "priority": priority,
+                    "signals_count": signals_count
+                })
+                
+            start += 5.0
+            total_windows += 1
+            
+        # 4. Return list sorted by priority (TRIPLE first) then timestamp
+        priority_order = {"TRIPLE": 0, "DUAL": 1, "SINGLE": 2}
+        
+        windows.sort(key=lambda x: (priority_order.get(str(x["priority"]), 3), float(str(x["timestamp_start"]))))
+        
+        # 5. Print [S07C] logs
+        print(f"[S07C] Job {job_id} | Total windows processed: {total_windows} | TRIPLE count: {triple_count} | DUAL count: {dual_count}")
+        
+        return windows
+        
+    except Exception as e:
+        print(f"[S07C] Error during signal fusion: {e}")
+        return []
+
+==================== END backend/app/pipeline/steps/s07c_signal_fusion.py ====================
+
+==================== backend/app/pipeline/steps/s08_clip_finder.py ====================
+import json
+import re
+from app.services.gemini_client import generate_json
+from app.pipeline.prompts import pass1_scan, pass2_evaluate, pass3_select
+from app.config import settings
+
+def calculate_clip_counts(duration_s: float) -> dict:
+    if duration_s < 900:
+        return {"min_candidates": 5, "max_candidates": 10, "min_clips": 2, "max_clips": 4}
+    elif duration_s < 1800:
+        return {"min_candidates": 10, "max_candidates": 18, "min_clips": 3, "max_clips": 5}
+    elif duration_s < 3600:
+        return {"min_candidates": 15, "max_candidates": 25, "min_clips": 4, "max_clips": 6}
+    else:
+        return {"min_candidates": 20, "max_candidates": 35, "min_clips": 5, "max_clips": 7}
+
+def _parse_timestamp(ts_str: str) -> float:
+    parts = ts_str.replace('[', '').replace(']', '').split(':')
+    seconds = 0.0
+    try:
+        if len(parts) == 3:
+            seconds = float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+        elif len(parts) == 2:
+            seconds = float(parts[0]) * 60 + float(parts[1])
+        elif len(parts) == 1:
+            seconds = float(parts[0])
+    except (ValueError, TypeError):
+        pass
+    return seconds
+
+def run(
+    fused_timeline: list,
+    labeled_transcript: str,
+    context: dict,
+    channel_dna: dict,
+    video_duration_s: float,
+    job_id: str
+) -> dict:
+    
+    counts = calculate_clip_counts(video_duration_s)
+    
+    candidates_list: list[dict] = []
+    evaluated_list: list[dict] = []
+    selected_list: list[dict] = []
+    rejected_list: list[dict] = []
+
+    result = {
+        "candidates": candidates_list,
+        "evaluated": evaluated_list,
+        "selected": selected_list,
+        "rejected": rejected_list,
+        "clip_counts": counts
+    }
+    
+    # PASS 1: Wide scan
+    try:
+        formatted_timeline: list[str] = []
+        for entry in fused_timeline:
+            priority = entry.get("priority", "NORMAL")
+            start = entry.get("timestamp_start", 0)
+            end = entry.get("timestamp_end", 0)
+            raw_text = entry.get("transcript", "")
+            text: str = str(raw_text) if raw_text is not None else ""
+            text_trunc = text[:100]
+            formatted_timeline.append(str(f"[{priority}] {start}s-{end}s: {text_trunc}"))
+        fused_timeline_text = "\n".join(formatted_timeline)
+        
+        prompt1 = pass1_scan.PROMPT
+        prompt1 = prompt1.replace("VIDEO_DURATION_PLACEHOLDER", str(video_duration_s))
+        prompt1 = prompt1.replace("MIN_CANDIDATES_PLACEHOLDER", str(counts["min_candidates"]))
+        prompt1 = prompt1.replace("MAX_CANDIDATES_PLACEHOLDER", str(counts["max_candidates"]))
+        prompt1 = prompt1.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
+        prompt1 = prompt1.replace("GUEST_PROFILE_PLACEHOLDER", json.dumps(context.get("guest_profile", {})))
+        prompt1 = prompt1.replace("CHANNEL_MEMORY_PLACEHOLDER", context.get("channel_memory", ""))
+        prompt1 = prompt1.replace("RAG_CONTEXT_PLACEHOLDER", context.get("rag_context", ""))
+        prompt1 = prompt1.replace("FUSED_TIMELINE_PLACEHOLDER", fused_timeline_text)
+        
+        pass1_out = generate_json(prompt1)
+        if isinstance(pass1_out, list):
+            candidates_list = pass1_out
+            result["candidates"] = candidates_list
+        else:
+            print("[S08] Pass 1 returned non-list output")
+            return result
+            
+        print(f"[S08] Pass 1: found {len(candidates_list)} candidates")
+    except Exception as e:
+        print(f"[S08] Error in Pass 1: {e}")
+        return result
+        
+    if not result["candidates"]:
+        return result
+        
+    # PASS 2: Deep evaluation
+    try:
+        transcript_lines = labeled_transcript.split('\n')
+        
+        for candidate in candidates_list:
+            cand_id = candidate.get("candidate_id", "unknown")
+            try:
+                ts_str = candidate.get("timestamp", "00:00")
+                target_s = _parse_timestamp(ts_str)
+                
+                # Extract +/- 2 minute context window
+                window_lines = []
+                for line in transcript_lines:
+                    match = re.match(r'^\[([\d:\.]+)\]', line)
+                    if match:
+                        line_s = _parse_timestamp(match.group(1))
+                        if target_s - 120 <= line_s <= target_s + 120:
+                            window_lines.append(line)
+                            
+                context_window_text = "\n".join(window_lines)
+                
+                # Match signals from fused_timeline
+                matching_signals = []
+                for entry in fused_timeline:
+                    start = entry.get("timestamp_start", 0)
+                    end = entry.get("timestamp_end", 0)
+                    # Include if within 30s of the target or overlapping
+                    if start <= target_s <= end or (target_s - 30 <= start <= target_s + 30):
+                        matching_signals.append(entry)
+                        
+                prompt2 = pass2_evaluate.PASS2_EVALUATE_PROMPT
+                prompt2 = prompt2.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
+                prompt2 = prompt2.replace("CHANNEL_MEMORY_PLACEHOLDER", context.get("channel_memory", ""))
+                prompt2 = prompt2.replace("RAG_CONTEXT_PLACEHOLDER", context.get("rag_context", ""))
+                prompt2 = prompt2.replace("CANDIDATE_CONTEXT_PLACEHOLDER", context_window_text)
+                prompt2 = prompt2.replace("CANDIDATE_SIGNALS_PLACEHOLDER", json.dumps(matching_signals))
+                prompt2 = prompt2.replace("CANDIDATE_ID_PLACEHOLDER", str(cand_id))
+                
+                pass2_out = generate_json(prompt2)
+                if isinstance(pass2_out, dict):
+                    evaluated_list.append(pass2_out)
+            except Exception as e:
+                print(f"[S08] Error evaluating candidate {cand_id}: {e}")
+                continue
+                
+        print(f"[S08] Pass 2: evaluated {len(evaluated_list)} candidates")
+    except Exception as e:
+        print(f"[S08] Error in Pass 2: {e}")
+        
+    if not evaluated_list:
+        return result
+        
+    # PASS 3: Final selection
+    try:
+        prompt3 = pass3_select.PROMPT
+        prompt3 = prompt3.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
+        prompt3 = prompt3.replace("EVALUATED_CANDIDATES_PLACEHOLDER", json.dumps(result["evaluated"]))
+        prompt3 = prompt3.replace("MIN_CLIPS_PLACEHOLDER", str(counts["min_clips"]))
+        prompt3 = prompt3.replace("MAX_CLIPS_PLACEHOLDER", str(counts["max_clips"]))
+        
+        pass3_out = generate_json(prompt3)
+        if isinstance(pass3_out, dict):
+            result["selected"] = pass3_out.get("selected_clips", [])
+            result["rejected"] = pass3_out.get("rejected_clips", [])
+            
+        print(f"[S08] Pass 3: selected {len(result['selected'])} clips")
+    except Exception as e:
+        print(f"[S08] Error in Pass 3: {e}")
+        
+    return result
+
+==================== END backend/app/pipeline/steps/s08_clip_finder.py ====================
+
+==================== backend/app/pipeline/steps/s09_quality_gate.py ====================
+import json
+from app.services.gemini_client import generate_json
+from app.pipeline.prompts.standalone_check import PROMPT
+from app.config import settings
+
+def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, job_id: str) -> list:
+    """
+    Step 9: Quality Gate
+    Filters and annotates selected clips based on structural and standalone meaning checks.
+    """
+    print(f"[S09] Starting quality gate for job {job_id} with {len(selected_clips)} clips")
+    
+    # Pre-process labeled transcript lines for faster lookup
+    # labeled_transcript is a string with lines like "[00:00:15.500] Speaker 1: Hello"
+    # Wait, the instruction says:
+    # "Extract clip transcript from labeled_transcript (lines where timestamp is between recommended_start and recommended_end)"
+    # A generic approach to extract lines between start and end seconds:
+    transcript_lines = labeled_transcript.strip().split("\n") if labeled_transcript else []
+    
+    parsed_transcript = []
+    for line in transcript_lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            # Parse timestamp e.g. [00:00:15.500]
+            if line.startswith("[") and "]" in line:
+                ts_str = line[1:line.find("]")]
+                parts = ts_str.split(":")
+                if len(parts) == 3:
+                    h, m, s = parts
+                    total_seconds = int(h) * 3600 + int(m) * 60 + float(s)
+                    parsed_transcript.append({"time": total_seconds, "text": line})
+        except Exception as e:
+            pass # Ignore malformed lines
+    
+    results = []
+    
+    # Metrics
+    passed_count = 0
+    fixable_count = 0
+    failed_count = 0
+    
+    # We need a quick lookup map for evaluated_clips by candidate_id
+    eval_map = {c.get("candidate_id"): c for c in evaluated_clips if "candidate_id" in c}
+    
+    for clip in selected_clips:
+        try:
+            candidate_id = clip.get("candidate_id")
+            eval_data = eval_map.get(candidate_id, {})
+            
+            # Use data from clip directly if present, fallback to eval_data
+            start = clip.get("recommended_start", eval_data.get("recommended_start", 0))
+            end = clip.get("recommended_end", eval_data.get("recommended_end", 0))
+            overall_confidence = clip.get("overall_confidence", eval_data.get("overall_confidence", 0))
+            standalone_score = clip.get("standalone_score", eval_data.get("standalone_score", 0))
+            hook_text = clip.get("hook_text", eval_data.get("hook_text"))
+            
+            # --- PART 1: Structural validation ---
+            duration = end - start
+            fail_reason = None
+            
+            if duration < 15:
+                fail_reason = f"Duration too short ({duration:.1f}s < 15s)"
+            elif duration > 50:
+                fail_reason = f"Duration too long ({duration:.1f}s > 50s)"
+            elif start < 0:
+                fail_reason = f"Invalid start time ({start})"
+            elif end <= start:
+                fail_reason = f"End time <= start time ({end} <= {start})"
+            elif standalone_score < 4:
+                fail_reason = f"Standalone score too low ({standalone_score} < 4)"
+            elif not hook_text or len(str(hook_text).strip()) <= 3:
+                fail_reason = "Missing or empty hook text"
+            
+            if overall_confidence < 0.4:
+                print(f"[S09] Warning: Clip {candidate_id} has low confidence ({overall_confidence})")
+                
+            if fail_reason:
+                print(f"[S09] Clip {candidate_id} rejected (structural): {fail_reason}")
+                clip["quality_status"] = "structural_fail"
+                clip["quality_note"] = fail_reason
+                failed_count += 1
+                results.append(clip)
+                continue
+                
+            # --- PART 2: Standalone meaning check ---
+            
+            # Extract transcript segment
+            clip_transcript_lines = []
+            for item in parsed_transcript:
+                if start <= item["time"] <= end:
+                    clip_transcript_lines.append(item["text"])
+            
+            clip_transcript_str = "\n".join(str(x) for x in clip_transcript_lines)
+            
+            if not clip_transcript_str.strip():
+                # No transcript found, maybe silent or bad timestamps
+                print(f"[S09] Clip {candidate_id} rejected (standalone): No transcript found between {start} and {end}")
+                clip["quality_status"] = "structural_fail"
+                clip["quality_note"] = "Empty transcript"
+                failed_count += 1
+                results.append(clip)
+                continue
+            
+            prompt = PROMPT.replace("CLIP_TRANSCRIPT_PLACEHOLDER", clip_transcript_str)
+            gemini_res = generate_json(prompt)
+            
+            overall = gemini_res.get("overall", "fail")
+            note = gemini_res.get("note", "")
+            
+            clip["standalone_result"] = gemini_res
+            
+            if overall == "fail":
+                clip["quality_status"] = "standalone_fail"
+                clip["quality_note"] = note or "Standalone check failed"
+                print(f"[S09] Clip {candidate_id} rejected (standalone): {clip['quality_note']}")
+                failed_count += 1
+            elif overall == "fixable":
+                clip["quality_status"] = "fixable"
+                clip["standalone_fix"] = note
+                print(f"[S09] Clip {candidate_id} fixable (standalone): {note}")
+                fixable_count += 1
+            elif overall == "pass":
+                clip["quality_status"] = "pass"
+                print(f"[S09] Clip {candidate_id} passed standalone check")
+                passed_count += 1
+            else:
+                clip["quality_status"] = "standalone_fail"
+                clip["quality_note"] = f"Unknown overall status: {overall}"
+                print(f"[S09] Clip {candidate_id} rejected (standalone): Unknown status {overall}")
+                failed_count += 1
+            
+            results.append(clip)
+            
+        except Exception as e:
+            print(f"[S09] Error processing clip {clip.get('candidate_id')}: {e}")
+            clip["quality_status"] = "structural_fail"
+            clip["quality_note"] = f"Error: {str(e)}"
+            failed_count += 1
+            results.append(clip)
+            
+    # Sort results: pass first, then fixable, then failed
+    status_order = {"pass": 0, "fixable": 1, "structural_fail": 2, "standalone_fail": 2}
+    results.sort(key=lambda x: status_order.get(x.get("quality_status", "structural_fail"), 3))
+    
+    print(f"[S09] Summary: {passed_count} passed, {fixable_count} fixable, {failed_count} failed.")
+    
+    return results
+
+==================== END backend/app/pipeline/steps/s09_quality_gate.py ====================
+
+==================== backend/app/pipeline/steps/s09b_clip_strategy.py ====================
+import json
+from app.services.gemini_client import generate_json
+from app.pipeline.prompts import pass3_select
+from app.services.supabase_client import get_client
+
+def run(quality_results: list, evaluated_clips: list, channel_dna: dict, job_id: str) -> list:
+    """
+    Assigns a strategy role and posting order to each clip that passed quality gate.
+    """
+    try:
+        # 1. Filter quality_results to only clips with quality_status "pass" or "fixable"
+        passing_clips = [c for c in quality_results if c.get("quality_status") in ("pass", "fixable")]
+        
+        # 2. If no clips passed: return empty list with [S09B] log
+        if not passing_clips:
+            print("[S09B] No clips passed quality gate. Returning empty list.")
+            return []
+            
+        # 3. Merge each passing clip with its full evaluation data from evaluated_clips (match by candidate_id)
+        merged_clips = []
+        eval_dict = {c.get("candidate_id"): c for c in evaluated_clips}
+        
+        for p_clip in passing_clips:
+            c_id = p_clip.get("candidate_id")
+            if c_id in eval_dict:
+                merged_clip = {**eval_dict[c_id], **p_clip}
+                merged_clips.append(merged_clip)
+            else:
+                merged_clips.append(p_clip)
+
+        # 4. Build prompt from pass3_select.PROMPT replacing placeholders
+        prompt = pass3_select.PROMPT
+        prompt = prompt.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
+        prompt = prompt.replace("EVALUATED_CANDIDATES_PLACEHOLDER", json.dumps(merged_clips))
+        prompt = prompt.replace("MIN_CLIPS_PLACEHOLDER", str(max(2, len(passing_clips) // 2)))
+        prompt = prompt.replace("MAX_CLIPS_PLACEHOLDER", str(len(passing_clips)))
+
+        # 5. Call generate_json(prompt)
+        print(f"[S09B] Evaluating {len(passing_clips)} clips for strategy and posting order...")
+        response = generate_json(prompt)
+        
+        # 6. Parse result: selected_clips and rejected_clips
+        selected_clips_info = response.get("selected_clips", [])
+        
+        # Map selected info by candidate_id
+        strategy_dict = {
+            item.get("candidate_id"): item 
+            for item in selected_clips_info
+        }
+
+        final_clips = []
+        
+        # 7. For each selected clip: add clip_strategy_role and posting_order to the clip data
+        for clip in merged_clips:
+            c_id = clip.get("candidate_id")
+            if c_id in strategy_dict:
+                strat_info = strategy_dict[c_id]
+                clip["clip_strategy_role"] = strat_info.get("clip_strategy_role", "viral")
+                clip["posting_order"] = strat_info.get("posting_order", 999)
+                clip["selection_reason"] = strat_info.get("selection_reason", "")
+                final_clips.append(clip)
+
+        # 8. Return final list sorted by posting_order ascending
+        final_clips.sort(key=lambda x: x.get("posting_order", 999))
+        
+        print(f"[S09B] Received {len(passing_clips)} clips, {len(final_clips)} selected with roles.")
+        return final_clips
+
+    except Exception as e:
+        print(f"[S09B] Error: {e}")
+        # Full try/except — if Gemini fails, return passing clips without strategy
+        fallback_clips = []
+        for i, clip in enumerate(passing_clips):
+            c_id = clip.get("candidate_id")
+            # Try to get evaluation data if available
+            eval_data = next((c for c in evaluated_clips if c.get("candidate_id") == c_id), {})
+            merged = {**eval_data, **clip}
+            merged["clip_strategy_role"] = "viral"
+            merged["posting_order"] = i + 1
+            merged["selection_reason"] = "Fallback assignment"
+            fallback_clips.append(merged)
+        
+        print(f"[S09B] Fallback triggered. Returning {len(fallback_clips)} clips with default strategy.")
+        return fallback_clips
+
+==================== END backend/app/pipeline/steps/s09b_clip_strategy.py ====================
+
+==================== backend/app/pipeline/steps/s10_precision_cut.py ====================
+import os
+import subprocess
+import json
+from app.config import settings
+from app.services import storage
+
+def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
+    """
+    Finds the nearest word start or end time to the target_sec within a ±3 second window.
+    mode: "start" or "end"
+    Returns target_sec unchanged if no word found.
+    """
+    best_time = target_sec
+    min_diff = 3.0  # 3 seconds search window
+
+    for word in words:
+        if mode == "start" and "start" in word:
+            diff = abs(word["start"] - target_sec)
+            if diff < min_diff:
+                min_diff = diff
+                best_time = word["start"]
+        elif mode == "end" and "end" in word:
+            diff = abs(word["end"] - target_sec)
+            if diff < min_diff:
+                min_diff = diff
+                best_time = word["end"]
+
+    return best_time
+
+def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: str) -> list:
+    """
+    Step 10: Precision Cut
+    Aligns clip boundaries to word boundaries and cuts video with FFmpeg.
+    """
+    print(f"[S10] Starting precision cut for job {job_id}. Total clips: {len(strategy_results)}")
+    
+    words = transcript_data.get("words", [])
+    if not words:
+        print("[S10] Warning: No words found in transcript_data.")
+
+    # Ensure output directory for job exists
+    job_output_dir = os.path.join(settings.OUTPUT_DIR, job_id)
+    os.makedirs(job_output_dir, exist_ok=True)
+
+    cut_results = []
+
+    for index, clip in enumerate(strategy_results):
+        try:
+            print(f"[S10] Processing clip {index+1}/{len(strategy_results)}")
+            
+            content_type = clip.get("content_type", "unknown")
+            rec_start = clip.get("recommended_start", 0.0)
+            rec_end = clip.get("recommended_end", 0.0)
+            
+            # 2. Snap recommended_start to nearest word start (mode="start")
+            # Then subtract 0.3 seconds (natural breath buffer) but never go below 0
+            snapped_start = snap_to_word_boundary(rec_start, words, "start")
+            final_start = max(0.0, snapped_start - 0.3)
+            
+            # 3. Snap recommended_end to nearest word end (mode="end")
+            # Then add 0.3 seconds buffer
+            snapped_end = snap_to_word_boundary(rec_end, words, "end")
+            final_end = snapped_end + 0.3
+            
+            # 4. Validate: end - start >= 15 and end - start <= 50
+            if final_end - final_start > 50.0:
+                print(f"[S10] Clip {index+1} duration > 50s. Trimming.")
+                final_end = final_start + 50.0
+            elif final_end - final_start < 15.0:
+                print(f"[S10] Warning: Clip {index+1} duration < 15s. Proceeding anyway.")
+            
+            # 5. Get video duration using ffprobe
+            ffprobe_cmd = [
+                "ffprobe", "-v", "quiet", "-show_entries", "format=duration", 
+                "-of", "json", video_path
+            ]
+            ffprobe_result = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
+            ffprobe_data = json.loads(ffprobe_result.stdout)
+            video_duration = float(ffprobe_data["format"]["duration"])
+            
+            # Ensure end does not exceed video duration
+            if final_end > video_duration:
+                final_end = video_duration
+                
+            final_duration_s = final_end - final_start
+            
+            # 6. Run FFmpeg cut
+            output_filename = f"clip_{index:02d}_{content_type}.mp4"
+            output_path = os.path.join(job_output_dir, output_filename)
+            
+            ffmpeg_cmd = [
+                "ffmpeg", "-y",
+                "-ss", str(final_start),
+                "-i", video_path,
+                "-t", str(final_duration_s),
+                "-c:v", "libx264",
+                "-preset", "slow",
+                "-crf", "18",
+                "-c:a", "aac",
+                "-b:a", "320k",
+                "-avoid_negative_ts", "make_zero",
+                "-map", "0:v:0",
+                "-map", "0:a:0",
+                output_path
+            ]
+            
+            subprocess.run(ffmpeg_cmd, check=True, capture_output=True, text=True)
+            
+            # 7. Verify output file exists and size > 0
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                print(f"[S10] Successfully generated {output_filename}")
+                # 8. Add to clip result
+                clip_copy = dict(clip)
+                clip_copy.update({
+                    "video_landscape_path": output_path,
+                    "final_start": float(final_start),
+                    "final_end": float(final_end),
+                    "final_duration_s": float(final_duration_s)
+                })
+                cut_results.append(clip_copy)
+            else:
+                print(f"[S10] Error: FFmpeg output file missing or empty for clip {index+1}")
+                
+        except subprocess.CalledProcessError as e:
+            print(f"[S10] FFmpeg/ffprobe error for clip {index+1}: {e.stderr}")
+        except Exception as e:
+            print(f"[S10] Unexpected error processing clip {index+1}: {e}")
+            
+    print(f"[S10] Precision cut complete. Successfully processed {len(cut_results)}/{len(strategy_results)} clips.")
+    return cut_results
+
+==================== END backend/app/pipeline/steps/s10_precision_cut.py ====================
+
+==================== backend/app/pipeline/steps/s11_export.py ====================
+import os
+import subprocess
+import traceback
+from app.config import settings
+from app.services.supabase_client import get_client
+
+def run(cut_results: list, job_id: str) -> list:
+    """
+    Step 11: Export
+    This is the final step — produces the highest quality 16:9 MP4 output files.
+    """
+    print(f"[S11] Starting export for {len(cut_results)} clips. Job ID: {job_id}")
+    exported_clips = []
+    
+    supabase = get_client()
+
+    for clip in cut_results:
+        try:
+            input_path = clip.get("video_landscape_path")
+            
+            # 1. Verify video_landscape_path exists and file size > 0
+            if not input_path or not os.path.exists(input_path) or os.path.getsize(input_path) == 0:
+                print(f"[S11] Error: Input video missing or empty for clip {clip.get('clip_index', 'unknown')}. Skipping.")
+                continue
+
+            # 2. Re-encode for maximum quality output
+            base, ext = os.path.splitext(input_path)
+            output_path = f"{base}_final{ext}"
+            
+            print(f"[S11] Re-encoding {input_path} to {output_path}")
+            
+            # FFmpeg command:
+            # ffmpeg -y -i {input_path} -c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k -movflags +faststart -pix_fmt yuv420p {output_path}
+            ffmpeg_cmd = [
+                "ffmpeg", "-y", "-i", input_path,
+                "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+                "-c:a", "aac", "-b:a", "320k",
+                "-movflags", "+faststart",
+                "-pix_fmt", "yuv420p",
+                output_path
+            ]
+            
+            subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+            # 3. Verify output file exists and size > 0
+            if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+                print(f"[S11] Error: Output video missing or empty for clip {clip.get('clip_index', 'unknown')}. Skipping.")
+                continue
+
+            # 4. Update clips table in Supabase
+            clip_data = {
+                "job_id": job_id,
+                "channel_id": clip.get("channel_id", "speedy_cast"),
+                "clip_index": clip.get("posting_order", clip.get("clip_index")),
+                "start_time": clip.get("start_time"),
+                "end_time": clip.get("end_time"),
+                "duration_s": clip.get("duration_s"),
+                "hook_text": clip.get("hook_text"),
+                "content_type": clip.get("content_type"),
+                "guest_name": clip.get("guest_name"),
+                "confidence": clip.get("overall_confidence"),
+                "standalone_score": clip.get("standalone_score"),
+                "hook_score": clip.get("hook_score"),
+                "arc_score": clip.get("arc_score"),
+                "channel_fit_score": clip.get("channel_fit_score"),
+                "thinking_steps": clip.get("thinking_steps", {}),
+                "suggested_title": clip.get("suggested_title", clip.get("hook_text")),
+                "clip_strategy_role": clip.get("clip_strategy_role"),
+                "posting_order": clip.get("posting_order"),
+                "video_landscape_path": output_path,
+                "standalone_result": clip.get("standalone_result"),
+                "quality_status": clip.get("quality_status", "passed")
+            }
+            
+            insert_result = supabase.table("clips").insert(clip_data).execute()
+            
+            if not insert_result.data:
+                print(f"[S11] Error: Failed to insert clip {clip.get('clip_index', 'unknown')} into Supabase.")
+                continue
+                
+            clip_id = insert_result.data[0].get("id")
+            print(f"[S11] Successfully exported and inserted clip {clip.get('clip_index', 'unknown')} with ID {clip_id}")
+            
+            # 5. Add to result
+            exported_clips.append({
+                "clip_id": clip_id,
+                "final_path": output_path,
+                "export_status": "success"
+            })
+            
+        except Exception as e:
+            print(f"[S11] Error processing clip {clip.get('clip_index', 'unknown')}: {e}")
+            traceback.print_exc()
+            continue
+
+    print(f"[S11] Summary: {len(exported_clips)} clips exported successfully.")
+    return exported_clips
+
+==================== END backend/app/pipeline/steps/s11_export.py ====================
+
+==================== backend/app/api/routes/jobs.py ====================
+from typing import Optional
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException
+from app.services.supabase_client import get_client
+from app.services import storage
+from app.pipeline.orchestrator import run_pipeline
+from app.models.schemas import JobResponse
+from app.models.enums import JobStatus
+from app.config import settings
+import uuid
+import shutil
+import os
+import json
+
+router = APIRouter(prefix="/jobs", tags=["jobs"])
+
+@router.post("")
+async def create_job(
+    background_tasks: BackgroundTasks,
+    video: UploadFile = File(...),
+    title: str = Form(...),
+    guest_name: Optional[str] = Form(None),
+    channel_id: str = Form("speedy_cast")
+):
+    try:
+        if not video.content_type.startswith("video/"):
+            raise HTTPException(status_code=400, detail="Uploaded file is not a video.")
+        
+        job_id = str(uuid.uuid4())
+        file_bytes = await video.read()
+        
+        # Save uploaded file
+        video_path = storage.save_upload(file_bytes, video.filename, job_id)
+        if not video_path:
+            raise HTTPException(status_code=500, detail="Failed to save video file.")
+            
+        supabase = get_client()
+        
+        # Insert job into Supabase
+        job_data = {
+            "id": job_id,
+            "channel_id": channel_id,
+            "video_title": title,
+            "guest_name": guest_name,
+            "status": JobStatus.QUEUED.value,
+            "current_step": "queued",
+            "progress_pct": 0
+        }
+        
+        response = supabase.table("jobs").insert(job_data).execute()
+        if not response.data:
+            raise HTTPException(status_code=500, detail="Failed to create job in database.")
+            
+        # Add run_pipeline to background tasks
+        background_tasks.add_task(
+            run_pipeline,
+            job_id,
+            video_path,
+            title,
+            guest_name,
+            channel_id
+        )
+        
+        print(f"[JobsRoute] Started job {job_id} for video '{title}'")
+        return {"job_id": job_id, "status": "queued", "message": "Processing started"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[JobsRoute] Error in POST /jobs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{job_id}")
+async def get_job(job_id: str):
+    try:
+        supabase = get_client()
+        
+        # Query job
+        job_response = supabase.table("jobs").select("*").eq("id", job_id).execute()
+        if not job_response.data:
+            raise HTTPException(status_code=404, detail="Job not found")
+            
+        job = job_response.data[0]
+        
+        # Query clips
+        clips_response = supabase.table("clips").select("*").eq("job_id", job_id).order("posting_order").execute()
+        
+        print(f"[JobsRoute] Fetched job {job_id}")
+        return {
+            "job": job,
+            "clips": clips_response.data if clips_response.data else []
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[JobsRoute] Error in GET /jobs/{job_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("")
+async def list_jobs(channel_id: str = "speedy_cast", limit: int = 20):
+    try:
+        supabase = get_client()
+        
+        jobs_response = supabase.table("jobs").select("*").eq("channel_id", channel_id).order("created_at", desc=True).limit(limit).execute()
+        
+        print(f"[JobsRoute] Fetched jobs for channel {channel_id}")
+        return jobs_response.data if jobs_response.data else []
+        
+    except Exception as e:
+        print(f"[JobsRoute] Error in GET /jobs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{job_id}")
+async def delete_job(job_id: str):
+    try:
+        supabase = get_client()
+        
+        # Delete clips
+        supabase.table("clips").delete().eq("job_id", job_id).execute()
+        
+        # Delete job
+        job_response = supabase.table("jobs").delete().eq("id", job_id).execute()
+        if not job_response.data:
+            raise HTTPException(status_code=404, detail="Job not found")
+            
+        # Delete output directory for job using storage
+        job_dir = os.path.join(storage.OUTPUT_DIR, job_id)
+        if os.path.exists(job_dir):
+            shutil.rmtree(job_dir)
+            print(f"[JobsRoute] Deleted output directory: {job_dir}")
+            
+        print(f"[JobsRoute] Deleted job {job_id}")
+        return {"deleted": True, "job_id": job_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[JobsRoute] Error in DELETE /jobs/{job_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+==================== END backend/app/api/routes/jobs.py ====================
+
+==================== backend/app/api/routes/clips.py ====================
+from fastapi import APIRouter, HTTPException, Body
+from app.services.supabase_client import get_client
+from typing import Optional, Any
+
+router = APIRouter(prefix="/clips", tags=["clips"])
+
+@router.get("")
+async def get_clips(
+    job_id: Optional[str] = None,
+    channel_id: Optional[str] = None,
+    limit: int = 20
+):
+    try:
+        print(f"[ClipsRoute] Fetching clips (job_id={job_id}, channel_id={channel_id}, limit={limit})")
+        supabase = get_client()
+        
+        query = supabase.table("clips").select("*")
+        
+        if job_id:
+            response = query.eq("job_id", job_id).order("posting_order").execute()
+        elif channel_id:
+            response = query.eq("channel_id", channel_id).order("created_at", desc=True).limit(limit).execute()
+        else:
+            response = query.order("created_at", desc=True).limit(limit).execute()
+            
+        return response.data
+    except Exception as e:
+        print(f"[ClipsRoute] Error fetching clips: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{clip_id}")
+async def get_clip(clip_id: str):
+    try:
+        print(f"[ClipsRoute] Fetching clip {clip_id}")
+        supabase = get_client()
+        
+        response = supabase.table("clips").select("*").eq("id", clip_id).execute()
+        
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        return response.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error fetching clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.patch("/{clip_id}/approve")
+async def approve_clip(clip_id: str, notes: Optional[str] = Body(default=None, embed=True)):
+    try:
+        print(f"[ClipsRoute] Approving clip {clip_id}")
+        supabase = get_client()
+        
+        update_data: dict[str, Any] = {"user_approved": True}
+        if notes is not None:
+            update_data["user_notes"] = notes
+            
+        response = supabase.table("clips").update(update_data).eq("id", clip_id).execute()
+        
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        return {"approved": True, "clip_id": clip_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error approving clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.patch("/{clip_id}/reject")
+async def reject_clip(clip_id: str, notes: Optional[str] = Body(default=None, embed=True)):
+    try:
+        print(f"[ClipsRoute] Rejecting clip {clip_id}")
+        supabase = get_client()
+        
+        update_data: dict[str, Any] = {"user_approved": False}
+        if notes is not None:
+            update_data["user_notes"] = notes
+            
+        response = supabase.table("clips").update(update_data).eq("id", clip_id).execute()
+        
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        return {"rejected": True, "clip_id": clip_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error rejecting clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+==================== END backend/app/api/routes/clips.py ====================
+
+==================== backend/app/api/routes/channels.py ====================
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from typing import Optional, Dict, Any, List
+from pydantic import BaseModel
+from app.services.supabase_client import get_client
+from app.services import storage
+import sys
+import os
+
+# Add backend directory to sys.path
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if backend_dir not in sys.path:
+    sys.path.append(backend_dir)
+
+# Ignore missing imports during Pyre checks; functions are dynamically loaded during runtime
+import importlib
+try:
+    onboarding_worker = importlib.import_module("workers.onboarding_worker")
+except Exception:
+    onboarding_worker = None
+
+router = APIRouter(prefix="/channels", tags=["channels"])
+
+class ChannelCreate(BaseModel):
+    channel_id: str
+    display_name: str
+    niche: Optional[str] = None
+    content_format: Optional[str] = None
+    clip_duration_min: int = 15
+    clip_duration_max: int = 50
+    channel_vision: Optional[str] = None
+
+class YouTubeConnect(BaseModel):
+    youtube_channel_id: str
+    access_token: str
+    refresh_token: str
+
+class OnboardExistingRequest(BaseModel):
+    youtube_channel_id: str
+    youtube_api_key: str
+
+@router.get("")
+async def list_channels():
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("*").order("created_at", desc=True).execute()
+        return result.data
+    except Exception as e:
+        print(f"[ChannelsRoute] Error listing channels: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{channel_id}")
+async def get_channel(channel_id: str):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+        return result.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error getting channel: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("")
+async def create_channel(channel: ChannelCreate):
+    try:
+        supabase = get_client()
+        data = {
+            "id": channel.channel_id,
+            "display_name": channel.display_name,
+            "niche": channel.niche,
+            "content_format": channel.content_format,
+            "clip_duration_min": channel.clip_duration_min,
+            "clip_duration_max": channel.clip_duration_max,
+            "channel_vision": channel.channel_vision
+        }
+        supabase.table("channels").insert(data).execute()
+        print(f"[ChannelsRoute] Created channel: {channel.channel_id}")
+        return {"created": True, "channel_id": channel.channel_id}
+    except Exception as e:
+        print(f"[ChannelsRoute] Error creating channel: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.patch("/{channel_id}")
+async def update_channel(channel_id: str, updates: Dict[str, Any]):
+    try:
+        allowed_fields = {
+            "display_name", "niche", "content_format", "clip_duration_min",
+            "clip_duration_max", "channel_vision", "channel_dna", "onboarding_status"
+        }
+        
+        filtered_updates = {k: v for k, v in updates.items() if k in allowed_fields}
+        
+        if not filtered_updates:
+            return {"updated": False, "channel_id": channel_id, "detail": "No valid fields to update"}
+            
+        supabase = get_client()
+        supabase.table("channels").update(filtered_updates).eq("id", channel_id).execute()
+        print(f"[ChannelsRoute] Updated channel {channel_id}: {list(filtered_updates.keys())}")
+        return {"updated": True, "channel_id": channel_id}
+    except Exception as e:
+        print(f"[ChannelsRoute] Error updating channel: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{channel_id}/connect-youtube")
+async def connect_youtube(channel_id: str, data: YouTubeConnect):
+    try:
+        supabase = get_client()
+        update_data = {
+            "youtube_channel_id": data.youtube_channel_id,
+            "youtube_access_token": data.access_token,
+            "youtube_refresh_token": data.refresh_token,
+            "channel_type": "existing"
+        }
+        supabase.table("channels").update(update_data).eq("id", channel_id).execute()
+        print(f"[ChannelsRoute] Connected YouTube for channel: {channel_id}")
+        return {"connected": True, "channel_id": channel_id}
+    except Exception as e:
+        print(f"[ChannelsRoute] Error connecting YouTube: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{channel_id}/onboard/existing")
+async def onboard_existing_channel(channel_id: str, request: OnboardExistingRequest, background_tasks: BackgroundTasks):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+            
+        channel = result.data[0]
+        if channel.get("onboarding_status") == "ready":
+            raise HTTPException(status_code=400, detail="Channel onboarding already complete")
+            
+        update_data = {
+            "youtube_channel_id": request.youtube_channel_id
+        }
+        supabase.table("channels").update(update_data).eq("id", channel_id).execute()
+        
+        import importlib
+        workers_mod = importlib.import_module("workers.onboarding_worker")
+
+        background_tasks.add_task(
+            workers_mod.run_existing_channel_onboarding,
+            channel_id,
+            request.youtube_channel_id,
+            request.youtube_api_key
+        )
+        
+        return {"started": True, "channel_id": channel_id, "type": "existing"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error starting existing channel onboarding: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{channel_id}/onboard/new")
+async def onboard_new_channel(
+    channel_id: str,
+    background_tasks: BackgroundTasks,
+    files: Optional[List[UploadFile]] = File(None)
+):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+            
+        reference_clip_paths = []
+        if files:
+            for file in files:
+                file_bytes = await file.read()
+                path = storage.save_upload(file_bytes, file.filename, f"onboard_ref_{channel_id}")
+                reference_clip_paths.append(path)
+                
+        import importlib
+        workers_mod = importlib.import_module("workers.onboarding_worker")
+
+        background_tasks.add_task(
+            workers_mod.run_new_channel_onboarding,
+            channel_id,
+            reference_clip_paths
+        )
+        
+        return {
+            "started": True,
+            "channel_id": channel_id,
+            "type": "new",
+            "reference_clips_count": len(reference_clip_paths)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error starting new channel onboarding: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{channel_id}/onboarding-status")
+async def get_onboarding_status(channel_id: str):
+    try:
+        supabase = get_client()
+        result = supabase.table("channels").select("id, onboarding_status, channel_dna").eq("id", channel_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+            
+        channel = result.data[0]
+        return {
+            "channel_id": channel_id,
+            "onboarding_status": channel.get("onboarding_status"),
+            "channel_dna": channel.get("channel_dna")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ChannelsRoute] Error getting onboarding status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{channel_id}/references")
+async def add_reference(
+    channel_id: str,
+    file: UploadFile = File(...),
+    source_url: Optional[str] = Form(None),
+    notes: Optional[str] = Form(None)
+):
+    try:
+        supabase = get_client()
+        
+        file_bytes = await file.read()
+        storage.save_upload(file_bytes, file.filename, f"ref_{channel_id}")
+        print(f"[ChannelsRoute] Saved reference file {file.filename} for channel {channel_id}")
+        
+        insert_data = {
+            "channel_id": channel_id,
+            "source": "external_reference",
+            "title": file.filename
+        }
+        if source_url:
+            insert_data["source_url"] = source_url
+            
+        supabase.table("reference_clips").insert(insert_data).execute()
+        print(f"[ChannelsRoute] Added reference clip for channel {channel_id}")
+        
+        return {"added": True, "channel_id": channel_id}
+    except Exception as e:
+        print(f"[ChannelsRoute] Error adding reference: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+==================== END backend/app/api/routes/channels.py ====================
+
+==================== backend/app/api/routes/speakers.py ====================
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from app.services.supabase_client import get_client
+from app.pipeline.orchestrator import run_pipeline
+from app.models.schemas import SpeakerConfirmRequest
+
+router = APIRouter(prefix="/jobs", tags=["speakers"])
+
+from workers.video_worker import resume_pipeline_from_s04
+
+@router.post("/{job_id}/confirm-speakers")
+async def confirm_speakers(job_id: str, request: SpeakerConfirmRequest, background_tasks: BackgroundTasks):
+    try:
+        supabase = get_client()
+        
+        # 1. Query jobs table WHERE id = job_id
+        job_res = supabase.table("jobs").select("*").eq("id", job_id).execute()
+        if not job_res.data:
+            raise HTTPException(status_code=404, detail="Job not found")
+            
+        job = job_res.data[0]
+        if job.get("status") != "awaiting_speaker_confirm":
+            raise HTTPException(status_code=400, detail="Job is not awaiting speaker confirmation")
+            
+        # 2. Query transcripts table WHERE job_id = job_id
+        transcript_res = supabase.table("transcripts").select("*").eq("job_id", job_id).execute()
+        if not transcript_res.data:
+            raise HTTPException(status_code=404, detail="Transcript not found")
+            
+        # 3. Update transcripts table
+        # request.speaker_map is a dict of SpeakerInfo, we need to convert it to dict for supabase JSONB
+        speaker_map_dict = {k: v.dict() for k, v in request.speaker_map.items()}
+        
+        supabase.table("transcripts").update({
+            "speaker_map": speaker_map_dict,
+            "speaker_confirmed": True
+        }).eq("job_id", job_id).execute()
+        
+        # 4. Update jobs table
+        supabase.table("jobs").update({
+            "status": "processing",
+            "current_step": "s04_labeled_transcript"
+        }).eq("id", job_id).execute()
+        
+        # 5. Re-trigger pipeline from s04 onwards
+        background_tasks.add_task(resume_pipeline_from_s04, job_id, speaker_map_dict)
+        
+        # 6. Return
+        return {
+            "confirmed": True,
+            "job_id": job_id,
+            "speaker_map": speaker_map_dict
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[SpeakersRoute] Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+==================== END backend/app/api/routes/speakers.py ====================
+
+==================== backend/app/api/routes/downloads.py ====================
+import os
+import zipfile
+import tempfile
+import pathlib
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse
+from app.services.supabase_client import get_client
+
+router = APIRouter(prefix="/downloads", tags=["downloads"])
+
+def cleanup_temp_file(path: str):
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+            print(f"[DownloadsRoute] Cleaned up temporary file: {path}")
+    except Exception as e:
+        print(f"[DownloadsRoute] Error cleaning up temp file: {e}")
+
+@router.get("/clips/{clip_id}")
+async def download_clip(clip_id: str):
+    try:
+        print(f"[DownloadsRoute] Request to download clip: {clip_id}")
+        supabase = get_client()
+        result = supabase.table("clips").select("*").eq("id", clip_id).execute()
+        
+        if not result.data:
+            print(f"[DownloadsRoute] Clip not found: {clip_id}")
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        clip = result.data[0]
+        video_path = clip.get("video_landscape_path")
+        
+        if video_path is None or not os.path.exists(video_path):
+            print(f"[DownloadsRoute] Video file not found on disk for clip {clip_id}: {video_path}")
+            raise HTTPException(status_code=404, detail="Video file not found on disk")
+            
+        clip_index = clip.get("clip_index", 0)
+        content_type = clip.get("content_type", "video")
+        
+        filename = f"clip_{clip_index}_{content_type}.mp4"
+        print(f"[DownloadsRoute] Serving file {video_path} as {filename}")
+        
+        return FileResponse(
+            path=video_path,
+            media_type="video/mp4",
+            filename=filename
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[DownloadsRoute] Error downloading clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/jobs/{job_id}/all")
+async def download_all_clips(job_id: str, background_tasks: BackgroundTasks):
+    try:
+        print(f"[DownloadsRoute] Request to download all clips for job: {job_id}")
+        supabase = get_client()
+        
+        # Query clips table WHERE job_id = job_id AND video_landscape_path IS NOT NULL
+        # ORDER BY posting_order
+        result = supabase.table("clips").select("*").eq("job_id", job_id).order("posting_order").execute()
+        
+        clips = [c for c in result.data if c.get("video_landscape_path") is not None]
+        
+        if not clips:
+            print(f"[DownloadsRoute] No clips found for job: {job_id}")
+            raise HTTPException(status_code=404, detail="No clips found")
+            
+        fd, zip_path = tempfile.mkstemp(suffix=".zip")
+        os.close(fd)
+        
+        added_count = 0
+        try:
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for clip in clips:
+                    video_path = clip.get("video_landscape_path")
+                    if video_path and os.path.exists(video_path):
+                        posting_order = clip.get("posting_order", 0)
+                        content_type = clip.get("content_type", "video")
+                        arcname = f"clip_{posting_order:02d}_{content_type}.mp4"
+                        zipf.write(video_path, arcname=arcname)
+                        added_count += 1
+                        
+            if added_count == 0:
+                print(f"[DownloadsRoute] No clip files found on disk for job: {job_id}")
+                cleanup_temp_file(zip_path)
+                raise HTTPException(status_code=404, detail="No clip files found on disk")
+                
+            filename = f"job_{job_id[:8]}_clips.zip"
+            print(f"[DownloadsRoute] Serving ZIP {zip_path} with {added_count} clips as {filename}")
+            
+            background_tasks.add_task(cleanup_temp_file, zip_path)
+            
+            return FileResponse(
+                path=zip_path,
+                media_type="application/zip",
+                filename=filename
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            cleanup_temp_file(zip_path)
+            raise e
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[DownloadsRoute] Error downloading all clips for job {job_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+==================== END backend/app/api/routes/downloads.py ====================
+
+==================== backend/app/api/routes/feedback.py ====================
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from pydantic import BaseModel
+from datetime import datetime, timezone
+from app.services.supabase_client import get_client
+from app.memory import feedback_processor
+from workers import feedback_worker
+
+router = APIRouter(prefix="/feedback", tags=["feedback"])
+
+class PublishRequest(BaseModel):
+    youtube_video_id: str
+    published_platform: str = "youtube"
+
+class ApproveRagRequest(BaseModel):
+    approved: bool
+
+@router.post("/clips/{clip_id}/publish")
+async def publish_clip(clip_id: str, request: PublishRequest):
+    try:
+        supabase = get_client()
+        supabase.table("clips").update({
+            "youtube_video_id": request.youtube_video_id,
+            "published_platform": request.published_platform,
+            "published_at": datetime.now(timezone.utc).isoformat(),
+            "feedback_status": "pending"
+        }).eq("id", clip_id).execute()
+        
+        return {"published": True, "clip_id": clip_id}
+    except Exception as e:
+        print(f"[Feedback] Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/clips/{clip_id}/approve-rag")
+async def approve_rag(clip_id: str, request: ApproveRagRequest, background_tasks: BackgroundTasks):
+    try:
+        supabase = get_client()
+        result = supabase.table("clips").select("*").eq("id", clip_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        clip = result.data[0]
+        
+        if request.approved:
+            background_tasks.add_task(feedback_processor.process_successful_clip, clip)
+        else:
+            supabase.table("clips").update({
+                "is_successful": False
+            }).eq("id", clip_id).execute()
+            
+        return {"processed": True, "clip_id": clip_id, "approved": request.approved}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Feedback] Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/collect")
+async def collect_feedback(background_tasks: BackgroundTasks):
+    try:
+        background_tasks.add_task(feedback_worker.check_pending_clips)
+        return {"started": True, "message": "Feedback collection started"}
+    except Exception as e:
+        print(f"[Feedback] Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/clips/{clip_id}/performance")
+async def get_performance(clip_id: str):
+    try:
+        supabase = get_client()
+        result = supabase.table("clips").select(
+            "id, views_48h, views_7d, avd_pct, is_successful, feedback_status, why_failed"
+        ).eq("id", clip_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        clip = result.data[0]
+        return {
+            "clip_id": clip_id,
+            "views_48h": clip.get("views_48h"),
+            "views_7d": clip.get("views_7d"),
+            "avd_pct": clip.get("avd_pct"),
+            "is_successful": clip.get("is_successful"),
+            "feedback_status": clip.get("feedback_status"),
+            "why_failed": clip.get("why_failed")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Feedback] Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+==================== END backend/app/api/routes/feedback.py ====================
+
+==================== backend/app/api/websocket/progress.py ====================
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+import asyncio
+import json
+from app.services.supabase_client import get_client
+
+router = APIRouter()
+
+@router.websocket("/ws/jobs/{job_id}/progress")
+async def job_progress_ws(websocket: WebSocket, job_id: str):
+    await websocket.accept()
+    print(f"[WSProgress] Client connected for job {job_id}")
+    
+    supabase = get_client()
+    
+    try:
+        while True:
+            try:
+                # Query job state
+                response = supabase.table("jobs").select(
+                    "status, current_step, current_step_number, progress_pct, error_message, clip_count"
+                ).eq("id", job_id).execute()
+                
+                if not response.data:
+                    # Job not found yet or deleted
+                    await asyncio.sleep(2)
+                    continue
+                    
+                job_data = response.data[0]
+                
+                # Send current job state
+                state_message = {
+                    "job_id": job_id,
+                    "status": job_data.get("status"),
+                    "current_step": job_data.get("current_step"),
+                    "current_step_number": job_data.get("current_step_number"),
+                    "progress_pct": job_data.get("progress_pct"),
+                    "error_message": job_data.get("error_message"),
+                    "clip_count": job_data.get("clip_count")
+                }
+                
+                await websocket.send_json(state_message)
+                
+                # Check for terminal states
+                status = job_data.get("status")
+                if status in ("completed", "failed"):
+                    print(f"[WSProgress] Job {job_id} reached terminal state: {status}")
+                    await websocket.send_json({"event": "done"})
+                    await websocket.close()
+                    break
+                    
+            except Exception as e:
+                print(f"[WSProgress] DB Error for job {job_id}: {e}")
+                await websocket.send_json({"event": "error", "message": str(e)})
+                await websocket.close()
+                break
+                
+            await asyncio.sleep(2)
+            
+    except WebSocketDisconnect:
+        print(f"[WSProgress] Client disconnected for job {job_id}")
+    except Exception as e:
+        print(f"[WSProgress] Unexpected error for job {job_id}: {e}")
+        try:
+            await websocket.close()
+        except:
+            pass
+
+==================== END backend/app/api/websocket/progress.py ====================
+
+==================== backend/app/memory/rag.py ====================
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from app.services.gemini_client import get_gemini_client
+from app.services.supabase_client import get_client
+from app.config import settings
+
+def embed_text(text: str) -> list | None:
+    try:
+        print(f"[RAG] Generating embedding for text (length: {len(text)})")
+        gemini = get_gemini_client()
+        result = gemini.models.embed_content(
+            model="text-embedding-004",
+            contents=text
+        )
+        if not result or not result.embeddings:
+            print("[RAG] Failed to get embedding from Gemini response")
+            return None
+            
+        print("[RAG] Successfully generated embedding")
+        return result.embeddings[0].values
+    except Exception as e:
+        print(f"[RAG] Error generating embedding: {e}")
+        return None
+
+def search_similar_clips(query_text: str, channel_id: str, limit: int = 3) -> list:
+    try:
+        print(f"[RAG] Searching for similar clips for channel {channel_id}")
+        embedding = embed_text(query_text)
+        if not embedding:
+            print("[RAG] Embedding failed, cannot search")
+            return []
+            
+        conn = psycopg2.connect(settings.DATABASE_URL)
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                embedding_str = "[" + ",".join(map(str, embedding)) + "]"
+                cur.execute("""
+                    SELECT id, hook_text, content_type, clip_summary, what_makes_it_work, views
+                    FROM reference_clips
+                    WHERE channel_id = %s
+                    ORDER BY clip_summary_embedding <=> %s::vector
+                    LIMIT %s
+                """, (channel_id, embedding_str, limit))
+                results = cur.fetchall()
+                print(f"[RAG] Found {len(results)} similar clips")
+                return [dict(row) for row in results]
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[RAG] Error searching similar clips: {e}")
+        return []
+
+def add_to_rag(clip_id: str, channel_id: str, summary_text: str) -> bool:
+    try:
+        print(f"[RAG] Adding clip {clip_id} to RAG for channel {channel_id}")
+        embedding = embed_text(summary_text)
+        if not embedding:
+            print("[RAG] Embedding failed, cannot add to RAG")
+            return False
+            
+        supabase = get_client()
+        
+        # Update clips table
+        print(f"[RAG] Updating clip {clip_id} with summary and embedding")
+        supabase.table("clips").update({
+            "clip_summary": summary_text,
+            "clip_summary_embedding": embedding
+        }).eq("id", clip_id).execute()
+        
+        # Insert into reference_clips
+        print(f"[RAG] Inserting clip {clip_id} into reference_clips")
+        conn = psycopg2.connect(settings.DATABASE_URL)
+        try:
+            with conn.cursor() as cur:
+                embedding_str = "[" + ",".join(map(str, embedding)) + "]"
+                cur.execute("""
+                    INSERT INTO reference_clips (
+                        channel_id, source, source_clip_id,
+                        clip_summary, clip_summary_embedding, analyzed_at
+                    ) VALUES (
+                        %s, 'own_successful', %s,
+                        %s, %s::vector, NOW()
+                    )
+                """, (channel_id, clip_id, summary_text, embedding_str))
+            conn.commit()
+        finally:
+            conn.close()
+            
+        print(f"[RAG] Successfully added clip {clip_id} to RAG")
+        return True
+    except Exception as e:
+        print(f"[RAG] Error adding to RAG: {e}")
+        return False
+
+def format_rag_context(similar_clips: list) -> str:
+    try:
+        if not similar_clips:
+            return ""
+            
+        lines = ["Similar successful clips from this channel:"]
+        for i, clip in enumerate(similar_clips, 1):
+            hook = clip.get('hook_text', '')
+            c_type = clip.get('content_type', '')
+            what_worked = clip.get('what_makes_it_work', '')
+            lines.append(f" {i}. Hook: '{hook}' | Type: {c_type} | What worked: {what_worked}")
+            
+        return "\n".join(lines)
+    except Exception as e:
+        print(f"[RAG] Error formatting context: {e}")
+        return ""
+
+==================== END backend/app/memory/rag.py ====================
+
+==================== backend/app/memory/dynamic_context.py ====================
+import datetime
+from app.services.supabase_client import get_client
+from app.models.enums import ContentType
+
+def build_channel_memory(channel_id: str, days: int = 90) -> str:
+    try:
+        supabase = get_client()
+        cutoff_date = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).isoformat()
+        
+        response = supabase.table("clips").select("*").eq("channel_id", channel_id).eq("feedback_status", "final_7d").gte("created_at", cutoff_date).execute()
+        clips = response.data
+        
+        if not clips:
+            return "No channel memory yet — using general viral content patterns."
+            
+        successful_clips = [c for c in clips if c.get("is_successful")]
+        failed_clips = [c for c in clips if not c.get("is_successful")]
+        
+        # WHAT WORKED
+        succ_types = {}
+        for c in successful_clips:
+            ct = c.get("content_type")
+            if ct:
+                succ_types[ct] = succ_types.get(ct, 0) + 1
+        sorted_succ_types = sorted(succ_types.items(), key=lambda x: x[1], reverse=True)[:3]
+        succ_types_str = ", ".join([f"{k} ({v})" for k, v in sorted_succ_types]) if sorted_succ_types else "None"
+        
+        durations = [c.get("duration", 0) for c in successful_clips if c.get("duration")]
+        avg_dur = sum(durations) / len(durations) if durations else 0
+        
+        hooks = [c.get("hook_text") for c in successful_clips if c.get("hook_text")]
+        hooks_str = ", ".join([f'"{h}"' for h in hooks[:3]]) if hooks else "None"
+        
+        # Content gap
+        cutoff_30d = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30)).isoformat()
+        clips_30d = [c for c in clips if c.get("created_at") and c.get("created_at") >= cutoff_30d]
+        types_30d = {c.get("content_type") for c in clips_30d if c.get("content_type")}
+        all_types = {ct.value for ct in ContentType}
+        gap_types = all_types - types_30d
+        gap_str = ", ".join(sorted(list(gap_types))) if gap_types else "None"
+        
+        # WHAT FAILED
+        fail_types = {}
+        for c in failed_clips:
+            ct = c.get("content_type")
+            if ct:
+                fail_types[ct] = fail_types.get(ct, 0) + 1
+        sorted_fail_types = sorted(fail_types.items(), key=lambda x: x[1], reverse=True)
+        fail_types_str = ", ".join([f"{k} ({v})" for k, v in sorted_fail_types]) if sorted_fail_types else "None"
+        
+        reasons = {}
+        for c in failed_clips:
+            wf = c.get("why_failed")
+            if wf:
+                reasons[wf] = reasons.get(wf, 0) + 1
+        sorted_reasons = sorted(reasons.items(), key=lambda x: x[1], reverse=True)[:3]
+        reasons_str = ", ".join([f"{k} ({v})" if v > 1 else k for k, v in sorted_reasons]) if sorted_reasons else "None"
+        
+        # Channel averages
+        views = [c.get("views_7d", 0) for c in clips if c.get("views_7d") is not None]
+        avg_views = sum(views) / len(views) if views else 0
+        
+        avds = [c.get("avd_pct", 0) for c in clips if c.get("avd_pct") is not None]
+        avg_avd = sum(avds) / len(avds) if avds else 0
+        
+        memory_str = f"""Channel memory (last {days} days):
+
+WHAT WORKED ({len(successful_clips)} clips):
+- Content types: {succ_types_str}
+- Avg successful duration: {avg_dur:.1f}s
+- Top hooks: {hooks_str}
+- Content gap (underrepresented last 30 days): {gap_str}
+
+WHAT FAILED ({len(failed_clips)} clips):
+- Failed content types: {fail_types_str}
+- Common failure reasons: {reasons_str}
+
+Channel averages: {avg_views:.1f} views, {avg_avd:.1f}% AVD"""
+        
+        return memory_str
+        
+    except Exception as e:
+        print(f"[DynamicContext] Error in build_channel_memory: {e}")
+        return ""
+
+def build_cold_start_context(niche: str, content_format: str) -> str:
+    try:
+        niche_lower = (niche or "").lower()
+        
+        if "entertainment" in niche_lower or "celebrity" in niche_lower:
+            return (
+                "General patterns for entertainment clips: shocking reveals and funny reactions "
+                "perform best. Keep under 40 seconds. Start with the most surprising statement."
+            )
+            
+        if "tech" in niche_lower or "business" in niche_lower:
+            return (
+                "General patterns for tech/business clips: contrarian takes and unexpected "
+                "insights perform best. Keep under 45 seconds. Start with a bold claim."
+            )
+            
+        return (
+            "No channel history available. Focus on strong hooks, complete story arcs, "
+            "and moments that are understandable without prior context."
+        )
+        
+    except Exception as e:
+        print(f"[DynamicContext] Error in build_cold_start_context: {e}")
+        return ""
+
+def get_full_context(channel_id: str) -> str:
+    try:
+        supabase = get_client()
+        channel_res = supabase.table("channels").select("niche, content_format, channel_dna").eq("id", channel_id).execute()
+        
+        if not channel_res.data:
+            print(f"[DynamicContext] Channel {channel_id} not found.")
+            return build_cold_start_context("", "")
+            
+        channel = channel_res.data[0]
+        niche = channel.get("niche", "")
+        content_format = channel.get("content_format", "")
+        
+        clips_res = supabase.table("clips").select("id").eq("channel_id", channel_id).eq("feedback_status", "final_7d").limit(5).execute()
+        clip_count = len(clips_res.data) if clips_res.data else 0
+        
+        if clip_count >= 5:
+            return build_channel_memory(channel_id)
+        else:
+            return build_cold_start_context(niche, content_format)
+            
+    except Exception as e:
+        print(f"[DynamicContext] Error in get_full_context: {e}")
+        return ""
+
+==================== END backend/app/memory/dynamic_context.py ====================
+
+==================== backend/app/memory/feedback_processor.py ====================
+import json
+from app.services.gemini_client import generate, generate_json, embed_content
+from app.services.supabase_client import get_client
+from app.pipeline.prompts.failure_analysis import PROMPT as FAILURE_ANALYSIS_PROMPT
+from app.pipeline.prompts.clip_summary import PROMPT as CLIP_SUMMARY_PROMPT
+from app.config import settings
+
+def process_successful_clip(clip: dict) -> None:
+    try:
+        # Generate natural language summary for RAG
+        prompt = CLIP_SUMMARY_PROMPT.replace("CLIP_DATA_PLACEHOLDER", json.dumps(clip))
+        summary_text = generate(prompt, model=settings.GEMINI_MODEL_FLASH)
+        
+        # Generate embedding for the summary
+        embedding = embed_content(summary_text)
+        
+        supabase = get_client()
+        
+        # Update clips table
+        supabase.table("clips").update({
+            "clip_summary": summary_text,
+            "clip_summary_embedding": embedding
+        }).eq("id", clip["id"]).execute()
+        
+        # Insert into reference_clips table
+        reference_data = {
+            "channel_id": clip.get("channel_id"),
+            "source": "own_successful",
+            "source_clip_id": clip["id"],
+            "hook_text": clip.get("hook_text"),
+            "content_type": clip.get("content_type"),
+            "duration_s": clip.get("duration_s"),
+            "views": clip.get("views_7d"),
+            "clip_summary": summary_text,
+            "clip_summary_embedding": embedding,
+            "what_makes_it_work": summary_text
+        }
+        
+        supabase.table("reference_clips").insert(reference_data).execute()
+        
+        print("[FeedbackProcessor] clip processed successfully")
+    except Exception as e:
+        print(f"[FeedbackProcessor] Error processing successful clip: {e}")
+
+def process_failed_clip(clip: dict) -> None:
+    try:
+        # Build failure_analysis prompt
+        clip_data = {
+            "hook_text": clip.get("hook_text"),
+            "content_type": clip.get("content_type"),
+            "duration_s": clip.get("duration_s"),
+            "standalone_score": clip.get("standalone_score"),
+            "hook_score": clip.get("hook_score"),
+            "arc_score": clip.get("arc_score")
+        }
+        performance_data = {
+            "views_7d": clip.get("views_7d"),
+            "avd_pct": clip.get("avd_pct")
+        }
+        
+        prompt = FAILURE_ANALYSIS_PROMPT.replace("CLIP_DATA_PLACEHOLDER", json.dumps(clip_data))
+        prompt = prompt.replace("PERFORMANCE_DATA_PLACEHOLDER", json.dumps(performance_data))
+        
+        analysis_result = generate_json(prompt, model=settings.GEMINI_MODEL_FLASH)
+        
+        supabase = get_client()
+        
+        # Update clips table
+        supabase.table("clips").update({
+            "why_failed": json.dumps(analysis_result)
+        }).eq("id", clip["id"]).execute()
+        
+        print("[FeedbackProcessor] failure analysis complete")
+    except Exception as e:
+        print(f"[FeedbackProcessor] Error processing failed clip: {e}")
+
+def update_channel_averages(channel_id: str) -> None:
+    try:
+        supabase = get_client()
+        
+        # Query clips
+        response = supabase.table("clips").select("views_7d").eq("channel_id", channel_id).eq("feedback_status", "final_7d").not_.is_("views_7d", "null").execute()
+        
+        clips = response.data
+        if not clips:
+            print(f"[FeedbackProcessor] No clips found for channel {channel_id}")
+            return
+            
+        successful_clips_count = len(clips)
+        total_views = sum(clip["views_7d"] for clip in clips if clip.get("views_7d") is not None)
+        calculated_avg = total_views / successful_clips_count if successful_clips_count > 0 else 0
+        
+        # Update channels table
+        supabase.table("channels").update({
+            "avg_views_7d": calculated_avg,
+            "successful_clips_count": successful_clips_count
+        }).eq("id", channel_id).execute()
+        
+        print(f"[FeedbackProcessor] Channel averages updated for {channel_id}")
+    except Exception as e:
+        print(f"[FeedbackProcessor] Error updating channel averages: {e}")
+==================== END backend/app/memory/feedback_processor.py ====================
+
+==================== backend/workers/video_worker.py ====================
+import os
+import time
+import traceback
+from datetime import datetime, timezone
+
+from app.pipeline.orchestrator import run_pipeline, update_job, log_step
+from app.services.supabase_client import get_client
+from app.models.enums import JobStatus, StepStatus
+
+
+def start_pipeline(job_id: str, video_path: str, video_title: str,
+                   guest_name: str = None, channel_id: str = "speedy_cast") -> None:
+    """
+    Simply calls run_pipeline with all params
+    Wraps in try/except, prints [Worker] prefixed logs
+    """
+    try:
+        print(f"[Worker] Starting pipeline for job {job_id}")
+        run_pipeline(job_id, video_path, video_title, guest_name, channel_id)
+        print(f"[Worker] Pipeline completed for job {job_id}")
+    except Exception as e:
+        print(f"[Worker] Error starting pipeline for job {job_id}: {e}")
+        traceback.print_exc()
+
+
+def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
+    """
+    Resumes pipeline from s04 after speaker confirmation.
+    """
+    audio_path = None
+    try:
+        print(f"[Worker] Resuming pipeline from s04 for job {job_id}")
+        supabase = get_client()
+
+        # Fetch transcript from transcripts table
+        transcript_res = supabase.table("transcripts").select("*").eq("job_id", job_id).execute()
+        if not transcript_res.data:
+            raise Exception("Transcript not found")
+        transcript_record = transcript_res.data[0]
+        transcript_data = transcript_record.get("transcript_data")
+
+        # In case we need previous step results that might not be in db but we need to re-run or fetch
+        labeled_transcript = transcript_record.get("labeled_transcript")
+        energy_map = transcript_record.get("energy_map")
+        visual_events = transcript_record.get("visual_events")
+        humor_moments = transcript_record.get("humor_moments")
+
+        # Fetch job from jobs table
+        job_res = supabase.table("jobs").select("*").eq("id", job_id).execute()
+        if not job_res.data:
+            raise Exception("Job not found")
+        job_record = job_res.data[0]
+
+        video_path = job_record.get("video_path")
+        video_title = job_record.get("title", "")
+        guest_name = job_record.get("guest_name")
+        channel_id = job_record.get("channel_id", "speedy_cast")
+
+        # Set job to processing
+        update_job(job_id=job_id, status=JobStatus.PROCESSING.value)
+
+        steps = [
+            (4, "s04_labeled_transcript", 36),
+            (5, "s05_energy_map", 44),
+            (6, "s06_video_analysis", 52),
+            (7, "s07_context_build", 58),
+            (8, "s07b_humor_map", 64),
+            (9, "s07c_signal_fusion", 70),
+            (10, "s08_clip_finder", 80),
+            (11, "s09_quality_gate", 88),
+            (12, "s09b_clip_strategy", 92),
+            (13, "s10_precision_cut", 96),
+            (14, "s11_export", 100)
+        ]
+
+        channel_dna = {}
+        context = None
+        fused_timeline = None
+
+        # Reconstruct audio_path if we need it for s05 (it might not exist if deleted, need to extract again or gracefully skip)
+        # However, the instruction says: "s05_energy_map.run(audio_path, job_id) — note: audio may be gone, handle gracefully"
+        audio_path = video_path.replace(".mp4", ".m4a") if video_path else "temp_audio.m4a"
+
+        for step_number, step_name, progress_pct in steps:
+            step_start_time = time.time()
+            log_step(job_id, step_number, step_name, StepStatus.STARTED.value)
+
+            update_job(
+                job_id=job_id,
+                current_step=step_name,
+                current_step_number=step_number,
+                progress_pct=progress_pct
+            )
+
+            try:
+                if step_number == 4:
+                    from app.pipeline.steps import s04_labeled_transcript
+                    labeled_transcript = s04_labeled_transcript.run(transcript_data, confirmed_speaker_map, guest_name)
+                elif step_number == 5:
+                    from app.pipeline.steps import s05_energy_map
+                    if os.path.exists(audio_path):
+                        energy_map = s05_energy_map.run(audio_path, job_id)
+                    else:
+                        print(f"[Worker] Audio path {audio_path} not found, gracefully skipping/failing s05 inside logic if needed")
+                        energy_map = s05_energy_map.run(audio_path, job_id)
+                elif step_number == 6:
+                    from app.pipeline.steps import s06_video_analysis
+                    visual_events = s06_video_analysis.run(video_path, job_id)
+                elif step_number == 7:
+                    from app.pipeline.steps import s07_context_build
+                    context = s07_context_build.run(guest_name, channel_id, video_title)
+                elif step_number == 8:
+                    from app.pipeline.steps import s07b_humor_map
+                    channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
+                    if channel_res.data and len(channel_res.data) > 0:
+                        channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    humor_moments = s07b_humor_map.run(labeled_transcript, channel_dna, job_id)
+                elif step_number == 9:
+                    from app.pipeline.steps import s07c_signal_fusion
+                    fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_map, visual_events, humor_moments, job_id)
+                elif step_number == 10:
+                    from app.pipeline.steps import s08_clip_finder
+                    selected_clips, evaluated_clips = s08_clip_finder.run(fused_timeline, labeled_transcript, context, job_id)
+                elif step_number == 11:
+                    from app.pipeline.steps import s09_quality_gate
+                    quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)
+                elif step_number == 12:
+                    from app.pipeline.steps import s09b_clip_strategy
+                    strategy_results = s09b_clip_strategy.run(quality_results, evaluated_clips, channel_dna, job_id)
+                elif step_number == 13:
+                    from app.pipeline.steps import s10_precision_cut
+                    cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
+                elif step_number == 14:
+                    from app.pipeline.steps import s11_export
+                    exported_clips = s11_export.run(cut_results, job_id)
+
+                duration_ms = int((time.time() - step_start_time) * 1000)
+                log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
+
+            except Exception as e:
+                error_msg = str(e)
+                print(f"[Worker] Error in step {step_name}: {error_msg}")
+                traceback.print_exc()
+
+                duration_ms = int((time.time() - step_start_time) * 1000)
+                log_step(
+                    job_id=job_id,
+                    step_number=step_number,
+                    step_name=step_name,
+                    status=StepStatus.FAILED.value,
+                    duration_ms=duration_ms,
+                    error_message=error_msg
+                )
+
+                update_job(
+                    job_id=job_id,
+                    status=JobStatus.FAILED.value,
+                    error_message=f"Step {step_name} failed: {error_msg}"
+                )
+                return
+
+        # After all steps complete
+        completed_at = datetime.now(timezone.utc).isoformat()
+        clip_count = len(exported_clips) if 'exported_clips' in locals() and exported_clips else 0
+        update_job(
+            job_id=job_id,
+            status=JobStatus.COMPLETED.value,
+            progress_pct=100,
+            completed_at=completed_at,
+            current_step="finished",
+            current_step_number=len(steps),
+            clip_count=clip_count
+        )
+        print(f"[Worker] Job {job_id} resume pipeline completed successfully.")
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[Worker] Resume pipeline execution failed unexpectedly: {error_msg}")
+        traceback.print_exc()
+        update_job(
+            job_id=job_id,
+            status=JobStatus.FAILED.value,
+            error_message=f"Pipeline critical failure: {error_msg}"
+        )
+    finally:
+        for path in [audio_path, video_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                    print(f"[Worker] Cleaned up {path}")
+                except Exception as e:
+                    print(f"[Worker] Error cleaning up {path}: {e}")
+
+==================== END backend/workers/video_worker.py ====================
+
