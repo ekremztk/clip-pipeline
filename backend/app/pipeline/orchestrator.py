@@ -259,13 +259,21 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             error_message=f"Pipeline critical failure: {error_msg}"
         )
     finally:
-        for path in [audio_path, video_path]:
-            if path and os.path.exists(path):
-                try:
-                    os.remove(path)
-                    print(f"[Orchestrator] Cleaned up {path}")
-                except Exception as e:
-                    print(f"[Orchestrator] Error cleaning up {path}: {e}")
+        try:
+            supabase = get_client()
+            job_res = supabase.table("jobs").select("status").eq("id", job_id).single().execute()
+            final_status = job_res.data.get("status") if job_res.data else None
+        except Exception:
+            final_status = None
+            
+        if final_status not in ("awaiting_speaker_confirm",):
+            for path in [audio_path, video_path]:
+                if path and os.path.exists(path):
+                    try:
+                        os.remove(path)
+                        print(f"[Orchestrator] Cleaned up {path}")
+                    except Exception as e:
+                        print(f"[Orchestrator] Error cleaning up {path}: {e}")
 
 def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
     """

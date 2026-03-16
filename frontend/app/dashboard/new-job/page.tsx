@@ -100,15 +100,12 @@ export default function NewJobPage() {
             setGuestName("");
 
             // Handle possible job statuses
-            switch (job.status) {
-                case 'awaiting_speaker_confirm':
-                    router.push(`/dashboard/speakers/${jobId}`);
-                    break;
-                case 'failed':
-                    setSubmitError('Pipeline failed. Please try again.');
-                    break;
-                default:
-                    router.push('/dashboard');
+            if (job.status === 'awaiting_speaker_confirm') {
+                router.push(`/dashboard/speakers/${jobId}`);
+            } else if (job.status === 'failed') {
+                setSubmitError('Pipeline failed. Please try again.');
+            } else {
+                router.push('/dashboard');
             }
         } catch (err: any) {
             console.error(err);
