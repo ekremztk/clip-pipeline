@@ -54,6 +54,7 @@ def get_guest_profile(guest_name: str) -> dict:
             "normalized_name": normalized_name,
             "original_name": guest_name,
             "profile_data": profile_data,
+            "clip_potential_note": profile_data.get("clip_potential_note", ""),
             "expires_at": expires_at,
             "updated_at": datetime.now(timezone.utc).isoformat()
         }
@@ -84,7 +85,7 @@ def get_channel_memory(channel_id: str) -> str:
         thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
         
         # Fetch last 90 days clips for this channel
-        response = supabase.table("clips").select("content_type, success_score, duration, created_at").eq("channel_id", channel_id).gte("created_at", ninety_days_ago).execute()
+        response = supabase.table("clips").select("content_type, success_score, duration_s, created_at").eq("channel_id", channel_id).gte("created_at", ninety_days_ago).execute()
         
         clips = response.data
         if not clips:
@@ -110,7 +111,7 @@ def get_channel_memory(channel_id: str) -> str:
         for clip in successful_clips:
             ctype = clip.get("content_type", "unknown")
             type_counts[ctype] = type_counts.get(ctype, 0) + 1
-            total_duration += clip.get("duration", 0)
+            total_duration += clip.get("duration_s", 0)
             
         sorted_types = sorted(type_counts.items(), key=lambda x: x[1], reverse=True)
         top_types = sorted_types[:3]

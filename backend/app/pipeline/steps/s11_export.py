@@ -1,6 +1,7 @@
 import os
 import subprocess
 import traceback
+import uuid
 from app.config import settings
 from app.services.supabase_client import get_client
 
@@ -49,27 +50,23 @@ def run(cut_results: list, job_id: str) -> list:
 
             # 4. Update clips table in Supabase
             clip_data = {
+                "id": str(uuid.uuid4()),
                 "job_id": job_id,
                 "channel_id": clip.get("channel_id", "speedy_cast"),
-                "clip_index": clip.get("posting_order", clip.get("clip_index")),
-                "start_time": clip.get("final_start"),
-                "end_time": clip.get("final_end"),
-                "duration_s": clip.get("duration_s"),
-                "hook_text": clip.get("hook_text"),
-                "content_type": clip.get("content_type"),
-                "guest_name": clip.get("guest_name"),
-                "confidence": clip.get("overall_confidence"),
-                "standalone_score": clip.get("standalone_score"),
-                "hook_score": clip.get("hook_score"),
-                "arc_score": clip.get("arc_score"),
-                "channel_fit_score": clip.get("channel_fit_score"),
-                "thinking_steps": clip.get("thinking_steps", {}),
-                "suggested_title": clip.get("suggested_title", clip.get("hook_text")),
-                "clip_strategy_role": clip.get("clip_strategy_role"),
-                "posting_order": clip.get("posting_order"),
-                "video_landscape_path": output_path,
-                "standalone_result": clip.get("standalone_result"),
-                "quality_status": clip.get("quality_status", "passed")
+                "start_time": clip.get("final_start") or clip.get("start_time") or 0,
+                "end_time": clip.get("final_end") or clip.get("end_time") or 0,
+                "duration_s": clip.get("duration_s") or 0,
+                "hook_text": clip.get("hook_text") or "",
+                "content_type": clip.get("content_type") or "general",
+                "clip_strategy_role": clip.get("clip_strategy_role") or "context_builder",
+                "posting_order": clip.get("posting_order") or 0,
+                "standalone_score": clip.get("standalone_score") or 0,
+                "hook_score": clip.get("hook_score") or 0,
+                "arc_score": clip.get("arc_score") or 0,
+                "channel_fit_score": clip.get("channel_fit_score") or 0,
+                "quality_status": clip.get("quality_status") or "fixable",
+                "quality_notes": clip.get("quality_notes") or "",
+                "video_landscape_path": output_path or ""
             }
             
             insert_result = supabase.table("clips").insert(clip_data).execute()

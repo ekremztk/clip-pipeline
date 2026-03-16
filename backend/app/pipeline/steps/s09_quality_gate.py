@@ -126,8 +126,8 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
                 clip["standalone_fix"] = note
                 print(f"[S09] Clip {candidate_id} fixable (standalone): {note}")
                 fixable_count += 1
-            elif overall == "pass":
-                clip["quality_status"] = "pass"
+            elif overall == "pass" or overall == "passed":
+                clip["quality_status"] = "passed"
                 print(f"[S09] Clip {candidate_id} passed standalone check")
                 passed_count += 1
             else:
@@ -146,7 +146,7 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
             results.append(clip)
             
     # Sort results: pass first, then fixable, then failed
-    status_order = {"pass": 0, "fixable": 1, "structural_fail": 2, "standalone_fail": 2}
+    status_order = {"passed": 0, "pass": 0, "fixable": 1, "structural_fail": 2, "standalone_fail": 2}
     results.sort(key=lambda x: status_order.get(x.get("quality_status", "structural_fail"), 3))
     
     print(f"[S09] Summary: {passed_count} passed, {fixable_count} fixable, {failed_count} failed.")

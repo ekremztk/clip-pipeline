@@ -85,8 +85,14 @@ export default function NewJobPage() {
                 throw new Error(errorData.detail || "Failed to start job");
             }
 
-            const data = await res.json();
-            if (!data.id) throw new Error("No job ID returned");
+            const responseData = await res.json();
+            const job = responseData.job || responseData.data || responseData;
+            const jobId = job?.id || job?.job_id;
+
+            if (!jobId) {
+                setSubmitError('Failed to get job ID from server');
+                return;
+            }
 
             // Clear form
             setFile(null);
@@ -94,13 +100,9 @@ export default function NewJobPage() {
             setGuestName("");
 
             // Handle possible job statuses
-            switch (data.status) {
-                case 'queued':
-                case 'processing':
-                    router.push('/dashboard');
-                    break;
+            switch (job.status) {
                 case 'awaiting_speaker_confirm':
-                    router.push(`/dashboard/speakers/${data.id}`);
+                    router.push(`/dashboard/speakers/${jobId}`);
                     break;
                 case 'failed':
                     setSubmitError('Pipeline failed. Please try again.');

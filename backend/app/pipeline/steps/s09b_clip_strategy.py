@@ -8,8 +8,8 @@ def run(quality_results: list, evaluated_clips: list, channel_dna: dict, job_id:
     Assigns a strategy role and posting order to each clip that passed quality gate.
     """
     try:
-        # 1. Filter quality_results to only clips with quality_status "pass" or "fixable"
-        passing_clips = [c for c in quality_results if c.get("quality_status") in ("pass", "fixable")]
+        # 1. Filter quality_results to only clips with quality_status "pass", "passed", or "fixable"
+        passing_clips = [c for c in quality_results if c.get("quality_status") in ("pass", "passed", "fixable")]
         
         # 2. If no clips passed: return empty list with [S09B] log
         if not passing_clips:
