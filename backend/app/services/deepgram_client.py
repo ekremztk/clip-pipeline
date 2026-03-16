@@ -1,6 +1,5 @@
 from deepgram import DeepgramClient
 from app.config import settings
-import httpx
 
 def transcribe(audio_path: str) -> dict:
     try:
@@ -8,8 +7,6 @@ def transcribe(audio_path: str) -> dict:
         
         with open(audio_path, "rb") as audio_file:
             buffer_data = audio_file.read()
-        
-        payload = {"buffer": buffer_data}
         
         options = {
             "model": "nova-2",
@@ -21,8 +18,9 @@ def transcribe(audio_path: str) -> dict:
             "language": "en"
         }
         
-        response = client.listen.prerecorded.v("1").transcribe_file(
-            payload, options
+        response = client.listen.rest.v("1").transcribe_file(
+            {"buffer": buffer_data},
+            options
         )
         
         return response.to_dict()
