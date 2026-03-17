@@ -294,6 +294,20 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             
         job = job_res.data
         video_path = job.get("video_path")
+        
+        # Fallback for old jobs where video_path wasn't saved to DB
+        if not video_path:
+            import glob
+            import os
+            from app.services.storage import UPLOAD_DIR
+            possible_files = glob.glob(os.path.join(UPLOAD_DIR, f"{job_id}_*"))
+            if possible_files:
+                video_path = possible_files[0]
+                print(f"[Orchestrator] Found video_path via fallback: {video_path}")
+            else:
+                print(f"[Orchestrator] Video file for job {job_id} not found in DB or on disk")
+                return
+
         video_title = job.get("title", "")
         guest_name = job.get("guest_name")
         channel_id = job.get("channel_id", "speedy_cast")

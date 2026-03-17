@@ -44,7 +44,8 @@ async def create_job(
             "guest_name": guest_name,
             "status": JobStatus.QUEUED.value,
             "current_step": "queued",
-            "progress_pct": 0
+            "progress_pct": 0,
+            "video_path": video_path
         }
         
         response = supabase.table("jobs").insert(job_data).execute()
