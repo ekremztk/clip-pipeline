@@ -2,8 +2,9 @@
 
 import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 import {
     LayoutDashboard,
     Plus,
@@ -14,7 +15,8 @@ import {
     Bell,
     PanelLeftClose,
     PanelLeftOpen,
-    ChevronDown
+    ChevronDown,
+    LogOut
 } from "lucide-react";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -39,6 +41,7 @@ export const useChannel = () => useContext(ChannelContext);
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const [channels, setChannels] = useState<Channel[]>([]);
@@ -73,6 +76,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             setSelectedChannel(ch);
             localStorage.setItem('selectedChannelId', channelId);
         }
+    };
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
     };
 
     const navItems = [
@@ -201,6 +209,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7c3aed] to-[#06b6d4] flex items-center justify-center cursor-pointer border border-white/10">
                                 <span className="text-xs font-bold text-white">SC</span>
                             </div>
+                            <button
+                                onClick={handleSignOut}
+                                className="text-[#6b7280] hover:text-white transition-colors flex items-center gap-2 p-1 rounded-md hover:bg-white/[0.03]"
+                                title="Sign Out"
+                            >
+                                <LogOut className="w-5 h-5" />
+                            </button>
                         </div>
                     </header>
 
