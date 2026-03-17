@@ -18,10 +18,10 @@ def run(quality_results: list, evaluated_clips: list, channel_dna: dict, job_id:
             
         # 3. Merge each passing clip with its full evaluation data from evaluated_clips (match by candidate_id)
         merged_clips = []
-        eval_dict = {c.get("candidate_id"): c for c in evaluated_clips}
+        eval_dict = {str(c.get("candidate_id")): c for c in evaluated_clips}
         
         for p_clip in passing_clips:
-            c_id = p_clip.get("candidate_id")
+            c_id = str(p_clip.get("candidate_id"))
             if c_id in eval_dict:
                 merged_clip = {**eval_dict[c_id], **p_clip}
                 merged_clips.append(merged_clip)
@@ -44,7 +44,7 @@ def run(quality_results: list, evaluated_clips: list, channel_dna: dict, job_id:
         
         # Map selected info by candidate_id
         strategy_dict = {
-            item.get("candidate_id"): item 
+            str(item.get("candidate_id")): item 
             for item in selected_clips_info
         }
 
@@ -52,12 +52,19 @@ def run(quality_results: list, evaluated_clips: list, channel_dna: dict, job_id:
         
         # 7. For each selected clip: add clip_strategy_role and posting_order to the clip data
         for clip in merged_clips:
-            c_id = clip.get("candidate_id")
+            c_id = str(clip.get("candidate_id"))
             if c_id in strategy_dict:
                 strat_info = strategy_dict[c_id]
                 clip["clip_strategy_role"] = strat_info.get("clip_strategy_role", "viral")
                 clip["posting_order"] = strat_info.get("posting_order", 999)
                 clip["selection_reason"] = strat_info.get("selection_reason", "")
+                
+                # Ensure scores are retained directly from eval_dict
+                if c_id in eval_dict:
+                    eval_data = eval_dict[c_id]
+                    for score_key in ["standalone_score", "hook_score", "arc_score", "channel_fit_score"]:
+                        clip[score_key] = eval_data.get(score_key, 0)
+                
                 final_clips.append(clip)
 
         # 8. Return final list sorted by posting_order ascending
@@ -71,9 +78,9 @@ def run(quality_results: list, evaluated_clips: list, channel_dna: dict, job_id:
         # Full try/except — if Gemini fails, return passing clips without strategy
         fallback_clips = []
         for i, clip in enumerate(passing_clips):
-            c_id = clip.get("candidate_id")
+            c_id = str(clip.get("candidate_id"))
             # Try to get evaluation data if available
-            eval_data = next((c for c in evaluated_clips if c.get("candidate_id") == c_id), {})
+            eval_data = next((c for c in evaluated_clips if str(c.get("candidate_id")) == c_id), {})
             merged = {**eval_data, **clip}
             merged["clip_strategy_role"] = "viral"
             merged["posting_order"] = i + 1

@@ -208,7 +208,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
                 elif step_number == 14:
                     from app.pipeline.steps import s11_export
-                    exported_clips = s11_export.run(cut_results, job_id)
+                    exported_clips = s11_export.run(cut_results, job_id, video_title)
                     
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -455,7 +455,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
                 elif step_number == 14:
                     from app.pipeline.steps import s11_export
-                    exported_clips = s11_export.run(cut_results, job_id)
+                    exported_clips = s11_export.run(cut_results, job_id, video_title)
                     
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)

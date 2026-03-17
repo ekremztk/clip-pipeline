@@ -46,11 +46,11 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
             pass # Ignore malformed lines
 
     # We need a quick lookup map for evaluated_clips by candidate_id
-    eval_map = {c.get("candidate_id"): c for c in evaluated_clips if "candidate_id" in c}
+    eval_map = {str(c.get("candidate_id")): c for c in evaluated_clips if "candidate_id" in c}
     
     for clip in selected_clips:
         try:
-            candidate_id = clip.get("candidate_id")
+            candidate_id = str(clip.get("candidate_id"))
             eval_data = eval_map.get(candidate_id, {})
             
             # Use data from clip directly if present, fallback to eval_data

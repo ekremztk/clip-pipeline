@@ -96,7 +96,9 @@ def get_channel_memory(channel_id: str) -> str:
         
         # Consider score > 7.0 as successful for this analysis
         for clip in clips:
-            score = clip.get("success_score", 0)
+            score = clip.get("success_score")
+            if score is None:
+                score = 0.0
             if score >= 7.0:
                 successful_clips.append(clip)
             else:
