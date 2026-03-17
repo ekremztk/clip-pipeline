@@ -86,10 +86,17 @@ async def get_job(job_id: str):
         # Query clips
         clips_response = supabase.table("clips").select("*").eq("job_id", job_id).order("posting_order").execute()
         
+        # Also fetch transcript speaker_map
+        transcript_res = supabase.table("transcripts").select("speaker_map").eq("job_id", job_id).execute()
+        speaker_map = {}
+        if transcript_res.data:
+            speaker_map = transcript_res.data[0].get("speaker_map", {})
+        
         print(f"[JobsRoute] Fetched job {job_id}")
         return {
             "job": job,
-            "clips": clips_response.data if clips_response.data else []
+            "clips": clips_response.data if clips_response.data else [],
+            "speaker_map": speaker_map
         }
         
     except HTTPException:

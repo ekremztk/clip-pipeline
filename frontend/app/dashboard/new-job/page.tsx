@@ -105,13 +105,13 @@ export default function NewJobPage() {
             // Poll job status until it changes from queued/processing
             setUploadStatus('Processing video...');
             let attempts = 0;
-            const maxAttempts = 30; // 60 seconds max
+            const maxAttempts = 90; // 180 seconds max
 
             const pollStatus = async () => {
                 try {
                     const statusRes = await fetch(`${API}/jobs/${jobId}`);
                     const jobData = await statusRes.json();
-                    const status = jobData?.status;
+                    const status = jobData?.job?.status;
 
                     if (status === 'awaiting_speaker_confirm') {
                         router.push(`/dashboard/speakers/${jobId}`);
@@ -131,7 +131,7 @@ export default function NewJobPage() {
                     }
 
                     // Update status message based on current step
-                    const step = jobData?.current_step || '';
+                    const step = jobData?.job?.current_step || '';
                     if (step.includes('s01')) setUploadStatus('Extracting audio...');
                     else if (step.includes('s02')) setUploadStatus('Transcribing...');
                     else if (step.includes('s03')) setUploadStatus('Identifying speakers...');
