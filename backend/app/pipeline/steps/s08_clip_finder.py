@@ -95,9 +95,13 @@ def run(
     try:
         transcript_lines = labeled_transcript.split('\n')
         
-        for candidate in candidates_list:
-            cand_id = candidate.get("candidate_id", "unknown")
-            try:
+        chunk_size = 4
+        for i in range(0, len(candidates_list), chunk_size):
+            batch = candidates_list[i:i + chunk_size]
+            
+            batch_data = []
+            for candidate in batch:
+                cand_id = candidate.get("candidate_id", "unknown")
                 ts_str = candidate.get("timestamp", "00:00")
                 target_s = _parse_timestamp(ts_str)
                 
@@ -121,19 +125,29 @@ def run(
                     if start <= target_s <= end or (target_s - 30 <= start <= target_s + 30):
                         matching_signals.append(entry)
                         
+                batch_data.append({
+                    "candidate_id": cand_id,
+                    "timestamp": ts_str,
+                    "context_window": context_window_text,
+                    "signals": matching_signals
+                })
+                
+            try:
                 prompt2 = pass2_evaluate.PASS2_EVALUATE_PROMPT
                 prompt2 = prompt2.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
                 prompt2 = prompt2.replace("CHANNEL_MEMORY_PLACEHOLDER", context.get("channel_memory", ""))
                 prompt2 = prompt2.replace("RAG_CONTEXT_PLACEHOLDER", context.get("rag_context", ""))
-                prompt2 = prompt2.replace("CANDIDATE_CONTEXT_PLACEHOLDER", context_window_text)
-                prompt2 = prompt2.replace("CANDIDATE_SIGNALS_PLACEHOLDER", json.dumps(matching_signals))
-                prompt2 = prompt2.replace("CANDIDATE_ID_PLACEHOLDER", str(cand_id))
+                prompt2 = prompt2.replace("BATCH_CANDIDATES_DATA_PLACEHOLDER", json.dumps(batch_data))
                 
                 pass2_out = generate_json(prompt2)
-                if isinstance(pass2_out, dict):
-                    evaluated_list.append(pass2_out)
+                if isinstance(pass2_out, list):
+                    for item in pass2_out:
+                        if isinstance(item, dict):
+                            evaluated_list.append(item)
+                else:
+                    print(f"[S08] Pass 2 batch {(i//chunk_size)+1} returned non-list")
             except Exception as e:
-                print(f"[S08] Error evaluating candidate {cand_id}: {e}")
+                print(f"[S08] Error evaluating batch {(i//chunk_size)+1}: {e}")
                 continue
                 
         print(f"[S08] Pass 2: evaluated {len(evaluated_list)} candidates")

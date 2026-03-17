@@ -176,12 +176,12 @@ def analyze_video(video_path: str, prompt: str) -> str:
         from google.genai import types
         import os
         
-        client = get_developer_client()
+        client = get_gemini_client()
         
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
         print(f"[GeminiClient] Video size: {file_size_mb:.1f}MB, uploading...")
         
-        # Upload file using Developer API
+        # Upload file using Vertex AI
         uploaded_file = client.files.upload(
             file=video_path,
             config=types.UploadFileConfig(mime_type="video/mp4")
@@ -194,7 +194,15 @@ def analyze_video(video_path: str, prompt: str) -> str:
         
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL_PRO,
-            contents=[uploaded_file, prompt]
+            contents=[
+                types.Content(parts=[
+                    types.Part.from_uri(
+                        file_uri=uploaded_file.uri,
+                        mime_type="video/mp4"
+                    ),
+                    types.Part.from_text(text=prompt)
+                ])
+            ]
         )
         
         # Clean up uploaded file

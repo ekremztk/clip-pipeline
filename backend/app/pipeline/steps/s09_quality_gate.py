@@ -48,6 +48,8 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
     # We need a quick lookup map for evaluated_clips by candidate_id
     eval_map = {str(c.get("candidate_id")): c for c in evaluated_clips if "candidate_id" in c}
     
+    structural_passed_clips = []
+    
     for clip in selected_clips:
         try:
             candidate_id = str(clip.get("candidate_id"))
@@ -88,8 +90,6 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
                 results.append(clip)
                 continue
                 
-            # --- PART 2: Standalone meaning check ---
-            
             # Extract transcript segment
             clip_transcript_lines = []
             for item in parsed_transcript:
@@ -107,36 +107,9 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
                 failed_count += 1
                 results.append(clip)
                 continue
-            
-            prompt = PROMPT.replace("CLIP_TRANSCRIPT_PLACEHOLDER", clip_transcript_str)
-            gemini_res = generate_json(prompt)
-            
-            overall = gemini_res.get("overall", "fail")
-            note = gemini_res.get("note", "")
-            
-            clip["standalone_result"] = gemini_res
-            
-            if overall == "fail":
-                clip["quality_status"] = "standalone_fail"
-                clip["quality_note"] = note or "Standalone check failed"
-                print(f"[S09] Clip {candidate_id} rejected (standalone): {clip['quality_note']}")
-                failed_count += 1
-            elif overall == "fixable":
-                clip["quality_status"] = "fixable"
-                clip["standalone_fix"] = note
-                print(f"[S09] Clip {candidate_id} fixable (standalone): {note}")
-                fixable_count += 1
-            elif overall == "pass" or overall == "passed":
-                clip["quality_status"] = "passed"
-                print(f"[S09] Clip {candidate_id} passed standalone check")
-                passed_count += 1
-            else:
-                clip["quality_status"] = "standalone_fail"
-                clip["quality_note"] = f"Unknown overall status: {overall}"
-                print(f"[S09] Clip {candidate_id} rejected (standalone): Unknown status {overall}")
-                failed_count += 1
-            
-            results.append(clip)
+                
+            clip["temp_transcript"] = clip_transcript_str
+            structural_passed_clips.append(clip)
             
         except Exception as e:
             print(f"[S09] Error processing clip {clip.get('candidate_id')}: {e}")
@@ -144,7 +117,79 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
             clip["quality_note"] = f"Error: {str(e)}"
             failed_count += 1
             results.append(clip)
+
+    # --- PART 2: Standalone meaning check (Batched) ---
+    chunk_size = 4
+    for i in range(0, len(structural_passed_clips), chunk_size):
+        batch = structural_passed_clips[i:i + chunk_size]
+        
+        batch_data = []
+        for clip in batch:
+            batch_data.append({
+                "candidate_id": str(clip.get("candidate_id")),
+                "transcript": clip.pop("temp_transcript", "")
+            })
             
+        try:
+            prompt = PROMPT.replace("BATCH_CLIPS_PLACEHOLDER", json.dumps(batch_data))
+            gemini_res = generate_json(prompt)
+            
+            if isinstance(gemini_res, list):
+                res_map = {str(item.get("candidate_id")): item for item in gemini_res if isinstance(item, dict)}
+                
+                for clip in batch:
+                    cid = str(clip.get("candidate_id"))
+                    item_res = res_map.get(cid)
+                    
+                    if not item_res:
+                        print(f"[S09] Clip {cid} rejected (standalone): Gemini missed this clip in batch evaluation")
+                        clip["quality_status"] = "standalone_fail"
+                        clip["quality_note"] = "Gemini missed this clip in batch evaluation"
+                        failed_count += 1
+                        results.append(clip)
+                        continue
+                        
+                    overall = item_res.get("overall", "fail")
+                    note = item_res.get("note", "")
+                    
+                    clip["standalone_result"] = item_res
+                    
+                    if overall == "fail":
+                        clip["quality_status"] = "standalone_fail"
+                        clip["quality_note"] = note or "Standalone check failed"
+                        print(f"[S09] Clip {cid} rejected (standalone): {clip['quality_note']}")
+                        failed_count += 1
+                    elif overall == "fixable":
+                        clip["quality_status"] = "fixable"
+                        clip["standalone_fix"] = note
+                        print(f"[S09] Clip {cid} fixable (standalone): {note}")
+                        fixable_count += 1
+                    elif overall == "pass" or overall == "passed":
+                        clip["quality_status"] = "passed"
+                        print(f"[S09] Clip {cid} passed standalone check")
+                        passed_count += 1
+                    else:
+                        clip["quality_status"] = "standalone_fail"
+                        clip["quality_note"] = f"Unknown overall status: {overall}"
+                        print(f"[S09] Clip {cid} rejected (standalone): Unknown status {overall}")
+                        failed_count += 1
+                        
+                    results.append(clip)
+            else:
+                print(f"[S09] Error: Gemini returned non-list for batch {(i//chunk_size)+1}")
+                for clip in batch:
+                    clip["quality_status"] = "standalone_fail"
+                    clip["quality_note"] = "Gemini returned invalid batch format"
+                    failed_count += 1
+                    results.append(clip)
+        except Exception as e:
+            print(f"[S09] Error processing batch {(i//chunk_size)+1}: {e}")
+            for clip in batch:
+                clip["quality_status"] = "standalone_fail"
+                clip["quality_note"] = f"Batch processing error: {e}"
+                failed_count += 1
+                results.append(clip)
+
     # Sort results: pass first, then fixable, then failed
     status_order = {"passed": 0, "pass": 0, "fixable": 1, "structural_fail": 2, "standalone_fail": 2}
     results.sort(key=lambda x: status_order.get(x.get("quality_status", "structural_fail"), 3))
