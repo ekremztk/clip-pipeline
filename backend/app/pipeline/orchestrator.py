@@ -124,7 +124,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     supabase = get_client()
                     transcript_raw = transcript_data.get("raw_response", {}) if isinstance(transcript_data, dict) else {}
                     words = transcript_data.get("words", []) if isinstance(transcript_data, dict) else []
-                    s_map = speaker_data.get("speaker_map", {}) if isinstance(speaker_data, dict) else {}
+                    s_map = speaker_data.get("predicted_map", {}) if isinstance(speaker_data, dict) else {}
 
                     supabase.table("transcripts").upsert({
                         "job_id": job_id,
