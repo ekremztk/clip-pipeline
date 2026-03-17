@@ -37,7 +37,31 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
         if not transcript_res.data:
             raise Exception("Transcript not found")
         transcript_record = transcript_res.data[0]
-        transcript_data = transcript_record.get("transcript_data")
+        
+        # Reconstruct transcript_data from stored columns
+        raw_response = transcript_record.get("raw_response", {})
+        if isinstance(raw_response, str):
+            import json
+            try:
+                raw_response = json.loads(raw_response)
+            except json.JSONDecodeError:
+                raw_response = {}
+                
+        words = transcript_record.get("word_timestamps", [])
+        if isinstance(words, str):
+            import json
+            try:
+                words = json.loads(words)
+            except json.JSONDecodeError:
+                words = []
+                
+        utterances = raw_response.get("results", {}).get("utterances", []) if isinstance(raw_response, dict) else []
+        
+        transcript_data = {
+            "raw_response": raw_response,
+            "words": words,
+            "utterances": utterances
+        }
 
         # In case we need previous step results that might not be in db but we need to re-run or fetch
         labeled_transcript = transcript_record.get("labeled_transcript")
@@ -129,8 +153,16 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         video_duration_s,
                         job_id
                     )
-                    selected_clips = s08_result.get("selected_clips", [])
-                    evaluated_clips = s08_result.get("evaluated_clips", [])
+                    
+                    if isinstance(s08_result, dict):
+                        selected_clips = s08_result.get("selected_clips", s08_result.get("selected", []))
+                        evaluated_clips = s08_result.get("evaluated_clips", s08_result.get("evaluated", []))
+                    elif isinstance(s08_result, list):
+                        selected_clips = s08_result
+                        evaluated_clips = s08_result
+                    else:
+                        selected_clips = []
+                        evaluated_clips = []
                 elif step_number == 11:
                     from app.pipeline.steps import s09_quality_gate
                     quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)

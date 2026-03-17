@@ -311,11 +311,28 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             return
             
         transcript_row = trans_res.data
+        
+        import json
+        
         raw_response = transcript_row.get("raw_response", {})
-        utterances = raw_response.get("results", {}).get("utterances", [])
+        if isinstance(raw_response, str):
+            try:
+                raw_response = json.loads(raw_response)
+            except json.JSONDecodeError:
+                raw_response = {}
+                
+        words = transcript_row.get("word_timestamps", [])
+        if isinstance(words, str):
+            try:
+                words = json.loads(words)
+            except json.JSONDecodeError:
+                words = []
+                
+        utterances = raw_response.get("results", {}).get("utterances", []) if isinstance(raw_response, dict) else []
+        
         transcript_data = {
             "raw_response": raw_response,
-            "words": transcript_row.get("word_timestamps", []),
+            "words": words,
             "utterances": utterances
         }
         
