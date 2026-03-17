@@ -3,7 +3,7 @@ import zipfile
 import tempfile
 import pathlib
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from app.services.supabase_client import get_client
 
 router = APIRouter(prefix="/downloads", tags=["downloads"])
@@ -28,23 +28,13 @@ async def download_clip(clip_id: str):
             raise HTTPException(status_code=404, detail="Clip not found")
             
         clip = result.data[0]
-        video_path = clip.get("video_landscape_path")
+        file_url = clip.get("file_url")
         
-        if video_path is None or not os.path.exists(video_path):
-            print(f"[DownloadsRoute] Video file not found on disk for clip {clip_id}: {video_path}")
-            raise HTTPException(status_code=404, detail="Video file not found on disk")
+        if not file_url:
+            print(f"[DownloadsRoute] File URL not found for clip {clip_id}")
+            raise HTTPException(status_code=404, detail="Video file URL not found")
             
-        clip_index = clip.get("clip_index", 0)
-        content_type = clip.get("content_type", "video")
-        
-        filename = f"clip_{clip_index}_{content_type}.mp4"
-        print(f"[DownloadsRoute] Serving file {video_path} as {filename}")
-        
-        return FileResponse(
-            path=video_path,
-            media_type="video/mp4",
-            filename=filename
-        )
+        return RedirectResponse(url=file_url)
         
     except HTTPException:
         raise

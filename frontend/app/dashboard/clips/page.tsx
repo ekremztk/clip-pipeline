@@ -19,11 +19,12 @@ interface Clip {
     standalone_score: number;
     hook_score: number;
     arc_score: number;
-    strategy_role: string;
+    clip_strategy_role: string;
     posting_order: number;
     is_successful: boolean | null;
     why_failed: string | null;
-    ai_reasoning: string;
+    standalone_result?: string;
+    quality_notes?: string;
     file_url: string | null;
 }
 
@@ -84,12 +85,25 @@ export default function ClipLibraryPage() {
     };
 
     const handleApprove = async (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        if (!clip) return;
+
         try {
-            const res = await fetch(`${API}/clips/${id}/approve`, { method: "PATCH" });
-            if (res.ok) {
-                setClips(clips.map(c => c.id === id ? { ...c, is_successful: true } : c));
-                if (selectedClip?.id === id) {
-                    setSelectedClip({ ...selectedClip, is_successful: true });
+            if (clip.is_successful === true) {
+                const res = await fetch(`${API}/clips/${id}/unset-approval`, { method: "PATCH" });
+                if (res.ok) {
+                    setClips(clips.map(c => c.id === id ? { ...c, is_successful: null } : c));
+                    if (selectedClip?.id === id) {
+                        setSelectedClip({ ...selectedClip, is_successful: null });
+                    }
+                }
+            } else {
+                const res = await fetch(`${API}/clips/${id}/approve`, { method: "PATCH" });
+                if (res.ok) {
+                    setClips(clips.map(c => c.id === id ? { ...c, is_successful: true } : c));
+                    if (selectedClip?.id === id) {
+                        setSelectedClip({ ...selectedClip, is_successful: true });
+                    }
                 }
             }
         } catch (error) {
@@ -98,12 +112,25 @@ export default function ClipLibraryPage() {
     };
 
     const handleReject = async (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        if (!clip) return;
+
         try {
-            const res = await fetch(`${API}/clips/${id}/reject`, { method: "PATCH" });
-            if (res.ok) {
-                setClips(clips.map(c => c.id === id ? { ...c, is_successful: false } : c));
-                if (selectedClip?.id === id) {
-                    setSelectedClip({ ...selectedClip, is_successful: false });
+            if (clip.is_successful === false) {
+                const res = await fetch(`${API}/clips/${id}/unset-approval`, { method: "PATCH" });
+                if (res.ok) {
+                    setClips(clips.map(c => c.id === id ? { ...c, is_successful: null } : c));
+                    if (selectedClip?.id === id) {
+                        setSelectedClip({ ...selectedClip, is_successful: null });
+                    }
+                }
+            } else {
+                const res = await fetch(`${API}/clips/${id}/reject`, { method: "PATCH" });
+                if (res.ok) {
+                    setClips(clips.map(c => c.id === id ? { ...c, is_successful: false } : c));
+                    if (selectedClip?.id === id) {
+                        setSelectedClip({ ...selectedClip, is_successful: false });
+                    }
                 }
             }
         } catch (error) {
@@ -112,7 +139,10 @@ export default function ClipLibraryPage() {
     };
 
     const handleDownload = (id: string) => {
-        window.open(`${API}/downloads/clips/${id}`, "_blank");
+        const clip = clips.find(c => c.id === id) || selectedClip;
+        if (clip && clip.file_url) {
+            window.open(clip.file_url, "_blank");
+        }
     };
 
     const getScoreColor = (score: number) => {
@@ -268,8 +298,8 @@ export default function ClipLibraryPage() {
                                     </div>
 
                                     <div className="mb-4">
-                                        <span className={`text-xs px-2 py-1 rounded-md border ${getRoleColor(clip.strategy_role)}`}>
-                                            {clip.strategy_role || "unassigned"}
+                                        <span className={`text-xs px-2 py-1 rounded-md border ${getRoleColor(clip.clip_strategy_role)}`}>
+                                            {clip.clip_strategy_role || "unassigned"}
                                         </span>
                                     </div>
 
@@ -351,8 +381,8 @@ export default function ClipLibraryPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-400 mb-2">Strategy Role</h3>
-                                    <span className={`inline-block text-xs px-2.5 py-1 rounded-md border ${getRoleColor(selectedClip.strategy_role)}`}>
-                                        {selectedClip.strategy_role || "unassigned"}
+                                    <span className={`inline-block text-xs px-2.5 py-1 rounded-md border ${getRoleColor(selectedClip.clip_strategy_role)}`}>
+                                        {selectedClip.clip_strategy_role || "unassigned"}
                                     </span>
                                 </div>
                                 <div>
@@ -392,7 +422,7 @@ export default function ClipLibraryPage() {
                             <div>
                                 <h3 className="text-sm font-medium text-gray-400 mb-2">AI Reasoning</h3>
                                 <p className="text-sm text-gray-300 leading-relaxed bg-black/50 p-4 rounded-lg border border-gray-800">
-                                    {selectedClip.ai_reasoning || "No reasoning provided."}
+                                    {selectedClip.standalone_result || selectedClip.quality_notes || "No reasoning provided."}
                                 </p>
                             </div>
 

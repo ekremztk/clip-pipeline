@@ -71,6 +71,26 @@ async def approve_clip(clip_id: str, notes: Optional[str] = Body(default=None, e
         print(f"[ClipsRoute] Error approving clip {clip_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.patch("/{clip_id}/unset-approval")
+async def unset_approval_clip(clip_id: str):
+    try:
+        print(f"[ClipsRoute] Unsetting approval for clip {clip_id}")
+        supabase = get_client()
+        
+        update_data: dict[str, Any] = {"user_approved": None}
+        
+        response = supabase.table("clips").update(update_data).eq("id", clip_id).execute()
+        
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+            
+        return {"unset": True, "clip_id": clip_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error unsetting approval clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.patch("/{clip_id}/reject")
 async def reject_clip(clip_id: str, notes: Optional[str] = Body(default=None, embed=True)):
     try:
