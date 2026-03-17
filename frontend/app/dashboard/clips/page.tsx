@@ -24,6 +24,7 @@ interface Clip {
     is_successful: boolean | null;
     why_failed: string | null;
     ai_reasoning: string;
+    file_url: string | null;
 }
 
 type FilterType = "all" | "successful" | "failed" | "pending";
@@ -221,8 +222,18 @@ export default function ClipLibraryPage() {
                                 onClick={() => setSelectedClip(clip)}
                             >
                                 {/* Thumbnail Area */}
-                                <div className="w-full aspect-[9/16] bg-[#141414] relative flex items-center justify-center group-hover:bg-[#1a1a1a] transition-colors">
-                                    <Play className="w-12 h-12 text-white/20 group-hover:text-white/50 transition-colors" />
+                                <div className="w-full aspect-[9/16] bg-[#141414] relative flex items-center justify-center group-hover:bg-[#1a1a1a] transition-colors overflow-hidden">
+                                    {clip.file_url ? (
+                                        <video
+                                            src={clip.file_url}
+                                            className="w-full h-full object-cover"
+                                            muted
+                                            playsInline
+                                            preload="metadata"
+                                        />
+                                    ) : (
+                                        <Play className="w-12 h-12 text-white/20" />
+                                    )}
                                     <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-medium text-white">
                                         {formatDuration(clip.duration)}
                                     </div>
@@ -313,13 +324,19 @@ export default function ClipLibraryPage() {
 
                         <div className="flex-1 overflow-y-auto p-6 space-y-8">
                             {/* Video Player Placeholder */}
-                            <div className="w-full aspect-[9/16] bg-[#141414] rounded-xl flex items-center justify-center border border-gray-800 relative">
-                                <Video className="w-12 h-12 text-gray-700" />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <button className="w-16 h-16 bg-purple-600/80 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
-                                        <Play className="w-6 h-6 text-white ml-1" />
-                                    </button>
-                                </div>
+                            <div className="w-full aspect-[9/16] bg-[#141414] rounded-xl flex items-center justify-center border border-gray-800 relative overflow-hidden">
+                                {selectedClip.file_url ? (
+                                    <video
+                                        src={selectedClip.file_url}
+                                        controls
+                                        playsInline
+                                        className="w-full h-full rounded-xl"
+                                    />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-gray-500">
+                                        No video available
+                                    </div>
+                                )}
                             </div>
 
                             {/* Hook Text */}
