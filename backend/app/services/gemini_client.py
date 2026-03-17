@@ -172,50 +172,30 @@ def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 
 
 def analyze_video(video_path: str, prompt: str) -> str:
     try:
-        from google import genai
-        from google.genai import types
         import os
         
         client = get_gemini_client()
         
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
-        print(f"[GeminiClient] Video size: {file_size_mb:.1f}MB, uploading...")
+        print(f"[GeminiClient] Video size: {file_size_mb:.1f}MB, reading inline...")
         
-        # Upload file using Vertex AI
-        uploaded_file = client.files.upload(
-            file=video_path,
-            config=types.UploadFileConfig(mime_type="video/mp4")
-        )
-        
-        print(f"[GeminiClient] File uploaded: {uploaded_file.name}")
-        
-        # Wait for video processing to complete
-        _poll_file_active(client, uploaded_file.name)
+        with open(video_path, "rb") as f:
+            video_bytes = f.read()
+            
+        video_part = types.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
         
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL_PRO,
-            contents=[
-                types.Content(parts=[
-                    types.Part.from_uri(
-                        file_uri=uploaded_file.uri,
-                        mime_type="video/mp4"
-                    ),
-                    types.Part.from_text(text=prompt)
-                ])
-            ]
+            contents=[video_part, prompt]
         )
-        
-        # Clean up uploaded file
-        try:
-            client.files.delete(name=uploaded_file.name)
-        except Exception:
-            pass
         
         return str(response.text) if response.text else "{}"
         
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")
         return "{}"
+    
+    return "{}"
 
 def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> str:
     """
