@@ -6,12 +6,26 @@ from app.services import storage
 
 def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
     """
-    Finds the nearest word start or end time to the target_sec within a ±3 second window.
+    Finds the nearest word start or end time to the target_sec.
+    Search window is 3s for start, 8s for end.
+    If target_sec falls inside a word, snaps to that word's boundary.
+    If no word found within window, falls back to the closest boundary to avoid mid-word cuts.
     mode: "start" or "end"
-    Returns target_sec unchanged if no word found.
     """
+    if not words:
+        return target_sec
+
+    # 1. If target_sec is inside a word, snap to that word's boundary
+    for word in words:
+        w_start = word.get("start", 0)
+        w_end = word.get("end", 0)
+        if w_start <= target_sec <= w_end:
+            return w_start if mode == "start" else w_end
+
     best_time = target_sec
-    min_diff = 3.0  # 3 seconds search window
+    search_window = 8.0 if mode == "end" else 3.0
+    min_diff = search_window
+    found = False
 
     for word in words:
         if mode == "start" and "start" in word:
@@ -19,11 +33,28 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
             if diff < min_diff:
                 min_diff = diff
                 best_time = word["start"]
+                found = True
         elif mode == "end" and "end" in word:
             diff = abs(word["end"] - target_sec)
             if diff < min_diff:
                 min_diff = diff
                 best_time = word["end"]
+                found = True
+
+    # 2. Ensure we always snap to a valid boundary
+    if not found:
+        closest_diff = float('inf')
+        for word in words:
+            if mode == "start" and "start" in word:
+                diff = abs(word["start"] - target_sec)
+                if diff < closest_diff:
+                    closest_diff = diff
+                    best_time = word["start"]
+            elif mode == "end" and "end" in word:
+                diff = abs(word["end"] - target_sec)
+                if diff < closest_diff:
+                    closest_diff = diff
+                    best_time = word["end"]
 
     return best_time
 

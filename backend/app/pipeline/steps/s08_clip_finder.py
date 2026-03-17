@@ -139,7 +139,7 @@ def run(
                 prompt2 = prompt2.replace("RAG_CONTEXT_PLACEHOLDER", context.get("rag_context", ""))
                 prompt2 = prompt2.replace("BATCH_CANDIDATES_DATA_PLACEHOLDER", json.dumps(batch_data))
                 
-                pass2_out = generate_json(prompt2)
+                pass2_out = generate_json(prompt2, model=settings.GEMINI_MODEL_PRO)
                 if isinstance(pass2_out, list):
                     for item in pass2_out:
                         if isinstance(item, dict):
@@ -165,7 +165,7 @@ def run(
         prompt3 = prompt3.replace("MIN_CLIPS_PLACEHOLDER", str(counts["min_clips"]))
         prompt3 = prompt3.replace("MAX_CLIPS_PLACEHOLDER", str(counts["max_clips"]))
         
-        pass3_out = generate_json(prompt3)
+        pass3_out = generate_json(prompt3, model=settings.GEMINI_MODEL_PRO)
         if isinstance(pass3_out, dict):
             result["selected"] = pass3_out.get("selected_clips", [])
             result["rejected"] = pass3_out.get("rejected_clips", [])
