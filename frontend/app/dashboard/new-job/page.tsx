@@ -29,6 +29,7 @@ export default function NewJobPage() {
     const [guestName, setGuestName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
+    const [uploadStatus, setUploadStatus] = useState("");
 
     const [jobs, setJobs] = useState<Job[]>([]);
 
@@ -75,22 +76,24 @@ export default function NewJobPage() {
         if (guestName) formData.append("guest_name", guestName);
 
         try {
-            const res = await fetch(`${API}/jobs`, {
+            const response = await fetch(`${API}/jobs`, {
                 method: "POST",
                 body: formData,
             });
 
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.detail || "Failed to start job");
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                setSubmitError(err.detail || 'Failed to start processing');
+                setIsSubmitting(false);
+                return;
             }
 
-            const responseData = await res.json();
-            const job = responseData.job || responseData.data || responseData;
-            const jobId = job?.id || job?.job_id;
+            const job = await response.json();
+            const jobId = job?.id || job?.job_id || job?.job?.id || job?.job?.job_id || job?.data?.id || job?.data?.job_id;
 
             if (!jobId) {
-                setSubmitError('Failed to get job ID from server');
+                setSubmitError('No job ID returned');
+                setIsSubmitting(false);
                 return;
             }
 
@@ -99,18 +102,59 @@ export default function NewJobPage() {
             setTitle("");
             setGuestName("");
 
-            // Handle possible job statuses
-            if (job.status === 'awaiting_speaker_confirm') {
-                router.push(`/dashboard/speakers/${jobId}`);
-            } else if (job.status === 'failed') {
-                setSubmitError('Pipeline failed. Please try again.');
-            } else {
-                router.push('/dashboard');
-            }
+            // Poll job status until it changes from queued/processing
+            setUploadStatus('Processing video...');
+            let attempts = 0;
+            const maxAttempts = 30; // 60 seconds max
+
+            const pollStatus = async () => {
+                try {
+                    const statusRes = await fetch(`${API}/jobs/${jobId}`);
+                    const jobData = await statusRes.json();
+                    const status = jobData?.status;
+
+                    if (status === 'awaiting_speaker_confirm') {
+                        router.push(`/dashboard/speakers/${jobId}`);
+                        return;
+                    }
+
+                    if (status === 'completed' || status === 'done') {
+                        router.push('/dashboard');
+                        return;
+                    }
+
+                    if (status === 'failed' || status === 'error') {
+                        setSubmitError('Pipeline failed. Please try again.');
+                        setIsSubmitting(false);
+                        setUploadStatus('');
+                        return;
+                    }
+
+                    // Update status message based on current step
+                    const step = jobData?.current_step || '';
+                    if (step.includes('s01')) setUploadStatus('Extracting audio...');
+                    else if (step.includes('s02')) setUploadStatus('Transcribing...');
+                    else if (step.includes('s03')) setUploadStatus('Identifying speakers...');
+
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(pollStatus, 2000);
+                    } else {
+                        router.push('/dashboard');
+                    }
+                } catch (e) {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(pollStatus, 2000);
+                    }
+                }
+            };
+
+            setTimeout(pollStatus, 2000);
+
         } catch (err: any) {
             console.error(err);
             setSubmitError(err.message || "Failed to start processing. Please try again.");
-        } finally {
             setIsSubmitting(false);
         }
     };
@@ -240,6 +284,12 @@ export default function NewJobPage() {
                         "Start Processing"
                     )}
                 </motion.button>
+
+                {isSubmitting && uploadStatus && (
+                    <div className="text-center text-sm text-[#7c3aed] animate-pulse mt-2">
+                        {uploadStatus}
+                    </div>
+                )}
             </div>
 
             {/* Recent Jobs */}
