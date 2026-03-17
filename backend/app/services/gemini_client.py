@@ -10,6 +10,21 @@ from google.genai.errors import APIError
 from app.config import settings
 
 _gemini_client: Optional[genai.Client] = None
+_developer_client: Optional[genai.Client] = None
+
+def get_developer_client() -> genai.Client:
+    """Returns a Gemini Developer client for file uploads (since files.upload is not supported in Vertex AI)."""
+    global _developer_client
+    if _developer_client is None:
+        try:
+            if not settings.GEMINI_API_KEY:
+                raise ValueError("GEMINI_API_KEY is not set. Developer client requires an API key for file uploads.")
+            _developer_client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            print("[GeminiClient] Developer client initialized.")
+        except Exception as e:
+            print(f"[GeminiClient] Error initializing Developer client: {e}")
+            raise
+    return _developer_client
 
 def get_gemini_client() -> genai.Client:
     """Lazy initialization of the Gemini client."""
@@ -161,16 +176,12 @@ def analyze_video(video_path: str, prompt: str) -> str:
         from google.genai import types
         import os
         
-        client = genai.Client(
-            vertexai=True,
-            project=settings.GCP_PROJECT,
-            location=settings.GCP_LOCATION
-        )
+        client = get_developer_client()
         
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
         print(f"[GeminiClient] Video size: {file_size_mb:.1f}MB, uploading...")
         
-        # Upload file using Vertex AI Files API
+        # Upload file using Developer API
         uploaded_file = client.files.upload(
             file=video_path,
             config=types.UploadFileConfig(mime_type="video/mp4")
@@ -178,17 +189,12 @@ def analyze_video(video_path: str, prompt: str) -> str:
         
         print(f"[GeminiClient] File uploaded: {uploaded_file.name}")
         
+        # Wait for video processing to complete
+        _poll_file_active(client, uploaded_file.name)
+        
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL_PRO,
-            contents=[
-                types.Content(parts=[
-                    types.Part.from_uri(
-                        file_uri=uploaded_file.uri,
-                        mime_type="video/mp4"
-                    ),
-                    types.Part.from_text(text=prompt)
-                ])
-            ]
+            contents=[uploaded_file, prompt]
         )
         
         # Clean up uploaded file
@@ -197,7 +203,7 @@ def analyze_video(video_path: str, prompt: str) -> str:
         except Exception:
             pass
         
-        return response.text or "{}"
+        return str(response.text) if response.text else "{}"
         
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")
@@ -251,14 +257,15 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
             return str(result)
             
         else:
-            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Using Files API.")
-            uploaded_file = client.files.upload(file=audio_path)
+            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Using Files API (Developer Client).")
+            dev_client = get_developer_client()
+            uploaded_file = dev_client.files.upload(file=audio_path)
             print(f"[GeminiClient] Uploaded as {uploaded_file.name}")
             
-            _poll_file_active(client, uploaded_file.name)
+            _poll_file_active(dev_client, uploaded_file.name)
             
             def do_generate_uploaded() -> str:
-                response = client.models.generate_content(
+                response = dev_client.models.generate_content(
                     model=model,
                     contents=[uploaded_file, prompt]
                 )
@@ -275,8 +282,8 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
         if uploaded_file:
             try:
                 print(f"[GeminiClient] Deleting uploaded file {uploaded_file.name}...")
-                client = get_gemini_client()
-                client.files.delete(name=uploaded_file.name)
+                dev_client = get_developer_client()
+                dev_client.files.delete(name=uploaded_file.name)
             except Exception as e:
                 print(f"[GeminiClient] Error deleting file {uploaded_file.name}: {e}")
 

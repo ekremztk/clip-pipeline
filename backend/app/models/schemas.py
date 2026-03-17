@@ -80,5 +80,6 @@ class ClipResponse(BaseModel):
     posting_order: Optional[int] = None
     suggested_title: Optional[str] = None
     video_landscape_path: Optional[str] = None
+    file_url: Optional[str] = None
     duration_s: float
     created_at: datetime

@@ -9,6 +9,9 @@ psycopg2-binary
 pgvector
 supabase
 
+# --- Storage ---
+boto3
+
 # --- AI & Models ---
 google-genai
 deepgram-sdk

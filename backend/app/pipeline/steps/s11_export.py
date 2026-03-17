@@ -4,6 +4,7 @@ import traceback
 import uuid
 from app.config import settings
 from app.services.supabase_client import get_client
+from app.services.r2_client import upload_clip
 
 def run(cut_results: list, job_id: str) -> list:
     """
@@ -48,7 +49,25 @@ def run(cut_results: list, job_id: str) -> list:
                 print(f"[S11] Error: Output video missing or empty for clip {clip.get('clip_index', 'unknown')}. Skipping.")
                 continue
 
-            # 4. Update clips table in Supabase
+            # 4. Upload to Cloudflare R2
+            filename = os.path.basename(output_path)
+            file_url = output_path  # Default to local path as fallback
+            try:
+                print(f"[S11] Uploading {filename} to R2...")
+                r2_url = upload_clip(job_id, filename, output_path)
+                print(f"[S11] Successfully uploaded to R2: {r2_url}")
+                file_url = r2_url
+                
+                # Delete the local file after successful upload
+                try:
+                    os.remove(output_path)
+                except Exception as cleanup_err:
+                    print(f"[S11] Warning: Failed to delete local file {output_path}: {cleanup_err}")
+            except Exception as r2_err:
+                print(f"[S11] Error: Failed to upload to R2: {r2_err}")
+                print("[S11] Using local path as fallback.")
+
+            # 5. Update clips table in Supabase
             clip_data = {
                 "clip_index": index,
                 "id": str(uuid.uuid4()),
@@ -67,7 +86,8 @@ def run(cut_results: list, job_id: str) -> list:
                 "channel_fit_score": clip.get("channel_fit_score") or 0,
                 "quality_status": clip.get("quality_status") or "fixable",
                 "quality_notes": clip.get("quality_notes") or "",
-                "video_landscape_path": output_path or ""
+                "video_landscape_path": output_path or "",
+                "file_url": file_url
             }
             
             insert_result = supabase.table("clips").insert(clip_data).execute()
@@ -79,10 +99,11 @@ def run(cut_results: list, job_id: str) -> list:
             clip_id = insert_result.data[0].get("id")
             print(f"[S11] Successfully exported and inserted clip {clip.get('clip_index', 'unknown')} with ID {clip_id}")
             
-            # 5. Add to result
+            # 6. Add to result
             exported_clips.append({
                 "clip_id": clip_id,
                 "final_path": output_path,
+                "file_url": file_url,
                 "export_status": "success"
             })
             

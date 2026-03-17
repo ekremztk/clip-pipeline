@@ -6,13 +6,21 @@ class Settings:
     GCP_PROJECT: str = os.getenv("GCP_PROJECT", "")
     GCP_LOCATION: str = os.getenv("GCP_LOCATION", "us-central1")
     GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
-    GEMINI_MODEL_PRO: str = "gemini-2.5-pro"
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL_PRO: str = "gemini-2.5-pro-preview-05-06"
     GEMINI_MODEL_FLASH: str = "gemini-2.5-flash"
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
     SUPABASE_URL = os.getenv("SUPABASE_URL")
     SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
     DATABASE_URL = os.getenv("DATABASE_URL")
     FRONTEND_URL = os.getenv("FRONTEND_URL")
+    
+    # Cloudflare R2
+    R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID")
+    R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
+    R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
+    R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME")
+    R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL")
     
     # Path variables
     OUTPUT_DIR = Path("output")
