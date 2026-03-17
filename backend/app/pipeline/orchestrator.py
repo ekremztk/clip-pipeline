@@ -311,9 +311,12 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             return
             
         transcript_row = trans_res.data
+        raw_response = transcript_row.get("raw_response", {})
+        utterances = raw_response.get("results", {}).get("utterances", [])
         transcript_data = {
-            "raw_response": transcript_row.get("raw_response", {}),
-            "words": transcript_row.get("word_timestamps", [])
+            "raw_response": raw_response,
+            "words": transcript_row.get("word_timestamps", []),
+            "utterances": utterances
         }
         
         # 3. Resume the pipeline from step 4
