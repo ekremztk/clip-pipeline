@@ -217,6 +217,16 @@ async def get_onboarding_status(channel_id: str):
         print(f"[ChannelsRoute] Error getting onboarding status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/{channel_id}/references")
+async def get_references(channel_id: str):
+    try:
+        supabase = get_client()
+        result = supabase.table("reference_clips").select("*").eq("channel_id", channel_id).execute()
+        return result.data
+    except Exception as e:
+        print(f"[ChannelsRoute] Error getting references: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/{channel_id}/references")
 async def add_reference(
     channel_id: str,
