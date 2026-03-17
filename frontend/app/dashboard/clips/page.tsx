@@ -16,9 +16,9 @@ interface Clip {
     job_id: string;
     hook_text: string;
     duration: number;
-    score_standalone: number;
-    score_hook: number;
-    score_arc: number;
+    standalone_score: number;
+    hook_score: number;
+    arc_score: number;
     strategy_role: string;
     posting_order: number;
     is_successful: boolean | null;
@@ -158,8 +158,8 @@ export default function ClipLibraryPage() {
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === f
-                                        ? "bg-purple-600 text-white"
-                                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                                    ? "bg-purple-600 text-white"
+                                    : "text-gray-400 hover:text-white hover:bg-white/5"
                                     }`}
                             >
                                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -245,14 +245,14 @@ export default function ClipLibraryPage() {
                                     </p>
 
                                     <div className="flex gap-3 text-xs font-medium mb-3">
-                                        <span className={getScoreColor(clip.score_standalone)}>
-                                            St: {clip.score_standalone || 0}/10
+                                        <span className={getScoreColor(clip.standalone_score)}>
+                                            St: {clip.standalone_score || 0}/10
                                         </span>
-                                        <span className={getScoreColor(clip.score_hook)}>
-                                            Hk: {clip.score_hook || 0}/10
+                                        <span className={getScoreColor(clip.hook_score)}>
+                                            Hk: {clip.hook_score || 0}/10
                                         </span>
-                                        <span className={getScoreColor(clip.score_arc)}>
-                                            Ar: {clip.score_arc || 0}/10
+                                        <span className={getScoreColor(clip.arc_score)}>
+                                            Ar: {clip.arc_score || 0}/10
                                         </span>
                                     </div>
 
@@ -349,9 +349,9 @@ export default function ClipLibraryPage() {
                                 <h3 className="text-sm font-medium text-gray-400 mb-4">Quality Scores</h3>
                                 <div className="space-y-4">
                                     {[
-                                        { label: "Standalone", value: selectedClip.score_standalone },
-                                        { label: "Hook", value: selectedClip.score_hook },
-                                        { label: "Arc", value: selectedClip.score_arc }
+                                        { label: "Standalone", value: selectedClip.standalone_score },
+                                        { label: "Hook", value: selectedClip.hook_score },
+                                        { label: "Arc", value: selectedClip.arc_score }
                                     ].map((score, idx) => (
                                         <div key={idx}>
                                             <div className="flex justify-between text-sm mb-1.5">
