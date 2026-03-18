@@ -54,7 +54,7 @@ def log_step(job_id: str, step_number: int, step_name: str, status: str,
 
 
 def run_pipeline(job_id: str, video_path: str, video_title: str,
-                 guest_name: str | None = None, channel_id: str = "speedy_cast") -> None:
+                 guest_name: str | None, channel_id: str) -> None:
     """
     Main pipeline function called by the worker.
     Runs steps exactly as defined.
@@ -310,7 +310,10 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
 
         video_title = job.get("title", "")
         guest_name = job.get("guest_name")
-        channel_id = job.get("channel_id", "speedy_cast")
+        channel_id = job.get("channel_id")
+        if not channel_id:
+            print(f"[Orchestrator] WARNING: job {job_id} has no channel_id in database")
+            channel_id = "unknown"
         
         # Set audio path assuming standard naming
         if video_path:

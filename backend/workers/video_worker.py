@@ -9,7 +9,7 @@ from app.models.enums import JobStatus, StepStatus
 
 
 def start_pipeline(job_id: str, video_path: str, video_title: str,
-                   guest_name: str = None, channel_id: str = "speedy_cast") -> None:
+                   guest_name: str | None, channel_id: str) -> None:
     """
     Simply calls run_pipeline with all params
     Wraps in try/except, prints [Worker] prefixed logs
@@ -90,7 +90,10 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                 
         video_title = job_record.get("title", "")
         guest_name = job_record.get("guest_name")
-        channel_id = job_record.get("channel_id", "speedy_cast")
+        channel_id = job_record.get("channel_id")
+        if not channel_id:
+            print(f"[Worker] WARNING: job {job_id} has no channel_id in database")
+            channel_id = "unknown"
 
         # Set job to processing
         update_job(job_id=job_id, status=JobStatus.PROCESSING.value)

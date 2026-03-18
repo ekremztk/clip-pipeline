@@ -56,7 +56,7 @@ class FusedSignalEntry(BaseModel):
 class JobCreateRequest(BaseModel):
     video_title: str
     guest_name: Optional[str] = None
-    channel_id: str = "speedy_cast"
+    channel_id: str
 
 class JobResponse(BaseModel):
     id: UUID

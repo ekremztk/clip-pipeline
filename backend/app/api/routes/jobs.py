@@ -19,7 +19,7 @@ async def create_job(
     video: UploadFile = File(...),
     title: str = Form(...),
     guest_name: Optional[str] = Form(None),
-    channel_id: str = Form("speedy_cast")
+    channel_id: str = Form(...)
 ):
     channel_id = channel_id.replace("-", "_")
     try:
@@ -108,7 +108,7 @@ async def get_job(job_id: str):
 
 
 @router.get("")
-async def list_jobs(channel_id: str = "speedy_cast", limit: int = 20):
+async def list_jobs(channel_id: str, limit: int = 20):
     channel_id = channel_id.replace("-", "_")
     try:
         supabase = get_client()
