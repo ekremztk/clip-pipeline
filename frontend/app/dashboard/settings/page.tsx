@@ -26,24 +26,38 @@ interface ReferenceClip {
 
 const MultiTagInput = ({ value, onChange, placeholder, colorClass }: { value: string[], onChange: (v: string[]) => void, placeholder?: string, colorClass?: string }) => {
     const [input, setInput] = useState('');
+
+    const safeValue = Array.isArray(value) ? value : [];
+
+    const commitTag = (valToCommit: string) => {
+        const val = valToCommit.trim();
+        if (val && !safeValue.includes(val)) {
+            onChange([...safeValue, val]);
+        }
+        setInput('');
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' || e.key === ',') {
             e.preventDefault();
-            const val = input.trim();
-            if (val && !value.includes(val)) {
-                onChange([...value, val]);
-            }
-            setInput('');
+            commitTag(input);
         }
     };
+
+    const handleBlur = () => {
+        if (input.trim()) {
+            commitTag(input);
+        }
+    };
+
     return (
         <div className="space-y-2">
-            {value.length > 0 && (
+            {safeValue.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
-                    {value.map((tag, i) => (
+                    {safeValue.map((tag, i) => (
                         <span key={i} className={`flex items-center gap-1 text-xs px-2.5 py-1 border rounded-lg ${colorClass || 'bg-white/[0.06] text-zinc-300 border-white/[0.1]'}`}>
                             {tag}
-                            <button onClick={() => onChange(value.filter((_, idx) => idx !== i))} className="ml-1 opacity-70 hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                            <button type="button" onClick={() => onChange(safeValue.filter((_, idx) => idx !== i))} className="ml-1 opacity-70 hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
                         </span>
                     ))}
                 </div>
@@ -53,6 +67,7 @@ const MultiTagInput = ({ value, onChange, placeholder, colorClass }: { value: st
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onBlur={handleBlur}
                 placeholder={placeholder}
                 className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-violet-500/50 outline-none transition-all"
             />
@@ -474,7 +489,7 @@ export default function ChannelSettingsPage() {
                                             {/* TONE */}
                                             <div className="col-span-2 md:col-span-1">
                                                 <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Tone</label>
-                                                <MultiTagInput value={dnaForm.tone} onChange={(v) => setDnaForm({ ...dnaForm, tone: v })} placeholder="e.g. Energetic" />
+                                                <MultiTagInput value={dnaForm.tone} onChange={(v) => setDnaForm((prev: any) => ({ ...prev, tone: v }))} placeholder="e.g. Energetic" />
                                             </div>
 
                                             {/* HOOK STYLE */}
@@ -482,7 +497,7 @@ export default function ChannelSettingsPage() {
                                                 <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Hook Style</label>
                                                 <select
                                                     value={dnaForm.hook_style}
-                                                    onChange={(e) => setDnaForm({ ...dnaForm, hook_style: e.target.value })}
+                                                    onChange={(e) => setDnaForm((prev: any) => ({ ...prev, hook_style: e.target.value }))}
                                                     className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:border-violet-500/50 outline-none appearance-none"
                                                 >
                                                     <option value="">Select style...</option>
@@ -503,7 +518,7 @@ export default function ChannelSettingsPage() {
                                                         <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Style</label>
                                                         <select
                                                             value={dnaForm.humor_profile.style}
-                                                            onChange={(e) => setDnaForm({ ...dnaForm, humor_profile: { ...dnaForm.humor_profile, style: e.target.value } })}
+                                                            onChange={(e) => setDnaForm((prev: any) => ({ ...prev, humor_profile: { ...prev.humor_profile, style: e.target.value } }))}
                                                             className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:border-violet-500/50 outline-none appearance-none"
                                                         >
                                                             <option value="">Select...</option>
@@ -520,7 +535,7 @@ export default function ChannelSettingsPage() {
                                                         <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Frequency</label>
                                                         <select
                                                             value={dnaForm.humor_profile.frequency}
-                                                            onChange={(e) => setDnaForm({ ...dnaForm, humor_profile: { ...dnaForm.humor_profile, frequency: e.target.value } })}
+                                                            onChange={(e) => setDnaForm((prev: any) => ({ ...prev, humor_profile: { ...prev.humor_profile, frequency: e.target.value } }))}
                                                             className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:border-violet-500/50 outline-none appearance-none"
                                                         >
                                                             <option value="">Select...</option>
@@ -532,7 +547,7 @@ export default function ChannelSettingsPage() {
                                                     </div>
                                                     <div className="col-span-2">
                                                         <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Triggers</label>
-                                                        <MultiTagInput value={dnaForm.humor_profile.triggers} onChange={(v) => setDnaForm({ ...dnaForm, humor_profile: { ...dnaForm.humor_profile, triggers: v } })} placeholder="e.g. Awkward Silence" />
+                                                        <MultiTagInput value={dnaForm.humor_profile.triggers} onChange={(v) => setDnaForm((prev: any) => ({ ...prev, humor_profile: { ...prev.humor_profile, triggers: v } }))} placeholder="e.g. Awkward Silence" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -540,25 +555,25 @@ export default function ChannelSettingsPage() {
                                             {/* DO LIST */}
                                             <div className="col-span-2 md:col-span-1">
                                                 <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Do List</label>
-                                                <MultiTagInput value={dnaForm.do_list} onChange={(v) => setDnaForm({ ...dnaForm, do_list: v })} placeholder="e.g. Start with shocking statement" />
+                                                <MultiTagInput value={dnaForm.do_list} onChange={(v) => setDnaForm((prev: any) => ({ ...prev, do_list: v }))} placeholder="e.g. Start with shocking statement" />
                                             </div>
 
                                             {/* DONT LIST */}
                                             <div className="col-span-2 md:col-span-1">
                                                 <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Don't List</label>
-                                                <MultiTagInput value={dnaForm.dont_list} onChange={(v) => setDnaForm({ ...dnaForm, dont_list: v })} placeholder="e.g. No slow intros" />
+                                                <MultiTagInput value={dnaForm.dont_list} onChange={(v) => setDnaForm((prev: any) => ({ ...prev, dont_list: v }))} placeholder="e.g. No slow intros" />
                                             </div>
 
                                             {/* NO GO ZONES */}
                                             <div className="col-span-2 md:col-span-1">
                                                 <label className="block text-[10px] text-red-500 mb-1.5 uppercase tracking-widest">No Go Zones</label>
-                                                <MultiTagInput value={dnaForm.no_go_zones} onChange={(v) => setDnaForm({ ...dnaForm, no_go_zones: v })} placeholder="e.g. Explicit Content" colorClass="bg-red-500/10 text-red-400 border-red-500/20" />
+                                                <MultiTagInput value={dnaForm.no_go_zones} onChange={(v) => setDnaForm((prev: any) => ({ ...prev, no_go_zones: v }))} placeholder="e.g. Explicit Content" colorClass="bg-red-500/10 text-red-400 border-red-500/20" />
                                             </div>
 
                                             {/* SACRED TOPICS */}
                                             <div className="col-span-2 md:col-span-1">
                                                 <label className="block text-[10px] text-emerald-500 mb-1.5 uppercase tracking-widest">Sacred Topics</label>
-                                                <MultiTagInput value={dnaForm.sacred_topics} onChange={(v) => setDnaForm({ ...dnaForm, sacred_topics: v })} placeholder="e.g. Tech Startups" colorClass="bg-emerald-500/10 text-emerald-400 border-emerald-500/20" />
+                                                <MultiTagInput value={dnaForm.sacred_topics} onChange={(v) => setDnaForm((prev: any) => ({ ...prev, sacred_topics: v }))} placeholder="e.g. Tech Startups" colorClass="bg-emerald-500/10 text-emerald-400 border-emerald-500/20" />
                                             </div>
 
                                             {/* BEST CONTENT TYPES */}
@@ -571,8 +586,13 @@ export default function ChannelSettingsPage() {
                                                             <button
                                                                 key={type}
                                                                 onClick={() => {
-                                                                    if (isSelected) setDnaForm({ ...dnaForm, best_content_types: dnaForm.best_content_types.filter((t: string) => t !== type) });
-                                                                    else setDnaForm({ ...dnaForm, best_content_types: [...dnaForm.best_content_types, type] });
+                                                                    setDnaForm((prev: any) => {
+                                                                        const selected = prev.best_content_types || [];
+                                                                        if (selected.includes(type)) {
+                                                                            return { ...prev, best_content_types: selected.filter((t: string) => t !== type) };
+                                                                        }
+                                                                        return { ...prev, best_content_types: [...selected, type] };
+                                                                    });
                                                                 }}
                                                                 className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${isSelected ? 'bg-violet-600/20 text-violet-300 border-violet-500/40' : 'bg-white/[0.02] text-zinc-400 border-white/[0.08] hover:bg-white/[0.06]'}`}
                                                             >
@@ -588,7 +608,7 @@ export default function ChannelSettingsPage() {
                                                 <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Audience Identity</label>
                                                 <textarea
                                                     value={dnaForm.audience_identity}
-                                                    onChange={(e) => setDnaForm({ ...dnaForm, audience_identity: e.target.value })}
+                                                    onChange={(e) => setDnaForm((prev: any) => ({ ...prev, audience_identity: e.target.value }))}
                                                     rows={3}
                                                     className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:border-violet-500/50 outline-none resize-none"
                                                     placeholder="Describe the target audience..."
@@ -601,7 +621,7 @@ export default function ChannelSettingsPage() {
                                                     <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Speaker Preference</label>
                                                     <select
                                                         value={dnaForm.speaker_preference}
-                                                        onChange={(e) => setDnaForm({ ...dnaForm, speaker_preference: e.target.value })}
+                                                        onChange={(e) => setDnaForm((prev: any) => ({ ...prev, speaker_preference: e.target.value }))}
                                                         className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:border-violet-500/50 outline-none appearance-none"
                                                     >
                                                         <option value="">Select...</option>
@@ -616,7 +636,7 @@ export default function ChannelSettingsPage() {
                                                         <input
                                                             type="number"
                                                             value={dnaForm.avg_successful_duration}
-                                                            onChange={(e) => setDnaForm({ ...dnaForm, avg_successful_duration: parseInt(e.target.value) || 0 })}
+                                                            onChange={(e) => setDnaForm((prev: any) => ({ ...prev, avg_successful_duration: parseInt(e.target.value) || 0 }))}
                                                             className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:border-violet-500/50 outline-none"
                                                         />
                                                         <span className="absolute right-3 top-2.5 text-xs text-zinc-500 pointer-events-none">seconds</span>
