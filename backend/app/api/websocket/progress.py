@@ -18,10 +18,13 @@ async def job_progress(websocket: WebSocket, job_id: str):
                 supabase = get_client()
                 result = supabase.table("jobs").select(
                     "status, current_step, progress_pct, current_step_number"
-                ).eq("id", job_id).single().execute()
+                ).eq("id", job_id).execute()
                 
+                if not result.data:
+                    break
+                    
                 if result.data:
-                    job = result.data
+                    job = result.data[0]
                     payload = {
                         "status": job.get("status"),
                         "current_step": job.get("current_step"),

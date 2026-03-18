@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Settings, Trash2, Upload, X, ChevronRight, Check, AlertCircle, Loader2, Dna, Film, Sparkles } from 'lucide-react';
+import { Plus, Settings, Trash2, Upload, X, ChevronRight, Check, AlertCircle, Loader2, Dna, Film, Sparkles, Pencil } from 'lucide-react';
 import { useChannel } from '../layout';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -29,10 +29,59 @@ export default function ChannelSettingsPage() {
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [referenceClips, setReferenceClips] = useState<ReferenceClip[]>([]);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [newChannel, setNewChannel] = useState({ name: '', niche: '', description: '' });
     const [creating, setCreating] = useState(false);
+
+    const formatText = (text: string) => {
+        if (!text) return '';
+        return text.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
+    const renderTags = (data: any, colorClass: string = "bg-violet-500/10 text-violet-300 border-violet-500/20") => {
+        if (!data) return null;
+
+        if (typeof data === 'string') {
+            return <span className={`text-xs px-2.5 py-1 border rounded-lg ${colorClass}`}>{formatText(data)}</span>;
+        }
+
+        if (Array.isArray(data)) {
+            return data.map((item, i) => (
+                <span key={i} className={`text-xs px-2.5 py-1 border rounded-lg ${colorClass}`}>
+                    {typeof item === 'string' ? formatText(item) : formatText(JSON.stringify(item))}
+                </span>
+            ));
+        }
+
+        if (typeof data === 'object') {
+            return Object.entries(data).map(([key, value], i) => {
+                if (Array.isArray(value)) {
+                    return value.map((v, j) => (
+                        <span key={`${i}-${j}`} className={`text-xs px-2.5 py-1 border rounded-lg ${colorClass}`}>
+                            <span className="opacity-50 mr-1">{formatText(key)}:</span>
+                            {typeof v === 'string' ? formatText(v) : formatText(JSON.stringify(v))}
+                        </span>
+                    ));
+                }
+                if (typeof value === 'object' && value !== null) {
+                    return <span key={i} className={`text-xs px-2.5 py-1 border rounded-lg ${colorClass}`}>
+                        <span className="opacity-50 mr-1">{formatText(key)}:</span>
+                        {formatText(JSON.stringify(value))}
+                    </span>;
+                }
+                return (
+                    <span key={i} className={`text-xs px-2.5 py-1 border rounded-lg ${colorClass}`}>
+                        <span className="opacity-50 mr-1">{formatText(key)}:</span>
+                        {typeof value === 'string' ? formatText(value) : String(value)}
+                    </span>
+                );
+            });
+        }
+
+        return <span className={`text-xs px-2.5 py-1 border rounded-lg ${colorClass}`}>{String(data)}</span>;
+    };
 
     useEffect(() => {
         if (selectedChannel) fetchReferenceClips(selectedChannel.id);
@@ -76,9 +125,25 @@ export default function ChannelSettingsPage() {
         finally { setUploading(false); }
     };
 
-    const getStatusConfig = (status?: string) => {
-        if (status === 'completed') return { label: 'Ready', dot: 'bg-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' };
-        if (status === 'processing') return { label: 'Training', dot: 'bg-yellow-400 animate-pulse', text: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20' };
+    const getStatusConfig = (ch: Channel | null) => {
+        if (!ch) return { label: 'Setup Required', dot: 'bg-zinc-500', text: 'text-zinc-400', bg: 'bg-zinc-800/50 border-zinc-700/50' };
+
+        let parsedDna = ch.channel_dna;
+        if (typeof parsedDna === 'string') {
+            try { parsedDna = JSON.parse(parsedDna); } catch { parsedDna = null; }
+        }
+        const hasDna = parsedDna && typeof parsedDna === 'object' && Object.keys(parsedDna).length > 0;
+
+        if (hasDna) {
+            return { label: 'Ready', dot: 'bg-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' };
+        }
+
+        const hasRefClips = (ch.id === selectedChannel?.id) ? referenceClips.length > 0 : ch.onboarding_status === 'processing';
+
+        if (hasRefClips || ch.onboarding_status === 'processing') {
+            return { label: 'Training', dot: 'bg-yellow-400 animate-pulse', text: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20' };
+        }
+
         return { label: 'Setup Required', dot: 'bg-zinc-500', text: 'text-zinc-400', bg: 'bg-zinc-800/50 border-zinc-700/50' };
     };
 
@@ -118,7 +183,7 @@ export default function ChannelSettingsPage() {
 
                     <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
                         {channels.map((ch: Channel, i: number) => {
-                            const status = getStatusConfig(ch.onboarding_status);
+                            const status = getStatusConfig(ch);
                             const isSelected = selectedChannel?.id === ch.id;
                             return (
                                 <motion.button
@@ -178,14 +243,37 @@ export default function ChannelSettingsPage() {
                         >
                             {/* Header */}
                             <div className="flex items-start justify-between mb-8">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-white tracking-tight">{selectedChannel.display_name || selectedChannel.name || selectedChannel.id}</h2>
-                                    {selectedChannel.niche && <p className="text-sm text-zinc-400 mt-1">{selectedChannel.niche}</p>}
+                                <div className="flex items-center gap-3">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="text-2xl font-bold text-white tracking-tight">{selectedChannel.display_name || selectedChannel.name || selectedChannel.id}</h2>
+                                            <button className="text-zinc-500 hover:text-white transition-colors">
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        {selectedChannel.niche && <p className="text-sm text-zinc-400 mt-1">{selectedChannel.niche}</p>}
+                                    </div>
                                 </div>
-                                <span className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-medium mt-1 ${getStatusConfig(selectedChannel.onboarding_status).bg} ${getStatusConfig(selectedChannel.onboarding_status).text}`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${getStatusConfig(selectedChannel.onboarding_status).dot}`} />
-                                    {getStatusConfig(selectedChannel.onboarding_status).label}
+                                <span className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-medium mt-1 ${getStatusConfig(selectedChannel).bg} ${getStatusConfig(selectedChannel).text}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${getStatusConfig(selectedChannel).dot}`} />
+                                    {getStatusConfig(selectedChannel).label}
                                 </span>
+                            </div>
+
+                            {/* Stats Row */}
+                            <div className="grid grid-cols-3 gap-4 mb-8">
+                                <div className="bg-zinc-800/50 rounded-xl p-4 border border-white/[0.04]">
+                                    <p className="text-xs text-zinc-500 mb-1 font-medium">Total Clips</p>
+                                    <p className="text-xl font-bold text-white">{selectedChannel.successful_clips_count || 0}</p>
+                                </div>
+                                <div className="bg-zinc-800/50 rounded-xl p-4 border border-white/[0.04]">
+                                    <p className="text-xs text-zinc-500 mb-1 font-medium">DNA Status</p>
+                                    <p className="text-xl font-bold text-white">{dna && Object.keys(dna).length > 0 ? 'Ready' : 'Not Generated'}</p>
+                                </div>
+                                <div className="bg-zinc-800/50 rounded-xl p-4 border border-white/[0.04]">
+                                    <p className="text-xs text-zinc-500 mb-1 font-medium">Reference Clips</p>
+                                    <p className="text-xl font-bold text-white">{referenceClips.length}</p>
+                                </div>
                             </div>
 
                             {/* Channel DNA */}
@@ -207,22 +295,49 @@ export default function ChannelSettingsPage() {
                                             <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
                                                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Tone</p>
                                                 <div className="flex flex-wrap gap-1.5">
-                                                    {Array.isArray(dna.tone) ? dna.tone.map((t: any, i: number) => (
-                                                        <span key={i} className="text-xs px-2.5 py-1 bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-lg">{typeof t === 'string' ? t : JSON.stringify(t)}</span>
-                                                    )) : (
-                                                        <span className="text-xs px-2.5 py-1 bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-lg">{typeof dna.tone === 'string' ? dna.tone : JSON.stringify(dna.tone)}</span>
-                                                    )}
+                                                    {renderTags(dna.tone, "bg-violet-500/10 text-violet-300 border-violet-500/20")}
                                                 </div>
                                             </div>
                                         )}
                                         {dna?.humor_profile && (
                                             <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-                                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Humor Style</p>
-                                                <div className="flex flex-wrap gap-1.5">
-                                                    {Array.isArray(dna.humor_profile) ? dna.humor_profile.map((h: any, i: number) => (
-                                                        <span key={i} className="text-xs px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg">{typeof h === 'string' ? h : JSON.stringify(h)}</span>
-                                                    )) : (
-                                                        <span className="text-xs px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg">{typeof dna.humor_profile === 'string' ? dna.humor_profile : JSON.stringify(dna.humor_profile)}</span>
+                                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Humor Profile</p>
+                                                <div className="flex flex-col gap-3">
+                                                    {typeof dna.humor_profile === 'object' && !Array.isArray(dna.humor_profile) ? (
+                                                        <>
+                                                            {dna.humor_profile.style && (
+                                                                <div>
+                                                                    <span className="text-[10px] text-zinc-500 mr-2">STYLE</span>
+                                                                    <span className="text-xs px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg">{formatText(dna.humor_profile.style)}</span>
+                                                                </div>
+                                                            )}
+                                                            {dna.humor_profile.triggers && Array.isArray(dna.humor_profile.triggers) && (
+                                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                                    <span className="text-[10px] text-zinc-500 mr-1">TRIGGERS</span>
+                                                                    {dna.humor_profile.triggers.map((t: string, i: number) => (
+                                                                        <span key={i} className="text-xs px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg">{formatText(t)}</span>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                            {dna.humor_profile.frequency && (
+                                                                <div>
+                                                                    <span className="text-[10px] text-zinc-500 mr-2">FREQUENCY</span>
+                                                                    <span className="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded text-[10px] uppercase tracking-wider">{dna.humor_profile.frequency}</span>
+                                                                </div>
+                                                            )}
+                                                            {Object.entries(dna.humor_profile).filter(([k]) => !['style', 'triggers', 'frequency'].includes(k)).length > 0 && (
+                                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                                    {renderTags(
+                                                                        Object.fromEntries(Object.entries(dna.humor_profile).filter(([k]) => !['style', 'triggers', 'frequency'].includes(k))),
+                                                                        "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {renderTags(dna.humor_profile, "bg-cyan-500/10 text-cyan-400 border-cyan-500/20")}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
@@ -230,21 +345,32 @@ export default function ChannelSettingsPage() {
                                         {dna?.target_audience && (
                                             <div className="col-span-2 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
                                                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Target Audience</p>
-                                                <p className="text-sm text-zinc-300 leading-relaxed">{typeof dna.target_audience === 'string' ? dna.target_audience : JSON.stringify(dna.target_audience)}</p>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {typeof dna.target_audience === 'string' ? (
+                                                        <p className="text-sm text-zinc-300 leading-relaxed">{dna.target_audience}</p>
+                                                    ) : (
+                                                        renderTags(dna.target_audience, "bg-zinc-800 text-zinc-300 border-zinc-700")
+                                                    )}
+                                                </div>
                                             </div>
                                         )}
                                         {dna?.content_pillars && (
                                             <div className="col-span-2 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
                                                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Content Pillars</p>
                                                 <div className="flex flex-wrap gap-1.5">
-                                                    {Array.isArray(dna.content_pillars) ? dna.content_pillars.map((p: any, i: number) => (
-                                                        <span key={i} className="text-xs px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">{typeof p === 'string' ? p : JSON.stringify(p)}</span>
-                                                    )) : (
-                                                        <span className="text-xs px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">{typeof dna.content_pillars === 'string' ? dna.content_pillars : JSON.stringify(dna.content_pillars)}</span>
-                                                    )}
+                                                    {renderTags(dna.content_pillars, "bg-emerald-500/10 text-emerald-400 border-emerald-500/20")}
                                                 </div>
                                             </div>
                                         )}
+                                        {/* Render any additional root level objects to avoid them being missed */}
+                                        {Object.entries(dna).filter(([k]) => !['tone', 'humor_profile', 'target_audience', 'content_pillars'].includes(k)).map(([key, value]) => (
+                                            <div key={key} className="col-span-2 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">{formatText(key)}</p>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {renderTags(value, "bg-zinc-800 text-zinc-300 border-zinc-700")}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 text-zinc-600">
@@ -315,7 +441,10 @@ export default function ChannelSettingsPage() {
                             >
                                 <h3 className="font-semibold text-white text-sm mb-1">Danger Zone</h3>
                                 <p className="text-xs text-zinc-500 mb-4">Permanently delete this channel and all associated data.</p>
-                                <button className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-medium transition-colors">
+                                <button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-medium transition-colors"
+                                >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     Delete Channel
                                 </button>
@@ -333,6 +462,56 @@ export default function ChannelSettingsPage() {
                                 </div>
                                 <p className="text-sm text-zinc-500">Select a channel to view settings</p>
                             </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* ── DELETE CHANNEL MODAL ── */}
+                <AnimatePresence>
+                    {showDeleteModal && selectedChannel && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/70 backdrop-blur-xl flex items-center justify-center z-50 p-4"
+                            onClick={(e) => { if (e.target === e.currentTarget) setShowDeleteModal(false); }}
+                        >
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 8 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                                className="bg-zinc-900/90 backdrop-blur-xl border border-red-500/20 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+                            >
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <AlertCircle className="w-5 h-5 text-red-400" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-white tracking-tight">Delete Channel?</h3>
+                                </div>
+
+                                <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+                                    This will permanently delete <strong className="text-white">{selectedChannel.display_name || selectedChannel.name || selectedChannel.id}</strong> and all its clips, jobs, and DNA data. This action cannot be undone.
+                                </p>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 py-2.5 border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.04] rounded-xl text-sm font-medium transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.01 }}
+                                        whileTap={{ scale: 0.99 }}
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400
+                                        text-white rounded-xl text-sm font-medium transition-all shadow-[0_0_16px_rgba(239,68,68,0.3)] hover:shadow-[0_0_24px_rgba(239,68,68,0.4)]"
+                                    >
+                                        Delete Forever
+                                    </motion.button>
+                                </div>
+                            </motion.div>
                         </motion.div>
                     )}
                 </AnimatePresence>
