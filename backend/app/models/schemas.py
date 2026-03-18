@@ -53,10 +53,17 @@ class FusedSignalEntry(BaseModel):
     priority: SignalPriority
     signals_count: int
 
+# SQL Migration Comment:
+# ALTER TABLE jobs ADD COLUMN IF NOT EXISTS trim_start_seconds FLOAT DEFAULT 0;
+# ALTER TABLE jobs ADD COLUMN IF NOT EXISTS trim_end_seconds FLOAT;
+
 class JobCreateRequest(BaseModel):
     video_title: str
     guest_name: Optional[str] = None
     channel_id: str
+    upload_id: Optional[str] = None
+    trim_start_seconds: Optional[float] = 0.0
+    trim_end_seconds: Optional[float] = None
 
 class JobResponse(BaseModel):
     id: UUID
