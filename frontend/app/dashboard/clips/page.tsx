@@ -693,7 +693,12 @@ export default function ClipLibraryPage() {
                             <div>
                                 <h3 className="text-sm font-medium text-gray-400 mb-2">AI Reasoning</h3>
                                 <p className="text-sm text-gray-300 leading-relaxed bg-black/50 p-4 rounded-lg border border-gray-800">
-                                    {selectedClip.standalone_result || selectedClip.quality_notes || "No reasoning provided."}
+                                    {selectedClip.standalone_result ||
+                                        selectedClip.quality_notes ||
+                                        (Array.isArray((selectedClip as any).thinking_steps)
+                                            ? (selectedClip as any).thinking_steps.join(' → ')
+                                            : (selectedClip as any).thinking_steps) ||
+                                        "No reasoning provided."}
                                 </p>
                             </div>
 
