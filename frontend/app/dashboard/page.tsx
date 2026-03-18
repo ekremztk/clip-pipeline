@@ -53,7 +53,7 @@ const ActiveJobCard = ({ initialJob, onComplete }: { initialJob: any, onComplete
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [job.id, job.status, onComplete]);
+    }, [job.id]); // Removed job.status and onComplete to prevent unnecessary remounts and state clearing
 
     const progress = job.progress_pct ?? job.progress ?? 0;
     const isAwaiting = job.status === 'awaiting_speaker_confirm';
