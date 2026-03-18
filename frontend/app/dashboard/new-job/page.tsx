@@ -257,7 +257,7 @@ export default function NewJobPage() {
                             className="w-full bg-[#1a1a1a] border border-white/[0.1] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7c3aed] transition-colors appearance-none"
                         >
                             {channels.length > 0 ? (
-                                channels.map(c => <option key={c.id} value={c.id}>{c.name}</option>)
+                                channels.map(c => <option key={c.id} value={c.id}>{c.display_name || c.name || c.id}</option>)
                             ) : (
                                 <option value="speedy_cast">Speedy Cast</option>
                             )}

@@ -189,7 +189,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     {channels.length > 0 ? (
                                         channels.map((ch: any) => (
                                             <option key={ch.id} value={ch.id} className="bg-[#0d0d0d]">
-                                                {ch.display_name}
+                                                {ch.display_name || ch.name || ch.id}
                                             </option>
                                         ))
                                     ) : (

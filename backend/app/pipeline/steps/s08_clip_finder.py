@@ -71,8 +71,8 @@ def run(
         prompt1 = prompt1.replace("MAX_CANDIDATES_PLACEHOLDER", str(counts["max_candidates"]))
         prompt1 = prompt1.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
         prompt1 = prompt1.replace("GUEST_PROFILE_PLACEHOLDER", json.dumps(context.get("guest_profile", {})))
-        prompt1 = prompt1.replace("CHANNEL_MEMORY_PLACEHOLDER", context.get("channel_memory", ""))
-        prompt1 = prompt1.replace("RAG_CONTEXT_PLACEHOLDER", context.get("rag_context", ""))
+        prompt1 = prompt1.replace("CHANNEL_MEMORY_PLACEHOLDER", "")
+        prompt1 = prompt1.replace("RAG_CONTEXT_PLACEHOLDER", "")
         prompt1 = prompt1.replace("FUSED_TIMELINE_PLACEHOLDER", fused_timeline_text)
         
         pass1_out = generate_json(prompt1)
@@ -135,8 +135,8 @@ def run(
             try:
                 prompt2 = pass2_evaluate.PASS2_EVALUATE_PROMPT
                 prompt2 = prompt2.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
-                prompt2 = prompt2.replace("CHANNEL_MEMORY_PLACEHOLDER", context.get("channel_memory", ""))
-                prompt2 = prompt2.replace("RAG_CONTEXT_PLACEHOLDER", context.get("rag_context", ""))
+                prompt2 = prompt2.replace("CHANNEL_MEMORY_PLACEHOLDER", "")
+                prompt2 = prompt2.replace("RAG_CONTEXT_PLACEHOLDER", "")
                 prompt2 = prompt2.replace("BATCH_CANDIDATES_DATA_PLACEHOLDER", json.dumps(batch_data))
                 
                 pass2_out = generate_json(prompt2, model=settings.GEMINI_MODEL_PRO)

@@ -21,16 +21,17 @@ Railway has no GPU. These will crash the build:
 - Exception: user-facing UI text in frontend
 
 ### Gemini model
-- Always use: `gemini-2.5-pro-preview-05-06`
-- Never change this without being asked
+- S08 Pass 2 + Pass 3: `gemini-3.1-pro-preview`
+- All other steps: `gemini-2.5-flash`
+- Never change without being asked
 
 ### Supabase connection
 - Port MUST be `6543` (Connection Pooler), never `5432`
 - `5432` is unreachable from Railway/Docker
 
-### FFmpeg export quality
-- Always: `-c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k`
-- Never use `-preset ultrafast` in production export
+### FFmpeg encoding
+- S10 (precision cut): -c copy  (lossless stream copy)
+- S11 (export): -c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k
 
 ### pgvector embedding size
 - clips.clip_summary_embedding → `vector(768)` — do NOT change
@@ -69,6 +70,7 @@ prompt = prompt.replace("PLACEHOLDER", value)
 - `backend/channels/` structure — channel isolation system
 
 ## ENVIRONMENT VARIABLES
+
 ### Railway
 ```
 GEMINI_API_KEY=
@@ -82,7 +84,14 @@ FRONTEND_URL=
 ```
 NEXT_PUBLIC_API_URL=    # Railway backend URL
 ```
-
+### Cloudflare R2
+```
+R2_ACCOUNT_ID=          # hex ID only, no URL
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET_NAME=
+R2_PUBLIC_URL=          # https://pub-xxxxx.r2.dev
+```
 ## KNOWN PITFALLS
 | Problem | Fix |
 |---------|-----|
