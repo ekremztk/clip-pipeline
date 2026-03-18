@@ -71,9 +71,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }, []);
 
     const handleChannelChange = (channelId: string) => {
-        const ch = channels.find((c: any) => c.id === channelId);
+        const ch = channels.find((c: any) => c.id === channelId || c.name === channelId || c.display_name === channelId);
         if (ch) {
             setSelectedChannel(ch);
+            localStorage.setItem('selectedChannelId', ch.id);
+        } else {
+            // Fallback: just save the ID if not found in list yet
+            setSelectedChannel({ id: channelId, display_name: channelId });
             localStorage.setItem('selectedChannelId', channelId);
         }
     };

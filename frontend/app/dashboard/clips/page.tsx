@@ -30,17 +30,14 @@ interface Clip {
 
 type FilterType = "all" | "successful" | "failed" | "pending";
 
+import { useChannel } from "../layout";
+
 export default function ClipLibraryPage() {
-    const [channels, setChannels] = useState<Channel[]>([]);
-    const [activeChannelId, setActiveChannelId] = useState<string>("");
+    const { channels, activeChannelId, setActiveChannelId } = useChannel();
     const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [filter, setFilter] = useState<FilterType>("all");
     const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
-
-    useEffect(() => {
-        fetchChannels();
-    }, []);
 
     useEffect(() => {
         if (activeChannelId) {
@@ -50,24 +47,6 @@ export default function ClipLibraryPage() {
             setLoading(false);
         }
     }, [activeChannelId]);
-
-    const fetchChannels = async () => {
-        try {
-            const res = await fetch(`${API}/channels`);
-            if (res.ok) {
-                const data = await res.json();
-                setChannels(data);
-                if (data.length > 0) {
-                    setActiveChannelId(data[0].id);
-                } else {
-                    setLoading(false);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to fetch channels", error);
-            setLoading(false);
-        }
-    };
 
     const fetchClips = async () => {
         setLoading(true);
