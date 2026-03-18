@@ -100,7 +100,10 @@ export default function ChannelSettingsPage() {
 
     const formatText = (text: string) => {
         if (!text) return '';
-        return text.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        return text.replace(/_/g, ' ').split(' ').map(word => {
+            if (word.toLowerCase() === 'youtube') return 'YouTube';
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
     };
 
     const renderTags = (data: any, colorClass: string = "bg-violet-500/10 text-violet-300 border-violet-500/20") => {
@@ -255,6 +258,8 @@ export default function ChannelSettingsPage() {
             no_go_zones: p.no_go_zones || [],
             sacred_topics: p.sacred_topics || [],
             best_content_types: p.best_content_types || [],
+            content_format: p.content_format || [],
+            target_platforms: p.target_platforms || [],
             audience_identity: p.audience_identity || p.target_audience || '',
             speaker_preference: p.speaker_preference || '',
             avg_successful_duration: p.avg_successful_duration || 30
@@ -603,6 +608,60 @@ export default function ChannelSettingsPage() {
                                                 </div>
                                             </div>
 
+                                            {/* CONTENT FORMAT */}
+                                            <div className="col-span-2">
+                                                <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Content Format</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {['podcast', 'interview', 'talk_show', 'comedy', 'debate', 'documentary', 'reaction', 'commentary'].map((format) => {
+                                                        const isSelected = (dnaForm.content_format || []).includes(format);
+                                                        return (
+                                                            <button
+                                                                key={format}
+                                                                onClick={() => {
+                                                                    setDnaForm((prev: any) => {
+                                                                        const selected = prev.content_format || [];
+                                                                        if (selected.includes(format)) {
+                                                                            return { ...prev, content_format: selected.filter((f: string) => f !== format) };
+                                                                        }
+                                                                        return { ...prev, content_format: [...selected, format] };
+                                                                    });
+                                                                }}
+                                                                className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${isSelected ? 'bg-violet-600 text-white border-violet-600' : 'bg-transparent text-zinc-400 border-zinc-600 hover:border-zinc-400'}`}
+                                                            >
+                                                                {formatText(format)}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* TARGET PLATFORMS */}
+                                            <div className="col-span-2">
+                                                <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Target Platforms</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {['youtube_shorts', 'tiktok', 'instagram_reels', 'all'].map((platform) => {
+                                                        const isSelected = (dnaForm.target_platforms || []).includes(platform);
+                                                        return (
+                                                            <button
+                                                                key={platform}
+                                                                onClick={() => {
+                                                                    setDnaForm((prev: any) => {
+                                                                        const selected = prev.target_platforms || [];
+                                                                        if (selected.includes(platform)) {
+                                                                            return { ...prev, target_platforms: selected.filter((p: string) => p !== platform) };
+                                                                        }
+                                                                        return { ...prev, target_platforms: [...selected, platform] };
+                                                                    });
+                                                                }}
+                                                                className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${isSelected ? 'bg-violet-600 text-white border-violet-600' : 'bg-transparent text-zinc-400 border-zinc-600 hover:border-zinc-400'}`}
+                                                            >
+                                                                {formatText(platform)}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
                                             {/* AUDIENCE IDENTITY */}
                                             <div className="col-span-2">
                                                 <label className="block text-[10px] text-zinc-500 mb-1.5 uppercase tracking-widest">Audience Identity</label>
@@ -758,6 +817,22 @@ export default function ChannelSettingsPage() {
                                                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Best Content Types</p>
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {renderTags(dna.best_content_types, "bg-blue-500/10 text-blue-400 border-blue-500/20")}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {dna?.content_format && (
+                                                <div className="col-span-2 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Content Format</p>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {renderTags(dna.content_format, "bg-violet-600/20 text-violet-300 border-violet-500/40")}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {dna?.target_platforms && (
+                                                <div className="col-span-2 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">Target Platforms</p>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {renderTags(dna.target_platforms, "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20")}
                                                     </div>
                                                 </div>
                                             )}
