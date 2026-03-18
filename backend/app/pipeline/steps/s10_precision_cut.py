@@ -91,7 +91,7 @@ def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: 
             # 3. Snap recommended_end to nearest word end (mode="end")
             # Then add 0.3 seconds buffer
             snapped_end = snap_to_word_boundary(rec_end, words, "end")
-            final_end = snapped_end + 0.3
+            final_end = snapped_end + 0.8
             
             # 4. Validate: end - start >= 15 and end - start <= 50
             if final_end - final_start > 50.0:
@@ -124,11 +124,7 @@ def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: 
                 "-ss", str(final_start),
                 "-i", video_path,
                 "-t", str(final_duration_s),
-                "-c:v", "libx264",
-                "-preset", "slow",
-                "-crf", "18",
-                "-c:a", "aac",
-                "-b:a", "320k",
+                "-c", "copy",
                 "-avoid_negative_ts", "make_zero",
                 "-map", "0:v:0",
                 "-map", "0:a:0",
