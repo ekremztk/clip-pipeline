@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Download, Check, X, Video, ChevronDown, Play, FileVideo } from "lucide-react";
+import { Download, Check, X, ChevronDown, Play, FileVideo, MoreHorizontal, ArrowLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { useChannel } from "../layout";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -30,36 +33,245 @@ interface Clip {
 
 type FilterType = "all" | "successful" | "failed" | "pending";
 
-import { useChannel } from "../layout";
+const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'Just now';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const hours = diff / (1000 * 60 * 60);
+    const days = Math.floor(hours / 24);
+    if (hours < 1) {
+        const mins = Math.floor(hours * 60);
+        return mins <= 1 ? 'Just now' : `${mins} min ago`;
+    }
+    if (hours < 24) return 'Today';
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+};
+
+const ActiveJobCard = ({ initialJob, onComplete }: { initialJob: any, onComplete: (job: any) => void }) => {
+    const [job, setJob] = useState(initialJob);
+
+    useEffect(() => {
+        if (job.status === 'completed' || job.status === 'failed' || job.status === 'error') return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API}/jobs/${job.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setJob(data);
+                    if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
+                        onComplete(data);
+                    }
+                }
+            } catch (err) { }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [job.id, job.status, onComplete]);
+
+    const progress = job.progress_pct ?? job.progress ?? 0;
+    const isAwaiting = job.status === 'awaiting_speaker_confirm';
+
+    return (
+        <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col">
+            <div className="w-full aspect-[16/9] relative bg-gradient-to-br from-zinc-900 to-zinc-950 overflow-hidden flex items-center justify-center p-6 text-center">
+                <motion.div
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    style={{
+                        background: "linear-gradient(105deg, transparent 40%, rgba(124,58,237,0.15) 50%, transparent 60%)",
+                        backgroundSize: "200% 100%"
+                    }}
+                    animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                />
+
+                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full gap-3">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+                        <span className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Processing</span>
+                    </div>
+
+                    {isAwaiting ? (
+                        <div className="flex flex-col items-center gap-3">
+                            <span className="text-white font-medium text-sm">Waiting for speaker confirmation...</span>
+                            <Link href={`/dashboard/speakers/${job.id}`} className="inline-flex items-center justify-center bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-1.5 px-4 rounded-full transition-colors z-20">
+                                Confirm Speakers →
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                            <span className="text-white font-medium text-sm truncate">Finding best clips...</span>
+                            <span className="text-violet-400 font-bold text-sm shrink-0">({progress}%)</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="p-4 flex flex-col gap-1 border-t border-white/[0.06] bg-[#0d0d0d]">
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium text-sm text-gray-200 truncate" title={job.video_title}>
+                        {job.video_title || "Untitled Video"}
+                    </span>
+                    <button className="p-1 text-gray-400/50 cursor-not-allowed">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>Processing...</span>
+                    <span>{formatDate(job.created_at)}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ProjectCard = ({ job, clips, onClick, onDelete }: { job: any, clips: Clip[], onClick: () => void, onDelete: () => void }) => {
+    const firstClip = clips.find(c => c.file_url);
+    const videoSrc = firstClip?.file_url;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    return (
+        <motion.div
+            className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col cursor-pointer"
+            whileHover={{ y: -2, borderColor: "rgba(139, 92, 246, 0.3)" }}
+            onClick={onClick}
+        >
+            <div className="w-full aspect-[16/9] bg-[#141414] relative flex items-center justify-center overflow-hidden group">
+                {videoSrc ? (
+                    <video
+                        src={videoSrc}
+                        className="w-full h-full object-cover"
+                        muted
+                        loop
+                        preload="metadata"
+                        playsInline
+                        onMouseEnter={(e) => e.currentTarget.play()}
+                        onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                    />
+                ) : (
+                    <Play className="w-12 h-12 text-white/20" />
+                )}
+            </div>
+
+            <div className="p-4 flex flex-col gap-1 border-t border-white/[0.06] bg-[#0d0d0d]">
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium text-sm text-gray-200 truncate" title={job.video_title}>
+                        {job.video_title || "Untitled Job"}
+                    </span>
+                    <div className="relative">
+                        <button
+                            className="p-1 text-gray-400 hover:text-white rounded transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMenuOpen(!isMenuOpen);
+                            }}
+                        >
+                            <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                        <AnimatePresence>
+                            {isMenuOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute right-0 top-full mt-1 bg-zinc-900 border border-white/[0.08] rounded-xl shadow-xl z-20 w-36 overflow-hidden"
+                                >
+                                    <button
+                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsMenuOpen(false);
+                                            onClick();
+                                        }}
+                                    >
+                                        View Clips
+                                    </button>
+                                    <button
+                                        className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsMenuOpen(false);
+                                            onDelete();
+                                        }}
+                                    >
+                                        Delete Project
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+                <div className="flex items-center text-xs text-gray-500">
+                    <span>{clips.length} clips</span>
+                    <span className="mx-1.5">·</span>
+                    <span>{formatDate(job.created_at)}</span>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
 
 export default function ClipLibraryPage() {
     const { channels, activeChannelId, setActiveChannelId } = useChannel();
+    const [jobs, setJobs] = useState<any[]>([]);
     const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [filter, setFilter] = useState<FilterType>("all");
+    const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
 
     useEffect(() => {
         if (activeChannelId) {
-            fetchClips();
+            fetchJobsAndClips();
         } else {
+            setJobs([]);
             setClips([]);
             setLoading(false);
         }
     }, [activeChannelId]);
 
-    const fetchClips = async () => {
+    const fetchJobsAndClips = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=50`);
-            if (res.ok) {
-                const data = await res.json();
-                setClips(data);
+            const [jobsRes, clipsRes] = await Promise.all([
+                fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=50`),
+                fetch(`${API}/clips?channel_id=${activeChannelId}&limit=200`)
+            ]);
+
+            if (jobsRes.ok && clipsRes.ok) {
+                setJobs(await jobsRes.json());
+                setClips(await clipsRes.json());
             }
         } catch (error) {
-            console.error("Failed to fetch clips", error);
+            console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchClipsOnly = async () => {
+        try {
+            const res = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=200`);
+            if (res.ok) setClips(await res.json());
+        } catch (err) { }
+    };
+
+    const handleJobComplete = (updatedJob: any) => {
+        setJobs(prev => prev.map(j => j.id === updatedJob.id ? updatedJob : j));
+        fetchClipsOnly();
+    };
+
+    const handleDeleteProject = async (jobId: string) => {
+        if (!confirm("Are you sure you want to delete this project?")) return;
+        try {
+            const res = await fetch(`${API}/jobs/${jobId}`, { method: 'DELETE' });
+            if (res.ok) {
+                setJobs(jobs.filter(j => j.id !== jobId));
+                if (selectedJob?.id === jobId) setSelectedJob(null);
+            }
+        } catch (err) {
+            console.error("Failed to delete project", err);
         }
     };
 
@@ -140,20 +352,33 @@ export default function ClipLibraryPage() {
         }
     };
 
-    const filteredClips = clips.filter((clip) => {
-        if (filter === "all") return true;
-        if (filter === "successful") return clip.is_successful === true;
-        if (filter === "failed") return clip.is_successful === false;
-        if (filter === "pending") return clip.is_successful === null;
-        return true;
-    });
-
     const formatDuration = (seconds: number) => {
         if (!seconds) return "0:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
+
+    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+    const completedJobs = jobs.filter(j => ['completed', 'failed', 'error'].includes(j.status));
+
+    const filteredProjects = completedJobs.filter(job => {
+        const jobClips = clips.filter(c => c.job_id === job.id);
+        if (filter === "all") return true;
+        if (filter === "successful") return jobClips.some(c => c.is_successful === true);
+        if (filter === "failed") return jobClips.some(c => c.is_successful === false);
+        if (filter === "pending") return jobClips.some(c => c.is_successful === null);
+        return true;
+    });
+
+    const projectClips = selectedJob ? clips.filter(c => c.job_id === selectedJob.id) : [];
+    const filteredProjectClips = projectClips.filter(clip => {
+        if (filter === "all") return true;
+        if (filter === "successful") return clip.is_successful === true;
+        if (filter === "failed") return clip.is_successful === false;
+        if (filter === "pending") return clip.is_successful === null;
+        return true;
+    });
 
     return (
         <div className="min-h-screen bg-black text-white p-6 pb-24 flex">
@@ -180,7 +405,10 @@ export default function ClipLibraryPage() {
                     <div className="relative">
                         <select
                             value={activeChannelId}
-                            onChange={(e) => setActiveChannelId(e.target.value)}
+                            onChange={(e) => {
+                                setActiveChannelId(e.target.value);
+                                setSelectedJob(null);
+                            }}
                             className="appearance-none bg-[#0d0d0d] border border-gray-800 text-white px-4 py-2 pr-10 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500"
                         >
                             {channels.length === 0 ? (
@@ -201,116 +429,185 @@ export default function ClipLibraryPage() {
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-[#0d0d0d] border border-gray-800 rounded-xl overflow-hidden animate-pulse">
-                                <div className="w-full aspect-[9/16] bg-[#141414]"></div>
+                            <div key={i} className="bg-[#0d0d0d] border border-gray-800 rounded-2xl overflow-hidden animate-pulse">
+                                <div className="w-full aspect-[16/9] bg-[#141414]"></div>
                                 <div className="p-4 space-y-3">
                                     <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-                                    <div className="h-4 bg-gray-800 rounded w-1/2"></div>
-                                    <div className="flex gap-2 pt-2">
-                                        <div className="h-6 bg-gray-800 rounded w-16"></div>
-                                        <div className="h-6 bg-gray-800 rounded w-16"></div>
-                                        <div className="h-6 bg-gray-800 rounded w-16"></div>
-                                    </div>
-                                    <div className="h-6 bg-gray-800 rounded w-24"></div>
+                                    <div className="h-3 bg-gray-800 rounded w-1/2"></div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                ) : filteredClips.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 bg-[#0d0d0d] border border-gray-800 rounded-xl">
-                        <FileVideo className="w-16 h-16 text-gray-700 mb-4" />
-                        <h3 className="text-xl font-medium text-gray-300">No clips yet</h3>
-                        <p className="text-[#6b7280] mt-2">Start your first job to extract clips</p>
-                    </div>
+                ) : !selectedJob ? (
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key="projects-view"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            {activeJobs.length > 0 && (
+                                <div className="mb-8">
+                                    <h2 className="text-[13px] uppercase tracking-wider text-[#6b7280] font-semibold mb-4 flex items-center gap-2">
+                                        Active Jobs
+                                        <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {activeJobs.map(job => (
+                                            <ActiveJobCard key={job.id} initialJob={job} onComplete={handleJobComplete} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <h2 className="text-[13px] uppercase tracking-wider text-[#6b7280] font-semibold mb-4">Projects</h2>
+                                {filteredProjects.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-20 bg-[#0d0d0d] border border-gray-800 rounded-xl">
+                                        <FileVideo className="w-16 h-16 text-gray-700 mb-4" />
+                                        <h3 className="text-xl font-medium text-gray-300">No projects found</h3>
+                                        <p className="text-[#6b7280] mt-2">Start your first job to extract clips</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredProjects.map(job => (
+                                            <ProjectCard
+                                                key={job.id}
+                                                job={job}
+                                                clips={clips.filter(c => c.job_id === job.id)}
+                                                onClick={() => setSelectedJob(job)}
+                                                onDelete={() => handleDeleteProject(job.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredClips.map((clip) => (
-                            <div
-                                key={clip.id}
-                                className="bg-[#0d0d0d] border border-gray-800 hover:border-purple-500/50 rounded-xl overflow-hidden cursor-pointer transition-colors group flex flex-col"
-                                onClick={() => setSelectedClip(clip)}
-                            >
-                                {/* Thumbnail Area */}
-                                <div className="w-full aspect-[9/16] bg-[#141414] relative flex items-center justify-center group-hover:bg-[#1a1a1a] transition-colors overflow-hidden">
-                                    {clip.file_url ? (
-                                        <video
-                                            src={clip.file_url}
-                                            className="w-full h-full object-cover"
-                                            muted
-                                            playsInline
-                                            preload="metadata"
-                                        />
-                                    ) : (
-                                        <Play className="w-12 h-12 text-white/20" />
-                                    )}
-                                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-medium text-white">
-                                        {formatDuration(clip.duration)}
-                                    </div>
-                                    {clip.is_successful === true && (
-                                        <div className="absolute top-2 right-2 bg-green-500/90 text-white p-1 rounded-full">
-                                            <Check className="w-4 h-4" />
-                                        </div>
-                                    )}
-                                    {clip.is_successful === false && (
-                                        <div className="absolute top-2 right-2 bg-red-500/90 text-white p-1 rounded-full">
-                                            <X className="w-4 h-4" />
-                                        </div>
-                                    )}
-                                </div>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key="clips-view"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="w-full"
+                        >
+                            <div className="mb-6 flex items-center">
+                                <button
+                                    onClick={() => setSelectedJob(null)}
+                                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-[#0d0d0d] hover:bg-white/5 border border-white/[0.06] px-4 py-2 rounded-lg"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    Back to Projects
+                                </button>
+                            </div>
 
-                                {/* Info Area */}
-                                <div className="p-4 flex flex-col flex-1">
-                                    <p className="text-sm text-gray-300 line-clamp-2 mb-3 h-10">
-                                        "{clip.hook_text || "No hook text generated..."}"
-                                    </p>
-
-                                    <div className="flex gap-3 text-xs font-medium mb-3">
-                                        <span className={getScoreColor(clip.standalone_score)}>
-                                            St: {clip.standalone_score || 0}/10
-                                        </span>
-                                        <span className={getScoreColor(clip.hook_score)}>
-                                            Hk: {clip.hook_score || 0}/10
-                                        </span>
-                                        <span className={getScoreColor(clip.arc_score)}>
-                                            Ar: {clip.arc_score || 0}/10
-                                        </span>
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <span className={`text-xs px-2 py-1 rounded-md border ${getRoleColor(clip.clip_strategy_role)}`}>
-                                            {clip.clip_strategy_role || "unassigned"}
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-800">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleDownload(clip.id); }}
-                                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                                            title="Download"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                        </button>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleApprove(clip.id); }}
-                                                className="p-2 text-gray-400 hover:text-green-400 hover:bg-green-400/10 rounded-lg transition-colors"
-                                                title="Approve"
-                                            >
-                                                <Check className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleReject(clip.id); }}
-                                                className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                                                title="Reject"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
+                            <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4">
+                                <div>
+                                    <h2 className="text-xl font-bold">{selectedJob.video_title || "Project Clips"}</h2>
+                                    <p className="text-sm text-gray-500 mt-1">{formatDate(selectedJob.created_at)}</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            {filteredProjectClips.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 bg-[#0d0d0d] border border-gray-800 rounded-xl">
+                                    <FileVideo className="w-16 h-16 text-gray-700 mb-4" />
+                                    <h3 className="text-xl font-medium text-gray-300">No clips found</h3>
+                                    <p className="text-[#6b7280] mt-2">Try changing your filter</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {filteredProjectClips.map((clip) => (
+                                        <div
+                                            key={clip.id}
+                                            className="bg-[#0d0d0d] border border-gray-800 hover:border-purple-500/50 rounded-xl overflow-hidden cursor-pointer transition-colors group flex flex-col"
+                                            onClick={() => setSelectedClip(clip)}
+                                        >
+                                            <div className="w-full aspect-[9/16] bg-[#141414] relative flex items-center justify-center group-hover:bg-[#1a1a1a] transition-colors overflow-hidden">
+                                                {clip.file_url ? (
+                                                    <video
+                                                        src={clip.file_url}
+                                                        className="w-full h-full object-cover"
+                                                        muted
+                                                        playsInline
+                                                        preload="metadata"
+                                                    />
+                                                ) : (
+                                                    <Play className="w-12 h-12 text-white/20" />
+                                                )}
+                                                <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-medium text-white">
+                                                    {formatDuration(clip.duration)}
+                                                </div>
+                                                {clip.is_successful === true && (
+                                                    <div className="absolute top-2 right-2 bg-green-500/90 text-white p-1 rounded-full">
+                                                        <Check className="w-4 h-4" />
+                                                    </div>
+                                                )}
+                                                {clip.is_successful === false && (
+                                                    <div className="absolute top-2 right-2 bg-red-500/90 text-white p-1 rounded-full">
+                                                        <X className="w-4 h-4" />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="p-4 flex flex-col flex-1">
+                                                <p className="text-sm text-gray-300 line-clamp-2 mb-3 h-10">
+                                                    "{clip.hook_text || "No hook text generated..."}"
+                                                </p>
+
+                                                <div className="flex gap-3 text-xs font-medium mb-3">
+                                                    <span className={getScoreColor(clip.standalone_score)}>
+                                                        St: {clip.standalone_score || 0}/10
+                                                    </span>
+                                                    <span className={getScoreColor(clip.hook_score)}>
+                                                        Hk: {clip.hook_score || 0}/10
+                                                    </span>
+                                                    <span className={getScoreColor(clip.arc_score)}>
+                                                        Ar: {clip.arc_score || 0}/10
+                                                    </span>
+                                                </div>
+
+                                                <div className="mb-4">
+                                                    <span className={`text-xs px-2 py-1 rounded-md border ${getRoleColor(clip.clip_strategy_role)}`}>
+                                                        {clip.clip_strategy_role || "unassigned"}
+                                                    </span>
+                                                </div>
+
+                                                <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-800">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDownload(clip.id); }}
+                                                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                                                        title="Download"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleApprove(clip.id); }}
+                                                            className="p-2 text-gray-400 hover:text-green-400 hover:bg-green-400/10 rounded-lg transition-colors"
+                                                            title="Approve"
+                                                        >
+                                                            <Check className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleReject(clip.id); }}
+                                                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                                                            title="Reject"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 )}
             </div>
 
@@ -332,7 +629,6 @@ export default function ClipLibraryPage() {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                            {/* Video Player Placeholder */}
                             <div className="w-full aspect-[9/16] bg-[#141414] rounded-xl flex items-center justify-center border border-gray-800 relative overflow-hidden">
                                 {selectedClip.file_url ? (
                                     <video
@@ -348,7 +644,6 @@ export default function ClipLibraryPage() {
                                 )}
                             </div>
 
-                            {/* Hook Text */}
                             <div>
                                 <h3 className="text-sm font-medium text-gray-400 mb-2">Hook Text</h3>
                                 <p className="text-base leading-relaxed bg-black/50 p-4 rounded-lg border border-gray-800">
@@ -356,7 +651,6 @@ export default function ClipLibraryPage() {
                                 </p>
                             </div>
 
-                            {/* Strategy & Order */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-400 mb-2">Strategy Role</h3>
@@ -370,7 +664,6 @@ export default function ClipLibraryPage() {
                                 </div>
                             </div>
 
-                            {/* Scores */}
                             <div>
                                 <h3 className="text-sm font-medium text-gray-400 mb-4">Quality Scores</h3>
                                 <div className="space-y-4">
@@ -397,7 +690,6 @@ export default function ClipLibraryPage() {
                                 </div>
                             </div>
 
-                            {/* AI Reasoning */}
                             <div>
                                 <h3 className="text-sm font-medium text-gray-400 mb-2">AI Reasoning</h3>
                                 <p className="text-sm text-gray-300 leading-relaxed bg-black/50 p-4 rounded-lg border border-gray-800">
@@ -405,7 +697,6 @@ export default function ClipLibraryPage() {
                                 </p>
                             </div>
 
-                            {/* Why Failed */}
                             {selectedClip.is_successful === false && selectedClip.why_failed && (
                                 <div>
                                     <h3 className="text-sm font-medium text-red-400 mb-2">Failure Reason</h3>
@@ -416,7 +707,6 @@ export default function ClipLibraryPage() {
                             )}
                         </div>
 
-                        {/* Actions Footer */}
                         <div className="p-4 border-t border-gray-800 bg-[#0d0d0d] flex gap-3">
                             <button
                                 onClick={() => handleDownload(selectedClip.id)}
@@ -441,7 +731,6 @@ export default function ClipLibraryPage() {
                 )}
             </div>
 
-            {/* Overlay for Detail Panel */}
             {selectedClip && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 md:hidden"

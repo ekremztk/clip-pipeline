@@ -2,20 +2,113 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Play, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Play, Clock, CheckCircle2, AlertCircle, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 import { useChannel } from "./layout";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const WS_API = API.replace(/^http/, "ws");
 
 type Job = {
     id: string;
     video_title: string;
     status: string;
     progress?: number;
+    progress_pct?: number;
     step?: string;
     created_at?: string;
     error?: string;
+};
+
+const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'Just now';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const hours = diff / (1000 * 60 * 60);
+    const days = Math.floor(hours / 24);
+    if (hours < 1) {
+        const mins = Math.floor(hours * 60);
+        return mins <= 1 ? 'Just now' : `${mins} min ago`;
+    }
+    if (hours < 24) return 'Today';
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+};
+
+const ActiveJobCard = ({ initialJob, onComplete }: { initialJob: any, onComplete: (job: any) => void }) => {
+    const [job, setJob] = useState(initialJob);
+
+    useEffect(() => {
+        if (job.status === 'completed' || job.status === 'failed' || job.status === 'error') return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API}/jobs/${job.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setJob(data);
+                    if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
+                        onComplete(data);
+                    }
+                }
+            } catch (err) { }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [job.id, job.status, onComplete]);
+
+    const progress = job.progress_pct ?? job.progress ?? 0;
+    const isAwaiting = job.status === 'awaiting_speaker_confirm';
+
+    return (
+        <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col h-full">
+            <div className="w-full aspect-[16/9] relative bg-gradient-to-br from-zinc-900 to-zinc-950 overflow-hidden flex items-center justify-center p-6 text-center">
+                <motion.div
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    style={{
+                        background: "linear-gradient(105deg, transparent 40%, rgba(124,58,237,0.15) 50%, transparent 60%)",
+                        backgroundSize: "200% 100%"
+                    }}
+                    animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                />
+
+                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full gap-3">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+                        <span className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Processing</span>
+                    </div>
+
+                    {isAwaiting ? (
+                        <div className="flex flex-col items-center gap-3">
+                            <span className="text-white font-medium text-sm">Waiting for speaker confirmation...</span>
+                            <Link href={`/dashboard/speakers/${job.id}`} className="inline-flex items-center justify-center bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-1.5 px-4 rounded-full transition-colors z-20">
+                                Confirm Speakers →
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                            <span className="text-white font-medium text-sm truncate">Finding best clips...</span>
+                            <span className="text-violet-400 font-bold text-sm shrink-0">({progress}%)</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="p-4 flex flex-col gap-1 border-t border-white/[0.06] bg-[#0d0d0d]">
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium text-sm text-gray-200 truncate" title={job.video_title}>
+                        {job.video_title || "Untitled Video"}
+                    </span>
+                    <button className="p-1 text-gray-400/50 cursor-not-allowed">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>Processing...</span>
+                    <span>{formatDate(job.created_at)}</span>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 type Clip = {
@@ -70,78 +163,36 @@ export default function DashboardPage() {
     const [loadingDashboard, setLoadingDashboard] = useState(true);
     const [dashboardError, setDashboardError] = useState("");
 
-    const wsConnections = useRef<Record<string, WebSocket>>({});
+    const fetchDashboardData = async () => {
+        setLoadingDashboard(true);
+        setDashboardError("");
+        try {
+            const jobsRes = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`);
+            if (jobsRes.ok) {
+                setJobs(await jobsRes.json());
+            }
+
+            const clipsRes = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=4`);
+            if (clipsRes.ok) {
+                setClips(await clipsRes.json());
+            }
+        } catch (err) {
+            console.error("Dashboard fetch error", err);
+            setDashboardError("Failed to load dashboard data.");
+        } finally {
+            setLoadingDashboard(false);
+        }
+    };
 
     useEffect(() => {
         if (!activeChannelId) return;
-
-        const fetchDashboardData = async () => {
-            setLoadingDashboard(true);
-            setDashboardError("");
-            try {
-                const jobsRes = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`);
-                let jobsData = [];
-                if (jobsRes.ok) {
-                    jobsData = await jobsRes.json();
-                    setJobs(jobsData);
-                }
-
-                const clipsRes = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=4`);
-                if (clipsRes.ok) {
-                    setClips(await clipsRes.json());
-                }
-            } catch (err) {
-                console.error("Dashboard fetch error", err);
-                setDashboardError("Failed to load dashboard data.");
-            } finally {
-                setLoadingDashboard(false);
-            }
-        };
-
         fetchDashboardData();
     }, [activeChannelId]);
 
-    useEffect(() => {
-        const activeJobs = jobs.filter((j) => j.status === "processing" || j.status === "queued" || j.status === "running");
-
-        activeJobs.forEach((job) => {
-            if (!wsConnections.current[job.id]) {
-                const ws = new WebSocket(`${WS_API}/ws/jobs/${job.id}/progress`);
-
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    setJobs((prevJobs) =>
-                        prevJobs.map((pJob) =>
-                            pJob.id === job.id
-                                ? { ...pJob, progress: data.progress, step: data.step, status: data.status || pJob.status }
-                                : pJob
-                        )
-                    );
-
-                    if (data.status === "done" || data.status === "error" || data.status === "completed") {
-                        ws.close();
-                        delete wsConnections.current[job.id];
-                    }
-                };
-
-                ws.onclose = () => {
-                    delete wsConnections.current[job.id];
-                };
-
-                wsConnections.current[job.id] = ws;
-            }
-        });
-
-        Object.keys(wsConnections.current).forEach(id => {
-            const job = jobs.find(j => j.id === id);
-            if (!job || (job.status !== "processing" && job.status !== "queued" && job.status !== "running")) {
-                wsConnections.current[id].close();
-                delete wsConnections.current[id];
-            }
-        });
-
-        return () => { };
-    }, [jobs]);
+    const handleJobComplete = (updatedJob: any) => {
+        setJobs((prev) => prev.map(j => j.id === updatedJob.id ? updatedJob : j));
+        fetchDashboardData();
+    };
 
     return (
         <motion.div
@@ -242,45 +293,25 @@ export default function DashboardPage() {
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <h2 className="text-[13px] uppercase tracking-wider text-[#6b7280] font-semibold">Active Jobs</h2>
-                    {jobs.some(j => j.status === "processing" || j.status === "queued" || j.status === "running") && (
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    {jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)) && (
+                        <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
                     )}
                 </div>
 
-                {jobs.filter(j => j.status === "processing" || j.status === "queued" || j.status === "running").length === 0 ? (
+                {jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).length === 0 ? (
                     <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-8 text-center">
                         <p className="text-[#6b7280] text-sm">No active jobs</p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
-                        {jobs.filter(j => j.status === "processing" || j.status === "queued" || j.status === "running").map((job, index) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).map((job, index) => (
                             <motion.div
                                 key={job.id}
                                 initial={{ opacity: 0, x: -12 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.06 }}
-                                className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg overflow-hidden"
                             >
-                                <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Clock className="w-5 h-5 text-[#06b6d4]" />
-                                        <span className="font-medium text-sm line-clamp-1">{job.video_title}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 shrink-0">
-                                        <span className="text-xs text-[#6b7280]">{job.step || "Initializing..."}</span>
-                                        <span className="px-2.5 py-1 rounded bg-[#7c3aed]/10 text-[#7c3aed] text-xs font-medium border border-[#7c3aed]/20 capitalize">
-                                            {job.status}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="w-full h-1 bg-[#1a1a1a]">
-                                    <div
-                                        className="h-full bg-[#7c3aed] relative overflow-hidden transition-all duration-300"
-                                        style={{ width: `${job.progress || 0}%` }}
-                                    >
-                                        <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_1.5s_infinite]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
-                                    </div>
-                                </div>
+                                <ActiveJobCard initialJob={job} onComplete={handleJobComplete} />
                             </motion.div>
                         ))}
                     </div>
