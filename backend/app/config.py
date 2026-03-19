@@ -4,7 +4,7 @@ from pathlib import Path
 class Settings:
     ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
     GCP_PROJECT: str = os.getenv("GCP_PROJECT", "")
-    GCP_LOCATION: str = os.getenv("GCP_LOCATION", "us-central1")
+    GCP_LOCATION: str = os.getenv("GCP_LOCATION", "global")
     GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL_PRO: str = "gemini-3.1-pro-preview"

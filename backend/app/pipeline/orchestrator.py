@@ -233,7 +233,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             progress_pct=100,
             completed_at=completed_at,
             current_step="finished",
-            current_step_number=len(steps),
+            current_step_number=8,
             clip_count=clip_count
         )
         print(f"[Orchestrator] Job {job_id} pipeline completed successfully.")

@@ -206,15 +206,14 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
             return str(result) if result else "{}"
 
         else:
-            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Using Files API.")
-            dev_client = get_developer_client()
-            uploaded_file = dev_client.files.upload(file=video_path)
+            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Using Files API via Vertex AI.")
+            uploaded_file = client.files.upload(file=video_path)
             print(f"[GeminiClient] Uploaded video as {uploaded_file.name}")
 
-            _poll_file_active(dev_client, uploaded_file.name)
+            _poll_file_active(client, uploaded_file.name)
 
             def do_generate_uploaded() -> str:
-                response = dev_client.models.generate_content(
+                response = client.models.generate_content(
                     model=model,
                     contents=[uploaded_file, prompt]
                 )
@@ -229,8 +228,8 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
     finally:
         if uploaded_file:
             try:
-                dev_client = get_developer_client()
-                dev_client.files.delete(name=uploaded_file.name)
+                client = get_gemini_client()
+                client.files.delete(name=uploaded_file.name)
                 print(f"[GeminiClient] Deleted uploaded video file {uploaded_file.name}")
             except Exception as cleanup_err:
                 print(f"[GeminiClient] Warning: Failed to delete uploaded file: {cleanup_err}")
@@ -284,14 +283,13 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
             
         else:
             print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Using Files API (Developer Client).")
-            dev_client = get_developer_client()
-            uploaded_file = dev_client.files.upload(file=audio_path)
+            uploaded_file = client.files.upload(file=audio_path)
             print(f"[GeminiClient] Uploaded as {uploaded_file.name}")
             
-            _poll_file_active(dev_client, uploaded_file.name)
+            _poll_file_active(client, uploaded_file.name)
             
             def do_generate_uploaded() -> str:
-                response = dev_client.models.generate_content(
+                response = client.models.generate_content(
                     model=model,
                     contents=[uploaded_file, prompt]
                 )
@@ -308,8 +306,8 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
         if uploaded_file:
             try:
                 print(f"[GeminiClient] Deleting uploaded file {uploaded_file.name}...")
-                dev_client = get_developer_client()
-                dev_client.files.delete(name=uploaded_file.name)
+                client = get_gemini_client()
+                client.files.delete(name=uploaded_file.name)
             except Exception as e:
                 print(f"[GeminiClient] Error deleting file {uploaded_file.name}: {e}")
 

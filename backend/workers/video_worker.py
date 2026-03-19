@@ -221,7 +221,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             progress_pct=100,
             completed_at=completed_at,
             current_step="finished",
-            current_step_number=len(steps),
+            current_step_number=8,
             clip_count=clip_count
         )
         print(f"[Worker] Job {job_id} resume pipeline completed successfully.")
