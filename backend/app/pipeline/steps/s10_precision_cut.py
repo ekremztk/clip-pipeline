@@ -6,55 +6,49 @@ from app.services import storage
 
 def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
     """
-    Finds the nearest word start or end time to the target_sec.
-    Search window is 3s for start, 8s for end.
-    If target_sec falls inside a word, snaps to that word's boundary.
-    If no word found within window, falls back to the closest boundary to avoid mid-word cuts.
-    mode: "start" or "end"
+    Finds the nearest word boundary to the target_sec.
+    For 'start' mode: prefers word starts slightly BEFORE target (captures full first word).
+    For 'end' mode: prefers word ends slightly AFTER target (keeps full last word).
+    Search window: 3s in both directions.
     """
     if not words:
         return target_sec
 
-    # 1. If target_sec is inside a word, snap to that word's boundary
+    # 1. If target is inside a word, snap to that word's boundary
     for word in words:
         w_start = word.get("start", 0)
         w_end = word.get("end", 0)
         if w_start <= target_sec <= w_end:
             return w_start if mode == "start" else w_end
 
+    search_window = 3.0
     best_time = target_sec
-    search_window = 8.0 if mode == "end" else 3.0
-    min_diff = search_window
-    found = False
+    best_score = float('inf')
 
     for word in words:
         if mode == "start" and "start" in word:
-            diff = abs(word["start"] - target_sec)
-            if diff < min_diff:
-                min_diff = diff
+            diff = word["start"] - target_sec  # negative = before target, positive = after
+            abs_diff = abs(diff)
+            if abs_diff > search_window:
+                continue
+            # Prefer boundaries slightly BEFORE the target (negative diff)
+            # Score: abs_diff but penalize "after" by 1.5x
+            score = abs_diff * (1.5 if diff > 0 else 1.0)
+            if score < best_score:
+                best_score = score
                 best_time = word["start"]
-                found = True
-        elif mode == "end" and "end" in word:
-            diff = abs(word["end"] - target_sec)
-            if diff < min_diff:
-                min_diff = diff
-                best_time = word["end"]
-                found = True
 
-    # 2. Ensure we always snap to a valid boundary
-    if not found:
-        closest_diff = float('inf')
-        for word in words:
-            if mode == "start" and "start" in word:
-                diff = abs(word["start"] - target_sec)
-                if diff < closest_diff:
-                    closest_diff = diff
-                    best_time = word["start"]
-            elif mode == "end" and "end" in word:
-                diff = abs(word["end"] - target_sec)
-                if diff < closest_diff:
-                    closest_diff = diff
-                    best_time = word["end"]
+        elif mode == "end" and "end" in word:
+            diff = word["end"] - target_sec  # positive = after target
+            abs_diff = abs(diff)
+            if abs_diff > search_window:
+                continue
+            # Prefer boundaries slightly AFTER the target (positive diff)
+            # Score: abs_diff but penalize "before" by 1.5x
+            score = abs_diff * (1.5 if diff < 0 else 1.0)
+            if score < best_score:
+                best_score = score
+                best_time = word["end"]
 
     return best_time
 
@@ -74,6 +68,19 @@ def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: 
     os.makedirs(job_output_dir, exist_ok=True)
 
     cut_results = []
+
+    # Get video duration using ffprobe BEFORE the loop
+    try:
+        ffprobe_cmd = [
+            "ffprobe", "-v", "quiet", "-show_entries", "format=duration", 
+            "-of", "json", video_path
+        ]
+        ffprobe_result = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
+        ffprobe_data = json.loads(ffprobe_result.stdout)
+        video_duration = float(ffprobe_data["format"]["duration"])
+    except Exception as e:
+        print(f"[S10] Error getting video duration: {e}")
+        video_duration = 999999.0  # Fallback
 
     for index, clip in enumerate(strategy_results):
         try:
@@ -100,16 +107,7 @@ def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: 
             elif final_end - final_start < 12.0:
                 print(f"[S10] Warning: Clip {index+1} duration < 12s. Proceeding anyway.")
             
-            # 5. Get video duration using ffprobe
-            ffprobe_cmd = [
-                "ffprobe", "-v", "quiet", "-show_entries", "format=duration", 
-                "-of", "json", video_path
-            ]
-            ffprobe_result = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
-            ffprobe_data = json.loads(ffprobe_result.stdout)
-            video_duration = float(ffprobe_data["format"]["duration"])
-            
-            # Ensure end does not exceed video duration
+            # 5. Ensure end does not exceed video duration
             if final_end > video_duration:
                 final_end = video_duration
                 
@@ -124,7 +122,11 @@ def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: 
                 "-ss", str(final_start),
                 "-i", video_path,
                 "-t", str(final_duration_s),
-                "-c", "copy",
+                "-c:v", "libx264",
+                "-preset", "medium",
+                "-crf", "20",
+                "-c:a", "aac",
+                "-b:a", "192k",
                 "-avoid_negative_ts", "make_zero",
                 "-map", "0:v:0",
                 "-map", "0:a:0",

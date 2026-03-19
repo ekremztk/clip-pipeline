@@ -4,14 +4,29 @@ import re
 from app.services.gemini_client import analyze_video
 from app.pipeline.prompts.video_visual import PROMPT
 
-def run(video_path: str, job_id: str) -> list[dict]:
+def run(video_path: str, job_id: str, channel_dna: dict = None) -> list[dict]:
     """
     Sends the video to Gemini for visual analysis.
     Finds visual events like facial expressions, body language, and reactions.
+    Optionally uses channel_dna to focus the analysis on niche-relevant signals.
     """
     print(f"[S06] Starting video analysis for job {job_id}")
     try:
-        raw_response = analyze_video(video_path, PROMPT)
+        # Build niche-aware prompt prefix
+        niche_context = ""
+        if channel_dna:
+            tone = channel_dna.get("tone", "")
+            audience = channel_dna.get("audience_identity", "")
+            sacred_topics = channel_dna.get("sacred_topics", [])
+            if tone or audience:
+                niche_context = f"\nCHANNEL CONTEXT: This channel's tone is '{tone}'. Target audience: '{audience}'."
+                if sacred_topics:
+                    niche_context += f" Key topics that matter to viewers: {', '.join(sacred_topics)}."
+                niche_context += "\nUse this context to prioritize visual moments that would resonate with this specific audience.\n\n"
+
+        full_prompt = niche_context + PROMPT
+
+        raw_response = analyze_video(video_path, full_prompt)
         
         # Strip code block wrappers and clean up any control characters
         cleaned = re.sub(r'```json', '', raw_response, flags=re.IGNORECASE)

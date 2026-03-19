@@ -94,7 +94,7 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
             clip_transcript_lines = []
             for item in parsed_transcript:
                 if isinstance(item, dict) and "time" in item and "text" in item:
-                    if start <= item["time"] <= end:
+                    if (start - 2.0) <= item["time"] <= (end + 2.0):
                         clip_transcript_lines.append(item["text"])
             
             clip_transcript_str = "\n".join(str(x) for x in clip_transcript_lines)

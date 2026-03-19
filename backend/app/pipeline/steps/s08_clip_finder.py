@@ -139,7 +139,10 @@ def run(
                     "candidate_id": cand_id,
                     "timestamp": ts_str,
                     "context_window": context_window_text,
-                    "signals": matching_signals
+                    "signals": matching_signals,
+                    "pass1_reason": candidate.get("reason", ""),
+                    "pass1_signal_type": candidate.get("signal", ""),
+                    "pass1_strength": candidate.get("strength", 0)
                 })
                 
             try:
@@ -151,9 +154,38 @@ def run(
                 
                 pass2_out = generate_json(prompt2, model=settings.GEMINI_MODEL_PRO)
                 if isinstance(pass2_out, list):
+                    returned_ids = set()
                     for item in pass2_out:
                         if isinstance(item, dict):
                             evaluated_list.append(item)
+                            returned_ids.add(str(item.get("candidate_id", "")))
+
+                    # Check for missing candidates
+                    sent_ids = {str(c["candidate_id"]) for c in batch_data}
+                    missing_ids = sent_ids - returned_ids
+                    if missing_ids:
+                        print(f"[S08] Warning: Gemini skipped {len(missing_ids)} candidates in batch: {missing_ids}")
+                        # Re-evaluate missing candidates individually
+                        for missing_id in missing_ids:
+                            missing_candidate = next((c for c in batch_data if str(c["candidate_id"]) == missing_id), None)
+                            if missing_candidate:
+                                try:
+                                    single_prompt = pass2_evaluate.PASS2_EVALUATE_PROMPT
+                                    single_prompt = single_prompt.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
+                                    single_prompt = single_prompt.replace("CHANNEL_MEMORY_PLACEHOLDER", "")
+                                    single_prompt = single_prompt.replace("RAG_CONTEXT_PLACEHOLDER", "")
+                                    single_prompt = single_prompt.replace("BATCH_CANDIDATES_DATA_PLACEHOLDER", json.dumps([missing_candidate]))
+                                    retry_out = generate_json(single_prompt, model=settings.GEMINI_MODEL_PRO)
+                                    if isinstance(retry_out, list):
+                                        for r_item in retry_out:
+                                            if isinstance(r_item, dict):
+                                                evaluated_list.append(r_item)
+                                                print(f"[S08] Recovered candidate {missing_id} via individual retry")
+                                    elif isinstance(retry_out, dict):
+                                        evaluated_list.append(retry_out)
+                                        print(f"[S08] Recovered candidate {missing_id} via individual retry")
+                                except Exception as retry_err:
+                                    print(f"[S08] Failed to recover candidate {missing_id}: {retry_err}")
                 else:
                     print(f"[S08] Pass 2 batch {(i//chunk_size)+1} returned non-list")
             except Exception as e:

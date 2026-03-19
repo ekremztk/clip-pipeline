@@ -6,7 +6,7 @@ from app.config import settings
 from app.services.supabase_client import get_client
 from app.services.r2_client import upload_clip
 
-def run(cut_results: list, job_id: str, video_title: str = "") -> list:
+def run(cut_results: list, job_id: str, channel_id: str, video_title: str = "") -> list:
     """
     Step 11: Export
     This is the final step — produces the highest quality 16:9 MP4 output files.
@@ -73,7 +73,7 @@ def run(cut_results: list, job_id: str, video_title: str = "") -> list:
                 "id": str(uuid.uuid4()),
                 "job_id": job_id,
                 "video_title": video_title,
-                "channel_id": clip.get("channel_id", "speedy_cast"),
+                "channel_id": channel_id,
                 "start_time": clip.get("final_start") or clip.get("start_time") or 0,
                 "end_time": clip.get("final_end") or clip.get("end_time") or 0,
                 "duration_s": clip.get("duration_s") or 0,

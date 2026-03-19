@@ -49,6 +49,26 @@ def run(labeled_transcript: str, energy_data: dict, visual_events: list, humor_m
             
         energy_peaks: list = energy_data.get("energy_peaks", [])
         
+        # Calculate dynamic energy threshold based on this video's distribution
+        all_energy_values = []
+        for e in energy_peaks:
+            if isinstance(e, dict) and e.get("energy") is not None:
+                try:
+                    all_energy_values.append(float(str(e["energy"])))
+                except (ValueError, TypeError):
+                    pass
+        
+        if len(all_energy_values) >= 3:
+            all_energy_values.sort()
+            p75_index = int(len(all_energy_values) * 0.75)
+            energy_threshold = all_energy_values[p75_index]
+            # Ensure minimum threshold of 0.5 to avoid noise
+            energy_threshold = max(0.5, energy_threshold)
+        else:
+            energy_threshold = 0.75
+        
+        humor_confidence_threshold = 0.5
+
         # Ensure visual_events and humor_moments are lists
         if not isinstance(visual_events, list):
             visual_events = []
@@ -89,7 +109,7 @@ def run(labeled_transcript: str, energy_data: dict, visual_events: list, humor_m
                         try:
                             f_time = float(str(e_time))
                             f_energy = float(str(e_energy))
-                            if start <= f_time <= end and f_energy >= 0.75:
+                            if start <= f_time <= end and f_energy >= energy_threshold:
                                 energy_hit_val = f_energy
                                 break
                         except ValueError:
@@ -123,7 +143,7 @@ def run(labeled_transcript: str, energy_data: dict, visual_events: list, humor_m
                         try:
                             f_h_time = float(str(h_time))
                             f_h_conf = float(str(h_conf))
-                            if start <= f_h_time <= end and f_h_conf >= 0.6:
+                            if start <= f_h_time <= end and f_h_conf >= humor_confidence_threshold:
                                 humor_hit_val = str(h.get("humor_type") or h.get("type") or "Humor")
                                 break
                         except ValueError:
@@ -158,6 +178,41 @@ def run(labeled_transcript: str, energy_data: dict, visual_events: list, humor_m
             start += 5.0
             total_windows += 1
             
+        # Merge adjacent windows that are both DUAL or higher into single moments
+        # This prevents moment-splitting at window boundaries
+        merged_windows = []
+        skip_next = False
+        for idx, w in enumerate(windows):
+            if skip_next:
+                skip_next = False
+                continue
+
+            if idx + 1 < len(windows):
+                next_w = windows[idx + 1]
+                # If both are DUAL+ and timestamps are adjacent (within 5s)
+                if (w["signals_count"] >= 2 and next_w["signals_count"] >= 2
+                        and abs(w["timestamp_end"] - next_w["timestamp_start"]) <= 5.0):
+                    # Merge: combine into one window
+                    merged = {
+                        "timestamp_start": w["timestamp_start"],
+                        "timestamp_end": next_w["timestamp_end"],
+                        "transcript": (w.get("transcript", "") + " " + next_w.get("transcript", "")).strip(),
+                        "sentiment_score": w.get("sentiment_score") or next_w.get("sentiment_score"),
+                        "energy_level": max(filter(None, [w.get("energy_level"), next_w.get("energy_level")]), default=None),
+                        "visual_event": w.get("visual_event") or next_w.get("visual_event"),
+                        "humor_type": w.get("humor_type") or next_w.get("humor_type"),
+                        "priority": "TRIPLE" if (w["signals_count"] + next_w["signals_count"]) >= 5 else w["priority"],
+                        "signals_count": max(w["signals_count"], next_w["signals_count"])
+                    }
+                    merged_windows.append(merged)
+                    skip_next = True
+                    continue
+
+            merged_windows.append(w)
+
+        if merged_windows:
+            windows = merged_windows
+
         # 4. Return list sorted by priority (TRIPLE first) then timestamp
         priority_order = {"TRIPLE": 0, "DUAL": 1, "SINGLE": 2}
         

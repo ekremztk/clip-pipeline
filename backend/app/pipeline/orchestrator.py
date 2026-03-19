@@ -148,7 +148,13 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     energy_data = s05_energy_map.run(audio_path, job_id)
                 elif step_number == 6:
                     from app.pipeline.steps import s06_video_analysis
-                    visual_events = s06_video_analysis.run(video_path, job_id)
+                    # Fetch channel_dna if not already available
+                    if not channel_dna:
+                        supabase = get_client()
+                        channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
+                        if channel_res.data and len(channel_res.data) > 0:
+                            channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    visual_events = s06_video_analysis.run(video_path, job_id, channel_dna=channel_dna)
                 elif step_number == 7:
                     from app.pipeline.steps import s07_context_build
                     context = s07_context_build.run(guest_name, channel_id, video_title)
@@ -208,7 +214,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
                 elif step_number == 14:
                     from app.pipeline.steps import s11_export
-                    exported_clips = s11_export.run(cut_results, job_id, video_title)
+                    exported_clips = s11_export.run(cut_results, job_id, channel_id, video_title)
                     
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -405,7 +411,13 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     energy_data = s05_energy_map.run(audio_path, job_id)
                 elif step_number == 6:
                     from app.pipeline.steps import s06_video_analysis
-                    visual_events = s06_video_analysis.run(video_path, job_id)
+                    # Fetch channel_dna if not already available
+                    if not channel_dna:
+                        supabase = get_client()
+                        channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
+                        if channel_res.data and len(channel_res.data) > 0:
+                            channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    visual_events = s06_video_analysis.run(video_path, job_id, channel_dna=channel_dna)
                 elif step_number == 7:
                     from app.pipeline.steps import s07_context_build
                     context = s07_context_build.run(guest_name, channel_id, video_title)
@@ -458,7 +470,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
                 elif step_number == 14:
                     from app.pipeline.steps import s11_export
-                    exported_clips = s11_export.run(cut_results, job_id, video_title)
+                    exported_clips = s11_export.run(cut_results, job_id, channel_id, video_title)
                     
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)

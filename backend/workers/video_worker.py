@@ -144,7 +144,12 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     energy_map = s05_energy_map.run(audio_path, job_id)
                 elif step_number == 6:
                     from app.pipeline.steps import s06_video_analysis
-                    visual_events = s06_video_analysis.run(video_path, job_id)
+                    # channel_dna is not defined before this in video_worker.py, so fetch it here
+                    if not channel_dna:
+                        channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
+                        if channel_res.data and len(channel_res.data) > 0:
+                            channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    visual_events = s06_video_analysis.run(video_path, job_id, channel_dna=channel_dna)
                 elif step_number == 7:
                     from app.pipeline.steps import s07_context_build
                     context = s07_context_build.run(guest_name, channel_id, video_title)
