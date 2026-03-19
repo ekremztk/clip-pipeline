@@ -5,14 +5,18 @@ from app.pipeline.prompts import pass1_scan, pass2_evaluate, pass3_select
 from app.config import settings
 
 def calculate_clip_counts(duration_s: float) -> dict:
-    if duration_s < 900:
-        return {"min_candidates": 5, "max_candidates": 10, "min_clips": 2, "max_clips": 4}
-    elif duration_s < 1800:
-        return {"min_candidates": 10, "max_candidates": 18, "min_clips": 3, "max_clips": 5}
-    elif duration_s < 3600:
-        return {"min_candidates": 15, "max_candidates": 25, "min_clips": 4, "max_clips": 6}
-    else:
-        return {"min_candidates": 20, "max_candidates": 35, "min_clips": 5, "max_clips": 7}
+    """
+    No minimum clip counts — model selects as few or as many as quality allows.
+    Max caps exist only to control cost and prevent low-quality filler.
+    """
+    if duration_s < 900:        # under 15 min
+        return {"min_candidates": 0, "max_candidates": 20, "min_clips": 0, "max_clips": 8}
+    elif duration_s < 1800:     # 15-30 min
+        return {"min_candidates": 0, "max_candidates": 30, "min_clips": 0, "max_clips": 10}
+    elif duration_s < 3600:     # 30-60 min
+        return {"min_candidates": 0, "max_candidates": 40, "min_clips": 0, "max_clips": 12}
+    else:                       # 60+ min
+        return {"min_candidates": 0, "max_candidates": 50, "min_clips": 0, "max_clips": 15}
 
 def _parse_timestamp(ts_str: str) -> float:
     parts = ts_str.replace('[', '').replace(']', '').split(':')
@@ -67,7 +71,13 @@ def run(
         
         prompt1 = pass1_scan.PROMPT
         prompt1 = prompt1.replace("VIDEO_DURATION_PLACEHOLDER", str(video_duration_s))
-        prompt1 = prompt1.replace("MIN_CANDIDATES_PLACEHOLDER", str(counts["min_candidates"]))
+        if counts["min_candidates"] == 0:
+            prompt1 = prompt1.replace(
+                "Find between MIN_CANDIDATES_PLACEHOLDER and MAX_CANDIDATES_PLACEHOLDER candidate moments. You MUST respect this range, as it is already calculated based on the video duration.",
+                "Find up to MAX_CANDIDATES_PLACEHOLDER candidate moments. Select only genuinely strong moments — do not force a minimum count."
+            )
+        else:
+            prompt1 = prompt1.replace("MIN_CANDIDATES_PLACEHOLDER", str(counts["min_candidates"]))
         prompt1 = prompt1.replace("MAX_CANDIDATES_PLACEHOLDER", str(counts["max_candidates"]))
         prompt1 = prompt1.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
         prompt1 = prompt1.replace("GUEST_PROFILE_PLACEHOLDER", json.dumps(context.get("guest_profile", {})))
@@ -75,7 +85,7 @@ def run(
         prompt1 = prompt1.replace("RAG_CONTEXT_PLACEHOLDER", "")
         prompt1 = prompt1.replace("FUSED_TIMELINE_PLACEHOLDER", fused_timeline_text)
         
-        pass1_out = generate_json(prompt1)
+        pass1_out = generate_json(prompt1, model=settings.GEMINI_MODEL_PRO)
         if isinstance(pass1_out, list):
             candidates_list = pass1_out
             result["candidates"] = candidates_list

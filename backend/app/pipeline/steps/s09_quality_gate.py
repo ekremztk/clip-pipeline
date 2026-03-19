@@ -66,16 +66,16 @@ def run(selected_clips: list, evaluated_clips: list, labeled_transcript: str, jo
             duration = end - start
             fail_reason = None
             
-            if duration < 15:
-                fail_reason = f"Duration too short ({duration:.1f}s < 15s)"
-            elif duration > 50:
-                fail_reason = f"Duration too long ({duration:.1f}s > 50s)"
+            if duration < 12:
+                fail_reason = f"Duration too short ({duration:.1f}s < 12s)"
+            elif duration > 60:
+                fail_reason = f"Duration too long ({duration:.1f}s > 60s)"
             elif start < 0:
                 fail_reason = f"Invalid start time ({start})"
             elif end <= start:
                 fail_reason = f"End time <= start time ({end} <= {start})"
-            elif standalone_score < 4:
-                fail_reason = f"Standalone score too low ({standalone_score} < 4)"
+            elif standalone_score < 2.5:
+                fail_reason = f"Standalone score too low ({standalone_score} < 2.5)"
             elif not hook_text or len(str(hook_text).strip()) <= 3:
                 fail_reason = "Missing or empty hook text"
             

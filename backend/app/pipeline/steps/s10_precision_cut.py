@@ -93,12 +93,12 @@ def run(strategy_results: list, transcript_data: dict, video_path: str, job_id: 
             snapped_end = snap_to_word_boundary(rec_end, words, "end")
             final_end = snapped_end + 0.8
             
-            # 4. Validate: end - start >= 15 and end - start <= 50
-            if final_end - final_start > 50.0:
-                print(f"[S10] Clip {index+1} duration > 50s. Trimming.")
-                final_end = final_start + 50.0
-            elif final_end - final_start < 15.0:
-                print(f"[S10] Warning: Clip {index+1} duration < 15s. Proceeding anyway.")
+            # 4. Validate: end - start >= 12 and end - start <= 60
+            if final_end - final_start > 60.0:
+                print(f"[S10] Clip {index+1} duration > 60s. Trimming.")
+                final_end = final_start + 60.0
+            elif final_end - final_start < 12.0:
+                print(f"[S10] Warning: Clip {index+1} duration < 12s. Proceeding anyway.")
             
             # 5. Get video duration using ffprobe
             ffprobe_cmd = [

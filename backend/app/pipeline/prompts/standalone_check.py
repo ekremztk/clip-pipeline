@@ -13,6 +13,7 @@ IMPORTANT EVALUATION CRITERIA:
 - "Story ends mid-sentence" or "Lacks narrative resolution" is NOT a valid rejection reason. 
 - A funny, surprising, or emotionally resonant moment that cuts before the full story ends is still a valid, high-quality clip.
 - Focus ONLY on whether the moment itself is compelling and scroll-stopping.
+- Slow-burn storytelling with a strong payoff at the end is VALID even if the opening energy is low — do not reject based on low energy alone. A clip that starts mid-context but contains a complete emotional arc should be marked fixable, not failed. Only reject if the clip is truly incomprehensible without prior context.
 
 Determine the "overall" status using this logic:
 - "pass": understood="yes" AND hook_strong=true AND engaging=true
