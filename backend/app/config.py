@@ -8,7 +8,7 @@ class Settings:
     GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
     GCS_BUCKET_NAME: str = os.getenv("GCS_BUCKET_NAME", "clip-pipeline-audio")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL_PRO: str = "gemini-3.1-pro"
+    GEMINI_MODEL_PRO: str = "gemini-2.5-pro"
     GEMINI_MODEL_FLASH: str = "gemini-2.5-flash"
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
     SUPABASE_URL = os.getenv("SUPABASE_URL")
