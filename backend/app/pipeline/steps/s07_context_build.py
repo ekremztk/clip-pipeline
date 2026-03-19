@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 from app.config import settings
 from app.services.supabase_client import get_client
 from app.services.gemini_client import generate_json, embed_content
+from app.pipeline.prompts.guest_research import PROMPT as GUEST_RESEARCH_PROMPT
 
 def get_guest_profile(guest_name: str) -> dict:
     """
@@ -32,14 +33,7 @@ def get_guest_profile(guest_name: str) -> dict:
                     return profile.get("profile_data", {})
                     
         print(f"[S07] Generating new profile for {guest_name}")
-        prompt = (
-            f"Research this person: {guest_name}. Return JSON with:\n"
-            f"profile_summary (1 sentence who they are),\n"
-            f"recent_topics (list of their recent news/topics, last 30 days),\n"
-            f"viral_moments (list of their known viral moments or quotes),\n"
-            f"controversies (list of any controversial topics),\n"
-            f"expertise_areas (list of their expertise)"
-        )
+        prompt = GUEST_RESEARCH_PROMPT.replace("GUEST_NAME_PLACEHOLDER", guest_name)
         
         system_instruction = "You are a helpful assistant that outputs ONLY valid JSON."
         profile_data = generate_json(prompt, system=system_instruction)

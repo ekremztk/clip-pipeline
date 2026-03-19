@@ -7,20 +7,25 @@ CANDIDATES TARGET: Find between MIN_CANDIDATES_PLACEHOLDER and MAX_CANDIDATES_PL
 Your selection approach should be LIBERAL. If you are uncertain about a candidate, include it—they will get filtered in Pass 2.
 
 ### INSTRUCTIONS:
-1. Prioritize moments marked as "TRIPLE" in the fused timeline.
-2. Use the Channel DNA: Treat the do_list as positive signals, and no_go_zones as hard exclusions.
-3. Use the Guest Profile: Moments connected to their recent news are of the highest value.
-4. Use Channel Memory: Strictly avoid content types that have historically failed.
-5. Look for the following viral elements:
+1. **CHANNEL DNA IS YOUR PRIMARY GUIDE.** The do_list defines what this specific channel wants. The dont_list and no_go_zones are hard exclusions. When in doubt between a general viral element and a Channel DNA instruction, ALWAYS follow the Channel DNA.
+2. Prioritize moments marked as "TRIPLE" in the fused timeline.
+3. Use the Channel DNA: Treat the do_list as the TOP priority signals, and no_go_zones as hard exclusions.
+4. Use the Guest Profile: Moments connected to their recent news are of the highest value.
+5. Use Channel Memory: Strictly avoid content types that have historically failed.
+6. CHANNEL-SPECIFIC PRIORITIES (from Channel DNA do_list — these override general rules):
+NICHE_SIGNALS_PLACEHOLDER
+
+7. General viral elements (use these as secondary signals, NOT primary):
    - Shocking revelations
    - Emotional moments
    - Controversial opinions
-   - Humor (including subtle dry wit from the humor map)
+   - Humor (only if the channel's humor_profile indicates humor is relevant)
    - Complete story arcs
    - High energy peaks
    - Visual reaction moments
    - Guest-news connections
-6. Context Check: Each candidate MUST be understandable WITHOUT watching the full episode.
+
+8. Context Check: Each candidate MUST be understandable WITHOUT watching the full episode.
 
 ### CONTEXT DATA:
 CHANNEL DNA:

@@ -83,6 +83,13 @@ def run(
         prompt1 = prompt1.replace("GUEST_PROFILE_PLACEHOLDER", json.dumps(context.get("guest_profile", {})))
         prompt1 = prompt1.replace("CHANNEL_MEMORY_PLACEHOLDER", "")
         prompt1 = prompt1.replace("RAG_CONTEXT_PLACEHOLDER", "")
+        # Inject channel-specific signals from do_list as PRIMARY priorities
+        do_list = channel_dna.get("do_list", [])
+        if do_list:
+            niche_signals = "\n".join([f"   - {item}" for item in do_list])
+        else:
+            niche_signals = "   - (No channel-specific priorities set — use general viral elements below as primary signals)"
+        prompt1 = prompt1.replace("NICHE_SIGNALS_PLACEHOLDER", niche_signals)
         prompt1 = prompt1.replace("FUSED_TIMELINE_PLACEHOLDER", fused_timeline_text)
         
         pass1_out = generate_json(prompt1, model=settings.GEMINI_MODEL_PRO)
@@ -150,6 +157,14 @@ def run(
                 prompt2 = prompt2.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
                 prompt2 = prompt2.replace("CHANNEL_MEMORY_PLACEHOLDER", "")
                 prompt2 = prompt2.replace("RAG_CONTEXT_PLACEHOLDER", "")
+                # Inject dynamic content types from channel_dna
+                default_content_types = "revelation, debate, humor, insight, emotional, controversial, storytelling, celebrity_conflict, hot_take, funny_reaction, unexpected_answer, relatable_moment, educational_insight"
+                channel_content_types = channel_dna.get("best_content_types", [])
+                if channel_content_types and len(channel_content_types) >= 3:
+                    content_types_str = ", ".join(channel_content_types)
+                else:
+                    content_types_str = default_content_types
+                prompt2 = prompt2.replace("CONTENT_TYPES_PLACEHOLDER", content_types_str)
                 prompt2 = prompt2.replace("BATCH_CANDIDATES_DATA_PLACEHOLDER", json.dumps(batch_data))
                 
                 pass2_out = generate_json(prompt2, model=settings.GEMINI_MODEL_PRO)
@@ -174,6 +189,7 @@ def run(
                                     single_prompt = single_prompt.replace("CHANNEL_DNA_PLACEHOLDER", json.dumps(channel_dna))
                                     single_prompt = single_prompt.replace("CHANNEL_MEMORY_PLACEHOLDER", "")
                                     single_prompt = single_prompt.replace("RAG_CONTEXT_PLACEHOLDER", "")
+                                    single_prompt = single_prompt.replace("CONTENT_TYPES_PLACEHOLDER", content_types_str)
                                     single_prompt = single_prompt.replace("BATCH_CANDIDATES_DATA_PLACEHOLDER", json.dumps([missing_candidate]))
                                     retry_out = generate_json(single_prompt, model=settings.GEMINI_MODEL_PRO)
                                     if isinstance(retry_out, list):

@@ -14,6 +14,12 @@ def run(labeled_transcript: str, channel_dna: dict, job_id: str) -> list[dict]:
         style = humor_profile.get("style", "general")
         triggers = humor_profile.get("triggers", [])
 
+        # Skip humor analysis if channel DNA indicates humor is not relevant
+        frequency = humor_profile.get("frequency", "occasional")
+        if style == "none" or frequency == "none":
+            print(f"[S07B] Skipping humor map for {job_id} — channel DNA humor_profile.style='{style}', frequency='{frequency}'")
+            return []
+
         # Process in chunks with overlap
         chunk_size = 10000
         overlap = 1000

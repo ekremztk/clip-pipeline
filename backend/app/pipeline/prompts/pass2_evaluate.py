@@ -22,7 +22,8 @@ Evaluate EACH candidate clip in the batch by answering the following 7 questions
 3. ARC TEST (1-10): Does it have setup -> tension -> payoff? Or does it end hanging in the air?
 4. CHANNEL FIT (1-10): Based on channel memory and DNA, does this content type perform well?
 5. EXACT CUT POINTS: Precise start_second and end_second as floats. Clip must be between 15 and 50 seconds. No exceptions.
-6. CONTENT TYPE: Exactly one of: revelation, debate, humor, insight, emotional, controversial, storytelling, celebrity_conflict, hot_take, funny_reaction, unexpected_answer, relatable_moment, educational_insight
+6. CONTENT TYPE: Select the single best matching type from this channel's content types: CONTENT_TYPES_PLACEHOLDER
+   If none fit perfectly, choose the closest match and explain why in thinking_steps.
 7. THINKING STEPS: Array of strings, step by step reasoning.
 
 OUTPUT FORMAT:
@@ -40,7 +41,7 @@ The JSON must perfectly match this schema, returning a list of objects (one for 
     "hook_score": float,
     "arc_score": float,
     "channel_fit_score": float,
-    "content_type": "one of the 13 types",
+    "content_type": "best matching type from the channel's content types above",
     "thinking_steps": ["Step 1: ...", "Step 2: ..."],
     "needs_context_prefix": boolean,
     "context_prefix_suggestion": "string or null",
