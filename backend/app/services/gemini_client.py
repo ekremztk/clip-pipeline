@@ -170,32 +170,70 @@ def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 
     print(f"[GeminiClient] Error: Timeout polling file {file_name} after {max_attempts} attempts.")
     raise RuntimeError(f"Timeout waiting for file {file_name} to become active")
 
-def analyze_video(video_path: str, prompt: str) -> str:
+def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> str:
+    """
+    Analyzes a video file with Gemini.
+    If < 20MB, uses inline bytes (fast, no upload needed).
+    If >= 20MB, uploads via Files API, polls for ACTIVE, then generates.
+    Deletes uploaded file in finally block.
+    Uses _retry_logic for rate limit handling.
+    """
+    if model is None:
+        model = settings.GEMINI_MODEL_PRO
+    uploaded_file = None
     try:
-        import os
-        
-        client = get_gemini_client()
-        
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Video file not found: {video_path}")
+
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
-        print(f"[GeminiClient] Video size: {file_size_mb:.1f}MB, reading inline...")
-        
-        with open(video_path, "rb") as f:
-            video_bytes = f.read()
-            
-        video_part = types.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
-        
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL_PRO,
-            contents=[video_part, prompt]
-        )
-        
-        return str(response.text) if response.text else "{}"
-        
+        client = get_gemini_client()
+
+        if file_size_mb < 20:
+            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB < 20MB. Using inline bytes.")
+            with open(video_path, "rb") as f:
+                video_bytes = f.read()
+
+            video_part = types.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
+
+            def do_generate_inline() -> str:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=[video_part, prompt]
+                )
+                return str(response.text)
+
+            result = _retry_logic(do_generate_inline)
+            return str(result) if result else "{}"
+
+        else:
+            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Using Files API.")
+            dev_client = get_developer_client()
+            uploaded_file = dev_client.files.upload(file=video_path)
+            print(f"[GeminiClient] Uploaded video as {uploaded_file.name}")
+
+            _poll_file_active(dev_client, uploaded_file.name)
+
+            def do_generate_uploaded() -> str:
+                response = dev_client.models.generate_content(
+                    model=model,
+                    contents=[uploaded_file, prompt]
+                )
+                return str(response.text)
+
+            result = _retry_logic(do_generate_uploaded)
+            return str(result) if result else "{}"
+
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")
         return "{}"
-    
-    return "{}"
+    finally:
+        if uploaded_file:
+            try:
+                dev_client = get_developer_client()
+                dev_client.files.delete(name=uploaded_file.name)
+                print(f"[GeminiClient] Deleted uploaded video file {uploaded_file.name}")
+            except Exception as cleanup_err:
+                print(f"[GeminiClient] Warning: Failed to delete uploaded file: {cleanup_err}")
 
 def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> str:
     """

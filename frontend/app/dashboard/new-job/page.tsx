@@ -18,6 +18,35 @@ type Job = {
     error?: string;
 };
 
+const STEP_LABELS: Record<string, string> = {
+    "initializing": "Initializing...",
+    "s01_audio_extract": "Extracting Audio...",
+    "s02_transcribe": "Transcribing...",
+    "s03_speaker_id": "Identifying Speakers...",
+    "s04_labeled_transcript": "Building Transcript...",
+    "s05_unified_discovery": "Analyzing Video with AI...",
+    "s06_batch_evaluation": "Evaluating Clips...",
+    "s07_precision_cut": "Calculating Cut Points...",
+    "s08_export": "Exporting & Uploading...",
+    "finished": "Complete!",
+    // Legacy step names (for jobs that started before the update)
+    "s05_energy_map": "Analyzing Audio Energy...",
+    "s06_video_analysis": "Analyzing Video...",
+    "s07_context_build": "Building Context...",
+    "s07b_humor_map": "Detecting Humor...",
+    "s07c_signal_fusion": "Merging Signals...",
+    "s08_clip_finder": "Finding Clips...",
+    "s09_quality_gate": "Quality Check...",
+    "s09b_clip_strategy": "Planning Strategy...",
+    "s10_precision_cut": "Cutting Clips...",
+    "s11_export": "Exporting..."
+};
+
+function getStepLabel(step: string | undefined): string {
+    if (!step) return "Starting...";
+    return STEP_LABELS[step] || step.replace(/_/g, " ").replace(/^s\d+\s?/, "");
+}
+
 function TimeInput({ value, onChange, max }: { value: number, onChange: (v: number) => void, max: number }) {
     const [localValue, setLocalValue] = useState(value.toString().padStart(2, '0'));
 
@@ -261,10 +290,8 @@ export default function NewJobPage() {
                         return;
                     }
 
-                    const step = jobData?.job?.current_step || '';
-                    if (step.includes('s01')) setStatusMsg('Extracting audio...');
-                    else if (step.includes('s02')) setStatusMsg('Transcribing...');
-                    else if (step.includes('s03')) setStatusMsg('Identifying speakers...');
+                    const step = jobData?.job?.current_step || jobData?.job?.step || '';
+                    setStatusMsg(getStepLabel(step));
 
                     attempts++;
                     if (attempts < maxAttempts) {

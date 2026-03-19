@@ -9,7 +9,26 @@
 - Database → Supabase (PostgreSQL + pgvector)
 - CI/CD → `git push` to main → auto deploy
 
+## PIPELINE STRUCTURE (V4 — 8 Steps)
+```
+S01 Audio Extract (FFmpeg)
+S02 Transcribe (Deepgram)
+S03 Speaker ID (Deepgram diarization + user confirm)
+S04 Labeled Transcript
+S05 Unified Discovery (Gemini Pro + Video — finds clip candidates)
+S06 Batch Evaluation (Gemini Pro + Text — scores, quality gate, strategy)
+S07 Precision Cut (FFmpeg + word boundary snap)
+S08 Export (FFmpeg re-encode + R2 upload + DB write)
+```
+
 ## ABSOLUTE RULES
+
+### Gemini model usage
+- S05 Unified Discovery: `gemini-3.1-pro-preview` (video + text, critical)
+- S06 Batch Evaluation: `gemini-3.1-pro-preview` (text only, critical)
+- All other Gemini calls (guest research, channel DNA generation, etc.): `gemini-2.5-flash`
+- Config keys: `settings.GEMINI_MODEL_PRO` and `settings.GEMINI_MODEL_FLASH`
+- Never change models without being asked
 
 ### No GPU libraries — ever
 Railway has no GPU. These will crash the build:
@@ -20,18 +39,14 @@ Railway has no GPU. These will crash the build:
 - Variable names, function names, comments, prompts, string literals → English only
 - Exception: user-facing UI text in frontend
 
-### Gemini model
-- S08 Pass 2 + Pass 3: `gemini-3.1-pro-preview`
-- All other steps: `gemini-2.5-flash`
-- Never change without being asked
-
 ### Supabase connection
 - Port MUST be `6543` (Connection Pooler), never `5432`
 - `5432` is unreachable from Railway/Docker
 
 ### FFmpeg encoding
-- S10 (precision cut): -c copy  (lossless stream copy)
-- S11 (export): -c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k
+- S07 (precision cut): `-c copy` (lossless stream copy, fast)
+- S08 (export): `-c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k`
+- Only ONE re-encode per clip (in S08). S07 does lossless copy.
 
 ### pgvector embedding size
 - clips.clip_summary_embedding → `vector(768)` — do NOT change
@@ -68,6 +83,8 @@ prompt = prompt.replace("PLACEHOLDER", value)
 - `backend/reframer.py` — Module 2, suspended indefinitely
 - `frontend/next.config.js` — proxy config, leave as-is
 - `backend/channels/` structure — channel isolation system
+- `backend/app/memory/` — Feedback system, suspended indefinitely
+- `backend/app/pipeline/steps/s01_audio_extract.py` through `s04_labeled_transcript.py` — these are stable
 
 ## ENVIRONMENT VARIABLES
 
@@ -92,6 +109,7 @@ R2_SECRET_ACCESS_KEY=
 R2_BUCKET_NAME=
 R2_PUBLIC_URL=          # https://pub-xxxxx.r2.dev
 ```
+
 ## KNOWN PITFALLS
 | Problem | Fix |
 |---------|-----|

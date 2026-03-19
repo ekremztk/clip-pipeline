@@ -63,11 +63,12 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             "utterances": utterances
         }
 
+        # Add duration from raw_response metadata
+        duration = raw_response.get("metadata", {}).get("duration", 0) if isinstance(raw_response, dict) else 0
+        transcript_data["duration"] = duration
+
         # In case we need previous step results that might not be in db but we need to re-run or fetch
         labeled_transcript = transcript_record.get("labeled_transcript")
-        energy_map = transcript_record.get("energy_map")
-        visual_events = transcript_record.get("visual_events")
-        humor_moments = transcript_record.get("humor_moments")
 
         # Fetch job from jobs table
         job_res = supabase.table("jobs").select("*").eq("id", job_id).execute()
@@ -99,26 +100,18 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
         update_job(job_id=job_id, status=JobStatus.PROCESSING.value)
 
         steps = [
-            (4, "s04_labeled_transcript", 36),
-            (5, "s05_energy_map", 44),
-            (6, "s06_video_analysis", 52),
-            (7, "s07_context_build", 58),
-            (8, "s07b_humor_map", 64),
-            (9, "s07c_signal_fusion", 70),
-            (10, "s08_clip_finder", 80),
-            (11, "s09_quality_gate", 88),
-            (12, "s09b_clip_strategy", 92),
-            (13, "s10_precision_cut", 96),
-            (14, "s11_export", 100)
+            (4, "s04_labeled_transcript", 30),
+            (5, "s05_unified_discovery", 65),
+            (6, "s06_batch_evaluation", 85),
+            (7, "s07_precision_cut", 92),
+            (8, "s08_export", 100)
         ]
 
         channel_dna = {}
-        context = None
-        fused_timeline = None
-
-        # Reconstruct audio_path if we need it for s05 (it might not exist if deleted, need to extract again or gracefully skip)
-        # However, the instruction says: "s05_energy_map.run(audio_path, job_id) — note: audio may be gone, handle gracefully"
-        audio_path = video_path.replace(".mp4", ".m4a") if video_path else "temp_audio.m4a"
+        candidates = []
+        evaluated_clips = []
+        cut_results = []
+        exported_clips = []
 
         for step_number, step_name, progress_pct in steps:
             step_start_time = time.time()
@@ -136,65 +129,63 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     from app.pipeline.steps import s04_labeled_transcript
                     labeled_transcript = s04_labeled_transcript.run(transcript_data, confirmed_speaker_map, guest_name)
                 elif step_number == 5:
-                    from app.pipeline.steps import s05_energy_map
-                    if not os.path.exists(audio_path):
-                        print(f"[Worker] Audio file missing, re-extracting...")
-                        from app.pipeline.steps import s01_audio_extract
-                        audio_path = s01_audio_extract.run(video_path, job_id)
-                    energy_map = s05_energy_map.run(audio_path, job_id)
-                elif step_number == 6:
-                    from app.pipeline.steps import s06_video_analysis
-                    # channel_dna is not defined before this in video_worker.py, so fetch it here
-                    if not channel_dna:
-                        channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
-                        if channel_res.data and len(channel_res.data) > 0:
-                            channel_dna = channel_res.data[0].get("channel_dna") or {}
-                    visual_events = s06_video_analysis.run(video_path, job_id, channel_dna=channel_dna)
-                elif step_number == 7:
-                    from app.pipeline.steps import s07_context_build
-                    context = s07_context_build.run(guest_name, channel_id, video_title)
-                elif step_number == 8:
-                    from app.pipeline.steps import s07b_humor_map
+                    from app.pipeline.steps import s05_unified_discovery
                     channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
                     if channel_res.data and len(channel_res.data) > 0:
                         channel_dna = channel_res.data[0].get("channel_dna") or {}
-                    humor_moments = s07b_humor_map.run(labeled_transcript, channel_dna, job_id)
-                elif step_number == 9:
-                    from app.pipeline.steps import s07c_signal_fusion
-                    fused_timeline = s07c_signal_fusion.run(labeled_transcript, energy_map, visual_events, humor_moments, job_id)
-                elif step_number == 10:
-                    from app.pipeline.steps import s08_clip_finder
-                    video_duration_s = energy_map.get("duration", 0.0) if energy_map else 0.0
-                    s08_result = s08_clip_finder.run(
-                        fused_timeline,
-                        labeled_transcript,
-                        context,
-                        channel_dna,
-                        video_duration_s,
-                        job_id
+                    video_duration_s = transcript_data.get("duration", 0.0) if transcript_data else 0.0
+                    candidates = s05_unified_discovery.run(
+                        video_path=video_path,
+                        labeled_transcript=labeled_transcript,
+                        channel_dna=channel_dna,
+                        guest_name=guest_name,
+                        channel_id=channel_id,
+                        video_duration_s=video_duration_s,
+                        job_id=job_id
                     )
-                    
-                    if isinstance(s08_result, dict):
-                        selected_clips = s08_result.get("selected_clips", s08_result.get("selected", []))
-                        evaluated_clips = s08_result.get("evaluated_clips", s08_result.get("evaluated", []))
-                    elif isinstance(s08_result, list):
-                        selected_clips = s08_result
-                        evaluated_clips = s08_result
+                    print(f"[Worker] S05 returned {len(candidates)} candidates")
+
+                elif step_number == 6:
+                    from app.pipeline.steps import s06_batch_evaluation
+                    if not candidates:
+                        print("[Worker] No candidates from S05. Skipping evaluation.")
                     else:
-                        selected_clips = []
-                        evaluated_clips = []
-                elif step_number == 11:
-                    from app.pipeline.steps import s09_quality_gate
-                    quality_results = s09_quality_gate.run(selected_clips, evaluated_clips, labeled_transcript, job_id)
-                elif step_number == 12:
-                    from app.pipeline.steps import s09b_clip_strategy
-                    strategy_results = s09b_clip_strategy.run(quality_results, evaluated_clips, channel_dna, job_id)
-                elif step_number == 13:
-                    from app.pipeline.steps import s10_precision_cut
-                    cut_results = s10_precision_cut.run(strategy_results, transcript_data, video_path, job_id)
-                elif step_number == 14:
-                    from app.pipeline.steps import s11_export
-                    exported_clips = s11_export.run(cut_results, job_id, channel_id, video_title)
+                        evaluated_clips = s06_batch_evaluation.run(
+                            candidates=candidates,
+                            labeled_transcript=labeled_transcript,
+                            transcript_data=transcript_data,
+                            channel_dna=channel_dna,
+                            channel_id=channel_id,
+                            job_id=job_id
+                        )
+                    print(f"[Worker] S06 returned {len(evaluated_clips)} evaluated clips")
+
+                elif step_number == 7:
+                    from app.pipeline.steps import s07_precision_cut
+                    if not evaluated_clips:
+                        print("[Worker] No evaluated clips. Skipping precision cut.")
+                    else:
+                        cut_results = s07_precision_cut.run(
+                            evaluated_clips=evaluated_clips,
+                            transcript_data=transcript_data,
+                            video_path=video_path,
+                            job_id=job_id
+                        )
+                    print(f"[Worker] S07 returned {len(cut_results)} clips with boundaries")
+
+                elif step_number == 8:
+                    from app.pipeline.steps import s08_export
+                    if not cut_results:
+                        print("[Worker] No cut results. Skipping export.")
+                    else:
+                        exported_clips = s08_export.run(
+                            cut_results=cut_results,
+                            job_id=job_id,
+                            channel_id=channel_id,
+                            video_path=video_path,
+                            video_title=video_title
+                        )
+                    print(f"[Worker] S08 exported {len(exported_clips)} clips")
 
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -223,7 +214,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
 
         # After all steps complete
         completed_at = datetime.now(timezone.utc).isoformat()
-        clip_count = len(exported_clips) if 'exported_clips' in locals() and exported_clips else 0
+        clip_count = len(exported_clips) if exported_clips else 0
         update_job(
             job_id=job_id,
             status=JobStatus.COMPLETED.value,
