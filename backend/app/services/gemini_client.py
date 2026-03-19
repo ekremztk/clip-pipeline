@@ -174,13 +174,13 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
     """
     Analyzes a video file with Gemini.
     If < 20MB, uses inline bytes (fast, no upload needed).
-    If >= 20MB, uploads via Files API, polls for ACTIVE, then generates.
-    Deletes uploaded file in finally block.
+    If >= 20MB, uploads to GCS and uses gs:// URI, then generates.
+    Deletes uploaded GCS file in finally block.
     Uses _retry_logic for rate limit handling.
     """
     if model is None:
         model = settings.GEMINI_MODEL_PRO
-    uploaded_file = None
+    gcs_uri = None
     try:
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"Video file not found: {video_path}")
@@ -206,16 +206,26 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
             return str(result) if result else "{}"
 
         else:
-            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Using Files API via Vertex AI.")
-            uploaded_file = client.files.upload(file=video_path)
-            print(f"[GeminiClient] Uploaded video as {uploaded_file.name}")
-
-            _poll_file_active(client, uploaded_file.name)
+            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
+            from google.cloud import storage
+            import uuid
+            
+            storage_client = storage.Client(project=settings.GCP_PROJECT)
+            bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+            
+            blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
+            blob = bucket.blob(blob_name)
+            blob.upload_from_filename(video_path)
+            
+            gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
+            print(f"[GeminiClient] Uploaded video to {gcs_uri}")
+            
+            video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
 
             def do_generate_uploaded() -> str:
                 response = client.models.generate_content(
                     model=model,
-                    contents=[uploaded_file, prompt]
+                    contents=[video_part, prompt]
                 )
                 return str(response.text)
 
@@ -226,24 +236,28 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
         print(f"[GeminiClient] Error in analyze_video: {e}")
         return "{}"
     finally:
-        if uploaded_file:
+        if gcs_uri:
             try:
-                client = get_gemini_client()
-                client.files.delete(name=uploaded_file.name)
-                print(f"[GeminiClient] Deleted uploaded video file {uploaded_file.name}")
+                from google.cloud import storage
+                storage_client = storage.Client(project=settings.GCP_PROJECT)
+                bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+                blob_name = gcs_uri.split(f"gs://{settings.GCS_BUCKET_NAME}/")[1]
+                blob = bucket.blob(blob_name)
+                blob.delete()
+                print(f"[GeminiClient] Deleted GCS video file {gcs_uri}")
             except Exception as cleanup_err:
-                print(f"[GeminiClient] Warning: Failed to delete uploaded file: {cleanup_err}")
+                print(f"[GeminiClient] Warning: Failed to delete GCS file: {cleanup_err}")
 
 def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> str:
     """
     Analyzes an audio file.
     If < 20MB, uses inline bytes.
-    If >= 20MB, uploads via Files API and polls.
-    Deletes uploaded file if used.
+    If >= 20MB, uploads to GCS and uses gs:// URI, then generates.
+    Deletes uploaded GCS file in finally block.
     """
     if model is None:
         model = settings.GEMINI_MODEL_FLASH
-    uploaded_file = None
+    gcs_uri = None
     try:
         if not os.path.exists(audio_path):
             raise FileNotFoundError(f"Audio file not found: {audio_path}")
@@ -282,16 +296,37 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
             return str(result)
             
         else:
-            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Using Files API (Developer Client).")
-            uploaded_file = client.files.upload(file=audio_path)
-            print(f"[GeminiClient] Uploaded as {uploaded_file.name}")
+            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Uploading to GCS.")
+            from google.cloud import storage
+            import uuid
             
-            _poll_file_active(client, uploaded_file.name)
+            storage_client = storage.Client(project=settings.GCP_PROJECT)
+            bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+            
+            blob_name = f"audio_{uuid.uuid4().hex}_{os.path.basename(audio_path)}"
+            blob = bucket.blob(blob_name)
+            blob.upload_from_filename(audio_path)
+            
+            gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
+            print(f"[GeminiClient] Uploaded audio to {gcs_uri}")
+            
+            mime_type = "audio/mp3"
+            ext = os.path.splitext(audio_path)[1].lower()
+            if ext == ".m4a":
+                mime_type = "audio/m4a"
+            elif ext == ".wav":
+                mime_type = "audio/wav"
+            elif ext == ".ogg":
+                mime_type = "audio/ogg"
+            elif ext == ".mp4":
+                mime_type = "audio/mp4"
+
+            audio_part = types.Part.from_uri(file_uri=gcs_uri, mime_type=mime_type)
             
             def do_generate_uploaded() -> str:
                 response = client.models.generate_content(
                     model=model,
-                    contents=[uploaded_file, prompt]
+                    contents=[audio_part, prompt]
                 )
                 return str(response.text)
                 
@@ -303,13 +338,17 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
         print(f"[GeminiClient] Error in analyze_audio: {e}")
         raise RuntimeError(f"analyze_audio failed: {e}")
     finally:
-        if uploaded_file:
+        if gcs_uri:
             try:
-                print(f"[GeminiClient] Deleting uploaded file {uploaded_file.name}...")
-                client = get_gemini_client()
-                client.files.delete(name=uploaded_file.name)
+                print(f"[GeminiClient] Deleting GCS file {gcs_uri}...")
+                from google.cloud import storage
+                storage_client = storage.Client(project=settings.GCP_PROJECT)
+                bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+                blob_name = gcs_uri.split(f"gs://{settings.GCS_BUCKET_NAME}/")[1]
+                blob = bucket.blob(blob_name)
+                blob.delete()
             except Exception as e:
-                print(f"[GeminiClient] Error deleting file {uploaded_file.name}: {e}")
+                print(f"[GeminiClient] Error deleting GCS file {gcs_uri}: {e}")
 
 def embed_content(text: str) -> list[float]:
     """

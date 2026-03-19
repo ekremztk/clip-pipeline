@@ -11,6 +11,7 @@ supabase
 
 # --- Storage ---
 boto3
+google-cloud-storage
 
 # --- AI & Models ---
 google-genai
