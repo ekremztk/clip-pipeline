@@ -51,23 +51,27 @@ const ActiveJobCard = ({ initialJob, onComplete }: { initialJob: any, onComplete
     const [job, setJob] = useState(initialJob);
 
     useEffect(() => {
+        if (!job?.id) return;
         if (job.status === 'completed' || job.status === 'failed' || job.status === 'error') return;
 
         const interval = setInterval(async () => {
             try {
+                if (!job?.id) return;
                 const res = await fetch(`${API}/jobs/${job.id}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setJob(data);
-                    if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
-                        onComplete(data);
+                    if (data && data.id) {
+                        setJob(data);
+                        if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
+                            onComplete(data);
+                        }
                     }
                 }
             } catch (err) { }
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [job.id]); // Removed job.status and onComplete to prevent unnecessary remounts and state clearing
+    }, [job?.id]); // Removed job.status and onComplete to prevent unnecessary remounts and state clearing
 
     const progress = job.progress_pct ?? job.progress ?? 0;
     const isAwaiting = job.status === 'awaiting_speaker_confirm';
