@@ -24,8 +24,8 @@ S08 Export (FFmpeg re-encode + R2 upload + DB write)
 ## ABSOLUTE RULES
 
 ### Gemini model usage
-- S05 Unified Discovery: `gemini-2.5-pro` (video + text, critical)
-- S06 Batch Evaluation: `gemini-2.5-pro` (text only, critical)
+- S05 Unified Discovery: `gemini-3.1-pro-preview` (video + text, critical)
+- S06 Batch Evaluation: `gemini-3.1-pro-preview` (text only, critical)
 - All other Gemini calls (guest research, channel DNA generation, etc.): `gemini-2.5-flash`
 - Config keys: `settings.GEMINI_MODEL_PRO` and `settings.GEMINI_MODEL_FLASH`
 - Never change models without being asked
