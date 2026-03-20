@@ -20,7 +20,7 @@ import subprocess
 import json
 import boto3
 import librosa
-from deepgram import DeepgramClient, PrerecordedOptions, FileSource
+from deepgram import DeepgramClient, PrerecordedOptions
 
 from editor_celery import editor_celery_app
 from editor_database import get_editor_job, update_editor_job
@@ -142,31 +142,30 @@ def pre_process_video(self, job_id: str) -> None:
         with open(audio_path, "rb") as f:
             buffer_data = f.read()
             
-        payload: FileSource = {"buffer": buffer_data}
+        payload = {"buffer": buffer_data}
         options = PrerecordedOptions(
             model="nova-2",
             diarize=True,
             punctuate=True,
             utterances=True,
-            smart_format=True
+            smart_format=True,
         )
         
-        response = dg_client.listen.rest.v("1").transcribe_file(payload, options)
-        resp_dict = json.loads(response.to_json())
+        response = dg_client.listen.prerecorded.v("1").transcribe_file(payload, options)
         
         try:
-            words = resp_dict["results"]["channels"][0]["alternatives"][0]["words"]
-        except (KeyError, IndexError):
+            words = response.results.channels[0].alternatives[0].words
+        except (KeyError, IndexError, AttributeError):
             words = []
             
         transcript = []
         for w in words:
             transcript.append({
-                "word": w.get("word", ""),
-                "start": w.get("start", 0.0),
-                "end": w.get("end", 0.0),
-                "speaker": w.get("speaker", 0),
-                "confidence": w.get("confidence", 0.0)
+                "word": getattr(w, "word", ""),
+                "start": getattr(w, "start", 0.0),
+                "end": getattr(w, "end", 0.0),
+                "speaker": getattr(w, "speaker", 0),
+                "confidence": getattr(w, "confidence", 0.0)
             })
             
         speaker_segments = []
