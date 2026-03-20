@@ -33,15 +33,19 @@ def get_client() -> Client:
         raise ValueError("Missing Supabase configuration")
     return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-async def create_editor_job(user_id: str) -> str:
+async def create_editor_job(user_id: Optional[str] = None) -> str:
     """
     Creates a new editor job for the given user.
     """
     try:
         supabase = get_client()
         # Since supabase-py standard client is synchronous, we use asyncio.to_thread to run it without blocking
+        data = {"status": "pending"}
+        if user_id:
+            data["user_id"] = user_id
+            
         response = await asyncio.to_thread(
-            lambda: supabase.table("editor_jobs").insert({"user_id": user_id}).execute()
+            lambda: supabase.table("editor_jobs").insert(data).execute()
         )
         if not response.data:
             raise RuntimeError("Failed to create job, no data returned")

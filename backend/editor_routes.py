@@ -36,7 +36,7 @@ async def get_upload_url(request: UploadUrlRequest):
     """
     # TODO: Replace request.user_id with FastAPI Dependency Injection: Depends(get_current_user)
     try:
-        job_id = await create_editor_job(request.user_id or "anonymous")
+        job_id = await create_editor_job(request.user_id if request.user_id else None)
         url_info = await generate_upload_presigned_url(request.filename, request.content_type)
         
         # Update job with the expected source r2 key
@@ -286,7 +286,7 @@ async def job_from_key(request: JobFromKeyRequest):
             else:
                 raise HTTPException(status_code=400, detail="Cannot verify R2 key")
                 
-        job_id = await create_editor_job(request.user_id)
+        job_id = await create_editor_job(request.user_id if request.user_id else None)
         await update_editor_job(job_id, source_r2_key=request.r2_key)
         
         return {
