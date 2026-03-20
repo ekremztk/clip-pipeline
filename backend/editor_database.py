@@ -23,15 +23,15 @@ import logging
 import asyncio
 from typing import Dict, List, Optional, Any
 from supabase import create_client, Client
-from editor_config import SUPABASE_URL, SUPABASE_KEY
+from editor_config import SUPABASE_URL, SUPABASE_SERVICE_KEY
 
 logger = logging.getLogger("editor.database")
 
 def get_client() -> Client:
     """Initialize and return Supabase client."""
-    if not SUPABASE_URL or not SUPABASE_KEY:
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
         raise ValueError("Missing Supabase configuration")
-    return create_client(SUPABASE_URL, SUPABASE_KEY)
+    return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 async def create_editor_job(user_id: str) -> str:
     """
