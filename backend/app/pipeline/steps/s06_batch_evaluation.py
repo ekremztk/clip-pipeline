@@ -238,35 +238,42 @@ def run(
 
         print(f"[S06] Total evaluated: {len(all_evaluated)}")
 
-        # 5. Filter out failed candidates
-        passed = []
+        # 5. Log quality gate results (keep ALL clips — failed ones get cut too for manual review)
+        passed_count = 0
         failed_count = 0
         for clip in all_evaluated:
             verdict = clip.get("quality_verdict", "fail")
             if verdict in ("pass", "fixable"):
-                passed.append(clip)
+                passed_count += 1
             else:
                 failed_count += 1
                 cid = clip.get("candidate_id", "?")
                 reason = clip.get("reject_reason", "no reason given")
                 print(f"[S06] Candidate {cid} failed quality gate: {reason}")
 
-        print(f"[S06] Quality gate: {len(passed)} passed, {failed_count} failed")
+        print(f"[S06] Quality gate: {passed_count} passed, {failed_count} failed, {len(all_evaluated)} total proceeding")
 
-        if not passed:
-            print("[S06] No candidates passed quality gate. Returning empty list.")
+        if not all_evaluated:
+            print("[S06] No candidates evaluated. Returning empty list.")
             return []
 
-        # 6. Sort by posting_order
-        passed.sort(key=lambda x: x.get("posting_order", 999))
+        # 6. Sort: passed clips first (by posting_order), then failed clips at the end
+        def sort_key(clip):
+            is_failed = 0 if clip.get("quality_verdict", "fail") in ("pass", "fixable") else 1
+            return (is_failed, clip.get("posting_order", 999))
 
-        # 7. Assign posting_order if missing (sequential)
-        for i, clip in enumerate(passed):
-            if clip.get("posting_order") is None or clip.get("posting_order") == 999:
-                clip["posting_order"] = i + 1
+        all_evaluated.sort(key=sort_key)
 
-        print(f"[S06] Final output: {len(passed)} clips, sorted by posting_order")
-        return passed
+        # 7. Assign posting_order only to passed clips (failed clips keep 999)
+        order = 1
+        for clip in all_evaluated:
+            if clip.get("quality_verdict", "fail") in ("pass", "fixable"):
+                if clip.get("posting_order") is None or clip.get("posting_order") == 999:
+                    clip["posting_order"] = order
+                    order += 1
+
+        print(f"[S06] Final output: {len(all_evaluated)} clips ({passed_count} passed, {failed_count} failed)")
+        return all_evaluated
 
     except Exception as e:
         print(f"[S06] Critical error: {e}")

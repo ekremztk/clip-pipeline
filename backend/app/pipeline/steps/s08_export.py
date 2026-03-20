@@ -93,6 +93,8 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                 "suggested_title": clip.get("suggested_title"),
                 "video_landscape_path": file_url,
                 "file_url": file_url,
+                "is_successful": True if clip.get("quality_verdict", "fail") in ("pass", "fixable") else False,
+                "why_failed": clip.get("reject_reason") if clip.get("quality_verdict") == "fail" else None,
             }
 
             # Remove None values to avoid Supabase errors
