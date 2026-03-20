@@ -60,7 +60,7 @@ export function mapEditDecisions(raw: Record<string, unknown>): EditDecisions {
 export async function createUploadUrl(
     filename: string,
     contentType: string,
-    userId: string
+    userId: string | null
 ): Promise<UploadUrlResponse> {
     const response = await fetch(`${API_BASE}/api/editor/upload-url`, {
         method: 'POST',
@@ -142,7 +142,7 @@ export async function startJob(jobId: string): Promise<void> {
  */
 export async function createJobFromKey(
     r2Key: string,
-    userId: string
+    userId: string | null
 ): Promise<{ jobId: string; r2Key: string }> {
     const res = await fetch(`${API_BASE}/api/editor/job-from-key`, {
         method: 'POST',
