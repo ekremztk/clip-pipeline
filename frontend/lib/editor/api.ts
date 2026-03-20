@@ -72,7 +72,12 @@ export async function createUploadUrl(
         throw new Error(`Failed to create upload URL: ${response.statusText}`)
     }
 
-    return response.json()
+    const data = await response.json()
+    return {
+        uploadUrl: data.upload_url,
+        r2Key: data.r2_key,
+        jobId: data.job_id
+    }
 }
 
 /**
