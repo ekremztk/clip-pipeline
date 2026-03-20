@@ -22,3 +22,6 @@ editor_celery_app.conf.update(
         "editor.*": {"queue": "editor"}
     }
 )
+
+# Import tasks so Celery can discover and register them
+import editor_worker  # noqa: F401
