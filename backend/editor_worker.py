@@ -138,11 +138,13 @@ def pre_process_video(self, job_id: str) -> None:
         if not DEEPGRAM_API_KEY:
             raise ValueError("DEEPGRAM_API_KEY not configured")
             
-        dg_client = DeepgramClient(DEEPGRAM_API_KEY)
-        with open(audio_path, "rb") as f:
-            buffer_data = f.read()
-            
+        deepgram = DeepgramClient(DEEPGRAM_API_KEY)
+
+        with open(audio_path, "rb") as audio:
+            buffer_data = audio.read()
+
         payload = {"buffer": buffer_data}
+
         options = PrerecordedOptions(
             model="nova-2",
             diarize=True,
@@ -150,39 +152,45 @@ def pre_process_video(self, job_id: str) -> None:
             utterances=True,
             smart_format=True,
         )
-        
-        response = dg_client.listen.prerecorded.v("1").transcribe_file(payload, options)
-        
-        try:
-            words = response.results.channels[0].alternatives[0].words
-        except (KeyError, IndexError, AttributeError):
-            words = []
-            
-        transcript = []
-        for w in words:
-            transcript.append({
-                "word": getattr(w, "word", ""),
-                "start": getattr(w, "start", 0.0),
-                "end": getattr(w, "end", 0.0),
-                "speaker": getattr(w, "speaker", 0),
-                "confidence": getattr(w, "confidence", 0.0)
-            })
-            
+
+        response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options)
+
+        # Parse transcript
+        words = []
         speaker_segments = []
-        current_seg = None
-        for w in transcript:
-            spk = w["speaker"]
-            if current_seg is None:
-                current_seg = {"start": w["start"], "end": w["end"], "speaker_id": spk}
-            elif current_seg["speaker_id"] == spk:
-                current_seg["end"] = w["end"]
-            else:
-                speaker_segments.append(current_seg)
-                current_seg = {"start": w["start"], "end": w["end"], "speaker_id": spk}
-        if current_seg:
-            speaker_segments.append(current_seg)
+        try:
+            alternatives = response.results.channels[0].alternatives[0]
+            for word in alternatives.words:
+                words.append({
+                    "word": word.word,
+                    "start": word.start,
+                    "end": word.end,
+                    "speaker": word.speaker if hasattr(word, 'speaker') else 0,
+                    "confidence": word.confidence
+                })
             
-        asyncio.run(update_editor_job(job_id, transcript=transcript, speaker_segments=speaker_segments, progress=60))
+            # Build speaker segments by merging consecutive same-speaker words
+            if words:
+                current_speaker = words[0]["speaker"]
+                seg_start = words[0]["start"]
+                for w in words[1:]:
+                    if w["speaker"] != current_speaker:
+                        speaker_segments.append({
+                            "start": seg_start,
+                            "end": w["start"],
+                            "speaker_id": current_speaker
+                        })
+                        current_speaker = w["speaker"]
+                        seg_start = w["start"]
+                speaker_segments.append({
+                    "start": seg_start,
+                    "end": words[-1]["end"],
+                    "speaker_id": current_speaker
+                })
+        except Exception as e:
+            logger.error(f"Error parsing Deepgram response: {e}")
+            
+        asyncio.run(update_editor_job(job_id, transcript=words, speaker_segments=speaker_segments, progress=60))
         
         # Step 5 - Silence detection with Librosa
         y, sr = librosa.load(audio_path, sr=16000)
