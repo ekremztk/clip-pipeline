@@ -15,7 +15,7 @@ from editor_config import (
     R2_ACCESS_KEY_ID,
     R2_SECRET_ACCESS_KEY,
     R2_EDITOR_BUCKET_NAME,
-    GCS_EDITOR_BUCKET_NAME
+    GCS_BUCKET_NAME
 )
 
 logger = logging.getLogger("editor.storage")
@@ -131,7 +131,7 @@ async def copy_r2_to_gcs(r2_key: str, gcs_key: str) -> str:
         await asyncio.to_thread(_download)
         
         # Upload from disk to GCS
-        bucket = gcs_client.bucket(GCS_EDITOR_BUCKET_NAME)
+        bucket = gcs_client.bucket(GCS_BUCKET_NAME)
         blob = bucket.blob(gcs_key)
         
         def _upload():
@@ -139,7 +139,7 @@ async def copy_r2_to_gcs(r2_key: str, gcs_key: str) -> str:
             
         await asyncio.to_thread(_upload)
         
-        return f"gs://{GCS_EDITOR_BUCKET_NAME}/{gcs_key}"
+        return f"gs://{GCS_BUCKET_NAME}/{gcs_key}"
         
     except ClientError as e:
         logger.error(f"R2 ClientError during copy for {r2_key}: {e}")
@@ -163,7 +163,7 @@ async def delete_gcs_object(gcs_key: str) -> None:
     """
     try:
         gcs_client = get_gcs_client()
-        bucket = gcs_client.bucket(GCS_EDITOR_BUCKET_NAME)
+        bucket = gcs_client.bucket(GCS_BUCKET_NAME)
         blob = bucket.blob(gcs_key)
         
         def _check_and_delete():
@@ -188,7 +188,7 @@ def upload_local_to_gcs(local_path: str, gcs_key: str) -> str:
     """
     try:
         gcs_client = get_gcs_client()
-        bucket = gcs_client.bucket(GCS_EDITOR_BUCKET_NAME)
+        bucket = gcs_client.bucket(GCS_BUCKET_NAME)
         blob = bucket.blob(gcs_key)
         
         # Setting chunk_size enables streaming uploads, preventing OOM issues
@@ -197,7 +197,7 @@ def upload_local_to_gcs(local_path: str, gcs_key: str) -> str:
         
         blob.upload_from_filename(local_path)
         
-        return f"gs://{GCS_EDITOR_BUCKET_NAME}/{gcs_key}"
+        return f"gs://{GCS_BUCKET_NAME}/{gcs_key}"
         
     except GoogleAPIError as e:
         logger.error(f"GCS error uploading {local_path} to {gcs_key}: {e}")

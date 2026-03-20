@@ -4,7 +4,7 @@
 # 1. Add a Redis plugin in Railway dashboard → copy REDIS_URL as EDITOR_REDIS_URL
 # 2. Add a new Railway service pointing to the same repo
 #    Start command: celery -A editor_celery worker --loglevel=info -Q editor --concurrency=2
-# 3. Required env vars: EDITOR_REDIS_URL, DEEPGRAM_API_KEY, R2_*, GCS_*, SUPABASE_URL, SUPABASE_KEY
+# 3. Required env vars: EDITOR_REDIS_URL, DEEPGRAM_API_KEY, R2_*, GCS_*, SUPABASE_URL, SUPABASE_SERVICE_KEY
 # 4. Required OS packages: ffmpeg
 #    Add to nixpacks.toml: [phases.setup] nixPkgs = ['ffmpeg']
 # SMART REFRAME DEPENDENCIES:

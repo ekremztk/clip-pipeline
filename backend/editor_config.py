@@ -27,8 +27,8 @@ EDITOR_OUTPUT_DIR = "/tmp/editor_outputs"
 
 # Supabase configurations
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-# Prioritize SUPABASE_SERVICE_KEY if present, otherwise fallback to SUPABASE_KEY
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", os.getenv("SUPABASE_SERVICE_KEY", ""))
+# Load SUPABASE_SERVICE_KEY
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
 # Celery / Redis
 EDITOR_REDIS_URL = os.getenv("EDITOR_REDIS_URL", "redis://localhost:6379/0")
