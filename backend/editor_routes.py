@@ -3,7 +3,7 @@
 import logging
 import asyncio
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
@@ -27,7 +27,7 @@ def process_video_task(job_id: str) -> None:
 class UploadUrlRequest(BaseModel):
     filename: str
     content_type: str
-    user_id: str
+    user_id: Optional[str] = None
 
 @editor_router.post("/upload-url")
 async def get_upload_url(request: UploadUrlRequest):
@@ -36,7 +36,7 @@ async def get_upload_url(request: UploadUrlRequest):
     """
     # TODO: Replace request.user_id with FastAPI Dependency Injection: Depends(get_current_user)
     try:
-        job_id = await create_editor_job(request.user_id)
+        job_id = await create_editor_job(request.user_id or "anonymous")
         url_info = await generate_upload_presigned_url(request.filename, request.content_type)
         
         # Update job with the expected source r2 key
