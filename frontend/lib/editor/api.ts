@@ -263,7 +263,7 @@ export function streamJobProgress(
     onComplete: () => void,
     onError: (err: Error) => void
 ): () => void {
-    const eventSource = new EventSource(`${API_BASE}/api/editor/jobs/${jobId}/progress`)
+    const eventSource = new EventSource(`${API_BASE}/api/editor/job/${jobId}/stream`)
 
     eventSource.onmessage = (event) => {
         try {
