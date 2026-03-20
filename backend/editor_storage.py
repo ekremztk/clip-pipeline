@@ -28,7 +28,9 @@ def get_r2_client():
         's3',
         endpoint_url=R2_ENDPOINT_URL,
         aws_access_key_id=R2_ACCESS_KEY_ID,
-        aws_secret_access_key=R2_SECRET_ACCESS_KEY
+        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        config=boto3.session.Config(signature_version='s3v4'),
+        region_name='auto'
     )
 
 def get_gcs_client() -> gcs.Client:
