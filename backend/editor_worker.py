@@ -20,7 +20,11 @@ import subprocess
 import json
 import boto3
 import librosa
-from deepgram import DeepgramClient, PrerecordedOptions
+try:
+    from deepgram import DeepgramClient, PrerecordedOptions
+except ImportError:
+    from deepgram import Deepgram as DeepgramClient
+    PrerecordedOptions = None
 
 from editor_celery import editor_celery_app
 from editor_database import get_editor_job, update_editor_job
@@ -138,36 +142,53 @@ def pre_process_video(self, job_id: str) -> None:
         if not DEEPGRAM_API_KEY:
             raise ValueError("DEEPGRAM_API_KEY not configured")
             
-        deepgram = DeepgramClient(DEEPGRAM_API_KEY)
+        deepgram_client = DeepgramClient(DEEPGRAM_API_KEY)
 
-        with open(audio_path, "rb") as audio:
-            buffer_data = audio.read()
-
-        payload = {"buffer": buffer_data}
-
-        options = PrerecordedOptions(
-            model="nova-2",
-            diarize=True,
-            punctuate=True,
-            utterances=True,
-            smart_format=True,
-        )
-
-        response = deepgram.listen.prerecorded.v("1").transcribe_file(payload, options)
+        if PrerecordedOptions is not None:
+            # New SDK v3+
+            with open(audio_path, "rb") as audio:
+                buffer_data = audio.read()
+            payload = {"buffer": buffer_data}
+            options = PrerecordedOptions(
+                model="nova-2",
+                diarize=True,
+                punctuate=True,
+                utterances=True,
+                smart_format=True,
+            )
+            response = deepgram_client.listen.prerecorded.v("1").transcribe_file(payload, options)
+            raw_words = response.results.channels[0].alternatives[0].words
+        else:
+            # Old SDK v2
+            import asyncio as _asyncio
+            source = {"buffer": open(audio_path, "rb"), "mimetype": "audio/wav"}
+            response = _asyncio.run(deepgram_client.transcription.prerecorded(
+                source,
+                {"diarize": True, "punctuate": True, "model": "nova-2"}
+            ))
+            raw_words = response["results"]["channels"][0]["alternatives"][0]["words"]
 
         # Parse transcript
         words = []
         speaker_segments = []
         try:
-            alternatives = response.results.channels[0].alternatives[0]
-            for word in alternatives.words:
-                words.append({
-                    "word": word.word,
-                    "start": word.start,
-                    "end": word.end,
-                    "speaker": word.speaker if hasattr(word, 'speaker') else 0,
-                    "confidence": word.confidence
-                })
+            for word in raw_words:
+                if isinstance(word, dict):
+                    words.append({
+                        "word": word.get("word"),
+                        "start": word.get("start"),
+                        "end": word.get("end"),
+                        "speaker": word.get("speaker", 0),
+                        "confidence": word.get("confidence")
+                    })
+                else:
+                    words.append({
+                        "word": word.word,
+                        "start": word.start,
+                        "end": word.end,
+                        "speaker": word.speaker if hasattr(word, 'speaker') else 0,
+                        "confidence": word.confidence
+                    })
             
             # Build speaker segments by merging consecutive same-speaker words
             if words:

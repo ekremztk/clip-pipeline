@@ -19,7 +19,7 @@ google-cloud-storage
 
 # --- AI & Models ---
 google-genai
-deepgram-sdk
+deepgram-sdk==3.2.7
 
 # --- Video & Audio Processing ---
 librosa
