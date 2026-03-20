@@ -47,8 +47,7 @@ async def generate_upload_presigned_url(filename: str, content_type: str) -> Dic
                 ClientMethod='put_object',
                 Params={
                     'Bucket': R2_EDITOR_BUCKET_NAME,
-                    'Key': key,
-                    'ContentType': content_type
+                    'Key': key
                 },
                 ExpiresIn=3600
             )
