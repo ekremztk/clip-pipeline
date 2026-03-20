@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@remotion/player": "^4.0.438",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.0",
     "framer-motion": "^11.0.0",
@@ -15,7 +16,9 @@
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "remotion": "^4.0.438",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/node": "^20",
