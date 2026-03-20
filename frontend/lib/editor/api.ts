@@ -131,7 +131,7 @@ export async function uploadFileToR2(
  * @returns Promise resolving when start request is successful
  */
 export async function startJob(jobId: string): Promise<void> {
-    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}/start`, {
+    const response = await fetch(`${API_BASE}/api/editor/job/${jobId}/start`, {
         method: 'POST'
     })
 
