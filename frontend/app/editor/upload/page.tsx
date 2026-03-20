@@ -9,7 +9,7 @@ function UploadPageContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const sourceKey = searchParams.get('sourceKey')
-    const userId = "temp_user_id" // TODO: get from auth
+    const userId = "temp-user-id" // TODO: get from auth
 
     const [status, setStatus] = useState<'idle' | 'creating' | 'uploading' | 'processing' | 'error'>('idle')
     const [progress, setProgress] = useState(0)

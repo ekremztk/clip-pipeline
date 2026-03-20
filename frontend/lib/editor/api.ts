@@ -65,7 +65,7 @@ export async function createUploadUrl(
     const response = await fetch(`${API_BASE}/api/editor/upload-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename, contentType, userId })
+        body: JSON.stringify({ filename, content_type: contentType, user_id: userId })
     })
 
     if (!response.ok) {
