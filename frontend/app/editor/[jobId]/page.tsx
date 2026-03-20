@@ -47,8 +47,9 @@ async function getJobServer(jobId: string): Promise<EditorJob | null> {
     }
 }
 
-export default async function EditorPage({ params }: { params: { jobId: string } }) {
-    const job = await getJobServer(params.jobId);
+export default async function EditorPage({ params }: { params: Promise<{ jobId: string }> }) {
+    const { jobId } = await params;
+    const job = await getJobServer(jobId);
 
     if (!job) {
         return (
