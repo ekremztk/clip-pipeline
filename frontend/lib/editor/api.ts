@@ -2,13 +2,15 @@
 
 import { EditorJob, UploadUrlResponse, JobStatus, EditSpecPayload, EditDecisions, CropSegment } from './types'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || ''
+
 /**
  * Triggers AI auto-edit analysis for a job.
  * After calling this, poll via streamJobProgress.
  * When status === 'completed', job.editSpec contains decisions.
  */
 export async function triggerAutoEdit(jobId: string): Promise<void> {
-    const res = await fetch(`/api/editor/job/${jobId}/auto-edit`, {
+    const res = await fetch(`${API_BASE}/api/editor/job/${jobId}/auto-edit`, {
         method: 'POST',
     })
     if (!res.ok) {
@@ -60,7 +62,7 @@ export async function createUploadUrl(
     contentType: string,
     userId: string
 ): Promise<UploadUrlResponse> {
-    const response = await fetch('/api/editor/upload-url', {
+    const response = await fetch(`${API_BASE}/api/editor/upload-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename, contentType, userId })
@@ -124,7 +126,7 @@ export async function uploadFileToR2(
  * @returns Promise resolving when start request is successful
  */
 export async function startJob(jobId: string): Promise<void> {
-    const response = await fetch(`/api/editor/jobs/${jobId}/start`, {
+    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}/start`, {
         method: 'POST'
     })
 
@@ -142,7 +144,7 @@ export async function createJobFromKey(
     r2Key: string,
     userId: string
 ): Promise<{ jobId: string; r2Key: string }> {
-    const res = await fetch('/api/editor/job-from-key', {
+    const res = await fetch(`${API_BASE}/api/editor/job-from-key`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ r2_key: r2Key, user_id: userId }),
@@ -175,7 +177,7 @@ function mapCropSegments(raw: unknown): CropSegment[] {
  * @returns Promise resolving to the job details
  */
 export async function getJob(jobId: string): Promise<EditorJob & { cropSegments?: CropSegment[] }> {
-    const response = await fetch(`/api/editor/jobs/${jobId}`)
+    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}`)
 
     if (!response.ok) {
         throw new Error(`Failed to get job: ${response.statusText}`)
@@ -212,7 +214,7 @@ export async function getJob(jobId: string): Promise<EditorJob & { cropSegments?
  * @returns Promise resolving when cancellation is successful
  */
 export async function cancelJob(jobId: string): Promise<void> {
-    const response = await fetch(`/api/editor/jobs/${jobId}/cancel`, {
+    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}/cancel`, {
         method: 'POST'
     })
 
@@ -231,7 +233,7 @@ export async function startRender(
     jobId: string,
     editSpecPayload: EditSpecPayload
 ): Promise<void> {
-    const response = await fetch(`/api/editor/jobs/${jobId}/render`, {
+    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}/render`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editSpecPayload)
@@ -256,7 +258,7 @@ export function streamJobProgress(
     onComplete: () => void,
     onError: (err: Error) => void
 ): () => void {
-    const eventSource = new EventSource(`/api/editor/jobs/${jobId}/progress`)
+    const eventSource = new EventSource(`${API_BASE}/api/editor/jobs/${jobId}/progress`)
 
     eventSource.onmessage = (event) => {
         try {
