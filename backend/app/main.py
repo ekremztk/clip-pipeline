@@ -46,6 +46,9 @@ app.include_router(channels.router)
 app.include_router(feedback.router)
 app.include_router(progress.router)
 
+from editor_main import editor_router
+app.include_router(editor_router)
+
 @app.get("/health")
 async def health_check():
     return {

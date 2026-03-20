@@ -1,0 +1,6 @@
+- [x] Update editor_config.py
+- [x] Add function to editor_storage.py
+- [x] Update editor_routes.py
+- [x] Create editor_celery.py
+- [x] Create editor_worker.py
+- [x] Done
