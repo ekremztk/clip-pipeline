@@ -1,5 +1,2 @@
 [phases.setup]
-nixPkgs = ['ffmpeg', 'glib']
-
-[phases.install]
-cmds = ['pip install -r requirements.txt']
+aptPkgs = ['ffmpeg', 'libglib2.0-0']
