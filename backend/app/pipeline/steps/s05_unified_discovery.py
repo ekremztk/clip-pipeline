@@ -317,7 +317,8 @@ def run(
     guest_name: Optional[str],
     channel_id: str,
     video_duration_s: float,
-    job_id: str
+    job_id: str,
+    audio_path: Optional[str] = None
 ) -> list:
     """
     S05: Unified Discovery
@@ -373,13 +374,15 @@ def run(
         print("[S05] Video analysis returned no candidates. Trying audio fallback...")
         try:
             from app.services.gemini_client import analyze_audio
-            audio_path = f"temp_{job_id}.m4a"
-            if os.path.exists(audio_path):
+            if audio_path and os.path.exists(audio_path):
+                print(f"[S05] Audio fallback: using {audio_path}")
                 raw_response = analyze_audio(audio_path, prompt, model=settings.GEMINI_MODEL_PRO)
                 candidates = _parse_gemini_json(raw_response)
                 if candidates:
                     print(f"[S05] Audio fallback returned {len(candidates)} candidates")
                     return [c for c in candidates if isinstance(c, dict) and "candidate_id" in c]
+            else:
+                print(f"[S05] Audio fallback skipped: audio_path not provided or file not found ({audio_path})")
         except Exception as fb_err:
             print(f"[S05] Audio fallback failed: {fb_err}")
 

@@ -153,7 +153,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         guest_name=guest_name,
                         channel_id=channel_id,
                         video_duration_s=video_duration_s,
-                        job_id=job_id
+                        job_id=job_id,
+                        audio_path=audio_path
                     )
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
 
@@ -198,15 +199,15 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             video_title=video_title
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
-                    
+
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
-                
+
             except Exception as e:
                 error_msg = str(e)
                 print(f"[Orchestrator] Error in step {step_name}: {error_msg}")
                 traceback.print_exc()
-                
+
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(
                     job_id=job_id,
@@ -216,7 +217,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     duration_ms=duration_ms,
                     error_message=error_msg
                 )
-                
+
                 update_job(
                     job_id=job_id,
                     status=JobStatus.FAILED.value,
@@ -304,11 +305,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             print(f"[Orchestrator] WARNING: job {job_id} has no channel_id in database")
             channel_id = "unknown"
         
-        # Set audio path assuming standard naming
-        if video_path:
-            import os
-            base, ext = os.path.splitext(video_path)
-            audio_path = f"{base}.m4a"
+        # Audio path matches what S01 produced before speaker confirmation pause
+        audio_path = f"temp_{job_id}.m4a"
             
         # 2. Fetch transcript data
         trans_res = supabase.table("transcripts").select("*").eq("job_id", job_id).single().execute()
@@ -398,7 +396,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         guest_name=guest_name,
                         channel_id=channel_id,
                         video_duration_s=video_duration_s,
-                        job_id=job_id
+                        job_id=job_id,
+                        audio_path=audio_path
                     )
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
 

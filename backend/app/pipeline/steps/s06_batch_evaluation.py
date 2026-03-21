@@ -187,8 +187,8 @@ def run(
             }
             all_batch_data.append(batch_item)
 
-        # 3. Process in batches of 4
-        batch_size = 4
+        # 3. Process in batches of 6
+        batch_size = 6
         all_evaluated = []
 
         for i in range(0, len(all_batch_data), batch_size):
