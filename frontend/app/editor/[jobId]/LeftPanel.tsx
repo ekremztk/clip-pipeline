@@ -6,6 +6,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useEditorStore, EditorStoreType } from '@/lib/editor/store';
 import { AudioTrackItem, SubtitleWord } from '@/lib/editor/types';
 import { Search, Music, Plus, Play } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { createUploadUrl, uploadFileToR2, startJob } from '@/lib/editor/api';
 
 const PRESET_TRACKS = [
     { id: 'bgm-lofi', name: 'Lo-fi Chill', duration: 120, src: 'preset://lofi-chill' },
@@ -32,7 +34,7 @@ export default function LeftPanel() {
                     className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'assets' ? 'border-[#6366f1] text-white' : 'border-transparent text-[#6b7280] hover:text-[#f1f1f1]'
                         }`}
                 >
-                    Assets
+                    Media
                 </button>
             </div>
 
@@ -156,6 +158,27 @@ function TranscriptTab() {
 }
 
 function AssetsTab() {
+    const router = useRouter()
+    const [isDragging, setIsDragging] = useState(false)
+    const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
+    const fileUploadRef = useRef<HTMLInputElement>(null)
+
+    const handleVideoUpload = async (file: File) => {
+        if (!file.type.startsWith('video/')) return
+        setIsUploading(true)
+        setUploadProgress(0)
+        try {
+            const { uploadUrl, r2Key, jobId } = await createUploadUrl(file.name, file.type, null)
+            await uploadFileToR2(uploadUrl, file, (pct) => setUploadProgress(Math.round(pct)))
+            await startJob(jobId)
+            router.push(`/editor/${jobId}`)
+        } catch (err) {
+            console.error('Upload failed:', err)
+            setIsUploading(false)
+        }
+    }
+
     const addAudioItem = useEditorStore((state: EditorStoreType) => state.setAudioTrack);
     const audioTrack = useEditorStore((state: EditorStoreType) => state.audioTrack);
     const pushHistory = useEditorStore((state: EditorStoreType) => state.pushHistory);
@@ -189,6 +212,45 @@ function AssetsTab() {
 
     return (
         <div className="h-full overflow-y-auto p-4">
+            {/* Video Upload */}
+            <div className="mb-5">
+                <h3 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-3">
+                    Videos
+                </h3>
+                {isUploading ? (
+                    <div className="p-4 bg-[#2a2a2a] rounded-lg text-center">
+                        <div className="w-6 h-6 border-2 border-[#6366f1] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                        <p className="text-xs text-[#6b7280]">{uploadProgress}%</p>
+                    </div>
+                ) : (
+                    <div
+                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={(e) => {
+                            e.preventDefault()
+                            setIsDragging(false)
+                            const file = e.dataTransfer.files?.[0]
+                            if (file) handleVideoUpload(file)
+                        }}
+                        onClick={() => fileUploadRef.current?.click()}
+                        className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all ${isDragging ? 'border-[#6366f1] bg-[#6366f1]/10' : 'border-[#3a3a3a] hover:border-[#6366f1]/50'
+                            }`}
+                    >
+                        <input
+                            ref={fileUploadRef}
+                            type="file"
+                            className="hidden"
+                            accept=".mp4,.mov,.webm,video/*"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleVideoUpload(file)
+                            }}
+                        />
+                        <p className="text-xs text-[#6b7280]">Drop video or click to add</p>
+                    </div>
+                )}
+            </div>
+
             <h3 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-4 flex items-center">
                 <Music className="w-3.5 h-3.5 mr-1.5" />
                 Background Music

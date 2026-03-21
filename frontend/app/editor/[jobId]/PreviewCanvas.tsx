@@ -138,7 +138,7 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
     const isScrubbing = useRef(false);
     const fps = 30;
     const safeDuration = (typeof duration === 'number' && duration > 0) ? duration : 1;
-    const durationInFrames = Math.ceil(safeDuration * 30);
+    const durationInFrames = Math.max(1, Math.ceil(safeDuration * 30));
 
     // Rule 1: Remotion owns time when playing
     useEffect(() => {
@@ -202,18 +202,35 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
             <div className="relative flex-1 w-full max-w-[360px] min-h-[400px] flex items-center justify-center">
                 <div className="relative w-full" style={{ paddingBottom: '177.78%' /* 16:9 ratio */ }}>
                     <div className="absolute inset-0 bg-black rounded-lg overflow-hidden border border-[#2a2a2a] shadow-2xl">
-                        <Player
-                            ref={playerRef}
-                            component={VideoComposition}
-                            inputProps={{ sourceVideoUrl }}
-                            durationInFrames={durationInFrames}
-                            compositionWidth={1080}
-                            compositionHeight={1920}
-                            fps={fps}
-                            style={{ width: '100%', height: '100%' }}
-                            controls={false}
-                            acknowledgeRemotionLicense
-                        />
+                        {!sourceVideoUrl ? (
+                            <div className="w-full h-full bg-[#111] flex items-center justify-center">
+                                <div className="text-center px-6">
+                                    <div className="text-4xl mb-3">🎥</div>
+                                    <p className="text-[#6b7280] text-sm font-medium">No video loaded</p>
+                                    <p className="text-[#4b5563] text-xs mt-1">Go to Media tab to add a video</p>
+                                </div>
+                            </div>
+                        ) : durationInFrames >= 1 ? (
+                            <Player
+                                ref={playerRef}
+                                component={VideoComposition}
+                                inputProps={{ sourceVideoUrl }}
+                                durationInFrames={durationInFrames}
+                                compositionWidth={1080}
+                                compositionHeight={1920}
+                                fps={fps}
+                                style={{ width: '100%', height: '100%' }}
+                                controls={false}
+                                acknowledgeRemotionLicense
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-[#111] flex items-center justify-center">
+                                <div className="text-center">
+                                    <div className="w-8 h-8 border-2 border-[#6366f1] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                                    <p className="text-[#6b7280] text-xs">Loading video...</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -25,6 +25,8 @@ deepgram-sdk==3.2.7
 librosa
 soundfile
 numpy
+mediapipe
+opencv-python-headless
 
 # --- YouTube Tools ---
 yt-dlp>=2026.3.3

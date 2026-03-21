@@ -2,9 +2,36 @@
 
 import json
 import logging
-from vertexai.generative_models import GenerativeModel, GenerationConfig
+import os
+import tempfile
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger("editor.gemini")
+
+_editor_gemini_client = None
+
+def get_editor_gemini_client() -> genai.Client:
+    """Lazy initialization of Vertex AI client for editor module."""
+    global _editor_gemini_client
+    if _editor_gemini_client is None:
+        gcp_credentials = os.getenv("GCP_CREDENTIALS_JSON", "")
+        gcp_project = os.getenv("GCP_PROJECT", "")
+        gcp_location = os.getenv("GCP_LOCATION", "us-central1")
+
+        if gcp_credentials:
+            fd, temp_path = tempfile.mkstemp(suffix=".json")
+            with os.fdopen(fd, 'w') as f:
+                f.write(gcp_credentials)
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_path
+
+        _editor_gemini_client = genai.Client(
+            vertexai=True,
+            project=gcp_project,
+            location=gcp_location
+        )
+        logger.info(f"[EditorGemini] Vertex AI client initialized for project {gcp_project}")
+    return _editor_gemini_client
 
 EDITOR_PROMPT_TEMPLATE = """
 You are a professional YouTube Shorts video editor specializing in viral podcast clips.
@@ -144,19 +171,22 @@ def generate_edit_decisions(
     )
 
     try:
-        model = GenerativeModel("gemini-2.5-flash")
-        generation_config = GenerationConfig(
+        client = get_editor_gemini_client()
+
+        config = types.GenerateContentConfig(
             temperature=0.3,
             max_output_tokens=2048,
             response_mime_type="application/json",
         )
-        
-        response = model.generate_content(
-            prompt,
-            generation_config=generation_config
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=config
         )
-        
+
         raw_output = response.text
+
         try:
             if hasattr(response, 'usage_metadata'):
                 logger.info(f"Gemini token usage: {response.usage_metadata}")
@@ -164,14 +194,23 @@ def generate_edit_decisions(
             pass
 
         try:
-            decisions = json.loads(raw_output)
+            cleaned = raw_output.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            if cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+
+            decisions = json.loads(cleaned)
             if "_reasoning" in decisions:
                 logger.debug(f"Gemini Reasoning: {decisions['_reasoning']}")
             return decisions
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON. Raw output: {raw_output}")
             raise ValueError(f"Invalid JSON from Gemini: {str(e)}")
-            
+
     except Exception as e:
         logger.error(f"Vertex AI API error: {str(e)}")
         raise

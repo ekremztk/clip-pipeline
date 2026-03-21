@@ -2,7 +2,7 @@
 
 // EDITOR MODULE — Isolated module, no dependencies on other app files
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEditorStore, EditorStoreType } from '@/lib/editor/store';
 import { startRender, triggerAutoEdit, mapEditDecisions, getJob, streamJobProgress } from '@/lib/editor/api';
 import { Undo2, Redo2, Sparkles, Loader2, PlaySquare, Download } from 'lucide-react';
@@ -25,6 +25,42 @@ export default function TopBar() {
     const isProcessing = useEditorStore((state: EditorStoreType) => state.ui.isProcessing);
     const isRendering = useEditorStore((state: EditorStoreType) => state.ui.isRendering);
     const renderProgress = useEditorStore((state: EditorStoreType) => state.ui.renderProgress);
+
+    const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'analyzing' | 'ready'>(
+        job?.status === 'completed' ? 'ready' :
+            job?.status === 'processing' ? 'analyzing' : 'idle'
+    )
+
+    useEffect(() => {
+        if (!job?.id) return
+        if (job.status === 'completed') {
+            setAnalysisStatus('ready')
+            return
+        }
+        if (job.status !== 'processing') return
+
+        setAnalysisStatus('analyzing')
+        const cleanup = streamJobProgress(
+            job.id,
+            (status) => {
+                if (status === 'processing') setAnalysisStatus('analyzing')
+            },
+            async () => {
+                setAnalysisStatus('ready')
+                try {
+                    const updatedJob = await getJob(job.id)
+                    if (updatedJob.editSpec) {
+                        const decisions = mapEditDecisions(updatedJob.editSpec as unknown as Record<string, unknown>)
+                        loadFromEditDecisions(decisions)
+                    }
+                } catch (err) {
+                    console.error('Failed to load edit decisions after analysis:', err)
+                }
+            },
+            () => setAnalysisStatus('idle')
+        )
+        return () => cleanup()
+    }, [job?.id, job?.status])
 
     const handleAutoEdit = async () => {
         if (!job?.id) return;
@@ -105,7 +141,7 @@ export default function TopBar() {
             <div className="flex items-center justify-center w-1/3 relative">
                 <button
                     onClick={handleAutoEdit}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !job?.id}
                     className="flex items-center space-x-2 bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-1.5 rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isProcessing ? (
@@ -126,6 +162,24 @@ export default function TopBar() {
 
             {/* Right */}
             <div className="flex items-center justify-end space-x-3 w-1/3">
+                {analysisStatus !== 'idle' && (
+                    <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-md ${analysisStatus === 'analyzing'
+                        ? 'text-[#f59e0b] bg-[#f59e0b]/10'
+                        : 'text-[#10b981] bg-[#10b981]/10'
+                        }`}>
+                        {analysisStatus === 'analyzing' ? (
+                            <>
+                                <div className="w-3 h-3 border border-[#f59e0b] border-t-transparent rounded-full animate-spin" />
+                                <span>Analyzing...</span>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-[#10b981]" />
+                                <span>Ready</span>
+                            </>
+                        )}
+                    </div>
+                )}
                 <button
                     onClick={undo}
                     disabled={!canUndo || isRendering}
@@ -147,7 +201,11 @@ export default function TopBar() {
 
                 <button
                     onClick={() => setIsExportModalOpen(true)}
-                    className="flex items-center space-x-1.5 bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-1.5 rounded-md font-medium transition-colors"
+                    disabled={!job?.id}
+                    className={`flex items-center space-x-1.5 text-white px-4 py-1.5 rounded-md font-medium transition-colors ${job?.id
+                            ? 'bg-[#6366f1] hover:bg-[#4f46e5]'
+                            : 'bg-[#2a2a2a] opacity-50 cursor-not-allowed'
+                        }`}
                 >
                     <Download className="w-4 h-4" />
                     <span>Export</span>

@@ -12,8 +12,8 @@ import PreviewCanvas from './PreviewCanvas';
 import RightPanel from './RightPanel';
 
 interface EditorShellProps {
-    job: EditorJob;
-    sourceVideoUrl: string;
+    job: EditorJob | null;
+    sourceVideoUrl?: string;
 }
 
 class EditorErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error: Error | null }> {
@@ -133,7 +133,7 @@ function EditorLayout({ job, sourceVideoUrl }: EditorShellProps) {
                 </div>
 
                 <div className="flex-1 overflow-hidden relative">
-                    <PreviewCanvas sourceVideoUrl={sourceVideoUrl} />
+                    <PreviewCanvas sourceVideoUrl={sourceVideoUrl || ''} />
                 </div>
 
                 <div className="w-[288px] shrink-0 border-l border-[#2a2a2a] bg-[#1a1a1a]">

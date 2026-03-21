@@ -182,7 +182,7 @@ function mapCropSegments(raw: unknown): CropSegment[] {
  * @returns Promise resolving to the job details
  */
 export async function getJob(jobId: string): Promise<EditorJob & { cropSegments?: CropSegment[] }> {
-    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}`)
+    const response = await fetch(`${API_BASE}/api/editor/job/${jobId}`)
 
     if (!response.ok) {
         throw new Error(`Failed to get job: ${response.statusText}`)
@@ -219,7 +219,7 @@ export async function getJob(jobId: string): Promise<EditorJob & { cropSegments?
  * @returns Promise resolving when cancellation is successful
  */
 export async function cancelJob(jobId: string): Promise<void> {
-    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}/cancel`, {
+    const response = await fetch(`${API_BASE}/api/editor/job/${jobId}/cancel`, {
         method: 'POST'
     })
 
@@ -238,7 +238,7 @@ export async function startRender(
     jobId: string,
     editSpecPayload: EditSpecPayload
 ): Promise<void> {
-    const response = await fetch(`${API_BASE}/api/editor/jobs/${jobId}/render`, {
+    const response = await fetch(`${API_BASE}/api/editor/job/${jobId}/render`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editSpecPayload)

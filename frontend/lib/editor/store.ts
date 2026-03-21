@@ -98,7 +98,7 @@ export interface EditorStore {
     setSelectedCropSegmentIndex: (index: number | null) => void
 
     // Actions
-    loadFromJob: (job: EditorJob) => void
+    loadFromJob: (job: EditorJob | null) => void
     loadFromEditDecisions: (decisions: EditDecisions) => void
     buildEditSpec: () => EditSpecPayload
     resetEditor: () => void
@@ -323,6 +323,26 @@ export const useEditorStore = create<EditorStore>()(
         },
 
         loadFromJob: (job) => {
+            if (!job) {
+                set({
+                    job: null,
+                    duration: 0,
+                    videoTrack: [],
+                    audioTrack: [],
+                    subtitleTrack: [],
+                    overlayTrack: [],
+                    speedSections: [],
+                    currentTime: 0,
+                    isPlaying: false,
+                    selectedItem: null,
+                    cropSegments: [],
+                    cropOverrides: {},
+                    selectedCropSegmentIndex: null,
+                })
+                get().pushHistory()
+                return
+            }
+
             const duration = job.videoMetadata?.duration || 0
 
             const initialVideoItem: VideoTrackItem = {

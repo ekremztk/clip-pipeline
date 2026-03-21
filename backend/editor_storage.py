@@ -2,6 +2,7 @@
 
 import os
 import uuid
+import tempfile
 import boto3
 import logging
 import asyncio
@@ -33,8 +34,28 @@ def get_r2_client():
         region_name='auto'
     )
 
+_gcs_client = None
+
 def get_gcs_client() -> gcs.Client:
-    return gcs.Client()
+    """Returns authenticated GCS client. Reads credentials from GCP_CREDENTIALS_JSON env var."""
+    global _gcs_client
+    if _gcs_client is not None:
+        return _gcs_client
+
+    import os
+    import tempfile
+    gcp_credentials = os.getenv("GCP_CREDENTIALS_JSON", "")
+    gcp_project = os.getenv("GCP_PROJECT", "")
+
+    if gcp_credentials and not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        fd, temp_path = tempfile.mkstemp(suffix=".json")
+        with os.fdopen(fd, 'w') as f:
+            f.write(gcp_credentials)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_path
+        logger.info("[EditorStorage] GCS credentials written from env var")
+
+    _gcs_client = gcs.Client(project=gcp_project if gcp_project else None)
+    return _gcs_client
 
 async def generate_upload_presigned_url(filename: str, content_type: str) -> Dict[str, str]:
     """

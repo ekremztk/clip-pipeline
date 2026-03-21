@@ -5,6 +5,7 @@ import asyncio
 import json
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
+from botocore.exceptions import ClientError
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 
@@ -279,7 +280,7 @@ async def job_from_key(request: JobFromKeyRequest):
         
         try:
             s3_client.head_object(Bucket=R2_EDITOR_BUCKET_NAME, Key=request.r2_key)
-        except s3_client.exceptions.ClientError as e:
+        except ClientError as e:
             error_code = int(e.response['Error']['Code'])
             if error_code == 404:
                 raise HTTPException(status_code=404, detail="R2 key not found")
