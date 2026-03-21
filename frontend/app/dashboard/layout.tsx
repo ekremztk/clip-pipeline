@@ -89,14 +89,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     const navItems = [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/dashboard/new-job", label: "New Clip Job", icon: Plus },
-        { href: "/dashboard/clips", label: "Clip Library", icon: Film },
-        { href: "/editor", label: "Editor", icon: Scissors },
-        { href: "/dashboard/performance", label: "Performance", icon: BarChart2 },
-        { href: "/dashboard/memory", label: "Channel Memory", icon: Brain },
-        { href: "/dashboard/settings", label: "Channel Settings", icon: Settings },
-    ] as const;
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, external: false },
+        { href: "/dashboard/new-job", label: "New Clip Job", icon: Plus, external: false },
+        { href: "/dashboard/clips", label: "Clip Library", icon: Film, external: false },
+        { href: "https://edit.prognot.com", label: "Editor", icon: Scissors, external: true },
+        { href: "/dashboard/performance", label: "Performance", icon: BarChart2, external: false },
+        { href: "/dashboard/memory", label: "Channel Memory", icon: Brain, external: false },
+        { href: "/dashboard/settings", label: "Channel Settings", icon: Settings, external: false },
+    ];
 
     return (
         <ChannelContext.Provider value={{
@@ -128,9 +128,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className="flex-1 py-6 flex flex-col gap-1 overflow-y-auto">
                         {navItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = pathname === item.href;
+                            const isActive = !item.external && pathname === item.href;
                             return (
-                                <Link key={item.href} href={item.href} passHref legacyBehavior>
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    passHref
+                                    legacyBehavior
+                                    {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                >
                                     <motion.a
                                         whileHover={{ x: 2 }}
                                         transition={{ duration: 0.15 }}
