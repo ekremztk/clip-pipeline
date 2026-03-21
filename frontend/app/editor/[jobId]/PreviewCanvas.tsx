@@ -13,6 +13,10 @@ import { SubtitleWord, OverlayTrackItem } from '@/lib/editor/types';
 // REMOTION COMPOSITION
 // ============================================================================
 const VideoComposition: React.FC<{ sourceVideoUrl: string }> = ({ sourceVideoUrl }) => {
+    if (!sourceVideoUrl) {
+        return <div style={{ width: '100%', height: '100%', background: '#0f0f0f' }} />
+    }
+
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
     const currentTimeSec = frame / fps;
@@ -133,7 +137,7 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
     const [scrubberValue, setScrubberValue] = useState(0);
     const isScrubbing = useRef(false);
     const fps = 30;
-    const safeDuration = typeof duration === 'number' && duration > 0 ? duration : 1;
+    const safeDuration = (typeof duration === 'number' && duration > 0) ? duration : 1;
     const durationInFrames = Math.ceil(safeDuration * 30);
 
     // Rule 1: Remotion owns time when playing

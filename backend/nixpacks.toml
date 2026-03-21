@@ -1,2 +1,5 @@
 [phases.setup]
 nixPkgs = ['ffmpeg', 'libglib2.0', 'libsm6', 'libxrender1', 'libxext6']
+
+[phases.install]
+cmds = ['pip install -r requirements.txt']

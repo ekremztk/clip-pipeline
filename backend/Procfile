@@ -1,0 +1,1 @@
+worker: python -m celery -A editor_celery worker --loglevel=info -Q editor --concurrency=2
