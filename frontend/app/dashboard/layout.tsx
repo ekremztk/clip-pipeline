@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/dashboard/new-job", label: "New Clip Job", icon: Plus },
         { href: "/dashboard/clips", label: "Clip Library", icon: Film },
-        { href: "/editor/upload", label: "Editor", icon: Scissors },
+        { href: "/editor", label: "Editor", icon: Scissors },
         { href: "/dashboard/performance", label: "Performance", icon: BarChart2 },
         { href: "/dashboard/memory", label: "Channel Memory", icon: Brain },
         { href: "/dashboard/settings", label: "Channel Settings", icon: Settings },
