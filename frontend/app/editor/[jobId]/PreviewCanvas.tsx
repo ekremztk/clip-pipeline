@@ -79,7 +79,7 @@ const VideoComposition: React.FC<{ sourceVideoUrl: string }> = ({ sourceVideoUrl
                             maxWidth: '80%'
                         }}
                     >
-                        {overlay.text}
+                        {String(overlay.text)}
                     </div>
                 );
             })}
@@ -110,7 +110,7 @@ const VideoComposition: React.FC<{ sourceVideoUrl: string }> = ({ sourceVideoUrl
                             fontWeight: 900,
                             textTransform: 'uppercase'
                         }}>
-                            {w.word}
+                            {String(w.word)}
                         </span>
                     ))}
                 </div>
@@ -133,7 +133,8 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
     const [scrubberValue, setScrubberValue] = useState(0);
     const isScrubbing = useRef(false);
     const fps = 30;
-    const durationInFrames = Math.max(1, Math.ceil((duration || 10) * fps));
+    const safeDuration = typeof duration === 'number' && duration > 0 ? duration : 1;
+    const durationInFrames = Math.ceil(safeDuration * 30);
 
     // Rule 1: Remotion owns time when playing
     useEffect(() => {
@@ -207,6 +208,7 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
                             fps={fps}
                             style={{ width: '100%', height: '100%' }}
                             controls={false}
+                            acknowledgeRemotionLicense
                         />
                     </div>
                 </div>
@@ -224,7 +226,7 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
                     </button>
 
                     <div className="text-sm font-mono text-[#f1f1f1]">
-                        {formatTime(scrubberValue)} <span className="text-[#6b7280]">/ {formatTime(duration)}</span>
+                        {formatTime(scrubberValue)} <span className="text-[#6b7280]">/ {formatTime(safeDuration)}</span>
                     </div>
                 </div>
 
@@ -232,7 +234,7 @@ export default function PreviewCanvas({ sourceVideoUrl }: { sourceVideoUrl: stri
                     <input
                         type="range"
                         min={0}
-                        max={duration || 10}
+                        max={safeDuration}
                         step={0.01}
                         value={scrubberValue}
                         onMouseDown={() => {
