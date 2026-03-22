@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Download, Check, X, ChevronDown, Play, FileVideo, MoreHorizontal, ArrowLeft } from "lucide-react";
+import { Download, Check, X, ChevronDown, Play, FileVideo, MoreHorizontal, ArrowLeft, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useChannel } from "../layout";
@@ -25,13 +25,14 @@ interface Clip {
     clip_strategy_role: string;
     posting_order: number;
     is_successful: boolean | null;
+    is_published: boolean | null;
     why_failed: string | null;
     standalone_result?: string;
     quality_notes?: string;
     file_url: string | null;
 }
 
-type FilterType = "all" | "successful" | "failed" | "pending";
+type FilterType = "all" | "successful" | "failed" | "published";
 
 const STEP_LABELS: Record<string, string> = {
     "initializing": "Initializing...",
@@ -309,6 +310,28 @@ export default function ClipLibraryPage() {
         }
     };
 
+    const handlePublish = async (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        if (!clip) return;
+        try {
+            if (clip.is_published) {
+                const res = await fetch(`${API}/clips/${id}/unpublish`, { method: "PATCH" });
+                if (res.ok) {
+                    setClips(clips.map(c => c.id === id ? { ...c, is_published: false } : c));
+                    if (selectedClip?.id === id) setSelectedClip({ ...selectedClip, is_published: false });
+                }
+            } else {
+                const res = await fetch(`${API}/clips/${id}/publish`, { method: "PATCH" });
+                if (res.ok) {
+                    setClips(clips.map(c => c.id === id ? { ...c, is_published: true } : c));
+                    if (selectedClip?.id === id) setSelectedClip({ ...selectedClip, is_published: true });
+                }
+            }
+        } catch (error) {
+            console.error("Failed to update publish status", error);
+        }
+    };
+
     const handleApprove = async (id: string) => {
         const clip = clips.find(c => c.id === id);
         if (!clip) return;
@@ -401,7 +424,7 @@ export default function ClipLibraryPage() {
         if (filter === "all") return true;
         if (filter === "successful") return jobClips.some(c => c.is_successful === true);
         if (filter === "failed") return jobClips.some(c => c.is_successful === false);
-        if (filter === "pending") return jobClips.some(c => c.is_successful === null);
+        if (filter === "published") return jobClips.some(c => c.is_published === true);
         return true;
     });
 
@@ -410,7 +433,7 @@ export default function ClipLibraryPage() {
         if (filter === "all") return true;
         if (filter === "successful") return clip.is_successful === true;
         if (filter === "failed") return clip.is_successful === false;
-        if (filter === "pending") return clip.is_successful === null;
+        if (filter === "published") return clip.is_published === true;
         return true;
     });
 
@@ -422,7 +445,7 @@ export default function ClipLibraryPage() {
                     <h1 className="text-2xl font-bold">Clip Library</h1>
 
                     <div className="flex items-center gap-4 bg-[#0d0d0d] p-1.5 rounded-lg border border-gray-800">
-                        {(["all", "successful", "failed", "pending"] as FilterType[]).map((f) => (
+                        {(["all", "successful", "failed", "published"] as FilterType[]).map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -746,24 +769,37 @@ export default function ClipLibraryPage() {
                             )}
                         </div>
 
-                        <div className="p-4 border-t border-gray-800 bg-[#0d0d0d] flex gap-3">
+                        <div className="p-4 border-t border-gray-800 bg-[#0d0d0d] flex flex-col gap-2">
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => handleDownload(selectedClip.id)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                                >
+                                    <Download className="w-4 h-4" /> Download
+                                </button>
+                                <button
+                                    onClick={() => handleApprove(selectedClip.id)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg font-medium transition-colors"
+                                >
+                                    <Check className="w-4 h-4" /> Approve
+                                </button>
+                                <button
+                                    onClick={() => handleReject(selectedClip.id)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg font-medium transition-colors"
+                                >
+                                    <X className="w-4 h-4" /> Reject
+                                </button>
+                            </div>
                             <button
-                                onClick={() => handleDownload(selectedClip.id)}
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                                onClick={() => handlePublish(selectedClip.id)}
+                                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-colors border ${
+                                    selectedClip.is_published
+                                        ? "bg-[#7c3aed]/20 hover:bg-[#7c3aed]/10 text-[#7c3aed] border-[#7c3aed]/40"
+                                        : "bg-[#7c3aed] hover:bg-[#6d28d9] text-white border-[#7c3aed]"
+                                }`}
                             >
-                                <Download className="w-4 h-4" /> Download
-                            </button>
-                            <button
-                                onClick={() => handleApprove(selectedClip.id)}
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg font-medium transition-colors"
-                            >
-                                <Check className="w-4 h-4" /> Approve
-                            </button>
-                            <button
-                                onClick={() => handleReject(selectedClip.id)}
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg font-medium transition-colors"
-                            >
-                                <X className="w-4 h-4" /> Reject
+                                <Upload className="w-4 h-4" />
+                                {selectedClip.is_published ? "Mark as Unpublished" : "Mark as Published"}
                             </button>
                         </div>
                     </>

@@ -91,6 +91,36 @@ async def unset_approval_clip(clip_id: str):
         print(f"[ClipsRoute] Error unsetting approval clip {clip_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.patch("/{clip_id}/publish")
+async def publish_clip(clip_id: str):
+    try:
+        print(f"[ClipsRoute] Marking clip {clip_id} as published")
+        supabase = get_client()
+        response = supabase.table("clips").update({"is_published": True}).eq("id", clip_id).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+        return {"published": True, "clip_id": clip_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error publishing clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.patch("/{clip_id}/unpublish")
+async def unpublish_clip(clip_id: str):
+    try:
+        print(f"[ClipsRoute] Unmarking clip {clip_id} as published")
+        supabase = get_client()
+        response = supabase.table("clips").update({"is_published": False}).eq("id", clip_id).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+        return {"published": False, "clip_id": clip_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error unpublishing clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.patch("/{clip_id}/reject")
 async def reject_clip(clip_id: str, notes: Optional[str] = Body(default=None, embed=True)):
     try:
