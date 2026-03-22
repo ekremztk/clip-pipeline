@@ -28,3 +28,4 @@ frontend/.env.local
 # Logs
 *.log
 .mcp.json
+opencut/
