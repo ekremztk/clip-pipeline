@@ -825,7 +825,7 @@ export default function ClipLibraryPage() {
                                 <Upload className="w-4 h-4" />
                                 {selectedClip.is_published ? "Mark as Unpublished" : "Mark as Published"}
                             </button>
-                            {selectedClip.file_url && (
+                            {selectedClip.file_url ? (
                                 <a
                                     href={`https://edit.prognot.com/editor/${crypto.randomUUID()}?clipUrl=${encodeURIComponent(selectedClip.file_url)}${selectedClip.suggested_title ? `&clipTitle=${encodeURIComponent(selectedClip.suggested_title)}` : ""}${selectedClip.suggested_description ? `&clipDesc=${encodeURIComponent(selectedClip.suggested_description)}` : ""}`}
                                     target="_blank"
@@ -835,6 +835,14 @@ export default function ClipLibraryPage() {
                                     <Scissors className="w-4 h-4" />
                                     Open in Editor
                                 </a>
+                            ) : (
+                                <button
+                                    disabled
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium border bg-gray-800/50 text-gray-600 border-gray-700 cursor-not-allowed"
+                                >
+                                    <Scissors className="w-4 h-4" />
+                                    Open in Editor
+                                </button>
                             )}
                         </div>
                     </>
