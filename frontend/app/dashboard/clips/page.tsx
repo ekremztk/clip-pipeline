@@ -30,6 +30,9 @@ interface Clip {
     standalone_result?: string;
     quality_notes?: string;
     file_url: string | null;
+    srt_url: string | null;
+    suggested_title: string | null;
+    suggested_description: string | null;
 }
 
 type FilterType = "all" | "successful" | "failed" | "published";
@@ -767,6 +770,26 @@ export default function ClipLibraryPage() {
                                     </p>
                                 </div>
                             )}
+
+                            {(selectedClip.suggested_title || selectedClip.suggested_description) && (
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-400 mb-3">YouTube Metadata</h3>
+                                    <div className="space-y-3">
+                                        {selectedClip.suggested_title && (
+                                            <div className="bg-black/50 p-3 rounded-lg border border-gray-800">
+                                                <p className="text-xs text-gray-500 mb-1">Title</p>
+                                                <p className="text-sm text-white font-medium">{selectedClip.suggested_title}</p>
+                                            </div>
+                                        )}
+                                        {selectedClip.suggested_description && (
+                                            <div className="bg-black/50 p-3 rounded-lg border border-gray-800">
+                                                <p className="text-xs text-gray-500 mb-1">Description</p>
+                                                <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedClip.suggested_description}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="p-4 border-t border-gray-800 bg-[#0d0d0d] flex flex-col gap-2">
@@ -777,6 +800,19 @@ export default function ClipLibraryPage() {
                                 >
                                     <Download className="w-4 h-4" /> Download
                                 </button>
+                                {selectedClip.srt_url && (
+                                    <a
+                                        href={selectedClip.srt_url}
+                                        download
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors text-sm"
+                                        title="Download SRT subtitles"
+                                    >
+                                        <Download className="w-4 h-4" /> SRT
+                                    </a>
+                                )}
+                            </div>
                                 <button
                                     onClick={() => handleApprove(selectedClip.id)}
                                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg font-medium transition-colors"

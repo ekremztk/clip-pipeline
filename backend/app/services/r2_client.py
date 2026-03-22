@@ -17,6 +17,34 @@ def get_r2_client():
         region_name="auto" # R2 requires region to be 'auto' or omited, boto3 needs it
     )
 
+def upload_srt(job_id: str, filename: str, content: str) -> str:
+    """
+    Uploads an SRT subtitle file (string) to Cloudflare R2 and returns the public URL.
+    """
+    try:
+        s3 = get_r2_client()
+        bucket_name = settings.R2_BUCKET_NAME
+
+        if not bucket_name:
+            raise ValueError("R2_BUCKET_NAME is not set.")
+
+        object_name = f"{job_id}/{filename}"
+
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=object_name,
+            Body=content.encode("utf-8"),
+            ContentType="text/plain; charset=utf-8"
+        )
+
+        public_url = settings.R2_PUBLIC_URL.rstrip("/")
+        return f"{public_url}/{object_name}"
+
+    except Exception as e:
+        print(f"[R2Client] Error uploading SRT {filename} to R2: {e}")
+        raise
+
+
 def upload_clip(job_id: str, filename: str, file_path: str) -> str:
     """
     Uploads a clip to Cloudflare R2 and returns the public URL.

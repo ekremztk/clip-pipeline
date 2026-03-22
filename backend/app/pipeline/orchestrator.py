@@ -196,7 +196,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             job_id=job_id,
                             channel_id=channel_id,
                             video_path=video_path,
-                            video_title=video_title
+                            video_title=video_title,
+                            transcript_data=transcript_data
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
 
@@ -439,7 +440,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             job_id=job_id,
                             channel_id=channel_id,
                             video_path=video_path,
-                            video_title=video_title
+                            video_title=video_title,
+                            transcript_data=transcript_data
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
                     
