@@ -812,15 +812,13 @@ export default function ClipLibraryPage() {
                         </div>
 
                         <div className="p-4 border-t border-gray-800 bg-[#0d0d0d] flex flex-col gap-2">
+                            <button
+                                onClick={() => handleDownload(selectedClip.id)}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                            >
+                                <Download className="w-4 h-4" /> Download
+                            </button>
                             <div className="flex gap-3">
-                                <button
-                                    onClick={() => handleDownload(selectedClip.id)}
-                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
-                                >
-                                    <Download className="w-4 h-4" /> Download
-                                </button>
-
-                            </div>
                                 <button
                                     onClick={() => handleApprove(selectedClip.id)}
                                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg font-medium transition-colors"
