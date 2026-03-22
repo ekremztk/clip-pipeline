@@ -3,11 +3,10 @@ import subprocess
 import traceback
 from app.config import settings
 from app.services.supabase_client import get_client
-from app.services.r2_client import upload_clip, upload_srt
-from app.utils.srt_generator import generate_srt
+from app.services.r2_client import upload_clip
 
 
-def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_title: str = "", transcript_data: dict = None) -> list:
+def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_title: str = "") -> list:
     """
     Step 8: Export
     For each clip: FFmpeg frame-accurate cut + encode → R2 upload → Supabase insert.
@@ -16,7 +15,6 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
     print(f"[S08] Starting export for {len(cut_results)} clips. Job: {job_id}")
     exported_clips = []
     supabase = get_client()
-    words = (transcript_data or {}).get("words", [])
 
     # Ensure output directory exists
     job_output_dir = os.path.join(settings.OUTPUT_DIR, job_id)
@@ -73,19 +71,6 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
             except Exception as r2_err:
                 print(f"[S08] R2 upload failed: {r2_err}. Using local path.")
 
-            # 3b. Generate and upload SRT
-            srt_url = None
-            try:
-                if words:
-                    final_end = clip.get("final_end", final_start + final_duration)
-                    srt_content = generate_srt(words, final_start, final_end)
-                    if srt_content:
-                        srt_filename = f"clip_{index:02d}_{content_type}.srt"
-                        srt_url = upload_srt(job_id, srt_filename, srt_content)
-                        print(f"[S08] SRT uploaded: {srt_url}")
-            except Exception as srt_err:
-                print(f"[S08] SRT generation failed for clip {index+1}: {srt_err}")
-
             # 4. Insert into Supabase clips table
             clip_data = {
                 "job_id": job_id,
@@ -107,7 +92,6 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                 "posting_order": clip.get("posting_order"),
                 "suggested_title": clip.get("suggested_title"),
                 "suggested_description": clip.get("suggested_description"),
-                "srt_url": srt_url,
                 "video_landscape_path": file_url,
                 "file_url": file_url,
                 "is_successful": True if clip.get("quality_verdict", "fail") in ("pass", "fixable") else False,

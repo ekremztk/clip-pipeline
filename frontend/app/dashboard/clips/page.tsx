@@ -30,7 +30,6 @@ interface Clip {
     standalone_result?: string;
     quality_notes?: string;
     file_url: string | null;
-    srt_url: string | null;
     suggested_title: string | null;
     suggested_description: string | null;
 }
@@ -800,18 +799,7 @@ export default function ClipLibraryPage() {
                                 >
                                     <Download className="w-4 h-4" /> Download
                                 </button>
-                                {selectedClip.srt_url && (
-                                    <a
-                                        href={selectedClip.srt_url}
-                                        download
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors text-sm"
-                                        title="Download SRT subtitles"
-                                    >
-                                        <Download className="w-4 h-4" /> SRT
-                                    </a>
-                                )}
+
                             </div>
                                 <button
                                     onClick={() => handleApprove(selectedClip.id)}
