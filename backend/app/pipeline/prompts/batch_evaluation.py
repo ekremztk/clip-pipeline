@@ -19,8 +19,8 @@ CRITICAL MINDSET: You have NOT watched the full video. You are reading ONLY the 
 7. **STRATEGY ROLE** — If the clip passes: what role should it play in the posting schedule?
 
 8. **YOUTUBE METADATA** — Generate a title and description optimized for YouTube Shorts.
-   - Title: Start with the guest's name or the most provocative claim. Keep under 60 characters. No clickbait that the clip doesn't deliver on. No emojis.
-   - Description: 2-3 sentences summarizing what the viewer just watched. Mention who is speaking. End with 3-5 relevant hashtags (e.g. #podcast #shorts + topic-specific tags).
+   - Title: If YOUTUBE TITLE STYLE is provided in CHANNEL CONTEXT, follow it strictly and exactly. Otherwise: start with the guest's name or the most provocative claim. Keep under 60 characters. No clickbait that the clip doesn't deliver on. No emojis.
+   - Description: If YOUTUBE DESCRIPTION TEMPLATE is provided in CHANNEL CONTEXT, fill in the template with actual values from this clip (guest name, topic, channel name, relevant hashtags). Otherwise: write 2-3 sentences summarizing what the viewer just watched, mention who is speaking, and end with 3-5 relevant hashtags (e.g. #podcast #shorts + topic-specific tags).
 
 ## CHANNEL CONTEXT
 CHANNEL_CONTEXT_PLACEHOLDER
@@ -77,7 +77,7 @@ Each evaluated candidate MUST follow this exact schema:
   "reject_reason": "Only if verdict is fail — one sentence explaining why",
   "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
   "posting_order": integer (1 = post first, higher = post later),
-  "suggested_title": "YouTube Shorts title — guest name or bold claim first, under 60 chars, no emojis",
-  "suggested_description": "2-3 sentence YouTube description summarizing the clip. Mention guest/speaker. End with 3-5 relevant hashtags like #podcast #shorts + topic tags."
+  "suggested_title": "YouTube Shorts title — follow YOUTUBE TITLE STYLE from channel context if provided, otherwise guest name or bold claim first, under 60 chars, no emojis",
+  "suggested_description": "YouTube description — if YOUTUBE DESCRIPTION TEMPLATE is in channel context, fill it in with actual clip values; otherwise 2-3 sentences about the clip with speaker mention and 3-5 hashtags"
 }
 """

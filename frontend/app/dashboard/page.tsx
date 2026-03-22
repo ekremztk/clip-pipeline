@@ -62,33 +62,7 @@ const formatDate = (dateStr?: string) => {
     return `${days} days ago`;
 };
 
-const ActiveJobCard = ({ initialJob, onComplete }: { initialJob: any, onComplete: (job: any) => void }) => {
-    const [job, setJob] = useState(initialJob);
-
-    useEffect(() => {
-        if (!job?.id) return;
-        if (job.status === 'completed' || job.status === 'failed' || job.status === 'error') return;
-
-        const interval = setInterval(async () => {
-            try {
-                if (!job?.id) return;
-                const res = await fetch(`${API}/jobs/${job.id}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.id) {
-                        setJob(data);
-                        if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
-                            clearInterval(interval);
-                            onComplete(data);
-                        }
-                    }
-                }
-            } catch (err) { }
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, [job?.id, job?.status]);
-
+const ActiveJobCard = ({ job }: { job: any }) => {
     const progress = job.progress_pct ?? job.progress ?? 0;
     const isAwaiting = job.status === 'awaiting_speaker_confirm';
 
@@ -197,16 +171,16 @@ export default function DashboardPage() {
     const [loadingDashboard, setLoadingDashboard] = useState(true);
     const [dashboardError, setDashboardError] = useState("");
 
-    const fetchDashboardData = async () => {
-        setLoadingDashboard(true);
+    const fetchDashboardData = async (silent = false) => {
+        if (!silent) setLoadingDashboard(true);
         setDashboardError("");
         try {
-            const jobsRes = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`);
+            const jobsRes = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`, { cache: 'no-store' });
             if (jobsRes.ok) {
                 setJobs(await jobsRes.json());
             }
 
-            const clipsRes = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=4`);
+            const clipsRes = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=4`, { cache: 'no-store' });
             if (clipsRes.ok) {
                 setClips(await clipsRes.json());
             }
@@ -214,7 +188,7 @@ export default function DashboardPage() {
             console.error("Dashboard fetch error", err);
             setDashboardError("Failed to load dashboard data.");
         } finally {
-            setLoadingDashboard(false);
+            if (!silent) setLoadingDashboard(false);
         }
     };
 
@@ -223,10 +197,14 @@ export default function DashboardPage() {
         fetchDashboardData();
     }, [activeChannelId]);
 
-    const handleJobComplete = (updatedJob: any) => {
-        setJobs((prev) => prev.map(j => j.id === updatedJob.id ? updatedJob : j));
-        fetchDashboardData();
-    };
+    // Auto-refresh every 4s when there are active jobs
+    useEffect(() => {
+        if (!activeChannelId) return;
+        const hasActive = jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+        if (!hasActive) return;
+        const interval = setInterval(() => fetchDashboardData(true), 4000);
+        return () => clearInterval(interval);
+    }, [activeChannelId, jobs]);
 
     return (
         <motion.div
@@ -345,7 +323,7 @@ export default function DashboardPage() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.06 }}
                             >
-                                <ActiveJobCard initialJob={job} onComplete={handleJobComplete} />
+                                <ActiveJobCard job={job} />
                             </motion.div>
                         ))}
                     </div>

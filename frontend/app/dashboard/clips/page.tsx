@@ -79,33 +79,7 @@ const formatDate = (dateStr?: string) => {
     return `${days} days ago`;
 };
 
-const ActiveJobCard = ({ initialJob, onComplete }: { initialJob: any, onComplete: (job: any) => void }) => {
-    const [job, setJob] = useState(initialJob);
-
-    useEffect(() => {
-        if (!job?.id) return;
-        if (job.status === 'completed' || job.status === 'failed' || job.status === 'error') return;
-
-        const interval = setInterval(async () => {
-            try {
-                if (!job?.id) return;
-                const res = await fetch(`${API}/jobs/${job.id}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.id) {
-                        setJob(data);
-                        if (data.status === 'completed' || data.status === 'failed' || data.status === 'error') {
-                            clearInterval(interval);
-                            onComplete(data);
-                        }
-                    }
-                }
-            } catch (err) { }
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, [job?.id, job?.status]);
-
+const ActiveJobCard = ({ job }: { job: any }) => {
     const progress = job.progress_pct ?? job.progress ?? 0;
     const isAwaiting = job.status === 'awaiting_speaker_confirm';
 
@@ -278,6 +252,25 @@ export default function ClipLibraryPage() {
     const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
 
+    const fetchJobsAndClips = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const [jobsRes, clipsRes] = await Promise.all([
+                fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=50`, { cache: 'no-store' }),
+                fetch(`${API}/clips?channel_id=${activeChannelId}&limit=200`, { cache: 'no-store' })
+            ]);
+
+            if (jobsRes.ok && clipsRes.ok) {
+                setJobs(await jobsRes.json());
+                setClips(await clipsRes.json());
+            }
+        } catch (error) {
+            console.error("Failed to fetch data", error);
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (activeChannelId) {
             fetchJobsAndClips();
@@ -288,36 +281,13 @@ export default function ClipLibraryPage() {
         }
     }, [activeChannelId]);
 
-    const fetchJobsAndClips = async () => {
-        setLoading(true);
-        try {
-            const [jobsRes, clipsRes] = await Promise.all([
-                fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=50`),
-                fetch(`${API}/clips?channel_id=${activeChannelId}&limit=200`)
-            ]);
-
-            if (jobsRes.ok && clipsRes.ok) {
-                setJobs(await jobsRes.json());
-                setClips(await clipsRes.json());
-            }
-        } catch (error) {
-            console.error("Failed to fetch data", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchClipsOnly = async () => {
-        try {
-            const res = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=200`);
-            if (res.ok) setClips(await res.json());
-        } catch (err) { }
-    };
-
-    const handleJobComplete = (updatedJob: any) => {
-        setJobs(prev => prev.map(j => j.id === updatedJob.id ? updatedJob : j));
-        fetchClipsOnly();
-    };
+    useEffect(() => {
+        if (!activeChannelId) return;
+        const hasActive = jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+        if (!hasActive) return;
+        const interval = setInterval(() => fetchJobsAndClips(true), 4000);
+        return () => clearInterval(interval);
+    }, [activeChannelId, jobs]);
 
     const handleDeleteProject = async (jobId: string) => {
         if (!confirm("Are you sure you want to delete this project?")) return;
@@ -534,7 +504,7 @@ export default function ClipLibraryPage() {
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {activeJobs.map(job => (
-                                            <ActiveJobCard key={job.id} initialJob={job} onComplete={handleJobComplete} />
+                                            <ActiveJobCard key={job.id} job={job} />
                                         ))}
                                     </div>
                                 </div>
