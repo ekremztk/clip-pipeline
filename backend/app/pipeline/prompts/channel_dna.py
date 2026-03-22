@@ -43,6 +43,8 @@ Schema:
   },
   "sacred_topics": [],
   "no_go_zones": [],
-  "audience_identity": "one sentence describing who watches this channel and why"
+  "audience_identity": "one sentence describing who watches this channel and why",
+  "title_style": "brief instruction for title format, e.g. 'Guest name first, then bold claim' or 'Start with the provocative question'",
+  "description_template": "template with placeholders, e.g. '[GUEST] on [TOPIC]. Full episode on [CHANNEL_NAME]. #podcast #shorts #[TOPIC_TAG]'"
 }
 """

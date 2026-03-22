@@ -18,6 +18,10 @@ CRITICAL MINDSET: You have NOT watched the full video. You are reading ONLY the 
 
 7. **STRATEGY ROLE** — If the clip passes: what role should it play in the posting schedule?
 
+8. **YOUTUBE METADATA** — Generate a title and description optimized for YouTube Shorts.
+   - Title: Start with the guest's name or the most provocative claim. Keep under 60 characters. No clickbait that the clip doesn't deliver on. No emojis.
+   - Description: 2-3 sentences summarizing what the viewer just watched. Mention who is speaking. End with 3-5 relevant hashtags (e.g. #podcast #shorts + topic-specific tags).
+
 ## CHANNEL CONTEXT
 CHANNEL_CONTEXT_PLACEHOLDER
 
@@ -73,6 +77,7 @@ Each evaluated candidate MUST follow this exact schema:
   "reject_reason": "Only if verdict is fail — one sentence explaining why",
   "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
   "posting_order": integer (1 = post first, higher = post later),
-  "suggested_title": "A compelling YouTube Shorts title for this clip"
+  "suggested_title": "YouTube Shorts title — guest name or bold claim first, under 60 chars, no emojis",
+  "suggested_description": "2-3 sentence YouTube description summarizing the clip. Mention guest/speaker. End with 3-5 relevant hashtags like #podcast #shorts + topic tags."
 }
 """

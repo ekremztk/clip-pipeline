@@ -91,6 +91,7 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                 "clip_strategy_role": clip.get("clip_strategy_role"),
                 "posting_order": clip.get("posting_order"),
                 "suggested_title": clip.get("suggested_title"),
+                "suggested_description": clip.get("suggested_description"),
                 "video_landscape_path": file_url,
                 "file_url": file_url,
                 "is_successful": True if clip.get("quality_verdict", "fail") in ("pass", "fixable") else False,

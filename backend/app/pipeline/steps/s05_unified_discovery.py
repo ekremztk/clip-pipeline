@@ -106,7 +106,16 @@ def build_channel_context(channel_dna: dict, channel_id: str) -> str:
     if sacred:
         lines.append(f"\nHIGH-VALUE TOPICS (audience cares deeply): {', '.join(sacred)}")
 
-    # 11. Channel memory context
+    # 11. YouTube title/description style
+    title_style = channel_dna.get("title_style", "")
+    if title_style:
+        lines.append(f"\nYOUTUBE TITLE STYLE: {title_style}")
+
+    description_template = channel_dna.get("description_template", "")
+    if description_template:
+        lines.append(f"YOUTUBE DESCRIPTION TEMPLATE: {description_template}")
+
+    # 12. Channel memory context
     channel_memory = _get_channel_memory(channel_id)
     if channel_memory:
         lines.append(f"\nCHANNEL PERFORMANCE HISTORY:\n{channel_memory}")
