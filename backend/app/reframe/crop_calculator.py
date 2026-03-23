@@ -141,6 +141,81 @@ def _get_target_x(
         return center_x
 
 
+def extract_canvas_keyframes(
+    crop_positions: np.ndarray,
+    fps: float,
+    src_w: int,
+    src_h: int,
+    crop_w: int,
+    canvas_w: int = 1080,
+    canvas_h: int = 1920,
+    min_delta_canvas_px: float = 5.0,
+    jump_threshold_source_px: int = 60,
+) -> list:
+    """
+    Convert per-frame crop_x array to a minimal keyframe list for the editor timeline.
+
+    Each keyframe: {"time_s": float, "offset_x": float}
+
+    offset_x is in CANVAS pixels — same coordinate system as transform.position.x:
+      0   = frame centered on source center
+      +N  = shifted right (shows left side of source)
+      -N  = shifted left (shows right side of source)
+
+    Hard cuts (large jumps) emit two keyframes: one at (t - half_frame) holding
+    the old value, then one at (t) with the new value.
+    """
+    try:
+        if len(crop_positions) == 0:
+            return []
+
+        cover_scale = max(canvas_w / src_w, canvas_h / src_h)
+        scaled_src_w = src_w * cover_scale
+        max_offset = (scaled_src_w - canvas_w) / 2
+
+        def crop_x_to_offset(cx: int) -> float:
+            cx_norm = (cx + crop_w / 2) / src_w
+            raw = scaled_src_w * (0.5 - cx_norm)
+            return float(np.clip(raw, -max_offset, max_offset))
+
+        half_frame = 0.5 / fps
+        keyframes = []
+        last_kept_offset: float | None = None
+
+        for frame_num in range(len(crop_positions)):
+            t = frame_num / fps
+            offset = crop_x_to_offset(int(crop_positions[frame_num]))
+
+            if frame_num == 0:
+                keyframes.append({"time_s": round(t, 4), "offset_x": round(offset, 2)})
+                last_kept_offset = offset
+                continue
+
+            prev_offset = crop_x_to_offset(int(crop_positions[frame_num - 1]))
+            jump = abs(offset - prev_offset) > (jump_threshold_source_px * cover_scale)
+
+            if jump:
+                # Hard cut: freeze at previous value just before this frame
+                keyframes.append({"time_s": round(t - half_frame, 4), "offset_x": round(prev_offset, 2)})
+                keyframes.append({"time_s": round(t, 4), "offset_x": round(offset, 2)})
+                last_kept_offset = offset
+            elif last_kept_offset is not None and abs(offset - last_kept_offset) >= min_delta_canvas_px:
+                keyframes.append({"time_s": round(t, 4), "offset_x": round(offset, 2)})
+                last_kept_offset = offset
+
+        # Always end with the last frame value
+        last_t = (len(crop_positions) - 1) / fps
+        last_offset = crop_x_to_offset(int(crop_positions[-1]))
+        if not keyframes or keyframes[-1]["time_s"] < round(last_t - half_frame, 4):
+            keyframes.append({"time_s": round(last_t, 4), "offset_x": round(last_offset, 2)})
+
+        return keyframes
+
+    except Exception as e:
+        print(f"[CropCalculator] extract_canvas_keyframes error: {e}")
+        return [{"time_s": 0.0, "offset_x": 0.0}]
+
+
 def _build_speaker_array(
     total_frames: int,
     fps: float,

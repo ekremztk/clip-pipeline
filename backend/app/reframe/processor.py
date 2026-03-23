@@ -1,15 +1,13 @@
 """
-Main reframe processor.
+Reframe processor — keyframe mode.
 Pipeline:
-  1. Download video from R2 URL → temp file
+  1. Download video from URL → temp file
   2. Detect scenes
   3. Detect face positions per scene
-  4. Fetch diarization (if job/clip IDs provided)
+  4. Fetch diarization (if job_id provided)
   5. Calculate per-frame crop positions
-  6. Encode: read → crop → resize → pipe to FFmpeg
-  7. Merge audio
-  8. Upload to R2
-  9. Cleanup
+  6. Convert to canvas keyframes
+  7. Return keyframe list (no encoding, no upload)
 """
 
 import os
@@ -17,18 +15,13 @@ import uuid
 import subprocess
 import requests
 import cv2
-import numpy as np
 from typing import Callable, Optional
 
 from app.reframe.scene_detector import get_scene_intervals
 from app.reframe.face_detector import build_scene_face_map
 from app.reframe.diarization import get_speaker_segments
-from app.reframe.crop_calculator import calculate_crop_positions, compute_crop_width
-from app.services.r2_client import upload_clip
+from app.reframe.crop_calculator import calculate_crop_positions, compute_crop_width, extract_canvas_keyframes
 from app.config import settings
-
-TARGET_W = 1080
-TARGET_H = 1920
 
 
 def run_reframe(
@@ -38,9 +31,10 @@ def run_reframe(
     clip_start: float = 0.0,
     clip_end: Optional[float] = None,
     on_progress: Optional[Callable[[str, int], None]] = None,
-) -> str:
+) -> dict:
     """
-    Full reframe pipeline. Returns R2 URL of the output 9:16 video.
+    Reframe pipeline. Returns a dict with keyframes and video metadata.
+    Keyframes: [{time_s, offset_x}, ...] in canvas-pixel coordinates.
     on_progress(step_label, percent) called throughout.
     """
 
@@ -51,10 +45,7 @@ def run_reframe(
 
     temp_dir = os.path.join(str(settings.UPLOAD_DIR), f"reframe_{uuid.uuid4().hex}")
     os.makedirs(temp_dir, exist_ok=True)
-
     input_path = os.path.join(temp_dir, "input.mp4")
-    video_only_path = os.path.join(temp_dir, "video_only.mp4")
-    output_path = os.path.join(temp_dir, "output.mp4")
 
     try:
         # ── 1. Download ──────────────────────────────────────────────────────
@@ -105,7 +96,7 @@ def run_reframe(
             if speaker_segments:
                 print(f"[Reframe] Using diarization: {len(speaker_segments)} segments")
             else:
-                print("[Reframe] No diarization found — using visual-only mode")
+                print("[Reframe] No diarization found — visual-only mode")
         else:
             print("[Reframe] No job_id — visual-only mode")
 
@@ -121,48 +112,38 @@ def run_reframe(
             speaker_segments=speaker_segments,
         )
         crop_w = compute_crop_width(src_w, src_h)
-        print(f"[Reframe] Crop width: {crop_w}px → upscale to {TARGET_W}x{TARGET_H}")
+        print(f"[Reframe] Crop width: {crop_w}px")
 
-        # ── 7. Encode video (no audio) ───────────────────────────────────────
-        progress("Encoding video...", 45)
-        _encode_frames(
-            input_path=input_path,
-            output_path=video_only_path,
+        # ── 7. Extract canvas keyframes ──────────────────────────────────────
+        progress("Generating keyframes...", 80)
+        keyframes = extract_canvas_keyframes(
             crop_positions=crop_positions,
-            crop_w=crop_w,
-            src_h=src_h,
-            target_w=TARGET_W,
-            target_h=TARGET_H,
             fps=fps,
-            total_frames=total_frames,
-            on_frame_progress=lambda pct: progress(f"Encoding... {pct}%", 45 + int(pct * 0.35)),
+            src_w=src_w,
+            src_h=src_h,
+            crop_w=crop_w,
         )
-
-        # ── 8. Merge audio ───────────────────────────────────────────────────
-        progress("Merging audio...", 82)
-        _merge_audio(video_only_path, input_path, output_path)
-
-        # ── 9. Upload to R2 ──────────────────────────────────────────────────
-        progress("Uploading to storage...", 90)
-        reframe_job_id = f"reframe_{clip_id or uuid.uuid4().hex}"
-        filename = f"reframe_{uuid.uuid4().hex}.mp4"
-        r2_url = upload_clip(reframe_job_id, filename, output_path)
-        print(f"[Reframe] Uploaded: {r2_url}")
+        print(f"[Reframe] {len(keyframes)} keyframes generated")
 
         progress("Done!", 100)
-        return r2_url
+        return {
+            "keyframes": keyframes,
+            "fps": fps,
+            "src_w": src_w,
+            "src_h": src_h,
+            "duration_s": duration_s,
+        }
 
     except Exception as e:
         print(f"[Reframe] Pipeline error: {e}")
         raise
 
     finally:
-        for path in [input_path, video_only_path, output_path]:
-            try:
-                if os.path.exists(path):
-                    os.remove(path)
-            except Exception:
-                pass
+        try:
+            if os.path.exists(input_path):
+                os.remove(input_path)
+        except Exception:
+            pass
         try:
             os.rmdir(temp_dir)
         except Exception:
@@ -172,7 +153,7 @@ def run_reframe(
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _download_video(url: str, dest_path: str) -> None:
-    """Download video from URL to local path using FFmpeg (handles auth headers, CORS, etc.)."""
+    """Download video from URL to local path using FFmpeg (handles auth headers, etc.)."""
     try:
         cmd = [
             "ffmpeg", "-y",
@@ -188,100 +169,3 @@ def _download_video(url: str, dest_path: str) -> None:
         with open(dest_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=1024 * 1024):
                 f.write(chunk)
-
-
-def _encode_frames(
-    input_path: str,
-    output_path: str,
-    crop_positions: np.ndarray,
-    crop_w: int,
-    src_h: int,
-    target_w: int,
-    target_h: int,
-    fps: float,
-    total_frames: int,
-    on_frame_progress: Callable[[int], None],
-) -> None:
-    """
-    Read source video frame-by-frame, crop and resize, pipe to FFmpeg for H.264 encoding.
-    Audio is excluded here (merged separately).
-    """
-    ffmpeg_cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-vcodec", "rawvideo",
-        "-s", f"{target_w}x{target_h}",
-        "-pix_fmt", "bgr24",
-        "-r", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264",
-        "-preset", settings.FFMPEG_PRESET,
-        "-crf", str(settings.FFMPEG_CRF),
-        "-pix_fmt", "yuv420p",
-        "-an",
-        output_path,
-    ]
-
-    cap = cv2.VideoCapture(input_path)
-    pipe = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    try:
-        frame_num = 0
-        report_every = max(1, total_frames // 20)
-
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Crop
-            crop_x = int(crop_positions[frame_num]) if frame_num < len(crop_positions) else (src_h * 9 // 16)
-            crop_x = max(0, min(crop_x, frame.shape[1] - crop_w))
-            cropped = frame[:, crop_x: crop_x + crop_w]
-
-            # Resize to target
-            resized = cv2.resize(cropped, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
-
-            pipe.stdin.write(resized.tobytes())
-
-            frame_num += 1
-            if frame_num % report_every == 0:
-                on_frame_progress(int(frame_num / total_frames * 100))
-
-    finally:
-        cap.release()
-        try:
-            pipe.stdin.close()
-        except Exception:
-            pass
-        pipe.wait()
-
-    if pipe.returncode != 0:
-        raise RuntimeError(f"FFmpeg encoding failed (exit {pipe.returncode})")
-
-
-def _merge_audio(video_path: str, audio_source_path: str, output_path: str) -> None:
-    """Merge video track from video_path with audio track from audio_source_path."""
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", video_path,
-        "-i", audio_source_path,
-        "-map", "0:v:0",
-        "-map", "1:a:0",
-        "-c:v", "copy",
-        "-c:a", "aac",
-        "-b:a", "320k",
-        output_path,
-    ]
-    result = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-    if result.returncode != 0:
-        # If source has no audio track, just copy video
-        cmd_no_audio = [
-            "ffmpeg", "-y",
-            "-i", video_path,
-            "-c:v", "copy",
-            output_path,
-        ]
-        subprocess.run(cmd_no_audio, check=True,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

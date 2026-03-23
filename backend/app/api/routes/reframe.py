@@ -1,7 +1,7 @@
 """
 Reframe API endpoint.
 POST /reframe/process  → starts async reframe job, returns job_id
-GET  /reframe/status/{job_id} → returns progress + result URL
+GET  /reframe/status/{job_id} → returns progress + keyframes when done
 """
 
 import uuid
@@ -30,7 +30,9 @@ class ReframeStatusResponse(BaseModel):
     status: str          # "processing" | "done" | "error"
     step: str
     percent: int
-    output_url: Optional[str] = None
+    keyframes: Optional[list] = None
+    src_w: Optional[int] = None
+    src_h: Optional[int] = None
     error: Optional[str] = None
 
 
@@ -45,7 +47,9 @@ async def start_reframe(req: ReframeRequest):
         "status": "processing",
         "step": "Starting...",
         "percent": 0,
-        "output_url": None,
+        "keyframes": None,
+        "src_w": None,
+        "src_h": None,
         "error": None,
     }
 
@@ -55,7 +59,7 @@ async def start_reframe(req: ReframeRequest):
                 _jobs[reframe_job_id]["step"] = step
                 _jobs[reframe_job_id]["percent"] = pct
 
-            output_url = run_reframe(
+            result = run_reframe(
                 clip_url=req.clip_url,
                 clip_id=req.clip_id,
                 job_id=req.job_id,
@@ -67,7 +71,9 @@ async def start_reframe(req: ReframeRequest):
             _jobs[reframe_job_id]["status"] = "done"
             _jobs[reframe_job_id]["step"] = "Done!"
             _jobs[reframe_job_id]["percent"] = 100
-            _jobs[reframe_job_id]["output_url"] = output_url
+            _jobs[reframe_job_id]["keyframes"] = result["keyframes"]
+            _jobs[reframe_job_id]["src_w"] = result["src_w"]
+            _jobs[reframe_job_id]["src_h"] = result["src_h"]
 
         except Exception as e:
             print(f"[ReframeRoute] Job {reframe_job_id} failed: {e}")
@@ -92,6 +98,8 @@ async def get_reframe_status(reframe_job_id: str):
         status=job["status"],
         step=job["step"],
         percent=job["percent"],
-        output_url=job.get("output_url"),
+        keyframes=job.get("keyframes"),
+        src_w=job.get("src_w"),
+        src_h=job.get("src_h"),
         error=job.get("error"),
     )
