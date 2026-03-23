@@ -136,7 +136,7 @@ const ActiveJobCard = ({ job }: { job: any }) => {
     );
 };
 
-const OpenInEditorButton = ({ clip }: { clip: Clip }) => {
+const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: string | null }) => {
     const btnClass = "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-colors border";
     if (!clip.file_url) {
         return (
@@ -148,6 +148,7 @@ const OpenInEditorButton = ({ clip }: { clip: Clip }) => {
     const params = new URLSearchParams({ clipUrl: clip.file_url });
     if (clip.suggested_title) params.set("clipTitle", clip.suggested_title);
     if (clip.suggested_description) params.set("clipDesc", clip.suggested_description);
+    if (guestName) params.set("clipGuestName", guestName);
     const href = `https://edit.prognot.com/editor/${crypto.randomUUID()}?${params.toString()}`;
     return (
         <a href={href} target="_blank" rel="noopener noreferrer" className={`${btnClass} bg-gray-800 hover:bg-gray-700 text-white border-gray-700`}>
@@ -813,7 +814,7 @@ export default function ClipLibraryPage() {
                                 <Upload className="w-4 h-4" />
                                 {selectedClip.is_published ? "Mark as Unpublished" : "Mark as Published"}
                             </button>
-                            <OpenInEditorButton clip={selectedClip} />
+                            <OpenInEditorButton clip={selectedClip} guestName={selectedJob?.guest_name} />
                         </div>
                     </>
                 )}
