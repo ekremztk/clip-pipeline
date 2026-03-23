@@ -28,5 +28,7 @@ numpy
 mediapipe
 opencv-python-headless
 
+scenedetect[opencv]==0.6.5.2
+
 # --- YouTube Tools ---
 yt-dlp>=2026.3.3

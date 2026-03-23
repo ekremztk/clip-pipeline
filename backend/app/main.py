@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     yield
 
-from app.api.routes import jobs, clips, speakers, downloads, channels, feedback, captions, proxy, youtube_metadata
+from app.api.routes import jobs, clips, speakers, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe
 from app.api.websocket import progress
 
 app = FastAPI(
@@ -47,6 +47,7 @@ app.include_router(feedback.router)
 app.include_router(captions.router)
 app.include_router(proxy.router)
 app.include_router(youtube_metadata.router)
+app.include_router(reframe.router)
 app.include_router(progress.router)
 
 from editor_main import editor_router
