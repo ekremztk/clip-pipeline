@@ -1,20 +1,20 @@
-# DIRECTOR MODÜLÜ — v2.0 Agent Mimarisi
-> Versiyon 2.0 — 2026-03-24
-> v1.0'dan temel fark: Director bir monitoring sistemi değil, kalıcı bir AI agent'tır.
+# DIRECTOR MODÜLÜ — v2.0 (Birleşik Tam Plan)
+> 2026-03-24 | v1.0 operasyonel detaylar + v2.0 agent mimarisi
 
 ---
 
-## 0. TEMEL FARK: v1.0 vs v2.0
+## 0. v1.0 → v2.0 FARK TABLOSU
 
 | | v1.0 (Monitoring) | v2.0 (Agent) |
 |---|---|---|
-| Yapı | Veri topla → Gemini'ye gönder → Puan üret | Kalıcı AI agent, araçlarla düşünür |
+| Yapı | Veri topla → analiz et → puan üret | Kalıcı AI agent, araçlarla düşünür |
 | Arayüz | Dashboard birincil | Chat birincil, dashboard ikincil |
 | Zeka | Metrik bazlı kural | Araç tabanlı akıl yürütme |
 | Hafıza | Analiz geçmişi | Konuşma + semantik uzun dönem hafıza |
-| Erişim | Okuma + yazma (kısıtlı) | Her şey: okur, yazar, sorgular, düzenler |
-| Başlatma | Tetiklenince çalışır | Her zaman uyanık, proaktif |
+| Erişim | Okuma + kısıtlı yazma | Her şey: okur, yazar, sorgular, düzenler |
 | Model | Flash (çoğunlukla) | Gemini Pro (her zaman) |
+
+**Değişmeyen şeyler:** Event sistemi, test suite, puanlama boyutları, öneri anatomisi, dış araçlar, cross-module köprüsü, prompt lab, DNA denetçisi — hepsi korundu ve agent mimarisine entegre edildi.
 
 ---
 
@@ -26,16 +26,16 @@ Bir kurucunun sistemini yönettiği gibi çalışır: verilere bakar, kodu okur,
 
 **Director ne değildir:**
 - Pasif bir dashboard değil
-- Sadece metrik takip eden bir sistem değil
-- Sana ne söylersen onu yapan bir bot değil
+- Sadece metrik takip eden bir monitoring sistemi değil
+- Sana ne söylersen onu yapan kör bir bot değil
 
 **Director nedir:**
-- Sistemin tüm dosyalarını, veritabanını, logları, kodları okuyabilen bir AI agent
-- Gerektiğinde MD dosyalarını düzenleyen, DB'yi güncelleyen, analizleri tetikleyen
+- Sistemin tüm dosyalarını, veritabanını, logları ve kodları okuyabilen bir AI agent
+- MD dosyalarını düzenleyen, DB'yi güncelleyen, analizleri tetikleyen
 - Konuşma hafızası ve uzun dönem semantik hafızası olan
-- Seninle chat üzerinden çalışan, ama arka planda da otomatik izleyen
 - Gemini Pro ile her şeyi bütüncül değerlendiren
-- "Bu sistemin ilerlemesi için en cesur ama doğru adım nedir?" sorusunu soran
+- Hiçbir modülü, sistemi, aşamayı nihai karar olarak görmeyen
+- Cesaretli değişim önerilerinden çekinmeyen
 
 **Temel Prensip:**
 > Director, sana yanlış bilgi vermektense "emin değilim, şuna bakayım" demesini tercih eder. Araçlarıyla sistemi GERÇEKTEN okur, varsayımla değil kanıtla konuşur.
@@ -57,23 +57,18 @@ Bir kurucunun sistemini yönettiği gibi çalışır: verilere bakar, kodu okur,
 │                         │                                        │
 │              ┌──────────▼──────────┐                            │
 │              │   DIRECTOR AGENT    │                            │
-│              │                     │                            │
-│              │  ┌───────────────┐  │                            │
-│              │  │  Gemini Pro   │  │  ← Ana beyin               │
-│              │  │  (function    │  │                            │
-│              │  │   calling)    │  │                            │
-│              │  └──────┬────────┘  │                            │
-│              │         │           │                            │
-│              │  ┌──────▼────────┐  │                            │
-│              │  │  TOOL ENGINE  │  │  ← Araçları çalıştırır     │
-│              │  └──────┬────────┘  │                            │
-│              └─────────┼───────────┘                            │
-│                        │                                        │
-│     ┌──────────────────┼──────────────────┐                    │
-│     ▼                  ▼                  ▼                    │
-│  Supabase          Dosya sistemi       Dış servisler           │
-│  (DB, vektör)      (MD, kod)          (Langfuse, Sentry,       │
-│                                        PostHog, Web)           │
+│              │  Gemini Pro Brain   │                            │
+│              │  + Tool Engine      │                            │
+│              └──────────┬──────────┘                            │
+│                         │                                        │
+│   ┌─────────────────────┼──────────────────────┐               │
+│   ▼                     ▼                      ▼               │
+│ Supabase           Dosya Sistemi          Dış Servisler         │
+│ (DB + pgvector)    (MD, Python, TS)       (Langfuse, Sentry,    │
+│                                            PostHog, Web)        │
+│                                                                  │
+│   ───────────── EVENT COLLECTION LAYER ──────────────           │
+│   Modül 1 hook'ları    Modül 2 hook'ları    Gelecek modüller    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -83,183 +78,283 @@ Bir kurucunun sistemini yönettiği gibi çalışır: verilere bakar, kodu okur,
 
 ### 3.1 Araç Tabanlı Akıl Yürütme
 
-Director, bir şeyi "bilmez" — **öğrenir**. Her soruya önce araçlarıyla sisteme bakar, sonra cevap verir.
+Director bir şeyi "bilmez" — öğrenir. Her soruya önce araçlarıyla sisteme bakar, sonra cevap verir.
 
 ```
 Kullanıcı: "Pipeline neden yavaş?"
 
-Director'ın düşünce zinciri:
+Director'ın araç zinciri:
   1. query_database("SELECT step_name, AVG(duration_ms) FROM pipeline_audit_log
                       WHERE created_at > now()-interval '7d' GROUP BY step_name
                       ORDER BY avg DESC")
-  → S05 ortalama 340s, S06 ortalama 180s
+     → S05 ortalama 340s, S06 ortalama 180s
 
-  2. get_langfuse_traces(step="s05", days=7)
-  → S05'te 4 rate_limit hit, her biri 30-60s bekledi
+  2. get_langfuse_data(step="s05", days=7)
+     → S05'te 4 rate_limit hit, her biri 30-60s bekledi
 
   3. query_memory("S05 rate limit geçmiş")
-  → Hafızada not var: "2026-02-10 - S05 rate limit sorunu yaşandı,
-     batch size düşürüldü. İyileşti."
+     → Hafızada: "2026-02-10 batch size düşürüldü, iyileşti"
 
   4. read_file("backend/app/pipeline/steps/s05_unified_discovery.py")
-  → Kod incelendi, retry mekanizması var
+     → Batch size kontrol edildi → eski değere dönmüş
 
-  Sentez: "S05 yavaş, 4 rate limit hit var bu hafta.
-           Geçen sefer batch size düşürülmüştü ama
-           o değişiklik kalıcı mı kontrol edeyim..."
-
-  5. read_file("backend/app/pipeline/steps/s05_unified_discovery.py")
-  → Batch size hâlâ eski değerde
-
-  "Geçen sefer yapılan düzeltme kaybolmuş görünüyor.
-   Batch size tekrar yüksek. Ayrıca bu hafta video boyutları
-   ortalama %23 büyüdü (query_database ile doğrulandı),
-   bu yüzden GCS upload süresi de uzadı."
+  Yanıt: "S05 yavaş. 4 rate limit hit var. Geçen sefer batch size
+          düşürülmüştü ama kod eski haline dönmüş. Ayrıca bu hafta
+          video boyutları %23 büyüdü, GCS upload süresi de uzadı.
+          İkisini birlikte düzeltelim mi?"
 ```
 
-**Önemli**: Director, bir araç sonucu beklediğini karşılamazsa **soru sorar**, tahmin etmez.
-
-### 3.2 16:9 Gibi Durumları Nasıl Çözer?
-
-Bu senaryoda araçlarla şunu yapar:
+### 3.2 "16:9 Gibi" Durumları Nasıl Çözer?
 
 ```
-1. read_file("docs/MODULE_1_CLIP_EXTRACTOR.md")
-   → "S08 çıktısı: 16:9 MP4"
-
-2. read_file("docs/MODULE_2_EDITOR.md")
-   → "Reframe: 16:9 kaynak gerektiriyor"
-
-3. query_database("SELECT DISTINCT file_url FROM clips LIMIT 5")
-   → URL'ler .mp4, normal
-
-4. Çıkarım: "M1→M2 pipeline'ında 16:9 kasıtlı. M2 reframe buna bağımlı.
-             Bu doğru. Flag etme."
+1. read_file("docs/MODULE_1_CLIP_EXTRACTOR.md") → "S08 çıktısı 16:9"
+2. read_file("docs/MODULE_2_EDITOR.md") → "Reframe 16:9 kaynak gerektiriyor"
+3. Çıkarım: M1→M2 bağımlılığı var, 16:9 kasıtlı ve doğru. Flag etme.
 ```
 
-Kimse ona söylemedi. Okudu, bağladı, anladı. Emin olamadığı durumlarda:
-```
-"M1 çıktısının 16:9 kalması intentional mı? M2 reframe buna bağımlı
- görünüyor ama emin olmak istedim."
-```
+Emin olmadığında soru sorar:
+> "M1 çıktısının 16:9 kalması intentional mı? M2 reframe bağımlı görünüyor ama teyit etmek istedim."
 
 ### 3.3 Proaktif Davranış
 
-Director yalnızca sorulduğunda değil, kendi de konuşur. Arka planda periyodik kontrol yapar ve önemli bir şey fark ederse:
-
 ```
-[Otomatik mesaj, saat 09:00]
-"Bugün 3 pipeline çalıştı. Bir şeye dikkat çekmek istedim:
- Son 5 job'da S06'nın ortalama thinking_steps uzunluğu düştü —
- Gemini daha az düşünerek karar veriyor. Bu genellikle
- prompt context'in zayıfladığını gösteriyor.
- Channel DNA'nın son güncellenmesi üzerinden 52 gün geçti.
+[Arka planda fark etti, 09:00'da otomatik mesaj]
+"Son 5 job'da S06 thinking_steps uzunluğu düştü — Gemini daha az
+ düşünerek karar veriyor. Channel DNA 52 gündür güncellenmedi.
  Güncelleme yapalım mı?"
 ```
 
 ---
 
-## 4. TOOL KATALOĞU (Director'ın Araçları)
+## 4. TOOL KATALOĞU
 
-Director'ın kullanabileceği tüm araçlar. Gemini Pro function calling ile bunları zincirler.
+Gemini Pro function calling ile bu araçları zincirler.
 
 ### 4.1 Okuma Araçları
 
 ```python
 read_file(path: str) -> str
-  """Herhangi bir proje dosyasını okur: MD, Python, TypeScript, JSON"""
-  # Director sistemi anlamak için kodu doğrudan okuyabilir
+  # Her proje dosyasını okur: MD, Python, TypeScript, JSON
   # Örnek: read_file("backend/app/pipeline/steps/s05_unified_discovery.py")
 
 list_files(directory: str, pattern: str = "*") -> list[str]
-  """Bir dizindeki dosyaları listeler"""
 
 search_codebase(query: str, file_pattern: str = None) -> list[dict]
-  """Kodda arama yapar (grep benzeri). Sonuç: [{file, line, content}]"""
-  # Örnek: search_codebase("channel_dna", "*.py")
+  # Kodda grep araması. Sonuç: [{file, line, content}]
 
 query_database(sql: str) -> list[dict]
-  """Supabase'e SQL sorgusu atar. Sadece SELECT."""
-  # Director dilediği veriyi okuyabilir
+  # Supabase'e SELECT sorgusu. Her tabloyu okuyabilir.
 
 get_pipeline_stats(days: int = 7, channel_id: str = None) -> dict
-  """Özet pipeline metrikleri: pass rate, avg duration, error count, etc."""
+  # Pass rate, avg duration, error count, step breakdown
 
 get_clip_analysis(job_id: str = None, days: int = 7) -> dict
-  """Klip puanları, verdict dağılımı, content type breakdown"""
+  # Puan dağılımı, verdict breakdown, content type stats
 
 get_langfuse_data(step: str = None, days: int = 7) -> dict
-  """Gemini çağrı metrikleri: token kullanımı, latency, retry sayısı"""
+  # Gemini token kullanımı, latency, retry sayısı
 
 get_sentry_issues(days: int = 7, resolved: bool = False) -> list[dict]
-  """Aktif Sentry hataları: [{title, count, culprit, lastSeen}]"""
+  # [{title, count, culprit, lastSeen}]
 
 get_posthog_events(event: str = None, days: int = 7) -> dict
-  """Editor kullanıcı davranışı: export oranı, feature kullanımı"""
+  # Editor kullanıcı davranışı
 
 get_channel_dna(channel_id: str) -> dict
-  """Kanal DNA'sını getirir"""
 
 web_search(query: str) -> str
-  """Gemini grounding ile web araştırması yapar"""
-  # Örnek: "CPU-only face detection alternatives 2025"
+  # Gemini grounding ile web araştırması
 ```
 
 ### 4.2 Yazma ve Aksiyon Araçları
 
 ```python
 edit_file(path: str, old_content: str, new_content: str) -> bool
-  """Herhangi bir dosyayı düzenler. MD dosyaları için onay gerekmez.
-     Kod dosyaları için kullanıcı onayı istenir (Director sorar)."""
-  # Örnek: docs/*.md dosyalarını günceller
-  # Director kendi dökümanlarını da günceller
+  # MD dosyaları: onaysız. Kod dosyaları: kullanıcı onayı ister.
 
 save_memory(content: str, type: str, tags: list[str] = []) -> str
-  """Uzun dönem hafızaya kayıt. Type: 'decision' | 'context' | 'plan' | 'note'"""
-  # Kullanıcı "bunu hatırla" dediğinde veya Director önemli bulunca
-  # pgvector'e embed edilir, gelecek konuşmalarda retrieve edilir
+  # type: 'decision' | 'context' | 'plan' | 'note' | 'learning'
+  # pgvector'e embed edilir, sonraki konuşmalarda retrieve edilir
 
 update_database(table: str, data: dict, where: dict) -> bool
-  """Supabase'e güvenli yazma. Sadece izin verilen tablolar:
-     channels (dna, settings), director_analyses, director_recommendations,
-     director_conversations, director_memory"""
-  # Kritik tablolara (clips, jobs, transcripts) yazma yok
+  # İzin verilen tablolar: channels, director_* tabloları
+  # clips, jobs, transcripts'e yazma YOK
 
 trigger_analysis(module: str, depth: str = "standard") -> str
-  """Director analiz zincirini tetikler (arka planda)"""
-
 trigger_test(test_type: str) -> str
-  """Test runner'ı başlatır. Sonuç async olarak gelir."""
-
 update_channel_dna(channel_id: str, updates: dict) -> bool
-  """Kanal DNA'sını günceller (Gemini ile generate veya manual patch)"""
-
 send_notification(message: str, priority: str = "info") -> None
-  """Dashboard'a bildirim gönderir (kırmızı/sarı/yeşil)"""
 ```
 
 ### 4.3 Hafıza Araçları
 
 ```python
 query_memory(query: str, type: str = None, top_k: int = 5) -> list[dict]
-  """Semantik hafıza araması. Konuşma başında otomatik çalışır."""
-  # Örnek: "M1 M2 entegrasyon planı" → ilgili geçmiş kararlar
+  # Semantik hafıza araması. Her konuşma başında otomatik çalışır.
 
 get_conversation_history(last_n: int = 20) -> list[dict]
-  """Mevcut konuşmanın son N mesajını getirir"""
-
 list_memories(type: str = None) -> list[dict]
-  """Tüm kayıtlı hafıza girişlerini listeler"""
-
 delete_memory(memory_id: str) -> bool
-  """Kullanıcı "unu" dediğinde hafızadan siler"""
 ```
 
 ---
 
-## 5. HAFIZA SİSTEMİ
+## 5. VERİ TOPLAMA — EVENT SİSTEMİ (Katman 0)
 
-### 5.1 Konuşma Hafızası (Kısa Dönem)
+### 5.1 Tasarım Prensibi
+
+Event hook'ları mevcut kodun işleyişini **hiç bozmaz**. Her adıma küçük, asenkron log çağrıları eklenir. Log başarısız olursa pipeline sessizce devam eder.
+
+```python
+try:
+    candidates = await run_unified_discovery(...)
+    # Ana iş tamamlandı
+
+    asyncio.create_task(
+        director_collector.emit(
+            module="module_1",
+            event="s05_discovery_completed",
+            payload={
+                "job_id": job_id,
+                "candidate_count": len(candidates),
+                "duration_ms": elapsed,
+                "had_video": video_used,
+                "had_guest_profile": guest_profile_used,
+                "channel_dna_present": channel_dna is not None,
+                "channel_memory_clips": memory_clip_count
+            }
+        )
+    )
+except Exception as e:
+    raise
+```
+
+### 5.2 Modül 1 Event Kataloğu
+
+```
+pipeline_started
+  payload: {job_id, channel_id, video_duration_s, has_trim,
+            guest_name_provided, channel_dna_present}
+
+pipeline_step_completed
+  payload: {job_id, step_name, step_number, duration_ms, success, error_message}
+
+s02_transcribe_completed
+  payload: {job_id, duration_s, word_count, speaker_count,
+            language_confidence, deepgram_confidence_avg}
+
+s03_speaker_id_completed
+  payload: {job_id, predicted_correctly, confirmation_wait_ms}
+
+s05_discovery_completed
+  payload: {job_id, candidate_count, video_used,
+            fallback_mode (video/audio/transcript),
+            guest_profile_cached, channel_memory_clip_count,
+            gemini_input_tokens, gemini_output_tokens,
+            gemini_duration_ms, gemini_retries}
+
+s05_candidates_detail
+  payload: {job_id, candidates: [{id, strength, content_type,
+                                   needs_context, primary_signal}]}
+
+s06_evaluation_completed
+  payload: {job_id, batch_count, skipped_candidates, retry_count,
+            pass_count, fixable_count, fail_count,
+            avg_standalone, avg_hook, avg_arc, avg_channel_fit,
+            gemini_input_tokens, gemini_output_tokens,
+            gemini_duration_ms}
+
+s06_quality_verdicts_detail
+  payload: {job_id, verdicts: [{candidate_id, standalone, hook,
+                                 arc, channel_fit, verdict,
+                                 reject_reason, content_type, strategy_role}]}
+
+s07_precision_cut_completed
+  payload: {job_id, clips_adjusted, avg_boundary_shift_ms,
+            no_word_timestamp_fallbacks}
+
+s08_export_completed
+  payload: {job_id, exported_count, failed_count,
+            avg_ffmpeg_duration_ms, r2_upload_failures,
+            total_duration_exported_s}
+
+pipeline_completed
+  payload: {job_id, total_duration_ms, pass_clips, fail_clips, partial}
+
+pipeline_failed
+  payload: {job_id, failed_at_step, error_type, error_message}
+
+user_clip_approved
+  payload: {clip_id, job_id, channel_id, clip_index,
+            quality_verdict, overall_confidence}
+
+user_clip_rejected
+  payload: {clip_id, job_id, channel_id, reason_provided,
+            standalone_score, hook_score}
+
+clip_opened_in_editor
+  payload: {clip_id, job_id, quality_verdict, posting_order}
+```
+
+### 5.3 Modül 2 Event Kataloğu
+
+```
+editor_session_started
+  payload: {session_id, source (from_module1|direct_upload), clip_id}
+
+reframe_triggered
+  payload: {session_id, clip_duration_s, job_id_provided}
+
+reframe_completed
+  payload: {session_id, duration_ms, total_frames_analyzed,
+            face_detected_frames, fallback_frames,
+            scene_count, keyframe_count,
+            diarization_used, speaker_switch_count}
+
+reframe_face_detail
+  payload: {session_id,
+            per_scene_detection_rate: [{scene_idx, detection_rate}],
+            left_face_segments, right_face_segments, no_face_segments}
+
+captions_generated
+  payload: {session_id, word_count, segment_count, avg_confidence,
+            duration_s, language_detected, api_duration_ms}
+
+youtube_metadata_generated
+  payload: {session_id, title_accepted, description_accepted,
+            guest_name_provided}
+
+editor_export_completed
+  payload: {session_id, export_duration_ms, output_format,
+            had_captions, had_reframe, time_from_session_start_ms}
+
+editor_session_abandoned
+  payload: {session_id, time_open_ms, actions_taken: [list]}
+```
+
+### 5.4 `director_events` Tablosu
+
+```sql
+CREATE TABLE director_events (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp   TIMESTAMPTZ DEFAULT now(),
+  module_name TEXT NOT NULL,
+  event_type  TEXT NOT NULL,
+  payload     JSONB NOT NULL,
+  session_id  TEXT,
+  channel_id  TEXT
+);
+
+CREATE INDEX idx_director_events_module ON director_events(module_name, timestamp DESC);
+CREATE INDEX idx_director_events_type   ON director_events(event_type, timestamp DESC);
+CREATE INDEX idx_director_events_session ON director_events(session_id);
+```
+
+---
+
+## 6. HAFIZA SİSTEMİ (Katman 1)
+
+### 6.1 Konuşma Hafızası (Kısa Dönem)
 
 ```sql
 CREATE TABLE director_conversations (
@@ -267,587 +362,955 @@ CREATE TABLE director_conversations (
   session_id  TEXT NOT NULL,
   role        TEXT NOT NULL,    -- 'user' | 'assistant' | 'tool_result'
   content     TEXT NOT NULL,
-  tool_calls  JSONB,            -- Gemini'nin çağırdığı araçlar ve sonuçları
+  tool_calls  JSONB,
   timestamp   TIMESTAMPTZ DEFAULT now()
 );
 ```
 
-Her konuşma oturumu `session_id` ile gruplanır. Yeni chat başladığında son 20 mesaj yüklenir.
-
-### 5.2 Uzun Dönem Hafıza (Semantik)
+### 6.2 Uzun Dönem Semantik Hafıza
 
 ```sql
 CREATE TABLE director_memory (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  type        TEXT NOT NULL,    -- 'decision' | 'context' | 'plan' | 'note' | 'learning'
-  content     TEXT NOT NULL,    -- hafıza içeriği
-  embedding   vector(768),      -- pgvector embed
+  type        TEXT NOT NULL,  -- 'decision'|'context'|'plan'|'note'|'learning'
+  content     TEXT NOT NULL,
+  embedding   vector(768),
   tags        TEXT[],
-  source      TEXT,             -- 'user_instruction' | 'director_inference' | 'auto'
+  source      TEXT,           -- 'user_instruction'|'director_inference'|'auto'
   created_at  TIMESTAMPTZ DEFAULT now(),
   updated_at  TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE INDEX idx_director_memory_embedding ON director_memory
+USING ivfflat (embedding vector_cosine_ops) WITH (lists = 50);
 ```
 
 **Örnek hafıza kayıtları:**
 
 ```
 type: "context"
-content: "M1 ve M2 şu an ayrı katmanlar. Neden: M2 henüz otonom edit için
-          hazır değil — reframe bazen karışıyor, hook/kapanış düzenleme
-          sistemi henüz yok. İleride M2 mükemmelleşince M1'e entegre edilecek,
-          M1'den direkt editlenmiş klip çıkacak."
+content: "M1 ve M2 şu an kasıtlı olarak ayrı katmanlar.
+          Sebep: M2 henüz otonom edit için hazır değil.
+          Reframe bazen karışıyor, hook/kapanış düzenleme sistemi yok.
+          İleride M2 mükemmelleşince M1'e entegre edilecek."
 tags: ["m1", "m2", "mimari", "roadmap"]
-source: "user_instruction"
-
-type: "decision"
-content: "2026-03-24: Langfuse, PostHog, Sentry entegrasyonu kararlaştırıldı.
-          Self-host değil Cloud versiyonları. Langfuse için VertexAIInstrumentor."
-tags: ["tooling", "langfuse", "posthog", "sentry"]
-source: "user_instruction"
-
-type: "learning"
-content: "Channel DNA 52+ gün güncellenmeden kalınca S06 thinking_steps
-          kalitesi düşüyor. Hafıza bağlamı zayıflıyor."
-tags: ["channel_dna", "s06", "pattern"]
-source: "director_inference"
 
 type: "plan"
-content: "Gelecek kanallar için: B-roll görsel ekleme, ElevenLabs seslendirme
-          entegrasyonu planlanıyor. Henüz başlanmadı. Bu sistemler geldikçe
-          Director'a entegre edilmeli."
-tags: ["roadmap", "b-roll", "elevenlabs", "future"]
-source: "user_instruction"
+content: "Gelecek kanallar için: B-roll görsel ekleme,
+          ElevenLabs seslendirme entegrasyonu planlanıyor.
+          Henüz başlanmadı."
+tags: ["roadmap", "b-roll", "elevenlabs"]
+
+type: "learning"
+content: "Channel DNA 52+ gün güncellenmeden kalınca
+          S06 thinking_steps kalitesi düşüyor."
+tags: ["channel_dna", "s06", "pattern"]
 ```
 
-### 5.3 Director Her Konuşmada Ne Yükler?
+### 6.3 Yapısal Hafıza (Analiz Geçmişi)
+
+```sql
+CREATE TABLE director_analyses (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp         TIMESTAMPTZ DEFAULT now(),
+  module_name       TEXT NOT NULL,
+  triggered_by      TEXT NOT NULL,  -- 'manual'|'scheduled'|'post_test'|'chat'
+  score             INT NOT NULL,
+  subscores         JSONB NOT NULL,
+  findings          JSONB NOT NULL,
+  recommendations   JSONB NOT NULL,
+  data_period_start TIMESTAMPTZ,
+  data_period_end   TIMESTAMPTZ,
+  data_points_used  INT,
+  context_snapshot  JSONB,
+  gemini_calls      INT,
+  total_tokens_used INT
+);
+
+CREATE TABLE director_recommendations (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  analysis_id     UUID REFERENCES director_analyses(id),
+  module_name     TEXT NOT NULL,
+  priority        INT NOT NULL,
+  impact_score    FLOAT,
+  effort_score    INT,
+  title           TEXT NOT NULL,
+  what            TEXT NOT NULL,
+  why             TEXT NOT NULL,
+  expected_impact TEXT NOT NULL,
+  risk            TEXT,
+  alternative     TEXT,
+  data_needs      TEXT,
+  status          TEXT DEFAULT 'pending',
+  dismissed_reason TEXT,
+  applied_at      TIMESTAMPTZ,
+  measured_impact FLOAT,
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### 6.4 Context Builder (Her Konuşmada)
 
 ```python
-# Her chat request'te:
 def build_director_context(user_message: str, session_id: str) -> list:
-    context = []
-
-    # 1. Son 20 konuşma mesajı (kısa dönem hafıza)
+    # 1. Son 20 konuşma mesajı
     history = get_conversation_history(session_id, last_n=20)
-    context.extend(history)
 
-    # 2. Kullanıcı mesajına semantik olarak benzer hafıza kayıtları
+    # 2. Semantik olarak ilgili hafıza kayıtları
     relevant_memories = query_memory(user_message, top_k=5)
-    if relevant_memories:
-        context.insert(0, {
-            "role": "system",
-            "content": f"İlgili hafıza:\n{format_memories(relevant_memories)}"
-        })
 
-    # 3. Anlık sistem durumu özeti (sayısal, araç gerekmez)
-    system_snapshot = get_quick_system_snapshot()
-    context.insert(0, {
-        "role": "system",
-        "content": f"Anlık sistem durumu:\n{system_snapshot}"
-    })
+    # 3. Anlık sistem özeti (Gemini gerekmez, sayısal)
+    snapshot = get_quick_system_snapshot()
 
-    return context
+    return build_context(history, relevant_memories, snapshot)
 ```
 
 ---
 
-## 6. SİSTEM PROMPTU (Director'ın Kimliği)
+## 7. CROSS-MODULE KÖPRÜSÜ (Katman 2)
 
-Her konuşmada Gemini Pro'ya gönderilen system prompt:
+```sql
+CREATE TABLE director_cross_module_signals (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp     TIMESTAMPTZ DEFAULT now(),
+  signal_type   TEXT NOT NULL,
+  source_module TEXT NOT NULL,
+  target_module TEXT NOT NULL,
+  payload       JSONB NOT NULL,
+  channel_id    TEXT
+);
+```
+
+**İzlenen Sinyaller:**
+
+```
+m1_to_editor_flow
+  M1 pass klipler / editörde açılan klipler oranı
+  Soru: "M1 çıktısı editör için gerçekten kullanılıyor mu?"
+
+editor_to_publish_flow
+  Editor export / yayınlanan oranı
+  Soru: "Editörden çıkan iş yayına hazır mı?"
+
+m1_quality_vs_editor_use
+  Yüksek puanlı vs düşük puanlı kliplerin editör kullanımı
+  Soru: "Kullanıcı Gemini puanlarına güveniyor mu?"
+
+youtube_metadata_acceptance
+  Üretilen başlık/açıklama değiştirilmeden kullanıldı mı?
+  Soru: "YouTube metadata gerçekten işe yarıyor mu?"
+
+caption_to_export_rate
+  Caption eklendikten sonra export oranı
+  Soru: "Captions export kararını etkiliyor mu?"
+```
+
+---
+
+## 8. SİSTEM PROMPTU (Director'ın Kimliği)
 
 ```
 Sen Prognot'un AI Direktörüsün.
 
-GÖREV:
-Prognot sisteminin her boyutunu anlayan, izleyen, analiz eden ve geliştiren
-bir stratejik AI agent'sın. Kullanıcının sağ kolusun — bir CEO veya kurucu
-gibi düşünürsün. Sistemin teknik detaylarını, mimari kararlarını, gelecek
-planlarını bilirsin.
+GÖREV: Prognot sisteminin her boyutunu anlayan, izleyen, analiz eden
+ve geliştiren stratejik AI agent'sın. Kullanıcının sağ kolusun.
 
 KİM OLDUĞUNU BİL:
 - Kullanıcı bu sistemi tek başına geliştiriyor
-- Prognot: AI destekli klip çıkarma ve düzenleme sistemi
-- Şu an: Modül 1 (klip çıkartıcı) + Modül 2 (editör) aktif
-- Deployment: Railway (backend) + Vercel (frontend) + Supabase + Cloudflare R2
+- Modül 1 (klip çıkartıcı) + Modül 2 (editör) aktif
+- Railway (backend) + Vercel (frontend) + Supabase + R2
 
 ÇALIŞMA PRENSİBİN:
-1. Varsayımla değil, kanıtla konuş — araçlarınla sistemi oku, sonra yorum yap
-2. Emin olmadığında "şuna bakayım" de ve aracını çağır
-3. Emin olmadığında kullanıcıya sor, yanlış bilgi verme
-4. Sistemin hiçbir parçasını dokunulamaz görme — her şey sorgulanabilir
+1. Varsayımla değil, kanıtla konuş — araçlarınla sistemi oku
+2. Emin olmadığında "şuna bakayım" de, aracını çağır
+3. Hâlâ emin olmadığında kullanıcıya sor
+4. Hiçbir parçayı dokunulamaz görme, her şey sorgulanabilir
 5. Cesaretli ama gerekçeli öneriler üret
-6. Proaktif ol: önemli bir şey fark edersen söyle
-7. Kısa ve net konuş — gereksiz söz etme
+6. Proaktif ol — önemli şeyleri söyle
+7. Kısa ve net konuş
 8. MD dosyalarını güncelleyebilirsin (onay gerekmez)
-9. Kod değişikliği için kullanıcı onayı iste, sonra uygula
+9. Kod değişikliği için onay al, sonra uygula
 
-ARAÇLARIN: [tool catalog buraya inject edilir]
-
-HAFIZA: [ilgili hafıza kayıtları buraya inject edilir]
-
-ANLIKI SİSTEM DURUMU: [snapshot buraya inject edilir]
+[ARAÇLAR, HAFIZA ve ANLIKI DURUM buraya inject edilir]
 ```
 
 ---
 
-## 7. CHAT ARAYÜZÜ
+## 9. CHAT ARAYÜZÜ
 
-### 7.1 Çalışma Akışı
+### 9.1 Çalışma Akışı
 
 ```
-Kullanıcı mesaj gönderir
-    ↓
 POST /director/chat {message, session_id}
     ↓
-1. Konuşma geçmişi yükle (son 20 mesaj)
-2. Semantik hafızadan ilgili kayıtları getir
-3. Sistem snapshot'ı hazırla
-4. Gemini Pro'ya gönder (streaming, function calling enabled)
+Context hazırla (geçmiş + hafıza + snapshot)
     ↓
-Gemini araç çağrıları yapabilir (zincir halinde):
-  → Araç çağrıldı
-  → Araç çalıştı
-  → Sonuç Gemini'ye döndü
-  → Gemini devam etti / yeni araç çağırdı
+Gemini Pro'ya gönder (streaming + function calling)
     ↓
-Gemini yanıt üretiyor (streaming)
+Araç zinciri (Director ihtiyaç duydukça çağırır)
     ↓
-SSE ile frontend'e stream edilir (token token görünür)
+SSE ile frontend'e stream (token token görünür)
     ↓
-Mesaj ve araç çağrıları DB'ye kaydedilir
-    ↓
-Director hafızaya kayıt yapmışsa kullanıcıya "Hafızama ekledim: ..." notu
+Mesaj + araç çağrıları DB'ye kaydedilir
 ```
 
-### 7.2 Örnek Konuşmalar
+### 9.2 Örnek Konuşmalar
 
-**Durum Analizi:**
+**Durum analizi:**
 ```
 Sen: Bu hafta nasıl gitti?
 
-Director: [query_database çağırıyor...]
-          [get_langfuse_data çağırıyor...]
-          [query_memory("haftalık analiz") çağırıyor...]
+Director: [query_database → get_langfuse_data → query_memory]
 
-          Bu hafta 8 pipeline çalıştı. Pass rate %44 — geçen haftanın
-          %38'inden iyi. S05'te 2 rate limit olayı var, toplam ~90s yavaşlama.
-
-          Dikkat çekici bir şey: Son 3 job'da 'humor' content type'ı
-          seçilmiyor. Channel DNA'da humor triggers mevcut ama S05
-          bu hafta hiç humor klip önermedi. Ya misafirler gerçekten
-          komik değildi ya da bir şey kayıyor. Kontrol etmemeli miyim?
+          8 pipeline çalıştı, pass rate %44 (+6% geçen haftaya göre).
+          S05'te 2 rate limit olayı, ~90s yavaşlama.
+          Dikkat: Son 3 job'da 'humor' klip önerilmiyor, DNA'da
+          humor triggers var ama çalışmıyor. Kontrol edeyim mi?
 ```
 
-**Sorun Araştırma:**
+**Sorun araştırma:**
 ```
-Sen: Reframe bazen yanlış kişiyi takip ediyor, bak bakalım
+Sen: Reframe bazen yanlış kişiyi takip ediyor
 
-Director: [read_file("backend/app/reframe/crop_calculator.py") çağırıyor...]
-          [read_file("backend/app/reframe/diarization.py") çağırıyor...]
-          [query_database("SELECT * FROM director_events WHERE event_type='reframe_completed'
-                           ORDER BY timestamp DESC LIMIT 10") çağırıyor...]
+Director: [read_file("diarization.py") → read_file("crop_calculator.py")
+           → query_database("reframe events last 10")]
 
-          Kodu ve son 10 reframe eventini inceledim. Şunu buldum:
-
-          diarization.py'de speaker segmentleri "clip_start/clip_end'e kırpılıyor"
-          ama bu kırpma işleminde bir edge case var: Eğer diarization segmenti
-          tam clip başlangıcında bitiyorsa (0-0.3s fark), o segment atlanıyor.
-          Bu yüzden ilk birkaç saniyede konuşmacı tespiti yok ve
-          crop_calculator fallback'e düşüyor.
-
-          Recent events'e bakınca: 10 job'dan 3'ünde face_detected_frames
-          %72'nin altında. Bunlar muhtemelen affected.
-
-          Fix önerim: diarization.py'de kırpma toleransını 0.3s yerine 0.5s
-          yap. Uygulayayım mı?
+          Buldum. diarization.py'de segment kırpma toleransı 0.3s.
+          Klip başında segment bu pencerede bitiyorsa atlanıyor,
+          fallback'e düşüyor. 10 job'dan 3'ü affected.
+          Fix: toleransı 0.5s yap. Uygulayayım mı?
 ```
 
-**Hafızaya Kayıt:**
+**Hafızaya kayıt:**
 ```
-Sen: M1 ve M2'nin ayrı olma sebebini hafızana al, sonra bana yanlış
-     analiz yapmasın
+Sen: M1 M2 ayrı olma sebebini hafızana al
 
-Director: [save_memory çağırıyor...]
+Director: [save_memory çağırıyor]
 
-          Kaydettim:
-          "M1 ve M2 şu an kasıtlı olarak ayrı katmanlar.
-           Sebep: M2 henüz otonom edit için hazır değil —
-           reframe bazen yanlış kişiyi takip ediyor,
-           hook/kapanış düzenleme sistemi yok.
-           İleride M2 mükemmelleşince M1'e entegre edilecek."
-
-          Artık 16:9 çıktı, ayrı workflow gibi konularda
-          bu bağlamla değerlendirme yapacağım.
+          Kaydettim: "M1 ve M2 kasıtlı ayrı — M2 henüz otonom edit
+          için hazır değil. Reframe, hook/kapanış düzenleme eksik.
+          İleride entegre edilecek."
+          Artık 16:9 çıktı ve ayrı workflow konularında bu bağlamla
+          değerlendirme yapacağım.
 ```
 
-**MD Dosyası Güncelleme:**
+**MD güncelleme:**
 ```
-Sen: Reframe için yeni bir kural ekle: scene detection eşiği
-     0.3'ten 0.4'e çıktı, bunu MODULE_2_EDITOR.md'ye işle
+Sen: Scene detection eşiği 0.3'ten 0.4'e çıktı, MODULE_2'ye işle
 
-Director: [read_file("docs/MODULE_2_EDITOR.md") çağırıyor...]
-          [edit_file çağırıyor...]
+Director: [read_file → edit_file]
 
-          MODULE_2_EDITOR.md güncellendi. Sahne tespiti bölümünde:
-          "ContentDetector threshold: 0.3" → "0.4" olarak değiştirildi.
-          Değişiklik tarihi notu eklendi: "2026-03-24"
-
-          Bunu hafızama da alayım mı?
+          MODULE_2_EDITOR.md güncellendi. Sahne tespiti bölümünde
+          threshold 0.3 → 0.4 olarak değiştirildi, tarih notu eklendi.
 ```
 
-**Sistem Planı Tartışması:**
-```
-Sen: İleride ElevenLabs entegre etmek istiyorum, bu mimariyi nasıl etkiler?
-
-Director: [read_file("docs/MODULE_1_CLIP_EXTRACTOR.md") çağırıyor...]
-          [read_file("docs/MODULE_2_EDITOR.md") çağırıyor...]
-          [web_search("ElevenLabs API Python integration 2025") çağırıyor...]
-
-          ElevenLabs için en mantıklı yer M2'de, S08 sonrası veya
-          editor export pipeline'ında. İki seçenek var:
-
-          1. M1 çıktısına otomatik seslendirme ekleme (B2B kanallar için):
-             S08 sonrasına yeni S09 adımı. Klip transcript'i alınır,
-             ElevenLabs ile host sesi üzerinde seslendirme yapılır,
-             FFmpeg ile overlay.
-
-          2. M2'de manuel tetikleme (kullanıcı isteğe göre):
-             Editor'da "Add Voiceover" butonu, ElevenLabs API çağrısı,
-             timeline'a yeni audio track olarak eklenir.
-
-          İkisi de mümkün. Hangi kanallar için düşünüyorsun? B-roll ile
-          birlikte mi gelecek? Bunları hafızama alayım mı?
-```
-
-### 7.3 Özel Komutlar
+### 9.3 Özel Komutlar
 
 ```
-"bunu hatırla / hafızana al"  → Director save_memory çağırır
-"unu / sil"                   → İlgili hafıza silinir
-"hafızanı göster"             → list_memories sonucu
-"analiz et"                   → trigger_analysis çalışır
-"test et"                     → trigger_test çalışır
-"dashboard güncelle"          → Tüm metrikler yeniden hesaplanır
-"[dosya_adı] güncelle"        → edit_file çağırılır
+"bunu hatırla / hafızana al"  → save_memory
+"unu / sil"                   → delete_memory
+"hafızanı göster"             → list_memories
+"analiz et"                   → trigger_analysis
+"test et"                     → trigger_test
+"dashboard güncelle"          → yeniden hesapla
 ```
 
 ---
 
-## 8. DASHBOARD (Pasif İzleme Katmanı)
-
-Dashboard, Director'ın arka planda otomatik ürettiği analizleri gösterir. Chat açmak gerekmez.
-
-### 8.1 Otomatik Güncelleme
-
-```
-Tetikleyiciler:
-  - Her pipeline tamamlandığında (lightweight update)
-  - Günde 1 kez 09:00'da (tam analiz)
-  - Kullanıcı "dashboard güncelle" dediğinde
-  - Sentry'de yeni kritik hata geldiğinde
-```
-
-### 8.2 Dashboard Yapısı
+## 10. DASHBOARD (Pasif İzleme)
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  PROGNOT DIRECTOR                    Son güncelleme: 2 saat önce│
+│  PROGNOT DIRECTOR               Son güncelleme: 2 saat önce    │
 │                                                                  │
 │  ┌──────────────────────┐  ┌──────────────────────┐            │
 │  │  MODÜL 1             │  │  MODÜL 2             │            │
-│  │  Klip Çıkartıcı      │  │  Editör              │            │
-│  │                      │  │                      │            │
 │  │  ████████████░  74   │  │  ████████████░░  71  │            │
-│  │                      │  │                      │            │
 │  │  Teknik    ████  88  │  │  Teknik    ████  91  │            │
 │  │  AI Karar  ███░  67  │  │  Reframe   ████  69  │            │
 │  │  Çıktı     ███░  71  │  │  Captions  █████ 84  │            │
 │  │  Öğrenme   ██░░  55  │  │  YouTube   ████░ 73  │            │
 │  │  Olgunluk  ████  62  │  │  UX        ████  78  │            │
-│  │                      │  │                      │            │
 │  │  ⚠ 2 öneri var       │  │  ⚠ 1 öneri var       │            │
 │  └──────────────────────┘  └──────────────────────┘            │
 │                                                                  │
-│  HAFTALIK ÖZET                                                  │
-│  ─────────────────────────────────────────────────────────────  │
-│  12 pipeline │ Pass rate %44 (+6%) │ Avg süre 6.2dk │ 0 hata   │
-│                                                                  │
 │  AKTİF ÖNERİLER                                                 │
-│  ─────────────────────────────────────────────────────────────  │
-│  1. [!] Channel DNA 52 gündür güncellenmedi        [Uygula] [✕] │
-│  2. [i] S05 fallback oranı %18 — video upload opt. [Detay]  [✕] │
-│  3. [i] Reframe diarization edge case tespit edildi [Detay]  [✕] │
+│  1. [!] Channel DNA 52 gündür güncellenmedi   [Uygula] [✕]     │
+│  2. [i] S05 fallback oranı %18               [Detay]  [✕]     │
+│  3. [i] Reframe diarization edge case        [Detay]  [✕]     │
 │                                                                  │
-│  NOTLAR / HAFIZA                                                │
-│  ─────────────────────────────────────────────────────────────  │
+│  HAFIZA NOTLARI                                                 │
 │  📌 M1-M2 ayrı katman: M2 henüz otonom edit için hazır değil   │
-│  📌 İleride: B-roll, ElevenLabs entegrasyonu planlanıyor        │
+│  📌 İleride: B-roll, ElevenLabs planlanıyor                    │
 │                                                                  │
-│  [Director ile Konuş]                [Tam Analiz Çalıştır]      │
+│  [Director ile Konuş]        [Tam Analiz Çalıştır]             │
 └────────────────────────────────────────────────────────────────┘
 ```
 
-### 8.3 Modül Detay Sayfası
-
-Modül kartına tıklanınca:
-- Her boyutun detaylı breakdown'u
-- Son 8 analiz skoru (trend grafik)
-- Tüm aktif öneriler (öncelik sırası)
-- Son test sonuçları
-- "Director'a Sor" butonu (chat'i o modül bağlamıyla açar)
+**Otomatik güncelleme tetikleyicileri:**
+- Her pipeline tamamlandığında (lightweight)
+- Günde 1 kez 09:00'da (tam analiz)
+- Sentry'de yeni kritik hata
+- Chat'te "dashboard güncelle" komutu
 
 ---
 
-## 9. PUANLAMA SİSTEMİ
+## 11. PUANLAMA SİSTEMİ
 
-*(v1.0'dan korundu, Director artık bunu araçlarla hesaplar)*
+### 11.1 Temel Prensip
 
-5 boyut, otomatik matematik + Gemini yorumu:
+Matematiksel hesaplamalar Python'da (hızlı, güvenilir). Yorumlama Gemini'ye bırakılır.
 
-**Modül 1:**
-- Teknik Sağlık (20p) — pipeline başarı oranı, süre, retry, fallback
-- AI Karar Kalitesi (35p) — pass rate, kullanıcı uyuşumu, DNA yansıması
-- Çıktı Yapısal Kalitesi (25p) — süre dağılımı, word snap, hook kalitesi
-- Öğrenme ve Adaptasyon (15p) — trend, feedback entegrasyonu, DNA güncelliği
-- Stratejik Olgunluk (5p) — açık öneriler, uygulama oranı
+### 11.2 Modül 1 — 5 Boyut
 
-**Modül 2:**
-- Teknik Sağlık (20p)
-- Araç Performansı (40p) — Reframe (20p), Captions (12p), YouTube (8p)
-- Kullanıcı Deneyimi (25p)
-- Öğrenme (10p)
-- Stratejik Olgunluk (5p)
+```
+BOYUT 1 — TEKNİK SAĞLIK (20 puan) — Otomatik, Gemini gerekmez
 
-**Eşikler:** 0-35 Kritik | 36-55 Zayıf | 56-70 Orta | 71-84 İyi | 85+ Güçlü
+Pipeline başarı oranı (son 30 gün) → 6 puan
+  %100 = 6 | %95 = 5 | %90 = 4 | %80 = 2 | < %80 = 0
+
+Ortalama işlem süresi (p95) → 4 puan
+  < 6 dk = 4 | < 8 dk = 3 | < 12 dk = 2 | > 12 dk = 0
+
+Gemini retry oranı → 4 puan
+  < %5 = 4 | < %10 = 3 | < %20 = 1 | ≥ %20 = 0
+
+R2 upload hata oranı → 3 puan
+  < %1 = 3 | < %5 = 2 | ≥ %5 = 0
+
+S05 video fallback oranı → 3 puan
+  < %5 = 3 | < %15 = 2 | < %30 = 1 | ≥ %30 = 0
+
+
+BOYUT 2 — AI KARAR KALİTESİ (35 puan)
+
+Pass rate (son 30 gün) → 8 puan
+  > %50 = 8 | > %35 = 6 | > %20 = 3 | ≤ %20 = 0
+
+Kullanıcı onay/red uyuşumu → 7 puan
+  Ters sinyal oranı (Gemini pass → kullanıcı red):
+  < %10 = 7 | < %25 = 4 | ≥ %25 = 1
+
+Ortalama standalone skoru → 7 puan
+  ≥ 8.0 = 7 | ≥ 7.0 = 5 | ≥ 6.0 = 3 | < 6.0 = 0
+
+Kanal DNA yansıma skoru → 8 puan (Gemini değerlendirmesi)
+  Çok uyumlu = 8 | Uyumlu = 5 | Kısmen = 2 | Uyumsuz = 0
+
+İçerik çeşitlilik skoru → 5 puan
+  5+ farklı content_type = 5 | 3-4 = 3 | 1-2 = 1
+
+
+BOYUT 3 — ÇIKTI YAPISAL KALİTESİ (25 puan)
+
+Süre dağılımı uyumu → 7 puan
+  channel_dna.duration_range içindeki klip oranı:
+  ≥ %85 = 7 | ≥ %70 = 5 | ≥ %50 = 2 | < %50 = 0
+
+Kelime snap başarı oranı → 5 puan
+  ≥ %90 = 5 | ≥ %70 = 3 | < %70 = 1
+
+Hook kalitesi → 7 puan (ortalama hook_score)
+  ≥ 7.5 = 7 | ≥ 6.5 = 5 | ≥ 5.5 = 2 | < 5.5 = 0
+
+S06 skip oranı → 6 puan
+  < %5 = 6 | < %10 = 4 | < %20 = 2 | ≥ %20 = 0
+
+
+BOYUT 4 — ÖĞRENME VE ADAPTASYON (15 puan)
+
+3 aylık trend → 6 puan
+  Belirgin iyileşme = 6 | Hafif = 4 | Stabil = 2 | Gerileme = 0
+
+Feedback entegrasyonu → 5 puan
+  Reddedilen clip tiplerinde azalma var mı?
+  Belirgin = 5 | Hafif = 3 | Yok = 1 | Artış = 0
+
+Channel DNA güncelliği → 4 puan
+  Güncel + ≥10 referans clip = 4 | Güncel ama az = 2 | > 90 gün = 0
+
+
+BOYUT 5 — STRATEJİK OLGUNLUK (5 puan)
+
+Açık kritik öneri sayısı → 3 puan
+  0 kritik = 3 | 1-2 = 2 | 3+ = 0
+
+Öneri uygulama oranı → 2 puan
+  ≥ %60 = 2 | ≥ %30 = 1 | < %30 = 0
+```
+
+### 11.3 Modül 2 — 5 Boyut (Özet)
+
+```
+Teknik Sağlık (20p)    — API başarı oranları, işlem süreleri
+Araç Performansı (40p) — Reframe (20p), Captions (12p), YouTube (8p)
+Kullanıcı Deneyimi (25p) — Session→export oranı, terk oranı
+Öğrenme (10p)          — Trend analizi
+Stratejik Olgunluk (5p) — Açık öneriler
+```
+
+### 11.4 Puan Eşikleri
+
+```
+0-35   KRİTİK  (kırmızı)
+36-55  ZAYIF   (turuncu)
+56-70  ORTA    (sarı)
+71-84  İYİ     (açık yeşil)
+85+    GÜÇLÜ   (yeşil) — bu seviyede sürekli kalmak zordur
+```
+
+**Puan düşebilir — bu normaldir.** Yeni özellik eklenince "Stratejik Olgunluk" yeni gereksinimler üretir.
 
 ---
 
-## 10. OTOMATİK TEST SİSTEMİ
+## 12. ÖNERİ SİSTEMİ
 
-*(v1.0'dan korundu)*
+### 12.1 6 Bileşen Anatomisi
 
 ```
-Director chat'ten: "Test et" veya "Full E2E test çalıştır"
-Dashboard'dan: [Test Çalıştır] butonu
+ÖRNEK ÖNERİ:
 
-Test tipleri:
-  full_e2e      → Tüm pipeline + M2 suite (~15 dk)
-  module1       → Yalnızca pipeline (~10 dk)
-  module2       → Reframe + captions + youtube (~5 dk)
-  regression    → Önceki test sonuçlarıyla karşılaştır (~10 dk)
-  prompt_ab     → A/B prompt testi (~20 dk)
+başlık: "S05 Prompt'una Kanal Hafızası Bölümü Ekle"
+öncelik: 1 | etki: +8 puan | zorluk: 2/5
+
+ne: "build_channel_context() fonksiyonuna son 30 günde başarısız
+    içerik türlerini 'BAŞARISIZ PATTERN'LAR' başlığıyla ekle.
+    Bu bilgi şu an hesaplanıyor ama Gemini'ye iletilmiyor."
+
+neden: "Son 30 günde 'educational_insight' türü %12 başarı oranıyla
+        en düşük performansta. Son 7 günde 8 adet önerildi,
+        6'sı kullanıcı tarafından reddedildi."
+
+beklenen_etki: "Bu tür klip seçimini %40-60 azaltır. +4-6 puan."
+
+risk: "Prompt uzar, token kullanımı ~%8-12 artar. Aylık ek ~$2-4."
+
+alternatif: "Sadece en kötü 2 content_type'ı ekle. Token artışı %4."
+
+veri_ihtiyacı: "Etkiyi ölçmek için değişiklikten sonra 2 hafta + 10 pipeline."
 ```
 
-Test tamamlandığında Director chat'e otomatik mesaj gelir:
+### 12.2 Öneri Önceliklendirme
+
+```python
+# Skor = (etki × 2) + (5 - zorluk) + güven
+# Maksimum 7 öneri sunulur
 ```
-"E2E test tamamlandı. Özet:
- - Pass rate: %50 (benchmark: %44, +6)
- - Reframe face detection: %81 (önceki: %79)
- - Caption avg confidence: 0.91
- - 1 yeni bulgu: S06'da 'relatable_moment' klipler
-   tutarsız puanlama alıyor (±3 puan sapma).
- Detaylı raporu görmek ister misin?"
+
+### 12.3 Cesaretli Kararlar (Bold Calls)
+
+Sistem çalışıyor görünse bile Director bunları söyler:
+
+```
+"S05 için Gemini Pro çok pahalı. Flash ile önce tarama yapıp
+ yalnızca belirsiz momentler için Pro'ya git. Token maliyeti
+ %40-60 düşebilir."
+
+"Speaker ID heuristiği %78 doğrulukta. Bu düşük.
+ PyAnnote Audio CPU-only test edilmeli."
+
+"Channel DNA onboardingden bu yana güncellenmedi.
+ Öğrenme mekanizması çalışmıyor."
 ```
 
 ---
 
-## 11. DIŞ ENTEGRASYON ARAÇLARI
+## 13. PROMPT LABORATUVARI
 
-*(v1.0'dan korundu)*
+### 13.1 Amaç
 
-**Langfuse Cloud:** Her Gemini çağrısı → otomatik trace. Director kalite skorları yazar.
-**PostHog Cloud:** Editor frontend davranışı. Director M2 analizine ekler.
-**Sentry:** Backend + frontend hata takibi. Director Teknik Sağlık skoruna ekler.
+S05, S06 ve diğer promptları analiz et, iyileştirme öner, A/B test ile karşılaştır.
+
+```sql
+CREATE TABLE director_prompt_lab (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  module_name       TEXT NOT NULL,
+  step              TEXT NOT NULL,
+  current_prompt_hash TEXT NOT NULL,
+  proposed_change   TEXT NOT NULL,
+  rationale         TEXT NOT NULL,
+  status            TEXT DEFAULT 'proposed',
+  test_job_a_id     UUID,
+  test_job_b_id     UUID,
+  test_comparison   JSONB,
+  approved_at       TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### 13.2 Prompt Analiz Kriterleri
+
+```
+1. NETLİK: Talimatlar tek yorumlu mu?
+2. ÇELİŞKİ: Farklı talimatlar birbiriyle çelişiyor mu?
+3. DNA ENTEGRASYONU: do_list, no_go_zones tam aktarılmış mı?
+4. OUTPUT FORMAT: JSON schema net mi?
+5. KALIBRASYON: "6 = ortalama" açık ifade edilmiş mi?
+6. TOKEN VERİMLİLİĞİ: Gereksiz tekrar var mı?
+```
+
+### 13.3 A/B Test Akışı
+
+```
+1. Director öneri üretir: "S05'te şu satır değiştirilmeli"
+2. Kullanıcı Prompt Lab'da onaylar
+3. Aynı test videosu iki kez çalışır (Run A: mevcut, Run B: önerilen)
+4. Karşılaştırma: candidate sayısı, pass rate, avg puan, token farkı
+5. Sonuç raporu → kullanıcı kararı
+```
+
+---
+
+## 14. KANAL DNA DENETÇİSİ
+
+### 14.1 6 Sağlık Kontrolü
+
+```
+1. GÜNCELLİK
+   Son güncelleme > 90 gün? → Uyarı
+   Reference clip sayısı < 5? → Yetersiz
+
+2. TUTARLILIK
+   do_list ve dont_list çelişiyor mu?
+   "Teknik deep-dive yap" + "Teknik konulardan kaçın" → Çelişki
+
+3. GÜNCEL PERFORMANS YANSIMASI
+   Son 30 günde fail olan content_type'lar dont_list'te var mı?
+   Başarılı türler do_list'te güçlendirilmiş mi?
+
+4. SPESİFİKLİK
+   "İyi içerik seç" → İşe yaramaz
+   "Misafirin 8+ yıl önceki başarısızlık anları" → İşe yarar
+
+5. HOOK STİLİ KALIBRASYONU
+   Seçilen kliplerin ilk cümleleri hook_style ile uyumlu mu?
+
+6. SÜRE UYUMU
+   Seçilen kliplerin duration_range'e uyumu > %85 mi?
+   Sapma > %20 → DNA'nın süre parametresi gerçeği yansıtmıyor
+```
+
+### 14.2 DNA Güncelleme Tetikleyicisi
+
+DNA sağlık skoru düşükse:
+> "Bu kanalın son 60 günlük başarılı kliplerine dayanarak DNA'yı yeniden oluşturayım. Onaylıyor musun?"
+
+---
+
+## 15. DIRECTOR'IN KENDİ KENDİNİ DEĞERLENDİRMESİ
+
+```
+1. ÖNERİ UYGULAMA ORANI
+   < %30: Öneriler çok zor/alakasız, kalibrasyon gerekiyor
+
+2. ETKİ TAHMİN DOĞRULUĞU
+   "+6 puan getirir" dedim → gerçekte kaç puan getirdi?
+   Ortalama hata > ±3 puan: Tahmin modeli yanlış kalibre
+
+3. FALSE ALARM ORANI
+   "Kritik sorun" dediğim durumların kaçı gerçekten kritikti?
+   > %30 yanlış alarm: Signal kalitesini artır
+
+4. MISSED SORUNLAR
+   Kullanıcının bildirdiği sorunlar önceden tespit edildi mi?
+   Tespit edilmediyse: Hangi event bu sorunu yakalardı?
+
+5. TOKEN VERİMLİLİĞİ
+   Analiz başına token → Kaliteli öneri üretiyor mu?
+```
+
+---
+
+## 16. OTOMATİK TEST SİSTEMİ
+
+### 16.1 Test Tipleri
+
+| Test | Süre | Amaç |
+|------|------|------|
+| Full E2E | ~15 dk | Tüm pipeline + M2 suite |
+| Module 1 Only | ~10 dk | Yalnızca pipeline |
+| Module 2 Suite | ~5 dk | Reframe + Captions + YouTube |
+| Regression | ~10 dk | Önceki test ile karşılaştır |
+| Prompt A/B | ~20 dk | Prompt versiyonları karşılaştır |
+
+### 16.2 Test Videosu Konfigürasyonu
+
+```python
+{
+  "director_test_config": {
+    "test_video_r2_url": "https://pub-xxx.r2.dev/test/benchmark.mp4",
+    "test_video_duration_s": 480,
+    "test_guest_name": "Test Guest",
+    "test_channel_id": "speedy_cast",
+    "expected_min_clips": 2,
+    "expected_max_clips": 8,
+    "baseline_standalone_score": 6.5
+  }
+}
+```
+
+### 16.3 Full E2E Test Akışı
+
+```
+1. Test job oluştur (is_test_run = true)
+2. Pipeline çalıştır S01-S08 (speaker confirm otomatik)
+3. Klip çıktı analizi (otomatik, Gemini yok):
+   - Pass/fixable/fail dağılımı
+   - Puan dağılımı (min, max, avg, median)
+   - Süre dağılımı, içerik çeşitliliği
+   - Kelime snap başarı oranı, R2 upload başarısı
+4. Gemini düşünce zinciri analizi:
+   - S05: Her adayın seçilme gerekçesi, primary_signal dağılımı
+   - S06: Reddetme gerekçeleri, puan tutarlılığı, thinking_steps kalitesi
+5. Prompt kalite analizi (Gemini Flash çağrısı)
+6. Channel DNA denetimi
+7. En iyi klibi editöre yönlendir (opsiyonel, kullanıcı onaylar)
+8. Modül 2 testleri
+9. Rapor üret → director_analyses'e kaydet → regression delta
+```
+
+### 16.4 Reframe Kalite Testi
+
+```
+Ölçümler:
+1. Yüz tespit durumu:
+   DNN başarı > %85 → İdeal
+   DNN %50-85      → Kabul, uyarı yaz
+   DNN < %50       → Sorunlu, yüksek öncelikli öneri
+
+2. Konuşmacı takip doğruluğu (diarization ile):
+   Konuşmacı 0 → sol yüz, Konuşmacı 1 → sağ yüz
+   Her 0.5s kontrol: doğru_segment / toplam_segment
+
+3. Sahne geçişi:
+   Sahne sınırında keyframe var mı?
+   Hold → Linear geçişi doğru mu?
+
+4. EMA yumuşatma:
+   Shake: > 50px / 0.5s → uyarı
+   Lag: Geçişi 2s+ geç yakalamak → uyarı
+
+Çıktı:
+{face_detection_rate, dnn_rate, haar_fallback_rate,
+ speaker_tracking_accuracy, scene_detection_count,
+ keyframe_count, shake_events, lag_events, overall_score}
+```
+
+### 16.5 Caption Drift Testi
+
+```
+Ölçümler:
+1. API başarısızlık oranı
+2. Kelime güvenilirliği (avg confidence < 0.80 → uyarı)
+3. Segment boyutu (optimal: 1.5-3.5s)
+4. Timestamp kayma (< 200ms ideal, > 500ms sorunlu)
+5. Punctuation kalitesi
+
+Çıktı:
+{avg_confidence, segment_count, short_segments, long_segments,
+ avg_segment_duration_s, drift_avg_ms, overall_score}
+```
+
+### 16.6 Regression Test
+
+```python
+regression_report = {
+  "previous_score": 71,
+  "current_score": 68,
+  "delta": -3,
+  "degraded_dimensions": ["ai_quality"],
+  "improved_dimensions": ["technical"],
+  "regression_cause_hypothesis": "...",
+  "action_required": True
+}
+```
+
+---
+
+## 17. DIŞ ENTEGRASYON ARAÇLARI
+
+### 17.1 Langfuse Cloud — LLM Gözlemlenebilirliği
+
+```python
+# main.py'de başlangıçta:
+from openinference.instrumentation.vertexai import VertexAIInstrumentor
+VertexAIInstrumentor().instrument()
+# Tüm Gemini çağrıları otomatik trace'e düşer
+
+# Director analiz sonrası kalite skoru ekler:
+langfuse.create_score(
+    trace_id=s05_trace_id,
+    name="clip_pass_rate",
+    value=0.42,
+    data_type="NUMERIC"
+)
+```
+
+Langfuse Dashboard'da: Her S05/S06 trace, token kullanımı, latency, Director kalite skorları, maliyet grafiği.
 
 ```
 LANGFUSE_PUBLIC_KEY=pk-lf-...
 LANGFUSE_SECRET_KEY=sk-lf-...
-POSTHOG_API_KEY=phc_...
-SENTRY_DSN=https://xxx@o123.ingest.sentry.io/456
+LANGFUSE_HOST=https://cloud.langfuse.com
+```
+
+### 17.2 PostHog Cloud — Frontend Davranışı
+
+```typescript
+// Editor'da:
+posthog.capture('reframe_triggered', {
+    session_id, has_diarization: Boolean(clipJobId), clip_duration_s
+})
+posthog.capture('captions_generated', {session_id, word_count, language_detected})
+posthog.capture('editor_export_completed', {
+    session_id, had_reframe, had_captions, time_from_open_ms
+})
+posthog.capture('youtube_metadata_accepted', {title_changed, description_changed})
+```
+
+Director PostHog Query API'sinden M2 analizi için veri çeker.
+
+```
+NEXT_PUBLIC_POSTHOG_KEY=phc_...
+```
+
+### 17.3 Sentry — Hata Takibi
+
+```python
+# Backend (main.py):
+sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
+```
+
+```typescript
+// Frontend:
+Sentry.init({dsn: NEXT_PUBLIC_SENTRY_DSN, tracesSampleRate: 0.5})
+```
+
+Director Sentry Issues API'den açık hataları çeker, Teknik Sağlık skoruna ekler.
+
+```
+SENTRY_DSN=...
 SENTRY_AUTH_TOKEN=sntrys_...
+```
+
+### 17.4 Araç İş Bölümü
+
+```
+Olay                    Langfuse  PostHog  Sentry  Supabase
+────────────────────────────────────────────────────────────
+Gemini API çağrısı         ✓        -        -        -
+Token kullanımı            ✓        -        -        -
+Director kalite skoru      ✓        -        -        ✓
+Backend exception          -        -        ✓        -
+Pipeline adım süresi       -        -        -        ✓
+Reframe tetiklendi         -        ✓        -        ✓
+Caption oluşturuldu        -        ✓        -        ✓
+Editor export              -        ✓        -        ✓
+Frontend exception         -        -        ✓        -
+Kullanıcı klip onayı       -        -        -        ✓
 ```
 
 ---
 
-## 12. KOD YAPISI
+## 18. VERİTABANI ŞEMASI ÖZETI
+
+```sql
+-- Director tabloları
+director_events              -- ham event log (M1+M2 hook'ları)
+director_conversations       -- chat geçmişi
+director_memory              -- uzun dönem semantik hafıza (pgvector)
+director_analyses            -- analiz sonuçları + skorlar
+director_recommendations     -- öneriler
+director_cross_module_signals -- modüller arası sinyaller
+director_prompt_lab          -- prompt A/B testleri
+director_test_runs           -- otomatik test sonuçları
+
+CREATE TABLE director_test_runs (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp     TIMESTAMPTZ DEFAULT now(),
+  test_type     TEXT NOT NULL,
+  status        TEXT DEFAULT 'running',
+  test_job_id   UUID,
+  results       JSONB,
+  module1_score INT,
+  module2_score INT,
+  delta_from_prev JSONB,
+  completed_at  TIMESTAMPTZ
+);
+```
+
+---
+
+## 19. KOD YAPISI
 
 ```
 backend/app/director/
-├── __init__.py
-│
 ├── agent/
-│   ├── core.py               → Ana agent loop: mesaj al → context hazırla → Gemini çağır → araç çalıştır → yanıt
-│   ├── system_prompt.py      → Director kimliği ve prensipler
-│   └── context_builder.py    → Konuşma geçmişi + hafıza + snapshot birleştirme
-│
+│   ├── core.py               → Ana loop: mesaj → context → Gemini → araç → yanıt
+│   ├── system_prompt.py      → Director kimliği
+│   └── context_builder.py    → Geçmiş + hafıza + snapshot birleştirme
 ├── tools/
-│   ├── registry.py           → Tüm tool tanımları (Gemini function calling schema)
+│   ├── registry.py           → Gemini function calling schema
 │   ├── read_tools.py         → read_file, list_files, search_codebase, query_database
 │   ├── query_tools.py        → get_pipeline_stats, get_clip_analysis, get_langfuse_data
 │   ├── external_tools.py     → get_sentry_issues, get_posthog_events, web_search
 │   ├── write_tools.py        → edit_file, update_database, update_channel_dna
 │   ├── memory_tools.py       → save_memory, query_memory, list_memories, delete_memory
 │   └── action_tools.py       → trigger_analysis, trigger_test, send_notification
-│
 ├── memory/
 │   ├── conversation.py       → director_conversations CRUD
 │   ├── long_term.py          → director_memory embed + semantic search
-│   └── snapshot.py           → Anlık sistem durumu özeti (hızlı, Gemini gerekmez)
-│
+│   └── snapshot.py           → Anlık sistem özeti (Gemini gerekmez)
+├── collector/
+│   ├── base_collector.py     → emit() arayüzü, async, hata fırlatmaz
+│   ├── module1_collector.py  → M1 event hook'ları
+│   └── module2_collector.py  → M2 event hook'ları
 ├── analysis/
-│   ├── scorer.py             → Puan hesaplama (otomatik, Gemini gerekmez)
-│   ├── scheduler.py          → Günlük otomatik analiz background task
-│   └── dashboard_writer.py   → director_analyses tablosuna yazma
-│
+│   ├── scorer.py             → Puan hesaplama (otomatik)
+│   ├── scheduler.py          → Günlük otomatik analiz
+│   └── dashboard_writer.py   → director_analyses'e yazma
 ├── test_runner/
 │   ├── e2e_runner.py
 │   ├── module2_suite.py
 │   ├── regression_runner.py
 │   └── prompt_ab_runner.py
-│
+├── analyzers/
+│   ├── module1_analyzer.py
+│   ├── module2_analyzer.py
+│   ├── reframe_analyzer.py
+│   ├── caption_analyzer.py
+│   ├── channel_dna_auditor.py
+│   └── prompt_lab_analyzer.py
 ├── integrations/
 │   ├── langfuse_client.py
 │   ├── posthog_reader.py
 │   └── sentry_reader.py
-│
+├── cost_tracker.py           → Token/maliyet takibi (Langfuse'dan)
 └── api/
     ├── chat_routes.py        → POST /director/chat (SSE streaming)
-    ├── dashboard_routes.py   → GET /director/status, /director/module/{name}
+    ├── dashboard_routes.py   → GET /director/status
     ├── memory_routes.py      → GET/DELETE /director/memory
     └── test_routes.py        → POST /director/test/run
 
 frontend/app/dashboard/director/
-├── page.tsx                  → Dashboard (modül kartları, öneriler, notlar)
-├── chat/
-│   └── page.tsx              → Chat arayüzü (SSE ile streaming)
-├── analysis/
-│   └── [module]/page.tsx     → Modül detay sayfası
-└── test/
-    └── page.tsx              → Test merkezi
+├── page.tsx                  → Dashboard
+├── chat/page.tsx             → Chat arayüzü (SSE streaming)
+├── analysis/[module]/page.tsx
+└── test/page.tsx
 ```
 
 ---
 
-## 13. API ENDPOINTS
+## 20. API ENDPOINTS
 
 ```
-# Chat
-POST /director/chat
-  body: {message: str, session_id: str}
-  response: SSE stream (token token)
+POST /director/chat                      → SSE stream
+GET  /director/chat/history/{session_id} → Son 50 mesaj
 
-GET /director/chat/history/{session_id}
-  → Son 50 mesaj
+GET  /director/status                    → Tüm modüller özet (DB'den, Gemini'siz)
+GET  /director/module/{name}             → Tek modül detayı
+GET  /director/analyses/{name}           → Analiz geçmişi
 
-# Dashboard
-GET /director/status
-  → Tüm modüllerin özet durumu (DB'den okur, Gemini çağırmaz)
-
-GET /director/module/{module_name}
-  → Tek modül detayı
-
-# Hafıza
-GET /director/memory
-  → Tüm hafıza kayıtları
-
+GET  /director/memory                    → Tüm hafıza
 DELETE /director/memory/{id}
-  → Hafıza kaydı sil
 
-# Analizler
-POST /director/analyze/{module}
-  → Manuel analiz tetikle
+POST /director/analyze/{module}          → Manuel analiz tetikle
+POST /director/test/run                  → Test başlat
+GET  /director/test/{run_id}/status
+GET  /director/test/{run_id}/report
 
-GET /director/analyses/{module}
-  → Analiz geçmişi
-
-# Test
-POST /director/test/run
-  body: {type: str}
-  → Test başlat, job_id döner
-
-GET /director/test/{run_id}/status
-  → Test durumu
-
-GET /director/test/{run_id}/report
-  → Test raporu
-
-# Öneriler
-POST /director/recommendation/{id}/mark
-  body: {status: "applied" | "dismissed"}
+POST /director/recommendation/{id}/mark  → applied | dismissed
 ```
 
 ---
 
-## 14. KISITLAR
+## 21. KISITLAR
 
-**Director ne YAPAMAZ (asla):**
-- `git push` veya deploy
-- Jobs veya clips tablosunu değiştirme (okuma var, yazma yok)
-- Kullanıcı adına karar verme ve uygulama
+**Asla:**
+- git push / deploy
+- clips, jobs, transcripts tablolarına yazma
+- Kullanıcı adına karar verip uygulama
 
-**Director onay alarak YAPAR:**
+**Onay alarak:**
 - Python/TypeScript kod değişikliği
-- Channel DNA güncelleme (büyük değişiklikler)
-- Test pipeline başlatma (1'den fazla paralel test)
+- Channel DNA büyük güncelleme
+- Paralel test çalıştırma
 
-**Director serbestçe YAPAR:**
-- Tüm MD dosyalarını düzenleme
+**Serbestçe:**
+- Tüm MD dosyalarını okuma ve düzenleme
 - Supabase'den okuma (tüm tablolar)
 - director_* tablolarına yazma
 - Hafızaya kayıt
-- Analiz tetikleme
 - Araç zinciri kurma
+- Web araştırması
 
 ---
 
-## 15. COLD START
+## 22. COLD START
 
 ```
 0 konuşma:
-  Director ilk açıldığında şunu yapar:
-  1. Tüm MD dökümanlarını okur (MODULE_1, MODULE_2, SYSTEM_CORE)
-  2. Son 30 günün pipeline verilerini çeker
-  3. Kendini tanıtır: "Merhaba. Sistemi inceledim.
-     X pipeline çalışmış, pass rate %Y. İlk bakışta dikkatimi
-     çeken şeyler: ..."
+  Tüm MD dökümanları okunur, son 30 günün verisi çekilir.
+  "Merhaba. Sistemi inceledim. X pipeline çalışmış, pass rate %Y.
+   İlk bakışta dikkat çeken: ..."
 
 1-4 pipeline:
-  "Yeterli veri yok" yerine "Az veri var ama şunu söyleyebilirim:" der
+  "Az veri var ama şunu söyleyebilirim:"
 
 5+ pipeline:
-  Tam analiz, puanlama, öneriler aktif
+  Tam analiz ve puanlama aktif
+
+20+ pipeline:
+  Trend analizi aktif
 ```
 
 ---
 
-## 16. YAYINLAMA PLANI
+## 23. YENİ MODÜL ENTEGRASYON PROTOKOLÜ
 
-### Faz 1 — Temel Araçlar (3 saat)
-1. Sentry + Langfuse + PostHog kurulumu
+```
+Yeni modül eklendiğinde:
+1. docs/MODULE_N.md oluştur
+2. collector/module_n_collector.py yaz
+3. analyzers/module_n_analyzer.py yaz
+4. scorer.py'a yeni modül boyutları ekle
+5. Dashboard'a sağlık kartı ekle
+6. Test runner'a modül testi ekle
+7. Bu dokümanda "Modül N Puanlama Detayları" bölümü ekle
+```
+
+---
+
+## 24. YAYINLAMA PLANI
+
+### Faz 1 — Dış Araçlar (3 saat)
+1. Sentry + Langfuse Cloud + PostHog kurulumu
 
 ### Faz 2 — Agent Çekirdeği (1-2 gün)
 2. `director_conversations` + `director_memory` tabloları
-3. Tool registry + temel araçlar (read_file, query_database, query_memory, save_memory)
-4. Agent core loop (Gemini Pro function calling)
+3. Tool registry + temel araçlar (read_file, query_database, save_memory)
+4. Agent core loop (Gemini Pro + function calling)
 5. SSE streaming chat endpoint
-6. Basit chat frontend (tek sayfa, sade)
+6. Basit chat frontend
 
-### Faz 3 — Dashboard (1 gün)
-7. Scorer.py (Gemini'siz puan hesaplama)
-8. Günlük otomatik analiz scheduler
-9. Dashboard frontend (modül kartları, öneriler)
+### Faz 3 — Event Sistemi ve Dashboard (1 gün)
+7. M1 ve M2 event hook'ları
+8. scorer.py (otomatik puan)
+9. Günlük otomatik analiz scheduler
+10. Dashboard frontend
 
 ### Faz 4 — Araç Genişletme (2 gün)
-10. Tüm write/action araçları
-11. Langfuse + Sentry + PostHog reader araçları
-12. Web search (Gemini grounding)
-13. Test runner entegrasyonu
+11. Tüm write/action araçları
+12. Langfuse + Sentry + PostHog reader araçları
+13. Web search (Gemini grounding)
+14. Test runner entegrasyonu
 
 ### Faz 5 — İleri Özellikler (sürekli)
-14. Semantik hafıza (pgvector)
-15. Proaktif bildirimler
-16. Prompt Lab
-17. Yeni modül entegrasyon protokolü
+15. Semantik hafıza (pgvector)
+16. Cross-module köprüsü
+17. Prompt Lab + DNA Denetçisi
+18. Proaktif bildirimler
+19. Langfuse Prompt Management
 
 ---
 
