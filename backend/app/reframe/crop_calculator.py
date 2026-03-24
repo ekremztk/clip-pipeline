@@ -11,7 +11,7 @@ Speaker tracking rules:
 2. At scene cuts → instant jump (no EMA bleed)
 3. At speaker switches → instant jump
 4. During same speaker/same scene → smooth EMA (alpha = 0.25)
-5. No active speaker (silence/gap) → hold last position
+5. No active speaker (silence/gap) → follow dominant face (face_map[0])
 6. No faces detected in scene → use center
 """
 
@@ -125,16 +125,24 @@ def _get_target_x(
 ) -> int:
     """
     Returns the ideal crop x for this frame based on active speaker and face map.
+
+    When speaker=-1 (no diarization or silence), follows face_map[0] (dominant face)
+    instead of defaulting to center. This allows face-following without diarization.
     """
     try:
-        speaker = int(active_speaker[frame]) if frame < len(active_speaker) else -1
-
-        if speaker < 0 or len(face_map) == 0:
+        if len(face_map) == 0:
             return center_x
 
-        # Clamp speaker index to available faces
-        face_idx = min(speaker, len(face_map) - 1)
-        cx_norm = face_map[face_idx]
+        speaker = int(active_speaker[frame]) if frame < len(active_speaker) else -1
+
+        if speaker < 0:
+            # No diarization or silence — follow the dominant (first/only) face
+            cx_norm = face_map[0]
+        else:
+            # Diarization available — follow the active speaker's face
+            face_idx = min(speaker, len(face_map) - 1)
+            cx_norm = face_map[face_idx]
+
         return face_cx_to_crop_x(cx_norm, src_width, crop_w)
 
     except Exception:

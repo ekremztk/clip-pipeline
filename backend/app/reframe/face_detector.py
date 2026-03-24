@@ -8,41 +8,60 @@ import numpy as np
 from typing import List, Optional
 
 
-def _get_detector():
-    """Load Haar Cascade face detector (bundled with opencv-python-headless)."""
-    path = cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml"
-    detector = cv2.CascadeClassifier(path)
-    if detector.empty():
-        raise RuntimeError("Failed to load haarcascade_frontalface_alt2.xml")
-    return detector
+def _load_cascade(name: str) -> Optional[cv2.CascadeClassifier]:
+    path = cv2.data.haarcascades + name
+    cc = cv2.CascadeClassifier(path)
+    return None if cc.empty() else cc
 
 
-_DETECTOR = None
+# Prefer alt2; fall back to default if not available
+_DETECTOR: Optional[cv2.CascadeClassifier] = None
 
 
-def get_detector():
+def get_detector() -> cv2.CascadeClassifier:
     global _DETECTOR
     if _DETECTOR is None:
-        _DETECTOR = _get_detector()
+        _DETECTOR = _load_cascade("haarcascade_frontalface_alt2.xml")
+        if _DETECTOR is None:
+            _DETECTOR = _load_cascade("haarcascade_frontalface_default.xml")
+        if _DETECTOR is None:
+            raise RuntimeError("No Haar cascade face model found in OpenCV data directory")
     return _DETECTOR
+
+
+# Shared CLAHE instance for contrast enhancement
+_CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 
 def detect_faces_in_frame(frame: np.ndarray) -> List[dict]:
     """
     Detect faces in a single frame.
-    Returns list of dicts: {cx_norm: float, cy_norm: float, width_norm: float, area: int}
-    cx_norm and cy_norm are normalized [0..1] relative to frame dimensions.
+    Returns list of dicts: {cx_norm, cy_norm, width_norm, area}
+    All positions normalized [0..1] relative to original frame dimensions.
     """
     try:
-        h, w = frame.shape[:2]
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        detector = get_detector()
+        orig_h, orig_w = frame.shape[:2]
 
+        # Resize to max 640px wide for consistent, faster detection
+        max_w = 640
+        scale = min(1.0, max_w / orig_w)
+        if scale < 1.0:
+            det_w = int(orig_w * scale)
+            det_h = int(orig_h * scale)
+            small = cv2.resize(frame, (det_w, det_h), interpolation=cv2.INTER_LINEAR)
+        else:
+            small = frame
+            det_w, det_h = orig_w, orig_h
+
+        gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+        gray = _CLAHE.apply(gray)
+
+        detector = get_detector()
         faces = detector.detectMultiScale(
             gray,
-            scaleFactor=1.1,
-            minNeighbors=5,
-            minSize=(max(30, w // 20), max(30, h // 20)),
+            scaleFactor=1.05,
+            minNeighbors=3,
+            minSize=(24, 24),
             flags=cv2.CASCADE_SCALE_IMAGE,
         )
 
@@ -51,16 +70,17 @@ def detect_faces_in_frame(frame: np.ndarray) -> List[dict]:
             return result
 
         for (x, y, fw, fh) in faces:
-            cx = (x + fw / 2) / w
-            cy = (y + fh / 2) / h
+            # Normalize relative to detection frame (same proportions as original)
+            cx = (x + fw / 2) / det_w
+            cy = (y + fh / 2) / det_h
             result.append({
                 "cx_norm": float(cx),
                 "cy_norm": float(cy),
-                "width_norm": float(fw / w),
+                "width_norm": float(fw / det_w),
                 "area": int(fw * fh),
             })
 
-        # Sort left to right by cx_norm
+        # Sort left to right
         result.sort(key=lambda f: f["cx_norm"])
         return result
 
@@ -74,17 +94,16 @@ def build_scene_face_map(
     scene_start_frame: int,
     scene_end_frame: int,
     sample_count: int = 8,
-) -> List[Optional[float]]:
+) -> List[float]:
     """
     Sample `sample_count` frames from a scene, detect faces, and build a
-    stable face map for that scene.
+    stable face map.
 
-    Returns a list of up to 2 x-positions (normalized), sorted left to right.
-    Index 0 = left speaker (Speaker 0 / Host)
-    Index 1 = right speaker (Speaker 1 / Guest)
+    Returns up to 2 cx_norm values sorted left to right:
+      [left_cx]              — single speaker
+      [left_cx, right_cx]    — two speakers
 
-    If only one face is found, returns [cx_norm].
-    If no faces, returns [0.5] (center fallback).
+    Falls back to [0.5] (center) if no faces detected.
     """
     try:
         cap = cv2.VideoCapture(video_path)
@@ -100,7 +119,6 @@ def build_scene_face_map(
             if scene_start_frame + i * step < scene_end_frame
         ]
 
-        # Collect all detected cx_norm positions across samples
         all_cx: List[float] = []
         for frame_num in sample_frames:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
@@ -114,13 +132,16 @@ def build_scene_face_map(
         cap.release()
 
         if not all_cx:
+            print(f"[FaceDetector] No faces detected in scene frames {scene_start_frame}-{scene_end_frame}")
             return [0.5]
 
-        # Cluster cx values: faces on the left half vs right half
+        print(f"[FaceDetector] Scene {scene_start_frame}-{scene_end_frame}: detected cx={[round(c, 2) for c in all_cx]}")
+
+        # Cluster: left half vs right half of frame
         left_cx = [cx for cx in all_cx if cx <= 0.5]
         right_cx = [cx for cx in all_cx if cx > 0.5]
 
-        face_map = []
+        face_map: List[float] = []
         if left_cx:
             face_map.append(float(np.median(left_cx)))
         if right_cx:
