@@ -50,9 +50,6 @@ app.include_router(youtube_metadata.router)
 app.include_router(reframe.router)
 app.include_router(progress.router)
 
-from editor_main import editor_router
-app.include_router(editor_router)
-
 @app.get("/health")
 async def health_check():
     return {
