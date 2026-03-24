@@ -160,7 +160,7 @@ async def get_recommendations(status: str = "pending", limit: int = 20):
     try:
         client = get_client()
         res = (client.table("director_recommendations")
-               .select("*")
+               .select("id,module_name,title,description,priority,impact,effort,status,metadata,created_at")
                .eq("status", status)
                .order("priority", desc=False)
                .limit(limit)
@@ -188,84 +188,133 @@ async def update_recommendation(rec_id: str, req: RecommendationUpdate):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/recommendations/{rec_id}/dismiss")
+async def dismiss_recommendation(rec_id: str):
+    """Dismiss a recommendation and mark it as dismissed."""
+    try:
+        client = get_client()
+        client.table("director_recommendations").update({
+            "status": "dismissed"
+        }).eq("id", rec_id).execute()
+        return {"ok": True, "dismissed": rec_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ─────────────────────────────────────────────
 # Dashboard Aggregation
 # ─────────────────────────────────────────────
 
 def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
-    """Calculate simplified module health scores (0-100) from available data."""
+    """Calculate module health scores (0-100). Returns None score when no data."""
     modules = {}
 
     # Module 1 — Clip Pipeline
     try:
         s = pipeline.get("summary", {})
-        total = s.get("total_jobs", 0) or 0
-        completed = s.get("completed", 0) or 0
+        total = int(s.get("total_jobs", 0) or 0)
+        completed = int(s.get("completed", 0) or 0)
         avg_dur = float(s.get("avg_duration_min", 0) or 0)
 
-        success_rate = (completed / total * 100) if total > 0 else 0
-
         ca = clips.get("analysis", {})
-        total_clips = ca.get("total_clips", 0) or 0
-        pass_count = ca.get("pass_count", 0) or 0
+        total_clips = int(ca.get("total_clips", 0) or 0)
+        pass_count = int(ca.get("pass_count", 0) or 0)
         avg_conf = float(ca.get("avg_confidence", 0) or 0)
-        pass_rate = (pass_count / total_clips * 100) if total_clips > 0 else 0
 
-        # Score calculation (simplified from DIRECTOR_MODULE.md)
-        tech_health = min(20, success_rate * 0.12 + max(0, (12 - avg_dur)) * 0.67)
-        ai_quality = min(35, pass_rate * 0.2 + avg_conf * 1.5)
-        output_quality = min(25, (total_clips / max(total, 1)) * 3.5)
-        score = min(100, round(tech_health + ai_quality + output_quality + 10))
-
-        if score >= 85:
-            status, status_color = "GUCLU", "green"
-        elif score >= 71:
-            status, status_color = "IYI", "cyan"
-        elif score >= 56:
-            status, status_color = "ORTA", "yellow"
-        elif score >= 36:
-            status, status_color = "ZAYIF", "orange"
+        if total == 0 and total_clips == 0:
+            # No data yet — do not fabricate a score
+            modules["clip_pipeline"] = {
+                "name": "Clip Pipeline",
+                "score": None,
+                "status": "VERI YOK",
+                "status_color": "gray",
+                "metrics": {},
+                "subscores": {},
+            }
         else:
-            status, status_color = "KRITIK", "red"
+            success_rate = (completed / total * 100) if total > 0 else 0
+            pass_rate = (pass_count / total_clips * 100) if total_clips > 0 else 0
 
-        modules["clip_pipeline"] = {
-            "name": "Clip Pipeline",
-            "score": score,
-            "status": status,
-            "status_color": status_color,
-            "metrics": {
-                "success_rate": round(success_rate, 1),
-                "avg_duration_min": avg_dur,
-                "total_jobs": total,
-                "pass_rate": round(pass_rate, 1),
-                "avg_confidence": avg_conf,
-                "total_clips": total_clips,
-            },
-        }
+            # DIRECTOR_MODULE.md simplified scoring
+            # Boyut 1: Teknik Sağlık (max 20)
+            sr_score = 6 if success_rate >= 100 else 5 if success_rate >= 95 else 4 if success_rate >= 90 else 2 if success_rate >= 80 else 0
+            dur_score = 4 if avg_dur < 6 else 3 if avg_dur < 8 else 2 if avg_dur < 12 else 0
+            tech_health = sr_score + dur_score + 5  # +5 base (R2 upload, fallback assume ok)
+
+            # Boyut 2: AI Karar Kalitesi (max 35)
+            pr_score = 8 if pass_rate > 50 else 6 if pass_rate > 35 else 3 if pass_rate > 20 else 0
+            conf_score = 7 if avg_conf >= 8.0 else 5 if avg_conf >= 7.0 else 3 if avg_conf >= 6.0 else 0
+            ai_quality = pr_score + conf_score + 5  # +5 base
+
+            # Boyut 3: Çıktı Kalitesi (max 25)
+            clips_per_job = total_clips / max(total, 1)
+            cj_score = 8 if clips_per_job >= 5 else 5 if clips_per_job >= 3 else 2 if clips_per_job >= 1 else 0
+            output_quality = cj_score + 8  # +8 base
+
+            # Boyut 4+5: Öğrenme + Strateji (max 20) — default medium until data accumulates
+            learn_strategy = 10
+
+            score = min(100, round(tech_health + ai_quality + output_quality + learn_strategy))
+
+            if score >= 85:
+                status, status_color = "GUCLU", "green"
+            elif score >= 71:
+                status, status_color = "IYI", "cyan"
+            elif score >= 56:
+                status, status_color = "ORTA", "yellow"
+            elif score >= 36:
+                status, status_color = "ZAYIF", "orange"
+            else:
+                status, status_color = "KRITIK", "red"
+
+            modules["clip_pipeline"] = {
+                "name": "Clip Pipeline",
+                "score": score,
+                "status": status,
+                "status_color": status_color,
+                "metrics": {
+                    "success_rate": round(success_rate, 1),
+                    "avg_duration_min": avg_dur,
+                    "total_jobs": total,
+                    "pass_rate": round(pass_rate, 1),
+                    "avg_confidence": avg_conf,
+                    "total_clips": total_clips,
+                },
+                "subscores": {
+                    "teknik_saglik": {"score": tech_health, "max": 20},
+                    "ai_karar_kalitesi": {"score": ai_quality, "max": 35},
+                    "cikti_kalitesi": {"score": output_quality, "max": 25},
+                    "ogrenme_strateji": {"score": learn_strategy, "max": 20},
+                },
+            }
     except Exception:
-        modules["clip_pipeline"] = {"name": "Clip Pipeline", "score": 0, "status": "KRITIK", "status_color": "red", "metrics": {}}
+        modules["clip_pipeline"] = {
+            "name": "Clip Pipeline", "score": None, "status": "HATA",
+            "status_color": "red", "metrics": {}, "subscores": {},
+        }
 
     # Module 2 — Editor
     modules["editor"] = {
         "name": "Editor",
-        "score": 0,
+        "score": None,
         "status": "VERI YOK",
         "status_color": "gray",
-        "metrics": {"note": "Editor metrics will populate with usage data"},
+        "metrics": {},
+        "subscores": {},
     }
 
     # Module 3 — Director
     modules["director"] = {
         "name": "Director",
-        "score": 0,
+        "score": None,
         "status": "VERI YOK",
         "status_color": "gray",
-        "metrics": {"note": "Director self-assessment requires conversation history"},
+        "metrics": {},
+        "subscores": {},
     }
 
-    # Overall system health (weighted average of modules with data)
-    scored = [m for m in modules.values() if m["score"] > 0]
-    overall = round(sum(m["score"] for m in scored) / len(scored)) if scored else 0
+    scored = [m for m in modules.values() if m.get("score") is not None]
+    overall = round(sum(m["score"] for m in scored) / len(scored)) if scored else None
 
     return {"overall_score": overall, "modules": modules}
 

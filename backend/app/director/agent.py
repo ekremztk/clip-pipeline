@@ -25,6 +25,8 @@ from app.director.tools import sentry as sentry_tools
 from app.director.tools import posthog as ph_tools
 from app.director.tools import railway as railway_tools
 from app.director.tools import deepgram as deepgram_tools
+from app.director.tools import websearch as ws_tools
+from app.director.tools import self_analysis as sa_tools
 
 # ─────────────────────────────────────────────
 # System Prompt
@@ -259,6 +261,54 @@ TOOL_DECLARATIONS = [
             }
         )
     ),
+    types.FunctionDeclaration(
+        name="web_search",
+        description="Search the internet for information, tools, integrations, best practices. Uses Brave Search or DuckDuckGo fallback.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "query": types.Schema(type="STRING", description="Search query in English or Turkish"),
+                "num_results": types.Schema(type="INTEGER", description="Number of results, default 6"),
+            },
+            required=["query"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="fetch_url",
+        description="Fetch and read the text content of a specific URL (documentation, blog posts, GitHub repos, etc.).",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "url": types.Schema(type="STRING", description="URL to fetch"),
+                "max_chars": types.Schema(type="INTEGER", description="Max characters to return, default 6000"),
+            },
+            required=["url"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_director_self_analysis",
+        description="Director analyzes its own capabilities: tools inventory, API integration status, memory count, limitations, and self-improvement recommendations.",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="create_recommendation",
+        description="Write a new improvement recommendation to the database. Use this when you identify a concrete, actionable improvement opportunity.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "module_name": types.Schema(type="STRING", description="e.g. clip_pipeline, editor, director, system"),
+                "title": types.Schema(type="STRING", description="Short, clear title"),
+                "description": types.Schema(type="STRING", description="Detailed description of what to do and why"),
+                "priority": types.Schema(type="INTEGER", description="1=critical, 2=high, 3=medium, 4=low, 5=nice-to-have"),
+                "impact": types.Schema(type="STRING", description="Expected impact: yüksek/orta/düşük"),
+                "effort": types.Schema(type="STRING", description="Implementation effort estimate"),
+                "what_it_solves": types.Schema(type="STRING", description="What problem or opportunity this addresses"),
+                "how_to_integrate": types.Schema(type="STRING", description="Concrete steps to implement"),
+                "why_recommended": types.Schema(type="STRING", description="Reasoning and evidence behind this recommendation"),
+            },
+            required=["module_name", "title", "description", "priority"]
+        )
+    ),
 ]
 
 GEMINI_TOOLS = [types.Tool(function_declarations=TOOL_DECLARATIONS)]
@@ -303,6 +353,24 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return railway_tools.get_railway_logs(args.get("service_name"), args.get("limit", 50))
     elif name == "get_deepgram_usage":
         return deepgram_tools.get_deepgram_usage(args.get("days", 7))
+    elif name == "web_search":
+        return ws_tools.web_search(args["query"], args.get("num_results", 6))
+    elif name == "fetch_url":
+        return ws_tools.fetch_url(args["url"], args.get("max_chars", 6000))
+    elif name == "get_director_self_analysis":
+        return sa_tools.get_director_self_analysis()
+    elif name == "create_recommendation":
+        return db_tools.create_recommendation(
+            module_name=args["module_name"],
+            title=args["title"],
+            description=args["description"],
+            priority=args.get("priority", 3),
+            impact=args.get("impact", "orta"),
+            effort=args.get("effort", ""),
+            what_it_solves=args.get("what_it_solves", ""),
+            how_to_integrate=args.get("how_to_integrate", ""),
+            why_recommended=args.get("why_recommended", ""),
+        )
     else:
         return {"error": f"Unknown tool: {name}"}
 
