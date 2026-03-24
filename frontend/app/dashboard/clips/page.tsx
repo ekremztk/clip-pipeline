@@ -149,6 +149,7 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
     if (clip.suggested_title) params.set("clipTitle", clip.suggested_title);
     if (clip.suggested_description) params.set("clipDesc", clip.suggested_description);
     if (guestName) params.set("clipGuestName", guestName);
+    if (clip.job_id) params.set("clipJobId", clip.job_id);
     const href = `https://edit.prognot.com/editor/${crypto.randomUUID()}?${params.toString()}`;
     return (
         <a href={href} target="_blank" rel="noopener noreferrer" className={`${btnClass} bg-gray-800 hover:bg-gray-700 text-white border-gray-700`}>
