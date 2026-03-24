@@ -15,10 +15,11 @@ import uuid
 import subprocess
 import requests
 import cv2
+import numpy as np
 from typing import Callable, Optional
 
 from app.reframe.scene_detector import get_scene_intervals
-from app.reframe.face_detector import build_scene_face_map
+from app.reframe.face_detector import build_video_face_positions
 from app.reframe.diarization import get_speaker_segments
 from app.reframe.crop_calculator import calculate_crop_positions, compute_crop_width, extract_canvas_keyframes
 from app.config import settings
@@ -85,20 +86,17 @@ def run_reframe(
         scene_intervals = get_scene_intervals(input_path, total_frames)
         print(f"[Reframe] {len(scene_intervals)} scenes detected")
 
-        # ── 4. Face detection per scene ──────────────────────────────────────
+        # ── 4. Face detection (video-wide sampling, per-frame timeline) ─────
         progress("Detecting faces...", 25)
-        scene_face_maps = []
-        for i, scene in enumerate(scene_intervals):
-            face_map = build_scene_face_map(
-                input_path,
-                scene["start"],
-                scene["end"],
-                sample_count=8,
-            )
-            scene_face_maps.append(face_map)
-            if (i + 1) % 5 == 0:
-                pct = 25 + int(((i + 1) / len(scene_intervals)) * 10)
-                progress(f"Detecting faces (scene {i+1}/{len(scene_intervals)})...", pct)
+        left_cx_timeline, right_cx_timeline = build_video_face_positions(
+            input_path,
+            total_frames=total_frames,
+            fps=fps,
+            sample_interval_s=0.5,
+        )
+        print(f"[Reframe] Face timelines built: "
+              f"left={int((~np.isnan(left_cx_timeline)).sum())} frames, "
+              f"right={int((~np.isnan(right_cx_timeline)).sum())} frames")
 
         # ── 5. Diarization ───────────────────────────────────────────────────
         progress("Loading speaker data...", 36)
@@ -120,7 +118,8 @@ def run_reframe(
             src_width=src_w,
             src_height=src_h,
             scene_intervals=scene_intervals,
-            scene_face_maps=scene_face_maps,
+            left_cx_timeline=left_cx_timeline,
+            right_cx_timeline=right_cx_timeline,
             speaker_segments=speaker_segments,
         )
         crop_w = compute_crop_width(src_w, src_h)

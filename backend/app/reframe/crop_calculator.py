@@ -7,42 +7,29 @@ Logic:
 - We crop a (crop_w × src_height) strip from the source, then upscale to 1080×1920
 
 Speaker tracking rules:
-1. If diarization available → follow active speaker's face position
-2. At scene cuts → instant jump (no EMA bleed)
-3. At speaker switches → instant jump
-4. During same speaker/same scene → smooth EMA (alpha = 0.25)
-5. No active speaker (silence/gap) → follow dominant face (face_map[0])
-6. No faces detected in scene → use center
+1. If diarization available → follow active speaker's face (left=spk0, right=spk1)
+2. At scene cuts → instant jump to new scene's face position
+3. At speaker switches → instant jump to new speaker's face
+4. During same speaker/same scene → smooth EMA (alpha = 0.15, tighter than before)
+5. No diarization (speaker = -1) → follow any detected face
+6. No face detected for this frame → hold last smoothed position
 """
 
 import numpy as np
-from typing import List, Optional
+from typing import List
 
 
-# EMA smoothing factor within a continuous segment (higher = faster response)
-EMA_ALPHA = 0.25
-
-# How many pixels of change are considered "no real movement" (suppressed)
-MIN_MOVE_PX = 3
+EMA_ALPHA = 0.15        # Tighter smoothing — less overshoot when face moves
+MIN_MOVE_PX = 2         # Minimum source-pixel change to trigger EMA update
 
 
 def compute_crop_width(src_width: int, src_height: int) -> int:
-    """
-    Crop width needed to extract a 9:16 strip from the source frame.
-    We use the full source height, so crop_width = src_height * (9/16).
-    """
+    """Crop width for a 9:16 strip using full source height."""
     return max(1, int(src_height * 9 / 16))
 
 
-def face_cx_to_crop_x(
-    face_cx_norm: float,
-    src_width: int,
-    crop_w: int,
-) -> int:
-    """
-    Convert normalized face center-x to the crop x-offset that centers the face.
-    Clamped to [0, src_width - crop_w].
-    """
+def face_cx_to_crop_x(face_cx_norm: float, src_width: int, crop_w: int) -> int:
+    """Convert normalized face center-x to crop x-offset that centers the face."""
     face_px = face_cx_norm * src_width
     desired_x = face_px - crop_w / 2
     return int(np.clip(desired_x, 0, src_width - crop_w))
@@ -54,23 +41,22 @@ def calculate_crop_positions(
     src_width: int,
     src_height: int,
     scene_intervals: List[dict],
-    scene_face_maps: List[List[float]],
+    left_cx_timeline: np.ndarray,
+    right_cx_timeline: np.ndarray,
     speaker_segments: List[dict],
 ) -> np.ndarray:
     """
     Returns a 1-D int32 array of length `total_frames` with crop x-offsets.
 
-    scene_intervals: [{"start": int, "end": int}, ...]
-    scene_face_maps: parallel list; scene_face_maps[i] = [left_cx, right_cx] or [single_cx]
-    speaker_segments: [{"speaker": int, "start": float, "end": float}, ...]
+    left_cx_timeline:  per-frame cx_norm for left-side face (NaN = no face)
+    right_cx_timeline: per-frame cx_norm for right-side face (NaN = no face)
+    speaker_segments:  [{"speaker": int, "start": float, "end": float}, ...]
     """
     try:
         crop_w = compute_crop_width(src_width, src_height)
         center_x = (src_width - crop_w) // 2
 
         positions = np.full(total_frames, center_x, dtype=np.int32)
-
-        # Build a per-frame active-speaker array from diarization
         active_speaker = _build_speaker_array(total_frames, fps, speaker_segments)
 
         smoothed_x = float(center_x)
@@ -82,24 +68,30 @@ def calculate_crop_positions(
             if s_start >= total_frames:
                 break
 
-            face_map = scene_face_maps[scene_idx] if scene_idx < len(scene_face_maps) else [0.5]
-
-            # Hard reset at scene boundary
-            target_x = _get_target_x(s_start, active_speaker, face_map, src_width, crop_w, center_x)
+            # Hard reset at scene boundary — snap to new scene's face position
+            target_x = _get_target_x(
+                s_start, active_speaker, left_cx_timeline, right_cx_timeline,
+                src_width, crop_w, center_x,
+            )
             smoothed_x = float(target_x)
-
-            prev_speaker = active_speaker[s_start] if s_start < total_frames else None
+            prev_speaker = active_speaker[s_start]
 
             for frame in range(s_start, s_end):
                 cur_speaker = active_speaker[frame]
 
                 # Hard jump on speaker switch
                 if cur_speaker != prev_speaker:
-                    target_x = _get_target_x(frame, active_speaker, face_map, src_width, crop_w, center_x)
+                    target_x = _get_target_x(
+                        frame, active_speaker, left_cx_timeline, right_cx_timeline,
+                        src_width, crop_w, center_x,
+                    )
                     smoothed_x = float(target_x)
                     prev_speaker = cur_speaker
                 else:
-                    target_x = _get_target_x(frame, active_speaker, face_map, src_width, crop_w, center_x)
+                    target_x = _get_target_x(
+                        frame, active_speaker, left_cx_timeline, right_cx_timeline,
+                        src_width, crop_w, center_x,
+                    )
                     diff = target_x - smoothed_x
                     if abs(diff) > MIN_MOVE_PX:
                         smoothed_x = EMA_ALPHA * target_x + (1.0 - EMA_ALPHA) * smoothed_x
@@ -118,32 +110,50 @@ def calculate_crop_positions(
 def _get_target_x(
     frame: int,
     active_speaker: np.ndarray,
-    face_map: List[float],
+    left_cx_timeline: np.ndarray,
+    right_cx_timeline: np.ndarray,
     src_width: int,
     crop_w: int,
     center_x: int,
 ) -> int:
     """
-    Returns the ideal crop x for this frame based on active speaker and face map.
+    Returns ideal crop x for this frame.
 
-    When speaker=-1 (no diarization or silence), follows face_map[0] (dominant face)
-    instead of defaulting to center. This allows face-following without diarization.
+    Priority:
+    - Speaker 0 (HOST): follow left face, fall back to right if left not detected
+    - Speaker 1 (GUEST): follow right face, fall back to left if right not detected
+    - Speaker -1 (no diarization / silence): follow any detected face
+    - No face detected anywhere: return current center (hold position)
     """
     try:
-        if len(face_map) == 0:
-            return center_x
-
         speaker = int(active_speaker[frame]) if frame < len(active_speaker) else -1
 
-        if speaker < 0:
-            # No diarization or silence — follow the dominant (first/only) face
-            cx_norm = face_map[0]
-        else:
-            # Diarization available — follow the active speaker's face
-            face_idx = min(speaker, len(face_map) - 1)
-            cx_norm = face_map[face_idx]
+        left = float(left_cx_timeline[frame]) if frame < len(left_cx_timeline) else float("nan")
+        right = float(right_cx_timeline[frame]) if frame < len(right_cx_timeline) else float("nan")
 
-        return face_cx_to_crop_x(cx_norm, src_width, crop_w)
+        left_ok = not np.isnan(left)
+        right_ok = not np.isnan(right)
+
+        if speaker == 0:
+            cx = left if left_ok else (right if right_ok else None)
+        elif speaker == 1:
+            cx = right if right_ok else (left if left_ok else None)
+        else:
+            # No diarization — follow any face that's detected
+            if left_ok and right_ok:
+                # Both visible: pick the one closer to center (avoids extreme crop)
+                cx = left if abs(left - 0.5) < abs(right - 0.5) else right
+            elif left_ok:
+                cx = left
+            elif right_ok:
+                cx = right
+            else:
+                return center_x
+
+        if cx is None:
+            return center_x
+
+        return face_cx_to_crop_x(float(cx), src_width, crop_w)
 
     except Exception:
         return center_x
@@ -157,21 +167,29 @@ def extract_canvas_keyframes(
     crop_w: int,
     canvas_w: int = 1080,
     canvas_h: int = 1920,
-    min_delta_canvas_px: float = 5.0,
-    jump_threshold_source_px: int = 60,
+    min_delta_canvas_px: float = 15.0,
+    jump_threshold_source_px: int = 50,
+    min_interval_s: float = 0.2,
 ) -> list:
     """
-    Convert per-frame crop_x array to a minimal keyframe list for the editor timeline.
+    Convert per-frame crop_x array to a minimal keyframe list.
 
-    Each keyframe: {"time_s": float, "offset_x": float}
+    Each keyframe: {"time_s": float, "offset_x": float, "interpolation": str}
 
-    offset_x is in CANVAS pixels — same coordinate system as transform.position.x:
-      0   = frame centered on source center
-      +N  = shifted right (shows left side of source)
-      -N  = shifted left (shows right side of source)
+    interpolation values:
+      "linear" — smooth motion between this and the next keyframe
+      "hold"   — freeze at this value until the next keyframe (used before scene cuts)
 
-    Hard cuts (large jumps) emit two keyframes: one at (t - half_frame) holding
-    the old value, then one at (t) with the new value.
+    offset_x is canvas pixels:
+      0   = source center
+      +N  = show left side of source
+      -N  = show right side of source
+
+    Hard cuts emit a HOLD keyframe just before the cut and a LINEAR keyframe at the cut:
+      {t - half_frame, old_offset, "hold"}  → freeze until cut
+      {t,              new_offset, "linear"} → new position after cut
+
+    This prevents the brief linear pan artifact at scene transitions.
     """
     try:
         if len(crop_positions) == 0:
@@ -189,39 +207,70 @@ def extract_canvas_keyframes(
         half_frame = 0.5 / fps
         keyframes = []
         last_kept_offset: float | None = None
+        last_keyframe_time: float = -999.0
 
         for frame_num in range(len(crop_positions)):
             t = frame_num / fps
             offset = crop_x_to_offset(int(crop_positions[frame_num]))
 
             if frame_num == 0:
-                keyframes.append({"time_s": round(t, 4), "offset_x": round(offset, 2)})
+                keyframes.append({
+                    "time_s": round(t, 4),
+                    "offset_x": round(offset, 2),
+                    "interpolation": "linear",
+                })
                 last_kept_offset = offset
+                last_keyframe_time = t
                 continue
 
             prev_offset = crop_x_to_offset(int(crop_positions[frame_num - 1]))
             jump = abs(offset - prev_offset) > (jump_threshold_source_px * cover_scale)
 
             if jump:
-                # Hard cut: freeze at previous value just before this frame
-                keyframes.append({"time_s": round(t - half_frame, 4), "offset_x": round(prev_offset, 2)})
-                keyframes.append({"time_s": round(t, 4), "offset_x": round(offset, 2)})
+                # Scene cut — emit HOLD keyframe before cut, then snap to new position.
+                # HOLD prevents the editor from linearly interpolating across the cut.
+                hold_t = round(t - half_frame, 4)
+                keyframes.append({
+                    "time_s": hold_t,
+                    "offset_x": round(prev_offset, 2),
+                    "interpolation": "hold",
+                })
+                keyframes.append({
+                    "time_s": round(t, 4),
+                    "offset_x": round(offset, 2),
+                    "interpolation": "linear",
+                })
                 last_kept_offset = offset
-            elif last_kept_offset is not None and abs(offset - last_kept_offset) >= min_delta_canvas_px:
-                keyframes.append({"time_s": round(t, 4), "offset_x": round(offset, 2)})
-                last_kept_offset = offset
+                last_keyframe_time = t
 
-        # Always end with the last frame value
+            elif (
+                last_kept_offset is not None
+                and abs(offset - last_kept_offset) >= min_delta_canvas_px
+                and (t - last_keyframe_time) >= min_interval_s
+            ):
+                keyframes.append({
+                    "time_s": round(t, 4),
+                    "offset_x": round(offset, 2),
+                    "interpolation": "linear",
+                })
+                last_kept_offset = offset
+                last_keyframe_time = t
+
+        # Always include last frame
         last_t = (len(crop_positions) - 1) / fps
         last_offset = crop_x_to_offset(int(crop_positions[-1]))
         if not keyframes or keyframes[-1]["time_s"] < round(last_t - half_frame, 4):
-            keyframes.append({"time_s": round(last_t, 4), "offset_x": round(last_offset, 2)})
+            keyframes.append({
+                "time_s": round(last_t, 4),
+                "offset_x": round(last_offset, 2),
+                "interpolation": "linear",
+            })
 
         return keyframes
 
     except Exception as e:
         print(f"[CropCalculator] extract_canvas_keyframes error: {e}")
-        return [{"time_s": 0.0, "offset_x": 0.0}]
+        return [{"time_s": 0.0, "offset_x": 0.0, "interpolation": "linear"}]
 
 
 def _build_speaker_array(
@@ -231,23 +280,19 @@ def _build_speaker_array(
 ) -> np.ndarray:
     """
     Returns int8 array of length total_frames.
-    Value: 0 = Speaker 0, 1 = Speaker 1, -1 = unknown/silence.
-    Uses last-speaker hold for gaps.
+    0 = Speaker 0 (HOST), 1 = Speaker 1 (GUEST), -1 = unknown/silence.
+    Forward-fills silence gaps with the last known speaker.
     """
     arr = np.full(total_frames, -1, dtype=np.int8)
 
     if not speaker_segments or fps <= 0:
         return arr
 
-    # Fill in known speaker ranges
     for seg in speaker_segments:
-        f_start = int(seg["start"] * fps)
-        f_end = int(seg["end"] * fps)
-        f_start = max(0, f_start)
-        f_end = min(total_frames, f_end)
+        f_start = max(0, int(seg["start"] * fps))
+        f_end = min(total_frames, int(seg["end"] * fps))
         arr[f_start:f_end] = int(seg["speaker"])
 
-    # Forward-fill silence gaps with last known speaker
     last = -1
     for i in range(total_frames):
         if arr[i] >= 0:
