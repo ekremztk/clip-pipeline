@@ -24,6 +24,7 @@ from app.director.tools import langfuse as lf_tools
 from app.director.tools import sentry as sentry_tools
 from app.director.tools import posthog as ph_tools
 from app.director.tools import railway as railway_tools
+from app.director.tools import deepgram as deepgram_tools
 
 # ─────────────────────────────────────────────
 # System Prompt
@@ -260,6 +261,16 @@ TOOL_DECLARATIONS = [
             }
         )
     ),
+    types.FunctionDeclaration(
+        name="get_deepgram_usage",
+        description="Fetch Deepgram transcription usage: requests, audio hours, estimated cost and current balance.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "days": types.Schema(type="INTEGER", description="Look-back period in days"),
+            }
+        )
+    ),
 ]
 
 GEMINI_TOOLS = [types.Tool(function_declarations=TOOL_DECLARATIONS)]
@@ -304,6 +315,8 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return railway_tools.get_railway_status()
     elif name == "get_railway_logs":
         return railway_tools.get_railway_logs(args.get("service_name"), args.get("limit", 50))
+    elif name == "get_deepgram_usage":
+        return deepgram_tools.get_deepgram_usage(args.get("days", 7))
     else:
         return {"error": f"Unknown tool: {name}"}
 
