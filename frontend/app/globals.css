@@ -61,3 +61,51 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   box-shadow: 0 0 0 1px var(--accent);
 }
+
+/* ── Sci-fi Director Dashboard ── */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+@keyframes border-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes data-stream {
+  0% { transform: translateY(-8px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(8px); opacity: 0; }
+}
+.glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+.scan-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.03), transparent);
+  animation: scan-line 4s linear infinite;
+  pointer-events: none;
+}
+.border-flow {
+  background: linear-gradient(90deg, #00d4ff, #0ea5e9, #00d4ff);
+  background-size: 200% 100%;
+  animation: border-flow 3s linear infinite;
+}
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.glass-card {
+  background: rgba(0, 212, 255, 0.02);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 212, 255, 0.08);
+}
+.glass-card:hover {
+  background: rgba(0, 212, 255, 0.04);
+  border-color: rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.06);
+}

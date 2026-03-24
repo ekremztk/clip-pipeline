@@ -186,3 +186,151 @@ async def update_recommendation(rec_id: str, req: RecommendationUpdate):
         return {"ok": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─────────────────────────────────────────────
+# Dashboard Aggregation
+# ─────────────────────────────────────────────
+
+def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
+    """Calculate simplified module health scores (0-100) from available data."""
+    modules = {}
+
+    # Module 1 — Clip Pipeline
+    try:
+        s = pipeline.get("summary", {})
+        total = s.get("total_jobs", 0) or 0
+        completed = s.get("completed", 0) or 0
+        avg_dur = float(s.get("avg_duration_min", 0) or 0)
+
+        success_rate = (completed / total * 100) if total > 0 else 0
+
+        ca = clips.get("analysis", {})
+        total_clips = ca.get("total_clips", 0) or 0
+        pass_count = ca.get("pass_count", 0) or 0
+        avg_conf = float(ca.get("avg_confidence", 0) or 0)
+        pass_rate = (pass_count / total_clips * 100) if total_clips > 0 else 0
+
+        # Score calculation (simplified from DIRECTOR_MODULE.md)
+        tech_health = min(20, success_rate * 0.12 + max(0, (12 - avg_dur)) * 0.67)
+        ai_quality = min(35, pass_rate * 0.2 + avg_conf * 1.5)
+        output_quality = min(25, (total_clips / max(total, 1)) * 3.5)
+        score = min(100, round(tech_health + ai_quality + output_quality + 10))
+
+        if score >= 85:
+            status, status_color = "GUCLU", "green"
+        elif score >= 71:
+            status, status_color = "IYI", "cyan"
+        elif score >= 56:
+            status, status_color = "ORTA", "yellow"
+        elif score >= 36:
+            status, status_color = "ZAYIF", "orange"
+        else:
+            status, status_color = "KRITIK", "red"
+
+        modules["clip_pipeline"] = {
+            "name": "Clip Pipeline",
+            "score": score,
+            "status": status,
+            "status_color": status_color,
+            "metrics": {
+                "success_rate": round(success_rate, 1),
+                "avg_duration_min": avg_dur,
+                "total_jobs": total,
+                "pass_rate": round(pass_rate, 1),
+                "avg_confidence": avg_conf,
+                "total_clips": total_clips,
+            },
+        }
+    except Exception:
+        modules["clip_pipeline"] = {"name": "Clip Pipeline", "score": 0, "status": "KRITIK", "status_color": "red", "metrics": {}}
+
+    # Module 2 — Editor
+    modules["editor"] = {
+        "name": "Editor",
+        "score": 0,
+        "status": "VERI YOK",
+        "status_color": "gray",
+        "metrics": {"note": "Editor metrics will populate with usage data"},
+    }
+
+    # Module 3 — Director
+    modules["director"] = {
+        "name": "Director",
+        "score": 0,
+        "status": "VERI YOK",
+        "status_color": "gray",
+        "metrics": {"note": "Director self-assessment requires conversation history"},
+    }
+
+    # Overall system health (weighted average of modules with data)
+    scored = [m for m in modules.values() if m["score"] > 0]
+    overall = round(sum(m["score"] for m in scored) / len(scored)) if scored else 0
+
+    return {"overall_score": overall, "modules": modules}
+
+
+@router.get("/dashboard")
+async def dashboard_aggregate(days: int = 7):
+    """Single endpoint returning all dashboard data."""
+    result: dict = {"period_days": days}
+
+    # Pipeline stats
+    try:
+        result["pipeline"] = get_pipeline_stats(days)
+    except Exception:
+        result["pipeline"] = {"error": "unavailable"}
+
+    # Clip analysis
+    try:
+        result["clips"] = get_clip_analysis(None, days)
+    except Exception:
+        result["clips"] = {"error": "unavailable"}
+
+    # AI Costs (Langfuse)
+    try:
+        from app.director.tools.langfuse import get_langfuse_data
+        result["costs_ai"] = get_langfuse_data(None, days)
+    except Exception:
+        result["costs_ai"] = {"error": "unavailable"}
+
+    # Deepgram Costs
+    try:
+        from app.director.tools.deepgram import get_deepgram_usage
+        result["costs_deepgram"] = get_deepgram_usage(days)
+    except Exception:
+        result["costs_deepgram"] = {"error": "unavailable"}
+
+    # Recommendations
+    try:
+        client = get_client()
+        recs = (client.table("director_recommendations")
+                .select("*")
+                .eq("status", "pending")
+                .order("priority", desc=False)
+                .limit(10)
+                .execute())
+        result["recommendations"] = recs.data or []
+    except Exception:
+        result["recommendations"] = []
+
+    # Sentry Errors
+    try:
+        from app.director.tools.sentry import get_sentry_issues
+        result["errors"] = get_sentry_issues(days)
+    except Exception:
+        result["errors"] = []
+
+    # Recent Events
+    try:
+        result["events"] = get_recent_events(None, days, 20)
+    except Exception:
+        result["events"] = []
+
+    # Module Scores
+    result["modules"] = _calculate_module_scores(
+        result.get("pipeline", {}),
+        result.get("clips", {}),
+    )
+
+    return result
