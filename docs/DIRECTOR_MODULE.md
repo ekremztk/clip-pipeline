@@ -15,14 +15,15 @@
 - Director'ın kendi kendini değerlendirmesi
 
 ### Değiştirilenler
-- **Langfuse, PostHog, OpenTelemetry kaldırıldı** — Tek kullanıcılı, Railway'deki CPU-only bir sistem için gereksiz dış bağımlılıklar. Tüm event logging Supabase'e yapılır, mevcut `pipeline_audit_log` genişletilir.
 - **K0-K5 sinyalleri kaldırıldı** — Mevcut sistemimizde bu kavram yok. Onun yerine gerçek veri kaynaklarımız kullanılır: `channel_dna`, `guest_profiles`, `reference_clips`, `channel_memory`.
 - **"Minimum 30 çalışma" cold start** → Minimum 5 çalışma (küçük örneklem uyarısıyla göster, susturma).
 - **"Direktor hiçbir iş yapmaz"** prensibi yumuşatıldı — Director test modunda API'leri doğrudan çağırır, klibi editöre yönlendirir, analiz raporları oluşturur. Yayınlamaz ama test eder.
 - **4 Gemini çağrısı → 2-4 adaptif** — Basit analizde 2 çağrı yeterli. Pro model yalnızca kod analizi ve derin değerlendirmede kullanılır; geri kalanı Flash.
-- **"Direktor stratejik bir akıl"** — Evet, ama aynı zamanda aktif bir test cihazı ve kalite kontrolcüsüdür.
 
 ### Eklenenler
+- **Langfuse Cloud** — Her Gemini çağrısını izler, token/maliyet takibi, Director kalite skorları ekleme
+- **PostHog Cloud** — Frontend editör davranış analitiği (caption, reframe, export eylemleri)
+- **Sentry** — Railway backend + Vercel frontend hata takibi
 - Otomatik test suite (E2E, Modül 2, Regression, Prompt testi)
 - Reframe frame bazlı kalite analizi
 - Caption drift analizi
@@ -1252,6 +1253,10 @@ GET  /director/costs
 ```
 backend/app/director/
 ├── __init__.py
+├── integrations/
+│   ├── langfuse_client.py         → Langfuse Cloud bağlantısı, score yazma, usage okuma
+│   ├── posthog_reader.py          → PostHog Query API, editor event'leri çekme
+│   └── sentry_reader.py           → Sentry Issues API, açık hata listesi çekme
 ├── collector/
 │   ├── base_collector.py          → emit() arayüzü, async, hata fırlatmaz
 │   ├── module1_collector.py       → Modül 1 event hook'ları
@@ -1273,12 +1278,12 @@ backend/app/director/
 │   └── prompt_ab_runner.py        → Prompt A/B test
 ├── analyzers/
 │   ├── module1_analyzer.py        → Modül 1 metrik hesaplama
-│   ├── module2_analyzer.py        → Modül 2 metrik hesaplama
+│   ├── module2_analyzer.py        → Modül 2 metrik hesaplama + PostHog verileri
 │   ├── reframe_analyzer.py        → Reframe kalite analizi
 │   ├── caption_analyzer.py        → Caption drift analizi
 │   ├── channel_dna_auditor.py     → DNA sağlık kontrolü
 │   └── prompt_lab_analyzer.py     → Prompt kalite analizi
-├── cost_tracker.py                → Token kullanımı ve maliyet takibi
+├── cost_tracker.py                → Langfuse'dan token/maliyet verisi çekme
 └── api/
     └── director_routes.py         → FastAPI endpoints
 
@@ -1387,30 +1392,286 @@ Sisteme yeni bir modül (örn. Content Finder) eklendiğinde Director'a entegras
 
 ---
 
-## 20. YAYINLAMA PLANI VE ÖNCELİK SIRASI
+## 20. DIŞ ENTEGRASYON ARAÇLARI
 
-### Faz 1 — Temel Altyapı (Director'ın İskeleti)
-1. `director_events` tablosu ve base_collector.py
-2. Modül 1 event hook'ları (S05 ve S06 en kritik)
-3. Sayısal metrik hesaplayıcı (scorer.py — Gemini yok)
-4. Basit dashboard: ham metrikler tablosu
+Director üç dış araçla güçlendirilir. Her biri ayrı bir sorumluluk alanını kapsar ve birbirini tamamlar.
+
+---
+
+### 20.1 Langfuse — LLM Gözlemlenebilirliği
+
+**Neden:** Her Gemini çağrısını izlemek, token maliyetini görmek, Director'ın analizlerinden sonra her trace'e kalite skoru eklemek için.
+
+**Kurulum:** Langfuse Cloud (self-host değil — self-host ClickHouse + Redis + PostgreSQL + S3 gerektirir, Railway'de çok kaynak harcatır)
+
+**Gemini Entegrasyonu:** Vertex AI için native `VertexAIInstrumentor` (OpenTelemetry tabanlı).
+
+```python
+# backend/app/services/langfuse_client.py
+from langfuse import get_client
+from openinference.instrumentation.vertexai import VertexAIInstrumentor
+
+# Uygulama başlangıcında bir kez çağrılır (main.py)
+def init_langfuse():
+    VertexAIInstrumentor().instrument()
+    # Otomatik olarak tüm Vertex AI / Gemini çağrıları izlenir
+    # Prompt, response, token sayısı, latency → Langfuse'a gider
+
+langfuse = get_client()
+```
+
+**Director'ın Langfuse ile yapacakları:**
+
+```python
+# 1. Her Gemini çağrısı otomatik olarak trace'e düşer (VertexAIInstrumentor)
+
+# 2. Director analiz tamamlandığında trace'e kalite skoru ekler
+langfuse.create_score(
+    trace_id=s05_trace_id,   # S05 çağrısının trace ID'si
+    name="clip_pass_rate",
+    value=0.42,              # Bu job'da %42 pass rate
+    data_type="NUMERIC",
+    comment="Director analysis: 2026-03-24"
+)
+
+langfuse.create_score(
+    trace_id=s06_trace_id,
+    name="channel_dna_alignment",
+    value=0.78,              # 0.0-1.0 arası
+    data_type="NUMERIC"
+)
+
+# 3. Prompt Lab A/B testi için iki trace karşılaştırması
+# Run A trace_id vs Run B trace_id → token kullanımı ve kalite farkı
+
+# 4. Maliyet takibi için Langfuse API'sinden token toplamı çekilir
+metrics = langfuse.get_model_usage(
+    from_timestamp="2026-03-01",
+    to_timestamp="2026-03-24"
+)
+# → {total_input_tokens, total_output_tokens, estimated_cost_usd}
+```
+
+**Langfuse Dashboard'da görünecekler:**
+- Her S05 ve S06 çağrısı için trace (prompt → response → token sayısı → süre)
+- Director'ın eklediği kalite skorları (pass_rate, channel_dna_alignment, hook_quality)
+- Zaman bazlı token kullanım grafiği
+- En pahalı çağrılar
+- Retry yapılan çağrılar
+
+**Çevre değişkenleri (Railway):**
+```
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_HOST=https://cloud.langfuse.com
+```
+
+---
+
+### 20.2 PostHog — Frontend Davranış Analitiği
+
+**Neden:** Editor'da kullanıcı ne yapıyor? Caption oluşturuluyor mu, reframe çalıştırılıyor mu, export yapılıyor mu? Bu veriler Director'ın Modül 2 analizini besler.
+
+**Kurulum:** PostHog Cloud (1 milyon event/ay ücretsiz)
+
+**Next.js Entegrasyonu:**
+
+```typescript
+// opencut/apps/web/src/lib/posthog.ts
+import posthog from 'posthog-js'
+
+export function initPostHog() {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    api_host: 'https://app.posthog.com',
+    capture_pageview: false,  // Manuel kontrol
+    persistence: 'localStorage'
+  })
+}
+
+// Kullanım:
+posthog.capture('reframe_triggered', {
+  session_id: sessionId,
+  has_diarization: Boolean(clipJobId),
+  clip_duration_s: duration
+})
+
+posthog.capture('captions_generated', {
+  session_id: sessionId,
+  word_count: words.length,
+  language: detectedLanguage
+})
+
+posthog.capture('editor_export_completed', {
+  session_id: sessionId,
+  had_reframe: reframeActive,
+  had_captions: captionsActive,
+  time_from_open_ms: Date.now() - sessionStartTime
+})
+
+posthog.capture('youtube_metadata_accepted', {
+  title_changed: titleWasEdited,
+  description_changed: descWasEdited
+})
+```
+
+**Director PostHog API'sinden veri çeker:**
+
+```python
+# backend/app/director/analyzers/posthog_reader.py
+import httpx
+
+async def get_editor_metrics(days: int = 30) -> dict:
+    """PostHog Query API üzerinden event verisi çeker"""
+    response = await httpx.post(
+        "https://app.posthog.com/api/projects/{project_id}/query/",
+        headers={"Authorization": f"Bearer {POSTHOG_API_KEY}"},
+        json={
+            "query": {
+                "kind": "EventsQuery",
+                "event": "editor_export_completed",
+                "properties": [],
+                "dateRange": {"date_from": f"-{days}d"}
+            }
+        }
+    )
+    return response.json()
+```
+
+**Çevre değişkenleri (Vercel):**
+```
+NEXT_PUBLIC_POSTHOG_KEY=phc_...
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+```
+
+**PostHog Railway backend'e de eklenir:**
+```python
+# Önemli backend olayları için
+from posthog import Posthog
+posthog = Posthog(POSTHOG_API_KEY, host='https://app.posthog.com')
+
+posthog.capture('anonymous', 'pipeline_completed', {
+    'channel_id': channel_id,
+    'pass_count': pass_count,
+    'duration_ms': duration_ms
+})
+```
+
+---
+
+### 20.3 Sentry — Hata Takibi
+
+**Neden:** Railway backend ve Vercel frontend'deki her hata otomatik yakalanır, stack trace ile. Director "bilinen hata kategorileri" bölümünü Sentry'den besler.
+
+**Kurulum:** Sentry Cloud (5.000 hata/ay + 5M span ücretsiz — tek kullanıcı için fazlasıyla yeterli)
+
+**Railway Backend Entegrasyonu:**
+
+```python
+# backend/app/main.py — en üste ekle
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn=os.environ.get("SENTRY_DSN"),
+    traces_sample_rate=1.0,      # %100 transaction takibi
+    profiles_sample_rate=0.2,    # %20 profiling (performans)
+    environment=settings.ENVIRONMENT,
+    release="prognot@1.0.0"
+)
+```
+
+**Vercel Frontend Entegrasyonu:**
+
+```typescript
+// opencut/apps/web/src/lib/sentry.ts
+import * as Sentry from "@sentry/nextjs"
+
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  tracesSampleRate: 0.5,
+  environment: process.env.NODE_ENV
+})
+```
+
+**Director'ın Sentry ile entegrasyonu:**
+
+```python
+# Director analiz sırasında Sentry Issues API'den son hataları çeker
+async def get_recent_errors(days: int = 7) -> list:
+    response = await httpx.get(
+        f"https://sentry.io/api/0/projects/{ORG}/{PROJECT}/issues/",
+        headers={"Authorization": f"Bearer {SENTRY_AUTH_TOKEN}"},
+        params={"query": "is:unresolved", "statsPeriod": f"{days}d"}
+    )
+    issues = response.json()
+    # Director'a dönen: [{title, count, firstSeen, lastSeen, culprit}]
+    return issues
+```
+
+Director analizinde "Teknik Sağlık" boyutu Sentry'deki açık hata sayısından etkilenir.
+
+**Çevre değişkenleri:**
+```
+# Railway
+SENTRY_DSN=https://xxx@o123.ingest.sentry.io/456
+SENTRY_AUTH_TOKEN=sntrys_...   # Director API erişimi için
+
+# Vercel
+NEXT_PUBLIC_SENTRY_DSN=https://xxx@o123.ingest.sentry.io/456
+```
+
+---
+
+### 20.4 Araçlar Arasındaki İş Bölümü
+
+```
+Olay                          Langfuse   PostHog    Sentry     Supabase
+─────────────────────────────────────────────────────────────────────────
+Gemini API çağrısı               ✓          -          -          -
+Gemini token kullanımı           ✓          -          -          -
+Director kalite skoru            ✓          -          -          ✓
+Backend exception                -          -          ✓          -
+Pipeline adım süresi             -          -          -          ✓
+Reframe tetiklendi               -          ✓          -          ✓
+Caption oluşturuldu              -          ✓          -          ✓
+Editor export                    -          ✓          -          ✓
+Frontend exception               -          -          ✓          -
+Kullanıcı klip onayı             -          -          -          ✓
+Kanal DNA güncellemesi           -          -          -          ✓
+```
+
+---
+
+## 21. YAYINLAMA PLANI VE ÖNCELİK SIRASI
+
+### Faz 1 — Temel Altyapı + Dış Araçlar
+1. **Sentry** kurulumu (Railway backend + Vercel frontend) — 30 dakika
+2. **Langfuse Cloud** hesabı + VertexAIInstrumentor entegrasyonu — 1 saat
+3. **PostHog Cloud** hesabı + Next.js snippet — 30 dakika
+4. `director_events` tablosu ve base_collector.py
+5. Modül 1 event hook'ları (S05 ve S06 en kritik)
+6. Sayısal metrik hesaplayıcı (scorer.py — Gemini yok)
+7. Basit dashboard: ham metrikler tablosu
 
 ### Faz 2 — Analiz Zinciri
-5. Gemini analiz zinciri (2 çağrı ile başla, Flash)
-6. `director_analyses` ve `director_recommendations` tabloları
-7. Dashboard'a puan kartları ve öneri listesi
+8. Gemini analiz zinciri (2 çağrı ile başla, Flash)
+9. `director_analyses` ve `director_recommendations` tabloları
+10. Director → Langfuse score yazma entegrasyonu
+11. Director → Sentry Issues okuma entegrasyonu
+12. Dashboard'a puan kartları ve öneri listesi
 
 ### Faz 3 — Test Sistemi
-8. Modül 1 E2E test runner
-9. Modül 2 test suite (reframe + captions)
-10. Test dashboard sayfası
+13. Modül 1 E2E test runner
+14. Modül 2 test suite (reframe + captions)
+15. PostHog event verisi → Director modül 2 analizi
+16. Test dashboard sayfası
 
 ### Faz 4 — İleri Özellikler
-11. Semantik hafıza (pgvector embedding)
-12. Cross-module köprüsü
-13. Prompt Lab
-14. İnternet araştırması (Gemini grounding)
-15. Director kendi kendini değerlendirme
+17. Semantik hafıza (pgvector embedding)
+18. Cross-module köprüsü
+19. Prompt Lab
+20. İnternet araştırması (Gemini grounding)
+21. Director kendi kendini değerlendirme
+22. Langfuse Prompt Management entegrasyonu (prompt versiyonlama)
 
 ---
 
