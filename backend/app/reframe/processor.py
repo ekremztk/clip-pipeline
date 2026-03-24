@@ -25,7 +25,8 @@ from app.config import settings
 
 
 def run_reframe(
-    clip_url: str,
+    clip_url: Optional[str] = None,
+    clip_local_path: Optional[str] = None,
     clip_id: Optional[str] = None,
     job_id: Optional[str] = None,
     clip_start: float = 0.0,
@@ -35,8 +36,11 @@ def run_reframe(
     """
     Reframe pipeline. Returns a dict with keyframes and video metadata.
     Keyframes: [{time_s, offset_x}, ...] in canvas-pixel coordinates.
+    Pass either clip_url (remote) or clip_local_path (already on disk).
     on_progress(step_label, percent) called throughout.
     """
+    if not clip_url and not clip_local_path:
+        raise ValueError("Either clip_url or clip_local_path must be provided")
 
     def progress(step: str, pct: int):
         print(f"[Reframe] {pct}% — {step}")
@@ -45,12 +49,20 @@ def run_reframe(
 
     temp_dir = os.path.join(str(settings.UPLOAD_DIR), f"reframe_{uuid.uuid4().hex}")
     os.makedirs(temp_dir, exist_ok=True)
-    input_path = os.path.join(temp_dir, "input.mp4")
+
+    # Use pre-uploaded file directly, or download to temp dir
+    if clip_local_path and os.path.exists(clip_local_path):
+        input_path = clip_local_path
+        downloaded = False
+    else:
+        input_path = os.path.join(temp_dir, "input.mp4")
+        downloaded = True
 
     try:
-        # ── 1. Download ──────────────────────────────────────────────────────
-        progress("Downloading video...", 5)
-        _download_video(clip_url, input_path)
+        # ── 1. Download (skip if local file already provided) ────────────────
+        if downloaded:
+            progress("Downloading video...", 5)
+            _download_video(clip_url, input_path)
 
         # ── 2. Video info ────────────────────────────────────────────────────
         progress("Reading video metadata...", 10)
@@ -139,6 +151,7 @@ def run_reframe(
         raise
 
     finally:
+        # Always clean up the input file (whether downloaded or pre-uploaded)
         try:
             if os.path.exists(input_path):
                 os.remove(input_path)
