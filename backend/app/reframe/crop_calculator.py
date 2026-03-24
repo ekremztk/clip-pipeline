@@ -16,7 +16,7 @@ Speaker tracking rules:
 """
 
 import numpy as np
-from typing import List
+from typing import List, Optional
 
 
 EMA_ALPHA = 0.15        # Tighter smoothing — less overshoot when face moves
@@ -165,11 +165,11 @@ def extract_canvas_keyframes(
     src_w: int,
     src_h: int,
     crop_w: int,
+    scene_intervals: Optional[List[dict]] = None,
     canvas_w: int = 1080,
     canvas_h: int = 1920,
-    min_delta_canvas_px: float = 15.0,
-    jump_threshold_source_px: int = 50,
-    min_interval_s: float = 0.2,
+    min_delta_canvas_px: float = 25.0,
+    min_interval_s: float = 0.5,
 ) -> list:
     """
     Convert per-frame crop_x array to a minimal keyframe list.
@@ -185,11 +185,8 @@ def extract_canvas_keyframes(
       +N  = show left side of source
       -N  = show right side of source
 
-    Hard cuts emit a HOLD keyframe just before the cut and a LINEAR keyframe at the cut:
-      {t - half_frame, old_offset, "hold"}  → freeze until cut
-      {t,              new_offset, "linear"} → new position after cut
-
-    This prevents the brief linear pan artifact at scene transitions.
+    Scene cuts (from scene_intervals) emit a HOLD keyframe just before the cut and a
+    LINEAR keyframe at the cut — this prevents the editor from panning across scene cuts.
     """
     try:
         if len(crop_positions) == 0:
@@ -203,6 +200,12 @@ def extract_canvas_keyframes(
             cx_norm = (cx + crop_w / 2) / src_w
             raw = scaled_src_w * (0.5 - cx_norm)
             return float(np.clip(raw, -max_offset, max_offset))
+
+        # Build set of frame numbers that are scene cut boundaries
+        cut_frames: set = set()
+        if scene_intervals:
+            for scene in scene_intervals[1:]:   # skip first — no cut before it
+                cut_frames.add(int(scene["start"]))
 
         half_frame = 0.5 / fps
         keyframes = []
@@ -223,13 +226,10 @@ def extract_canvas_keyframes(
                 last_keyframe_time = t
                 continue
 
-            prev_offset = crop_x_to_offset(int(crop_positions[frame_num - 1]))
-            jump = abs(offset - prev_offset) > (jump_threshold_source_px * cover_scale)
-
-            if jump:
-                # Scene cut — emit HOLD keyframe before cut, then snap to new position.
-                # HOLD prevents the editor from linearly interpolating across the cut.
-                hold_t = round(t - half_frame, 4)
+            if frame_num in cut_frames:
+                # Known scene cut — hold at previous position then snap to new one.
+                prev_offset = crop_x_to_offset(int(crop_positions[frame_num - 1]))
+                hold_t = max(0.0, round(t - half_frame, 4))
                 keyframes.append({
                     "time_s": hold_t,
                     "offset_x": round(prev_offset, 2),

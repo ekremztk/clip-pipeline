@@ -92,6 +92,7 @@ def run_reframe(
             input_path,
             total_frames=total_frames,
             fps=fps,
+            scene_intervals=scene_intervals,
             sample_interval_s=0.5,
         )
         print(f"[Reframe] Face timelines built: "
@@ -133,6 +134,7 @@ def run_reframe(
             src_w=src_w,
             src_h=src_h,
             crop_w=crop_w,
+            scene_intervals=scene_intervals,
         )
         print(f"[Reframe] {len(keyframes)} keyframes generated")
 
