@@ -568,7 +568,7 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
   async function dismissRec(id: string) {
-    setDismissedIds((prev) => new Set([...prev, id]));
+    setDismissedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
     try {
       await fetch(`${API_URL}/director/recommendations/${id}/dismiss`, { method: "POST" });
     } catch { /* silent */ }
