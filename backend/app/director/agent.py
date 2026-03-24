@@ -11,11 +11,12 @@ Runs a tool-calling loop, yields SSE events at each step:
 """
 
 import json
+import time
 from typing import AsyncGenerator, Any
-from google import genai
 from google.genai import types
 
 from app.config import settings
+from app.services.gemini_client import get_gemini_client, _trace_generation
 from app.director.tools import database as db_tools
 from app.director.tools import filesystem as fs_tools
 from app.director.tools import memory as mem_tools
@@ -339,7 +340,7 @@ async def run_agent(
     Runs tool-calling loop until Gemini stops calling tools, then yields final text.
     """
     try:
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        client = get_gemini_client()  # Vertex AI — same client as pipeline
 
         # Build initial context injection
         memory_context = ""
@@ -378,11 +379,36 @@ async def run_agent(
         while iteration < max_iterations:
             iteration += 1
 
+            t0 = time.time()
             response = client.models.generate_content(
                 model=settings.GEMINI_MODEL_PRO,
                 contents=contents,
                 config=config,
             )
+            duration_ms = int((time.time() - t0) * 1000)
+
+            # Trace this Director call to Langfuse
+            try:
+                usage = getattr(response, "usage_metadata", None)
+                in_tok = getattr(usage, "prompt_token_count", None) if usage else None
+                out_tok = getattr(usage, "candidates_token_count", None) if usage else None
+                last_user_text = user_message if iteration == 1 else f"[tool_results iteration {iteration}]"
+                out_text = ""
+                if response.candidates:
+                    for part in (response.candidates[0].content.parts or []):
+                        if hasattr(part, "text") and part.text:
+                            out_text += part.text
+                _trace_generation(
+                    name="director_chat",
+                    model=settings.GEMINI_MODEL_PRO,
+                    prompt_input=last_user_text,
+                    output=out_text,
+                    input_tokens=in_tok,
+                    output_tokens=out_tok,
+                    metadata={"session_id": session_id, "iteration": iteration, "duration_ms": duration_ms},
+                )
+            except Exception:
+                pass  # Tracing failure never blocks the agent
 
             candidate = response.candidates[0] if response.candidates else None
             if not candidate:
