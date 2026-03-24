@@ -446,19 +446,19 @@ function ModuleModal({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="glass-card rounded-xl p-4">
                       <div className="text-xs mb-2" style={{ color: C.textMuted }}>Pass Orani</div>
-                      <div className="text-2xl font-bold" style={{ color: C.green }}>{metrics.pass_rate || 0}%</div>
+                      <div className="text-2xl font-bold" style={{ color: C.green }}>{Number(metrics.pass_rate) || 0}%</div>
                       <GlowBar value={Number(metrics.pass_rate) || 0} max={100} color={C.green} />
                     </div>
                     <div className="glass-card rounded-xl p-4">
                       <div className="text-xs mb-2" style={{ color: C.textMuted }}>Ort. Guven</div>
-                      <div className="text-2xl font-bold" style={{ color: C.cyan }}>{metrics.avg_confidence || 0}</div>
+                      <div className="text-2xl font-bold" style={{ color: C.cyan }}>{Number(metrics.avg_confidence) || 0}</div>
                       <GlowBar value={Number(metrics.avg_confidence) || 0} max={10} color={C.cyan} />
                     </div>
                   </div>
                   <div className="glass-card rounded-xl p-4">
                     <div className="text-xs mb-2" style={{ color: C.textMuted }}>Ort. Tamamlanma Suresi</div>
                     <div className="flex items-end gap-2">
-                      <span className="text-3xl font-bold" style={{ color: C.text }}>{metrics.avg_duration_min || 0}</span>
+                      <span className="text-3xl font-bold" style={{ color: C.text }}>{Number(metrics.avg_duration_min) || 0}</span>
                       <span className="text-sm mb-1" style={{ color: C.textMuted }}>dakika</span>
                     </div>
                     <GlowBar value={Math.max(0, 15 - Number(metrics.avg_duration_min || 0))} max={15} color={C.cyan} />
