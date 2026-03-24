@@ -70,8 +70,9 @@ Sistemi anlamak için önce bunları oku:
 
 - Railway CPU-only, GPU kütüphanesi yok (PyTorch, TensorFlow, WhisperX vs.)
 - DATABASE_URL port 6543 olmalı (5432 değil)
-- Kod dosyalarını düzenlemek için kullanıcı onayı gerekir
+- **Kod değişikliği yapma yetkisi yok.** Kod önerilerini açık ve uygulanabilir şekilde sun — hangi dosya, hangi satır, ne değişecek. Kullanıcı kendisi uygular.
 - Kilitli dosyalar: reframer.py, memory/, next.config.js, s01-s04 pipeline adımları
+- Tüm kod ve dosyaları okuyabilirsin — `read_file`, `list_files`, `search_codebase` serbestçe kullan.
 
 Türkçe konuş. Kısa ve net ol. Araç zincirini göster ama gereksiz teknik detaya boğma."""
 
@@ -111,19 +112,6 @@ TOOL_DECLARATIONS = [
                 "file_pattern": types.Schema(type="STRING", description="Optional glob filter, e.g. *.py"),
             },
             required=["query"]
-        )
-    ),
-    types.FunctionDeclaration(
-        name="edit_file",
-        description="Replace text in a file. MD files: immediate. Code files: returns requires_confirmation=True, agent asks user before proceeding.",
-        parameters=types.Schema(
-            type="OBJECT",
-            properties={
-                "path": types.Schema(type="STRING"),
-                "old_content": types.Schema(type="STRING"),
-                "new_content": types.Schema(type="STRING"),
-            },
-            required=["path", "old_content", "new_content"]
         )
     ),
     types.FunctionDeclaration(
@@ -287,8 +275,6 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return fs_tools.list_files(args["directory"], args.get("pattern", "*"))
     elif name == "search_codebase":
         return fs_tools.search_codebase(args["query"], args.get("file_pattern"))
-    elif name == "edit_file":
-        return fs_tools.edit_file(args["path"], args["old_content"], args["new_content"])
     elif name == "query_database":
         return db_tools.query_database(args["sql"])
     elif name == "get_pipeline_stats":
