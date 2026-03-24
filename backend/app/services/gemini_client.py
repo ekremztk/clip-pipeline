@@ -9,6 +9,42 @@ from google.genai import types
 from google.genai.errors import APIError
 from app.config import settings
 
+# Langfuse — lazy init, no-op if not configured
+_langfuse = None
+
+def _get_langfuse():
+    global _langfuse
+    if _langfuse is None and settings.LANGFUSE_PUBLIC_KEY and settings.LANGFUSE_SECRET_KEY:
+        try:
+            from langfuse import Langfuse
+            _langfuse = Langfuse(
+                public_key=settings.LANGFUSE_PUBLIC_KEY,
+                secret_key=settings.LANGFUSE_SECRET_KEY,
+                host=settings.LANGFUSE_HOST,
+            )
+        except Exception as e:
+            print(f"[GeminiClient] Langfuse init failed (non-critical): {e}")
+    return _langfuse
+
+
+def _trace_generation(name: str, model: str, prompt_input: str, output: str, metadata: dict | None = None):
+    """Send a generation trace to Langfuse. Silent on failure."""
+    try:
+        lf = _get_langfuse()
+        if not lf:
+            return
+        trace = lf.trace(name=name)
+        trace.generation(
+            name=name,
+            model=model,
+            input=prompt_input[:2000],
+            output=output[:2000] if output else "",
+            metadata=metadata or {},
+        )
+        lf.flush()
+    except Exception as e:
+        print(f"[GeminiClient] Langfuse trace failed (non-critical): {e}")
+
 _gemini_client: Optional[genai.Client] = None
 _developer_client: Optional[genai.Client] = None
 
@@ -92,7 +128,8 @@ def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: boo
         config_kwargs["response_mime_type"] = "application/json"
         
     config = types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
-    
+
+    t0 = time.time()
     def do_generate() -> str:
         response = client.models.generate_content(
             model=model,
@@ -100,8 +137,16 @@ def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: boo
             config=config,
         )
         return str(response.text)
-        
-    return str(_retry_logic(do_generate))
+
+    result = str(_retry_logic(do_generate))
+    _trace_generation(
+        name="generate_json" if json_mode else "generate",
+        model=model,
+        prompt_input=prompt,
+        output=result,
+        metadata={"json_mode": json_mode, "duration_ms": int((time.time() - t0) * 1000)},
+    )
+    return result
 
 def generate(prompt: str, system: Optional[str] = None, model: Optional[str] = None) -> str:
     """
@@ -181,6 +226,7 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
     if model is None:
         model = settings.GEMINI_MODEL_PRO
     gcs_uri = None
+    t0 = time.time()
     try:
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"Video file not found: {video_path}")
@@ -203,23 +249,27 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
                 return str(response.text)
 
             result = _retry_logic(do_generate_inline)
-            return str(result) if result else "{}"
+            out = str(result) if result else "{}"
+            _trace_generation("analyze_video", model, prompt, out,
+                              {"file_size_mb": round(file_size_mb, 1), "mode": "inline",
+                               "duration_ms": int((time.time() - t0) * 1000)})
+            return out
 
         else:
             print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
             from google.cloud import storage
             import uuid
-            
+
             storage_client = storage.Client(project=settings.GCP_PROJECT)
             bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
-            
+
             blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
             blob = bucket.blob(blob_name)
             blob.upload_from_filename(video_path)
-            
+
             gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
             print(f"[GeminiClient] Uploaded video to {gcs_uri}")
-            
+
             video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
 
             def do_generate_uploaded() -> str:
@@ -230,7 +280,11 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
                 return str(response.text)
 
             result = _retry_logic(do_generate_uploaded)
-            return str(result) if result else "{}"
+            out = str(result) if result else "{}"
+            _trace_generation("analyze_video", model, prompt, out,
+                              {"file_size_mb": round(file_size_mb, 1), "mode": "gcs",
+                               "duration_ms": int((time.time() - t0) * 1000)})
+            return out
 
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")
