@@ -32,3 +32,8 @@ scenedetect[opencv]==0.6.5.2
 
 # --- YouTube Tools ---
 yt-dlp>=2026.3.3
+
+# --- Director Module ---
+sentry-sdk[fastapi]
+langfuse>=2.0.0
+posthog

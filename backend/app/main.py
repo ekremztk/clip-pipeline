@@ -3,12 +3,23 @@ from dotenv import load_dotenv
 # Load .env variables at the top
 load_dotenv()
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 from app.config import settings
+
+# Sentry — must init before FastAPI app creation
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        traces_sample_rate=0.2,
+        profiles_sample_rate=0.1,
+    )
+    print("[Sentry] Initialized")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,6 +30,7 @@ async def lifespan(app: FastAPI):
 
 from app.api.routes import jobs, clips, speakers, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe
 from app.api.websocket import progress
+from app.director.router import router as director_router
 
 app = FastAPI(
     title="Prognot Clip Pipeline",
@@ -49,6 +61,7 @@ app.include_router(proxy.router)
 app.include_router(youtube_metadata.router)
 app.include_router(reframe.router)
 app.include_router(progress.router)
+app.include_router(director_router)
 
 @app.get("/health")
 async def health_check():
