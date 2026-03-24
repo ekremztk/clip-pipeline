@@ -27,18 +27,35 @@ def _get_langfuse():
     return _langfuse
 
 
-def _trace_generation(name: str, model: str, prompt_input: str, output: str, metadata: dict | None = None):
-    """Send a generation trace to Langfuse. Silent on failure."""
+def _trace_generation(
+    name: str,
+    model: str,
+    prompt_input: str,
+    output: str,
+    input_tokens: int | None = None,
+    output_tokens: int | None = None,
+    metadata: dict | None = None,
+):
+    """Send a generation trace to Langfuse with token usage. Silent on failure."""
     try:
         lf = _get_langfuse()
         if not lf:
             return
         trace = lf.trace(name=name)
+        usage = None
+        if input_tokens is not None or output_tokens is not None:
+            usage = {
+                "input": input_tokens or 0,
+                "output": output_tokens or 0,
+                "total": (input_tokens or 0) + (output_tokens or 0),
+                "unit": "TOKENS",
+            }
         trace.generation(
             name=name,
             model=model,
             input=prompt_input[:2000],
             output=output[:2000] if output else "",
+            usage=usage,
             metadata=metadata or {},
         )
         lf.flush()
@@ -130,21 +147,36 @@ def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: boo
     config = types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
 
     t0 = time.time()
+    _last_response: list = []  # mutable container to capture response from closure
+
     def do_generate() -> str:
         response = client.models.generate_content(
             model=model,
             contents=prompt,
             config=config,
         )
+        _last_response.clear()
+        _last_response.append(response)
         return str(response.text)
 
     result = str(_retry_logic(do_generate))
+    duration_ms = int((time.time() - t0) * 1000)
+
+    input_tokens = output_tokens = None
+    if _last_response:
+        usage = getattr(_last_response[0], "usage_metadata", None)
+        if usage:
+            input_tokens = getattr(usage, "prompt_token_count", None)
+            output_tokens = getattr(usage, "candidates_token_count", None)
+
     _trace_generation(
         name="generate_json" if json_mode else "generate",
         model=model,
         prompt_input=prompt,
         output=result,
-        metadata={"json_mode": json_mode, "duration_ms": int((time.time() - t0) * 1000)},
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        metadata={"json_mode": json_mode, "duration_ms": duration_ms},
     )
     return result
 
@@ -234,6 +266,8 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
         client = get_gemini_client()
 
+        _last_video_response: list = []
+
         if file_size_mb < 20:
             print(f"[GeminiClient] Video size {file_size_mb:.1f}MB < 20MB. Using inline bytes.")
             with open(video_path, "rb") as f:
@@ -246,13 +280,22 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
                     model=model,
                     contents=[video_part, prompt]
                 )
+                _last_video_response.clear()
+                _last_video_response.append(response)
                 return str(response.text)
 
             result = _retry_logic(do_generate_inline)
             out = str(result) if result else "{}"
+            in_tok = out_tok = None
+            if _last_video_response:
+                u = getattr(_last_video_response[0], "usage_metadata", None)
+                if u:
+                    in_tok = getattr(u, "prompt_token_count", None)
+                    out_tok = getattr(u, "candidates_token_count", None)
             _trace_generation("analyze_video", model, prompt, out,
-                              {"file_size_mb": round(file_size_mb, 1), "mode": "inline",
-                               "duration_ms": int((time.time() - t0) * 1000)})
+                              input_tokens=in_tok, output_tokens=out_tok,
+                              metadata={"file_size_mb": round(file_size_mb, 1), "mode": "inline",
+                                        "duration_ms": int((time.time() - t0) * 1000)})
             return out
 
         else:
@@ -277,13 +320,22 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
                     model=model,
                     contents=[video_part, prompt]
                 )
+                _last_video_response.clear()
+                _last_video_response.append(response)
                 return str(response.text)
 
             result = _retry_logic(do_generate_uploaded)
             out = str(result) if result else "{}"
+            in_tok = out_tok = None
+            if _last_video_response:
+                u = getattr(_last_video_response[0], "usage_metadata", None)
+                if u:
+                    in_tok = getattr(u, "prompt_token_count", None)
+                    out_tok = getattr(u, "candidates_token_count", None)
             _trace_generation("analyze_video", model, prompt, out,
-                              {"file_size_mb": round(file_size_mb, 1), "mode": "gcs",
-                               "duration_ms": int((time.time() - t0) * 1000)})
+                              input_tokens=in_tok, output_tokens=out_tok,
+                              metadata={"file_size_mb": round(file_size_mb, 1), "mode": "gcs",
+                                        "duration_ms": int((time.time() - t0) * 1000)})
             return out
 
     except Exception as e:
