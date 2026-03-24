@@ -35,6 +35,8 @@ class Settings:
     FFMPEG_PRESET = "slow"
 
     # Director Module
+    RAILWAY_API_TOKEN: str = os.getenv("RAILWAY_API_TOKEN", "")
+    RAILWAY_PROJECT_ID: str = os.getenv("RAILWAY_PROJECT_ID", "")
     SENTRY_DSN: str = os.getenv("SENTRY_DSN", "")
     LANGFUSE_HOST: str = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
     LANGFUSE_PUBLIC_KEY: str = os.getenv("LANGFUSE_PUBLIC_KEY", "")

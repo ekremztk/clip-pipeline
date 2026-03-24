@@ -22,6 +22,7 @@ from app.director.tools import memory as mem_tools
 from app.director.tools import langfuse as lf_tools
 from app.director.tools import sentry as sentry_tools
 from app.director.tools import posthog as ph_tools
+from app.director.tools import railway as railway_tools
 
 # ─────────────────────────────────────────────
 # System Prompt
@@ -242,6 +243,22 @@ TOOL_DECLARATIONS = [
             }
         )
     ),
+    types.FunctionDeclaration(
+        name="get_railway_status",
+        description="Fetch Railway deployment status, service health, and latest deployment info.",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="get_railway_logs",
+        description="Fetch recent deployment logs from Railway for a service.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "service_name": types.Schema(type="STRING", description="Service name filter, e.g. backend"),
+                "limit": types.Schema(type="INTEGER", description="Number of log lines, default 50"),
+            }
+        )
+    ),
 ]
 
 GEMINI_TOOLS = [types.Tool(function_declarations=TOOL_DECLARATIONS)]
@@ -282,6 +299,10 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return sentry_tools.get_sentry_issues(args.get("days", 7), args.get("resolved", False))
     elif name == "get_posthog_events":
         return ph_tools.get_posthog_events(args.get("event"), args.get("days", 7))
+    elif name == "get_railway_status":
+        return railway_tools.get_railway_status()
+    elif name == "get_railway_logs":
+        return railway_tools.get_railway_logs(args.get("service_name"), args.get("limit", 50))
     else:
         return {"error": f"Unknown tool: {name}"}
 

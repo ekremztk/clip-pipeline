@@ -53,8 +53,8 @@ def _trace_generation(
         trace.generation(
             name=name,
             model=model,
-            input=prompt_input[:2000],
-            output=output[:2000] if output else "",
+            input=prompt_input,
+            output=output if output else "",
             usage=usage,
             metadata=metadata or {},
         )
