@@ -23,6 +23,21 @@ from app.services.supabase_client import get_client
 router = APIRouter(prefix="/director", tags=["director"])
 
 
+def _sanitize_json(obj):
+    """Recursively convert Decimal/datetime to JSON-serializable types."""
+    from decimal import Decimal
+    import datetime
+    if isinstance(obj, dict):
+        return {k: _sanitize_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_sanitize_json(v) for v in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    return obj
+
+
 # ─────────────────────────────────────────────
 # Chat (SSE)
 # ─────────────────────────────────────────────
@@ -819,7 +834,7 @@ Cevabını şu JSON formatında ver:
 
         # ── Save to director_analyses ────────────────────────────────────────
         client_db = get_client()
-        analysis_row = {
+        analysis_row = _sanitize_json({
             "module_name": module,
             "triggered_by": triggered_by,
             "score": score or 0,
@@ -831,7 +846,7 @@ Cevabını şu JSON formatında ver:
             ],
             "recommendations": [],
             "data_points_used": int(s.get("total_jobs", 0) or 0),
-        }
+        })
         res = client_db.table("director_analyses").insert(analysis_row).execute()
         analysis_id = res.data[0].get("id") if res.data else None
 

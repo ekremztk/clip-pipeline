@@ -60,13 +60,122 @@ SLASH_COMMANDS: list[dict] = [
     {
         "command": "/analiz-calistir",
         "label": "Analiz Çalıştır",
-        "description": "Şimdi hemen tam AI analizi yap ve kaydet",
+        "description": "Kapsamlı sistem araştırması — tüm kaynaklardan veri topla, derinlemesine analiz et",
         "icon": "chart",
         "category": "analiz",
         "prompt": (
-            "trigger_analysis aracını çalıştır: module='all', depth='deep'.\n"
-            "Analiz tamamlanınca sonuçları raporla: skor, boyutlar, öne çıkan bulgular.\n"
-            "Sonra create_recommendation ile en kritik 1-2 aksiyon yaz."
+            "Prognot sisteminin TAM VE DERİN analizini yap. "
+            "Bu bir araştırma protokolü — her adımı sırayla uygula, veri toplamadan sonuç çıkarma.\n\n"
+
+            "## ADIM 1 — PIPELINE SAĞLIĞI\n"
+            "query_database:\n"
+            "SELECT status, COUNT(*) as cnt, "
+            "ROUND(AVG(EXTRACT(EPOCH FROM (completed_at-started_at))/60) "
+            "FILTER (WHERE status='completed' AND started_at IS NOT NULL AND completed_at IS NOT NULL)::NUMERIC,1) as avg_min "
+            "FROM jobs WHERE created_at > now() - interval '30 days' GROUP BY status\n\n"
+
+            "## ADIM 2 — KLİP KALİTESİ DAĞILIMI\n"
+            "query_database:\n"
+            "SELECT quality_status, COUNT(*) as cnt, "
+            "ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, "
+            "ROUND(AVG(standalone_score)::NUMERIC,2) as standalone, "
+            "ROUND(AVG(hook_score)::NUMERIC,2) as hook, "
+            "ROUND(AVG(arc_score)::NUMERIC,2) as arc "
+            "FROM clips WHERE created_at > now() - interval '30 days' "
+            "GROUP BY quality_status ORDER BY cnt DESC\n\n"
+
+            "## ADIM 3 — PASS RATE TRENDİ (son 60 gün, 2 periyot karşılaştırması)\n"
+            "query_database:\n"
+            "SELECT "
+            "COUNT(*) FILTER (WHERE created_at > now()-interval '30 days') as clips_recent_30d, "
+            "COUNT(*) FILTER (WHERE quality_status='passed' AND created_at > now()-interval '30 days') as passed_recent, "
+            "COUNT(*) FILTER (WHERE created_at BETWEEN now()-interval '60 days' AND now()-interval '30 days') as clips_prev_30d, "
+            "COUNT(*) FILTER (WHERE quality_status='passed' AND created_at BETWEEN now()-interval '60 days' AND now()-interval '30 days') as passed_prev "
+            "FROM clips\n\n"
+
+            "## ADIM 4 — PIPELINE HATALARI (son 7 gün)\n"
+            "query_database:\n"
+            "SELECT step_name, COUNT(*) as errors, "
+            "MAX(error_message) as sample_error "
+            "FROM pipeline_audit_log "
+            "WHERE success = false AND created_at > now() - interval '7 days' "
+            "GROUP BY step_name ORDER BY errors DESC\n\n"
+
+            "## ADIM 5 — MALİYET ANALİZİ\n"
+            "query_database:\n"
+            "SELECT step_name, "
+            "ROUND(SUM((token_usage->>'cost_usd')::FLOAT)::NUMERIC,4) as total_cost, "
+            "COUNT(*) as runs, "
+            "ROUND(AVG((token_usage->>'input_tokens')::INT)::NUMERIC,0) as avg_input_tok "
+            "FROM pipeline_audit_log "
+            "WHERE token_usage IS NOT NULL AND token_usage::text != '{}' "
+            "AND created_at > now() - interval '30 days' "
+            "GROUP BY step_name ORDER BY total_cost DESC\n\n"
+
+            "## ADIM 6 — İÇERİK TİPİ PERFORMANSI\n"
+            "query_database:\n"
+            "SELECT content_type, COUNT(*) as cnt, "
+            "ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, "
+            "COUNT(*) FILTER (WHERE quality_status='passed') as passed "
+            "FROM clips WHERE created_at > now() - interval '30 days' "
+            "GROUP BY content_type ORDER BY cnt DESC LIMIT 10\n\n"
+
+            "## ADIM 7 — KANAL BAZLI PERFORMANS\n"
+            "query_database:\n"
+            "SELECT j.channel_id, COUNT(DISTINCT j.id) as jobs, "
+            "COUNT(c.id) as clips, "
+            "ROUND(COUNT(c.id)::NUMERIC/NULLIF(COUNT(DISTINCT j.id),0),1) as clips_per_job, "
+            "ROUND(AVG(c.confidence*10)::NUMERIC,2) as avg_conf "
+            "FROM jobs j LEFT JOIN clips c ON c.job_id = j.id "
+            "WHERE j.created_at > now() - interval '30 days' "
+            "GROUP BY j.channel_id ORDER BY clips DESC\n\n"
+
+            "## ADIM 8 — S05/S06 PROMPT KALİTESİNİ OKU\n"
+            "read_own_file ile backend/app/pipeline/prompts/unified_discovery.py oku. "
+            "Prompt'un güçlü ve zayıf noktalarını not et. "
+            "Sonra read_own_file ile backend/app/pipeline/prompts/batch_evaluation.py oku. "
+            "Pass rate %14 gibi düşükse — bu prompt'larda hangi eşik değerleri var, neden bu kadar klip eleniyor?\n\n"
+
+            "## ADIM 9 — LANGFUSE MALİYET VERİSİ\n"
+            "get_langfuse_data(days=30) — Gemini maliyet ve token trend verisi.\n\n"
+
+            "## ADIM 10 — DİRECTOR HAFIZASINI KONTROL ET\n"
+            "query_database:\n"
+            "SELECT type, COUNT(*) as cnt, MAX(created_at) as last_entry "
+            "FROM director_memory GROUP BY type ORDER BY cnt DESC\n\n"
+            "Sonra list_memories ile son 5 hafıza kaydına bak.\n\n"
+
+            "## ADIM 11 — ÖNCEKİ ANALİZLERE BAK\n"
+            "query_database:\n"
+            "SELECT id, module_name, score, triggered_by, timestamp "
+            "FROM director_analyses ORDER BY timestamp DESC LIMIT 5\n\n"
+
+            "## ADIM 12 — BEKLEYEN ÖNERİLER\n"
+            "query_database:\n"
+            "SELECT title, module_name, priority, status, created_at "
+            "FROM director_recommendations "
+            "WHERE status = 'pending' ORDER BY priority ASC, created_at DESC LIMIT 10\n\n"
+
+            "## ADIM 13 — EDİTÖR DAVRANIŞI (approval/rejection sinyalleri)\n"
+            "query_database:\n"
+            "SELECT user_approved, COUNT(*) as cnt, "
+            "ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf "
+            "FROM clips WHERE created_at > now() - interval '30 days' "
+            "GROUP BY user_approved\n\n"
+
+            "## ADIM 14 — SENTEZ VE BULGULAR\n"
+            "Tüm verileri topladıktan sonra şunları yap:\n"
+            "1. Sistemin en kritik 3 sorununu kanıtla destekle (hangi adımdan, hangi sayı)\n"
+            "2. Sistemin en güçlü 2 yönünü kanıtla belirt\n"
+            "3. Pass rate neden düşük/yüksek? — S06 threshold'larına ve gerçek score dağılımına bakarak kök neden analizi yap\n"
+            "4. Maliyet/kalite dengesini değerlendir\n"
+            "5. Director'ın kendi körlüklerini (kopuk API'ler, hafıza eksikliği) dürüstçe raporla\n\n"
+
+            "## ADIM 15 — AKSIYONLAR\n"
+            "Bulgulara göre EN AZ 5 create_recommendation çağır — her biri somut, ölçülebilir, bu sisteme özel olmalı. "
+            "Genel tavsiyeler yasak. 'S06'daki standalone_score eşiğini 7'den 6'ya düşür' gibi spesifik ol.\n"
+            "Son olarak save_memory ile bu analizin en kritik bulgusunu kaydet (type='analysis_insight').\n"
+            "trigger_analysis ile de bu analizi director_analyses tablosuna kaydet."
         ),
     },
 

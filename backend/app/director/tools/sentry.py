@@ -31,13 +31,16 @@ def get_sentry_issues(days: int = 7, resolved: bool = False) -> list[dict]:
             }]
 
         import urllib.request
+        import urllib.parse
         import json
 
         status_filter = "resolved" if resolved else "unresolved"
-        url = (
-            f"https://sentry.io/api/0/projects/{org_slug}/{project_slug}/issues/"
-            f"?statsPeriod={days}d&query=is:{status_filter}&limit=25"
-        )
+        params = urllib.parse.urlencode({
+            "statsPeriod": f"{days}d",
+            "query": f"is:{status_filter}",
+            "limit": 25,
+        })
+        url = f"https://sentry.io/api/0/projects/{org_slug}/{project_slug}/issues/?{params}"
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {auth_token}"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             issues = json.loads(resp.read())

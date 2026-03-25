@@ -11,6 +11,9 @@ class Settings:
     GEMINI_MODEL_PRO: str = "gemini-3.1-pro-preview"
     GEMINI_MODEL_FLASH: str = "gemini-2.5-flash"
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
+    # Separate key with Member role for usage/billing API (usage:read scope)
+    # Falls back to DEEPGRAM_API_KEY if not set (will still 403 if key lacks permissions)
+    DEEPGRAM_MANAGEMENT_KEY = os.getenv("DEEPGRAM_MANAGEMENT_KEY") or os.getenv("DEEPGRAM_API_KEY")
     SUPABASE_URL = os.getenv("SUPABASE_URL")
     SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
     DATABASE_URL = os.getenv("DATABASE_URL")

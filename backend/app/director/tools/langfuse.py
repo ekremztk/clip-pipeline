@@ -42,34 +42,23 @@ def get_langfuse_data(step: str | None = None, days: int = 7) -> dict:
             trace_cost = 0.0
             input_tok = 0
             output_tok = 0
+
+            # Use trace-level usage data (avoids per-trace API calls that hit rate limits)
+            trace_usage = getattr(trace, "usage", None)
+            if trace_usage:
+                input_tok = getattr(trace_usage, "input", 0) or 0
+                output_tok = getattr(trace_usage, "output", 0) or 0
+                trace_cost = float(getattr(trace_usage, "totalCost", None) or 0.0)
+
+            # Trace-level input/output preview
             full_input = ""
             full_output = ""
-
-            # Get observations for this trace (tokens, cost, full I/O)
-            try:
-                obs_page = lf.fetch_observations(trace_id=trace.id)
-                for ob in (obs_page.data or []):
-                    # Token usage
-                    usage = getattr(ob, "usage", None)
-                    if usage:
-                        input_tok += getattr(usage, "input", 0) or 0
-                        output_tok += getattr(usage, "output", 0) or 0
-
-                    # Cost
-                    ob_cost = getattr(ob, "calculatedTotalCost", None) or 0.0
-                    trace_cost += float(ob_cost)
-
-                    # Full input/output — take the first generation observation
-                    if not full_input:
-                        raw_input = getattr(ob, "input", None)
-                        if raw_input:
-                            full_input = str(raw_input) if not isinstance(raw_input, str) else raw_input
-                    if not full_output:
-                        raw_output = getattr(ob, "output", None)
-                        if raw_output:
-                            full_output = str(raw_output) if not isinstance(raw_output, str) else raw_output
-            except Exception:
-                pass
+            raw_input = getattr(trace, "input", None)
+            if raw_input:
+                full_input = str(raw_input) if not isinstance(raw_input, str) else raw_input
+            raw_output = getattr(trace, "output", None)
+            if raw_output:
+                full_output = str(raw_output) if not isinstance(raw_output, str) else raw_output
 
             total_input_tokens += input_tok
             total_output_tokens += output_tok

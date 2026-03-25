@@ -14,9 +14,12 @@ def get_deepgram_usage(days: int = 7) -> dict:
     Returns breakdown by date and totals.
     """
     try:
-        api_key = settings.DEEPGRAM_API_KEY
+        api_key = settings.DEEPGRAM_MANAGEMENT_KEY
         if not api_key:
             return {"error": "DEEPGRAM_API_KEY not set"}
+        if api_key == settings.DEEPGRAM_API_KEY and not os.getenv("DEEPGRAM_MANAGEMENT_KEY"):
+            # Warn that the transcription key likely lacks usage:read scope
+            print("[DirectorDeepgram] Warning: using transcription key for usage API — may 403. Set DEEPGRAM_MANAGEMENT_KEY with Member role.")
 
         project_id = os.getenv("DEEPGRAM_PROJECT_ID", "")
 
