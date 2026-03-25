@@ -159,6 +159,11 @@ def check_performance_drop() -> dict | None:
                 description=msg + " S05/S06 logları ve Channel DNA incelenmeli.",
                 priority=1,
             )
+            try:
+                from app.director.notifier import notify_performance_drop
+                notify_performance_drop(rate_7, rate_30, rate_30 - rate_7)
+            except Exception:
+                pass
             return {"trigger": "PERFORMANCE_DROP", "rate_7d": rate_7, "rate_30d": rate_30}
         return None
     except Exception as e:
@@ -205,6 +210,11 @@ def check_cost_spike() -> dict | None:
                 description=msg + " Hangi adımın (S05/S06) token kullanımı arttı incelenmeli.",
                 priority=2,
             )
+            try:
+                from app.director.notifier import notify_cost_spike
+                notify_cost_spike(latest.get("job_id", "?"), latest_cost, mean, z)
+            except Exception:
+                pass
             return {"trigger": "COST_SPIKE", "job_id": latest.get("job_id"),
                     "cost_usd": latest_cost, "z_score": round(z, 2)}
         return None
@@ -226,9 +236,11 @@ def check_unused_clips() -> dict | None:
         sql = """
             SELECT COUNT(*) AS unused_count
             FROM clips
-            WHERE created_at > now() - interval '14 days'
-              AND quality_verdict IN ('pass', 'fixable')
-              AND (is_successful IS NULL OR is_successful = false)
+            WHERE quality_verdict IN ('pass', 'fixable')
+              AND is_successful IS NULL
+              AND is_published IS NULL
+              AND created_at < now() - interval '3 days'
+              AND created_at > now() - interval '14 days'
         """
         rows = _run_sql(sql)
         if not rows:
@@ -382,6 +394,127 @@ def check_new_pattern() -> dict | None:
 
 
 # ──────────────────────────────────────────────────────────
+# TRIGGER 7: GEMINI_RATE_LIMIT_HIGH
+# ──────────────────────────────────────────────────────────
+
+def check_gemini_rate_limits() -> dict | None:
+    """5+ Gemini rate limit errors in last 24 hours."""
+    try:
+        if _already_triggered_recently("GEMINI_RATE_LIMIT_HIGH", hours=24):
+            return None
+
+        rows = _run_sql("""
+            SELECT COUNT(*) AS cnt FROM director_events
+            WHERE event_type IN ('gemini_rate_limit', 'pipeline_error')
+              AND (payload->>'error' ILIKE '%%429%%' OR payload->>'error' ILIKE '%%rate%%limit%%')
+              AND timestamp > now() - interval '24 hours'
+        """)
+        count = int(rows[0].get("cnt", 0)) if rows else 0
+
+        if count >= 5:
+            msg = f"Son 24 saatte {count} adet Gemini rate limit hatasi. API kullanimi kontrol edilmeli."
+            _emit_trigger("GEMINI_RATE_LIMIT_HIGH", msg, {"rate_limit_count": count})
+            _write_recommendation(
+                title="Gemini Rate Limit Uyarisi",
+                description=msg + " Pipeline zamanlama ayarlari veya batch boyutu dusurulmeli.",
+                priority=2,
+                module_name="system",
+            )
+            try:
+                from app.director.notifier import notify_rate_limit
+                notify_rate_limit(count)
+            except Exception:
+                pass
+            return {"trigger": "GEMINI_RATE_LIMIT_HIGH", "count": count}
+        return None
+    except Exception as e:
+        print(f"[Proactive] GEMINI_RATE_LIMIT_HIGH error: {e}")
+        return None
+
+
+# ──────────────────────────────────────────────────────────
+# TRIGGER 8: PIPELINE_DURATION_SPIKE
+# ──────────────────────────────────────────────────────────
+
+def check_pipeline_duration_spike() -> dict | None:
+    """Last completed job took 2x longer than 30-day average."""
+    try:
+        if _already_triggered_recently("PIPELINE_DURATION_SPIKE", hours=12):
+            return None
+
+        rows = _run_sql("""
+            SELECT
+                id AS job_id,
+                EXTRACT(EPOCH FROM (completed_at - started_at)) / 60.0 AS duration_min
+            FROM jobs
+            WHERE status = 'completed' AND started_at IS NOT NULL AND completed_at IS NOT NULL
+            ORDER BY completed_at DESC
+            LIMIT 1
+        """)
+        if not rows or not rows[0].get("duration_min"):
+            return None
+
+        latest_dur = float(rows[0]["duration_min"])
+        latest_job = rows[0]["job_id"]
+
+        avg_rows = _run_sql("""
+            SELECT AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) / 60.0) AS avg_dur
+            FROM jobs
+            WHERE status = 'completed'
+              AND started_at IS NOT NULL AND completed_at IS NOT NULL
+              AND completed_at > now() - interval '30 days'
+        """)
+        avg_dur = float(avg_rows[0].get("avg_dur") or 0) if avg_rows else 0
+
+        if avg_dur > 0 and latest_dur > avg_dur * 2:
+            msg = (f"Son pipeline {latest_dur:.1f} dakika surdu — "
+                   f"30 gunluk ortalama {avg_dur:.1f} dakikanin 2x uzerinde.")
+            _emit_trigger("PIPELINE_DURATION_SPIKE", msg,
+                          {"job_id": latest_job, "duration_min": round(latest_dur, 1),
+                           "avg_duration_min": round(avg_dur, 1)})
+            _write_recommendation(
+                title="Pipeline Sure Spike'i",
+                description=msg + " Video suresi, rate limit veya S05/S06 yavaslamasi kontrol edilmeli.",
+                priority=2,
+            )
+            return {"trigger": "PIPELINE_DURATION_SPIKE", "job_id": latest_job,
+                    "duration_min": round(latest_dur, 1), "avg_min": round(avg_dur, 1)}
+        return None
+    except Exception as e:
+        print(f"[Proactive] PIPELINE_DURATION_SPIKE error: {e}")
+        return None
+
+
+# ──────────────────────────────────────────────────────────
+# TRIGGER 9: MEMORY_GROWTH_WARNING
+# ──────────────────────────────────────────────────────────
+
+def check_memory_growth() -> dict | None:
+    """director_memory table exceeds 500 records — suggest cleanup."""
+    try:
+        if _already_triggered_recently("MEMORY_GROWTH_WARNING", hours=72):
+            return None
+
+        rows = _run_sql("SELECT COUNT(*) AS cnt FROM director_memory")
+        count = int(rows[0].get("cnt", 0)) if rows else 0
+
+        if count >= 500:
+            msg = f"director_memory tablosu {count} kayita ulasti. Eski/gereksiz kayitlar temizlenmeli."
+            _emit_trigger("MEMORY_GROWTH_WARNING", msg, {"memory_count": count})
+            _write_recommendation(
+                title="Director Memory Temizligi Gerekiyor",
+                description=msg + " 90 gunun uzerindeki non-learning kayitlar arsivlenebilir.",
+                priority=3,
+                module_name="director",
+            )
+            return {"trigger": "MEMORY_GROWTH_WARNING", "memory_count": count}
+        return None
+    except Exception as e:
+        print(f"[Proactive] MEMORY_GROWTH_WARNING error: {e}")
+        return None
+
+
+# ──────────────────────────────────────────────────────────
 # Main entry point
 # ──────────────────────────────────────────────────────────
 
@@ -398,6 +531,9 @@ def run_proactive_checks(job_id: str | None = None) -> list[dict]:
         check_unused_clips,
         check_success_celebration,
         check_new_pattern,
+        check_gemini_rate_limits,
+        check_pipeline_duration_spike,
+        check_memory_growth,
     ]:
         try:
             result = check_fn()

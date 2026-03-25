@@ -10,12 +10,14 @@ Runs a tool-calling loop, yields SSE events at each step:
     {"type": "error", "message": "..."}
 """
 
+import hashlib
 import json
 import time
 from typing import AsyncGenerator, Any
 from google.genai import types
 
 from app.config import settings
+from app.director.config import MAX_TOOL_CALLS_PER_SESSION, MAX_ITERATIONS_PER_SESSION, MAX_RESULT_CHARS
 from app.services.gemini_client import get_gemini_client, _trace_generation
 from app.director.tools import database as db_tools
 from app.director.tools import filesystem as fs_tools
@@ -36,6 +38,61 @@ SYSTEM_PROMPT = """Sen Prognot sisteminin Director'ısın — yapay zeka destekl
 
 Prognot, YouTube podcast kliplerini otomatik keşfeden, düzenleyen ve export eden bir pipeline sistemidir.
 Kurucunun sağ kolu olarak çalışırsın: verilere bakarsın, kodu okursun, geçmişi hatırlarsın, cesur öneriler üretirsin.
+
+## ARAÇ KULLANIM KURALLARI
+
+ARAÇ KULLANMA — doğrudan cevap ver:
+- Selamlaşma, teşekkür, onaylama ("merhaba", "tamam", "teşekkürler", "harika")
+- Bu konuşmada zaten araçla öğrendiğin bilgiyi tekrar soruyorsa
+- Genel programlama/AI bilgisi soruları
+- Kullanıcı sana bilgi VERİYORSA (kaydet ama tarama yapma)
+- Fikir, beyin fırtınası, öneri istiyorsa
+
+ARAÇ KULLAN — sisteme bak:
+- Spesifik metrik ("pass rate kaç?", "son 7 günde kaç job?")
+- Hata araştırması, güncel durum, dosya içeriği
+- Kanal/klip/job hakkında veri
+
+ALTIN KURAL: Soruyu araç çağırmadan cevaplayabiliyorsan ÇAĞIRMA.
+Bir dosyayı bulamazsan EN FAZLA 1 kez dene. Bulamazsan "erişimim dışında" de ve devam et.
+Aynı aracı aynı argümanlarla HİÇBİR ZAMAN iki kez çağırma.
+
+## ERİŞİM HARİTAN
+
+DOSYA SİSTEMİ:
+  ✅ backend/app/ — tüm Python kodu
+  ✅ docs/ — MD dokümantasyon
+  ✅ backend/migrations/ — SQL şemaları
+  ❌ frontend/ — bu container'da yok (git'te var ama read_file ile erişilemiyor)
+
+VERİTABANI:
+  ✅ OKUMA: Tüm tablolar
+  ✅ YAZMA: director_* tabloları + channels.channel_dna (sadece dna alanı)
+  ❌ YAZMA: jobs, clips, transcripts, pipeline_audit_log
+
+## YENİ ARAÇLARIN KULLANIM KURALLARI
+
+### Pipeline Test Araçları
+- create_test_pipeline: Sadece kullanıcı açıkça "pipeline başlat/test et" dediğinde.
+  ASLA otomatik tetikleme. Her zaman onay iste. Günde max 5 test (maliyet kontrolü).
+- get_test_pipeline_status: İlerleme takibi için. Polling yapabilirsin ama max 3 kez.
+- analyze_test_results: Sadece pipeline completed olduğunda çağır.
+- get_active_pipelines: Pipeline durumu sorulduğunda kullan.
+
+### A/B Test Araçları
+- start_ab_test: Kullanıcı "karşılaştır" veya "A/B test" dediğinde.
+  İKİ pipeline çalışacağını ve maliyetin 2x olacağını kullanıcıya bildir, onay al.
+- compare_ab_test: Her iki run tamamlandığında. Öncesinde status kontrol et.
+
+### Tahmin Araçları
+- forecast_monthly_cost / forecast_pipeline_volume: "tahmin", "nereye gidiyoruz" gibi sorularda.
+  Tahmin olduğunu açıkça belirt. Gerçek değil projeksiyon.
+- predict_failure_risk: Yeni pipeline öncesinde risk değerlendirmesi istendiğinde.
+- forecast_capacity: "sistem ne durumda", "kapasite?" gibi sorularda.
+
+### Model Seçimi
+- Tool gerektiren tüm sorgular → Gemini Pro (otomatik, değiştirme)
+- Kısa/basit cevaplar (use_tools=False) → model_router karar verir
 
 ## Temel Prensipler
 
@@ -426,6 +483,194 @@ TOOL_DECLARATIONS = [
             required=["test_name"]
         )
     ),
+    types.FunctionDeclaration(
+        name="create_test_pipeline",
+        description="Start a test pipeline run with a video (is_test_run=True). Use get_test_pipeline_status to monitor progress.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "channel_id": types.Schema(type="STRING", description="Channel. Default: speedy_cast"),
+                "title": types.Schema(type="STRING", description="Test run title"),
+                "guest_name": types.Schema(type="STRING"),
+                "video_url": types.Schema(type="STRING", description="R2 URL or leave empty for default test video"),
+            },
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_test_pipeline_status",
+        description="Get detailed status of a running or completed test pipeline.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"job_id": types.Schema(type="STRING")},
+            required=["job_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="analyze_test_results",
+        description="Deep analysis of a completed test pipeline.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"job_id": types.Schema(type="STRING")},
+            required=["job_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_active_pipelines",
+        description="List all currently running or queued pipelines.",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="forecast_monthly_cost",
+        description="Project end-of-month cost (Gemini + Railway).",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="forecast_pipeline_volume",
+        description="Pipeline usage trend and next-30-day projection.",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="predict_failure_risk",
+        description="Predict pipeline failure risk based on video duration and channel history.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "video_duration_s": types.Schema(type="NUMBER"),
+                "channel_id": types.Schema(type="STRING"),
+            },
+        )
+    ),
+    types.FunctionDeclaration(
+        name="forecast_capacity",
+        description="Check system capacity — DB table sizes and growth warnings.",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="get_editor_engagement_stats",
+        description="Which clip quality verdicts are most opened in the editor? Breakdown by pass/fixable/fail.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"channel_id": types.Schema(type="STRING")},
+            required=["channel_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_clips_opened_but_not_published",
+        description="List clips that were opened in editor but never published — potential waste.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"channel_id": types.Schema(type="STRING")},
+            required=["channel_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_editor_conversion_rate",
+        description="What percentage of clips opened in editor actually get published?",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"channel_id": types.Schema(type="STRING")},
+            required=["channel_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="start_ab_test",
+        description="Start an A/B test — runs two parallel pipelines with the same video. Costs 2x. Ask user confirmation first.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "test_name": types.Schema(type="STRING", description="Name for this A/B test"),
+                "channel_id": types.Schema(type="STRING", description="Channel ID, default: speedy_cast"),
+                "video_url": types.Schema(type="STRING", description="R2 video URL or leave empty for default"),
+                "description": types.Schema(type="STRING", description="What this test is comparing"),
+            },
+            required=["test_name"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="compare_ab_test",
+        description="Compare results of a completed A/B test. Both runs must be finished.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"test_id": types.Schema(type="STRING", description="Test ID from start_ab_test")},
+            required=["test_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="check_dependency_impact",
+        description="Analyze what breaks if a service/component goes down. E.g. 'gemini_pro', 'r2_storage', 'deepgram'.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"component": types.Schema(type="STRING", description="Service name: r2_storage, deepgram, gemini_pro, supabase, etc.")},
+            required=["component"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_dependency_map",
+        description="Get the full system dependency map — all services and their dependents.",
+        parameters=types.Schema(type="OBJECT", properties={})
+    ),
+    types.FunctionDeclaration(
+        name="get_cross_module_signals",
+        description="Fetch recent cross-module signal flow (M1->M2 and back) from the database.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "channel_id": types.Schema(type="STRING"),
+                "days": types.Schema(type="INTEGER", description="Look-back period, default 7"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="create_execution_plan",
+        description="Generate a step-by-step implementation plan for a recommendation. Shows files, actions, and risk levels.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={"recommendation_id": types.Schema(type="STRING", description="Recommendation ID to plan")},
+            required=["recommendation_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="calculate_system_score",
+        description="Run the full 5-dimension scoring: Technical Health, AI Quality, Output Quality, Learning, Strategic Maturity. Returns 0-100 score.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "days": types.Schema(type="INTEGER", description="Look-back period, default 30"),
+                "channel_id": types.Schema(type="STRING", description="Optional channel filter"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="analyze_prompt_performance",
+        description="Analyze how prompt versions perform for a pipeline step (S05/S06). Shows weekly trends.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "step": types.Schema(type="STRING", description="Pipeline step: s05 or s06"),
+                "days": types.Schema(type="INTEGER", description="Look-back period, default 30"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="suggest_prompt_improvement",
+        description="Analyze current performance and suggest specific prompt improvements based on weak content types, confidence calibration, and discovery volume.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "step": types.Schema(type="STRING", description="Pipeline step: s05 or s06"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="cross_channel_analysis",
+        description="Compare ALL channels side-by-side: pass rate, cost, volume, content types. Shows rankings and cross-pollination suggestions.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "days": types.Schema(type="INTEGER", description="Look-back period, default 30"),
+            }
+        )
+    ),
 ]
 
 GEMINI_TOOLS = [types.Tool(function_declarations=TOOL_DECLARATIONS)]
@@ -453,50 +698,33 @@ def _get_analyses_history(module: str | None = None, limit: int = 10) -> list[di
 
 
 def _trigger_analysis(module: str, depth: str = "standard") -> dict:
-    """Run on-demand analysis, save to director_analyses, return summary."""
+    """Run on-demand analysis using the 5-dimension scorer, save to director_analyses."""
     try:
         from app.services.supabase_client import get_client
-        pipeline = db_tools.get_pipeline_stats(30)
-        clips = db_tools.get_clip_analysis(None, 30)
+        from app.director.analysis.scorer import calculate_scores
 
-        # Compute score inline (avoids circular import with router.py)
-        s = (pipeline.get("summary") or {})
-        total = int(s.get("total_jobs", 0) or 0)
-        completed = int(s.get("completed", 0) or 0)
-        ca = (clips.get("analysis") or {})
-        total_clips = int(ca.get("total_clips", 0) or 0)
-        pass_count = int(ca.get("pass_count", 0) or 0)
-        avg_conf = float(ca.get("avg_confidence", 0) or 0)
-        success_rate = (completed / total * 100) if total > 0 else 0
-        pass_rate = (pass_count / total_clips * 100) if total_clips > 0 else 0
-        sr_score = 6 if success_rate >= 100 else 5 if success_rate >= 95 else 4 if success_rate >= 90 else 2 if success_rate >= 80 else 0
-        avg_dur = float(s.get("avg_duration_min", 0) or 0)
-        dur_score = 4 if avg_dur < 6 else 3 if avg_dur < 8 else 2 if avg_dur < 12 else 0
-        tech = sr_score + dur_score + 5
-        pr = 8 if pass_rate > 50 else 6 if pass_rate > 35 else 3 if pass_rate > 20 else 0
-        cf = 7 if avg_conf >= 8.0 else 5 if avg_conf >= 7.0 else 3 if avg_conf >= 6.0 else 0
-        ai_q = pr + cf + 5
-        clips_per_job = total_clips / max(total, 1)
-        cj = 8 if clips_per_job >= 5 else 5 if clips_per_job >= 3 else 2 if clips_per_job >= 1 else 0
-        out_q = cj + 8
-        learn = 8 if total < 20 else 10
-        overall_score = min(100, round(tech + ai_q + out_q + learn + 3)) if total > 0 else None
-        scores = {"overall_score": overall_score,
-                  "modules": {"clip_pipeline": {"score": overall_score, "subscores": {
-                      "teknik_saglik": tech, "ai_karar": ai_q, "cikti": out_q, "ogrenme": learn}}}}
+        days = 60 if depth == "deep" else 30
+        scores = calculate_scores(days=days)
+
+        pipeline = db_tools.get_pipeline_stats(days)
+
+        overall_score = scores.get("overall_score")
+        if overall_score is None:
+            return {"ok": True, "module": module, "overall_score": None,
+                    "reason": "Not enough data for scoring"}
 
         client = get_client()
         analysis_row = {
             "module_name": module,
             "triggered_by": "chat",
-            "score": scores.get("overall_score") or 0,
-            "subscores": scores.get("modules", {}),
+            "score": overall_score,
+            "subscores": scores.get("dimensions", {}),
             "findings": [
                 {"key": "pipeline_summary", "data": pipeline.get("summary", {})},
-                {"key": "clip_summary", "data": clips.get("analysis", {})},
+                {"key": "scorer_dimensions", "data": scores.get("dimensions", {})},
             ],
             "recommendations": [],
-            "data_points_used": int((pipeline.get("summary") or {}).get("total_jobs", 0) or 0),
+            "data_points_used": scores.get("data_points", 0),
         }
         res = client.table("director_analyses").insert(analysis_row).execute()
         analysis_id = res.data[0].get("id") if res.data else None
@@ -505,9 +733,10 @@ def _trigger_analysis(module: str, depth: str = "standard") -> dict:
             "ok": True,
             "analysis_id": analysis_id,
             "module": module,
-            "overall_score": scores.get("overall_score"),
-            "modules": scores.get("modules", {}),
-            "pipeline_summary": pipeline.get("summary", {}),
+            "overall_score": overall_score,
+            "dimensions": scores.get("dimensions", {}),
+            "data_points": scores.get("data_points", 0),
+            "period_days": days,
         }
     except Exception as e:
         print(f"[Director] trigger_analysis error: {e}")
@@ -678,8 +907,95 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return _send_notification(args["title"], args["message"], args.get("channel_id"))
     elif name == "trigger_test":
         return _trigger_test(args["test_name"], args.get("channel_id"), args.get("params", "{}"))
+    elif name == "create_test_pipeline":
+        from app.director.tools.pipeline_executor import create_test_job
+        return create_test_job(video_url=args.get("video_url"), channel_id=args.get("channel_id", "speedy_cast"),
+                               title=args.get("title", "Director Test Run"), guest_name=args.get("guest_name"))
+    elif name == "get_test_pipeline_status":
+        from app.director.tools.pipeline_executor import get_test_pipeline_status
+        return get_test_pipeline_status(args["job_id"])
+    elif name == "analyze_test_results":
+        from app.director.tools.pipeline_executor import analyze_test_results
+        return analyze_test_results(args["job_id"])
+    elif name == "get_active_pipelines":
+        from app.director.tools.pipeline_executor import get_active_pipelines
+        return get_active_pipelines()
+    elif name == "forecast_monthly_cost":
+        from app.director.predictive.forecaster import forecast_monthly_cost
+        return forecast_monthly_cost()
+    elif name == "forecast_pipeline_volume":
+        from app.director.predictive.forecaster import forecast_pipeline_volume
+        return forecast_pipeline_volume()
+    elif name == "predict_failure_risk":
+        from app.director.predictive.forecaster import predict_failure_risk
+        return predict_failure_risk(args.get("video_duration_s"), args.get("channel_id"))
+    elif name == "forecast_capacity":
+        from app.director.predictive.forecaster import forecast_capacity
+        return forecast_capacity()
+    elif name == "get_editor_engagement_stats":
+        from app.director.tools.editor_intelligence import get_editor_engagement_stats
+        return get_editor_engagement_stats(args["channel_id"])
+    elif name == "get_clips_opened_but_not_published":
+        from app.director.tools.editor_intelligence import get_clips_opened_but_not_published
+        return get_clips_opened_but_not_published(args["channel_id"])
+    elif name == "get_editor_conversion_rate":
+        from app.director.tools.editor_intelligence import get_editor_conversion_rate
+        return get_editor_conversion_rate(args["channel_id"])
+    elif name == "start_ab_test":
+        from app.director.tools.ab_test import start_ab_test
+        return start_ab_test(
+            test_name=args["test_name"],
+            channel_id=args.get("channel_id", "speedy_cast"),
+            video_url=args.get("video_url"),
+            description=args.get("description", ""),
+        )
+    elif name == "compare_ab_test":
+        from app.director.tools.ab_test import compare_ab_test
+        return compare_ab_test(args["test_id"])
+    elif name == "check_dependency_impact":
+        from app.director.dependency_graph import check_dependency_impact
+        return check_dependency_impact(args["component"])
+    elif name == "get_dependency_map":
+        from app.director.dependency_graph import get_full_dependency_map
+        return get_full_dependency_map()
+    elif name == "get_cross_module_signals":
+        from app.director.dependency_graph import get_cross_module_signals
+        return get_cross_module_signals(args.get("channel_id"), args.get("days", 7))
+    elif name == "create_execution_plan":
+        from app.director.execution_planner import create_execution_plan
+        return create_execution_plan(args["recommendation_id"])
+    elif name == "calculate_system_score":
+        from app.director.analysis.scorer import calculate_scores
+        return calculate_scores(days=args.get("days", 30), channel_id=args.get("channel_id"))
+    elif name == "analyze_prompt_performance":
+        from app.director.tools.prompt_lab import analyze_prompt_performance
+        return analyze_prompt_performance(step=args.get("step", "s05"), days=args.get("days", 30))
+    elif name == "suggest_prompt_improvement":
+        from app.director.tools.prompt_lab import suggest_prompt_improvement
+        return suggest_prompt_improvement(step=args.get("step", "s05"))
+    elif name == "cross_channel_analysis":
+        from app.director.tools.cross_channel import cross_channel_analysis
+        return cross_channel_analysis(days=args.get("days", 30))
     else:
         return {"error": f"Unknown tool: {name}"}
+
+
+def _smart_truncate(result: Any, tool_name: str, max_chars: int = MAX_RESULT_CHARS) -> str:
+    """Truncate tool results intelligently, preserving structure."""
+    try:
+        if isinstance(result, list) and len(result) > 20:
+            return json.dumps({
+                "total_count": len(result),
+                "first_10": result[:10],
+                "last_5": result[-5:],
+                "note": f"{len(result)} sonuçtan 15'i gösteriliyor"
+            }, ensure_ascii=False, default=str)
+        result_str = json.dumps(result, ensure_ascii=False, default=str)
+        if len(result_str) > max_chars:
+            return result_str[:max_chars] + f"...[truncated, {len(result_str)} chars total]"
+        return result_str
+    except Exception:
+        return str(result)[:max_chars]
 
 
 def _result_summary(result: Any, tool_name: str) -> str:
@@ -708,6 +1024,7 @@ async def run_agent(
     session_id: str,
     conversation_history: list[dict],
     relevant_memories: list[dict],
+    use_tools: bool = True,
 ) -> AsyncGenerator[dict, None]:
     """
     Main Director agent loop. Yields SSE event dicts.
@@ -741,14 +1058,16 @@ async def run_agent(
 
         config = types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
-            tools=GEMINI_TOOLS,
+            tools=GEMINI_TOOLS if use_tools else None,
             temperature=0.3,
         )
 
         # Tool calling loop
-        max_iterations = 10
+        max_iterations = MAX_ITERATIONS_PER_SESSION
         iteration = 0
         final_text = ""
+        _tool_call_hashes: set[str] = set()
+        _total_tool_calls = 0
 
         while iteration < max_iterations:
             iteration += 1
@@ -814,21 +1133,28 @@ async def run_agent(
                 tool_name = fc.name
                 tool_args = dict(fc.args) if fc.args else {}
 
-                yield {"type": "tool_call", "tool": tool_name, "args": tool_args}
+                # Dedup guard
+                call_key = f"{tool_name}:{hashlib.md5(json.dumps(tool_args, sort_keys=True).encode()).hexdigest()}"
+                if call_key in _tool_call_hashes:
+                    result = {"note": "Bu araç aynı argümanlarla zaten çağrıldı. Mevcut sonucu kullan."}
+                    yield {"type": "tool_call", "tool": tool_name, "args": tool_args}
+                    yield {"type": "tool_result", "tool": tool_name, "summary": "duplicate — skipped"}
+                else:
+                    _tool_call_hashes.add(call_key)
+                    _total_tool_calls += 1
+                    yield {"type": "tool_call", "tool": tool_name, "args": tool_args}
 
-                # Execute
-                try:
-                    result = _dispatch_tool(tool_name, tool_args)
-                except Exception as e:
-                    result = {"error": str(e)}
+                    # Execute
+                    try:
+                        result = _dispatch_tool(tool_name, tool_args)
+                    except Exception as e:
+                        result = {"error": str(e)}
 
-                summary = _result_summary(result, tool_name)
-                yield {"type": "tool_result", "tool": tool_name, "summary": summary}
+                    summary = _result_summary(result, tool_name)
+                    yield {"type": "tool_result", "tool": tool_name, "summary": summary}
 
                 # Serialize result
-                result_str = json.dumps(result, ensure_ascii=False, default=str)
-                if len(result_str) > 8000:
-                    result_str = result_str[:8000] + "...[truncated]"
+                result_str = _smart_truncate(result, tool_name)
 
                 tool_response_parts.append(
                     types.Part.from_function_response(
@@ -836,6 +1162,27 @@ async def run_agent(
                         response={"result": result_str},
                     )
                 )
+
+            # Force final response if tool call limit reached
+            if _total_tool_calls >= MAX_TOOL_CALLS_PER_SESSION:
+                contents.append(types.Content(role="user", parts=tool_response_parts))
+                contents.append(types.Content(role="user", parts=[
+                    types.Part(text="[SİSTEM: Araç çağrısı limiti doldu. Topladığın bilgilerle şimdi cevap ver.]")
+                ]))
+                final_config = types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    temperature=0.3,
+                )
+                forced_response = client.models.generate_content(
+                    model=settings.GEMINI_MODEL_PRO,
+                    contents=contents,
+                    config=final_config,
+                )
+                if forced_response.candidates:
+                    for part in (forced_response.candidates[0].content.parts or []):
+                        if hasattr(part, "text") and part.text:
+                            final_text += part.text
+                break
 
             # Add tool results to contents
             contents.append(types.Content(role="user", parts=tool_response_parts))

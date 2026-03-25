@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.director.agent import run_agent
+from app.director.message_router import should_use_tools
 from app.director.tools.memory import (
     query_memory, save_memory, list_memories, delete_memory,
     get_conversation_history, save_conversation_turn
@@ -40,7 +41,8 @@ async def _sse_generator(message: str, session_id: str) -> AsyncGenerator[str, N
 
     full_response_parts = []
 
-    async for event in run_agent(message, session_id, history, relevant_memories):
+    use_tools = should_use_tools(message)
+    async for event in run_agent(message, session_id, history, relevant_memories, use_tools=use_tools):
         data = json.dumps(event, ensure_ascii=False)
         yield f"data: {data}\n\n"
 
@@ -212,6 +214,48 @@ async def dismiss_recommendation(rec_id: str):
             "status": "dismissed"
         }).eq("id", rec_id).execute()
         return {"ok": True, "dismissed": rec_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/recommendations/{rec_id}/apply")
+async def apply_recommendation(rec_id: str, note: str = ""):
+    """Mark a recommendation as applied."""
+    try:
+        client = get_client()
+        client.table("director_recommendations").update({
+            "status": "applied",
+            "dismissed_reason": note or None,
+        }).eq("id", rec_id).execute()
+        return {"ok": True, "applied": rec_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/cleanup-recommendations")
+async def cleanup_stale_recommendations():
+    """Archive recommendations pending for 30+ days."""
+    try:
+        rows = _run_sql("""
+            UPDATE director_recommendations
+            SET status = 'archived'
+            WHERE status = 'pending'
+              AND created_at < now() - interval '30 days'
+            RETURNING id
+        """)
+        return {"archived": len(rows)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/cross-module-graph")
+async def get_cross_module_graph(channel_id: str = None, days: int = 7):
+    """Return cross-module signal flow for dependency visualization."""
+    try:
+        from app.director.dependency_graph import get_cross_module_signals, get_full_dependency_map
+        signals = get_cross_module_signals(channel_id, days)
+        dep_map = get_full_dependency_map()
+        return {"signals": signals, "dependency_map": dep_map}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

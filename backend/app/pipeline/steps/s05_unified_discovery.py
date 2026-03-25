@@ -7,6 +7,7 @@ from app.services.gemini_client import analyze_video, generate_json
 from app.services.supabase_client import get_client
 from app.pipeline.prompts.unified_discovery import PROMPT
 from datetime import datetime, timezone, timedelta
+from app.director.events import director_events
 
 
 def build_channel_context(channel_dna: dict, channel_id: str) -> str:
@@ -377,6 +378,14 @@ def run(
                 if isinstance(c, dict) and "candidate_id" in c:
                     valid_candidates.append(c)
             print(f"[S05] {len(valid_candidates)} valid candidates after validation")
+            try:
+                director_events.emit_sync(
+                    module="module_1", event="s05_discovery_completed",
+                    payload={"job_id": job_id, "candidate_count": len(valid_candidates)},
+                    channel_id=channel_id,
+                )
+            except Exception:
+                pass
             return valid_candidates
 
         # 7. Fallback: If video analysis returned nothing, try audio-only

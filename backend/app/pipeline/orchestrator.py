@@ -271,6 +271,19 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     status=JobStatus.FAILED.value,
                     error_message=f"Step {step_name} failed: {error_msg}"
                 )
+                try:
+                    director_events.emit_sync(
+                        module="module_1", event="pipeline_error",
+                        payload={"job_id": job_id, "step": step_name, "error": error_msg},
+                        channel_id=channel_id,
+                    )
+                except Exception:
+                    pass
+                try:
+                    from app.director.notifier import notify_pipeline_failed
+                    notify_pipeline_failed(job_id, step_name, error_msg, channel_id)
+                except Exception:
+                    pass
                 director_events.emit_sync(
                     module="module_1", event="pipeline_failed",
                     payload={"job_id": job_id, "failed_at_step": step_name,
@@ -584,6 +597,19 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     status=JobStatus.FAILED.value,
                     error_message=f"Step {step_name} failed: {error_msg}"
                 )
+                try:
+                    director_events.emit_sync(
+                        module="module_1", event="pipeline_error",
+                        payload={"job_id": job_id, "step": step_name, "error": error_msg},
+                        channel_id=channel_id,
+                    )
+                except Exception:
+                    pass
+                try:
+                    from app.director.notifier import notify_pipeline_failed
+                    notify_pipeline_failed(job_id, step_name, error_msg, channel_id)
+                except Exception:
+                    pass
                 director_events.emit_sync(
                     module="module_1", event="pipeline_failed",
                     payload={"job_id": job_id, "failed_at_step": step_name,

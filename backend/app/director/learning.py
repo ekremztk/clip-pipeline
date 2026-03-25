@@ -31,16 +31,15 @@ def _count_rejections_for_content_type(channel_id: str, content_type: str, days:
     """Count how many pass/fixable clips of this content_type were rejected in last N days."""
     try:
         from app.director.tools.database import _run_sql
-        sql = f"""
+        rows = _run_sql(f"""
             SELECT COUNT(*) AS cnt
             FROM clips
-            WHERE channel_id = '{channel_id}'
-              AND content_type = '{content_type}'
+            WHERE channel_id = %s
+              AND content_type = %s
               AND quality_verdict IN ('pass', 'fixable')
               AND is_successful = false
               AND created_at > now() - interval '{days} days'
-        """
-        rows = _run_sql(sql)
+        """, (channel_id, content_type))
         return int((rows[0] or {}).get("cnt") or 0) if rows else 0
     except Exception:
         return 0
@@ -171,3 +170,84 @@ def on_clip_rejected(clip_id: str, why_failed: str | None = None) -> None:
                 )
     except Exception as e:
         print(f"[Learning] on_clip_rejected error: {e}")
+
+
+def on_clip_published(clip_id: str, youtube_video_id: str | None = None) -> None:
+    """Called when a clip is published. Records content type success signal."""
+    try:
+        clip = _get_clip_context(clip_id)
+        if not clip:
+            return
+
+        content_type = clip.get("content_type") or "unknown"
+        channel_id = clip.get("channel_id")
+
+        save_memory(
+            content=(
+                f"Published clip ({datetime.now(timezone.utc).strftime('%Y-%m-%d')}): "
+                f"content_type='{content_type}', channel={channel_id}. "
+                f"Content type validated through full pipeline → publish."
+            ),
+            type="learning",
+            tags=["published", content_type, channel_id or ""],
+            source="feedback",
+        )
+
+        director_events.emit_sync(
+            module="learning", event="clip_published",
+            payload={"clip_id": clip_id, "content_type": content_type,
+                     "youtube_video_id": youtube_video_id},
+            channel_id=channel_id,
+        )
+    except Exception as e:
+        print(f"[Learning] on_clip_published error: {e}")
+
+
+def on_views_received(clip_id: str, views_48h: int, avd_pct: float) -> None:
+    """Called when 48h view data is available. Records real performance feedback."""
+    try:
+        clip = _get_clip_context(clip_id)
+        if not clip:
+            return
+
+        content_type = clip.get("content_type") or "unknown"
+        channel_id = clip.get("channel_id")
+
+        if views_48h > 1000 and avd_pct > 50:
+            verdict = "viral_success"
+            memory_text = (
+                f"Viral success ({datetime.now(timezone.utc).strftime('%Y-%m-%d')}): "
+                f"content_type='{content_type}', {views_48h} views in 48h, "
+                f"{avd_pct:.1f}% AVD. This content type works — reinforce."
+            )
+        elif views_48h < 100:
+            verdict = "low_performance"
+            memory_text = (
+                f"Low performance ({datetime.now(timezone.utc).strftime('%Y-%m-%d')}): "
+                f"content_type='{content_type}', only {views_48h} views in 48h, "
+                f"{avd_pct:.1f}% AVD. Published but didn't gain traction."
+            )
+        else:
+            verdict = "moderate"
+            memory_text = (
+                f"Moderate performance ({datetime.now(timezone.utc).strftime('%Y-%m-%d')}): "
+                f"content_type='{content_type}', {views_48h} views in 48h, "
+                f"{avd_pct:.1f}% AVD."
+            )
+
+        save_memory(
+            content=memory_text,
+            type="learning",
+            tags=["performance", verdict, content_type, channel_id or ""],
+            source="feedback",
+        )
+
+        director_events.emit_sync(
+            module="learning", event="views_received",
+            payload={"clip_id": clip_id, "views_48h": views_48h,
+                     "avd_pct": avd_pct, "verdict": verdict,
+                     "content_type": content_type},
+            channel_id=channel_id,
+        )
+    except Exception as e:
+        print(f"[Learning] on_views_received error: {e}")

@@ -4,6 +4,7 @@ import traceback
 from app.config import settings
 from app.services.supabase_client import get_client
 from app.services.r2_client import upload_clip
+from app.director.events import director_events
 
 
 def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_title: str = "") -> list:
@@ -136,4 +137,12 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                     pass
 
     print(f"[S08] Export complete. {len(exported_clips)}/{len(cut_results)} clips exported.")
+    try:
+        director_events.emit_sync(
+            module="module_1", event="s08_export_completed",
+            payload={"job_id": job_id, "exported_count": len(exported_clips)},
+            channel_id=channel_id,
+        )
+    except Exception:
+        pass
     return exported_clips

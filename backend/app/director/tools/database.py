@@ -1,23 +1,46 @@
 """Director database tools — read-only queries against Supabase."""
 
 import psycopg2
+from psycopg2 import pool as pg_pool
 import statistics
 from typing import Any
 from app.config import settings
 from app.services.supabase_client import get_client
 
+_connection_pool: pg_pool.SimpleConnectionPool | None = None
 
-def _run_sql(sql: str) -> list[dict]:
-    """Execute a raw SQL SELECT query via psycopg2 (port 6543)."""
-    conn = psycopg2.connect(settings.DATABASE_URL)
+
+def _get_pool() -> pg_pool.SimpleConnectionPool:
+    """Get or create the connection pool."""
+    global _connection_pool
+    if _connection_pool is None or _connection_pool.closed:
+        _connection_pool = pg_pool.SimpleConnectionPool(
+            minconn=1, maxconn=5,
+            dsn=settings.DATABASE_URL,
+            connect_timeout=5,
+        )
+    return _connection_pool
+
+
+def _run_sql(sql: str, params: tuple = ()) -> list[dict]:
+    """Execute a raw SQL SELECT query via connection pool (port 6543)."""
+    pool = _get_pool()
+    conn = pool.getconn()
     try:
         with conn.cursor() as cur:
-            cur.execute(sql)
+            cur.execute("SET statement_timeout = '10s'")
+            cur.execute(sql, params)
             cols = [desc[0] for desc in cur.description]
             rows = cur.fetchall()
             return [dict(zip(cols, row)) for row in rows]
     finally:
-        conn.close()
+        pool.putconn(conn)
+
+
+DANGEROUS_KEYWORDS = [
+    "DROP", "DELETE", "UPDATE", "INSERT", "ALTER",
+    "TRUNCATE", "EXEC", "EXECUTE", "UNION",
+]
 
 
 def query_database(sql: str) -> list[dict]:
@@ -30,8 +53,18 @@ def query_database(sql: str) -> list[dict]:
         if not sql.upper().startswith("SELECT"):
             return [{"error": "Only SELECT queries are allowed"}]
 
+        # SQL injection protection
+        sql_upper = sql.upper()
+        for kw in DANGEROUS_KEYWORDS:
+            if kw in sql_upper:
+                return [{"error": f"Forbidden keyword: {kw}"}]
+        if "--" in sql:
+            return [{"error": "SQL comments not allowed"}]
+        if sql.count(";") > 0:
+            return [{"error": "Multiple statements not allowed"}]
+
         # Inject LIMIT safety
-        if "LIMIT" not in sql.upper():
+        if "LIMIT" not in sql_upper:
             sql = sql.rstrip(";") + " LIMIT 200"
 
         return _run_sql(sql)
@@ -43,7 +76,11 @@ def query_database(sql: str) -> list[dict]:
 def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
     """Pass rate, avg duration, error count, step-level breakdown."""
     try:
-        channel_filter = f"AND channel_id = '{channel_id}'" if channel_id else ""
+        params = []
+        channel_filter = ""
+        if channel_id:
+            channel_filter = "AND channel_id = %s"
+            params.append(channel_id)
         sql = f"""
             SELECT
                 COUNT(*) AS total_jobs,
@@ -54,7 +91,7 @@ def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
             WHERE created_at > now() - interval '{days} days'
             {channel_filter}
         """
-        rows = _run_sql(sql)
+        rows = _run_sql(sql, tuple(params))
         stats = rows[0] if rows else {}
 
         # Step-level timings from audit log
@@ -87,7 +124,11 @@ def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
 def get_clip_analysis(job_id: str | None = None, days: int = 7) -> dict:
     """Score distribution, verdict breakdown, content type stats."""
     try:
-        job_filter = f"AND job_id = '{job_id}'" if job_id else ""
+        params = []
+        job_filter = ""
+        if job_id:
+            job_filter = "AND job_id = %s"
+            params.append(job_id)
         sql = f"""
             SELECT
                 COUNT(*) AS total_clips,
@@ -101,7 +142,7 @@ def get_clip_analysis(job_id: str | None = None, days: int = 7) -> dict:
             WHERE created_at > now() - interval '{days} days'
             {job_filter}
         """
-        rows = _run_sql(sql)
+        rows = _run_sql(sql, tuple(params))
         return {"period_days": days, "job_id": job_id, "analysis": rows[0] if rows else {}}
     except Exception as e:
         print(f"[DirectorDB] get_clip_analysis error: {e}")
@@ -261,7 +302,11 @@ def detect_cost_anomalies(threshold_sigma: float = 2.0) -> list[dict]:
 def get_pass_rate_trend(channel_id: str | None = None) -> dict:
     """Compare pass rate: last 30 days vs previous 30 days. Used for B4 scoring."""
     try:
-        channel_filter = f"AND channel_id = '{channel_id}'" if channel_id else ""
+        params = []
+        channel_filter = ""
+        if channel_id:
+            channel_filter = "AND channel_id = %s"
+            params.append(channel_id)
         sql = f"""
             SELECT
                 COUNT(*) FILTER (WHERE created_at > now() - interval '30 days') AS total_current,
@@ -275,7 +320,7 @@ def get_pass_rate_trend(channel_id: str | None = None) -> dict:
             FROM clips
             WHERE 1=1 {channel_filter}
         """
-        rows = _run_sql(sql)
+        rows = _run_sql(sql, tuple(params))
         if not rows:
             return {}
         r = rows[0]
@@ -387,11 +432,11 @@ def compare_channels(channel_a: str, channel_b: str, metric: str = "pass_rate") 
                     COUNT(*) FILTER (WHERE quality_verdict IN ('pass','fixable'))    AS passed,
                     ROUND(AVG(overall_confidence)::NUMERIC, 2)                       AS avg_confidence
                 FROM clips
-                WHERE channel_id IN ('{channel_a}', '{channel_b}')
+                WHERE channel_id IN (%s, %s)
                   AND created_at > now() - interval '30 days'
                 GROUP BY channel_id
             """
-            rows = _run_sql(sql)
+            rows = _run_sql(sql, (channel_a, channel_b))
             data: dict = {}
             for r in rows:
                 cid = r.get("channel_id")
@@ -411,11 +456,11 @@ def compare_channels(channel_a: str, channel_b: str, metric: str = "pass_rate") 
                     COUNT(DISTINCT j.id) AS job_count
                 FROM pipeline_audit_log pal
                 JOIN jobs j ON j.id = pal.job_id
-                WHERE j.channel_id IN ('{channel_a}', '{channel_b}')
+                WHERE j.channel_id IN (%s, %s)
                   AND pal.created_at > now() - interval '30 days'
                 GROUP BY j.channel_id
             """
-            rows = _run_sql(sql)
+            rows = _run_sql(sql, (channel_a, channel_b))
             data = {}
             for r in rows:
                 cid = r.get("channel_id")
@@ -457,7 +502,11 @@ def compare_channels(channel_a: str, channel_b: str, metric: str = "pass_rate") 
 def get_recent_events(module: str | None = None, days: int = 7, limit: int = 50) -> list[dict]:
     """Fetch recent director events for a module."""
     try:
-        mod_filter = f"AND module_name = '{module}'" if module else ""
+        params = []
+        mod_filter = ""
+        if module:
+            mod_filter = "AND module_name = %s"
+            params.append(module)
         sql = f"""
             SELECT module_name, event_type, payload, session_id, channel_id, timestamp
             FROM director_events
@@ -466,7 +515,7 @@ def get_recent_events(module: str | None = None, days: int = 7, limit: int = 50)
             ORDER BY timestamp DESC
             LIMIT {limit}
         """
-        return _run_sql(sql)
+        return _run_sql(sql, tuple(params))
     except Exception as e:
         print(f"[DirectorDB] get_recent_events error: {e}")
         return [{"error": str(e)}]

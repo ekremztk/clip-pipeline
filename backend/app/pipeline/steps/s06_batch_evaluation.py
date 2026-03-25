@@ -5,6 +5,7 @@ from app.config import settings
 from app.services.gemini_client import generate_json
 from app.pipeline.prompts.batch_evaluation import PROMPT
 from app.pipeline.steps.s05_unified_discovery import build_channel_context
+from app.director.events import director_events
 
 
 def _extract_transcript_segment(
@@ -273,6 +274,16 @@ def run(
                     order += 1
 
         print(f"[S06] Final output: {len(all_evaluated)} clips ({passed_count} passed, {failed_count} failed)")
+        try:
+            pass_count = sum(1 for c in all_evaluated if c.get("quality_verdict") == "pass")
+            fail_count = len(all_evaluated) - pass_count
+            director_events.emit_sync(
+                module="module_1", event="s06_evaluation_completed",
+                payload={"job_id": job_id, "pass_count": pass_count, "fail_count": fail_count},
+                channel_id=channel_id,
+            )
+        except Exception:
+            pass
         return all_evaluated
 
     except Exception as e:

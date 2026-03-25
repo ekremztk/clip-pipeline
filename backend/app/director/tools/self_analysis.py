@@ -215,8 +215,13 @@ def get_director_self_analysis() -> dict:
             "limitations": limitations,
             "self_recommendations": self_recommendations,
             "write_access": {
-                "allowed": ["director_memory", "director_recommendations", "director_conversations", "director_events"],
-                "blocked": ["jobs", "clips", "channels", "pipeline_audit_log", "code_files"],
+                "allowed": [
+                    "director_memory", "director_recommendations", "director_conversations",
+                    "director_events", "director_analyses", "director_decision_journal",
+                    "director_test_runs", "director_cross_module_signals",
+                    "channels.channel_dna (merge update — sadece dna alanı)",
+                ],
+                "blocked": ["jobs", "clips", "transcripts", "pipeline_audit_log", "channels (diğer alanlar)"],
             },
         }
 

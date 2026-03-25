@@ -122,6 +122,11 @@ def _run_weekly_digest():
             "recommendations": [],
         }).execute()
         print("[WeeklyDigest] Saved to director_analyses")
+        try:
+            from app.director.notifier import notify_weekly_digest
+            notify_weekly_digest(summary)
+        except Exception:
+            pass
     except Exception as e:
         print(f"[WeeklyDigest] error: {e}")
 
@@ -135,6 +140,14 @@ async def lifespan(app: FastAPI):
     proactive_task = asyncio.create_task(_proactive_scheduler())
     daily_task = asyncio.create_task(_daily_analysis_scheduler())
     yield
+    # Cleanup Director connection pool
+    try:
+        from app.director.tools.database import _connection_pool
+        if _connection_pool and not _connection_pool.closed:
+            _connection_pool.closeall()
+            print("[DB] Director connection pool closed.")
+    except Exception:
+        pass
     for task in [pulse_task, proactive_task, daily_task]:
         task.cancel()
         try:
