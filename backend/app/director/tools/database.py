@@ -177,34 +177,28 @@ def get_channel_dna(channel_id: str) -> dict:
 def create_recommendation(
     module_name: str,
     title: str,
-    description: str,
+    what: str,
+    why: str,
+    expected_impact: str,
     priority: int = 3,
-    impact: str = "orta",
     effort: str = "",
-    what_it_solves: str = "",
-    how_to_integrate: str = "",
-    why_recommended: str = "",
+    risk: str = "",
+    description: str = "",
 ) -> dict:
     """Write a new improvement recommendation to the director_recommendations table."""
     try:
         client = get_client()
-        metadata = {}
-        if what_it_solves:
-            metadata["what_it_solves"] = what_it_solves
-        if how_to_integrate:
-            metadata["how_to_integrate"] = how_to_integrate
-        if why_recommended:
-            metadata["why_recommended"] = why_recommended
-
         res = client.table("director_recommendations").insert({
             "module_name": module_name,
             "title": title,
-            "description": description,
+            "what": what,
+            "why": why,
+            "expected_impact": expected_impact,
             "priority": priority,
-            "impact": impact,
-            "effort": effort,
+            "effort": effort or None,
+            "risk": risk or None,
+            "description": description or None,
             "status": "pending",
-            "metadata": metadata if metadata else None,
         }).execute()
         created = res.data[0] if res.data else {}
         return {"ok": True, "id": created.get("id"), "title": title}

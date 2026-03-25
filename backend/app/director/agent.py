@@ -383,15 +383,15 @@ TOOL_DECLARATIONS = [
             properties={
                 "module_name": types.Schema(type="STRING", description="e.g. clip_pipeline, editor, director, system"),
                 "title": types.Schema(type="STRING", description="Short, clear title"),
-                "description": types.Schema(type="STRING", description="Detailed description of what to do and why"),
+                "what": types.Schema(type="STRING", description="Concrete action: what exactly should be done"),
+                "why": types.Schema(type="STRING", description="Reasoning: why this matters, evidence from data"),
+                "expected_impact": types.Schema(type="STRING", description="What will improve and by how much if implemented"),
                 "priority": types.Schema(type="INTEGER", description="1=critical, 2=high, 3=medium, 4=low, 5=nice-to-have"),
-                "impact": types.Schema(type="STRING", description="Expected impact: yüksek/orta/düşük"),
-                "effort": types.Schema(type="STRING", description="Implementation effort estimate"),
-                "what_it_solves": types.Schema(type="STRING", description="What problem or opportunity this addresses"),
-                "how_to_integrate": types.Schema(type="STRING", description="Concrete steps to implement"),
-                "why_recommended": types.Schema(type="STRING", description="Reasoning and evidence behind this recommendation"),
+                "effort": types.Schema(type="STRING", description="Implementation effort estimate, e.g. '2 saat', '1 gün'"),
+                "risk": types.Schema(type="STRING", description="Potential risks or downsides"),
+                "description": types.Schema(type="STRING", description="Additional context or implementation notes"),
             },
-            required=["module_name", "title", "description", "priority"]
+            required=["module_name", "title", "what", "why", "expected_impact", "priority"]
         )
     ),
     types.FunctionDeclaration(
@@ -714,6 +714,21 @@ def _get_analyses_history(module: str | None = None, limit: int = 10) -> list[di
         return []
 
 
+def _sanitize_json(obj):
+    """Recursively convert Decimal/datetime to JSON-safe types."""
+    from decimal import Decimal
+    import datetime
+    if isinstance(obj, dict):
+        return {k: _sanitize_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_sanitize_json(v) for v in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    return obj
+
+
 def _trigger_analysis(module: str, depth: str = "standard") -> dict:
     """Run on-demand analysis using the 5-dimension scorer, save to director_analyses."""
     try:
@@ -731,7 +746,7 @@ def _trigger_analysis(module: str, depth: str = "standard") -> dict:
                     "reason": "Not enough data for scoring"}
 
         client = get_client()
-        analysis_row = {
+        analysis_row = _sanitize_json({
             "module_name": module,
             "triggered_by": "chat",
             "score": overall_score,
@@ -742,7 +757,7 @@ def _trigger_analysis(module: str, depth: str = "standard") -> dict:
             ],
             "recommendations": [],
             "data_points_used": scores.get("data_points", 0),
-        }
+        })
         res = client.table("director_analyses").insert(analysis_row).execute()
         analysis_id = res.data[0].get("id") if res.data else None
 
@@ -900,13 +915,13 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return db_tools.create_recommendation(
             module_name=args["module_name"],
             title=args["title"],
-            description=args["description"],
+            what=args["what"],
+            why=args["why"],
+            expected_impact=args["expected_impact"],
             priority=args.get("priority", 3),
-            impact=args.get("impact", "orta"),
             effort=args.get("effort", ""),
-            what_it_solves=args.get("what_it_solves", ""),
-            how_to_integrate=args.get("how_to_integrate", ""),
-            why_recommended=args.get("why_recommended", ""),
+            risk=args.get("risk", ""),
+            description=args.get("description", ""),
         )
     elif name == "get_cost_breakdown":
         return db_tools.get_cost_breakdown(args.get("days", 30), args.get("per", "day"))
@@ -1085,6 +1100,8 @@ async def run_agent(
         iteration = 0
         final_text = ""
         _tool_call_hashes: set[str] = set()
+        _consecutive_errors = 0
+        _MAX_CONSECUTIVE_ERRORS = 4  # stop spiraling if tools keep failing
 
         while iteration < max_iterations:
             iteration += 1
@@ -1166,6 +1183,23 @@ async def run_agent(
                     except Exception as e:
                         result = {"error": str(e)}
 
+                    # Track consecutive errors to stop runaway debug spirals
+                    if isinstance(result, dict) and "error" in result:
+                        _consecutive_errors += 1
+                        if _consecutive_errors >= _MAX_CONSECUTIVE_ERRORS:
+                            summary = _result_summary(result, tool_name)
+                            yield {"type": "tool_result", "tool": tool_name, "summary": summary}
+                            final_text = (
+                                f"⚠️ Araç çağrıları art arda {_consecutive_errors} kez hata döndürdü, "
+                                f"döngü durduruldu. Son hata: {result.get('error', 'bilinmiyor')}\n"
+                                "Lütfen sorunun ne olduğunu söyleyin ya da daha spesifik bir komut deneyin."
+                            )
+                            yield {"type": "text", "text": final_text}
+                            yield {"type": "done"}
+                            return
+                    else:
+                        _consecutive_errors = 0
+
                     summary = _result_summary(result, tool_name)
                     yield {"type": "tool_result", "tool": tool_name, "summary": summary}
 
@@ -1183,7 +1217,7 @@ async def run_agent(
             contents.append(types.Content(role="user", parts=tool_response_parts))
 
         if not final_text:
-            final_text = "Analiz tamamlandı."
+            final_text = f"Analiz tamamlandı ({iteration} iterasyon, {len(_tool_call_hashes)} araç çağrısı)."
 
         yield {"type": "text", "text": final_text}
         yield {"type": "done"}
