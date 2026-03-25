@@ -86,7 +86,13 @@ def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
                 COUNT(*) AS total_jobs,
                 COUNT(*) FILTER (WHERE status = 'completed') AS completed,
                 COUNT(*) FILTER (WHERE status = 'failed') AS failed,
-                ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(completed_at, now()) - COALESCE(started_at, created_at)))/60)::NUMERIC, 1) AS avg_duration_min
+                ROUND(AVG(
+                    EXTRACT(EPOCH FROM (completed_at - started_at)) / 60
+                ) FILTER (
+                    WHERE status = 'completed'
+                      AND started_at IS NOT NULL
+                      AND completed_at IS NOT NULL
+                )::NUMERIC, 1) AS avg_duration_min
             FROM jobs
             WHERE created_at > now() - interval '{days} days'
             {channel_filter}
@@ -94,7 +100,7 @@ def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
         rows = _run_sql(sql, tuple(params))
         stats = rows[0] if rows else {}
 
-        # Step-level timings from audit log
+        # Step-level timings — new pipeline only (s01-s08)
         audit_sql = f"""
             SELECT step_name,
                    COUNT(*) AS runs,
@@ -102,6 +108,11 @@ def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
                    COUNT(*) FILTER (WHERE status = 'failed' OR success = false) AS errors
             FROM pipeline_audit_log
             WHERE created_at > now() - interval '{days} days'
+              AND step_name IN (
+                's01_audio_extract','s02_transcribe','s03_speaker_id',
+                's04_labeled_transcript','s05_unified_discovery',
+                's06_batch_evaluation','s07_precision_cut','s08_export'
+              )
             GROUP BY step_name
             ORDER BY step_name
         """
@@ -132,12 +143,15 @@ def get_clip_analysis(job_id: str | None = None, days: int = 7) -> dict:
         sql = f"""
             SELECT
                 COUNT(*) AS total_clips,
-                ROUND(AVG(overall_confidence)::NUMERIC, 2) AS avg_confidence,
-                MIN(overall_confidence) AS min_confidence,
-                MAX(overall_confidence) AS max_confidence,
-                COUNT(*) FILTER (WHERE quality_verdict = 'pass') AS pass_count,
-                COUNT(*) FILTER (WHERE quality_verdict = 'fixable') AS fixable_count,
-                COUNT(*) FILTER (WHERE quality_verdict = 'fail') AS fail_count
+                ROUND((AVG(confidence) * 10)::NUMERIC, 2) AS avg_confidence,
+                ROUND((MIN(confidence) * 10)::NUMERIC, 2) AS min_confidence,
+                ROUND((MAX(confidence) * 10)::NUMERIC, 2) AS max_confidence,
+                ROUND(AVG(standalone_score)::NUMERIC, 2) AS avg_standalone_score,
+                ROUND(AVG(hook_score)::NUMERIC, 2) AS avg_hook_score,
+                COUNT(*) FILTER (WHERE quality_status = 'passed') AS pass_count,
+                COUNT(*) FILTER (WHERE quality_status = 'fixable') AS fixable_count,
+                COUNT(*) FILTER (WHERE quality_status NOT IN ('passed','fixable') AND quality_status IS NOT NULL) AS fail_count,
+                COUNT(*) FILTER (WHERE quality_status IS NULL) AS pending_count
             FROM clips
             WHERE created_at > now() - interval '{days} days'
             {job_filter}

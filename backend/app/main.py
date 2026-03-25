@@ -70,40 +70,38 @@ async def _proactive_scheduler():
         await asyncio.sleep(3600)  # 1 hour
 
 
-async def _daily_analysis_scheduler():
-    """Daily 03:00 UTC: run full analysis. Weekly Monday 09:00 UTC: weekly digest."""
+async def _analysis_scheduler():
+    """Run AI analysis every 6 hours. Weekly digest on Mondays."""
     import asyncio
     from datetime import datetime, timezone
     await asyncio.sleep(120)  # wait 2 min after startup
     while True:
         try:
             now = datetime.now(timezone.utc)
-            # Daily at 03:00 UTC
-            if now.hour == 3 and now.minute < 5:
+            # Every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
+            if now.hour % 6 == 0 and now.minute < 5:
                 await asyncio.get_event_loop().run_in_executor(
                     None, _run_daily_analysis
                 )
-            # Weekly digest: Monday (weekday=0) at 09:00 UTC
+            # Weekly digest: Monday 09:00 UTC
             if now.weekday() == 0 and now.hour == 9 and now.minute < 5:
                 await asyncio.get_event_loop().run_in_executor(
                     None, _run_weekly_digest
                 )
         except Exception as e:
-            print(f"[DailyScheduler] error: {e}")
+            print(f"[AnalysisScheduler] error: {e}")
         await asyncio.sleep(300)  # check every 5 minutes
 
 
 def _run_daily_analysis():
-    """Synchronous: trigger full analysis and proactive checks."""
+    """Synchronous: trigger real AI analysis and proactive checks."""
     try:
-        import requests
-        import os
-        base = os.getenv("RAILWAY_STATIC_URL", "http://localhost:8000")
-        requests.post(f"{base}/director/run-analysis",
-                      params={"module": "all", "triggered_by": "scheduled"}, timeout=30)
+        from app.director.router import _run_ai_analysis
+        result = _run_ai_analysis(module="all", triggered_by="scheduled")
+        print(f"[DailyAnalysis] AI analysis done: score={result.get('overall_score')} id={result.get('analysis_id')}")
         from app.director.proactive import run_proactive_checks
         run_proactive_checks()
-        print("[DailyAnalysis] Completed")
+        print("[DailyAnalysis] Proactive checks done")
     except Exception as e:
         print(f"[DailyAnalysis] error: {e}")
 
@@ -159,7 +157,7 @@ async def lifespan(app: FastAPI):
     startup_task = asyncio.create_task(_startup_analysis())
     pulse_task = asyncio.create_task(_health_pulse_scheduler())
     proactive_task = asyncio.create_task(_proactive_scheduler())
-    daily_task = asyncio.create_task(_daily_analysis_scheduler())
+    daily_task = asyncio.create_task(_analysis_scheduler())
     yield
     # Cleanup Director connection pool
     try:

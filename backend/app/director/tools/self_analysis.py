@@ -16,27 +16,70 @@ def get_director_self_analysis() -> dict:
     try:
         # ── Tool Inventory ──────────────────────────────────
         tools = [
-            {"name": "read_file",               "category": "filesystem",      "status": "active"},
-            {"name": "list_files",              "category": "filesystem",      "status": "active"},
-            {"name": "search_codebase",         "category": "filesystem",      "status": "active"},
-            {"name": "query_database",          "category": "database",        "status": "active"},
-            {"name": "get_pipeline_stats",      "category": "database",        "status": "active"},
-            {"name": "get_clip_analysis",       "category": "database",        "status": "active"},
-            {"name": "get_channel_dna",         "category": "database",        "status": "active"},
-            {"name": "get_recent_events",       "category": "database",        "status": "active"},
-            {"name": "save_memory",             "category": "memory",          "status": "active"},
-            {"name": "query_memory",            "category": "memory",          "status": "active"},
-            {"name": "list_memories",           "category": "memory",          "status": "active"},
-            {"name": "create_recommendation",   "category": "action",          "status": "active"},
-            {"name": "get_langfuse_data",       "category": "monitoring",      "status": "active"},
-            {"name": "get_sentry_issues",       "category": "monitoring",      "status": "active"},
-            {"name": "get_posthog_events",      "category": "monitoring",      "status": "active"},
-            {"name": "get_railway_status",      "category": "infrastructure",  "status": "active"},
-            {"name": "get_railway_logs",        "category": "infrastructure",  "status": "active"},
-            {"name": "get_deepgram_usage",      "category": "monitoring",      "status": "active"},
-            {"name": "web_search",              "category": "internet",        "status": "active"},
-            {"name": "fetch_url",               "category": "internet",        "status": "active"},
-            {"name": "get_director_self_analysis", "category": "self",         "status": "active"},
+            # ── Filesystem / Code access ──────────────────────────────────────
+            {"name": "read_file",                    "category": "filesystem",     "status": "active"},
+            {"name": "list_files",                   "category": "filesystem",     "status": "active"},
+            {"name": "search_codebase",              "category": "filesystem",     "status": "active"},
+            {"name": "get_code_structure",           "category": "filesystem",     "status": "active"},
+            {"name": "read_own_file",                "category": "filesystem",     "status": "active"},
+            # ── Database ──────────────────────────────────────────────────────
+            {"name": "query_database",               "category": "database",       "status": "active"},
+            {"name": "get_pipeline_stats",           "category": "database",       "status": "active"},
+            {"name": "get_clip_analysis",            "category": "database",       "status": "active"},
+            {"name": "get_channel_dna",              "category": "database",       "status": "active"},
+            {"name": "get_recent_events",            "category": "database",       "status": "active"},
+            {"name": "get_cost_breakdown",           "category": "database",       "status": "active"},
+            {"name": "detect_cost_anomalies",        "category": "database",       "status": "active"},
+            {"name": "get_pass_rate_trend",          "category": "database",       "status": "active"},
+            {"name": "get_analyses_history",         "category": "database",       "status": "active"},
+            {"name": "update_channel_dna",           "category": "database",       "status": "active"},
+            {"name": "compare_channels",             "category": "database",       "status": "active"},
+            {"name": "audit_channel_dna",            "category": "database",       "status": "active"},
+            {"name": "cross_channel_analysis",       "category": "database",       "status": "active"},
+            # ── Memory ────────────────────────────────────────────────────────
+            {"name": "save_memory",                  "category": "memory",         "status": "active"},
+            {"name": "query_memory",                 "category": "memory",         "status": "active"},
+            {"name": "list_memories",                "category": "memory",         "status": "active"},
+            # ── Actions ───────────────────────────────────────────────────────
+            {"name": "create_recommendation",        "category": "action",         "status": "active"},
+            {"name": "trigger_analysis",             "category": "action",         "status": "active"},
+            {"name": "send_notification",            "category": "action",         "status": "active"},
+            {"name": "trigger_test",                 "category": "action",         "status": "active"},
+            {"name": "create_execution_plan",        "category": "action",         "status": "active"},
+            # ── Monitoring ────────────────────────────────────────────────────
+            {"name": "get_langfuse_data",            "category": "monitoring",     "status": "active"},
+            {"name": "get_sentry_issues",            "category": "monitoring",     "status": "active"},
+            {"name": "get_posthog_events",           "category": "monitoring",     "status": "active"},
+            {"name": "get_deepgram_usage",           "category": "monitoring",     "status": "active"},
+            {"name": "analyze_prompt_performance",   "category": "monitoring",     "status": "active"},
+            {"name": "suggest_prompt_improvement",   "category": "monitoring",     "status": "active"},
+            # ── Infrastructure ────────────────────────────────────────────────
+            {"name": "get_railway_status",           "category": "infrastructure", "status": "active"},
+            {"name": "get_railway_logs",             "category": "infrastructure", "status": "active"},
+            {"name": "check_dependency_impact",      "category": "infrastructure", "status": "active"},
+            {"name": "get_dependency_map",           "category": "infrastructure", "status": "active"},
+            {"name": "get_cross_module_signals",     "category": "infrastructure", "status": "active"},
+            # ── Pipeline testing ──────────────────────────────────────────────
+            {"name": "create_test_pipeline",         "category": "testing",        "status": "active"},
+            {"name": "get_test_pipeline_status",     "category": "testing",        "status": "active"},
+            {"name": "analyze_test_results",         "category": "testing",        "status": "active"},
+            {"name": "get_active_pipelines",         "category": "testing",        "status": "active"},
+            {"name": "start_ab_test",                "category": "testing",        "status": "active"},
+            {"name": "compare_ab_test",              "category": "testing",        "status": "active"},
+            # ── Prediction ────────────────────────────────────────────────────
+            {"name": "forecast_monthly_cost",        "category": "prediction",     "status": "active"},
+            {"name": "forecast_pipeline_volume",     "category": "prediction",     "status": "active"},
+            {"name": "predict_failure_risk",         "category": "prediction",     "status": "active"},
+            {"name": "forecast_capacity",            "category": "prediction",     "status": "active"},
+            # ── Editor intelligence ───────────────────────────────────────────
+            {"name": "get_editor_engagement_stats",          "category": "editor", "status": "active"},
+            {"name": "get_clips_opened_but_not_published",   "category": "editor", "status": "active"},
+            {"name": "get_editor_conversion_rate",           "category": "editor", "status": "active"},
+            # ── Internet ─────────────────────────────────────────────────────
+            {"name": "web_search",                   "category": "internet",       "status": "active"},
+            {"name": "fetch_url",                    "category": "internet",       "status": "active"},
+            # ── Self ─────────────────────────────────────────────────────────
+            {"name": "get_director_self_analysis",   "category": "self",           "status": "active"},
         ]
 
         # ── Integration Status ──────────────────────────────
@@ -57,9 +100,14 @@ def get_director_self_analysis() -> dict:
                 "note": None if os.getenv("SENTRY_AUTH_TOKEN") else "SENTRY_AUTH_TOKEN eksik — hata listesi API erişimi yok",
             },
             "posthog": {
-                "active": bool(os.getenv("POSTHOG_API_KEY")),
+                "active": bool(os.getenv("POSTHOG_PERSONAL_API_KEY")),
                 "purpose": "Frontend kullanıcı davranışı analizi",
-                "note": None if os.getenv("POSTHOG_PROJECT_ID") else "POSTHOG_PROJECT_ID eksik",
+                "note": (
+                    None if os.getenv("POSTHOG_PERSONAL_API_KEY")
+                    else "POSTHOG_PERSONAL_API_KEY eksik — POSTHOG_API_KEY (phc_...) ingestion key'dir, "
+                         "REST sorguları için phx_... formatında Personal API Key gerekli. "
+                         "PostHog → Settings → Personal API Keys → Create"
+                ),
             },
             "railway": {
                 "active": bool(os.getenv("RAILWAY_API_TOKEN")),
@@ -108,25 +156,27 @@ def get_director_self_analysis() -> dict:
                 "title": "Kod yazma yetkisi yok",
                 "detail": "Read-only modundayım. Kod değişikliklerini öneri olarak sunarım, kullanıcı uygular.",
                 "severity": "medium",
-                "workaround": "Önerileri detaylı açıkla, hangi dosya hangi satır değişmeli belirt.",
+                "workaround": "Önerileri detaylı açıkla: hangi dosya, hangi satır, ne değişmeli.",
             },
             {
                 "title": "DB yazma kısıtlı",
-                "detail": "Sadece director_memory, director_recommendations, director_conversations, director_events tablolarına yazabiliyorum.",
+                "detail": "Sadece director_* tabloları ve channels.channel_dna alanına yazabiliyorum.",
                 "severity": "low",
                 "workaround": "Mevcut yazma yetkileri analiz ve hafıza için yeterli.",
             },
             {
-                "title": "Otomatik zamanlama yok",
-                "detail": "Cron/scheduler entegrasyonu yok. Analizler manuel tetikleniyor.",
+                "title": "Director analizleri yalnızca sayısal — AI metin yok",
+                "detail": "trigger_analysis aracı formula skor hesaplar, Gemini metin analizi YAZMAZ. "
+                           "director_analyses tablosunda AI insight yok, sadece sayılar var.",
                 "severity": "high",
-                "workaround": "Kullanıcı periyodik olarak 'tam analiz çalıştır' diyebilir veya harici cron /director/run-analysis endpoint'ini çağırabilir.",
+                "workaround": "Chat'te analiz yapıp create_recommendation ile kaydet. "
+                               "/run-analysis endpoint'i gerçek AI çağrısı yapacak şekilde refactor edilmeli.",
             },
             {
                 "title": "Dashboard real-time güncelleme yok",
                 "detail": "Analiz sonuçları dashboard'a otomatik yansımıyor. Manuel refresh gerekiyor.",
-                "severity": "medium",
-                "workaround": "Analiz sonrası kullanıcıya 'Dashboard'ı yenile' diyorum.",
+                "severity": "low",
+                "workaround": "Analiz sonrası kullanıcıya 'Dashboard'ı yenile' de.",
             },
         ]
 

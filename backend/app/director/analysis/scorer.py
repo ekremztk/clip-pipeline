@@ -115,7 +115,11 @@ def _dim_technical_health(total: int, completed: int, summary: dict) -> dict:
 
 
 def _dim_ai_decision_quality(total_clips: int, pass_count: int, avg_conf: float) -> dict:
-    """Dimension 2: AI Decision Quality (max 35 points)."""
+    """Dimension 2: AI Decision Quality (max 35 points).
+    avg_conf is already on 0-10 scale (confidence*10 from DB).
+    pass_count based on quality_status='passed'.
+    Note: many clips don't have quality_status yet — treat as neutral, not fail.
+    """
     pass_rate = (pass_count / total_clips * 100) if total_clips > 0 else 0
 
     # Pass rate subscore (0-15)
@@ -284,15 +288,15 @@ def _dim_strategic_maturity(  ) -> dict:
 # ──── Helper subscores ────
 
 def _get_user_alignment_score() -> int:
-    """Score based on user approval/rejection ratio of clips."""
+    """Score based on user approval/rejection ratio of clips (user_approved column)."""
     try:
         rows = _run_sql("""
             SELECT
-                COUNT(*) FILTER (WHERE is_successful = true) AS approved,
-                COUNT(*) FILTER (WHERE is_successful = false) AS rejected,
+                COUNT(*) FILTER (WHERE user_approved = true) AS approved,
+                COUNT(*) FILTER (WHERE user_approved = false) AS rejected,
                 COUNT(*) AS total
             FROM clips
-            WHERE is_successful IS NOT NULL
+            WHERE user_approved IS NOT NULL
               AND created_at > now() - interval '30 days'
         """)
         if not rows or not rows[0].get("total"):

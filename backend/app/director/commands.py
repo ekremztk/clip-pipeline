@@ -1,281 +1,508 @@
 """
 Director Slash Commands — predefined tool chains triggered by /command.
 
-Each command maps to a prompt that Director executes with full tool access.
+Each command maps to a prompt that makes Director use real data queries,
+NOT pre-packaged summary functions. Director must form its own intelligent
+opinion based on raw data, not auto-computed formulas.
 """
 
 SLASH_COMMANDS: list[dict] = [
-    # ── System Analysis ──
+
+    # ── Analiz ──────────────────────────────────────────────────────────
     {
         "command": "/sistem-analizi",
         "label": "Sistem Analizi",
-        "description": "Tum sistemi analiz et, 5 boyutlu skor hesapla",
+        "description": "Tam sistem analizi yap, tüm boyutlarda gerçek veriyi değerlendir",
         "icon": "chart",
         "category": "analiz",
         "prompt": (
-            "Kapsamli bir sistem analizi yap. Sirasiya su araclari kullan:\n"
-            "1. get_pipeline_stats (son 30 gun)\n"
-            "2. get_clip_analysis (son 30 gun)\n"
-            "3. calculate_system_score\n"
-            "4. get_langfuse_data\n"
-            "Sonuclari 5 boyutta (Teknik Saglik, AI Karar Kalitesi, Cikti Kalitesi, "
-            "Ogrenme, Stratejik Olgunluk) degerlendir ve somut oneriler sun."
+            "Sistemi CEO gözüyle analiz et. Hiçbir hazır fonksiyon kullanma — "
+            "her soruyu kendi SQL sorgularınla cevapla.\n\n"
+            "Sırasıyla şunları yap:\n\n"
+            "1. PIPELINE DURUMU:\n"
+            "   query_database ile çalıştır:\n"
+            "   SELECT status, COUNT(*) as cnt, "
+            "   ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - started_at))/60) "
+            "   FILTER (WHERE status='completed' AND started_at IS NOT NULL AND completed_at IS NOT NULL)::NUMERIC,1) as avg_min "
+            "   FROM jobs WHERE created_at > now() - interval '30 days' GROUP BY status\n\n"
+            "2. KLİP KALİTESİ:\n"
+            "   query_database ile çalıştır:\n"
+            "   SELECT quality_status, COUNT(*) as cnt, "
+            "   ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, "
+            "   ROUND(AVG(standalone_score)::NUMERIC,2) as avg_standalone "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY quality_status ORDER BY cnt DESC\n\n"
+            "3. İÇERİK TİPİ DAĞILIMI:\n"
+            "   query_database ile çalıştır:\n"
+            "   SELECT content_type, COUNT(*) as cnt FROM clips "
+            "   WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY content_type ORDER BY cnt DESC LIMIT 10\n\n"
+            "4. SON HATALAR:\n"
+            "   query_database ile çalıştır:\n"
+            "   SELECT step_name, COUNT(*) as errors FROM pipeline_audit_log "
+            "   WHERE success = false AND created_at > now() - interval '7 days' "
+            "   GROUP BY step_name ORDER BY errors DESC\n\n"
+            "5. KANAL BAZLI PERFORMANS:\n"
+            "   query_database ile çalıştır:\n"
+            "   SELECT j.channel_id, COUNT(DISTINCT j.id) as jobs, COUNT(c.id) as clips "
+            "   FROM jobs j LEFT JOIN clips c ON c.job_id = j.id "
+            "   WHERE j.created_at > now() - interval '30 days' GROUP BY j.channel_id\n\n"
+            "6. S05 ve S06 pipeline adımlarını analiz et:\n"
+            "   read_file ile backend/app/pipeline/steps/s05_unified_discovery.py oku — "
+            "   prompt kalitesi, model, output parse mantığını değerlendir\n\n"
+            "Tüm verileri topladıktan sonra:\n"
+            "- Sistemin güçlü olduğu noktaları somut kanıtlarla belirt\n"
+            "- Kritik sorunları sırala (kör formül değil, gördüğün gerçek veriye dayandır)\n"
+            "- En az 2 create_recommendation ile somut ve uygulanabilir öneri kaydet\n"
+            "- trigger_analysis ile bu analizi director_analyses tablosuna kaydet"
         ),
     },
     {
+        "command": "/analiz-calistir",
+        "label": "Analiz Çalıştır",
+        "description": "Şimdi hemen tam AI analizi yap ve kaydet",
+        "icon": "chart",
+        "category": "analiz",
+        "prompt": (
+            "trigger_analysis aracını çalıştır: module='all', depth='deep'.\n"
+            "Analiz tamamlanınca sonuçları raporla: skor, boyutlar, öne çıkan bulgular.\n"
+            "Sonra create_recommendation ile en kritik 1-2 aksiyon yaz."
+        ),
+    },
+
+    {
         "command": "/saglik",
-        "label": "Saglik Durumu",
-        "description": "Hizli sistem sagligi kontrolu",
+        "label": "Sistem Sağlığı",
+        "description": "Son 48 saat gerçek pipeline ve hata durumu",
         "icon": "heart",
         "category": "analiz",
         "prompt": (
-            "Hizli bir sistem sagligi kontrolu yap. get_pipeline_stats ve get_clip_analysis kullan. "
-            "Pipeline basari orani, son hatalar, ortalama sure ve klip kalitesini raporla. "
-            "Kritik bir sorun varsa vurgula."
+            "Son 48 saatin sistem sağlığını kontrol et. Gerçek veriye bak:\n\n"
+            "1. Son 48 saatteki joblar:\n"
+            "   query_database: SELECT id, status, channel_id, error_message, "
+            "   ROUND(EXTRACT(EPOCH FROM (completed_at-started_at))/60::NUMERIC,1) as dur_min, "
+            "   created_at FROM jobs "
+            "   WHERE created_at > now() - interval '48 hours' ORDER BY created_at DESC\n\n"
+            "2. Pipeline hata logları:\n"
+            "   query_database: SELECT step_name, error_message, created_at "
+            "   FROM pipeline_audit_log "
+            "   WHERE (success = false OR status = 'failed') "
+            "   AND created_at > now() - interval '48 hours' "
+            "   ORDER BY created_at DESC LIMIT 20\n\n"
+            "3. Son çıkan kliplerin kalitesi:\n"
+            "   query_database: SELECT quality_status, confidence, "
+            "   standalone_score, hook_score, content_type, created_at "
+            "   FROM clips "
+            "   WHERE created_at > now() - interval '48 hours' ORDER BY created_at DESC\n\n"
+            "Bulguları yorumla. İyi giden ne, dikkat gerektiren ne? "
+            "Eğer kritik bir sorun varsa kırmızı bayrak kaldır ve "
+            "create_recommendation ile kaydet."
         ),
     },
     {
         "command": "/maliyet",
         "label": "Maliyet Analizi",
-        "description": "AI ve transkripsiyon maliyetlerini analiz et",
+        "description": "Gerçek AI ve transkripsiyon maliyetleri",
         "icon": "dollar",
         "category": "analiz",
         "prompt": (
-            "Detayli maliyet analizi yap:\n"
-            "1. get_langfuse_data ile AI maliyetlerini cek\n"
-            "2. get_deepgram_usage ile transkripsiyon maliyetlerini cek\n"
-            "3. detect_cost_anomalies ile anormal harcamalari bul\n"
-            "4. forecast_monthly_cost ile ay sonu projeksiyonu yap\n"
-            "Tasarruf onerileri sun."
+            "Maliyetleri gerçek kaynaklardan analiz et:\n\n"
+            "1. get_langfuse_data (days=30) ile Gemini maliyetlerini çek\n"
+            "2. get_deepgram_usage (days=30) ile Deepgram maliyetlerini çek\n"
+            "3. Job başına maliyet:\n"
+            "   query_database: SELECT job_id, "
+            "   SUM((token_usage->>'cost_usd')::FLOAT) as cost_usd, "
+            "   COUNT(*) as steps "
+            "   FROM pipeline_audit_log "
+            "   WHERE token_usage IS NOT NULL AND token_usage::text != '{}' "
+            "   AND created_at > now() - interval '30 days' "
+            "   GROUP BY job_id ORDER BY cost_usd DESC LIMIT 10\n\n"
+            "4. Adım bazında maliyet:\n"
+            "   query_database: SELECT step_name, "
+            "   ROUND(SUM((token_usage->>'cost_usd')::FLOAT)::NUMERIC,4) as total_cost, "
+            "   COUNT(*) as runs "
+            "   FROM pipeline_audit_log "
+            "   WHERE token_usage IS NOT NULL AND token_usage::text != '{}' "
+            "   AND created_at > now() - interval '30 days' "
+            "   GROUP BY step_name ORDER BY total_cost DESC\n\n"
+            "Toplam maliyeti hesapla, en pahalı adımları belirle, "
+            "maliyet azaltma fırsatlarını somut olarak öner. "
+            "Ay sonu projeksiyon yap."
         ),
     },
     {
         "command": "/hatalar",
         "label": "Hata Analizi",
-        "description": "Son hatalari ve cozum onerilerini goster",
+        "description": "Pipeline ve sistem hataları, kök neden analizi",
         "icon": "alert",
         "category": "analiz",
         "prompt": (
-            "Son hatalari analiz et:\n"
-            "1. get_sentry_issues ile Sentry hatalarini cek\n"
-            "2. get_pipeline_stats ile pipeline hatalarini incele\n"
-            "3. get_railway_logs ile son deployment loglarini kontrol et\n"
-            "Her hata icin olasi nedeni ve cozum onerisi sun."
+            "Tüm hata kaynaklarını araştır:\n\n"
+            "1. Pipeline hataları:\n"
+            "   query_database: SELECT step_name, error_message, COUNT(*) as cnt "
+            "   FROM pipeline_audit_log "
+            "   WHERE (success = false OR status = 'failed') "
+            "   AND created_at > now() - interval '7 days' "
+            "   GROUP BY step_name, error_message ORDER BY cnt DESC LIMIT 20\n\n"
+            "2. Failed joblar:\n"
+            "   query_database: SELECT id, channel_id, error_message, created_at "
+            "   FROM jobs WHERE status = 'failed' "
+            "   AND created_at > now() - interval '14 days' ORDER BY created_at DESC\n\n"
+            "3. get_sentry_issues ile uygulama hatalarını çek\n\n"
+            "4. get_railway_logs ile son deployment loglarına bak\n\n"
+            "Her hata için:\n"
+            "- Kök nedeni tahmin et (rastgele değil, log mesajına bakarak)\n"
+            "- Düzeltme önerisi sun\n"
+            "Kritik hata varsa create_recommendation ile kaydet."
         ),
     },
 
-    # ── Pipeline ──
+    # ── Pipeline ─────────────────────────────────────────────────────────
     {
         "command": "/pipeline",
         "label": "Pipeline Durumu",
-        "description": "Aktif ve son pipeline'lari goster",
+        "description": "Aktif joblar ve son pipeline performansı",
         "icon": "play",
         "category": "pipeline",
         "prompt": (
-            "Pipeline durumunu raporla:\n"
-            "1. get_active_pipelines ile aktif isleri goster\n"
-            "2. get_pipeline_stats (son 7 gun) ile genel performansi ozetle\n"
-            "3. Basarisiz pipeline varsa nedenlerini analiz et."
+            "Pipeline durumunu gerçek verilerle raporla:\n\n"
+            "1. Aktif / bekleyen joblar:\n"
+            "   query_database: SELECT id, status, channel_id, current_step, "
+            "   progress_pct, created_at FROM jobs "
+            "   WHERE status NOT IN ('completed','failed') ORDER BY created_at DESC\n\n"
+            "2. Son 7 günün tamamlanan jobları:\n"
+            "   query_database: SELECT channel_id, status, "
+            "   ROUND(EXTRACT(EPOCH FROM (completed_at-started_at))/60::NUMERIC,1) as dur_min, "
+            "   clip_count, created_at FROM jobs "
+            "   WHERE status = 'completed' AND created_at > now() - interval '7 days' "
+            "   ORDER BY created_at DESC LIMIT 15\n\n"
+            "3. Adım bazında süre (sadece yeni pipeline):\n"
+            "   query_database: SELECT step_name, "
+            "   ROUND(AVG(duration_ms)/1000::NUMERIC,1) as avg_s, COUNT(*) as runs "
+            "   FROM pipeline_audit_log "
+            "   WHERE step_name IN ('s01_audio_extract','s02_transcribe','s03_speaker_id',"
+            "'s04_labeled_transcript','s05_unified_discovery','s06_batch_evaluation',"
+            "'s07_precision_cut','s08_export') "
+            "   AND created_at > now() - interval '7 days' "
+            "   GROUP BY step_name ORDER BY step_name\n\n"
+            "Darboğaz var mı? Hangi adım en uzun sürüyor? Bunu yorumla."
         ),
     },
     {
         "command": "/klip-kalitesi",
         "label": "Klip Kalitesi",
-        "description": "Klip pass rate, confidence ve icerik dagilimi",
+        "description": "Clip confidence, quality_status, içerik tipi dağılımı",
         "icon": "star",
         "category": "pipeline",
         "prompt": (
-            "Klip kalitesini detayli analiz et:\n"
-            "1. get_clip_analysis (son 30 gun)\n"
-            "2. get_pass_rate_trend ile trend analizi\n"
-            "Pass/fixable/fail dagilimi, ortalama confidence, en iyi ve en kotu icerik tiplerini raporla."
+            "Klip kalitesini derinlemesine analiz et:\n\n"
+            "1. Genel kalite dağılımı:\n"
+            "   query_database: SELECT quality_status, COUNT(*) as cnt, "
+            "   ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, "
+            "   ROUND(AVG(standalone_score)::NUMERIC,2) as standalone, "
+            "   ROUND(AVG(hook_score)::NUMERIC,2) as hook "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY quality_status ORDER BY cnt DESC\n\n"
+            "2. İçerik tipi bazında performans:\n"
+            "   query_database: SELECT content_type, COUNT(*) as cnt, "
+            "   ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, "
+            "   COUNT(*) FILTER (WHERE quality_status='passed') as passed "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY content_type ORDER BY cnt DESC\n\n"
+            "3. Süre dağılımı (ideal range 30-180s):\n"
+            "   query_database: SELECT "
+            "   COUNT(*) FILTER (WHERE duration_s < 30) as too_short, "
+            "   COUNT(*) FILTER (WHERE duration_s BETWEEN 30 AND 60) as short, "
+            "   COUNT(*) FILTER (WHERE duration_s BETWEEN 60 AND 120) as medium, "
+            "   COUNT(*) FILTER (WHERE duration_s BETWEEN 120 AND 180) as long_clip, "
+            "   COUNT(*) FILTER (WHERE duration_s > 180) as too_long "
+            "   FROM clips WHERE created_at > now() - interval '30 days'\n\n"
+            "4. En düşük ve en yüksek scoring klipler:\n"
+            "   query_database: SELECT id, content_type, confidence, "
+            "   standalone_score, hook_score, quality_status "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   ORDER BY confidence ASC LIMIT 5\n\n"
+            "Kalite sorununu yorumla: hangi content_type zayıf, neden? "
+            "S06 batch evaluation prompt'u bunu iyileştirebilir mi?"
         ),
     },
     {
         "command": "/test-pipeline",
-        "label": "Test Pipeline Baslat",
-        "description": "Test amacli bir pipeline baslat",
+        "label": "Test Pipeline Başlat",
+        "description": "Onay alarak test pipeline başlat",
         "icon": "flask",
         "category": "pipeline",
         "prompt": (
-            "Kullanici test pipeline baslatmak istiyor. Oncelikle:\n"
-            "1. get_active_pipelines ile aktif is var mi kontrol et\n"
-            "2. Kullaniciya maliyet bilgisini (yaklasik $0.05-0.15 per run) hatırlat\n"
-            "3. Onay aldiktan sonra create_test_pipeline ile baslat"
+            "Test pipeline başlatmadan önce kontrol yap:\n\n"
+            "1. query_database: SELECT COUNT(*) as aktif FROM jobs "
+            "   WHERE status NOT IN ('completed','failed')\n\n"
+            "Aktif job varsa kullanıcıyı bilgilendir. Yoksa:\n"
+            "Test başlatmak için onay iste — maliyet yaklaşık $0.05-0.15. "
+            "Onay gelirse create_test_pipeline çağır, sonra "
+            "get_test_pipeline_status ile takip et."
         ),
     },
 
-    # ── DNA & Channel ──
+    # ── DNA & Kanal ───────────────────────────────────────────────────────
     {
         "command": "/dna",
         "label": "Channel DNA",
-        "description": "Kanal DNA'sini goster ve denetle",
+        "description": "Kanal DNA'sını gerçek klip performansıyla karşılaştır",
         "icon": "dna",
         "category": "kanal",
         "prompt": (
-            "Channel DNA analizi yap:\n"
-            "1. query_database ile tum kanallari listele\n"
-            "2. Her kanalin DNA'sini get_channel_dna ile cek\n"
-            "3. audit_channel_dna ile 6-nokta saglik kontrolu yap\n"
-            "Eksik veya guncel olmayan alanlari raporla."
+            "Kanal DNA analizi yap — DNA'yı gerçek performans verileriyle karşılaştır:\n\n"
+            "1. Kanalları listele:\n"
+            "   query_database: SELECT id, display_name FROM channels\n\n"
+            "2. Her kanal için DNA'yı çek: get_channel_dna\n\n"
+            "3. DNA'da tanımlanan içerik tipleri ile gerçek üretilen içerik tiplerini karşılaştır:\n"
+            "   query_database: SELECT channel_id, content_type, COUNT(*) as cnt, "
+            "   ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY channel_id, content_type ORDER BY channel_id, cnt DESC\n\n"
+            "4. audit_channel_dna ile 6-nokta sağlık kontrolü yap\n\n"
+            "DNA'da yazılan hedefler ile gerçekte üretilen içerik arasındaki uçurumu belirt. "
+            "DNA güncel değilse update_channel_dna öner (değişiklik yapmadan sadece öner)."
         ),
     },
     {
         "command": "/kanal-karsilastir",
-        "label": "Kanal Karsilastirma",
-        "description": "Tum kanallari yan yana karsilastir",
+        "label": "Kanal Karşılaştırma",
+        "description": "Kanalları gerçek metriklerle yan yana karşılaştır",
         "icon": "columns",
         "category": "kanal",
         "prompt": (
-            "Tum kanallari karsilastir:\n"
-            "1. cross_channel_analysis ile kanal bazli metrikleri cek\n"
-            "En iyi/en kotu performans gosteren kanallari belirle. "
-            "Cross-pollination onerileri sun."
+            "Tüm kanalları gerçek verilerle karşılaştır:\n\n"
+            "1. Kanal bazında job ve clip performansı:\n"
+            "   query_database: SELECT j.channel_id, "
+            "   COUNT(DISTINCT j.id) as jobs, COUNT(c.id) as clips, "
+            "   ROUND(COUNT(c.id)::NUMERIC/NULLIF(COUNT(DISTINCT j.id),0),1) as clips_per_job, "
+            "   ROUND(AVG(c.confidence*10)::NUMERIC,2) as avg_conf "
+            "   FROM jobs j LEFT JOIN clips c ON c.job_id = j.id "
+            "   WHERE j.created_at > now() - interval '30 days' "
+            "   GROUP BY j.channel_id ORDER BY clips DESC\n\n"
+            "2. İçerik tipi dağılımı kanal bazında:\n"
+            "   query_database: SELECT channel_id, content_type, COUNT(*) as cnt "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY channel_id, content_type ORDER BY channel_id, cnt DESC\n\n"
+            "Kanallar arasındaki farkları yorumla. "
+            "Hangi kanal neden daha iyi/kötü performans gösteriyor?"
         ),
     },
 
-    # ── Research & Recommendations ──
+    # ── Öneri & Araştırma ────────────────────────────────────────────────
     {
         "command": "/oneri",
-        "label": "Oneri Olustur",
-        "description": "Sistemi arastir ve gelistirme onerileri olustur",
+        "label": "Öneri Oluştur",
+        "description": "Gerçek verilere dayalı akıllı geliştirme önerileri",
         "icon": "lightbulb",
         "category": "oneri",
         "prompt": (
-            "Kapsamli bir analiz yapip oneriler olustur:\n"
-            "1. get_pipeline_stats + get_clip_analysis ile mevcut durumu oku\n"
-            "2. get_langfuse_data ile maliyet verisini cek\n"
-            "3. get_pass_rate_trend ile trend analizi yap\n"
-            "4. web_search ile benzer sistemlerdeki best practice'leri arastir\n"
-            "5. create_recommendation ile en az 3 somut, cesur oneri olustur\n"
-            "Her oneri icin etki ve implementasyon zorlugu belirt."
+            "Sistemi gerçekten araştırıp kanıta dayalı öneriler oluştur:\n\n"
+            "1. Son 30 günün job ve clip özeti:\n"
+            "   query_database: SELECT status, COUNT(*) FROM jobs "
+            "   WHERE created_at > now() - interval '30 days' GROUP BY status\n\n"
+            "2. En düşük confidence'lı content type'lar:\n"
+            "   query_database: SELECT content_type, "
+            "   ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, COUNT(*) as cnt "
+            "   FROM clips WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY content_type ORDER BY avg_conf ASC LIMIT 5\n\n"
+            "3. S05 ve S06 adımlarının süre trendi:\n"
+            "   query_database: SELECT step_name, "
+            "   ROUND(AVG(duration_ms)/1000::NUMERIC,1) as avg_s "
+            "   FROM pipeline_audit_log "
+            "   WHERE step_name IN ('s05_unified_discovery','s06_batch_evaluation') "
+            "   AND created_at > now() - interval '30 days' GROUP BY step_name\n\n"
+            "4. En yüksek maliyetli adım:\n"
+            "   query_database: SELECT step_name, "
+            "   ROUND(SUM((token_usage->>'cost_usd')::FLOAT)::NUMERIC,4) as total_cost "
+            "   FROM pipeline_audit_log "
+            "   WHERE token_usage IS NOT NULL AND token_usage::text != '{}' "
+            "   AND created_at > now() - interval '30 days' "
+            "   GROUP BY step_name ORDER BY total_cost DESC LIMIT 5\n\n"
+            "5. web_search ile 'YouTube shorts clip extraction AI quality improvement 2025' ara\n\n"
+            "Topladığın kanıtlara dayanarak EN AZ 3 somut öneri oluştur. "
+            "Her biri için create_recommendation çağır. "
+            "Genel tavsiyeler verme — sadece bu sistemin bu verisine özel ol."
         ),
     },
     {
         "command": "/arastir",
-        "label": "Internet Arastirmasi",
-        "description": "Belirli bir konuyu internette arastir",
+        "label": "İnternet Araştırması",
+        "description": "Belirtilen konuyu araştır, Prognot'a uygula",
         "icon": "search",
         "category": "oneri",
         "prompt": (
-            "Kullanicinin belirtecegi konuyu internette arastir. "
-            "web_search ve fetch_url araclarini kullanarak detayli bilgi topla. "
-            "Sonuclari Prognot sistemine uygulanabilecek sekilde ozetle.\n\n"
-            "Hangi konuyu arastirmami istiyorsun?"
+            "Araştırma yapacağım. Önce sistemi tanımak için:\n"
+            "query_database: SELECT id, display_name FROM channels\n\n"
+            "Sonra hangi konuyu araştırmamı istiyorsun? "
+            "web_search ve fetch_url ile derinlemesine araştırıp "
+            "Prognot sistemine nasıl uygulanabileceğini açıklayacağım."
         ),
     },
 
-    # ── Memory & Self ──
+    # ── Hafıza & Self ─────────────────────────────────────────────────────
     {
         "command": "/hafiza",
-        "label": "Hafiza Yonetimi",
-        "description": "Kayitli hafizalari goster ve yonet",
+        "label": "Hafıza Yönetimi",
+        "description": "Kayıtlı hafızaları göster",
         "icon": "brain",
         "category": "hafiza",
         "prompt": (
-            "Hafiza kayitlarimi goster:\n"
-            "1. list_memories ile tum kayitlari listele\n"
-            "Tip bazinda grupla (decision, context, plan, note, learning). "
-            "Eski veya gecersiz kayitlar varsa temizlik onerisi sun."
+            "Hafıza kayıtlarımı göster:\n"
+            "1. list_memories ile tüm kayıtları listele\n"
+            "2. query_database: SELECT COUNT(*) as total, type "
+            "   FROM director_memory GROUP BY type ORDER BY total DESC\n\n"
+            "Tip bazında grupla. Eksik hafıza alanları varsa belirt "
+            "(örn: kanal kararları, sistem öğrenmeleri kayıt altında mı?)"
         ),
     },
     {
         "command": "/kendini-analiz-et",
-        "label": "Director Oz-Analizi",
-        "description": "Director kendi yeteneklerini ve limitlerini analiz etsin",
+        "label": "Director Öz-Analizi",
+        "description": "Director kendi yeteneklerini ve eksiklerini değerlendirir",
         "icon": "eye",
         "category": "hafiza",
         "prompt": (
-            "Kendi yeteneklerini analiz et:\n"
-            "1. get_director_self_analysis ile tool envanterini cek\n"
-            "2. API entegrasyonlarinin durumunu kontrol et\n"
-            "3. Hafiza kullanimi ve limitlerini raporla\n"
-            "Eksik yetenekler ve gelistirme onerileri sun."
+            "Kendi yeteneklerini ve sınırlarını dürüstçe değerlendir:\n\n"
+            "1. get_director_self_analysis ile araç envanteri ve API durumunu çek\n\n"
+            "2. director_analyses tablosunu kontrol et:\n"
+            "   query_database: SELECT COUNT(*) as analysis_count, "
+            "   MAX(timestamp) as last_analysis FROM director_analyses\n\n"
+            "3. Öneri geçmişine bak:\n"
+            "   query_database: SELECT status, COUNT(*) as cnt "
+            "   FROM director_recommendations GROUP BY status\n\n"
+            "4. Hafıza kullanımı:\n"
+            "   query_database: SELECT type, COUNT(*) FROM director_memory GROUP BY type\n\n"
+            "Şu an hangi görevleri GERÇEKTEN yapabiliyorsun? "
+            "Hangi entegrasyonlar kopuk? "
+            "Sistemin potansiyelinin ne kadarını kullanabiliyorsun ve neden?"
         ),
     },
 
-    # ── Costs & Forecasting ──
+    # ── Tahmin & Risk ─────────────────────────────────────────────────────
     {
         "command": "/tahmin",
-        "label": "Tahmin ve Projeksiyon",
-        "description": "Maliyet ve kapasite tahminleri",
+        "label": "Tahmin & Projeksiyon",
+        "description": "Maliyet ve kapasite projeksiyonları",
         "icon": "trending",
         "category": "tahmin",
         "prompt": (
-            "Sistem tahminlerini hesapla:\n"
-            "1. forecast_monthly_cost ile ay sonu maliyet projeksiyonu\n"
-            "2. forecast_pipeline_volume ile kullanim trendi\n"
-            "3. forecast_capacity ile kapasite durumu\n"
-            "Riskleri ve onerileri raporla."
+            "Gerçek verilere dayalı projeksiyon yap:\n\n"
+            "1. Son 30 günün iş hacmi:\n"
+            "   query_database: SELECT "
+            "   DATE_TRUNC('week', created_at) as week, "
+            "   COUNT(*) as jobs, SUM(clip_count) as clips "
+            "   FROM jobs WHERE created_at > now() - interval '30 days' "
+            "   GROUP BY week ORDER BY week\n\n"
+            "2. forecast_monthly_cost ile maliyet tahmini\n"
+            "3. forecast_pipeline_volume ile hacim tahmini\n"
+            "4. forecast_capacity ile kapasite durumu\n\n"
+            "Haftalık trende bakarak gerçekçi bir ay sonu tahmini yap. "
+            "Büyüme hızı hesapla."
         ),
     },
     {
         "command": "/risk",
-        "label": "Risk Degerlendirmesi",
-        "description": "Sistem risklerini ve bagimlilik etkilerini analiz et",
+        "label": "Risk Değerlendirmesi",
+        "description": "Gerçek hata loglarına dayalı sistem riski",
         "icon": "shield",
         "category": "tahmin",
         "prompt": (
-            "Sistem risklerini degerlendir:\n"
-            "1. get_dependency_map ile bagimlillik haritasini cek\n"
-            "2. check_dependency_impact ile kritik servislerin etkisini analiz et (gemini_pro, deepgram, supabase, r2_storage)\n"
-            "3. predict_failure_risk ile pipeline risk seviyesini hesapla\n"
-            "Tek nokta arizalari (SPOF) ve onlem onerileri sun."
+            "Sistem risklerini gerçek kanıtlarla değerlendir:\n\n"
+            "1. Son 7 günün hata oranı adım bazında:\n"
+            "   query_database: SELECT step_name, "
+            "   COUNT(*) as total, "
+            "   COUNT(*) FILTER (WHERE success = false) as errors, "
+            "   ROUND(COUNT(*) FILTER (WHERE success = false)::NUMERIC / "
+            "   NULLIF(COUNT(*),0) * 100, 1) as error_rate_pct "
+            "   FROM pipeline_audit_log "
+            "   WHERE created_at > now() - interval '7 days' "
+            "   GROUP BY step_name ORDER BY error_rate_pct DESC\n\n"
+            "2. get_dependency_map ile servis bağımlılıklarını çek\n\n"
+            "3. Kritik servisler için etki analizi:\n"
+            "   check_dependency_impact('gemini_pro')\n"
+            "   check_dependency_impact('deepgram')\n"
+            "   check_dependency_impact('supabase')\n\n"
+            "4. Retry sayısı yüksek joblar:\n"
+            "   query_database: SELECT id, retry_count, status, error_message "
+            "   FROM jobs WHERE retry_count > 0 "
+            "   ORDER BY retry_count DESC LIMIT 10\n\n"
+            "Tek nokta arızaları (SPOF) ve en kritik risk faktörlerini listele."
         ),
     },
 
-    # ── Prompt & AI ──
+    # ── AI & Prompt ───────────────────────────────────────────────────────
     {
         "command": "/prompt-analiz",
-        "label": "Prompt Performansi",
-        "description": "S05/S06 prompt performansini analiz et",
+        "label": "Prompt Performansı",
+        "description": "S05/S06 prompt kalitesini gerçek çıktılarla değerlendir",
         "icon": "code",
         "category": "ai",
         "prompt": (
-            "Prompt performansini analiz et:\n"
-            "1. analyze_prompt_performance (s05) ve analyze_prompt_performance (s06)\n"
-            "2. suggest_prompt_improvement (s05) ve suggest_prompt_improvement (s06)\n"
-            "Zayif icerik tipleri, confidence calibration ve kesfedilen klip sayisini raporla. "
-            "Somut prompt iyilestirme onerileri sun."
+            "Prompt performansını gerçek data ile analiz et:\n\n"
+            "1. S05 ve S06 Langfuse verisini çek: get_langfuse_data (step='s05', days=30)\n\n"
+            "2. S05 token kullanımı ve süre:\n"
+            "   query_database: SELECT "
+            "   ROUND(AVG(duration_ms)/1000::NUMERIC,1) as avg_s, "
+            "   ROUND(AVG((token_usage->>'input_tokens')::INT)::NUMERIC,0) as avg_input_tok, "
+            "   ROUND(AVG((token_usage->>'output_tokens')::INT)::NUMERIC,0) as avg_output_tok "
+            "   FROM pipeline_audit_log "
+            "   WHERE step_name = 's05_unified_discovery' "
+            "   AND created_at > now() - interval '30 days'\n\n"
+            "3. Job başına keşfedilen aday sayısı:\n"
+            "   query_database: SELECT j.id, j.total_candidates_found, "
+            "   j.total_candidates_evaluated, j.clip_count "
+            "   FROM jobs j WHERE j.status = 'completed' "
+            "   AND j.created_at > now() - interval '30 days' "
+            "   ORDER BY j.created_at DESC LIMIT 10\n\n"
+            "4. S05 ve S06 prompt dosyalarını oku:\n"
+            "   read_file: backend/app/pipeline/prompts/s05_discovery_prompt.py\n"
+            "   (veya benzer isimli prompt dosyasını bul: "
+            "   list_files: backend/app/pipeline/prompts/)\n\n"
+            "Adaylara bakarak: kaç aday keşfediliyor, kaçı değerlendirmeye giriyor, "
+            "kaçı son klip oluyor? Bu huni dar mı?"
         ),
     },
 
-    # ── Code ──
+    # ── Kod ──────────────────────────────────────────────────────────────
     {
         "command": "/kod-tara",
-        "label": "Kod Taramasi",
-        "description": "Kod tabaninda zayif noktalari ve iyilestirme firsatlarini bul",
+        "label": "Kod Taraması",
+        "description": "Pipeline kodunu tara, zayıf noktaları bul",
         "icon": "file",
         "category": "kod",
         "prompt": (
-            "Kod tabanini tara:\n"
-            "1. read_file ile kritik dosyalari oku (orchestrator.py, s05, s06, agent.py)\n"
-            "2. search_codebase ile hata paternleri ara (bare except, TODO, FIXME, hardcoded)\n"
-            "3. Buldugun sorunlari kategorize et (guvenlik, performans, bakim)\n"
-            "Somut iyilestirme onerileri sun."
+            "Kod tabanını tara — sadece okuma, öneri ver:\n\n"
+            "1. search_codebase ile tüm bare except'leri bul: query='except Exception'\n"
+            "2. search_codebase ile TODO/FIXME'leri bul: query='TODO|FIXME'\n"
+            "3. search_codebase ile hardcoded değerleri bul: query='speedy_cast'\n"
+            "4. read_file: backend/app/pipeline/steps/s05_unified_discovery.py\n"
+            "5. read_file: backend/app/pipeline/orchestrator.py\n\n"
+            "Her bulguyu kategorize et: güvenlik, performans, bakım, bug riski. "
+            "En kritik 3 sorunu öne çıkar ve create_recommendation ile kaydet."
         ),
     },
     {
         "command": "/dosya-oku",
         "label": "Dosya Oku",
-        "description": "Belirli bir dosyayi oku ve analiz et",
+        "description": "Belirtilen dosyayı oku ve yorumla",
         "icon": "file",
         "category": "kod",
         "prompt": (
-            "Hangi dosyayi okumami istiyorsun? "
-            "Dosya yolunu belirt (ornek: backend/app/pipeline/steps/s05_unified_discovery.py)"
+            "Hangi dosyayı okumamı istiyorsun? "
+            "Tam yolu söyle (örn: backend/app/pipeline/steps/s06_batch_evaluation.py). "
+            "read_file ile okuyup içeriği analiz edeceğim."
         ),
     },
 ]
 
 
 def get_commands() -> list[dict]:
-    """Return all available slash commands."""
     return SLASH_COMMANDS
 
 
 def find_command(text: str) -> dict | None:
-    """Find a command matching the given text (e.g. '/sistem-analizi')."""
     text = text.strip().lower()
     for cmd in SLASH_COMMANDS:
         if cmd["command"] == text:
@@ -284,7 +511,6 @@ def find_command(text: str) -> dict | None:
 
 
 def get_command_categories() -> list[dict]:
-    """Return commands grouped by category."""
     cats: dict[str, list[dict]] = {}
     for cmd in SLASH_COMMANDS:
         cat = cmd.get("category", "diger")
@@ -296,8 +522,8 @@ def get_command_categories() -> list[dict]:
         "analiz": "Analiz",
         "pipeline": "Pipeline",
         "kanal": "Kanal & DNA",
-        "oneri": "Oneri & Arastirma",
-        "hafiza": "Hafiza & Self",
+        "oneri": "Öneri & Araştırma",
+        "hafiza": "Hafıza & Self",
         "tahmin": "Tahmin & Risk",
         "ai": "AI & Prompt",
         "kod": "Kod",

@@ -129,10 +129,10 @@ def check_performance_drop() -> dict | None:
             SELECT
                 COUNT(*) FILTER (WHERE created_at > now() - interval '7 days') AS total_7,
                 COUNT(*) FILTER (WHERE created_at > now() - interval '7 days'
-                                   AND quality_verdict IN ('pass','fixable'))   AS pass_7,
+                                   AND quality_status IN ('passed','fixable'))  AS pass_7,
                 COUNT(*) FILTER (WHERE created_at > now() - interval '30 days') AS total_30,
                 COUNT(*) FILTER (WHERE created_at > now() - interval '30 days'
-                                   AND quality_verdict IN ('pass','fixable'))   AS pass_30
+                                   AND quality_status IN ('passed','fixable'))  AS pass_30
             FROM clips
         """
         rows = _run_sql(sql)
@@ -236,9 +236,8 @@ def check_unused_clips() -> dict | None:
         sql = """
             SELECT COUNT(*) AS unused_count
             FROM clips
-            WHERE quality_verdict IN ('pass', 'fixable')
-              AND is_successful IS NULL
-              AND is_published IS NULL
+            WHERE quality_status IN ('passed', 'fixable')
+              AND user_approved IS NULL
               AND created_at < now() - interval '3 days'
               AND created_at > now() - interval '14 days'
         """
@@ -269,9 +268,9 @@ def check_success_celebration() -> dict | None:
 
         sql = """
             SELECT
-                COUNT(*)                                                      AS total,
-                COUNT(*) FILTER (WHERE quality_verdict IN ('pass','fixable')) AS passed,
-                ROUND(AVG(overall_confidence)::NUMERIC, 2)                    AS avg_conf
+                COUNT(*)                                                       AS total,
+                COUNT(*) FILTER (WHERE quality_status IN ('passed','fixable')) AS passed,
+                ROUND((AVG(confidence) * 10)::NUMERIC, 2)                      AS avg_conf
             FROM clips
             WHERE job_id IN (
                 SELECT id FROM jobs ORDER BY created_at DESC LIMIT 5
@@ -329,12 +328,12 @@ def check_new_pattern() -> dict | None:
                 content_type,
                 COUNT(*) FILTER (WHERE created_at > now() - interval '14 days')  AS total_now,
                 COUNT(*) FILTER (WHERE created_at > now() - interval '14 days'
-                                   AND quality_verdict IN ('pass','fixable'))     AS pass_now,
+                                   AND quality_status IN ('passed','fixable'))     AS pass_now,
                 COUNT(*) FILTER (WHERE created_at BETWEEN now() - interval '28 days'
                                                        AND now() - interval '14 days') AS total_prev,
                 COUNT(*) FILTER (WHERE created_at BETWEEN now() - interval '28 days'
                                                        AND now() - interval '14 days'
-                                   AND quality_verdict IN ('pass','fixable'))          AS pass_prev
+                                   AND quality_status IN ('passed','fixable'))          AS pass_prev
             FROM clips
             WHERE content_type IS NOT NULL
             GROUP BY content_type

@@ -3,9 +3,9 @@ Director security limits and rate-limit protections.
 Centralized constants used by agent.py and other modules.
 """
 
-# Tool loop limits
-MAX_TOOL_CALLS_PER_SESSION = 8
-MAX_ITERATIONS_PER_SESSION = 10
+# Tool loop limits — no hard cap on tool calls, only iteration limit matters
+MAX_TOOL_CALLS_PER_SESSION = 9999  # effectively unlimited
+MAX_ITERATIONS_PER_SESSION = 30
 
 # Token / result limits
 MAX_RESULT_CHARS = 6_000

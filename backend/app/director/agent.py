@@ -17,7 +17,7 @@ from typing import AsyncGenerator, Any
 from google.genai import types
 
 from app.config import settings
-from app.director.config import MAX_TOOL_CALLS_PER_SESSION, MAX_ITERATIONS_PER_SESSION, MAX_RESULT_CHARS
+from app.director.config import MAX_ITERATIONS_PER_SESSION, MAX_RESULT_CHARS
 from app.services.gemini_client import get_gemini_client, _trace_generation
 from app.director.tools import database as db_tools
 from app.director.tools import filesystem as fs_tools
@@ -49,66 +49,74 @@ ARAÇ KULLANMA — doğrudan cevap ver:
 - Fikir, beyin fırtınası, öneri istiyorsa
 
 ARAÇ KULLAN — sisteme bak:
-- Spesifik metrik ("pass rate kaç?", "son 7 günde kaç job?")
-- Hata araştırması, güncel durum, dosya içeriği
-- Kanal/klip/job hakkında veri
+- Spesifik metrik, hata araştırması, güncel durum, dosya içeriği
+- Kanal/klip/job/kod hakkında veri
+- "Neden çalışmıyor?", "Bu kodda sorun var mı?", "Kaliteyi kontrol et" gibi istekler
 
 ALTIN KURAL: Soruyu araç çağırmadan cevaplayabiliyorsan ÇAĞIRMA.
-Bir dosyayı bulamazsan EN FAZLA 1 kez dene. Bulamazsan "erişimim dışında" de ve devam et.
 Aynı aracı aynı argümanlarla HİÇBİR ZAMAN iki kez çağırma.
 
-## ERİŞİM HARİTAN
+## KOD ERİŞİM HARİTAN
 
-DOSYA SİSTEMİ:
-  ✅ backend/app/ — tüm Python kodu
-  ✅ docs/ — MD dokümantasyon
-  ✅ backend/migrations/ — SQL şemaları
-  ❌ frontend/ — bu container'da yok (git'te var ama read_file ile erişilemiyor)
+### Kendi kodlarını okumak için (HER ZAMAN ÇALIŞIR):
+`read_own_file` aracını kullan — Docker veya local fark etmez:
+  - read_own_file("director/agent.py")          — bu dosya
+  - read_own_file("director/router.py")         — API endpoint'leri
+  - read_own_file("director/tools/database.py") — DB araçları
+  - read_own_file("director/proactive.py")      — proaktif tetikleyiciler
+  - read_own_file("director/learning.py")       — öğrenme döngüsü
+  - read_own_file("pipeline/orchestrator.py")   — pipeline akışı
+  - read_own_file("api/routes/feedback.py")     — feedback API
+  - read_own_file("api/routes/clips.py")        — clips API
 
-VERİTABANI:
-  ✅ OKUMA: Tüm tablolar
-  ✅ YAZMA: director_* tabloları + channels.channel_dna (sadece dna alanı)
+`get_code_structure(scope="director")` → tüm director dosyalarını listele
+`get_code_structure(scope="all")` → projenin tam kod haritası
+
+### Klasik read_file (local'de çalışır, Docker'da path prefix farklı olabilir):
+  - backend/app/director/... (local)
+  - app/director/... (Docker)
+
+### Frontend (Vercel'de deploy edilir, lokal geliştirmede erişilebilir):
+  get_code_structure(scope="frontend") → mevcut olup olmadığını gösterir
+
+### Veritabanı erişimi:
+  ✅ OKUMA: Tüm tablolar (query_database ile SELECT)
+  ✅ YAZMA: director_* tabloları + channels.channel_dna
   ❌ YAZMA: jobs, clips, transcripts, pipeline_audit_log
 
-## YENİ ARAÇLARIN KULLANIM KURALLARI
+## KOD İNCELEME PROTOKOLÜ
+
+Bir şey yanlış gittiğinde veya kod kalitesi sorulduğunda:
+1. `get_code_structure(scope="director")` ile dosya haritasını al
+2. `read_own_file("director/[ilgili dosya].py")` ile kodu oku
+3. `search_codebase(query="[aradığın pattern]", file_pattern="*.py")` ile sistemde ara
+4. Bulguları kanıta dayalı raporla: hangi dosya, hangi satır, ne sorun
+
+Hata var dediğinde önce kodu oku. Varsayımla hata bulma.
+
+## ARAÇ KULLANIM REHBERİ
 
 ### Pipeline Test Araçları
-- create_test_pipeline: Sadece kullanıcı açıkça "pipeline başlat/test et" dediğinde.
-  ASLA otomatik tetikleme. Her zaman onay iste. Günde max 5 test (maliyet kontrolü).
-- get_test_pipeline_status: İlerleme takibi için. Polling yapabilirsin ama max 3 kez.
-- analyze_test_results: Sadece pipeline completed olduğunda çağır.
-- get_active_pipelines: Pipeline durumu sorulduğunda kullan.
+- create_test_pipeline: Sadece kullanıcı "pipeline başlat/test et" dediğinde. Onay al. Günde max 5.
+- get_test_pipeline_status: max 3 kez poll yap.
+- analyze_test_results: Sadece pipeline completed olduğunda.
 
 ### A/B Test Araçları
-- start_ab_test: Kullanıcı "karşılaştır" veya "A/B test" dediğinde.
-  İKİ pipeline çalışacağını ve maliyetin 2x olacağını kullanıcıya bildir, onay al.
-- compare_ab_test: Her iki run tamamlandığında. Öncesinde status kontrol et.
+- start_ab_test: "2x maliyet" uyarısını kullanıcıya ver, onay al.
+- compare_ab_test: Her iki run tamamlandığında.
 
 ### Tahmin Araçları
-- forecast_monthly_cost / forecast_pipeline_volume: "tahmin", "nereye gidiyoruz" gibi sorularda.
-  Tahmin olduğunu açıkça belirt. Gerçek değil projeksiyon.
-- predict_failure_risk: Yeni pipeline öncesinde risk değerlendirmesi istendiğinde.
-- forecast_capacity: "sistem ne durumda", "kapasite?" gibi sorularda.
-
-### Model Seçimi
-- Tool gerektiren tüm sorgular → Gemini Pro (otomatik, değiştirme)
-- Kısa/basit cevaplar (use_tools=False) → model_router karar verir
+- forecast_monthly_cost / forecast_pipeline_volume: Tahmin olduğunu belirt.
+- predict_failure_risk: Pipeline öncesinde risk değerlendirmesi.
 
 ## Temel Prensipler
 
-1. **Araçlarla düşün, varsayımla değil.** Bir şeyi "bilmek" yerine önce araçlarınla sistemi oku.
-   "S05 yavaş görünüyor" diyorsan önce query_database ile gerçek süreleri bak.
-
-2. **Kanıt olmadan hata bulma.** Bir şeyin problem olduğunu söylemeden önce read_file veya query_database ile doğrula.
-
-3. **Kasıtlı tasarım kararlarını tanı.** Örneğin: M1 çıktısı 16:9 çünkü M2 reframe 16:9 gerektirir.
-   Bunu "problem" olarak işaretlemeden önce MODULE_2_EDITOR.md dosyasını oku.
-
-4. **Hafıza kullan.** Her konuşmada query_memory ile geçmişe bak. Öğrendiklerini save_memory ile kaydet.
-
-5. **Emin olmadığında sor.** "Bunun kasıtlı olup olmadığından emin değilim, teyit edebilir misin?"
-
-6. **Cesur ol.** Küçük iyileştirmelerden değil, sistem seviyesi değişikliklerden bahset.
+1. **Araçlarla düşün.** "S05 yavaş görünüyor" → önce query_database ile gerçek süreleri bak.
+2. **Kodu oku.** Hata bulduğunda read_own_file ile doğrula. "Satır X'te Y var" → kaynak göster.
+3. **Kasıtlı tasarım kararlarını tanı.** Şüphe duyduğunda docs/ okı.
+4. **Hafıza kullan.** query_memory ile geçmişe bak, öğrendiklerini save_memory ile kaydet.
+5. **Cesur ol.** Sistem seviyesi değişiklikler öner.
+6. **Sonuçları kaydet.** Önemli bulgular → create_recommendation + save_memory.
 
 ## Sistem Yapısı
 
@@ -116,24 +124,23 @@ VERİTABANI:
 - **Module 2**: Editor (OpenCut), Reframe (yüz takibi), Auto Captions (Deepgram)
 - **Stack**: Railway (FastAPI) + Vercel (Next.js) + Supabase + Cloudflare R2
 - **Models**: gemini-3.1-pro-preview (S05, S06), gemini-2.5-flash (diğerleri)
+- **Director araçları**: ~45 fonksiyon — DB, filesystem, memory, monitoring, prediction, A/B test
 
 ## Dokümanlar
 
-Sistemi anlamak için önce bunları oku:
 - docs/MODULE_1_CLIP_EXTRACTOR.md
 - docs/MODULE_2_EDITOR.md
 - docs/SYSTEM_CORE.md
 - docs/DIRECTOR_MODULE.md
 
-## Önemli Kısıtlamalar
+## Kısıtlamalar
 
-- Railway CPU-only, GPU kütüphanesi yok (PyTorch, TensorFlow, WhisperX vs.)
+- Railway CPU-only — PyTorch/TensorFlow/WhisperX yok
 - DATABASE_URL port 6543 olmalı (5432 değil)
-- **Kod değişikliği yapma yetkisi yok.** Kod önerilerini açık ve uygulanabilir şekilde sun — hangi dosya, hangi satır, ne değişecek. Kullanıcı kendisi uygular.
-- Kilitli dosyalar: reframer.py, memory/, next.config.js, s01-s04 pipeline adımları
-- Tüm kod ve dosyaları okuyabilirsin — `read_file`, `list_files`, `search_codebase` serbestçe kullan.
+- Kod değişikliği yapma yetkisi yok — öneriler sun, kullanıcı uygular
+- Kilitli: reframer.py, app/memory/, next.config.js, s01-s04 pipeline adımları
 
-Türkçe konuş. Kısa ve net ol. Araç zincirini göster ama gereksiz teknik detaya boğma."""
+Türkçe konuş. Kısa ve net ol. Hata/sorun bulduğunda dosya:satır referansı ver."""
 
 # ─────────────────────────────────────────────
 # Tool Definitions (Gemini function declarations)
@@ -171,6 +178,27 @@ TOOL_DECLARATIONS = [
                 "file_pattern": types.Schema(type="STRING", description="Optional glob filter, e.g. *.py"),
             },
             required=["query"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_code_structure",
+        description="Get a full tree of all project source files. Use this to discover what files exist before reading them. scope: all | director | pipeline | api | frontend",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "scope": types.Schema(type="STRING", description="all | director | pipeline | api | frontend. Default: all"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="read_own_file",
+        description="Read any backend/app source file using runtime path — always works regardless of Docker or local. Use module_path relative to backend/app/. Examples: 'director/agent.py', 'pipeline/orchestrator.py', 'api/routes/feedback.py', 'director/tools/database.py'",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "module_path": types.Schema(type="STRING", description="Path relative to backend/app/, e.g. 'director/agent.py'"),
+            },
+            required=["module_path"]
         )
     ),
     types.FunctionDeclaration(
@@ -630,17 +658,6 @@ TOOL_DECLARATIONS = [
         )
     ),
     types.FunctionDeclaration(
-        name="calculate_system_score",
-        description="Run the full 5-dimension scoring: Technical Health, AI Quality, Output Quality, Learning, Strategic Maturity. Returns 0-100 score.",
-        parameters=types.Schema(
-            type="OBJECT",
-            properties={
-                "days": types.Schema(type="INTEGER", description="Look-back period, default 30"),
-                "channel_id": types.Schema(type="STRING", description="Optional channel filter"),
-            }
-        )
-    ),
-    types.FunctionDeclaration(
         name="analyze_prompt_performance",
         description="Analyze how prompt versions perform for a pipeline step (S05/S06). Shows weekly trends.",
         parameters=types.Schema(
@@ -841,6 +858,10 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
         return fs_tools.list_files(args["directory"], args.get("pattern", "*"))
     elif name == "search_codebase":
         return fs_tools.search_codebase(args["query"], args.get("file_pattern"))
+    elif name == "get_code_structure":
+        return fs_tools.get_code_structure(args.get("scope", "all"))
+    elif name == "read_own_file":
+        return fs_tools.read_own_file(args["module_path"])
     elif name == "query_database":
         return db_tools.query_database(args["sql"])
     elif name == "get_pipeline_stats":
@@ -964,9 +985,6 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
     elif name == "create_execution_plan":
         from app.director.execution_planner import create_execution_plan
         return create_execution_plan(args["recommendation_id"])
-    elif name == "calculate_system_score":
-        from app.director.analysis.scorer import calculate_scores
-        return calculate_scores(days=args.get("days", 30), channel_id=args.get("channel_id"))
     elif name == "analyze_prompt_performance":
         from app.director.tools.prompt_lab import analyze_prompt_performance
         return analyze_prompt_performance(step=args.get("step", "s05"), days=args.get("days", 30))
@@ -1067,7 +1085,6 @@ async def run_agent(
         iteration = 0
         final_text = ""
         _tool_call_hashes: set[str] = set()
-        _total_tool_calls = 0
 
         while iteration < max_iterations:
             iteration += 1
@@ -1141,7 +1158,6 @@ async def run_agent(
                     yield {"type": "tool_result", "tool": tool_name, "summary": "duplicate — skipped"}
                 else:
                     _tool_call_hashes.add(call_key)
-                    _total_tool_calls += 1
                     yield {"type": "tool_call", "tool": tool_name, "args": tool_args}
 
                     # Execute
@@ -1162,27 +1178,6 @@ async def run_agent(
                         response={"result": result_str},
                     )
                 )
-
-            # Force final response if tool call limit reached
-            if _total_tool_calls >= MAX_TOOL_CALLS_PER_SESSION:
-                contents.append(types.Content(role="user", parts=tool_response_parts))
-                contents.append(types.Content(role="user", parts=[
-                    types.Part(text="[SİSTEM: Araç çağrısı limiti doldu. Topladığın bilgilerle şimdi cevap ver.]")
-                ]))
-                final_config = types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    temperature=0.3,
-                )
-                forced_response = client.models.generate_content(
-                    model=settings.GEMINI_MODEL_PRO,
-                    contents=contents,
-                    config=final_config,
-                )
-                if forced_response.candidates:
-                    for part in (forced_response.candidates[0].content.parts or []):
-                        if hasattr(part, "text") and part.text:
-                            final_text += part.text
-                break
 
             # Add tool results to contents
             contents.append(types.Content(role="user", parts=tool_response_parts))

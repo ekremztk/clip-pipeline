@@ -17,8 +17,8 @@ def _get_clip_context(clip_id: str) -> dict | None:
     try:
         client = get_client()
         res = (client.table("clips")
-               .select("id,channel_id,job_id,content_type,quality_verdict,overall_confidence,"
-                       "hook_text,is_successful,why_failed,suggested_title")
+               .select("id,channel_id,job_id,content_type,quality_status,confidence,"
+                       "hook_text,user_approved,why_failed,suggested_title")
                .eq("id", clip_id)
                .single()
                .execute())
@@ -36,8 +36,8 @@ def _count_rejections_for_content_type(channel_id: str, content_type: str, days:
             FROM clips
             WHERE channel_id = %s
               AND content_type = %s
-              AND quality_verdict IN ('pass', 'fixable')
-              AND is_successful = false
+              AND quality_status IN ('passed', 'fixable')
+              AND user_approved = false
               AND created_at > now() - interval '{days} days'
         """, (channel_id, content_type))
         return int((rows[0] or {}).get("cnt") or 0) if rows else 0
@@ -81,12 +81,12 @@ def on_clip_approved(clip_id: str) -> None:
 
         content_type = clip.get("content_type") or "unknown"
         channel_id = clip.get("channel_id")
-        confidence = clip.get("overall_confidence") or 0
+        confidence = float(clip.get("confidence") or 0) * 10  # normalize to 0-10
 
         memory_content = (
             f"Approved clip ({datetime.now(timezone.utc).strftime('%Y-%m-%d')}): "
             f"content_type='{content_type}', channel={channel_id}, "
-            f"confidence={confidence:.2f}. "
+            f"confidence={confidence:.1f}/10. "
             f"This content type is working — reinforce in DNA."
         )
         save_memory(
@@ -123,8 +123,8 @@ def on_clip_rejected(clip_id: str, why_failed: str | None = None) -> None:
 
         content_type = clip.get("content_type") or "unknown"
         channel_id = clip.get("channel_id")
-        quality_verdict = clip.get("quality_verdict") or "unknown"
-        confidence = clip.get("overall_confidence") or 0
+        quality_verdict = clip.get("quality_status") or "unknown"
+        confidence = float(clip.get("confidence") or 0) * 10  # normalize to 0-10
 
         memory_content = (
             f"Rejected clip ({datetime.now(timezone.utc).strftime('%Y-%m-%d')}): "

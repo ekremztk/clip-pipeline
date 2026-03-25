@@ -31,7 +31,7 @@ class ApproveRagRequest(BaseModel):
     approved: bool
 
 @router.post("/clips/{clip_id}/publish")
-async def publish_clip(clip_id: str, request: PublishRequest):
+async def publish_clip(clip_id: str, request: PublishRequest, background_tasks: BackgroundTasks):
     try:
         supabase = get_client()
         supabase.table("clips").update({
@@ -40,7 +40,15 @@ async def publish_clip(clip_id: str, request: PublishRequest):
             "published_at": datetime.now(timezone.utc).isoformat(),
             "feedback_status": "pending"
         }).eq("id", clip_id).execute()
-        
+
+        def _director_published(cid: str, yt_id: str) -> None:
+            try:
+                from app.director.learning import on_clip_published
+                on_clip_published(cid, yt_id)
+            except Exception as e:
+                print(f"[Feedback] director published hook error: {e}")
+
+        background_tasks.add_task(_director_published, clip_id, request.youtube_video_id)
         return {"published": True, "clip_id": clip_id}
     except Exception as e:
         print(f"[Feedback] Error: {e}")
@@ -62,7 +70,7 @@ async def approve_rag(clip_id: str, request: ApproveRagRequest, background_tasks
             background_tasks.add_task(_director_approved, clip_id)
         else:
             supabase.table("clips").update({
-                "is_successful": False
+                "user_approved": False
             }).eq("id", clip_id).execute()
             background_tasks.add_task(_director_rejected, clip_id, None)
             

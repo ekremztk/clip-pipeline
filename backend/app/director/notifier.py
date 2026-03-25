@@ -14,8 +14,8 @@ import os
 import urllib.request
 import urllib.error
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8647395439:AAG_qlAyzQ-fwHWO3o2Fzb5Bw3Ew8KWfnRA")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "8345507912")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 
 def send_telegram(message: str, parse_mode: str = "Markdown") -> dict:

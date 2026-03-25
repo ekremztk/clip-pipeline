@@ -43,6 +43,10 @@ class Settings:
     LANGFUSE_SECRET_KEY: str = os.getenv("LANGFUSE_SECRET_KEY", "")
     POSTHOG_API_KEY: str = os.getenv("POSTHOG_API_KEY", "")
     POSTHOG_HOST: str = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com")
-    PROJECT_ROOT: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    # Auto-detect project root: works in both local monorepo and Docker
+    # __file__ = .../backend/app/config.py (local) or /app/app/config.py (Docker)
+    _backend = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../backend or /app
+    _candidate = os.path.dirname(_backend)  # .../prognot locally, / in Docker
+    PROJECT_ROOT: str = _candidate if os.path.isdir(os.path.join(_candidate, "frontend")) else _backend
 
 settings = Settings()

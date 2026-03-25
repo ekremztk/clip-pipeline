@@ -320,12 +320,36 @@ async def get_cross_module_graph(channel_id: str = None, days: int = 7):
 # Dashboard Aggregation
 # ─────────────────────────────────────────────
 
+def _get_latest_director_analysis(module: str) -> dict | None:
+    """Read the most recent director_analyses record for a module (last 48h)."""
+    try:
+        rows = _run_sql(f"""
+            SELECT score, subscores, findings, timestamp
+            FROM director_analyses
+            WHERE module_name = '{module}'
+              AND timestamp > now() - interval '48 hours'
+            ORDER BY timestamp DESC
+            LIMIT 1
+        """)
+        return rows[0] if rows else None
+    except Exception:
+        return None
+
+
 def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
-    """Calculate module health scores (0-100). Returns None score when no data."""
+    """Calculate module health scores (0-100). Returns None score when no data.
+    Prefers reading from director_analyses (written by Director AI) when recent.
+    Falls back to formula if no analysis exists.
+    """
     modules = {}
 
     # Module 1 — Clip Pipeline
+    # Prefer score written by Director AI to director_analyses; fall back to formula
     try:
+        latest_analysis = _get_latest_director_analysis("clip_pipeline")
+        if latest_analysis is None:
+            latest_analysis = _get_latest_director_analysis("all")
+
         s = pipeline.get("summary", {})
         total = int(s.get("total_jobs", 0) or 0)
         completed = int(s.get("completed", 0) or 0)
@@ -333,7 +357,9 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
 
         ca = clips.get("analysis", {})
         total_clips = int(ca.get("total_clips", 0) or 0)
+        # pass_count: clips with quality_status='passed'
         pass_count = int(ca.get("pass_count", 0) or 0)
+        # avg_confidence: already scaled to 0-10 in get_clip_analysis (confidence*10)
         avg_conf = float(ca.get("avg_confidence", 0) or 0)
 
         if total == 0 and total_clips == 0:
@@ -353,9 +379,12 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
             # Boyut 1: Teknik Sağlık (max 20)
             sr_score = 6 if success_rate >= 100 else 5 if success_rate >= 95 else 4 if success_rate >= 90 else 2 if success_rate >= 80 else 0
             dur_score = 4 if avg_dur < 6 else 3 if avg_dur < 8 else 2 if avg_dur < 12 else 0
-            tech_health = sr_score + dur_score + 5  # +5 base (R2 upload, fallback assume ok)
+            tech_health = sr_score + dur_score + 5  # +5 base
 
             # Boyut 2: AI Karar Kalitesi (max 35)
+            # avg_conf is 0-10 scale (confidence*10 from DB)
+            # pass_rate based on quality_status='passed'
+            # Note: only 18/64 clips have quality_status — most are pending review
             pr_score = 8 if pass_rate > 50 else 6 if pass_rate > 35 else 3 if pass_rate > 20 else 0
             conf_score = 7 if avg_conf >= 8.0 else 5 if avg_conf >= 7.0 else 3 if avg_conf >= 6.0 else 0
             ai_quality = pr_score + conf_score + 5  # +5 base
@@ -368,7 +397,7 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
             # Boyut 4+5: Öğrenme (max 15) + Stratejik Olgunluk (max 5)
             b4b5_detail: dict = {}
             if total < 5:
-                learning, strategic = 8, 3  # no data yet — neutral
+                learning, strategic = 8, 3
             else:
                 try:
                     b4b5 = get_b4_b5_data()
@@ -381,7 +410,15 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
 
             learn_strategy = learning + strategic  # max 20
 
-            score = min(100, round(tech_health + ai_quality + output_quality + learn_strategy))
+            formula_score = min(100, round(tech_health + ai_quality + output_quality + learn_strategy))
+
+            # If Director has written a recent analysis, trust that score over the formula
+            if latest_analysis and latest_analysis.get("score") is not None:
+                score = int(latest_analysis["score"])
+                subscores_override = latest_analysis.get("subscores") or {}
+            else:
+                score = formula_score
+                subscores_override = {}
 
             if score >= 85:
                 status, status_color = "GUCLU", "green"
@@ -394,9 +431,19 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
             else:
                 status, status_color = "KRITIK", "red"
 
+            formula_subscores = {
+                "teknik_saglik": {"score": tech_health, "max": 20},
+                "ai_karar_kalitesi": {"score": ai_quality, "max": 35},
+                "cikti_kalitesi": {"score": output_quality, "max": 25},
+                "ogrenme": {"score": learning, "max": 15},
+                "stratejik_olgunluk": {"score": strategic, "max": 5},
+            }
+
             modules["clip_pipeline"] = {
                 "name": "Clip Pipeline",
                 "score": score,
+                "score_source": "director_analysis" if subscores_override else "formula",
+                "analysis_timestamp": latest_analysis.get("timestamp") if latest_analysis else None,
                 "status": status,
                 "status_color": status_color,
                 "metrics": {
@@ -408,13 +455,7 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
                     "total_clips": total_clips,
                     **b4b5_detail,
                 },
-                "subscores": {
-                    "teknik_saglik": {"score": tech_health, "max": 20},
-                    "ai_karar_kalitesi": {"score": ai_quality, "max": 35},
-                    "cikti_kalitesi": {"score": output_quality, "max": 25},
-                    "ogrenme": {"score": learning, "max": 15},
-                    "stratejik_olgunluk": {"score": strategic, "max": 5},
-                },
+                "subscores": subscores_override if subscores_override else formula_subscores,
             }
     except Exception:
         modules["clip_pipeline"] = {
@@ -530,9 +571,9 @@ def _compute_health_pulse() -> dict:
         total_jobs = int(ps.get("total", 0) or 0)
         success_rate = (int(ps.get("completed", 0) or 0) / total_jobs * 100) if total_jobs > 0 else None
 
-        # 2. Avg clip confidence (last 7 days)
+        # 2. Avg clip confidence (last 7 days) — confidence column is 0-1 scale, multiply by 10
         clip_sql = """
-            SELECT ROUND(AVG(overall_confidence)::NUMERIC, 2) AS avg_conf
+            SELECT ROUND((AVG(confidence) * 10)::NUMERIC, 2) AS avg_conf
             FROM clips WHERE created_at > now() - interval '7 days'
         """
         clip_rows = _run_sql(clip_sql)
@@ -665,37 +706,162 @@ async def cost_anomalies(sigma: float = 2.0):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/run-analysis")
-async def run_analysis(module: str = "all", triggered_by: str = "cron"):
-    """Trigger a system analysis — for Railway cron or manual call."""
+def _run_ai_analysis(module: str = "all", triggered_by: str = "cron") -> dict:
+    """
+    Run a real Gemini-powered analysis. Collects live metrics, sends to Gemini,
+    saves AI-written findings + score to director_analyses.
+    Called synchronously from scheduler or async endpoint.
+    """
     try:
-        from app.director.tools.database import get_pipeline_stats, get_clip_analysis
+        from app.director.tools.database import get_pipeline_stats, get_clip_analysis, get_pass_rate_trend
+        from app.director.tools.database import _run_sql
+        from app.services.gemini_client import get_gemini_client
+        from app.config import settings
+        from google.genai import types as gtypes
+        import json as _json
+
+        # ── Collect metrics ──────────────────────────────────────────────────
         pipeline = get_pipeline_stats(30)
         clips = get_clip_analysis(None, 30)
-        scores = _calculate_module_scores(pipeline, clips)
+        trend = {}
+        try:
+            trend = get_pass_rate_trend()
+        except Exception:
+            pass
 
-        client = get_client()
+        # Recent recommendations count
+        try:
+            rec_rows = _run_sql("""
+                SELECT COUNT(*) AS total,
+                       COUNT(*) FILTER (WHERE status='pending') AS pending,
+                       COUNT(*) FILTER (WHERE status='applied') AS applied
+                FROM director_recommendations
+                WHERE created_at > now() - interval '30 days'
+            """)
+            rec_stats = rec_rows[0] if rec_rows else {}
+        except Exception:
+            rec_stats = {}
+
+        s = pipeline.get("summary", {})
+        ca = clips.get("analysis", {})
+
+        metrics_text = f"""
+Son 30 Günlük Sistem Metrikleri:
+
+PIPELINE:
+- Toplam job: {s.get('total_jobs', 0)}
+- Tamamlanan: {s.get('completed', 0)}
+- Başarısız: {s.get('failed', 0)}
+- Ort. süre: {s.get('avg_duration_min', 0)} dakika
+
+KLİP KALİTESİ:
+- Toplam klip: {ca.get('total_clips', 0)}
+- Ort. confidence: {ca.get('avg_confidence', 0)}/10
+- Passed: {ca.get('pass_count', 0)}
+- Fixable: {ca.get('fixable_count', 0)}
+- Pending (kalite değerlendirmesi yok): {ca.get('pending_count', 0)}
+- Ort. standalone score: {ca.get('avg_standalone_score', 0)}
+- Ort. hook score: {ca.get('avg_hook_score', 0)}
+
+TREND: {trend.get('trend', 'veri yok')} — Son 30g pass rate: {trend.get('recent_pass_rate', 'N/A')}, Önceki 30g: {trend.get('previous_pass_rate', 'N/A')}
+
+ÖNERİLER (son 30g): Toplam {rec_stats.get('total', 0)}, Bekleyen {rec_stats.get('pending', 0)}, Uygulanan {rec_stats.get('applied', 0)}
+""".strip()
+
+        # ── Gemini analysis ──────────────────────────────────────────────────
+        prompt = f"""Sen Prognot'un Director AI'ısın. Aşağıdaki sistem metriklerini analiz et.
+
+{metrics_text}
+
+Şunları yap:
+1. Sistemin genel durumunu 1-2 cümleyle özetle
+2. En kritik 2-3 bulguyu belirle (iyi ve kötü)
+3. Her bulgu için somut bir aksiyon öner
+4. Sisteme 0-100 arasında bir skor ver ve gerekçele
+
+Cevabını şu JSON formatında ver:
+{{
+  "summary": "genel durum özeti",
+  "score": 75,
+  "score_rationale": "neden bu skor",
+  "findings": [
+    {{"type": "positive|negative|warning", "title": "başlık", "detail": "açıklama", "action": "yapılacak iş"}}
+  ]
+}}"""
+
+        client = get_gemini_client()
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL_FLASH,
+            contents=[gtypes.Content(role="user", parts=[gtypes.Part(text=prompt)])],
+            config=gtypes.GenerateContentConfig(temperature=0.2),
+        )
+
+        raw = response.candidates[0].content.parts[0].text if response.candidates else ""
+
+        # Parse JSON from response
+        import re
+        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        ai_result = {}
+        if json_match:
+            try:
+                ai_result = _json.loads(json_match.group())
+            except Exception:
+                ai_result = {"summary": raw[:500], "score": None, "findings": []}
+        else:
+            ai_result = {"summary": raw[:500], "score": None, "findings": []}
+
+        score = ai_result.get("score")
+        if score is not None:
+            try:
+                score = int(score)
+            except Exception:
+                score = None
+
+        # ── Save to director_analyses ────────────────────────────────────────
+        client_db = get_client()
         analysis_row = {
             "module_name": module,
             "triggered_by": triggered_by,
-            "score": scores.get("overall_score") or 0,
-            "subscores": scores.get("modules", {}),
+            "score": score or 0,
+            "subscores": {"ai_written": True, "score_rationale": ai_result.get("score_rationale", "")},
             "findings": [
-                {"key": "pipeline_summary", "data": pipeline.get("summary", {})},
-                {"key": "clip_summary", "data": clips.get("analysis", {})},
+                {"key": "ai_summary", "data": ai_result.get("summary", "")},
+                {"key": "ai_findings", "data": ai_result.get("findings", [])},
+                {"key": "raw_metrics", "data": {"pipeline": s, "clips": ca, "trend": trend}},
             ],
             "recommendations": [],
-            "data_points_used": int((pipeline.get("summary") or {}).get("total_jobs", 0) or 0),
+            "data_points_used": int(s.get("total_jobs", 0) or 0),
         }
-        res = client.table("director_analyses").insert(analysis_row).execute()
+        res = client_db.table("director_analyses").insert(analysis_row).execute()
         analysis_id = res.data[0].get("id") if res.data else None
 
+        print(f"[RunAnalysis] AI analysis saved: id={analysis_id} score={score}")
         return {
             "ok": True,
             "analysis_id": analysis_id,
-            "overall_score": scores.get("overall_score"),
+            "overall_score": score,
+            "summary": ai_result.get("summary", ""),
+            "findings_count": len(ai_result.get("findings", [])),
             "triggered_by": triggered_by,
         }
+    except Exception as e:
+        print(f"[RunAnalysis] error: {e}")
+        return {"ok": False, "error": str(e)}
+
+
+@router.post("/run-analysis")
+async def run_analysis(module: str = "all", triggered_by: str = "cron"):
+    """Trigger a real AI-powered system analysis. Writes findings to director_analyses."""
+    try:
+        import asyncio
+        result = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: _run_ai_analysis(module, triggered_by)
+        )
+        if not result.get("ok"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

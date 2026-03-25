@@ -161,14 +161,10 @@ def get_railway_status() -> dict:
 def get_railway_logs(service_name: str | None = None, limit: int = 50) -> dict:
     """
     Fetch recent deployment logs from Railway.
-    Requires RAILWAY_API_TOKEN and RAILWAY_PROJECT_ID.
+    Requires RAILWAY_API_TOKEN. RAILWAY_PROJECT_ID optional (uses first project if not set).
     """
     try:
-        project_id = os.getenv("RAILWAY_PROJECT_ID", "")
-        if not project_id:
-            return {"error": "RAILWAY_PROJECT_ID not set"}
-
-        # First get deployment ID for the service
+        # First get deployment ID for the service (works with or without RAILWAY_PROJECT_ID)
         status = get_railway_status()
         if "error" in status:
             return status
