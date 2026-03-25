@@ -432,15 +432,71 @@ def _calculate_module_scores(pipeline: dict, clips: dict) -> dict:
         "subscores": {},
     }
 
-    # Module 3 — Director
-    modules["director"] = {
-        "name": "Director",
-        "score": None,
-        "status": "VERI YOK",
-        "status_color": "gray",
-        "metrics": {},
-        "subscores": {},
-    }
+    # Module 3 — Director (scored from self-analysis)
+    try:
+        from app.director.tools.self_analysis import get_director_self_analysis
+        sa = get_director_self_analysis()
+        sa_summary = sa.get("summary", {})
+
+        active_int = int(sa_summary.get("active_integrations", 0))
+        total_int = int(sa_summary.get("total_integrations", 8))
+        memory_count = int(sa_summary.get("memory_records", 0))
+        total_recs = int(sa_summary.get("total_recommendations_created", 0))
+        pending_recs = int(sa_summary.get("pending_recommendations", 0))
+
+        # Integration health (0-60): what fraction of APIs are connected?
+        int_score = round(active_int / max(total_int, 1) * 60)
+        # Memory usage (0-20): has Director been building knowledge?
+        mem_score = 20 if memory_count >= 20 else 15 if memory_count >= 10 else 10 if memory_count >= 5 else 5 if memory_count >= 1 else 0
+        # Recommendation output (0-20): has Director been generating value?
+        rec_score = 20 if total_recs >= 10 else 15 if total_recs >= 5 else 10 if total_recs >= 2 else 5 if total_recs >= 1 else 0
+
+        dir_score = min(100, int_score + mem_score + rec_score)
+
+        if dir_score >= 85:
+            dir_status, dir_color = "GUCLU", "green"
+        elif dir_score >= 71:
+            dir_status, dir_color = "IYI", "cyan"
+        elif dir_score >= 56:
+            dir_status, dir_color = "ORTA", "yellow"
+        elif dir_score >= 36:
+            dir_status, dir_color = "ZAYIF", "orange"
+        else:
+            dir_status, dir_color = "KURULUM", "orange"
+
+        modules["director"] = {
+            "name": "Director",
+            "score": dir_score,
+            "status": dir_status,
+            "status_color": dir_color,
+            "metrics": {
+                "active_integrations": active_int,
+                "total_integrations": total_int,
+                "memory_records": memory_count,
+                "total_recommendations": total_recs,
+                "pending_recommendations": pending_recs,
+                "tool_count": int(sa_summary.get("total_tools", 0)),
+                "readiness_score": int(sa_summary.get("readiness_score", 0)),
+            },
+            "subscores": {
+                "entegrasyon_saglik": {"score": int_score, "max": 60},
+                "hafiza_kullanimi": {"score": mem_score, "max": 20},
+                "oneri_uretimi": {"score": rec_score, "max": 20},
+            },
+            "integrations": {
+                k: v.get("active", False)
+                for k, v in sa.get("integrations", {}).items()
+            },
+        }
+    except Exception:
+        modules["director"] = {
+            "name": "Director",
+            "score": None,
+            "status": "HATA",
+            "status_color": "red",
+            "metrics": {},
+            "subscores": {},
+        }
 
     scored = [m for m in modules.values() if m.get("score") is not None]
     overall = round(sum(m["score"] for m in scored) / len(scored)) if scored else None

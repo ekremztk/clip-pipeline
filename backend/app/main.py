@@ -21,6 +21,26 @@ if settings.SENTRY_DSN:
     )
     print("[Sentry] Initialized")
 
+async def _startup_analysis():
+    """On startup: if no analysis in last 24h, run one to seed the dashboard."""
+    import asyncio
+    await asyncio.sleep(30)  # wait for app to fully start
+    try:
+        from app.director.tools.database import _run_sql
+        rows = _run_sql("""
+            SELECT COUNT(*) AS cnt FROM director_analyses
+            WHERE timestamp > now() - interval '24 hours'
+        """)
+        recent = int((rows[0] or {}).get("cnt", 0)) if rows else 0
+        if recent == 0:
+            print("[Startup] No recent analysis found — running initial analysis...")
+            _run_daily_analysis()
+        else:
+            print(f"[Startup] {recent} recent analyses found — skipping startup analysis.")
+    except Exception as e:
+        print(f"[Startup] analysis check error: {e}")
+
+
 async def _health_pulse_scheduler():
     """Refresh health pulse cache every 5 minutes."""
     import asyncio
@@ -136,6 +156,7 @@ async def lifespan(app: FastAPI):
     import asyncio
     settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    startup_task = asyncio.create_task(_startup_analysis())
     pulse_task = asyncio.create_task(_health_pulse_scheduler())
     proactive_task = asyncio.create_task(_proactive_scheduler())
     daily_task = asyncio.create_task(_daily_analysis_scheduler())
@@ -148,7 +169,7 @@ async def lifespan(app: FastAPI):
             print("[DB] Director connection pool closed.")
     except Exception:
         pass
-    for task in [pulse_task, proactive_task, daily_task]:
+    for task in [startup_task, pulse_task, proactive_task, daily_task]:
         task.cancel()
         try:
             await task

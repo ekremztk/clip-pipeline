@@ -17,6 +17,7 @@ interface ModuleData {
   status_color: string;
   metrics: Record<string, unknown>;
   subscores: Record<string, Subscore>;
+  integrations?: Record<string, boolean>;
 }
 
 interface DashboardData {
@@ -450,12 +451,70 @@ function ModuleModal({ mod, modKey, data, onClose, onChatAbout }: {
             </>
           )}
 
-          {tab === "overview" && !isPipeline && (
+          {tab === "overview" && modKey === "director" && (
+            <div className="space-y-5">
+              {/* Key metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { l: "Araç Sayısı", v: String(Number(mod.metrics.tool_count) || 45) },
+                  { l: "Hafıza Kaydı", v: String(Number(mod.metrics.memory_records) || 0) },
+                  { l: "Toplam Öneri", v: String(Number(mod.metrics.total_recommendations) || 0) },
+                  { l: "Aktif Entegrasyon", v: `${Number(mod.metrics.active_integrations) || 0}/${Number(mod.metrics.total_integrations) || 8}` },
+                ].map((m) => (
+                  <div key={m.l} className="glass-card rounded-xl p-4 text-center">
+                    <div className="text-xl font-bold" style={{ color: C.cyan }}>{m.v}</div>
+                    <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>{m.l}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Integration status */}
+              {mod.integrations && Object.keys(mod.integrations).length > 0 && (
+                <div>
+                  <div className="text-xs mb-3" style={{ color: C.textMuted }}>API Entegrasyon Durumu</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(mod.integrations).map(([name, active]) => (
+                      <div key={name} className="flex items-center gap-2 glass-card rounded-lg px-3 py-2">
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: active ? C.green : C.red }} />
+                        <span className="text-xs font-mono" style={{ color: active ? C.text : C.textMuted }}>{name}</span>
+                        <span className="text-[10px] ml-auto" style={{ color: active ? C.green : C.red }}>
+                          {active ? "aktif" : "eksik"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Subscores */}
+              {mod.subscores && Object.keys(mod.subscores).length > 0 && (
+                <div>
+                  <div className="text-xs mb-3" style={{ color: C.textMuted }}>Boyut Puanları</div>
+                  <div className="space-y-3">
+                    {Object.entries(mod.subscores).map(([key, sub]) => {
+                      const pct = (sub.score / sub.max) * 100;
+                      const c = pct >= 80 ? C.green : pct >= 60 ? C.cyan : pct >= 40 ? C.yellow : C.red;
+                      const label = key === "entegrasyon_saglik" ? "Entegrasyon Sağlığı" : key === "hafiza_kullanimi" ? "Hafıza Kullanımı" : "Öneri Üretimi";
+                      return (
+                        <div key={key}>
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span style={{ color: C.textMuted }}>{label}</span>
+                            <span className="font-mono" style={{ color: c }}>{sub.score}/{sub.max}</span>
+                          </div>
+                          <GlowBar value={sub.score} max={sub.max} color={c} h={5} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === "overview" && modKey === "editor" && (
             <div className="text-center py-10">
               <div className="text-4xl mb-3">🔭</div>
-              <div className="text-sm" style={{ color: C.textMuted }}>
-                {modKey === "editor" ? "Editor metrikleri kullanım verileriyle dolacak." : "Director öz-değerlendirmesi için 'Director ile Konuş' butonuna tıkla."}
-              </div>
+              <div className="text-sm" style={{ color: C.textMuted }}>Editor metrikleri kullanım verileriyle dolacak.</div>
             </div>
           )}
 
@@ -723,7 +782,22 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
                 </div>
               )}
 
-              {(key !== "clip_pipeline" || mod.score === null) && (
+              {key === "director" && mod.score !== null && (
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { l: "Entegrasyon", v: `${Number(mod.metrics.active_integrations) || 0}/${Number(mod.metrics.total_integrations) || 8}` },
+                    { l: "Hafıza", v: String(Number(mod.metrics.memory_records) || 0) },
+                    { l: "Öneri", v: String(Number(mod.metrics.total_recommendations) || 0) },
+                  ].map((m2) => (
+                    <div key={m2.l}>
+                      <div className="text-sm font-bold" style={{ color: C.text }}>{m2.v}</div>
+                      <div className="text-[9px]" style={{ color: C.textMuted }}>{m2.l}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {(key === "editor" || (key !== "clip_pipeline" && key !== "director") || mod.score === null) && (
                 <div className="text-xs text-center py-1" style={{ color: C.textMuted }}>
                   {mod.score === null ? "Veri birikmesi bekleniyor" : "Detay için tıklayın"}
                 </div>
