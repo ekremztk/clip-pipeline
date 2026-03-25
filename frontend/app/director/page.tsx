@@ -976,14 +976,19 @@ function MsgBubble({ msg }: { msg: Message }) {
   );
 }
 
-function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoading, sessionId }: {
+function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoading, sessionId,
+  onNewSession, pastSessions, onSwitchSession }: {
   messages: Message[]; setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   input: string; setInput: React.Dispatch<React.SetStateAction<string>>;
   isLoading: boolean; setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   sessionId: string;
+  onNewSession: () => void;
+  pastSessions: {session_id:string;first_message:string;last_message_at:string;message_count:number}[];
+  onSwitchSession: (sid: string) => void;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [showSessions, setShowSessions] = useState(false);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -1054,6 +1059,38 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Session controls */}
+      <div className="flex items-center justify-between px-4 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.cyanBorder}` }}>
+        <div className="relative">
+          <button onClick={() => setShowSessions(!showSessions)}
+            className="text-xs px-3 py-1.5 rounded-lg transition-all"
+            style={{ border: `1px solid ${C.cyanBorder}`, color: C.textMuted }}>
+            Sohbet Gecmisi ({pastSessions.length})
+          </button>
+          {showSessions && pastSessions.length > 0 && (
+            <div className="absolute top-full left-0 mt-1 w-80 max-h-60 overflow-y-auto rounded-lg z-50"
+              style={{ background: "#0a0a0a", border: `1px solid ${C.cyanBorder}` }}>
+              {pastSessions.map((s) => (
+                <button key={s.session_id}
+                  onClick={() => { onSwitchSession(s.session_id); setShowSessions(false); }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-all"
+                  style={{ borderBottom: `1px solid ${C.cyanBorder}`,
+                    color: s.session_id === sessionId ? C.cyan : C.textMuted }}>
+                  <div className="truncate">{s.first_message || "Yeni sohbet"}</div>
+                  <div className="text-[10px] mt-0.5 opacity-50">
+                    {s.message_count} mesaj · {new Date(s.last_message_at).toLocaleDateString("tr-TR")}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <button onClick={onNewSession}
+          className="text-xs px-3 py-1.5 rounded-lg transition-all"
+          style={{ background: `${C.cyan}15`, border: `1px solid ${C.cyanBorder}`, color: C.cyan }}>
+          + Yeni Sohbet
+        </button>
+      </div>
       <div className="flex-1 overflow-y-auto px-4 py-6">
         {messages.map((m) => <MsgBubble key={m.id} msg={m} />)}
         {messages.length === 1 && (
@@ -1237,13 +1274,68 @@ export default function DirectorPage() {
   const [days, setDays] = useState(7);
   const [openModuleKey, setOpenModuleKey] = useState<string | null>(null);
 
-  const [messages, setMessages] = useState<Message[]>([{
+  const WELCOME_MSG: Message = {
     id: "welcome", role: "assistant",
     content: "Merhaba. Ben Director — sistemin AI CEO'su.\n\nPipeline, maliyetler, klip kalitesi, kod tabanı — hepsini analiz edebilirim. İnternet araştırması yapabilirim. Hafızama kaydedebilirim. Öneri oluşturabilirim.\n\nNe öğrenmek istiyorsun?",
-  }]);
+  };
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MSG]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [sessionId] = useState(() => genId());
+  const [sessionId, setSessionId] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("director_session_id");
+      if (saved) return saved;
+    }
+    const id = genId();
+    if (typeof window !== "undefined") localStorage.setItem("director_session_id", id);
+    return id;
+  });
+  const [pastSessions, setPastSessions] = useState<{session_id:string;first_message:string;last_message_at:string;message_count:number}[]>([]);
+
+  // Load conversation history on mount
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const res = await fetch(`${API_URL}/director/conversations/${sessionId}?limit=50`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const loaded: Message[] = [WELCOME_MSG];
+          for (const turn of data) {
+            loaded.push({ id: genId(), role: turn.role, content: turn.content || "" });
+          }
+          setMessages(loaded);
+        }
+      } catch { /* silent */ }
+    }
+    loadHistory();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
+
+  // Load past sessions list
+  useEffect(() => {
+    async function loadSessions() {
+      try {
+        const res = await fetch(`${API_URL}/director/sessions?limit=20`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.sessions) setPastSessions(data.sessions);
+      } catch { /* silent */ }
+    }
+    loadSessions();
+  }, []);
+
+  function startNewSession() {
+    const id = genId();
+    localStorage.setItem("director_session_id", id);
+    setSessionId(id);
+    setMessages([WELCOME_MSG]);
+  }
+
+  function switchSession(sid: string) {
+    localStorage.setItem("director_session_id", sid);
+    setSessionId(sid);
+  }
 
   const fetchDashboard = useCallback(async (d: number) => {
     setLoading(true);
@@ -1317,6 +1409,9 @@ export default function DirectorPage() {
           input={chatInput} setInput={setChatInput}
           isLoading={chatLoading} setIsLoading={setChatLoading}
           sessionId={sessionId}
+          onNewSession={startNewSession}
+          pastSessions={pastSessions}
+          onSwitchSession={switchSession}
         />
       )}
 

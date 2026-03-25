@@ -102,6 +102,30 @@ async def delete_memory_endpoint(memory_id: str):
 # Conversation History
 # ─────────────────────────────────────────────
 
+@router.get("/sessions")
+async def list_sessions(limit: int = 20):
+    """List past chat sessions with their first message and timestamp."""
+    try:
+        client = get_client()
+        rows = _run_sql("""
+            SELECT
+                session_id,
+                MIN(timestamp) AS started_at,
+                MAX(timestamp) AS last_message_at,
+                COUNT(*) AS message_count,
+                (SELECT content FROM director_conversations c2
+                 WHERE c2.session_id = c1.session_id AND c2.role = 'user'
+                 ORDER BY timestamp ASC LIMIT 1) AS first_message
+            FROM director_conversations c1
+            GROUP BY session_id
+            ORDER BY MAX(timestamp) DESC
+            LIMIT %s
+        """, (limit,))
+        return {"sessions": rows}
+    except Exception as e:
+        return {"sessions": [], "error": str(e)}
+
+
 @router.get("/conversations/{session_id}")
 async def get_session_history(session_id: str, limit: int = 50):
     return get_conversation_history(session_id, last_n=limit)
