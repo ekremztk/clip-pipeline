@@ -32,18 +32,24 @@ def get_sentry_issues(days: int = 7, resolved: bool = False) -> list[dict]:
 
         import urllib.request
         import urllib.parse
+        import urllib.error
         import json
 
         status_filter = "resolved" if resolved else "unresolved"
+        # Keep colon unencoded — Sentry query parser expects literal is:unresolved
         params = urllib.parse.urlencode({
             "statsPeriod": f"{days}d",
-            "query": f"is:{status_filter}",
             "limit": 25,
-        })
+        }) + f"&query=is:{status_filter}"
         url = f"https://sentry.io/api/0/projects/{org_slug}/{project_slug}/issues/?{params}"
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {auth_token}"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            issues = json.loads(resp.read())
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                issues = json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")[:500]
+            print(f"[DirectorSentry] HTTP {e.code} — url={url} — body={body}")
+            raise
 
         return [
             {
