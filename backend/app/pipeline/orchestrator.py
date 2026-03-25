@@ -7,6 +7,7 @@ from app.config import settings
 from app.services.supabase_client import get_client
 from app.models.enums import JobStatus, StepStatus
 from app.services import storage
+from app.director.events import director_events
 
 
 def update_job(job_id: str, **kwargs) -> None:
@@ -70,7 +71,16 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             progress_pct=0,
             current_step="initializing"
         )
-        
+
+        # Director hook: pipeline started
+        director_events.emit_sync(
+            module="module_1",
+            event="pipeline_started",
+            payload={"job_id": job_id, "channel_id": channel_id,
+                     "guest_name_provided": bool(guest_name)},
+            channel_id=channel_id,
+        )
+
         steps = [
             (1, "s01_audio_extract", 5),
             (2, "s02_transcribe", 15),
@@ -91,7 +101,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
         evaluated_clips = []
         cut_results = []
         exported_clips = []
-        
+        pass_count = 0
+
         for step_number, step_name, progress_pct in steps:
             step_start_time = time.time()
             log_step(job_id, step_number, step_name, StepStatus.STARTED.value)
@@ -157,6 +168,15 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         audio_path=audio_path
                     )
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
+                    duration_ms_s05 = int((time.time() - step_start_time) * 1000)
+                    director_events.emit_sync(
+                        module="module_1", event="s05_discovery_completed",
+                        payload={"job_id": job_id, "candidate_count": len(candidates),
+                                 "duration_ms": duration_ms_s05,
+                                 "channel_dna_present": bool(channel_dna),
+                                 "guest_name_provided": bool(guest_name)},
+                        channel_id=channel_id,
+                    )
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
@@ -172,6 +192,20 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             job_id=job_id
                         )
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
+                    duration_ms_s06 = int((time.time() - step_start_time) * 1000)
+                    pass_count = sum(1 for c in evaluated_clips if c.get("quality_verdict") in ("pass", "fixable"))
+                    fail_count = len(evaluated_clips) - pass_count
+                    avg_standalone = round(
+                        sum(float(c.get("standalone_score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
+                    )
+                    director_events.emit_sync(
+                        module="module_1", event="s06_evaluation_completed",
+                        payload={"job_id": job_id, "total_evaluated": len(evaluated_clips),
+                                 "pass_count": pass_count, "fail_count": fail_count,
+                                 "avg_standalone": avg_standalone,
+                                 "duration_ms": duration_ms_s06},
+                        channel_id=channel_id,
+                    )
 
                 elif step_number == 7:
                     from app.pipeline.steps import s07_precision_cut
@@ -185,6 +219,13 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             job_id=job_id
                         )
                     print(f"[Orchestrator] S07 returned {len(cut_results)} clips with boundaries")
+                    duration_ms_s07 = int((time.time() - step_start_time) * 1000)
+                    director_events.emit_sync(
+                        module="module_1", event="s07_precision_cut_completed",
+                        payload={"job_id": job_id, "clips_cut": len(cut_results),
+                                 "duration_ms": duration_ms_s07},
+                        channel_id=channel_id,
+                    )
 
                 elif step_number == 8:
                     from app.pipeline.steps import s08_export
@@ -199,6 +240,13 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             video_title=video_title
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
+                    duration_ms_s08 = int((time.time() - step_start_time) * 1000)
+                    director_events.emit_sync(
+                        module="module_1", event="s08_export_completed",
+                        payload={"job_id": job_id, "exported_count": len(exported_clips),
+                                 "duration_ms": duration_ms_s08},
+                        channel_id=channel_id,
+                    )
 
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -223,8 +271,14 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     status=JobStatus.FAILED.value,
                     error_message=f"Step {step_name} failed: {error_msg}"
                 )
+                director_events.emit_sync(
+                    module="module_1", event="pipeline_failed",
+                    payload={"job_id": job_id, "failed_at_step": step_name,
+                             "error_message": error_msg},
+                    channel_id=channel_id,
+                )
                 return  # Return early on any step failure
-                
+
         # After all steps complete
         completed_at = datetime.now(timezone.utc).isoformat()
         clip_count = len(exported_clips) if exported_clips else 0
@@ -237,8 +291,32 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             current_step_number=8,
             clip_count=clip_count
         )
+        director_events.emit_sync(
+            module="module_1", event="pipeline_completed",
+            payload={"job_id": job_id, "clip_count": clip_count,
+                     "pass_clips": pass_count if evaluated_clips else 0},
+            channel_id=channel_id,
+        )
         print(f"[Orchestrator] Job {job_id} pipeline completed successfully.")
-        
+        # Cross-module signal: M1 clips ready for M2 editor
+        try:
+            from app.services.supabase_client import get_client as _get_client
+            _get_client().table("director_cross_module_signals").insert({
+                "signal_type": "clips_ready_for_editor",
+                "source_module": "module_1",
+                "target_module": "module_2",
+                "payload": {"job_id": job_id, "pass_clips": pass_count, "clip_count": clip_count},
+                "channel_id": channel_id,
+            }).execute()
+        except Exception as _cme:
+            print(f"[Orchestrator] Cross-module signal error (non-critical): {_cme}")
+        # Run proactive checks after every pipeline completion (non-blocking)
+        try:
+            from app.director.proactive import run_proactive_checks
+            run_proactive_checks(job_id=job_id)
+        except Exception as _pe:
+            print(f"[Orchestrator] Proactive check error (non-critical): {_pe}")
+
     except Exception as e:
         error_msg = str(e)
         print(f"[Orchestrator] Pipeline execution failed unexpectedly: {error_msg}")
@@ -347,6 +425,12 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             current_step_number=4,
             current_step="s04_labeled_transcript"
         )
+        director_events.emit_sync(
+            module="module_1", event="pipeline_resumed",
+            payload={"job_id": job_id, "channel_id": channel_id,
+                     "guest_name_provided": bool(guest_name)},
+            channel_id=channel_id,
+        )
         
         steps = [
             (4, "s04_labeled_transcript", 30),
@@ -363,7 +447,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
         evaluated_clips = []
         cut_results = []
         exported_clips = []
-        
+        pass_count = 0
+
         for step_number, step_name, progress_pct in steps:
             step_start_time = time.time()
             log_step(job_id, step_number, step_name, StepStatus.STARTED.value)
@@ -400,6 +485,14 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         audio_path=audio_path
                     )
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
+                    director_events.emit_sync(
+                        module="module_1", event="s05_discovery_completed",
+                        payload={"job_id": job_id, "candidate_count": len(candidates),
+                                 "duration_ms": int((time.time() - step_start_time) * 1000),
+                                 "channel_dna_present": bool(channel_dna),
+                                 "guest_name_provided": bool(guest_name)},
+                        channel_id=channel_id,
+                    )
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
@@ -415,6 +508,19 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             job_id=job_id
                         )
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
+                    pass_count = sum(1 for c in evaluated_clips if c.get("quality_verdict") in ("pass", "fixable"))
+                    fail_count = len(evaluated_clips) - pass_count
+                    avg_standalone = round(
+                        sum(float(c.get("standalone_score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
+                    )
+                    director_events.emit_sync(
+                        module="module_1", event="s06_evaluation_completed",
+                        payload={"job_id": job_id, "total_evaluated": len(evaluated_clips),
+                                 "pass_count": pass_count, "fail_count": fail_count,
+                                 "avg_standalone": avg_standalone,
+                                 "duration_ms": int((time.time() - step_start_time) * 1000)},
+                        channel_id=channel_id,
+                    )
 
                 elif step_number == 7:
                     from app.pipeline.steps import s07_precision_cut
@@ -428,6 +534,12 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             job_id=job_id
                         )
                     print(f"[Orchestrator] S07 returned {len(cut_results)} clips with boundaries")
+                    director_events.emit_sync(
+                        module="module_1", event="s07_precision_cut_completed",
+                        payload={"job_id": job_id, "clips_cut": len(cut_results),
+                                 "duration_ms": int((time.time() - step_start_time) * 1000)},
+                        channel_id=channel_id,
+                    )
 
                 elif step_number == 8:
                     from app.pipeline.steps import s08_export
@@ -442,15 +554,21 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             video_title=video_title
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
-                    
+                    director_events.emit_sync(
+                        module="module_1", event="s08_export_completed",
+                        payload={"job_id": job_id, "exported_count": len(exported_clips),
+                                 "duration_ms": int((time.time() - step_start_time) * 1000)},
+                        channel_id=channel_id,
+                    )
+
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
-                
+
             except Exception as e:
                 error_msg = str(e)
                 print(f"[Orchestrator] Error in step {step_name}: {error_msg}")
                 traceback.print_exc()
-                
+
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(
                     job_id=job_id,
@@ -460,14 +578,20 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     duration_ms=duration_ms,
                     error_message=error_msg
                 )
-                
+
                 update_job(
                     job_id=job_id,
                     status=JobStatus.FAILED.value,
                     error_message=f"Step {step_name} failed: {error_msg}"
                 )
+                director_events.emit_sync(
+                    module="module_1", event="pipeline_failed",
+                    payload={"job_id": job_id, "failed_at_step": step_name,
+                             "error_message": error_msg},
+                    channel_id=channel_id,
+                )
                 return
-                
+
         # After all steps complete
         completed_at = datetime.now(timezone.utc).isoformat()
         clip_count = len(exported_clips) if exported_clips else 0
@@ -480,8 +604,31 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
             current_step_number=8,
             clip_count=clip_count
         )
+        director_events.emit_sync(
+            module="module_1", event="pipeline_completed",
+            payload={"job_id": job_id, "clip_count": clip_count,
+                     "pass_clips": pass_count if evaluated_clips else 0},
+            channel_id=channel_id,
+        )
         print(f"[Orchestrator] Job {job_id} resumed pipeline completed successfully.")
-        
+        # Cross-module signal: M1 clips ready for M2 editor
+        try:
+            from app.services.supabase_client import get_client as _get_client
+            _get_client().table("director_cross_module_signals").insert({
+                "signal_type": "clips_ready_for_editor",
+                "source_module": "module_1",
+                "target_module": "module_2",
+                "payload": {"job_id": job_id, "pass_clips": pass_count, "clip_count": clip_count},
+                "channel_id": channel_id,
+            }).execute()
+        except Exception as _cme:
+            print(f"[Orchestrator] Cross-module signal error (non-critical): {_cme}")
+        try:
+            from app.director.proactive import run_proactive_checks
+            run_proactive_checks(job_id=job_id)
+        except Exception as _pe:
+            print(f"[Orchestrator] Proactive check error (non-critical): {_pe}")
+
     except Exception as e:
         error_msg = str(e)
         print(f"[Orchestrator] Resumed pipeline execution failed unexpectedly: {error_msg}")

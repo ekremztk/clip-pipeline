@@ -234,7 +234,8 @@ except Exception as e:
 ```
 pipeline_started
   payload: {job_id, channel_id, video_duration_s, has_trim,
-            guest_name_provided, channel_dna_present}
+            guest_name_provided, channel_dna_present,
+            reference_clip_count}
 
 pipeline_step_completed
   payload: {job_id, step_name, step_number, duration_ms, success, error_message}
@@ -251,7 +252,12 @@ s05_discovery_completed
             fallback_mode (video/audio/transcript),
             guest_profile_cached, channel_memory_clip_count,
             gemini_input_tokens, gemini_output_tokens,
-            gemini_duration_ms, gemini_retries}
+            gemini_duration_ms, gemini_retries,
+            gemini_model_used (pro/flash)}
+
+gemini_fallback_triggered
+  payload: {job_id, step_name, reason (rate_limit|timeout|error),
+            fallback_model, wait_ms, retry_attempt}
 
 s05_candidates_detail
   payload: {job_id, candidates: [{id, strength, content_type,
@@ -294,6 +300,25 @@ user_clip_rejected
 
 clip_opened_in_editor
   payload: {clip_id, job_id, quality_verdict, posting_order}
+
+clip_feedback_received
+  payload: {clip_id, job_id, channel_id, feedback_type (approved|rejected|edited_title|reordered),
+            old_value, new_value, content_type, quality_verdict}
+  # Learning loop tetikleyicisi — Director bu event'ten memory üretir
+
+channel_dna_created
+  payload: {channel_id, reference_clip_count, do_list_count, no_go_zones_count,
+            hook_style, duration_range, generated_by (user|director)}
+
+channel_dna_updated
+  payload: {channel_id, changed_fields: [list], reason, triggered_by,
+            days_since_last_update}
+
+guest_profile_cache_hit
+  payload: {job_id, guest_name, cache_age_days, data_fields_available}
+
+guest_profile_cache_miss
+  payload: {job_id, guest_name, search_performed, result_count}
 ```
 
 ### 5.3 Modül 2 Event Kataloğu
@@ -660,6 +685,27 @@ Director: [read_file → edit_file]
 ### 11.1 Temel Prensip
 
 Matematiksel hesaplamalar Python'da (hızlı, güvenilir). Yorumlama Gemini'ye bırakılır.
+
+### 11.0 Olgunluk Tabanlı Ağırlıklar
+
+Pipeline erken dönemde (az veri) bazı boyutlar için ağırlık ayarlanır:
+
+```
+< 5 pipeline:   "VERİ YOK" — puan üretme
+5-19 pipeline:  Erken dönem — B4 (öğrenme) ve B5 (olgunluk) veriyi cezalandırmamalı
+                → B4 default 8/15, B5 default 3/5 (nötr)
+20+ pipeline:   Tam hesaplama, tüm boyutlar aktif
+```
+
+```python
+def get_scoring_mode(total_jobs: int) -> str:
+    if total_jobs < 5:
+        return "no_data"
+    elif total_jobs < 20:
+        return "early"   # B4+B5 neutral defaults
+    else:
+        return "mature"  # full calculation
+```
 
 ### 11.2 Modül 1 — 5 Boyut
 
@@ -1283,34 +1329,315 @@ Yeni modül eklendiğinde:
 
 ## 24. YAYINLAMA PLANI
 
-### Faz 1 — Dış Araçlar (3 saat)
-1. Sentry + Langfuse Cloud + PostHog kurulumu
+> **Not:** Faz 0 önce gelir — çalışan bir chat olmadan dış araç entegrasyonu doğrulanamaz.
 
-### Faz 2 — Agent Çekirdeği (1-2 gün)
-2. `director_conversations` + `director_memory` tabloları
-3. Tool registry + temel araçlar (read_file, query_database, save_memory)
-4. Agent core loop (Gemini Pro + function calling)
-5. SSE streaming chat endpoint
-6. Basit chat frontend
+### Faz 0 — Çalışan Chat (öncelik 1)
+1. `director_conversations` + `director_memory` tabloları
+2. Tool registry + temel araçlar (read_file, query_database, save_memory)
+3. Agent core loop (Gemini Pro + function calling)
+4. SSE streaming chat endpoint
+5. Basit chat frontend
 
-### Faz 3 — Event Sistemi ve Dashboard (1 gün)
-7. M1 ve M2 event hook'ları
-8. scorer.py (otomatik puan)
-9. Günlük otomatik analiz scheduler
-10. Dashboard frontend
+### Faz 1 — Dış Araçlar (önce chat çalıştıktan sonra)
+6. Sentry + Langfuse Cloud + PostHog kurulumu ve reader araçları
+7. web_search (Brave/DuckDuckGo)
 
-### Faz 4 — Araç Genişletme (2 gün)
-11. Tüm write/action araçları
-12. Langfuse + Sentry + PostHog reader araçları
-13. Web search (Gemini grounding)
-14. Test runner entegrasyonu
+### Faz 2 — Event Sistemi ve Dashboard
+8. M1 ve M2 event hook'ları (S05, S06, S07, S08)
+9. pipeline_audit_log doldurma
+10. scorer.py (otomatik puan, olgunluk tabanlı ağırlıklar)
+11. Health Pulse (Bölüm 28)
+12. Dashboard frontend
 
-### Faz 5 — İleri Özellikler (sürekli)
-15. Semantik hafıza (pgvector)
-16. Cross-module köprüsü
-17. Prompt Lab + DNA Denetçisi
-18. Proaktif bildirimler
-19. Langfuse Prompt Management
+### Faz 3 — Aksiyon Araçları
+13. trigger_analysis, trigger_test, update_channel_dna, send_notification
+14. edit_file, update_database yazma araçları
+15. Günlük + haftalık otomatik analiz scheduler (Bölüm 29)
+16. Proaktif tetikleyiciler (Bölüm 26)
+
+### Faz 4 — Zeka Katmanı (sürekli)
+17. Cost Intelligence Engine (Bölüm 25)
+18. Learning Loop (Bölüm 27)
+19. Decision Journal (Bölüm 30)
+20. Channel DNA Denetçisi
+21. Prompt Lab + DNA Denetçisi
+22. Cross-module köprüsü
+
+---
+
+---
+
+## 25. COST INTELLIGENCE ENGINE
+
+### 25.1 Amaç
+
+Langfuse token verilerini Supabase'e job bazında aggregate ederek anomali tespiti ve optimizasyon önerileri üret.
+
+### 25.2 Per-Job Cost Tracking
+
+```python
+# Her pipeline tamamlandığında:
+cost_data = {
+    "job_id": job_id,
+    "s05_input_tokens": ...,
+    "s05_output_tokens": ...,
+    "s05_cost_usd": ...,
+    "s06_input_tokens": ...,
+    "s06_output_tokens": ...,
+    "s06_cost_usd": ...,
+    "total_cost_usd": ...,
+    "cost_per_clip_usd": total_cost / max(clip_count, 1),
+    "deepgram_cost_usd": ...,
+}
+# director_events'e yazılır: event_type="pipeline_cost_tracked"
+```
+
+### 25.3 Anomali Tespiti (2σ Kural)
+
+```python
+def detect_cost_anomaly(current_cost: float, historical: list[float]) -> dict:
+    mean = statistics.mean(historical)
+    std = statistics.stdev(historical) if len(historical) > 1 else 0
+    z_score = (current_cost - mean) / std if std > 0 else 0
+
+    if z_score > 2.0:
+        return {"anomaly": True, "type": "spike", "z_score": z_score,
+                "mean_usd": mean, "current_usd": current_cost}
+    if z_score < -2.0:
+        return {"anomaly": True, "type": "drop", "z_score": z_score}
+    return {"anomaly": False}
+```
+
+### 25.4 Director Cost Araçları
+
+```python
+get_cost_breakdown(days: int = 30, per: str = "job") -> dict
+  # per: "job" | "step" | "channel" | "day"
+
+get_cost_trend(days: int = 30) -> dict
+  # 7 günlük hareketli ortalama, trend yönü
+
+detect_cost_anomalies(threshold_sigma: float = 2.0) -> list[dict]
+  # Son 30 günün z-score analizi
+```
+
+---
+
+## 26. PROAKTİF TETİKLEYİCİLER
+
+### 26.1 6 Rule-Based Trigger
+
+Director aşağıdaki durumları periyodik kontrol eder (her pipeline sonrası + günlük 09:00):
+
+```
+TRIGGER 1: DNA_STALE
+  Koşul: channel_dna.updated_at > 90 gün VEYA reference_clip_count < 5
+  Mesaj: "Kanal DNA'sı {N} gündür güncellenmedi. Performansı etkileyebilir."
+  Aksiyon: update_channel_dna öner
+
+TRIGGER 2: PERFORMANCE_DROP
+  Koşul: Son 7 gün pass_rate < (son 30 gün pass_rate - 10%)
+  Mesaj: "Pass rate son haftada %{N} düştü. S05/S06 loglarına bakıyorum."
+  Aksiyon: trigger_analysis(module="clip_pipeline")
+
+TRIGGER 3: COST_SPIKE
+  Koşul: Son job cost > 2σ üzerinde
+  Mesaj: "Son pipeline maliyeti normalin {N}x üzerinde (${X})."
+  Aksiyon: get_cost_breakdown ile adım bazlı analiz
+
+TRIGGER 4: UNUSED_CLIPS
+  Koşul: Son 14 günde pass klipler var ama editor'da hiç açılmamış
+  Mesaj: "{N} adet pass klip editörde hiç açılmadı. Sorun mu var?"
+
+TRIGGER 5: SUCCESS_CELEBRATION
+  Koşul: Son 5 job'da pass_rate > 60% VEYA avg_confidence > 8.0
+  Mesaj: "Son 5 job'da harika sonuçlar — pass rate %{N}. Neyi doğru yapıyoruz?"
+  Aksiyon: Başarı pattern'ini hafızaya kaydet
+
+TRIGGER 6: NEW_PATTERN_DETECTED
+  Koşul: Belirli content_type'ın son 14 günde pass rate'i > 2x arttı/azaldı
+  Mesaj: "'{type}' içerikleri son 2 haftada %{N} değişti. Hafızaya kaydedeyim mi?"
+```
+
+### 26.2 Tetikleyici Kontrolü
+
+```python
+async def check_proactive_triggers(job_id: str = None) -> list[dict]:
+    """Pipeline sonrası veya günlük cron'dan çağrılır."""
+    triggers = []
+    # Her trigger check fonksiyonu çalışır
+    # Sonuçlar director_events'e kaydedilir: event_type="proactive_trigger"
+    # Kritik olanlar öneri olarak da yazılır
+    return triggers
+```
+
+---
+
+## 27. ÖĞRENME DÖNGÜSÜ (Learning Loop)
+
+### 27.1 Kullanıcı Sinyal → Memory Pipeline
+
+```
+clip_feedback_received event geldiğinde Director otomatik:
+  1. Sinyali analiz et (hangi content_type, hangi puan aralığı)
+  2. Pattern var mı kontrol et (memory'de benzer kayıt)
+  3. Varsa güncelle, yoksa yeni memory yaz
+  4. DNA audit için flag at
+```
+
+### 27.2 Sinyal Tipleri ve Memory Dönüşümü
+
+```
+approved:       Gemini pass + kullanıcı onay → "Bu tip çalışıyor" memory
+rejected:       Gemini pass + kullanıcı red → "Bu tip aslında çalışmıyor" (yüksek öncelik)
+edited_title:   Başlık değiştirildi → Tercih edilen başlık stilini öğren
+reordered:      Klip sırası değiştirildi → Sıralama tercihlerini öğren
+```
+
+### 27.3 Örnek Memory Çıktısı
+
+```
+type: "learning"
+content: "Kullanıcı son 3 haftada 'controversial_take' içeriklerin %80'ini reddetti.
+          Gemini avg 6.8 veriyor ama kullanıcı tercih etmiyor.
+          DNA'ya no_go_zones'a eklenebilir."
+tags: ["content_type", "controversial_take", "user_signal", "dna_candidate"]
+```
+
+---
+
+## 28. HEALTH PULSE
+
+### 28.1 Amaç
+
+5 dakikada bir (veya pipeline sonrası) Gemini çağrısı olmadan sistem sağlığını ölç.
+
+### 28.2 Metrikler ve Ağırlıklar
+
+```python
+health_checks = {
+    "pipeline_success_rate":    {"weight": 0.30, "source": "jobs table"},
+    "avg_clip_confidence":      {"weight": 0.20, "source": "clips table"},
+    "open_critical_issues":     {"weight": 0.20, "source": "sentry + director_recommendations"},
+    "dna_freshness":            {"weight": 0.15, "source": "channels table"},
+    "cost_trend":               {"weight": 0.10, "source": "director_events"},
+    "gemini_error_rate":        {"weight": 0.05, "source": "langfuse"},
+}
+
+# Sonuç:
+health_pulse = {
+    "score": 78,           # 0-100, ağırlıklı ortalama
+    "status": "IYI",       # KRITIK|ZAYIF|ORTA|IYI|GUCLU
+    "checks": {...},       # Her check detayı
+    "last_updated": "...", # Timestamp
+    "gemini_used": False   # Hızlı kontrol, Gemini gerekmez
+}
+```
+
+### 28.3 Dashboard Entegrasyonu
+
+Health Pulse her 5 dakikada güncellenir. Dashboard `/director/health-pulse` endpoint'inden çeker. Puan kritik seviyeye düşünce otomatik alert.
+
+---
+
+## 29. HAFTALIK ÖZET (Weekly Digest)
+
+### 29.1 Zamanlama
+
+Her Pazartesi 09:00 otomatik çalışır. Gemini Pro çağrısı içerir.
+
+### 29.2 Özet İçeriği
+
+```
+HAFTALIK ÖZET — {tarih aralığı}
+
+Pipeline Özeti:
+  {N} job çalıştı, {X} klip üretildi
+  Pass rate: %{Y} (geçen hafta: %{Z}, trend: ↑/↓/→)
+
+En İyi Performans:
+  {content_type}: %{pass_rate} pass rate
+
+Dikkat Edilmesi Gerekenler:
+  - {anomaly veya sorun varsa}
+
+Bu Hafta Uygulanan Öneriler: {N}
+Bekleyen Kritik Öneriler: {N}
+
+Önerilen Aksiyon:
+  "{Director'ın stratejik önerisi}"
+```
+
+### 29.3 Scheduler
+
+```python
+# Railway cron veya APScheduler
+schedule:
+  - "haftalik_ozet": her Pazartesi 09:00
+  - "gunluk_analiz": her gün 03:00
+  - "health_pulse": her 5 dakika
+  - "proaktif_kontrol": her pipeline sonrası + her saat
+```
+
+---
+
+## 30. KARAR GÜNLÜĞü (Decision Journal)
+
+### 30.1 Amaç
+
+Kullanıcının aldığı önemli kararları ve sonuçlarını takip et. Gelecekte aynı karar noktasında geri bakabilmek için.
+
+### 30.2 Tablo
+
+```sql
+CREATE TABLE director_decision_journal (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp       TIMESTAMPTZ DEFAULT now(),
+  decision        TEXT NOT NULL,         -- Ne kararı alındı
+  context         TEXT,                   -- Neden bu karar
+  alternatives    TEXT,                   -- Değerlendirilen alternatifler
+  expected_impact TEXT,                   -- Beklenen sonuç
+  actual_impact   TEXT,                   -- Gerçekte ne oldu (sonradan doldurulur)
+  status          TEXT DEFAULT 'open',    -- open | measured | archived
+  channel_id      TEXT,
+  related_rec_id  UUID REFERENCES director_recommendations(id),
+  measured_at     TIMESTAMPTZ
+);
+```
+
+### 30.3 Kullanım
+
+```
+Director bir öneri onaylandığında → decision_journal'a otomatik kayıt
+2 hafta sonra → Director ölçüm yapar, actual_impact doldurur
+Pattern analizi: "Benzer kararlar ne kadar doğru sonuçlandı?"
+```
+
+---
+
+## 31. ÇOKLU KANAL ZEKASı (Multi-Channel Intelligence)
+
+> **Durum:** 2 aktif kanal mevcut. Bu özellik aktif olarak kullanılabilir.
+
+### 31.1 Kanal Karşılaştırması
+
+```python
+compare_channels(channel_a: str, channel_b: str, metric: str) -> dict
+  # metric: "pass_rate" | "content_types" | "duration_distribution" | "dna_similarity"
+  # Örnek: "speedy_cast vs channel_b: Teknik içerikler A'da %40 daha iyi performans"
+```
+
+### 31.2 Bilgi Transferi
+
+```
+Kanal A'da başarılı bir pattern → Kanal B DNA'sına önerilir
+Kanal B'de fail olan tip → Kanal A için uyarı üretilir
+Ortak "evrensel" başarı patternleri hafızaya kaydedilir
+```
+
+### 31.3 Kanal Bazlı Scoring
+
+Her kanal kendi geçmişiyle değerlendirilir. `_calculate_module_scores()` channel_id parametresi alır.
 
 ---
 

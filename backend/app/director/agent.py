@@ -309,9 +309,296 @@ TOOL_DECLARATIONS = [
             required=["module_name", "title", "description", "priority"]
         )
     ),
+    types.FunctionDeclaration(
+        name="get_cost_breakdown",
+        description="Get pipeline cost breakdown from token usage data. Aggregated by day, step, or job.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "days": types.Schema(type="INTEGER", description="Look-back period, default 30"),
+                "per": types.Schema(type="STRING", description="Aggregation: day | step | job"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="detect_cost_anomalies",
+        description="Detect pipeline jobs with abnormal cost (2σ above or below mean). Returns list of anomalous jobs.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "threshold_sigma": types.Schema(type="NUMBER", description="Z-score threshold, default 2.0"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_pass_rate_trend",
+        description="Compare pass rate last 30 days vs previous 30 days. Shows whether AI quality is improving, stable, or declining.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "channel_id": types.Schema(type="STRING", description="Optional channel filter"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="get_analyses_history",
+        description="Fetch past Director analysis records from director_analyses table.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "module": types.Schema(type="STRING", description="Filter by module name"),
+                "limit": types.Schema(type="INTEGER", description="Number of records, default 10"),
+            }
+        )
+    ),
+    types.FunctionDeclaration(
+        name="trigger_analysis",
+        description="Trigger an on-demand analysis of a module. Collects current metrics, calculates scores, saves to director_analyses, and returns a summary.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "module": types.Schema(type="STRING", description="Module to analyze: clip_pipeline | editor | director | all"),
+                "depth": types.Schema(type="STRING", description="Analysis depth: standard | deep. Standard is faster."),
+            },
+            required=["module"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="update_channel_dna",
+        description="Update Channel DNA fields for a channel. Only updates the provided fields, leaves others unchanged.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "channel_id": types.Schema(type="STRING", description="Channel ID to update"),
+                "updates": types.Schema(type="STRING", description="JSON string of fields to update in channel_dna. E.g. {\"do_list\": [...], \"tone\": \"...\"} "),
+                "reason": types.Schema(type="STRING", description="Why this update is being made"),
+            },
+            required=["channel_id", "updates"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="compare_channels",
+        description="Compare two channels side-by-side on a metric (pass_rate, avg_confidence, clip_count, cost). Returns stats for both channels and a suggestion.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "channel_a": types.Schema(type="STRING", description="First channel ID"),
+                "channel_b": types.Schema(type="STRING", description="Second channel ID"),
+                "metric": types.Schema(type="STRING", description="Metric to compare: pass_rate | avg_confidence | clip_count | cost"),
+            },
+            required=["channel_a", "channel_b"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="audit_channel_dna",
+        description="Run a 6-point health audit on a channel's DNA: freshness, consistency, performance reflection, specificity, hook style, duration fit.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "channel_id": types.Schema(type="STRING", description="Channel ID to audit"),
+            },
+            required=["channel_id"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="send_notification",
+        description="Send a notification event to director_events (stub — no email/webhook yet). Use for logging important alerts.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "title": types.Schema(type="STRING", description="Notification title"),
+                "message": types.Schema(type="STRING", description="Notification body"),
+                "channel_id": types.Schema(type="STRING", description="Optional channel context"),
+            },
+            required=["title", "message"]
+        )
+    ),
+    types.FunctionDeclaration(
+        name="trigger_test",
+        description="Create a test run entry in director_test_runs for debugging pipeline behavior without processing real content.",
+        parameters=types.Schema(
+            type="OBJECT",
+            properties={
+                "test_name": types.Schema(type="STRING", description="Name/description of this test run"),
+                "channel_id": types.Schema(type="STRING", description="Optional channel ID to test against"),
+                "params": types.Schema(type="STRING", description="JSON string of test parameters"),
+            },
+            required=["test_name"]
+        )
+    ),
 ]
 
 GEMINI_TOOLS = [types.Tool(function_declarations=TOOL_DECLARATIONS)]
+
+
+# ─────────────────────────────────────────────
+# Action Tool Implementations
+# ─────────────────────────────────────────────
+
+def _get_analyses_history(module: str | None = None, limit: int = 10) -> list[dict]:
+    """Fetch director_analyses records."""
+    try:
+        from app.services.supabase_client import get_client
+        client = get_client()
+        q = (client.table("director_analyses")
+             .select("id,module_name,triggered_by,score,subscores,findings,data_points_used,timestamp")
+             .order("timestamp", desc=True).limit(limit))
+        if module:
+            q = q.eq("module_name", module)
+        res = q.execute()
+        return res.data or []
+    except Exception as e:
+        print(f"[Director] get_analyses_history error: {e}")
+        return []
+
+
+def _trigger_analysis(module: str, depth: str = "standard") -> dict:
+    """Run on-demand analysis, save to director_analyses, return summary."""
+    try:
+        from app.services.supabase_client import get_client
+        pipeline = db_tools.get_pipeline_stats(30)
+        clips = db_tools.get_clip_analysis(None, 30)
+
+        # Compute score inline (avoids circular import with router.py)
+        s = (pipeline.get("summary") or {})
+        total = int(s.get("total_jobs", 0) or 0)
+        completed = int(s.get("completed", 0) or 0)
+        ca = (clips.get("analysis") or {})
+        total_clips = int(ca.get("total_clips", 0) or 0)
+        pass_count = int(ca.get("pass_count", 0) or 0)
+        avg_conf = float(ca.get("avg_confidence", 0) or 0)
+        success_rate = (completed / total * 100) if total > 0 else 0
+        pass_rate = (pass_count / total_clips * 100) if total_clips > 0 else 0
+        sr_score = 6 if success_rate >= 100 else 5 if success_rate >= 95 else 4 if success_rate >= 90 else 2 if success_rate >= 80 else 0
+        avg_dur = float(s.get("avg_duration_min", 0) or 0)
+        dur_score = 4 if avg_dur < 6 else 3 if avg_dur < 8 else 2 if avg_dur < 12 else 0
+        tech = sr_score + dur_score + 5
+        pr = 8 if pass_rate > 50 else 6 if pass_rate > 35 else 3 if pass_rate > 20 else 0
+        cf = 7 if avg_conf >= 8.0 else 5 if avg_conf >= 7.0 else 3 if avg_conf >= 6.0 else 0
+        ai_q = pr + cf + 5
+        clips_per_job = total_clips / max(total, 1)
+        cj = 8 if clips_per_job >= 5 else 5 if clips_per_job >= 3 else 2 if clips_per_job >= 1 else 0
+        out_q = cj + 8
+        learn = 8 if total < 20 else 10
+        overall_score = min(100, round(tech + ai_q + out_q + learn + 3)) if total > 0 else None
+        scores = {"overall_score": overall_score,
+                  "modules": {"clip_pipeline": {"score": overall_score, "subscores": {
+                      "teknik_saglik": tech, "ai_karar": ai_q, "cikti": out_q, "ogrenme": learn}}}}
+
+        client = get_client()
+        analysis_row = {
+            "module_name": module,
+            "triggered_by": "chat",
+            "score": scores.get("overall_score") or 0,
+            "subscores": scores.get("modules", {}),
+            "findings": [
+                {"key": "pipeline_summary", "data": pipeline.get("summary", {})},
+                {"key": "clip_summary", "data": clips.get("analysis", {})},
+            ],
+            "recommendations": [],
+            "data_points_used": int((pipeline.get("summary") or {}).get("total_jobs", 0) or 0),
+        }
+        res = client.table("director_analyses").insert(analysis_row).execute()
+        analysis_id = res.data[0].get("id") if res.data else None
+
+        return {
+            "ok": True,
+            "analysis_id": analysis_id,
+            "module": module,
+            "overall_score": scores.get("overall_score"),
+            "modules": scores.get("modules", {}),
+            "pipeline_summary": pipeline.get("summary", {}),
+        }
+    except Exception as e:
+        print(f"[Director] trigger_analysis error: {e}")
+        return {"error": str(e)}
+
+
+def _update_channel_dna(channel_id: str, updates_json: str, reason: str = "") -> dict:
+    """Update Channel DNA fields. updates_json is a JSON string of fields to merge."""
+    try:
+        import json as _json
+        from app.services.supabase_client import get_client
+
+        updates = _json.loads(updates_json) if isinstance(updates_json, str) else updates_json
+
+        client = get_client()
+        # Fetch current DNA
+        res = client.table("channels").select("channel_dna").eq("id", channel_id).single().execute()
+        if not res.data:
+            return {"error": f"Channel {channel_id} not found"}
+
+        current_dna = res.data.get("channel_dna") or {}
+        current_dna.update(updates)
+
+        client.table("channels").update({"channel_dna": current_dna}).eq("id", channel_id).execute()
+
+        from app.director.events import director_events
+        director_events.emit_sync(
+            module="module_1", event="channel_dna_updated",
+            payload={"channel_id": channel_id, "changed_fields": list(updates.keys()),
+                     "reason": reason, "triggered_by": "director_chat"},
+            channel_id=channel_id,
+        )
+
+        return {"ok": True, "channel_id": channel_id, "updated_fields": list(updates.keys())}
+    except Exception as e:
+        print(f"[Director] update_channel_dna error: {e}")
+        return {"error": str(e)}
+
+
+def _audit_channel_dna(channel_id: str) -> dict:
+    """6-point DNA health audit."""
+    try:
+        from app.director.dna_auditor import audit_channel_dna
+        return audit_channel_dna(channel_id)
+    except Exception as e:
+        print(f"[Director] audit_channel_dna error: {e}")
+        return {"error": str(e)}
+
+
+def _send_notification(title: str, message: str, channel_id: str | None = None) -> dict:
+    """Stub: log notification to director_events."""
+    try:
+        from app.director.events import director_events
+        director_events.emit_sync(
+            module="director",
+            event="notification_sent",
+            payload={"title": title, "message": message},
+            channel_id=channel_id,
+        )
+        return {"ok": True, "title": title}
+    except Exception as e:
+        print(f"[Director] send_notification error: {e}")
+        return {"error": str(e)}
+
+
+def _trigger_test(test_name: str, channel_id: str | None = None, params_json: str = "{}") -> dict:
+    """Create a test run entry in director_test_runs."""
+    try:
+        import json as _json
+        from app.services.supabase_client import get_client
+
+        params = {}
+        try:
+            params = _json.loads(params_json) if params_json else {}
+        except Exception:
+            pass
+
+        client = get_client()
+        res = client.table("director_test_runs").insert({
+            "test_name": test_name,
+            "channel_id": channel_id,
+            "params": params,
+            "status": "created",
+            "is_test_run": True,
+        }).execute()
+        test_id = res.data[0].get("id") if res.data else None
+        return {"ok": True, "test_id": test_id, "test_name": test_name}
+    except Exception as e:
+        print(f"[Director] trigger_test error: {e}")
+        return {"error": str(e)}
+
 
 # ─────────────────────────────────────────────
 # Tool Dispatcher
@@ -371,6 +658,26 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
             how_to_integrate=args.get("how_to_integrate", ""),
             why_recommended=args.get("why_recommended", ""),
         )
+    elif name == "get_cost_breakdown":
+        return db_tools.get_cost_breakdown(args.get("days", 30), args.get("per", "day"))
+    elif name == "detect_cost_anomalies":
+        return db_tools.detect_cost_anomalies(args.get("threshold_sigma", 2.0))
+    elif name == "get_pass_rate_trend":
+        return db_tools.get_pass_rate_trend(args.get("channel_id"))
+    elif name == "get_analyses_history":
+        return _get_analyses_history(args.get("module"), args.get("limit", 10))
+    elif name == "trigger_analysis":
+        return _trigger_analysis(args.get("module", "all"), args.get("depth", "standard"))
+    elif name == "update_channel_dna":
+        return _update_channel_dna(args["channel_id"], args["updates"], args.get("reason", ""))
+    elif name == "compare_channels":
+        return db_tools.compare_channels(args["channel_a"], args["channel_b"], args.get("metric", "pass_rate"))
+    elif name == "audit_channel_dna":
+        return _audit_channel_dna(args["channel_id"])
+    elif name == "send_notification":
+        return _send_notification(args["title"], args["message"], args.get("channel_id"))
+    elif name == "trigger_test":
+        return _trigger_test(args["test_name"], args.get("channel_id"), args.get("params", "{}"))
     else:
         return {"error": f"Unknown tool: {name}"}
 

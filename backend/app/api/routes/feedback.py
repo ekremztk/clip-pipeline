@@ -7,6 +7,22 @@ from workers import feedback_worker
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
+
+def _director_approved(clip_id: str) -> None:
+    try:
+        from app.director.learning import on_clip_approved
+        on_clip_approved(clip_id)
+    except Exception as e:
+        print(f"[Feedback] director approved hook error: {e}")
+
+
+def _director_rejected(clip_id: str, why_failed: str | None) -> None:
+    try:
+        from app.director.learning import on_clip_rejected
+        on_clip_rejected(clip_id, why_failed)
+    except Exception as e:
+        print(f"[Feedback] director rejected hook error: {e}")
+
 class PublishRequest(BaseModel):
     youtube_video_id: str
     published_platform: str = "youtube"
@@ -43,10 +59,12 @@ async def approve_rag(clip_id: str, request: ApproveRagRequest, background_tasks
         
         if request.approved:
             background_tasks.add_task(feedback_processor.process_successful_clip, clip)
+            background_tasks.add_task(_director_approved, clip_id)
         else:
             supabase.table("clips").update({
                 "is_successful": False
             }).eq("id", clip_id).execute()
+            background_tasks.add_task(_director_rejected, clip_id, None)
             
         return {"processed": True, "clip_id": clip_id, "approved": request.approved}
     except HTTPException:

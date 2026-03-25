@@ -20,6 +20,27 @@ from app.services.supabase_client import get_client
 
 
 class DirectorEventCollector:
+    def emit_sync(
+        self,
+        module: str,
+        event: str,
+        payload: dict[str, Any],
+        session_id: str | None = None,
+        channel_id: str | None = None,
+    ) -> None:
+        """Synchronous emit — safe to call from RQ workers / non-async contexts."""
+        try:
+            client = get_client()
+            client.table("director_events").insert({
+                "module_name": module,
+                "event_type": event,
+                "payload": payload,
+                "session_id": session_id,
+                "channel_id": channel_id,
+            }).execute()
+        except Exception as e:
+            print(f"[DirectorEvents] Emit failed (non-critical): {e}")
+
     async def emit(
         self,
         module: str,
@@ -28,6 +49,7 @@ class DirectorEventCollector:
         session_id: str | None = None,
         channel_id: str | None = None,
     ) -> None:
+        """Async emit — for use in async contexts (FastAPI endpoints etc.)."""
         try:
             client = get_client()
             client.table("director_events").insert({

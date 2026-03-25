@@ -74,6 +74,19 @@ interface DirectorEvent {
   payload: Record<string, unknown>; timestamp: string;
 }
 
+interface Decision {
+  id: string;
+  decision: string;
+  context?: string;
+  alternatives?: string[];
+  expected_impact?: string;
+  actual_impact?: string;
+  status: string;
+  channel_id?: string;
+  timestamp: string;
+  measured_at?: string;
+}
+
 interface Message {
   id: string; role: "user" | "assistant";
   content: string; toolCalls?: ToolCallItem[]; isStreaming?: boolean;
@@ -1079,11 +1092,146 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
 }
 
 // ═══════════════════════════════════════════════
+// Decisions Tab
+// ═══════════════════════════════════════════════
+
+function DecisionsTab() {
+  const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ decision: "", context: "", expected_impact: "", alternatives: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchDecisions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/director/decisions?limit=50`, { cache: "no-store" });
+      if (res.ok) setDecisions(await res.json());
+    } catch { /* silent */ } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchDecisions(); }, [fetchDecisions]);
+
+  async function submitDecision() {
+    if (!form.decision.trim()) return;
+    setSubmitting(true);
+    try {
+      await fetch(`${API_URL}/director/decisions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          decision: form.decision,
+          context: form.context || null,
+          expected_impact: form.expected_impact || null,
+          alternatives: form.alternatives ? form.alternatives.split("\n").filter(Boolean) : [],
+        }),
+      });
+      setForm({ decision: "", context: "", expected_impact: "", alternatives: "" });
+      setShowForm(false);
+      fetchDecisions();
+    } catch { /* silent */ } finally { setSubmitting(false); }
+  }
+
+  const statusColor: Record<string, string> = {
+    active: C.cyan, evaluated: C.green, cancelled: C.textMuted,
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6" style={{ background: C.bg }}>
+      <div className="max-w-4xl mx-auto space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold tracking-wider" style={{ color: C.text }}>DECISION JOURNAL</h2>
+          <button onClick={() => setShowForm(!showForm)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{ background: C.cyanDim, color: C.cyan, border: `1px solid ${C.cyanBorder}` }}>
+            + New Decision
+          </button>
+        </div>
+
+        {showForm && (
+          <div className="rounded-xl p-4 space-y-3" style={{ background: C.panel, border: `1px solid ${C.border}` }}>
+            <textarea value={form.decision} onChange={e => setForm(f => ({ ...f, decision: e.target.value }))}
+              placeholder="Decision made..." rows={2}
+              className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
+              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+            <textarea value={form.context} onChange={e => setForm(f => ({ ...f, context: e.target.value }))}
+              placeholder="Context / why..." rows={2}
+              className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
+              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+            <textarea value={form.expected_impact} onChange={e => setForm(f => ({ ...f, expected_impact: e.target.value }))}
+              placeholder="Expected impact..." rows={1}
+              className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
+              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+            <textarea value={form.alternatives} onChange={e => setForm(f => ({ ...f, alternatives: e.target.value }))}
+              placeholder="Alternatives considered (one per line)..." rows={2}
+              className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
+              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs"
+                style={{ color: C.textMuted }}>Cancel</button>
+              <button onClick={submitDecision} disabled={submitting || !form.decision.trim()}
+                className="px-4 py-1.5 rounded-lg text-xs font-medium disabled:opacity-40"
+                style={{ background: C.cyan, color: "#000" }}>
+                {submitting ? "Saving..." : "Save Decision"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-xs text-center py-8" style={{ color: C.textMuted }}>Loading decisions...</div>
+        ) : decisions.length === 0 ? (
+          <div className="text-xs text-center py-8" style={{ color: C.textMuted }}>No decisions recorded yet.</div>
+        ) : (
+          <div className="space-y-3">
+            {decisions.map(d => (
+              <div key={d.id} className="rounded-xl p-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}>
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <p className="text-sm font-medium" style={{ color: C.text }}>{d.decision}</p>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full shrink-0"
+                    style={{ color: statusColor[d.status] || C.textMuted, background: `${statusColor[d.status] || C.textMuted}15` }}>
+                    {d.status}
+                  </span>
+                </div>
+                {d.context && <p className="text-xs mb-1" style={{ color: C.textMuted }}>{d.context}</p>}
+                {d.expected_impact && (
+                  <p className="text-xs" style={{ color: C.text }}>
+                    <span style={{ color: C.cyan }}>Expected:</span> {d.expected_impact}
+                  </p>
+                )}
+                {d.actual_impact && (
+                  <p className="text-xs mt-1" style={{ color: C.text }}>
+                    <span style={{ color: C.green }}>Actual:</span> {d.actual_impact}
+                  </p>
+                )}
+                {d.alternatives && d.alternatives.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-[10px] mb-1" style={{ color: C.textMuted }}>Alternatives considered:</p>
+                    <ul className="space-y-0.5">
+                      {d.alternatives.map((alt, i) => (
+                        <li key={i} className="text-xs" style={{ color: C.text }}>• {alt}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <p className="text-[10px] mt-2" style={{ color: C.textMuted }}>
+                  {new Date(d.timestamp).toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" })}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
 // Main Page
 // ═══════════════════════════════════════════════
 
 export default function DirectorPage() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "chat">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "decisions">("dashboard");
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(7);
@@ -1135,11 +1283,11 @@ export default function DirectorPage() {
         </div>
 
         <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>
-          {(["dashboard", "chat"] as const).map((tab) => (
+          {(["dashboard", "chat", "decisions"] as const).map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className="px-4 py-1.5 rounded-md text-xs font-medium transition-all relative"
               style={{ background: activeTab === tab ? C.cyanDim : "transparent", color: activeTab === tab ? C.cyan : C.textMuted }}>
-              {tab === "dashboard" ? "Dashboard" : "Chat"}
+              {tab === "dashboard" ? "Dashboard" : tab === "chat" ? "Chat" : "Decisions"}
               {activeTab === tab && (
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] rounded-full"
                   style={{ background: C.cyan, boxShadow: `0 0 8px ${C.cyan}` }} />
@@ -1161,6 +1309,8 @@ export default function DirectorPage() {
           onDaysChange={setDays} onOpenModule={setOpenModuleKey}
           onChatAbout={handleChatAbout} onRefresh={() => fetchDashboard(days)}
         />
+      ) : activeTab === "decisions" ? (
+        <DecisionsTab />
       ) : (
         <ChatTab
           messages={messages} setMessages={setMessages}

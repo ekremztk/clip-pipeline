@@ -151,10 +151,35 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
     if (guestName) params.set("clipGuestName", guestName);
     if (clip.job_id) params.set("clipJobId", clip.job_id);
     const href = `https://edit.prognot.com/editor/${crypto.randomUUID()}?${params.toString()}`;
+
+    const handleClick = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        try {
+            await fetch(`${API}/director/events`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    module_name: "editor",
+                    event_type: "clip_opened_in_editor",
+                    payload: {
+                        clip_id: clip.id,
+                        job_id: clip.job_id,
+                        channel_id: clip.channel_id,
+                        quality_verdict: clip.quality_verdict,
+                    },
+                    channel_id: clip.channel_id,
+                }),
+            });
+        } catch {
+            // non-critical, continue to editor regardless
+        }
+        window.open(href, "_blank", "noopener,noreferrer");
+    };
+
     return (
-        <a href={href} target="_blank" rel="noopener noreferrer" className={`${btnClass} bg-gray-800 hover:bg-gray-700 text-white border-gray-700`}>
+        <button onClick={handleClick} className={`${btnClass} bg-gray-800 hover:bg-gray-700 text-white border-gray-700`}>
             <Scissors className="w-4 h-4" /> Open in Editor
-        </a>
+        </button>
     );
 };
 
