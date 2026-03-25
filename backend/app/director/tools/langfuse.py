@@ -23,7 +23,7 @@ def get_langfuse_data(step: str | None = None, days: int = 7) -> dict:
         )
 
         from_date = datetime.now(timezone.utc) - timedelta(days=days)
-        traces = lf.fetch_traces(limit=200, from_timestamp=from_date).data
+        traces = lf.fetch_traces(limit=100, from_timestamp=from_date).data
 
         total_input_tokens = 0
         total_output_tokens = 0

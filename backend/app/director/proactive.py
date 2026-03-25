@@ -41,7 +41,9 @@ def _emit_trigger(trigger_name: str, message: str, payload: dict,
 
 
 def _write_recommendation(title: str, description: str, priority: int,
-                           module_name: str = "clip_pipeline") -> None:
+                           module_name: str = "clip_pipeline",
+                           what: str = "", why: str = "",
+                           expected_impact: str = "") -> None:
     """Write a recommendation if none with the same title is already pending."""
     try:
         client = get_client()
@@ -54,6 +56,9 @@ def _write_recommendation(title: str, description: str, priority: int,
             "module_name": module_name,
             "title": title,
             "description": description,
+            "what": what or title,
+            "why": why or description,
+            "expected_impact": expected_impact or "Pipeline kalitesi artar",
             "priority": priority,
             "status": "pending",
         }).execute()

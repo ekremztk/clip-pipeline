@@ -319,12 +319,12 @@ def get_pass_rate_trend(channel_id: str | None = None) -> dict:
             SELECT
                 COUNT(*) FILTER (WHERE created_at > now() - interval '30 days') AS total_current,
                 COUNT(*) FILTER (WHERE created_at > now() - interval '30 days'
-                                   AND quality_verdict IN ('pass','fixable'))    AS pass_current,
+                                   AND quality_status IN ('passed','fixable'))   AS pass_current,
                 COUNT(*) FILTER (WHERE created_at BETWEEN now() - interval '60 days'
                                                         AND now() - interval '30 days') AS total_prev,
                 COUNT(*) FILTER (WHERE created_at BETWEEN now() - interval '60 days'
                                                         AND now() - interval '30 days'
-                                   AND quality_verdict IN ('pass','fixable'))    AS pass_prev
+                                   AND quality_status IN ('passed','fixable'))   AS pass_prev
             FROM clips
             WHERE 1=1 {channel_filter}
         """
@@ -437,8 +437,8 @@ def compare_channels(channel_a: str, channel_b: str, metric: str = "pass_rate") 
                 SELECT
                     channel_id,
                     COUNT(*)                                                         AS total_clips,
-                    COUNT(*) FILTER (WHERE quality_verdict IN ('pass','fixable'))    AS passed,
-                    ROUND(AVG(overall_confidence)::NUMERIC, 2)                       AS avg_confidence
+                    COUNT(*) FILTER (WHERE quality_status IN ('passed','fixable'))   AS passed,
+                    ROUND(AVG(confidence * 10)::NUMERIC, 2)                          AS avg_confidence
                 FROM clips
                 WHERE channel_id IN (%s, %s)
                   AND created_at > now() - interval '30 days'
