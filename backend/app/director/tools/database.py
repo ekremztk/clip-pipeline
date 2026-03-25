@@ -184,9 +184,13 @@ def create_recommendation(
     effort: str = "",
     risk: str = "",
     description: str = "",
+    category: str = "improvement",
 ) -> dict:
     """Write a new improvement recommendation to the director_recommendations table."""
     try:
+        valid_categories = {"bug_fix", "improvement", "optimization", "monitoring"}
+        if category not in valid_categories:
+            category = "improvement"
         client = get_client()
         res = client.table("director_recommendations").insert({
             "module_name": module_name,
@@ -199,6 +203,7 @@ def create_recommendation(
             "risk": risk or None,
             "description": description or None,
             "status": "pending",
+            "category": category,
         }).execute()
         created = res.data[0] if res.data else {}
         return {"ok": True, "id": created.get("id"), "title": title}

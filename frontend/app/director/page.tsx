@@ -43,6 +43,7 @@ interface DashboardData {
     balance: { amount: number; units: string } | null;
   };
   recommendations: Recommendation[];
+  recommendations_history: Recommendation[];
   errors: SentryError[];
   events: DirectorEvent[];
   modules: { overall_score: number | null; modules: Record<string, ModuleData> };
@@ -52,16 +53,15 @@ interface Recommendation {
   id: string;
   module_name: string;
   title: string;
-  description: string;
+  description?: string | null;
   priority: number;
-  impact: string;
-  effort: string;
+  impact?: string | null;
+  effort?: string | null;
   status: string;
-  metadata?: {
-    what_it_solves?: string;
-    how_to_integrate?: string;
-    why_recommended?: string;
-  };
+  category: string;
+  what?: string | null;
+  why?: string | null;
+  expected_impact?: string | null;
   created_at?: string;
 }
 
@@ -219,11 +219,29 @@ function PeriodSelector({ value, onChange, includeAll = false }: { value: number
 // Recommendation Detail Modal
 // ═══════════════════════════════════════════════
 
-function RecommendationModal({ rec, onClose, onDismiss }: {
-  rec: Recommendation; onClose: () => void; onDismiss: (id: string) => void;
+const CATEGORY_LABELS: Record<string, string> = {
+  bug_fix: "Düzeltme",
+  improvement: "İyileştirme",
+  optimization: "Optimizasyon",
+  monitoring: "İzleme",
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  bug_fix: C.red,
+  improvement: C.cyan,
+  optimization: C.yellow,
+  monitoring: C.sky,
+};
+
+function RecommendationModal({ rec, onClose, onDismiss, onComplete }: {
+  rec: Recommendation; onClose: () => void;
+  onDismiss: (id: string) => void; onComplete: (id: string) => void;
 }) {
   const priorityLabel = rec.priority <= 1 ? "KRİTİK" : rec.priority <= 2 ? "YÜKSEK" : rec.priority <= 3 ? "ORTA" : "DÜŞÜK";
   const priorityColor = rec.priority <= 1 ? C.red : rec.priority <= 2 ? C.orange : rec.priority <= 3 ? C.yellow : C.textMuted;
+  const catColor = CATEGORY_COLORS[rec.category] || C.cyan;
+
+  const isHistory = rec.status !== "pending";
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
@@ -235,9 +253,12 @@ function RecommendationModal({ rec, onClose, onDismiss }: {
         {/* Header */}
         <div className="flex items-start justify-between p-6 border-b" style={{ borderColor: C.cyanBorder }}>
           <div className="flex-1 pr-4">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: `${priorityColor}20`, color: priorityColor }}>
                 P{rec.priority} {priorityLabel}
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: `${catColor}15`, color: catColor }}>
+                {CATEGORY_LABELS[rec.category] || rec.category}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: C.textMuted }}>
                 {rec.module_name}
@@ -261,36 +282,45 @@ function RecommendationModal({ rec, onClose, onDismiss }: {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
-          {rec.description && (
+        <div className="p-6 space-y-4">
+          {rec.what && (
+            <div className="glass-card rounded-xl p-4">
+              <div className="text-[10px] uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: C.cyan }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14" /></svg>
+                Ne Yapılmalı
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: C.text }}>{rec.what}</p>
+            </div>
+          )}
+
+          {rec.why && (
+            <div className="glass-card rounded-xl p-4">
+              <div className="text-[10px] uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: C.yellow }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                Neden
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: C.text }}>{rec.why}</p>
+            </div>
+          )}
+
+          {rec.expected_impact && (
+            <div className="glass-card rounded-xl p-4">
+              <div className="text-[10px] uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: C.green }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
+                Beklenen Etki
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: C.text }}>{rec.expected_impact}</p>
+            </div>
+          )}
+
+          {rec.description && !rec.what && (
             <div>
               <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.cyan }}>Açıklama</div>
               <p className="text-sm leading-relaxed" style={{ color: C.text }}>{rec.description}</p>
             </div>
           )}
 
-          {rec.metadata?.what_it_solves && (
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.yellow }}>Ne Çözüyor / Ne Getirir</div>
-              <p className="text-sm" style={{ color: C.text }}>{rec.metadata.what_it_solves}</p>
-            </div>
-          )}
-
-          {rec.metadata?.how_to_integrate && (
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.cyan }}>Nasıl Entegre Edilir</div>
-              <p className="text-sm leading-relaxed" style={{ color: C.text }}>{rec.metadata.how_to_integrate}</p>
-            </div>
-          )}
-
-          {rec.metadata?.why_recommended && (
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Neden Öneriliyor</div>
-              <p className="text-sm leading-relaxed" style={{ color: C.text }}>{rec.metadata.why_recommended}</p>
-            </div>
-          )}
-
-          {!rec.metadata?.what_it_solves && !rec.metadata?.how_to_integrate && (
+          {!rec.what && !rec.why && !rec.description && (
             <div className="text-xs text-center py-4" style={{ color: C.textMuted }}>
               Bu öneri Director tarafından araştırma yapılarak detaylandırılabilir.
             </div>
@@ -298,18 +328,30 @@ function RecommendationModal({ rec, onClose, onDismiss }: {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-6 pt-0">
-          <button onClick={() => { onDismiss(rec.id); onClose(); }}
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: `${C.red}10`, color: C.red, border: `1px solid ${C.red}20` }}>
-            Reddet
-          </button>
-          <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: C.cyanDim, color: C.cyan, border: `1px solid ${C.cyanBorder}` }}>
-            Tamam
-          </button>
-        </div>
+        {!isHistory && (
+          <div className="flex gap-3 p-6 pt-0">
+            <button onClick={() => { onDismiss(rec.id); onClose(); }}
+              className="py-2.5 px-4 rounded-xl text-xs font-medium transition-all"
+              style={{ background: `${C.red}10`, color: C.red, border: `1px solid ${C.red}20` }}>
+              Sil
+            </button>
+            <button onClick={() => { onComplete(rec.id); onClose(); }}
+              className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2"
+              style={{ background: `${C.green}15`, color: C.green, border: `1px solid ${C.green}30` }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+              Tamamlandı
+            </button>
+          </div>
+        )}
+        {isHistory && (
+          <div className="flex gap-3 p-6 pt-0">
+            <button onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all"
+              style={{ background: C.cyanDim, color: C.cyan, border: `1px solid ${C.cyanBorder}` }}>
+              Kapat
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -642,13 +684,27 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
 }) {
   const [costsExpanded, setCostsExpanded] = useState(false);
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+  const [recTab, setRecTab] = useState<"active" | "history">("active");
+  const [recCategory, setRecCategory] = useState<string | null>(null);
+  const [recsExpanded, setRecsExpanded] = useState(false);
+
+  async function completeRec(id: string) {
+    setRemovedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
+    try {
+      await fetch(`${API_URL}/director/recommendations/${id}/complete`, { method: "POST" });
+    } catch { /* silent */ }
+  }
+
+  async function deleteRec(id: string) {
+    setRemovedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
+    try {
+      await fetch(`${API_URL}/director/recommendations/${id}`, { method: "DELETE" });
+    } catch { /* silent */ }
+  }
 
   async function dismissRec(id: string) {
-    setDismissedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
-    try {
-      await fetch(`${API_URL}/director/recommendations/${id}/dismiss`, { method: "POST" });
-    } catch { /* silent */ }
+    deleteRec(id);
   }
 
   if (loading && !data) {
@@ -672,7 +728,11 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
   const aiSteps = data?.costs_ai?.by_step || {};
   const sortedCostSteps = Object.entries(aiSteps).sort((a, b) => b[1].total_cost_usd - a[1].total_cost_usd);
 
-  const visibleRecs = (data?.recommendations || []).filter((r) => !dismissedIds.has(r.id));
+  const activeRecs = (data?.recommendations || []).filter((r) => !removedIds.has(r.id));
+  const historyRecs = (data?.recommendations_history || []);
+  const filteredActive = recCategory ? activeRecs.filter((r) => r.category === recCategory) : activeRecs;
+  const displayedActive = recsExpanded ? filteredActive : filteredActive.slice(0, 3);
+  const activeCategories = activeRecs.map((r) => r.category).filter((c, i, arr) => Boolean(c) && arr.indexOf(c) === i);
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-8 grid-overlay">
@@ -900,7 +960,7 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
       </div>
 
       {/* ── Recommendations ── */}
-      <SectionTitle count={visibleRecs.length}
+      <SectionTitle count={activeRecs.length}
         action={
           <button onClick={() => onChatAbout("Tüm sistemi araştır: önce get_director_self_analysis, sonra get_pipeline_stats, get_clip_analysis, get_langfuse_data araçlarını kullan. Ardından web_search ile benzer sistemlerdeki en iyi pratikleri araştır. Son olarak create_recommendation ile en az 5 cesur, araştırmaya dayalı öneri oluştur.")}
             className="text-[10px] px-3 py-1 rounded-lg flex items-center gap-1.5 transition-all"
@@ -909,52 +969,153 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
             Yeni Analiz + Öneri
           </button>
         }>
-        Aktif Öneriler
+        Öneriler
       </SectionTitle>
 
-      {visibleRecs.length > 0 ? (
-        <div className="space-y-3">
-          {visibleRecs.map((rec) => {
-            const pc = rec.priority <= 1 ? C.red : rec.priority <= 2 ? C.orange : rec.priority <= 3 ? C.yellow : C.textMuted;
-            return (
-              <div key={rec.id} className="glass-card rounded-xl p-4 group cursor-pointer hover:bg-white/[0.02] transition-colors"
-                onClick={() => setSelectedRec(rec)}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${pc}15`, color: pc }}>P{rec.priority}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: C.textMuted }}>{rec.module_name}</span>
-                      {rec.impact && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: `${C.green}15`, color: C.green }}>{rec.impact} etki</span>}
-                      {rec.effort && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.04)", color: C.textMuted }}>{rec.effort}</span>}
+      <div className="glass-card rounded-2xl overflow-hidden">
+        {/* Tab bar */}
+        <div className="flex items-center gap-1 p-3 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+          <div className="flex gap-1 p-0.5 rounded-lg flex-1" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <button onClick={() => setRecTab("active")}
+              className="flex-1 py-1.5 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1.5"
+              style={{ background: recTab === "active" ? C.cyanDim : "transparent", color: recTab === "active" ? C.cyan : C.textMuted }}>
+              Aktif
+              {activeRecs.length > 0 && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono" style={{ background: `${C.cyan}20`, color: C.cyan }}>{activeRecs.length}</span>
+              )}
+            </button>
+            <button onClick={() => setRecTab("history")}
+              className="flex-1 py-1.5 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1.5"
+              style={{ background: recTab === "history" ? C.cyanDim : "transparent", color: recTab === "history" ? C.cyan : C.textMuted }}>
+              Geçmiş
+              {historyRecs.length > 0 && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono" style={{ background: "rgba(255,255,255,0.05)", color: C.textMuted }}>{historyRecs.length}</span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {recTab === "active" && (
+          <div className="p-3 space-y-2">
+            {/* Category filter chips */}
+            {activeCategories.length > 1 && (
+              <div className="flex gap-1.5 flex-wrap mb-1">
+                <button onClick={() => setRecCategory(null)}
+                  className="text-[10px] px-2.5 py-1 rounded-full transition-all"
+                  style={{ background: recCategory === null ? C.cyanDim : "rgba(255,255,255,0.04)", color: recCategory === null ? C.cyan : C.textMuted, border: `1px solid ${recCategory === null ? C.cyanBorder : "rgba(255,255,255,0.06)"}` }}>
+                  Tümü
+                </button>
+                {(["bug_fix", "improvement", "optimization", "monitoring"] as const).filter((c) => activeCategories.includes(c)).map((cat) => {
+                  const cc = CATEGORY_COLORS[cat] || C.cyan;
+                  return (
+                    <button key={cat} onClick={() => setRecCategory(recCategory === cat ? null : cat)}
+                      className="text-[10px] px-2.5 py-1 rounded-full transition-all"
+                      style={{ background: recCategory === cat ? `${cc}20` : "rgba(255,255,255,0.04)", color: recCategory === cat ? cc : C.textMuted, border: `1px solid ${recCategory === cat ? `${cc}40` : "rgba(255,255,255,0.06)"}` }}>
+                      {CATEGORY_LABELS[cat]}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Rec cards */}
+            {displayedActive.length > 0 ? (
+              <>
+                {displayedActive.map((rec) => {
+                  const pc = rec.priority <= 1 ? C.red : rec.priority <= 2 ? C.orange : rec.priority <= 3 ? C.yellow : C.textMuted;
+                  const cc = CATEGORY_COLORS[rec.category] || C.cyan;
+                  return (
+                    <div key={rec.id} className="rounded-xl p-4 group cursor-pointer transition-colors hover:bg-white/[0.02]"
+                      style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
+                      onClick={() => setSelectedRec(rec)}>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${pc}15`, color: pc }}>P{rec.priority}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: `${cc}10`, color: cc }}>{CATEGORY_LABELS[rec.category] || rec.category}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: C.textMuted }}>{rec.module_name}</span>
+                          </div>
+                          <div className="text-sm font-medium" style={{ color: C.text }}>{rec.title}</div>
+                          {(rec.why || rec.description) && (
+                            <div className="text-xs mt-1 line-clamp-1" style={{ color: C.textMuted }}>{rec.why || rec.description}</div>
+                          )}
+                        </div>
+                        <div className="flex gap-1.5 shrink-0 items-center">
+                          <button onClick={(e) => { e.stopPropagation(); completeRec(rec.id); }}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-green-500/20"
+                            style={{ border: `1px solid ${C.green}30`, color: C.green }}
+                            title="Tamamlandı">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); deleteRec(rec.id); }}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-red-500/10"
+                            style={{ border: `1px solid ${C.red}20`, color: C.red }}
+                            title="Sil">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm font-medium" style={{ color: C.text }}>{rec.title}</div>
-                    <div className="text-xs mt-1 line-clamp-1" style={{ color: C.textMuted }}>{rec.description}</div>
-                  </div>
-                  <div className="flex gap-2 shrink-0 items-start">
-                    <button onClick={(e) => { e.stopPropagation(); setSelectedRec(rec); }}
-                      className="text-[10px] px-2 py-1 rounded transition-all" style={{ background: C.cyanDim, color: C.cyan }}>
-                      Detay
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); dismissRec(rec.id); }}
-                      className="text-[10px] px-2 py-1 rounded transition-all" style={{ background: `${C.red}10`, color: C.red }}>
-                      Reddet
-                    </button>
+                  );
+                })}
+
+                {/* Show more / collapse */}
+                {filteredActive.length > 3 && (
+                  <button onClick={() => setRecsExpanded((v) => !v)}
+                    className="w-full py-2 text-xs transition-all hover:bg-white/[0.01] rounded-lg"
+                    style={{ color: C.textMuted, border: "1px solid rgba(255,255,255,0.04)" }}>
+                    {recsExpanded ? `Daha az göster` : `${filteredActive.length - 3} öneri daha göster`}
+                    <svg className="inline ml-1.5" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                      style={{ transform: recsExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="py-8 text-center">
+                <div className="text-sm" style={{ color: C.textMuted }}>{recCategory ? "Bu kategoride öneri yok" : "Henüz öneri yok"}</div>
+                {!recCategory && (
+                  <button onClick={() => onChatAbout("Sistemi analiz et ve araştırmaya dayalı geliştirme önerileri oluştur.")}
+                    className="mt-3 text-xs px-4 py-2 rounded-lg transition-all inline-block"
+                    style={{ background: C.cyanDim, color: C.cyan, border: `1px solid ${C.cyanBorder}` }}>
+                    Director&apos;dan Öneri İste
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {recTab === "history" && (
+          <div className="p-3 space-y-2">
+            {historyRecs.length > 0 ? historyRecs.map((rec) => {
+              const cc = CATEGORY_COLORS[rec.category] || C.cyan;
+              const statusLabel = rec.status === "completed" ? "Tamamlandı" : rec.status === "applied" ? "Uygulandı" : "Reddedildi";
+              const statusColor = rec.status === "completed" ? C.green : rec.status === "applied" ? C.cyan : C.textMuted;
+              return (
+                <div key={rec.id} className="rounded-xl p-4 cursor-pointer transition-colors hover:bg-white/[0.01]"
+                  style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.03)", opacity: 0.8 }}
+                  onClick={() => setSelectedRec(rec)}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${statusColor}15`, color: statusColor }}>{statusLabel}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: `${cc}10`, color: cc }}>{CATEGORY_LABELS[rec.category] || rec.category}</span>
+                        {rec.created_at && <span className="text-[10px]" style={{ color: C.textMuted }}>{timeAgo(rec.created_at)}</span>}
+                      </div>
+                      <div className="text-xs font-medium" style={{ color: C.textMuted }}>{rec.title}</div>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" className="shrink-0 mt-1"><path d="M9 18l6-6-6-6" /></svg>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="glass-card rounded-xl p-8 text-center">
-          <div className="text-sm" style={{ color: C.textMuted }}>Henüz öneri yok</div>
-          <button onClick={() => onChatAbout("Sistemi analiz et ve araştırmaya dayalı geliştirme önerileri oluştur.")}
-            className="mt-3 text-xs px-4 py-2 rounded-lg transition-all inline-block"
-            style={{ background: C.cyanDim, color: C.cyan, border: `1px solid ${C.cyanBorder}` }}>
-            Director&apos;dan Öneri İste
-          </button>
-        </div>
-      )}
+              );
+            }) : (
+              <div className="py-8 text-center text-sm" style={{ color: C.textMuted }}>Tamamlanan öneri yok</div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ── Errors ── */}
       <SectionTitle count={(data?.errors || []).filter((e) => !e.error && !e.warning).length}>Sistem Hataları</SectionTitle>
@@ -1009,7 +1170,7 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
 
       {/* Recommendation detail modal */}
       {selectedRec && (
-        <RecommendationModal rec={selectedRec} onClose={() => setSelectedRec(null)} onDismiss={dismissRec} />
+        <RecommendationModal rec={selectedRec} onClose={() => setSelectedRec(null)} onDismiss={deleteRec} onComplete={completeRec} />
       )}
     </div>
   );

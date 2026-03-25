@@ -401,6 +401,33 @@ SLASH_COMMANDS: list[dict] = [
 
     # ── Öneri & Araştırma ────────────────────────────────────────────────
     {
+        "command": "/oneriler",
+        "label": "Aktif Öneriler",
+        "description": "Aktif önerileri listele, hangilerinin çözüldüğünü kontrol et",
+        "icon": "check-circle",
+        "category": "oneri",
+        "prompt": (
+            "Aktif önerileri incele ve hangileri artık geçerli değil kontrol et:\n\n"
+            "1. Mevcut aktif önerileri listele:\n"
+            "   query_database: SELECT id, title, module_name, category, priority, created_at "
+            "   FROM director_recommendations WHERE status = 'pending' ORDER BY priority ASC\n\n"
+            "2. Öneri sayısını ve dağılımını gör:\n"
+            "   query_database: SELECT category, COUNT(*) as cnt, "
+            "   MIN(priority) as min_priority FROM director_recommendations "
+            "   WHERE status = 'pending' GROUP BY category ORDER BY min_priority ASC\n\n"
+            "3. Her kritik/yüksek öncelikli öneri (priority <= 2) için kontrol et:\n"
+            "   - query_database ile ilgili metriklere bak (jobs, clips, errors)\n"
+            "   - Sorun hâlâ geçerli mi? Yoksa düzeldi mi?\n\n"
+            "4. Son 7 günlük job ve hata durumu:\n"
+            "   get_pipeline_stats(days=7)\n\n"
+            "Sonuçları şu formatta ver:\n"
+            "- **Hâlâ Geçerli**: Sorun devam eden öneriler (neden devam ettiğini say)\n"
+            "- **Çözüldü / Eskidi**: Artık geçerli olmayan öneriler (Tamamlandı işaretlenebilir)\n"
+            "- **Öncelik Değişimi**: Şu an kritikleşen veya azalan öneriler\n\n"
+            "Her 'çözüldü' önerisi için neyi kontrol ettiğini belirt."
+        ),
+    },
+    {
         "command": "/oneri",
         "label": "Öneri Oluştur",
         "description": "Gerçek verilere dayalı akıllı geliştirme önerileri",

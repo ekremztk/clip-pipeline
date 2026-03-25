@@ -417,6 +417,7 @@ TOOL_DECLARATIONS = [
                 "effort": types.Schema(type="STRING", description="Implementation effort estimate, e.g. '2 saat', '1 gün'"),
                 "risk": types.Schema(type="STRING", description="Potential risks or downsides"),
                 "description": types.Schema(type="STRING", description="Additional context or implementation notes"),
+                "category": types.Schema(type="STRING", description="Category: 'bug_fix' (for errors/bugs to fix), 'improvement' (feature/UX improvements), 'optimization' (performance/cost), 'monitoring' (observability)"),
             },
             required=["module_name", "title", "what", "why", "expected_impact", "priority"]
         )
@@ -949,6 +950,7 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
             effort=args.get("effort", ""),
             risk=args.get("risk", ""),
             description=args.get("description", ""),
+            category=args.get("category", "improvement"),
         )
     elif name == "get_cost_breakdown":
         return db_tools.get_cost_breakdown(args.get("days", 30), args.get("per", "day"))

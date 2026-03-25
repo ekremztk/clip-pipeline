@@ -244,15 +244,17 @@ async def ingest_event(req: EventRequest):
 # ─────────────────────────────────────────────
 
 @router.get("/recommendations")
-async def get_recommendations(status: str = "pending", limit: int = 20):
+async def get_recommendations(status: str = "pending", category: str | None = None, limit: int = 50):
     try:
         client = get_client()
-        res = (client.table("director_recommendations")
-               .select("id,module_name,title,description,priority,impact,effort,status,metadata,created_at")
-               .eq("status", status)
-               .order("priority", desc=False)
-               .limit(limit)
-               .execute())
+        q = (client.table("director_recommendations")
+             .select("id,module_name,title,description,what,why,expected_impact,priority,impact,effort,status,category,created_at")
+             .eq("status", status)
+             .order("priority", desc=False)
+             .limit(limit))
+        if category:
+            q = q.eq("category", category)
+        res = q.execute()
         return res.data or []
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -303,18 +305,42 @@ async def apply_recommendation(rec_id: str, note: str = ""):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/recommendations/{rec_id}/complete")
+async def complete_recommendation(rec_id: str):
+    """Mark a recommendation as completed (moved to history)."""
+    try:
+        client = get_client()
+        client.table("director_recommendations").update({
+            "status": "completed",
+        }).eq("id", rec_id).execute()
+        return {"ok": True, "completed": rec_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/recommendations/{rec_id}")
+async def delete_recommendation(rec_id: str):
+    """Permanently delete a recommendation."""
+    try:
+        client = get_client()
+        client.table("director_recommendations").delete().eq("id", rec_id).execute()
+        return {"ok": True, "deleted": rec_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/cleanup-recommendations")
 async def cleanup_stale_recommendations():
-    """Archive recommendations pending for 30+ days."""
+    """Move recommendations pending for 30+ days to completed (history)."""
     try:
         rows = _run_sql("""
             UPDATE director_recommendations
-            SET status = 'archived'
+            SET status = 'completed'
             WHERE status = 'pending'
               AND created_at < now() - interval '30 days'
             RETURNING id
         """)
-        return {"archived": len(rows)}
+        return {"completed": len(rows)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -912,18 +938,31 @@ async def dashboard_aggregate(days: int = 7):
     except Exception:
         result["costs_deepgram"] = {"error": "unavailable"}
 
-    # Recommendations
+    # Recommendations (active)
     try:
         client = get_client()
         recs = (client.table("director_recommendations")
-                .select("*")
+                .select("id,module_name,title,description,what,why,expected_impact,priority,impact,effort,status,category,created_at")
                 .eq("status", "pending")
                 .order("priority", desc=False)
-                .limit(10)
+                .limit(20)
                 .execute())
         result["recommendations"] = recs.data or []
     except Exception:
         result["recommendations"] = []
+
+    # Recommendations (completed/history) — last 10
+    try:
+        client = get_client()
+        hist = (client.table("director_recommendations")
+                .select("id,module_name,title,description,what,why,expected_impact,priority,impact,effort,status,category,created_at")
+                .in_("status", ["completed", "applied", "dismissed"])
+                .order("created_at", desc=True)
+                .limit(10)
+                .execute())
+        result["recommendations_history"] = hist.data or []
+    except Exception:
+        result["recommendations_history"] = []
 
     # Sentry Errors
     try:
