@@ -27,6 +27,7 @@ interface Clip {
     is_successful: boolean | null;
     is_published: boolean | null;
     why_failed: string | null;
+    quality_verdict?: string | null;
     standalone_result?: string;
     quality_notes?: string;
     file_url: string | null;
