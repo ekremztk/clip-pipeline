@@ -15,7 +15,7 @@ def cross_channel_analysis(days: int = 30) -> dict:
         rows = _run_sql("""
             SELECT
                 c.id AS channel_id,
-                c.name AS channel_name,
+                c.display_name AS channel_name,
                 COUNT(DISTINCT j.id) AS job_count,
                 COUNT(cl.id) AS total_clips,
                 COUNT(cl.id) FILTER (WHERE cl.quality_verdict IN ('pass','fixable')) AS pass_clips,
@@ -25,7 +25,7 @@ def cross_channel_analysis(days: int = 30) -> dict:
             LEFT JOIN jobs j ON j.channel_id = c.id
                 AND j.created_at > now() - interval '%s days'
             LEFT JOIN clips cl ON cl.job_id = j.id
-            GROUP BY c.id, c.name
+            GROUP BY c.id, c.display_name
             HAVING COUNT(DISTINCT j.id) > 0
             ORDER BY COUNT(cl.id) DESC
         """, (days,))

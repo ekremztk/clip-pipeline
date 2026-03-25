@@ -86,7 +86,7 @@ def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:
                 COUNT(*) AS total_jobs,
                 COUNT(*) FILTER (WHERE status = 'completed') AS completed,
                 COUNT(*) FILTER (WHERE status = 'failed') AS failed,
-                ROUND(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60)::NUMERIC, 1) AS avg_duration_min
+                ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(completed_at, now()) - COALESCE(started_at, created_at)))/60)::NUMERIC, 1) AS avg_duration_min
             FROM jobs
             WHERE created_at > now() - interval '{days} days'
             {channel_filter}

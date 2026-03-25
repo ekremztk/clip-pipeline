@@ -72,7 +72,7 @@ def check_dna_stale() -> dict | None:
             return None
 
         client = get_client()
-        channels_res = client.table("channels").select("id,name,updated_at,channel_dna").execute()
+        channels_res = client.table("channels").select("id,display_name,updated_at,channel_dna").execute()
         if not channels_res.data:
             return None
 
@@ -88,7 +88,7 @@ def check_dna_stale() -> dict | None:
                 dna = ch.get("channel_dna") or {}
                 ref_clips = len(dna.get("reference_clips", []))
                 if days_old > 90 or ref_clips < 5:
-                    stale.append({"channel_id": ch["id"], "name": ch.get("name", ch["id"]),
+                    stale.append({"channel_id": ch["id"], "name": ch.get("display_name", ch["id"]),
                                   "days_old": days_old, "ref_clips": ref_clips})
             except Exception:
                 continue

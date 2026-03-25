@@ -94,6 +94,11 @@ interface Message {
 
 interface ToolCallItem { tool: string; args: Record<string, unknown>; summary?: string; }
 
+interface SlashCommand {
+  command: string; label: string; description: string;
+  icon: string; category: string; prompt: string;
+}
+
 // ═══════════════════════════════════════════════
 // Design tokens
 // ═══════════════════════════════════════════════
@@ -940,18 +945,64 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
 // Chat Tab
 // ═══════════════════════════════════════════════
 
-function ToolBadge({ item }: { item: ToolCallItem }) {
-  const argStr = Object.entries(item.args).map(([k, v]) => `${k}: ${String(v).slice(0, 40)}`).join(", ");
+function ThinkingProcess({ toolCalls, isStreaming }: { toolCalls: ToolCallItem[]; isStreaming?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!toolCalls || toolCalls.length === 0) return null;
+
+  const completedCount = toolCalls.filter((tc) => tc.summary).length;
+  const isThinking = isStreaming && completedCount < toolCalls.length;
+
   return (
-    <div className="flex items-start gap-2 text-xs rounded-lg px-3 py-2 my-1" style={{ background: "rgba(0,212,255,0.03)", border: `1px solid ${C.cyanBorder}` }}>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.cyan} strokeWidth="2" className="mt-0.5 shrink-0">
-        <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-      </svg>
-      <div>
-        <span className="font-mono" style={{ color: C.cyan }}>{item.tool}</span>
-        {argStr && <span className="ml-2" style={{ color: C.textMuted }}>({argStr})</span>}
-        {item.summary && <div className="mt-0.5" style={{ color: C.textMuted }}>{item.summary}</div>}
-      </div>
+    <div className="mb-2 rounded-xl overflow-hidden" style={{ background: "rgba(0,212,255,0.02)", border: `1px solid ${C.cyanBorder}` }}>
+      <button onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/[0.02]">
+        {isThinking ? (
+          <div className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin shrink-0" style={{ borderColor: `${C.cyan} transparent ${C.cyan} ${C.cyan}` }} />
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.cyan} strokeWidth="2" className="shrink-0">
+            <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+          </svg>
+        )}
+        <span className="font-medium" style={{ color: C.cyan }}>
+          {isThinking ? "Dusunuyor..." : `${toolCalls.length} arac kullanildi`}
+        </span>
+        <span className="text-[10px] font-mono" style={{ color: C.textMuted }}>
+          {completedCount}/{toolCalls.length}
+        </span>
+        <div className="flex-1" />
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          style={{ color: C.textMuted, transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {expanded && (
+        <div className="px-3 pb-2 space-y-1" style={{ borderTop: `1px solid ${C.cyanBorder}` }}>
+          {toolCalls.map((tc, i) => {
+            const argStr = Object.entries(tc.args).map(([k, v]) => `${k}: ${String(v).slice(0, 50)}`).join(", ");
+            const isDone = !!tc.summary;
+            return (
+              <div key={i} className="flex items-start gap-2 py-1.5 text-[11px]"
+                style={{ borderBottom: i < toolCalls.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                <div className="mt-0.5 shrink-0">
+                  {isDone ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : isStreaming ? (
+                    <div className="w-3 h-3 border border-t-transparent rounded-full animate-spin" style={{ borderColor: `${C.yellow} transparent ${C.yellow} ${C.yellow}` }} />
+                  ) : (
+                    <div className="w-3 h-3 rounded-full" style={{ background: C.textMuted }} />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-mono" style={{ color: isDone ? C.cyan : C.yellow }}>{tc.tool}</span>
+                  {argStr && <span className="ml-1.5" style={{ color: C.textMuted }}>({argStr})</span>}
+                  {tc.summary && <div className="mt-0.5 truncate" style={{ color: C.textMuted }}>{tc.summary}</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -962,7 +1013,7 @@ function MsgBubble({ msg }: { msg: Message }) {
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
       <div className={`max-w-[80%] ${isUser ? "order-2" : "order-1"}`}>
         {!isUser && msg.toolCalls && msg.toolCalls.length > 0 && (
-          <div className="mb-2">{msg.toolCalls.map((tc, i) => <ToolBadge key={i} item={tc} />)}</div>
+          <ThinkingProcess toolCalls={msg.toolCalls} isStreaming={msg.isStreaming} />
         )}
         <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap"
           style={isUser
@@ -974,6 +1025,30 @@ function MsgBubble({ msg }: { msg: Message }) {
       </div>
     </div>
   );
+}
+
+function CommandIcon({ icon, size = 14 }: { icon: string; size?: number }) {
+  const s = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2 };
+  switch (icon) {
+    case "chart": return <svg {...s}><path d="M18 20V10M12 20V4M6 20v-6" /></svg>;
+    case "heart": return <svg {...s}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>;
+    case "dollar": return <svg {...s}><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>;
+    case "alert": return <svg {...s}><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" /></svg>;
+    case "play": return <svg {...s}><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none" /></svg>;
+    case "star": return <svg {...s}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
+    case "flask": return <svg {...s}><path d="M9 3h6M10 9V3M14 9V3M5 21h14l-4.5-7.5V9h-5v4.5L5 21z" /></svg>;
+    case "dna": return <svg {...s}><path d="M2 15c6.667-6 13.333 0 20-6M2 9c6.667 6 13.333 0 20 6" /></svg>;
+    case "columns": return <svg {...s}><rect x="3" y="3" width="7" height="18" rx="1" /><rect x="14" y="3" width="7" height="18" rx="1" /></svg>;
+    case "lightbulb": return <svg {...s}><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" /></svg>;
+    case "search": return <svg {...s}><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>;
+    case "brain": return <svg {...s}><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z" /></svg>;
+    case "eye": return <svg {...s}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>;
+    case "trending": return <svg {...s}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>;
+    case "shield": return <svg {...s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
+    case "code": return <svg {...s}><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>;
+    case "file": return <svg {...s}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>;
+    default: return <svg {...s}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>;
+  }
 }
 
 function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoading, sessionId,
@@ -990,12 +1065,74 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [showSessions, setShowSessions] = useState(false);
 
+  // Slash commands state
+  const [allCommands, setAllCommands] = useState<SlashCommand[]>([]);
+  const [showCommands, setShowCommands] = useState(false);
+  const [cmdIndex, setCmdIndex] = useState(0);
+  const cmdListRef = useRef<HTMLDivElement>(null);
+
+  // Load commands on mount
+  useEffect(() => {
+    async function loadCmds() {
+      try {
+        const res = await fetch(`${API_URL}/director/commands`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.commands) setAllCommands(data.commands);
+        }
+      } catch { /* silent */ }
+    }
+    loadCmds();
+  }, []);
+
+  // Filter commands based on input
+  const filteredCommands = (() => {
+    if (!input.startsWith("/")) return [];
+    const query = input.slice(1).toLowerCase();
+    if (!query) return allCommands;
+    return allCommands.filter((cmd) =>
+      cmd.command.slice(1).includes(query) ||
+      cmd.label.toLowerCase().includes(query) ||
+      cmd.description.toLowerCase().includes(query)
+    );
+  })();
+
+  // Show/hide command dropdown based on input
+  useEffect(() => {
+    if (input.startsWith("/") && !input.includes(" ") && filteredCommands.length > 0) {
+      setShowCommands(true);
+      setCmdIndex(0);
+    } else {
+      setShowCommands(false);
+    }
+  }, [input, filteredCommands.length]);
+
+  // Scroll active command into view
+  useEffect(() => {
+    if (showCommands && cmdListRef.current) {
+      const active = cmdListRef.current.children[cmdIndex] as HTMLElement | undefined;
+      active?.scrollIntoView({ block: "nearest" });
+    }
+  }, [cmdIndex, showCommands]);
+
+  function selectCommand(cmd: SlashCommand) {
+    setInput(cmd.command + " ");
+    setShowCommands(false);
+    inputRef.current?.focus();
+  }
+
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   async function sendMessage(override?: string) {
     const text = (override ?? input).trim();
     if (!text || isLoading) return;
-    const userMsg: Message = { id: genId(), role: "user", content: text };
+    setShowCommands(false);
+
+    // Display label for slash commands
+    const matchedCmd = text.startsWith("/") ? allCommands.find((c) => text.startsWith(c.command)) : null;
+    const displayText = matchedCmd ? `${matchedCmd.label} ${text.slice(matchedCmd.command.length).trim()}`.trim() : text;
+
+    const userMsg: Message = { id: genId(), role: "user", content: displayText };
     setMessages((p) => [...p, userMsg]);
     if (!override) setInput("");
     setIsLoading(true);
@@ -1045,6 +1182,35 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
       setMessages((p) => p.map((m) => m.id === aId ? { ...m, content: `Bağlantı hatası: ${String(err)}`, isStreaming: false } : m));
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (showCommands && filteredCommands.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setCmdIndex((i) => (i + 1) % filteredCommands.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setCmdIndex((i) => (i - 1 + filteredCommands.length) % filteredCommands.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        selectCommand(filteredCommands[cmdIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setShowCommands(false);
+        return;
+      }
+    }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   }
 
@@ -1107,22 +1273,56 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
         <div ref={bottomRef} />
       </div>
       <div className="px-4 pb-4">
-        <div className="flex gap-2 rounded-2xl p-2" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.cyanBorder}` }}>
-          <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-            placeholder="Director'a sor..." rows={1} disabled={isLoading}
-            className="flex-1 bg-transparent text-sm placeholder-gray-600 resize-none outline-none px-2 py-1.5 max-h-32"
-            style={{ minHeight: 36, color: C.text }} />
-          <button onClick={() => sendMessage()} disabled={isLoading || !input.trim()}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 disabled:opacity-30"
-            style={{ background: C.cyan, color: "#000" }}>
-            {isLoading
-              ? <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-              : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21L23 12 2 3V10L17 12 2 14Z" /></svg>
-            }
-          </button>
+        <div className="relative">
+          {/* Slash command autocomplete dropdown */}
+          {showCommands && filteredCommands.length > 0 && (
+            <div ref={cmdListRef}
+              className="absolute bottom-full left-0 right-0 mb-2 max-h-72 overflow-y-auto rounded-xl z-50"
+              style={{ background: "rgba(5,10,20,0.98)", border: `1px solid ${C.cyanBorder}`, boxShadow: `0 -4px 24px rgba(0,212,255,0.08)` }}>
+              <div className="px-3 py-2 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted, borderBottom: `1px solid ${C.cyanBorder}` }}>
+                Komutlar — ok tuslariyla sec, Enter ile onayla
+              </div>
+              {filteredCommands.map((cmd, i) => (
+                <button key={cmd.command}
+                  onClick={() => selectCommand(cmd)}
+                  onMouseEnter={() => setCmdIndex(i)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors"
+                  style={{
+                    background: i === cmdIndex ? C.cyanDim : "transparent",
+                    borderBottom: `1px solid rgba(255,255,255,0.03)`,
+                  }}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: i === cmdIndex ? `${C.cyan}20` : "rgba(255,255,255,0.04)", color: i === cmdIndex ? C.cyan : C.textMuted }}>
+                    <CommandIcon icon={cmd.icon} size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-medium" style={{ color: i === cmdIndex ? C.cyan : C.text }}>{cmd.command}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.04)", color: C.textMuted }}>{cmd.category}</span>
+                    </div>
+                    <div className="text-[11px] truncate mt-0.5" style={{ color: C.textMuted }}>{cmd.description}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2 rounded-2xl p-2" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.cyanBorder}` }}>
+            <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Director'a sor... ( / ile komut kullan)" rows={1} disabled={isLoading}
+              className="flex-1 bg-transparent text-sm placeholder-gray-600 resize-none outline-none px-2 py-1.5 max-h-32"
+              style={{ minHeight: 36, color: C.text }} />
+            <button onClick={() => sendMessage()} disabled={isLoading || !input.trim()}
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 disabled:opacity-30"
+              style={{ background: C.cyan, color: "#000" }}>
+              {isLoading
+                ? <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21L23 12 2 3V10L17 12 2 14Z" /></svg>
+              }
+            </button>
+          </div>
         </div>
-        <p className="text-center text-xs mt-2" style={{ color: C.textMuted }}>Enter ile gönder · Shift+Enter yeni satır</p>
+        <p className="text-center text-xs mt-2" style={{ color: C.textMuted }}>Enter ile gönder · / ile komut · Shift+Enter yeni satır</p>
       </div>
     </div>
   );

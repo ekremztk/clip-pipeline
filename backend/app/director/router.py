@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from app.director.agent import run_agent
 from app.director.message_router import should_use_tools
+from app.director.commands import get_commands, find_command, get_command_categories
 from app.director.tools.memory import (
     query_memory, save_memory, list_memories, delete_memory,
     get_conversation_history, save_conversation_turn
@@ -33,16 +34,31 @@ class ChatRequest(BaseModel):
 
 async def _sse_generator(message: str, session_id: str) -> AsyncGenerator[str, None]:
     """Wrap agent generator into SSE format."""
-    history = get_conversation_history(session_id, last_n=20)
-    relevant_memories = query_memory(message, top_k=5)
+    # Detect slash commands — replace with the command's prompt
+    actual_message = message
+    slash_cmd = None
+    if message.strip().startswith("/"):
+        slash_cmd = find_command(message.strip().split()[0])
+        if slash_cmd:
+            # If user typed just the command, use the prompt directly
+            # If they typed extra text after it, append it as context
+            parts = message.strip().split(maxsplit=1)
+            extra = parts[1] if len(parts) > 1 else ""
+            actual_message = slash_cmd["prompt"]
+            if extra:
+                actual_message += f"\n\nEk bilgi: {extra}"
 
-    # Save user turn
+    history = get_conversation_history(session_id, last_n=20)
+    relevant_memories = query_memory(actual_message, top_k=5)
+
+    # Save user turn (show original message in history)
     save_conversation_turn(session_id, "user", message)
 
     full_response_parts = []
 
-    use_tools = should_use_tools(message)
-    async for event in run_agent(message, session_id, history, relevant_memories, use_tools=use_tools):
+    # Slash commands always use tools
+    use_tools = True if slash_cmd else should_use_tools(actual_message)
+    async for event in run_agent(actual_message, session_id, history, relevant_memories, use_tools=use_tools):
         data = json.dumps(event, ensure_ascii=False)
         yield f"data: {data}\n\n"
 
@@ -67,6 +83,22 @@ async def chat(req: ChatRequest):
             "X-Session-Id": session_id,
         }
     )
+
+
+# ─────────────────────────────────────────────
+# Slash Commands
+# ─────────────────────────────────────────────
+
+@router.get("/commands")
+async def list_commands():
+    """Return all available slash commands for autocomplete."""
+    return {"commands": get_commands()}
+
+
+@router.get("/commands/categories")
+async def list_command_categories():
+    """Return commands grouped by category."""
+    return {"categories": get_command_categories()}
 
 
 # ─────────────────────────────────────────────
