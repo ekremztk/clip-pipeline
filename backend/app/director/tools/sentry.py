@@ -36,9 +36,11 @@ def get_sentry_issues(days: int = 7, resolved: bool = False) -> list[dict]:
         import json
 
         status_filter = "resolved" if resolved else "unresolved"
+        # Sentry only accepts '', '24h', '14d' for statsPeriod on this endpoint
+        stats_period = "24h" if days <= 1 else "14d"
         # Keep colon unencoded — Sentry query parser expects literal is:unresolved
         params = urllib.parse.urlencode({
-            "statsPeriod": f"{days}d",
+            "statsPeriod": stats_period,
             "limit": 25,
         }) + f"&query=is:{status_filter}"
         url = f"https://sentry.io/api/0/projects/{org_slug}/{project_slug}/issues/?{params}"

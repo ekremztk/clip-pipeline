@@ -54,7 +54,8 @@ ARAÇ KULLAN — sisteme bak:
 - "Neden çalışmıyor?", "Bu kodda sorun var mı?", "Kaliteyi kontrol et" gibi istekler
 
 ALTIN KURAL: Soruyu araç çağırmadan cevaplayabiliyorsan ÇAĞIRMA.
-Aynı aracı aynı argümanlarla HİÇBİR ZAMAN iki kez çağırma.
+Aynı aracı aynı argümanlarla bu konuşmada zaten çağırdıysan tekrar çağırma — mevcut sonucu kullan.
+İSTİSNA: Kullanıcı "tekrar dene", "yeniden çalıştır", "retry", "tekrar çalıştır", "yeniden dene" gibi açıkça yeniden deneme isterse — önceki sonucu yoksay, aracı tekrar çağır.
 
 ## KOD ERİŞİM HARİTAN
 
@@ -1128,6 +1129,9 @@ async def run_agent(
         _tool_call_hashes: set[str] = set()
         _consecutive_errors = 0
         _MAX_CONSECUTIVE_ERRORS = 4  # stop spiraling if tools keep failing
+        # If user explicitly asks to retry, disable dedup guard for this turn
+        _retry_keywords = ("tekrar dene", "yeniden dene", "tekrar çalıştır", "yeniden çalıştır", "retry", "tekrar çağır")
+        _force_retry = any(kw in user_message.lower() for kw in _retry_keywords)
 
         while iteration < max_iterations:
             iteration += 1
@@ -1193,9 +1197,9 @@ async def run_agent(
                 tool_name = fc.name
                 tool_args = dict(fc.args) if fc.args else {}
 
-                # Dedup guard
+                # Dedup guard (skipped when user explicitly asked to retry)
                 call_key = f"{tool_name}:{hashlib.md5(json.dumps(tool_args, sort_keys=True).encode()).hexdigest()}"
-                if call_key in _tool_call_hashes:
+                if not _force_retry and call_key in _tool_call_hashes:
                     result = {"note": "Bu araç aynı argümanlarla zaten çağrıldı. Mevcut sonucu kullan."}
                     yield {"type": "tool_call", "tool": tool_name, "args": tool_args}
                     yield {"type": "tool_result", "tool": tool_name, "summary": "duplicate — skipped"}
