@@ -3,11 +3,46 @@ import os
 import re
 import time
 import tempfile
+import threading
 from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 from app.config import settings
+
+# ── Per-step token accumulator (thread-local, used by orchestrator) ──────────
+_thread_local = threading.local()
+
+def reset_token_accumulator() -> None:
+    """Call before a pipeline step starts to begin fresh token tracking."""
+    _thread_local.input_tokens = 0
+    _thread_local.output_tokens = 0
+    _thread_local.cost_usd = 0.0
+
+def get_accumulated_token_usage() -> dict:
+    """Returns accumulated token/cost for the current step and resets."""
+    usage = {
+        "input_tokens": getattr(_thread_local, "input_tokens", 0),
+        "output_tokens": getattr(_thread_local, "output_tokens", 0),
+        "cost_usd": round(getattr(_thread_local, "cost_usd", 0.0), 6),
+    }
+    reset_token_accumulator()
+    return usage
+
+def _accumulate_tokens(input_tokens: int | None, output_tokens: int | None, model: str) -> None:
+    """Add token counts to the current step accumulator with rough cost estimate."""
+    if not hasattr(_thread_local, "input_tokens"):
+        reset_token_accumulator()
+    inp = input_tokens or 0
+    out = output_tokens or 0
+    _thread_local.input_tokens += inp
+    _thread_local.output_tokens += out
+    # Rough Vertex AI pricing (estimates for display purposes)
+    if "pro" in model.lower():
+        cost = (inp / 1_000_000 * 1.25) + (out / 1_000_000 * 5.00)
+    else:
+        cost = (inp / 1_000_000 * 0.075) + (out / 1_000_000 * 0.30)
+    _thread_local.cost_usd = getattr(_thread_local, "cost_usd", 0.0) + cost
 
 # Langfuse — lazy init, no-op if not configured
 _langfuse = None
@@ -169,6 +204,7 @@ def _generate_internal(prompt: str, system: Optional[str] = None, json_mode: boo
             input_tokens = getattr(usage, "prompt_token_count", None)
             output_tokens = getattr(usage, "candidates_token_count", None)
 
+    _accumulate_tokens(input_tokens, output_tokens, model)
     _trace_generation(
         name="generate_json" if json_mode else "generate",
         model=model,
@@ -292,6 +328,7 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
                 if u:
                     in_tok = getattr(u, "prompt_token_count", None)
                     out_tok = getattr(u, "candidates_token_count", None)
+            _accumulate_tokens(in_tok, out_tok, model)
             _trace_generation("analyze_video", model, prompt, out,
                               input_tokens=in_tok, output_tokens=out_tok,
                               metadata={"file_size_mb": round(file_size_mb, 1), "mode": "inline",
@@ -332,6 +369,7 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
                 if u:
                     in_tok = getattr(u, "prompt_token_count", None)
                     out_tok = getattr(u, "candidates_token_count", None)
+            _accumulate_tokens(in_tok, out_tok, model)
             _trace_generation("analyze_video", model, prompt, out,
                               input_tokens=in_tok, output_tokens=out_tok,
                               metadata={"file_size_mb": round(file_size_mb, 1), "mode": "gcs",

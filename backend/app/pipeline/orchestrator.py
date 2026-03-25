@@ -37,7 +37,8 @@ from app.utils.audit_logger import log_pipeline_step
 
 def log_step(job_id: str, step_number: int, step_name: str, status: str,
              input_summary: dict | None = None, output_summary: dict | None = None,
-             duration_ms: int | None = None, error_message: str | None = None) -> None:
+             duration_ms: int | None = None, error_message: str | None = None,
+             token_usage: dict | None = None) -> None:
     """
     Inserts a row into pipeline_audit_log table.
     Delegates to audit_logger.py
@@ -50,7 +51,8 @@ def log_step(job_id: str, step_number: int, step_name: str, status: str,
         input_summary=input_summary,
         output_summary=output_summary,
         duration_ms=duration_ms,
-        error_message=error_message
+        error_message=error_message,
+        token_usage=token_usage,
     )
 
 
@@ -149,6 +151,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, guest_name)
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
+                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
                     # Fetch channel_dna from Supabase
                     supabase = get_client()
                     channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
@@ -157,6 +160,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     # Get video duration from transcript_data (Deepgram provides this)
                     video_duration_s = transcript_data.get("duration", 0.0) if transcript_data else 0.0
                     # guest_name is already available as a function parameter
+                    reset_token_accumulator()
                     candidates = s05_unified_discovery.run(
                         video_path=video_path,
                         labeled_transcript=labeled_transcript,
@@ -167,8 +171,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         job_id=job_id,
                         audio_path=audio_path
                     )
+                    s05_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
                     duration_ms_s05 = int((time.time() - step_start_time) * 1000)
+                    log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
+                             duration_ms=duration_ms_s05, token_usage=s05_token_usage)
                     director_events.emit_sync(
                         module="module_1", event="s05_discovery_completed",
                         payload={"job_id": job_id, "candidate_count": len(candidates),
@@ -177,12 +184,15 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                                  "guest_name_provided": bool(guest_name)},
                         channel_id=channel_id,
                     )
+                    continue  # log_step already called above
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
+                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
                     if not candidates:
                         print("[Orchestrator] No candidates from S05. Skipping evaluation.")
                     else:
+                        reset_token_accumulator()
                         evaluated_clips = s06_batch_evaluation.run(
                             candidates=candidates,
                             labeled_transcript=labeled_transcript,
@@ -191,8 +201,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             channel_id=channel_id,
                             job_id=job_id
                         )
+                    s06_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)
+                    log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
+                             duration_ms=duration_ms_s06, token_usage=s06_token_usage)
                     pass_count = sum(1 for c in evaluated_clips if c.get("quality_verdict") in ("pass", "fixable"))
                     fail_count = len(evaluated_clips) - pass_count
                     avg_standalone = round(
@@ -206,6 +219,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                                  "duration_ms": duration_ms_s06},
                         channel_id=channel_id,
                     )
+                    continue  # log_step already called above
 
                 elif step_number == 7:
                     from app.pipeline.steps import s07_precision_cut
@@ -479,6 +493,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     labeled_transcript = s04_labeled_transcript.run(transcript_data, confirmed_speaker_map, guest_name)
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
+                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
                     # Fetch channel_dna from Supabase
                     supabase = get_client()
                     channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
@@ -487,6 +502,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                     # Get video duration from transcript_data (Deepgram provides this)
                     video_duration_s = transcript_data.get("duration", 0.0) if transcript_data else 0.0
                     # guest_name is already available as a function parameter
+                    reset_token_accumulator()
                     candidates = s05_unified_discovery.run(
                         video_path=video_path,
                         labeled_transcript=labeled_transcript,
@@ -497,21 +513,28 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         job_id=job_id,
                         audio_path=audio_path
                     )
+                    s05_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
+                    duration_ms_s05 = int((time.time() - step_start_time) * 1000)
+                    log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
+                             duration_ms=duration_ms_s05, token_usage=s05_token_usage)
                     director_events.emit_sync(
                         module="module_1", event="s05_discovery_completed",
                         payload={"job_id": job_id, "candidate_count": len(candidates),
-                                 "duration_ms": int((time.time() - step_start_time) * 1000),
+                                 "duration_ms": duration_ms_s05,
                                  "channel_dna_present": bool(channel_dna),
                                  "guest_name_provided": bool(guest_name)},
                         channel_id=channel_id,
                     )
+                    continue  # log_step already called above
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
+                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
                     if not candidates:
                         print("[Orchestrator] No candidates from S05. Skipping evaluation.")
                     else:
+                        reset_token_accumulator()
                         evaluated_clips = s06_batch_evaluation.run(
                             candidates=candidates,
                             labeled_transcript=labeled_transcript,
@@ -520,7 +543,11 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             channel_id=channel_id,
                             job_id=job_id
                         )
+                    s06_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
+                    duration_ms_s06 = int((time.time() - step_start_time) * 1000)
+                    log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
+                             duration_ms=duration_ms_s06, token_usage=s06_token_usage)
                     pass_count = sum(1 for c in evaluated_clips if c.get("quality_verdict") in ("pass", "fixable"))
                     fail_count = len(evaluated_clips) - pass_count
                     avg_standalone = round(
@@ -531,9 +558,10 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         payload={"job_id": job_id, "total_evaluated": len(evaluated_clips),
                                  "pass_count": pass_count, "fail_count": fail_count,
                                  "avg_standalone": avg_standalone,
-                                 "duration_ms": int((time.time() - step_start_time) * 1000)},
+                                 "duration_ms": duration_ms_s06},
                         channel_id=channel_id,
                     )
+                    continue  # log_step already called above
 
                 elif step_number == 7:
                     from app.pipeline.steps import s07_precision_cut
