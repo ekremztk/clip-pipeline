@@ -72,7 +72,7 @@ SLASH_COMMANDS: list[dict] = [
             "SELECT status, COUNT(*) as cnt, "
             "ROUND(AVG(EXTRACT(EPOCH FROM (completed_at-started_at))/60) "
             "FILTER (WHERE status='completed' AND started_at IS NOT NULL AND completed_at IS NOT NULL)::NUMERIC,1) as avg_min "
-            "FROM jobs WHERE created_at > now() - interval '30 days' GROUP BY status\n\n"
+            "FROM jobs WHERE created_at > now() - interval '7 days' GROUP BY status\n\n"
 
             "## ADIM 2 — KLİP KALİTESİ DAĞILIMI\n"
             "query_database:\n"
@@ -81,16 +81,16 @@ SLASH_COMMANDS: list[dict] = [
             "ROUND(AVG(standalone_score)::NUMERIC,2) as standalone, "
             "ROUND(AVG(hook_score)::NUMERIC,2) as hook, "
             "ROUND(AVG(arc_score)::NUMERIC,2) as arc "
-            "FROM clips WHERE created_at > now() - interval '30 days' "
+            "FROM clips WHERE created_at > now() - interval '7 days' "
             "GROUP BY quality_status ORDER BY cnt DESC\n\n"
 
-            "## ADIM 3 — PASS RATE TRENDİ (son 60 gün, 2 periyot karşılaştırması)\n"
+            "## ADIM 3 — PASS RATE TRENDİ (bu hafta vs geçen hafta)\n"
             "query_database:\n"
             "SELECT "
-            "COUNT(*) FILTER (WHERE created_at > now()-interval '30 days') as clips_recent_30d, "
-            "COUNT(*) FILTER (WHERE quality_status='passed' AND created_at > now()-interval '30 days') as passed_recent, "
-            "COUNT(*) FILTER (WHERE created_at BETWEEN now()-interval '60 days' AND now()-interval '30 days') as clips_prev_30d, "
-            "COUNT(*) FILTER (WHERE quality_status='passed' AND created_at BETWEEN now()-interval '60 days' AND now()-interval '30 days') as passed_prev "
+            "COUNT(*) FILTER (WHERE created_at > now()-interval '7 days') as clips_this_week, "
+            "COUNT(*) FILTER (WHERE quality_status='passed' AND created_at > now()-interval '7 days') as passed_this_week, "
+            "COUNT(*) FILTER (WHERE created_at BETWEEN now()-interval '14 days' AND now()-interval '7 days') as clips_last_week, "
+            "COUNT(*) FILTER (WHERE quality_status='passed' AND created_at BETWEEN now()-interval '14 days' AND now()-interval '7 days') as passed_last_week "
             "FROM clips\n\n"
 
             "## ADIM 4 — PIPELINE HATALARI (son 7 gün)\n"
@@ -109,7 +109,7 @@ SLASH_COMMANDS: list[dict] = [
             "ROUND(AVG((token_usage->>'input_tokens')::INT)::NUMERIC,0) as avg_input_tok "
             "FROM pipeline_audit_log "
             "WHERE token_usage IS NOT NULL AND token_usage::text != '{}' "
-            "AND created_at > now() - interval '30 days' "
+            "AND created_at > now() - interval '7 days' "
             "GROUP BY step_name ORDER BY total_cost DESC\n\n"
 
             "## ADIM 6 — İÇERİK TİPİ PERFORMANSI\n"
@@ -117,7 +117,7 @@ SLASH_COMMANDS: list[dict] = [
             "SELECT content_type, COUNT(*) as cnt, "
             "ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf, "
             "COUNT(*) FILTER (WHERE quality_status='passed') as passed "
-            "FROM clips WHERE created_at > now() - interval '30 days' "
+            "FROM clips WHERE created_at > now() - interval '7 days' "
             "GROUP BY content_type ORDER BY cnt DESC LIMIT 10\n\n"
 
             "## ADIM 7 — KANAL BAZLI PERFORMANS\n"
@@ -127,7 +127,7 @@ SLASH_COMMANDS: list[dict] = [
             "ROUND(COUNT(c.id)::NUMERIC/NULLIF(COUNT(DISTINCT j.id),0),1) as clips_per_job, "
             "ROUND(AVG(c.confidence*10)::NUMERIC,2) as avg_conf "
             "FROM jobs j LEFT JOIN clips c ON c.job_id = j.id "
-            "WHERE j.created_at > now() - interval '30 days' "
+            "WHERE j.created_at > now() - interval '7 days' "
             "GROUP BY j.channel_id ORDER BY clips DESC\n\n"
 
             "## ADIM 8 — S05/S06 PROMPT KALİTESİNİ OKU\n"
@@ -137,7 +137,7 @@ SLASH_COMMANDS: list[dict] = [
             "Pass rate %14 gibi düşükse — bu prompt'larda hangi eşik değerleri var, neden bu kadar klip eleniyor?\n\n"
 
             "## ADIM 9 — LANGFUSE MALİYET VERİSİ\n"
-            "get_langfuse_data(days=30) — Gemini maliyet ve token trend verisi.\n\n"
+            "get_langfuse_data(days=7) — Gemini maliyet ve token trend verisi.\n\n"
 
             "## ADIM 10 — DİRECTOR HAFIZASINI KONTROL ET\n"
             "query_database:\n"
@@ -160,7 +160,7 @@ SLASH_COMMANDS: list[dict] = [
             "query_database:\n"
             "SELECT user_approved, COUNT(*) as cnt, "
             "ROUND(AVG(confidence*10)::NUMERIC,2) as avg_conf "
-            "FROM clips WHERE created_at > now() - interval '30 days' "
+            "FROM clips WHERE created_at > now() - interval '7 days' "
             "GROUP BY user_approved\n\n"
 
             "## ADIM 14 — SENTEZ VE BULGULAR\n"
@@ -256,7 +256,7 @@ SLASH_COMMANDS: list[dict] = [
             "2. Failed joblar:\n"
             "   query_database: SELECT id, channel_id, error_message, created_at "
             "   FROM jobs WHERE status = 'failed' "
-            "   AND created_at > now() - interval '14 days' ORDER BY created_at DESC\n\n"
+            "   AND created_at > now() - interval '7 days' ORDER BY created_at DESC\n\n"
             "3. get_sentry_issues ile uygulama hatalarını çek\n\n"
             "4. get_railway_logs ile son deployment loglarına bak\n\n"
             "Her hata için:\n"
