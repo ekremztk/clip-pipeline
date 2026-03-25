@@ -1149,23 +1149,23 @@ function DecisionsTab() {
         </div>
 
         {showForm && (
-          <div className="rounded-xl p-4 space-y-3" style={{ background: C.panel, border: `1px solid ${C.border}` }}>
+          <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${"rgba(255,255,255,0.08)"}` }}>
             <textarea value={form.decision} onChange={e => setForm(f => ({ ...f, decision: e.target.value }))}
               placeholder="Decision made..." rows={2}
               className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
-              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+              style={{ border: `1px solid ${"rgba(255,255,255,0.08)"}`, color: C.text }} />
             <textarea value={form.context} onChange={e => setForm(f => ({ ...f, context: e.target.value }))}
               placeholder="Context / why..." rows={2}
               className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
-              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+              style={{ border: `1px solid ${"rgba(255,255,255,0.08)"}`, color: C.text }} />
             <textarea value={form.expected_impact} onChange={e => setForm(f => ({ ...f, expected_impact: e.target.value }))}
               placeholder="Expected impact..." rows={1}
               className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
-              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+              style={{ border: `1px solid ${"rgba(255,255,255,0.08)"}`, color: C.text }} />
             <textarea value={form.alternatives} onChange={e => setForm(f => ({ ...f, alternatives: e.target.value }))}
               placeholder="Alternatives considered (one per line)..." rows={2}
               className="w-full bg-transparent text-sm outline-none resize-none rounded-lg px-3 py-2"
-              style={{ border: `1px solid ${C.border}`, color: C.text }} />
+              style={{ border: `1px solid ${"rgba(255,255,255,0.08)"}`, color: C.text }} />
             <div className="flex gap-2 justify-end">
               <button onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs"
                 style={{ color: C.textMuted }}>Cancel</button>
@@ -1185,7 +1185,7 @@ function DecisionsTab() {
         ) : (
           <div className="space-y-3">
             {decisions.map(d => (
-              <div key={d.id} className="rounded-xl p-4" style={{ background: C.panel, border: `1px solid ${C.border}` }}>
+              <div key={d.id} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${"rgba(255,255,255,0.08)"}` }}>
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <p className="text-sm font-medium" style={{ color: C.text }}>{d.decision}</p>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full shrink-0"
