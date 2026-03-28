@@ -58,8 +58,16 @@ backend/app/
 │   ├── tools/           # 11 tool modules (DB, filesystem, Langfuse, etc.)
 │   ├── proactive.py     # Anomaly detection (hourly)
 │   └── events.py        # Pipeline event collector
+├── content_finder/      # Module 3 — in development (skeleton only)
+│   ├── models.py        # ContentFinderJob, scoring models
+│   ├── phases/          # Discovery pipeline phases
+│   ├── prompts/         # Gemini prompts for analysis
+│   ├── strategies/      # Search strategies
+│   └── utils/           # youtube_api, transcript_fetcher, score_calculator, guest_extractor
 ├── api/routes/          # 13 route modules (jobs, clips, speakers, channels, etc.)
 ├── services/            # External clients: Supabase, Gemini, Deepgram, R2
+│   ├── video_downloader.py  # yt-dlp wrapper for video download
+│   └── youtube_client.py    # YouTube Data API v3 wrapper
 ├── models/              # Pydantic schemas + enums (JobStatus, ContentType, etc.)
 └── channels/            # Channel isolation system (DO NOT TOUCH)
 ```
@@ -67,17 +75,21 @@ backend/app/
 ### Frontend structure
 ```
 frontend/app/
-├── layout.tsx           # Root layout
-├── providers.tsx        # PostHog + Sentry setup
-├── (auth)/login/        # Supabase Auth (email + Google OAuth)
+├── layout.tsx                # Root layout
+├── providers.tsx             # PostHog + Sentry setup
+├── (auth)/login/             # Supabase Auth (email + Google OAuth)
 ├── dashboard/
-│   ├── layout.tsx       # Sidebar + ChannelContext provider
-│   ├── page.tsx         # Overview: stats, active jobs, recent clips
-│   ├── new-job/         # Video upload + trim + pipeline trigger
-│   ├── clips/           # Clip library with approval workflow
-│   ├── speakers/[jobId] # Speaker confirmation (resumes pipeline)
-│   └── settings/        # Channel DNA, references
-└── director/            # Director dashboard (7 modules + chat)
+│   ├── layout.tsx            # Sidebar + ChannelContext provider
+│   ├── page.tsx              # Overview: stats, active jobs, recent clips
+│   ├── new-job/              # Video upload + trim + pipeline trigger
+│   ├── clips/                # "My Projects" — clip library with approval workflow
+│   ├── channel-dna/          # Channel DNA editor (identity, tone, content types, reference clips)
+│   ├── content-finder/       # Content Finder (coming soon stub)
+│   ├── performance/          # Analytics (coming soon stub)
+│   ├── speakers/[jobId]/     # Speaker confirmation (resumes pipeline after S03)
+│   ├── settings/             # Channel management only (create/list channels)
+│   └── memory/               # Channel Memory (coming soon stub)
+└── director/                 # Director dashboard — DO NOT TOUCH
 ```
 
 ### Key connections
@@ -86,6 +98,26 @@ frontend/app/
 - Auth: Supabase SSR middleware in `middleware.ts` protects all routes except `/login`
 - State: React Context for channel selection (persisted to localStorage), no global store
 - All pages are `"use client"` — minimal SSR
+
+### Frontend design system
+Design language is Figma-derived: pure black backgrounds, no purple, no glassmorphism.
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| Background | `#000000` | Page bg |
+| Surface | `#0a0a0a` | Cards |
+| Border | `#1a1a1a` | Default borders |
+| Border hover | `#404040` | Focus/hover borders |
+| Text | `#ffffff` | Primary |
+| Text secondary | `#a3a3a3` | Labels |
+| Text muted | `#737373` | Descriptions |
+| Text faint | `#525252` | Placeholders |
+
+- Primary button: `bg-white text-black hover:bg-[#e5e5e5]`
+- Input: `bg-black border border-[#262626] focus:border-[#404040]`
+- Active nav item: `bg-[#1a1a1a] text-white border-l-2 border-white -ml-[2px] pl-[14px]`
+- Loading spinner: `border-[#262626] border-t-white` (never purple)
+- No Framer Motion on main dashboard pages — plain Tailwind transitions only
 
 ### Pipeline flow
 ```
@@ -178,6 +210,7 @@ prompt = prompt.replace("PLACEHOLDER", value)
 ---
 
 ## DO NOT TOUCH
+- `frontend/app/director/` — Admin panel, completely separate design system, never apply dashboard redesign here
 - `backend/reframer.py` — Module 2, suspended indefinitely
 - `frontend/next.config.js` — proxy config, leave as-is
 - `backend/channels/` structure — channel isolation system
