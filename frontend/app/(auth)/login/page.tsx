@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
     const router = useRouter();
+
+    // Screen state
+    const [showOtpScreen, setShowOtpScreen] = useState(false);
+    const [signupEmail, setSignupEmail] = useState("");
+
+    // Form state
     const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -14,56 +20,62 @@ export default function LoginPage() {
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
 
-    const getStrength = (password: string) => {
-        if (password.length === 0) return 0;
-        const hasUpper = /[A-Z]/.test(password);
-        const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+    // OTP state
+    const [otpCode, setOtpCode] = useState("");
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [otpError, setOtpError] = useState<string | null>(null);
+    const [otpSuccess, setOtpSuccess] = useState<string | null>(null);
+    const [resendCooldown, setResendCooldown] = useState(0);
+    const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Password strength
+    const getStrength = (pw: string) => {
+        if (pw.length === 0) return 0;
+        const hasUpper = /[A-Z]/.test(pw);
+        const hasSpecial = /[^a-zA-Z0-9]/.test(pw);
         const hasSpecialOrUpper = hasUpper || hasSpecial;
-        if (hasSpecialOrUpper && password.length >= 6) return 4;
-        if (hasSpecialOrUpper && password.length >= 4) return 3;
-        if (password.length >= 8) return 4;
-        if (password.length >= 6) return 3;
-        if (password.length >= 3) return 2;
+        if (hasSpecialOrUpper && pw.length >= 6) return 4;
+        if (hasSpecialOrUpper && pw.length >= 4) return 3;
+        if (pw.length >= 8) return 4;
+        if (pw.length >= 6) return 3;
+        if (pw.length >= 3) return 2;
         return 1;
     };
-
     const strength = getStrength(password);
-
-    const getStrengthColor = (index: number) => {
+    const getStrengthColor = (i: number) => {
         if (strength === 0) return "bg-[#262626]";
-        if (strength === 1) return index === 0 ? "bg-red-500" : "bg-[#262626]";
-        if (strength === 2) return index < 2 ? "bg-orange-500" : "bg-[#262626]";
-        if (strength === 3) return index < 3 ? "bg-yellow-500" : "bg-[#262626]";
-        if (strength === 4) return "bg-green-500";
-        return "bg-[#262626]";
+        if (strength === 1) return i === 0 ? "bg-red-500" : "bg-[#262626]";
+        if (strength === 2) return i < 2 ? "bg-orange-500" : "bg-[#262626]";
+        if (strength === 3) return i < 3 ? "bg-yellow-500" : "bg-[#262626]";
+        return "bg-green-500";
+    };
+
+    useEffect(() => {
+        return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+    }, []);
+
+    const startCooldown = () => {
+        setResendCooldown(60);
+        cooldownRef.current = setInterval(() => {
+            setResendCooldown(prev => {
+                if (prev <= 1) {
+                    if (cooldownRef.current) clearInterval(cooldownRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
     };
 
     const validateForm = () => {
         setError(null);
-        setMessage(null);
-        if (!email.includes("@")) {
-            setError("Please enter a valid email address.");
-            return false;
-        }
-        if (password.length < 8) {
-            setError("Password must be at least 8 characters long.");
-            return false;
-        }
+        if (!email.includes("@")) { setError("Please enter a valid email address."); return false; }
+        if (password.length < 8) { setError("Password must be at least 8 characters long."); return false; }
         if (activeTab === "signup") {
-            if (!fullName.trim()) {
-                setError("Please enter your full name.");
-                return false;
-            }
-            if (password !== confirmPassword) {
-                setError("Passwords do not match.");
-                return false;
-            }
-            if (!termsAccepted) {
-                setError("You must agree to the Terms of Service and Privacy Policy.");
-                return false;
-            }
+            if (!fullName.trim()) { setError("Please enter your full name."); return false; }
+            if (password !== confirmPassword) { setError("Passwords do not match."); return false; }
+            if (!termsAccepted) { setError("You must agree to the Terms of Service and Privacy Policy."); return false; }
         }
         return true;
     };
@@ -85,17 +97,67 @@ export default function LoginPage() {
         e.preventDefault();
         if (!validateForm()) return;
         setLoading(true);
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: { data: { full_name: fullName } },
         });
         if (error) {
             setError(error.message);
-        } else {
-            setMessage("Check your email to confirm your account");
+            setLoading(false);
+            return;
+        }
+        if (data.session) {
+            // Email confirmation disabled — immediate login
+            router.push("/dashboard");
+            return;
+        }
+        if (data.user && !data.session) {
+            // Email confirmation enabled — show OTP screen
+            setSignupEmail(email);
+            setShowOtpScreen(true);
+            startCooldown();
         }
         setLoading(false);
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (otpCode.length !== 6) { setOtpError("Please enter the 6-digit code."); return; }
+        setOtpLoading(true);
+        setOtpError(null);
+        const { data, error } = await supabase.auth.verifyOtp({
+            email: signupEmail,
+            token: otpCode,
+            type: "signup",
+        });
+        if (error) {
+            setOtpError("Invalid or expired code. Please try again.");
+            setOtpLoading(false);
+            return;
+        }
+        if (data.session) {
+            router.push("/dashboard");
+        } else {
+            setOtpError("Verification failed. Please try again.");
+            setOtpLoading(false);
+        }
+    };
+
+    const handleResend = async () => {
+        if (resendCooldown > 0) return;
+        setOtpError(null);
+        setOtpSuccess(null);
+        const { error } = await supabase.auth.resend({
+            type: "signup",
+            email: signupEmail,
+        });
+        if (error) {
+            setOtpError(error.message);
+        } else {
+            setOtpSuccess("New code sent.");
+            startCooldown();
+        }
     };
 
     const handleGoogleSignIn = async () => {
@@ -113,7 +175,6 @@ export default function LoginPage() {
 
     const resetState = () => {
         setError(null);
-        setMessage(null);
         setEmail("");
         setPassword("");
         setFullName("");
@@ -121,16 +182,93 @@ export default function LoginPage() {
         setTermsAccepted(false);
     };
 
+    // ── OTP Screen ────────────────────────────────────────────────────────────
+    if (showOtpScreen) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <div className="w-full max-w-[400px]">
+                    <div className="text-center mb-8">
+                        <span className="text-white text-xl font-bold tracking-tight">PROGNOT</span>
+                        <p className="text-[#525252] text-sm mt-1">AI-powered viral clip extraction</p>
+                    </div>
+
+                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-6">
+                        <div className="mb-6">
+                            <h2 className="text-base font-semibold text-white mb-1">Check your email</h2>
+                            <p className="text-sm text-[#737373]">
+                                We sent a 6-digit code to
+                            </p>
+                            <p className="text-sm text-[#a3a3a3] font-medium mt-0.5">{signupEmail}</p>
+                        </div>
+
+                        <form onSubmit={handleVerifyOtp} className="space-y-4">
+                            <div>
+                                <label className="block text-xs text-[#737373] mb-1.5">Verification code</label>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    maxLength={6}
+                                    value={otpCode}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, "");
+                                        setOtpCode(val);
+                                        setOtpError(null);
+                                    }}
+                                    disabled={otpLoading}
+                                    autoFocus
+                                    placeholder="000000"
+                                    className="w-full bg-black border border-[#262626] rounded-lg px-3 py-3 text-lg text-white text-center tracking-[0.5em] placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors disabled:opacity-50 font-mono"
+                                />
+                            </div>
+
+                            {otpError && <p className="text-red-400 text-xs">{otpError}</p>}
+                            {otpSuccess && <p className="text-green-400 text-xs">{otpSuccess}</p>}
+
+                            <button
+                                type="submit"
+                                disabled={otpLoading || otpCode.length !== 6}
+                                className="w-full bg-white hover:bg-[#e5e5e5] text-black font-medium py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {otpLoading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                        Verifying...
+                                    </>
+                                ) : "Verify"}
+                            </button>
+                        </form>
+
+                        <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#1a1a1a]">
+                            <button
+                                onClick={() => { setShowOtpScreen(false); setOtpCode(""); setOtpError(null); setOtpSuccess(null); }}
+                                className="text-xs text-[#525252] hover:text-[#a3a3a3] transition-colors"
+                            >
+                                ← Back
+                            </button>
+                            <button
+                                onClick={handleResend}
+                                disabled={resendCooldown > 0}
+                                className="text-xs text-[#a3a3a3] hover:text-white transition-colors disabled:text-[#525252] disabled:cursor-not-allowed"
+                            >
+                                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ── Login/Signup Screen ───────────────────────────────────────────────────
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">
             <div className="w-full max-w-[400px]">
-                {/* Logo */}
                 <div className="text-center mb-8">
                     <span className="text-white text-xl font-bold tracking-tight">PROGNOT</span>
                     <p className="text-[#525252] text-sm mt-1">AI-powered viral clip extraction</p>
                 </div>
 
-                {/* Card */}
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-6">
                     {/* Tabs */}
                     <div className="flex mb-6 border-b border-[#1a1a1a]">
@@ -275,7 +413,6 @@ export default function LoginPage() {
                             </div>
 
                             {error && <p className="text-red-400 text-xs">{error}</p>}
-                            {message && <p className="text-green-400 text-xs">{message}</p>}
 
                             <button
                                 type="submit"
