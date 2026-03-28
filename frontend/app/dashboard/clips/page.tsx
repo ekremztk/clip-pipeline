@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Download, Check, X, Play, FileVideo, MoreHorizontal, ArrowLeft, Upload, Scissors } from "lucide-react";
+import { Download, Check, X, Play, FileVideo, MoreHorizontal, ArrowLeft, Upload, Scissors, FolderOpen } from "lucide-react";
 import Link from "next/link";
 import { useChannel } from "../layout";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { authFetch } from "@/lib/api";
 
 interface Clip {
     id: string;
@@ -91,7 +90,7 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
     const handleClick = async (e: React.MouseEvent) => {
         e.preventDefault();
         try {
-            await fetch(`${API}/director/events`, {
+            await authFetch('/director/events', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ module_name: "editor", event_type: "clip_opened_in_editor", payload: { clip_id: clip.id, job_id: clip.job_id, channel_id: clip.channel_id, quality_verdict: clip.quality_verdict }, channel_id: clip.channel_id }),
@@ -121,8 +120,8 @@ export default function MyProjectsPage() {
         if (!silent) setLoading(true);
         try {
             const [jobsRes, clipsRes] = await Promise.all([
-                fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=50`, { cache: 'no-store' }),
-                fetch(`${API}/clips?channel_id=${activeChannelId}&limit=200`, { cache: 'no-store' })
+                authFetch(`/jobs?channel_id=${activeChannelId}&limit=50`),
+                authFetch(`/clips?channel_id=${activeChannelId}&limit=200`)
             ]);
             if (jobsRes.ok) setJobs(await jobsRes.json());
             if (clipsRes.ok) setClips(await clipsRes.json());
@@ -146,7 +145,7 @@ export default function MyProjectsPage() {
     const handleDeleteProject = async (jobId: string) => {
         if (!confirm("Delete this project and all its clips?")) return;
         try {
-            const res = await fetch(`${API}/jobs/${jobId}`, { method: 'DELETE' });
+            const res = await authFetch(`/jobs/${jobId}`, { method: 'DELETE' });
             if (res.ok) { setJobs(jobs.filter(j => j.id !== jobId)); if (selectedJob?.id === jobId) setSelectedJob(null); }
         } catch (err) { console.error(err); }
     };
@@ -155,8 +154,8 @@ export default function MyProjectsPage() {
         const clip = clips.find(c => c.id === id);
         if (!clip) return;
         try {
-            const endpoint = clip.is_successful === true ? `${API}/clips/${id}/unset-approval` : `${API}/clips/${id}/approve`;
-            const res = await fetch(endpoint, { method: "PATCH" });
+            const endpoint = clip.is_successful === true ? `/clips/${id}/unset-approval` : `/clips/${id}/approve`;
+            const res = await authFetch(endpoint, { method: "PATCH" });
             if (res.ok) {
                 const newVal = clip.is_successful === true ? null : true;
                 setClips(clips.map(c => c.id === id ? { ...c, is_successful: newVal } : c));
@@ -169,8 +168,8 @@ export default function MyProjectsPage() {
         const clip = clips.find(c => c.id === id);
         if (!clip) return;
         try {
-            const endpoint = clip.is_successful === false ? `${API}/clips/${id}/unset-approval` : `${API}/clips/${id}/reject`;
-            const res = await fetch(endpoint, { method: "PATCH" });
+            const endpoint = clip.is_successful === false ? `/clips/${id}/unset-approval` : `/clips/${id}/reject`;
+            const res = await authFetch(endpoint, { method: "PATCH" });
             if (res.ok) {
                 const newVal = clip.is_successful === false ? null : false;
                 setClips(clips.map(c => c.id === id ? { ...c, is_successful: newVal } : c));
@@ -183,8 +182,8 @@ export default function MyProjectsPage() {
         const clip = clips.find(c => c.id === id) || selectedClip;
         if (!clip) return;
         try {
-            const endpoint = clip.is_published ? `${API}/clips/${id}/unpublish` : `${API}/clips/${id}/publish`;
-            const res = await fetch(endpoint, { method: "PATCH" });
+            const endpoint = clip.is_published ? `/clips/${id}/unpublish` : `/clips/${id}/publish`;
+            const res = await authFetch(endpoint, { method: "PATCH" });
             if (res.ok) {
                 const newVal = !clip.is_published;
                 setClips(clips.map(c => c.id === id ? { ...c, is_published: newVal } : c));
@@ -218,6 +217,27 @@ export default function MyProjectsPage() {
         if (filter === "published") return clip.is_published === true;
         return true;
     });
+
+    // No channel yet
+    if (!loading && !activeChannelId) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-8">
+                <div className="text-center max-w-sm">
+                    <div className="w-14 h-14 bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-5">
+                        <FolderOpen className="w-6 h-6 text-[#525252]" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-white mb-2">No channel yet</h2>
+                    <p className="text-sm text-[#737373] mb-6">Create a channel first to start managing your projects.</p>
+                    <Link
+                        href="/dashboard/settings"
+                        className="inline-flex items-center gap-2 bg-white hover:bg-[#e5e5e5] text-black text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+                    >
+                        Add Channel
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-black text-white p-6 pb-24 flex">

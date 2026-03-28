@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/api";
 import {
     Home,
     FolderOpen,
@@ -15,8 +16,6 @@ import {
     Sparkles,
     ChevronDown,
 } from "lucide-react";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type Channel = {
     id: string;
@@ -44,34 +43,40 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => setUser(data.user));
+        const init = async () => {
+            const { data } = await supabase.auth.getUser();
+            const currentUser = data.user;
+            setUser(currentUser);
+            if (!currentUser) return;
 
-        const fetchChannels = async () => {
+            // User-scoped localStorage key — different users never share channel selection
+            const storageKey = `selectedChannelId_${currentUser.id}`;
+
             try {
-                const res = await fetch(`${API}/channels`);
-                const data = await res.json();
-                const list = Array.isArray(data) ? data : data.channels || [];
+                const res = await authFetch('/channels');
+                const json = await res.json();
+                const list: Channel[] = Array.isArray(json) ? json : json.channels || [];
                 setChannels(list);
 
-                const saved = localStorage.getItem('selectedChannelId');
-                if (saved && list.find((c: any) => c.id === saved)) {
-                    setSelectedChannel(list.find((c: any) => c.id === saved));
-                } else if (list.length > 0) {
-                    setSelectedChannel(list[0]);
-                    localStorage.setItem('selectedChannelId', list[0].id);
-                }
+                if (list.length === 0) return;
+
+                const saved = localStorage.getItem(storageKey);
+                const match = saved ? list.find((c) => c.id === saved) : null;
+                const active = match || list[0];
+                setSelectedChannel(active);
+                localStorage.setItem(storageKey, active.id);
             } catch (err) {
                 console.error('Failed to fetch channels', err);
             }
         };
-        fetchChannels();
+        init();
     }, []);
 
     const handleChannelChange = (channelId: string) => {
-        const ch = channels.find((c: any) => c.id === channelId);
-        if (ch) {
+        const ch = channels.find((c) => c.id === channelId);
+        if (ch && user) {
             setSelectedChannel(ch);
-            localStorage.setItem('selectedChannelId', ch.id);
+            localStorage.setItem(`selectedChannelId_${user.id}`, ch.id);
         }
     };
 
@@ -100,7 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <ChannelContext.Provider value={{
             channels,
-            activeChannelId: selectedChannel?.id || "speedy_cast",
+            activeChannelId: selectedChannel?.id || "",
             setActiveChannelId: handleChannelChange
         }}>
             <div className="flex h-screen w-screen bg-black text-white overflow-hidden">
@@ -115,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     {/* Channel Selector */}
-                    {channels.length > 0 && (
+                    {channels.length > 0 ? (
                         <div className="px-3 pt-4 pb-1">
                             <div className="relative">
                                 <select
@@ -131,6 +136,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </select>
                                 <ChevronDown className="w-3 h-3 text-[#525252] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                             </div>
+                        </div>
+                    ) : (
+                        <div className="px-3 pt-4 pb-1">
+                            <Link
+                                href="/dashboard/settings"
+                                className="flex items-center justify-center gap-1.5 w-full bg-[#0a0a0a] border border-dashed border-[#262626] hover:border-[#404040] rounded-lg px-3 py-2 text-xs text-[#525252] hover:text-[#a3a3a3] transition-colors"
+                            >
+                                <span className="text-base leading-none">+</span>
+                                Add Channel
+                            </Link>
                         </div>
                     )}
 

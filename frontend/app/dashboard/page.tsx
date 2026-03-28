@@ -5,8 +5,7 @@ import { Upload, Play, MoreVertical, Dna, Clapperboard, Search, ArrowRight, Link
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useChannel } from "./layout";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { authFetch } from "@/lib/api";
 
 type Job = {
     id: string;
@@ -79,10 +78,13 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!activeChannelId) return;
+        if (!activeChannelId) {
+            setLoading(false);
+            return;
+        }
         const fetchJobs = async () => {
             try {
-                const res = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`, { cache: 'no-store' });
+                const res = await authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`);
                 if (res.ok) setJobs(await res.json());
             } catch (err) {
                 console.error("Dashboard fetch error", err);
@@ -100,7 +102,7 @@ export default function DashboardPage() {
         if (!hasActive) return;
         const interval = setInterval(async () => {
             try {
-                const res = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`, { cache: 'no-store' });
+                const res = await authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`);
                 if (res.ok) setJobs(await res.json());
             } catch { /* silent */ }
         }, 4000);
@@ -109,6 +111,27 @@ export default function DashboardPage() {
 
     const activeJobs = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
     const recentJobs = jobs.filter(j => !['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).slice(0, 8);
+
+    // No channel yet — prompt to create one
+    if (!loading && !activeChannelId) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-8">
+                <div className="text-center max-w-sm">
+                    <div className="w-14 h-14 bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-5">
+                        <Sparkles className="w-6 h-6 text-[#525252]" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-white mb-2">Create your first channel</h2>
+                    <p className="text-sm text-[#737373] mb-6">Set up a channel to start extracting viral clips from your videos.</p>
+                    <Link
+                        href="/dashboard/settings"
+                        className="inline-flex items-center gap-2 bg-white hover:bg-[#e5e5e5] text-black text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+                    >
+                        Add Channel
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-black">
