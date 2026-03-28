@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Play, Clock, CheckCircle2, AlertCircle, MoreHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Upload, Play, MoreVertical, Dna, Clapperboard, Search, ArrowRight, Link2, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useChannel } from "./layout";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -14,9 +14,9 @@ type Job = {
     status: string;
     progress?: number;
     progress_pct?: number;
+    current_step?: string;
     step?: string;
     created_at?: string;
-    error?: string;
 };
 
 const STEP_LABELS: Record<string, string> = {
@@ -30,21 +30,10 @@ const STEP_LABELS: Record<string, string> = {
     "s07_precision_cut": "Calculating Cut Points...",
     "s08_export": "Exporting & Uploading...",
     "finished": "Complete!",
-    // Legacy step names (for jobs that started before the update)
-    "s05_energy_map": "Analyzing Audio Energy...",
-    "s06_video_analysis": "Analyzing Video...",
-    "s07_context_build": "Building Context...",
-    "s07b_humor_map": "Detecting Humor...",
-    "s07c_signal_fusion": "Merging Signals...",
-    "s08_clip_finder": "Finding Clips...",
-    "s09_quality_gate": "Quality Check...",
-    "s09b_clip_strategy": "Planning Strategy...",
-    "s10_precision_cut": "Cutting Clips...",
-    "s11_export": "Exporting..."
 };
 
 function getStepLabel(step: string | undefined): string {
-    if (!step) return "Starting...";
+    if (!step) return "Processing...";
     return STEP_LABELS[step] || step.replace(/_/g, " ").replace(/^s\d+\s?/, "");
 }
 
@@ -55,364 +44,308 @@ const formatDate = (dateStr?: string) => {
     const days = Math.floor(hours / 24);
     if (hours < 1) {
         const mins = Math.floor(hours * 60);
-        return mins <= 1 ? 'Just now' : `${mins} min ago`;
+        return mins <= 1 ? 'Just now' : `${mins}m ago`;
     }
     if (hours < 24) return 'Today';
     if (days === 1) return 'Yesterday';
-    return `${days} days ago`;
+    return `${days}d ago`;
 };
 
-const ActiveJobCard = ({ job }: { job: any }) => {
-    const progress = job.progress_pct ?? job.progress ?? 0;
-    const isAwaiting = job.status === 'awaiting_speaker_confirm';
-
-    return (
-        <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col h-full">
-            <div className="w-full aspect-[16/9] relative bg-gradient-to-br from-zinc-900 to-zinc-950 overflow-hidden flex items-center justify-center p-6 text-center">
-                <motion.div
-                    className="absolute inset-0 z-0 pointer-events-none"
-                    style={{
-                        background: "linear-gradient(105deg, transparent 40%, rgba(124,58,237,0.15) 50%, transparent 60%)",
-                        backgroundSize: "200% 100%"
-                    }}
-                    animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                />
-
-                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full gap-3">
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
-                        <span className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Processing</span>
-                    </div>
-
-                    {isAwaiting ? (
-                        <div className="flex flex-col items-center gap-3">
-                            <span className="text-white font-medium text-sm">Waiting for speaker confirmation...</span>
-                            <Link href={`/dashboard/speakers/${job.id}`} className="inline-flex items-center justify-center bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-1.5 px-4 rounded-full transition-colors z-20">
-                                Confirm Speakers →
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
-                            <span className="text-white font-medium text-sm truncate">{getStepLabel(job.current_step || job.step)}</span>
-                            <span className="text-violet-400 font-bold text-sm shrink-0">({progress}%)</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="p-4 flex flex-col gap-1 border-t border-white/[0.06] bg-[#0d0d0d]">
-                <div className="flex items-center justify-between gap-4">
-                    <span className="font-medium text-sm text-gray-200 truncate" title={job.video_title}>
-                        {job.video_title || "Untitled Video"}
-                    </span>
-                    <button className="p-1 text-gray-400/50 cursor-not-allowed">
-                        <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                </div>
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>Processing...</span>
-                    <span>{formatDate(job.created_at)}</span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-type Clip = {
-    id: number | string;
-    hook: string;
-    score: number;
-    path: string;
-    suggested_title?: string;
-    created_at?: string;
-};
-
-function CountUp({ value, isFloat = false, suffix = "" }: { value: number; isFloat?: boolean; suffix?: string }) {
-    const [count, setCount] = useState(0);
-
-    useEffect(() => {
-        let startTime: number | null = null;
-        const duration = 1000;
-
-        const animate = (currentTime: number) => {
-            if (!startTime) startTime = currentTime;
-            const progress = Math.min((currentTime - startTime) / duration, 1);
-
-            const ease = 1 - Math.pow(1 - progress, 3);
-            setCount(value * ease);
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                setCount(value);
-            }
-        };
-
-        requestAnimationFrame(animate);
-    }, [value]);
-
-    return (
-        <>
-            {isFloat
-                ? count.toFixed(1)
-                : count.toLocaleString("en-US", { maximumFractionDigits: 0 })
-            }
-            {suffix}
-        </>
-    );
-}
+const features = [
+    {
+        icon: Dna,
+        name: "Channel DNA",
+        description: "Train the AI on your channel's unique style and voice",
+        href: "/dashboard/channel-dna",
+    },
+    {
+        icon: Clapperboard,
+        name: "AI Director",
+        description: "Intelligent recommendations based on your performance data",
+        href: "/director",
+    },
+    {
+        icon: Search,
+        name: "Content Finder",
+        description: "Discover viral moments across your long-form content",
+        href: "/dashboard/content-finder",
+    },
+];
 
 export default function DashboardPage() {
+    const router = useRouter();
     const { activeChannelId } = useChannel();
-
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [clips, setClips] = useState<Clip[]>([]);
-    const [loadingDashboard, setLoadingDashboard] = useState(true);
-    const [dashboardError, setDashboardError] = useState("");
-
-    const fetchDashboardData = async (silent = false) => {
-        if (!silent) setLoadingDashboard(true);
-        setDashboardError("");
-        try {
-            const jobsRes = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`, { cache: 'no-store' });
-            if (jobsRes.ok) {
-                setJobs(await jobsRes.json());
-            }
-
-            const clipsRes = await fetch(`${API}/clips?channel_id=${activeChannelId}&limit=4`, { cache: 'no-store' });
-            if (clipsRes.ok) {
-                setClips(await clipsRes.json());
-            }
-        } catch (err) {
-            console.error("Dashboard fetch error", err);
-            setDashboardError("Failed to load dashboard data.");
-        } finally {
-            if (!silent) setLoadingDashboard(false);
-        }
-    };
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!activeChannelId) return;
-        fetchDashboardData();
+        const fetchJobs = async () => {
+            try {
+                const res = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`, { cache: 'no-store' });
+                if (res.ok) setJobs(await res.json());
+            } catch (err) {
+                console.error("Dashboard fetch error", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchJobs();
     }, [activeChannelId]);
 
-    // Auto-refresh every 4s when there are active jobs
+    // Auto-refresh when active jobs exist
     useEffect(() => {
         if (!activeChannelId) return;
         const hasActive = jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
         if (!hasActive) return;
-        const interval = setInterval(() => fetchDashboardData(true), 4000);
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=20`, { cache: 'no-store' });
+                if (res.ok) setJobs(await res.json());
+            } catch { /* silent */ }
+        }, 4000);
         return () => clearInterval(interval);
     }, [activeChannelId, jobs]);
 
+    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+    const recentJobs = jobs.filter(j => !['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).slice(0, 8);
+
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className={`max-w-6xl mx-auto space-y-8 ${loadingDashboard ? "opacity-50 pointer-events-none animate-pulse" : ""}`}
-        >
-            {dashboardError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {dashboardError}
+        <div className="min-h-screen bg-black">
+            <div className="max-w-5xl mx-auto px-8 py-10 space-y-12">
+
+                {/* Hero */}
+                <div className="text-center space-y-3 pt-4">
+                    <h1 className="text-4xl font-semibold text-white tracking-tight">
+                        Transform Long Videos into Viral Shorts
+                    </h1>
+                    <p className="text-sm text-[#737373] max-w-xl mx-auto">
+                        AI-powered video clipping with Channel DNA, AI Director, and Content Finder
+                    </p>
                 </div>
-            )}
 
-            {/* Row 1: Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Total Clips */}
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0 * 0.08, duration: 0.3 }}
-                    className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-5 hover:border-l-[#7c3aed] hover:border-l-2 transition-all"
-                >
-                    <div className="text-[#6b7280] text-sm mb-1">Total Clips</div>
-                    <div className="flex items-end justify-between">
-                        <div className="text-3xl font-bold">
-                            {loadingDashboard ? "..." : <CountUp value={clips.length} />}
+                {/* Upload Area */}
+                <div className="w-full max-w-4xl mx-auto">
+                    <div className="relative">
+                        {/* Corner decorations */}
+                        <div className="absolute -left-1 -top-1 w-12 h-12 pointer-events-none">
+                            <div className="absolute top-0 left-0 w-12 h-px bg-white/10" />
+                            <div className="absolute top-0 left-0 w-px h-12 bg-white/10" />
                         </div>
-                        <div className="flex items-center text-gray-500 text-xs font-medium bg-gray-500/10 px-2 py-0.5 rounded">
-                            —
+                        <div className="absolute -right-1 -top-1 w-12 h-12 pointer-events-none">
+                            <div className="absolute top-0 right-0 w-12 h-px bg-white/10" />
+                            <div className="absolute top-0 right-0 w-px h-12 bg-white/10" />
+                        </div>
+                        <div className="absolute -left-1 -bottom-1 w-12 h-12 pointer-events-none">
+                            <div className="absolute bottom-0 left-0 w-12 h-px bg-white/10" />
+                            <div className="absolute bottom-0 left-0 w-px h-12 bg-white/10" />
+                        </div>
+                        <div className="absolute -right-1 -bottom-1 w-12 h-12 pointer-events-none">
+                            <div className="absolute bottom-0 right-0 w-12 h-px bg-white/10" />
+                            <div className="absolute bottom-0 right-0 w-px h-12 bg-white/10" />
+                        </div>
+
+                        <div
+                            onClick={() => router.push('/dashboard/new-job')}
+                            className="relative border border-dashed border-[#262626] hover:border-[#404040] rounded-xl overflow-hidden transition-all duration-300 cursor-pointer group"
+                        >
+                            {/* PROGNOT watermark */}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none overflow-hidden">
+                                <div className="text-[12rem] font-bold tracking-tighter leading-none whitespace-nowrap text-white">
+                                    PROGNOT
+                                </div>
+                            </div>
+
+                            <div className="relative p-10 flex flex-col items-center justify-center text-center">
+                                <div className="w-12 h-12 mb-4 rounded-lg bg-[#0a0a0a] flex items-center justify-center border border-[#262626] group-hover:border-[#404040] transition-colors">
+                                    <Upload className="w-6 h-6 text-[#a3a3a3]" />
+                                </div>
+                                <h3 className="text-lg font-medium text-white mb-1">
+                                    Drop your video or paste link
+                                </h3>
+                                <p className="text-sm text-[#737373] mb-5">
+                                    MP4, MOV, AVI, WebM up to 2GB
+                                </p>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); router.push('/dashboard/new-job'); }}
+                                    className="px-5 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
+                                >
+                                    Select File
+                                </button>
+
+                                <div className="mt-6 flex items-center gap-3 w-full max-w-sm">
+                                    <div className="flex-1 h-px bg-[#1a1a1a]" />
+                                    <span className="text-xs text-[#525252]">OR</span>
+                                    <div className="flex-1 h-px bg-[#1a1a1a]" />
+                                </div>
+
+                                <div className="mt-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                                    <div className="relative">
+                                        <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#525252]" />
+                                        <input
+                                            type="text"
+                                            placeholder="Paste YouTube, Twitch, or video URL"
+                                            className="w-full pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                            readOnly
+                                            onClick={() => router.push('/dashboard/new-job')}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="text-[#6b7280] text-xs mt-2">total from api</div>
-                </motion.div>
+                    <p className="mt-3 text-center text-xs text-[#525252]">
+                        YouTube • Twitch • Vimeo • Direct Upload
+                    </p>
+                </div>
 
-                {/* This Month Views */}
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1 * 0.08, duration: 0.3 }}
-                    className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-5 hover:border-l-[#7c3aed] hover:border-l-2 transition-all"
-                >
-                    <div className="text-[#6b7280] text-sm mb-1">This Month Views</div>
-                    <div className="flex items-end justify-between">
-                        <div className="text-3xl font-bold">0</div>
-                        <div className="flex items-center text-gray-500 text-xs font-medium bg-gray-500/10 px-2 py-0.5 rounded">
-                            —
-                        </div>
-                    </div>
-                    <div className="text-[#6b7280] text-xs mt-2">across platforms (pending)</div>
-                </motion.div>
-
-                {/* Avg Performance */}
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 2 * 0.08, duration: 0.3 }}
-                    className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-5 hover:border-l-[#7c3aed] hover:border-l-2 transition-all flex items-center justify-between"
-                >
+                {/* Active Jobs */}
+                {activeJobs.length > 0 && (
                     <div>
-                        <div className="text-[#6b7280] text-sm mb-1">Avg Performance</div>
-                        <div className="text-3xl font-bold">0<span className="text-lg text-[#6b7280]">%</span></div>
-                        <div className="text-[#6b7280] text-xs mt-2">virality score</div>
-                    </div>
-                    <div className="relative w-14 h-14">
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="28" cy="28" r="24" fill="none" stroke="#1a1a1a" strokeWidth="6" />
-                            <circle
-                                cx="28"
-                                cy="28"
-                                r="24"
-                                fill="none"
-                                stroke="#06b6d4"
-                                strokeWidth="6"
-                                strokeDasharray={`0 150`}
-                                strokeLinecap="round"
-                            />
-                        </svg>
-                    </div>
-                </motion.div>
-
-                {/* Pipeline Cost */}
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 3 * 0.08, duration: 0.3 }}
-                    className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-5 hover:border-l-[#7c3aed] hover:border-l-2 transition-all"
-                >
-                    <div className="text-[#6b7280] text-sm mb-1">Pipeline Cost</div>
-                    <div className="text-3xl font-bold">$0.00</div>
-                    <div className="text-[#6b7280] text-xs mt-2">this billing cycle</div>
-                </motion.div>
-            </div>
-
-            {/* Row 2: Active Jobs */}
-            <div>
-                <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-[13px] uppercase tracking-wider text-[#6b7280] font-semibold">Active Jobs</h2>
-                    {jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)) && (
-                        <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
-                    )}
-                </div>
-
-                {jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).length === 0 ? (
-                    <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-8 text-center">
-                        <p className="text-[#6b7280] text-sm">No active jobs</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).map((job, index) => (
-                            <motion.div
-                                key={job.id}
-                                initial={{ opacity: 0, x: -12 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.06 }}
-                            >
-                                <ActiveJobCard job={job} />
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Row 3: Two Columns */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Clips */}
-                <div>
-                    <h2 className="text-[13px] uppercase tracking-wider text-[#6b7280] font-semibold mb-4">Recent Clips</h2>
-
-                    {clips.length === 0 ? (
-                        <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-8 text-center h-[220px] flex items-center justify-center">
-                            <p className="text-[#6b7280] text-sm">No clips yet. Start your first job.</p>
+                        <div className="flex items-center gap-2 mb-4">
+                            <h2 className="text-base font-medium text-white">Active Jobs</h2>
+                            <span className="w-2 h-2 rounded-full bg-white pulse-dot" />
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-2 gap-4">
-                            {clips.slice(0, 4).map((clip, index) => {
-                                const scoreColor = clip.score >= 90 ? "text-green-400 border-green-500/20" :
-                                    clip.score >= 80 ? "text-orange-400 border-orange-500/20" :
-                                        "text-blue-400 border-blue-500/20";
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {activeJobs.map((job) => {
+                                const isAwaiting = job.status === 'awaiting_speaker_confirm';
+                                const progress = job.progress_pct ?? job.progress ?? 0;
                                 return (
-                                    <motion.div
-                                        key={clip.id}
-                                        initial={{ opacity: 0, y: 16 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.08, duration: 0.3 }}
-                                        className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-3 group hover:bg-white/[0.02] transition-colors cursor-pointer relative overflow-hidden"
-                                    >
-                                        <div className={`absolute top-2 right-2 flex items-center gap-1 bg-[#0a0a0a]/80 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold border z-10 ${scoreColor}`}>
-                                            {clip.score}
-                                        </div>
-                                        <div className="aspect-video bg-[#1a1a1a] rounded mb-3 relative overflow-hidden">
-                                            {clip.path ? (
-                                                <video src={`${API}${clip.path}`} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
-                                            ) : null}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                                                <Play className="w-8 h-8 text-white" />
+                                    <div key={job.id} className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#404040] transition-all">
+                                        <div className="aspect-video bg-[#0a0a0a] flex items-center justify-center p-6">
+                                            <div className="text-center">
+                                                <div className="flex items-center justify-center gap-2 mb-3">
+                                                    <div className="w-2 h-2 rounded-full bg-white pulse-dot" />
+                                                    <span className="text-xs text-[#737373] uppercase tracking-wider">Processing</span>
+                                                </div>
+                                                {isAwaiting ? (
+                                                    <div className="space-y-3">
+                                                        <p className="text-sm text-white">Speaker confirmation needed</p>
+                                                        <Link
+                                                            href={`/dashboard/speakers/${job.id}`}
+                                                            className="inline-block px-4 py-1.5 bg-white text-black text-xs font-medium rounded-lg hover:bg-[#e5e5e5] transition-colors"
+                                                        >
+                                                            Confirm Speakers →
+                                                        </Link>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-white">
+                                                        {getStepLabel(job.current_step || job.step)}
+                                                        {progress > 0 && <span className="text-[#737373] ml-2">({progress}%)</span>}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
-                                        <h3 className="text-sm font-medium line-clamp-1 mb-1 group-hover:text-[#7c3aed] transition-colors">
-                                            {clip.suggested_title || `Clip ${clip.id}`}
-                                        </h3>
-                                        <p className="text-xs text-[#6b7280] line-clamp-2 italic">"{clip.hook}"</p>
-                                    </motion.div>
+                                        <div className="p-3 border-t border-[#1a1a1a]">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs font-medium text-white truncate">{job.video_title || "Untitled"}</p>
+                                                <span className="text-xs text-[#525252]">{formatDate(job.created_at)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 );
                             })}
                         </div>
+                    </div>
+                )}
+
+                {/* Feature Cards */}
+                <div>
+                    <div className="mb-5">
+                        <h2 className="text-base font-medium text-white">Powered by AI</h2>
+                        <p className="text-xs text-[#525252] mt-0.5">Unique features that set us apart</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {features.map((feature) => (
+                            <Link
+                                key={feature.name}
+                                href={feature.href}
+                                className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-5 hover:border-[#404040] transition-all duration-300"
+                            >
+                                <div className="w-10 h-10 mb-3 rounded-lg bg-black flex items-center justify-center border border-[#1a1a1a] group-hover:border-[#404040] transition-colors">
+                                    <feature.icon className="w-5 h-5 text-white" />
+                                </div>
+                                <h3 className="text-sm font-medium text-white mb-1.5 flex items-center justify-between">
+                                    {feature.name}
+                                    <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                </h3>
+                                <p className="text-xs text-[#525252] leading-relaxed">{feature.description}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Recent Projects */}
+                <div>
+                    <div className="flex items-center justify-between mb-5">
+                        <div>
+                            <h2 className="text-base font-medium text-white">Recent Projects</h2>
+                            <p className="text-xs text-[#525252] mt-0.5">Continue where you left off</p>
+                        </div>
+                        <Link href="/dashboard/clips" className="text-xs text-[#525252] hover:text-white transition-colors">
+                            View all
+                        </Link>
+                    </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden">
+                                    <div className="aspect-video bg-[#1a1a1a] shimmer-load" />
+                                    <div className="p-3">
+                                        <div className="h-3 bg-[#1a1a1a] rounded w-3/4 mb-2" />
+                                        <div className="h-2 bg-[#1a1a1a] rounded w-1/2" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : recentJobs.length === 0 ? (
+                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-12 text-center">
+                            <p className="text-sm text-[#525252]">No projects yet. Upload your first video to get started.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            {recentJobs.map((job) => (
+                                <div
+                                    key={job.id}
+                                    className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#404040] transition-all duration-300 cursor-pointer"
+                                >
+                                    <div className="relative aspect-video bg-[#0d0d0d] overflow-hidden flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                            <div className="w-10 h-10 rounded-full bg-white/0 group-hover:bg-white/90 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all">
+                                                <Play className="w-4 h-4 text-black fill-black ml-0.5" />
+                                            </div>
+                                        </div>
+                                        {/* Status badge */}
+                                        <div className="absolute top-2 right-2">
+                                            {job.status === 'completed' && (
+                                                <span className="px-1.5 py-0.5 bg-black/80 text-green-400 text-[10px] rounded">Done</span>
+                                            )}
+                                            {job.status === 'failed' && (
+                                                <span className="px-1.5 py-0.5 bg-black/80 text-red-400 text-[10px] rounded">Failed</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="p-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-xs font-medium text-white truncate mb-1">
+                                                    {job.video_title || "Untitled"}
+                                                </h3>
+                                                <p className="text-xs text-[#525252]">{formatDate(job.created_at)}</p>
+                                            </div>
+                                            <button className="p-0.5 hover:bg-[#1a1a1a] rounded transition-colors">
+                                                <MoreVertical className="w-3.5 h-3.5 text-[#525252]" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
 
-                {/* Channel Performance Chart Placeholder */}
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 2 * 0.08, duration: 0.3 }}
-                >
-                    <h2 className="text-[13px] uppercase tracking-wider text-[#6b7280] font-semibold mb-4">Channel Performance</h2>
-                    <div className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg p-6 h-[220px] flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="text-xs text-[#6b7280]">Total Views (30 Days)</div>
-                            <div className="text-xs font-medium text-white bg-white/10 px-2 py-1 rounded">Daily</div>
-                        </div>
-                        <div className="flex-1 w-full relative">
-                            {/* Fake SVG Chart */}
-                            <svg viewBox="0 0 400 100" className="w-full h-full preserve-3d" preserveAspectRatio="none">
-                                <defs>
-                                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.3" />
-                                        <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
-                                    </linearGradient>
-                                </defs>
-                                <path
-                                    d="M0,80 Q40,90 80,60 T160,50 T240,70 T320,30 T400,10 L400,100 L0,100 Z"
-                                    fill="url(#gradient)"
-                                />
-                                <path
-                                    d="M0,80 Q40,90 80,60 T160,50 T240,70 T320,30 T400,10"
-                                    fill="none"
-                                    stroke="#7c3aed"
-                                    strokeWidth="2"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-                </motion.div>
             </div>
-        </motion.div>
+        </div>
     );
 }

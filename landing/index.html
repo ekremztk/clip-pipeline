@@ -1,0 +1,4055 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prognot AI: Your AI Content Director</title>
+  <meta name="description"
+    content="Not just a clipper. A 9-step AI pipeline with Director AI, Channel DNA, and viral scoring. Built for creators who take content seriously.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────────────────────── */
+    :root {
+      --bg: #060608;
+      --bg2: #0d0d12;
+      --surface: rgba(255, 255, 255, .04);
+      --surface2: rgba(255, 255, 255, .07);
+      --border: rgba(255, 255, 255, .08);
+      --border2: rgba(255, 255, 255, .16);
+      --v: #7c3aed;
+      --v2: #a78bfa;
+      --vg: rgba(124, 58, 237, .3);
+      --el: #22d3ee;
+      --elg: rgba(34, 211, 238, .2);
+      --gr: #10b981;
+      --grg: rgba(16, 185, 129, .2);
+      --am: #f59e0b;
+      --tx: #f1f5f9;
+      --tx2: #94a3b8;
+      --tx3: #475569;
+      --fh: 'Montserrat', sans-serif;
+      --fb: 'Space Grotesk', sans-serif;
+      --fm: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(.4, 0, .2, 1);
+      --spring: cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: var(--fb);
+      background: var(--bg);
+      color: var(--tx);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased
+    }
+
+    ::selection {
+      background: var(--v);
+      color: #fff
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 2px
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit
+    }
+
+    button {
+      font-family: var(--fb);
+      border: none;
+      outline: none;
+      cursor: pointer
+    }
+
+    /* Grain texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: .028;
+      mix-blend-mode: overlay
+    }
+
+    /* ── PROGRESS BAR ───────────────────────────────────────────────────── */
+    #sp {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--v), var(--el));
+      z-index: 1000;
+      transition: width .08s linear;
+      pointer-events: none
+    }
+
+    /* ── UTILITIES ──────────────────────────────────────────────────────── */
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 28px
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--fm);
+      font-size: .62rem;
+      font-weight: 500;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--v2);
+      margin-bottom: 14px
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--v2)
+    }
+
+    h2.sh {
+      font-family: var(--fh);
+      font-size: clamp(2rem, 4.2vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -.045em;
+      line-height: 1.08;
+      margin-bottom: 14px
+    }
+
+    .sub {
+      font-size: .96rem;
+      color: var(--tx2);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.8
+    }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: 72px
+    }
+
+    .fade {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .65s var(--ease), transform .65s var(--ease)
+    }
+
+    .fade.in {
+      opacity: 1;
+      transform: none
+    }
+
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px 5px 10px;
+      border-radius: 100px;
+      background: rgba(124, 58, 237, .1);
+      border: 1px solid rgba(124, 58, 237, .25);
+      font-family: var(--fm);
+      font-size: .62rem;
+      color: var(--v2);
+      margin-bottom: 26px
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gr);
+      box-shadow: 0 0 8px var(--gr);
+      animation: pulse 2s ease infinite;
+      flex-shrink: 0
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(.85)
+      }
+    }
+
+    /* ── NAV ────────────────────────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 500;
+      height: 60px;
+      border-bottom: 1px solid transparent;
+      transition: all .4s
+    }
+
+    .nav.scrolled {
+      background: rgba(6, 6, 8, .9);
+      border-color: var(--border);
+      backdrop-filter: blur(24px)
+    }
+
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 28px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--fh);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -.02em
+    }
+
+    .lmark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--v);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--vg)
+    }
+
+    .lmark svg {
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 26px
+    }
+
+    .nav-links a {
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--tx3);
+      transition: color .25s
+    }
+
+    .nav-links a:hover {
+      color: var(--tx)
+    }
+
+    .nbadge {
+      font-size: .5rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      background: rgba(124, 58, 237, .2);
+      color: var(--v2);
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: 4px;
+      vertical-align: middle
+    }
+
+    .nav-r {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: .78rem;
+      font-weight: 600;
+      font-family: var(--fb);
+      transition: all .3s var(--ease);
+      letter-spacing: -.01em
+    }
+
+    .btn svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--tx2)
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border2);
+      color: var(--tx)
+    }
+
+    .btn-v {
+      background: var(--v);
+      color: #fff;
+      box-shadow: 0 0 22px var(--vg)
+    }
+
+    .btn-v:hover {
+      background: #6d28d9;
+      box-shadow: 0 0 36px var(--vg);
+      transform: translateY(-1px)
+    }
+
+    /* ── HERO ───────────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 130px 28px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 70%);
+      mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 70%)
+    }
+
+    .hero-orb {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      filter: blur(80px)
+    }
+
+    .orb1 {
+      width: 700px;
+      height: 700px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -58%);
+      background: radial-gradient(circle, rgba(124, 58, 237, .14) 0%, transparent 70%)
+    }
+
+    .orb2 {
+      width: 400px;
+      height: 400px;
+      top: 40%;
+      left: 65%;
+      background: radial-gradient(circle, rgba(34, 211, 238, .08) 0%, transparent 70%)
+    }
+
+    .orb3 {
+      width: 350px;
+      height: 350px;
+      top: 55%;
+      left: 18%;
+      background: radial-gradient(circle, rgba(16, 185, 129, .07) 0%, transparent 70%)
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 940px
+    }
+
+    .hero h1 {
+      font-family: var(--fh);
+      font-weight: 800;
+      font-size: clamp(2.4rem, 5.8vw, 5rem);
+      letter-spacing: -.055em;
+      line-height: .96;
+      margin-bottom: 22px;
+      animation: fadeUp .7s .2s both
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, #c4b5fd, var(--v2), var(--el));
+      background-size: 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gp 5s ease infinite
+    }
+
+    @keyframes gp {
+      0% {
+        background-position: 0%
+      }
+
+      50% {
+        background-position: 100%
+      }
+
+      100% {
+        background-position: 0%
+      }
+    }
+
+    .hero-desc {
+      font-size: 1.02rem;
+      color: var(--tx2);
+      max-width: 580px;
+      margin: 0 auto 34px;
+      line-height: 1.8;
+      animation: fadeUp .7s .3s both
+    }
+
+    .hero-desc strong {
+      color: var(--tx);
+      font-weight: 500
+    }
+
+    .hero-form {
+      display: flex;
+      gap: 8px;
+      max-width: 540px;
+      margin: 0 auto 16px;
+      animation: fadeUp .7s .4s both
+    }
+
+    .hero-input {
+      flex: 1;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: var(--tx);
+      font-family: var(--fb);
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .3s, box-shadow .3s
+    }
+
+    .hero-input:focus {
+      border-color: rgba(124, 58, 237, .45);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, .1)
+    }
+
+    .hero-input::placeholder {
+      color: var(--tx3)
+    }
+
+    .hero-form .btn-v {
+      padding: 14px 26px;
+      font-size: .87rem;
+      white-space: nowrap
+    }
+
+    .hero-meta {
+      font-size: .72rem;
+      color: var(--tx3);
+      animation: fadeUp .7s .5s both;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap
+    }
+
+    .hero-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .hero-meta svg {
+      width: 10px;
+      height: 10px;
+      fill: none;
+      stroke: var(--gr);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* ── HERO PRODUCT MOCKUP ────────────────────────────────────────────── */
+    /* NEW: Real-looking product UI preview that OpusClip has but Prognot didn't */
+    .hero-mockup {
+      position: relative;
+      z-index: 1;
+      margin-top: 60px;
+      animation: fadeUp .9s .6s both;
+      perspective: 1000px
+    }
+
+    .hero-mockup-inner {
+      transform: rotateX(8deg) rotateY(-2deg) scale(.92);
+      transform-origin: top center;
+      transition: transform .6s var(--ease)
+    }
+
+    .hero-mockup:hover .hero-mockup-inner {
+      transform: rotateX(3deg) rotateY(0deg) scale(.95)
+    }
+
+    .mockup-shell {
+      background: rgba(13, 13, 18, .95);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .06), 0 0 60px rgba(124, 58, 237, .1);
+      width: 860px;
+      max-width: 100%
+    }
+
+    .mockup-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 18px;
+      background: rgba(255, 255, 255, .03);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .wdot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%
+    }
+
+    .wd-r {
+      background: #ef4444
+    }
+
+    .wd-y {
+      background: #f59e0b
+    }
+
+    .wd-g {
+      background: #10b981
+    }
+
+    .mockup-url {
+      flex: 1;
+      background: rgba(255, 255, 255, .05);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-family: var(--fm);
+      font-size: .64rem;
+      color: var(--tx3);
+      margin: 0 16px;
+      border: 1px solid var(--border)
+    }
+
+    .mockup-body {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 320px
+    }
+
+    .mock-sidebar {
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .mock-job {
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: .25s
+    }
+
+    .mock-job.active {
+      background: rgba(124, 58, 237, .08);
+      border-color: rgba(124, 58, 237, .2)
+    }
+
+    .mock-job-title {
+      font-size: .78rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--tx)
+    }
+
+    .mock-job-meta {
+      font-family: var(--fm);
+      font-size: .6rem;
+      color: var(--tx3)
+    }
+
+    .mock-main {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px
+    }
+
+    .mock-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .mock-score-big {
+      font-family: var(--fh);
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -.06em;
+      color: var(--el);
+      text-shadow: 0 0 24px var(--elg)
+    }
+
+    .mock-label {
+      font-family: var(--fm);
+      font-size: .6rem;
+      color: var(--tx3)
+    }
+
+    .mock-badge {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: .66rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, .12);
+      color: var(--gr);
+      border: 1px solid rgba(16, 185, 129, .2)
+    }
+
+    .mock-bars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .mock-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .mbl {
+      font-size: .7rem;
+      color: var(--tx3);
+      width: 70px;
+      flex-shrink: 0
+    }
+
+    .mbt {
+      flex: 1;
+      height: 5px;
+      background: rgba(255, 255, 255, .07);
+      border-radius: 3px;
+      overflow: hidden
+    }
+
+    .mbf {
+      height: 100%;
+      border-radius: 3px;
+      animation: barFill 1.8s var(--ease) forwards
+    }
+
+    @keyframes barFill {
+      from {
+        width: 0
+      }
+
+      to {
+        width: var(--w)
+      }
+    }
+
+    .mb1 {
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      --w: 88%
+    }
+
+    .mb2 {
+      background: linear-gradient(90deg, #22d3ee, #67e8f9);
+      --w: 95%
+    }
+
+    .mb3 {
+      background: linear-gradient(90deg, #f59e0b, #fcd34d);
+      --w: 72%
+    }
+
+    .mb4 {
+      background: linear-gradient(90deg, #10b981, #6ee7b7);
+      --w: 91%
+    }
+
+    .mb5 {
+      background: linear-gradient(90deg, #ec4899, #f9a8d4);
+      --w: 80%
+    }
+
+    .mb6 {
+      background: linear-gradient(90deg, #6366f1, #a5b4fc);
+      --w: 76%
+    }
+
+    .mock-clip-row {
+      display: flex;
+      gap: 8px;
+      overflow: hidden
+    }
+
+    .mock-clip {
+      width: 72px;
+      height: 128px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .12)
+    }
+
+    .mcs {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, .6);
+      border-radius: 5px;
+      padding: 2px 6px;
+      font-family: var(--fm);
+      font-size: .55rem;
+      color: #fff
+    }
+
+    .mcdot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%
+    }
+
+    .mc1 {
+      background: linear-gradient(160deg, #1a053a, #2d1458, #0f2040)
+    }
+
+    .mc2 {
+      background: linear-gradient(160deg, #0f1a2e, #1a2d4a, #0a1520)
+    }
+
+    .mc3 {
+      background: linear-gradient(160deg, #0a1a12, #0f2d1f, #050f0a)
+    }
+
+    .mc4 {
+      background: linear-gradient(160deg, #1a0a12, #2d0f1f, #0a050a)
+    }
+
+    /* ── LOGO MARQUEE (NEW - was missing from Prognot) ──────────────────── */
+    .logos-section {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      position: relative
+    }
+
+    .logos-label {
+      text-align: center;
+      font-family: var(--fm);
+      font-size: .62rem;
+      letter-spacing: .12em;
+      color: var(--tx3);
+      text-transform: uppercase;
+      margin-bottom: 24px
+    }
+
+    .marquee-wrap {
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
+      mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent)
+    }
+
+    .marquee-track {
+      display: flex;
+      gap: 60px;
+      width: max-content;
+      will-change: transform
+    }
+
+    @keyframes marquee {
+      0% {
+        transform: translateX(0)
+      }
+
+      100% {
+        transform: translateX(-50%)
+      }
+    }
+
+    .logo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--fm);
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--tx3);
+      white-space: nowrap;
+      opacity: .6;
+      transition: opacity .3s
+    }
+
+    .logo-item:hover {
+      opacity: 1
+    }
+
+    .logo-item svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor
+    }
+
+    /* ── PIPELINE LIVE (UPGRADED with live animation) ───────────────────── */
+    .pipeline {
+      padding: 110px 28px
+    }
+
+    .pipe-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 52px;
+      align-items: start
+    }
+
+    .pipe-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .pipe-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .3s var(--ease);
+      position: relative
+    }
+
+    .pipe-step:hover {
+      background: var(--surface);
+      border-color: var(--border)
+    }
+
+    .pipe-step.active {
+      background: rgba(124, 58, 237, .07);
+      border-color: rgba(124, 58, 237, .18)
+    }
+
+    /* NEW: connecting line between steps */
+    .pipe-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 27px;
+      bottom: -10px;
+      width: 1px;
+      height: 10px;
+      background: var(--border);
+      z-index: 0
+    }
+
+    .pipe-step.active::after,
+    .pipe-step.active+.pipe-step::before {
+      background: rgba(124, 58, 237, .3)
+    }
+
+    .pnum {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fm);
+      font-size: .58rem;
+      font-weight: 500;
+      background: var(--surface);
+      color: var(--tx3);
+      border: 1px solid var(--border);
+      transition: all .3s;
+      margin-top: 2px;
+      position: relative;
+      z-index: 1
+    }
+
+    .pipe-step.active .pnum {
+      background: var(--v);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 0 16px var(--vg)
+    }
+
+    .ptx {
+      flex: 1
+    }
+
+    .pname {
+      font-size: .86rem;
+      font-weight: 600;
+      color: var(--tx2);
+      transition: color .3s;
+      margin-bottom: 1px;
+      letter-spacing: -.01em
+    }
+
+    .pipe-step.active .pname {
+      color: var(--tx)
+    }
+
+    .psub {
+      font-family: var(--fm);
+      font-size: .59rem;
+      color: var(--tx3)
+    }
+
+    .pb-soon {
+      font-family: var(--fm);
+      font-size: .5rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 5px;
+      border-radius: 3px;
+      background: rgba(245, 158, 11, .1);
+      color: var(--am);
+      border: 1px solid rgba(245, 158, 11, .2);
+      margin-left: 5px
+    }
+
+    /* NEW: Live pipeline visualization panel */
+    .pipe-panel {
+      position: sticky;
+      top: 80px;
+      border-radius: 20px;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, .03), 0 30px 80px rgba(0, 0, 0, .4)
+    }
+
+    .panel-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .ph-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: rgba(124, 58, 237, .1);
+      border: 1px solid rgba(124, 58, 237, .18);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .ph-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: var(--v2);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .ph-step {
+      font-family: var(--fm);
+      font-size: .58rem;
+      color: var(--v2);
+      margin-bottom: 3px
+    }
+
+    .ph-name {
+      font-family: var(--fh);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -.03em
+    }
+
+    .panel-body {
+      padding: 24px
+    }
+
+    .pp-desc {
+      font-size: .84rem;
+      color: var(--tx2);
+      line-height: 1.75;
+      margin-bottom: 20px
+    }
+
+    /* NEW: Live waveform visualization (for audio extract step) */
+    .viz-waveform {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 52px;
+      margin-bottom: 20px
+    }
+
+    .wv-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: linear-gradient(to top, var(--v), var(--v2));
+      animation: wave var(--d, .8s) ease-in-out infinite alternate;
+      transform-origin: bottom
+    }
+
+    @keyframes wave {
+      from {
+        height: 4px;
+        opacity: .4
+      }
+
+      to {
+        height: var(--h, 32px);
+        opacity: 1
+      }
+    }
+
+    /* NEW: Live processing terminal */
+    .viz-terminal {
+      background: #070710;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: var(--fm);
+      font-size: .68rem;
+      line-height: 1.9;
+      border: 1px solid var(--border)
+    }
+
+    .vt-line {
+      display: flex;
+      gap: 8px
+    }
+
+    .vt-p {
+      color: var(--tx3);
+      flex-shrink: 0
+    }
+
+    .vt-t {
+      color: var(--gr)
+    }
+
+    .vt-t.d {
+      color: var(--tx3)
+    }
+
+    .vt-t.w {
+      color: var(--am)
+    }
+
+    .vt-t.i {
+      color: var(--el)
+    }
+
+    .vt-t.m {
+      color: rgba(16, 185, 129, .4)
+    }
+
+    .vcursor {
+      display: inline-block;
+      width: 6px;
+      height: 12px;
+      background: var(--gr);
+      animation: blink .85s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    .pp-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px
+    }
+
+    .ptag {
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-family: var(--fm);
+      font-size: .58rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--tx3)
+    }
+
+    /* ── DIRECTOR AI ─────────────────────────────────────────────────────── */
+    .director {
+      padding: 110px 28px
+    }
+
+    .dir-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center
+    }
+
+    /* NEW: Upgraded terminal with richer content */
+    .term-wrap {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(16, 185, 129, .12);
+      background: #060609;
+      box-shadow: 0 0 80px rgba(16, 185, 129, .04), 0 30px 80px rgba(0, 0, 0, .5)
+    }
+
+    .term-bar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 16px;
+      background: rgba(255, 255, 255, .02);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .td {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%
+    }
+
+    .td.r {
+      background: #ef4444
+    }
+
+    .td.y {
+      background: #f59e0b
+    }
+
+    .td.g {
+      background: #10b981
+    }
+
+    .t-title {
+      font-family: var(--fm);
+      font-size: .62rem;
+      color: var(--tx3);
+      margin-left: 8px
+    }
+
+    /* NEW: Status pill in terminal */
+    .t-status {
+      margin-left: auto;
+      font-family: var(--fm);
+      font-size: .56rem;
+      color: var(--gr);
+      display: flex;
+      align-items: center;
+      gap: 4px
+    }
+
+    .t-status::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--gr);
+      box-shadow: 0 0 6px var(--gr);
+      animation: pulse 2s ease infinite
+    }
+
+    .term-body {
+      padding: 16px 20px;
+      min-height: 300px;
+      font-family: var(--fm);
+      font-size: .7rem;
+      line-height: 1.9
+    }
+
+    .t-line {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1px
+    }
+
+    .t-p {
+      color: var(--tx3);
+      flex-shrink: 0
+    }
+
+    .t-t {
+      color: var(--gr)
+    }
+
+    .t-t.dim {
+      color: var(--tx3)
+    }
+
+    .t-t.w {
+      color: var(--am)
+    }
+
+    .t-t.i {
+      color: var(--el)
+    }
+
+    .t-t.mut {
+      color: rgba(16, 185, 129, .35)
+    }
+
+    .t-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 13px;
+      background: var(--gr);
+      animation: blink .9s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px
+    }
+
+    /* NEW: Alert card inside terminal */
+    .t-alert {
+      background: rgba(245, 158, 11, .07);
+      border: 1px solid rgba(245, 158, 11, .18);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: .66rem;
+      color: var(--am)
+    }
+
+    .t-alert strong {
+      color: var(--am);
+      font-weight: 600
+    }
+
+    .t-sugg {
+      background: rgba(124, 58, 237, .07);
+      border: 1px solid rgba(124, 58, 237, .18);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 4px 0;
+      font-size: .66rem;
+      color: var(--v2)
+    }
+
+    .dir-feats {
+      display: flex;
+      flex-direction: column;
+      gap: 22px
+    }
+
+    .df {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px
+    }
+
+    .df-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .df-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .dfi-v {
+      background: rgba(124, 58, 237, .1);
+      border: 1px solid rgba(124, 58, 237, .18)
+    }
+
+    .dfi-v svg {
+      stroke: var(--v2)
+    }
+
+    .dfi-g {
+      background: rgba(16, 185, 129, .1);
+      border: 1px solid rgba(16, 185, 129, .18)
+    }
+
+    .dfi-g svg {
+      stroke: var(--gr)
+    }
+
+    .dfi-e {
+      background: rgba(34, 211, 238, .1);
+      border: 1px solid rgba(34, 211, 238, .18)
+    }
+
+    .dfi-e svg {
+      stroke: var(--el)
+    }
+
+    .df-label {
+      font-weight: 600;
+      font-size: .88rem;
+      margin-bottom: 3px;
+      letter-spacing: -.01em
+    }
+
+    .df-desc {
+      font-size: .8rem;
+      color: var(--tx2);
+      line-height: 1.6
+    }
+
+    /* ── SCORING ─────────────────────────────────────────────────────────── */
+    .scoring {
+      padding: 110px 28px;
+      background: linear-gradient(180deg, transparent, rgba(124, 58, 237, .025), transparent)
+    }
+
+    .score-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 52px;
+      align-items: center
+    }
+
+    .score-card {
+      border-radius: 22px;
+      padding: 30px;
+      background: linear-gradient(145deg, rgba(34, 211, 238, .05), rgba(124, 58, 237, .03));
+      border: 1px solid rgba(34, 211, 238, .1);
+      box-shadow: 0 0 60px rgba(34, 211, 238, .04)
+    }
+
+    .score-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 26px
+    }
+
+    .score-num {
+      font-family: var(--fh);
+      font-size: 4.2rem;
+      font-weight: 800;
+      letter-spacing: -.07em;
+      line-height: 1;
+      color: var(--el);
+      text-shadow: 0 0 40px var(--elg)
+    }
+
+    .score-num span {
+      font-size: 1.4rem;
+      opacity: .35;
+      font-weight: 400
+    }
+
+    .sv {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px
+    }
+
+    .sv-badge {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: .64rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: rgba(16, 185, 129, .1);
+      color: var(--gr);
+      border: 1px solid rgba(16, 185, 129, .2)
+    }
+
+    .sv-dim {
+      font-family: var(--fm);
+      font-size: .68rem;
+      color: var(--tx3)
+    }
+
+    .score-axes {
+      display: flex;
+      flex-direction: column;
+      gap: 9px
+    }
+
+    .s-ax {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .ax-l {
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--tx2);
+      width: 84px;
+      flex-shrink: 0
+    }
+
+    .ax-bg {
+      flex: 1;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, .06);
+      overflow: hidden
+    }
+
+    .ax-f {
+      height: 100%;
+      border-radius: 3px;
+      width: 0;
+      transition: width 1.2s var(--ease)
+    }
+
+    .ax-v {
+      font-family: var(--fm);
+      font-size: .64rem;
+      color: var(--tx3);
+      width: 24px;
+      text-align: right;
+      flex-shrink: 0
+    }
+
+    .af1 {
+      background: linear-gradient(90deg, #7c3aed, #a78bfa)
+    }
+
+    .af2 {
+      background: linear-gradient(90deg, #22d3ee, #67e8f9)
+    }
+
+    .af3 {
+      background: linear-gradient(90deg, #f59e0b, #fcd34d)
+    }
+
+    .af4 {
+      background: linear-gradient(90deg, #10b981, #6ee7b7)
+    }
+
+    .af5 {
+      background: linear-gradient(90deg, #ec4899, #f9a8d4)
+    }
+
+    .af6 {
+      background: linear-gradient(90deg, #6366f1, #a5b4fc)
+    }
+
+    .af7 {
+      background: linear-gradient(90deg, #ef4444, #fca5a5)
+    }
+
+    .af8 {
+      background: linear-gradient(90deg, #8b5cf6, #22d3ee)
+    }
+
+    /* ── STATS (UPGRADED) ────────────────────────────────────────────────── */
+    .stats-bar {
+      padding: 52px 28px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .stats-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr)
+    }
+
+    .stat-item {
+      padding: 18px;
+      text-align: center;
+      border-right: 1px solid var(--border)
+    }
+
+    .stat-item:last-child {
+      border-right: none
+    }
+
+    .stat-num {
+      font-family: var(--fh);
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -.06em;
+      line-height: 1;
+      margin-bottom: 5px;
+      background: linear-gradient(135deg, var(--tx), var(--tx2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .stat-label {
+      font-size: .7rem;
+      color: var(--tx3);
+      font-weight: 500;
+      letter-spacing: .02em
+    }
+
+    /* ── TESTIMONIALS (NEW SECTION) ─────────────────────────────────────── */
+    /* OpusClip had testimonials — Prognot didn't. Critical for investor trust. */
+    .testimonials {
+      padding: 110px 0
+    }
+
+    .testi-inner {
+      padding: 0 28px
+    }
+
+    .testi-track-wrap {
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+      mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+      margin-top: 56px
+    }
+
+    .testi-track {
+      display: flex;
+      gap: 20px;
+      width: max-content;
+      will-change: transform
+    }
+
+    .testi-card {
+      width: 320px;
+      flex-shrink: 0;
+      padding: 24px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color .3s
+    }
+
+    .testi-card:hover {
+      border-color: var(--border2)
+    }
+
+    .testi-text {
+      font-size: .83rem;
+      color: var(--tx2);
+      line-height: 1.7;
+      margin-bottom: 16px
+    }
+
+    .testi-text strong {
+      color: var(--tx);
+      font-weight: 500
+    }
+
+    .testi-author {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .testi-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-family: var(--fh);
+      font-size: .72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .testi-name {
+      font-size: .78rem;
+      font-weight: 600
+    }
+
+    .testi-role {
+      font-size: .68rem;
+      color: var(--tx3);
+      font-family: var(--fm)
+    }
+
+    .testi-stars {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 10px
+    }
+
+    .testi-stars span {
+      color: #f59e0b;
+      font-size: .78rem
+    }
+
+    /* ── DNA CARDS (UPGRADED) ────────────────────────────────────────────── */
+    .dna {
+      padding: 110px 28px
+    }
+
+    .dna-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 1000px;
+      margin: 0 auto
+    }
+
+    .dna-card {
+      padding: 28px;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color .3s, transform .4s var(--spring)
+    }
+
+    .dna-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-4px)
+    }
+
+    .dna-glow {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 100px;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: .6
+    }
+
+    .dna-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px
+    }
+
+    .dna-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .dna-card h3 {
+      font-family: var(--fh);
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 7px
+    }
+
+    .dna-card p {
+      font-size: .78rem;
+      color: var(--tx2);
+      line-height: 1.68
+    }
+
+    /* ── COMPARE ─────────────────────────────────────────────────────────── */
+    .compare {
+      padding: 80px 28px 110px
+    }
+
+    .compare-box {
+      max-width: 840px;
+      margin: 0 auto
+    }
+
+    table.ct {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    table.ct th {
+      padding: 11px 18px;
+      text-align: left;
+      font-family: var(--fm);
+      font-size: .6rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--tx3);
+      border-bottom: 1px solid var(--border)
+    }
+
+    table.ct th.oc {
+      color: var(--v2)
+    }
+
+    table.ct th:not(:first-child) {
+      text-align: center
+    }
+
+    table.ct td {
+      padding: 13px 18px;
+      font-size: .8rem;
+      color: var(--tx2);
+      border-bottom: 1px solid rgba(255, 255, 255, .03);
+      transition: background .2s
+    }
+
+    table.ct td:not(:first-child) {
+      text-align: center
+    }
+
+    table.ct tr:hover td {
+      background: rgba(255, 255, 255, .015)
+    }
+
+    .oc {
+      background: rgba(124, 58, 237, .04)
+    }
+
+    tr:hover .oc {
+      background: rgba(124, 58, 237, .08) !important
+    }
+
+    .cy {
+      color: var(--gr);
+      font-weight: 700;
+      font-size: .9rem
+    }
+
+    .cn {
+      color: rgba(255, 255, 255, .15);
+      font-size: 1rem
+    }
+
+    .cp {
+      color: var(--am);
+      font-size: .72rem;
+      font-weight: 600
+    }
+
+    .oc-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px
+    }
+
+    .oc-b {
+      font-size: .52rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: var(--v);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 3px
+    }
+
+    /* ── FAQ (NEW SECTION) ───────────────────────────────────────────────── */
+    /* OpusClip had FAQ — Prognot didn't. Investors/users look for this. */
+    .faq {
+      padding: 110px 28px
+    }
+
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .faq-item {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color .3s
+    }
+
+    .faq-item.open {
+      border-color: rgba(124, 58, 237, .25)
+    }
+
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      transition: color .25s;
+      gap: 16px
+    }
+
+    .faq-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform .3s, background .3s, border-color .3s
+    }
+
+    .faq-icon svg {
+      width: 10px;
+      height: 10px;
+      fill: none;
+      stroke: var(--tx3);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      transition: stroke .3s
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+      background: rgba(124, 58, 237, .1);
+      border-color: rgba(124, 58, 237, .25)
+    }
+
+    .faq-item.open .faq-icon svg {
+      stroke: var(--v2)
+    }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s var(--ease), padding .3s
+    }
+
+    .faq-item.open .faq-a {
+      max-height: 300px
+    }
+
+    .faq-a-inner {
+      padding: 0 22px 18px;
+      font-size: .84rem;
+      color: var(--tx2);
+      line-height: 1.78
+    }
+
+    /* ── WAITLIST (UPGRADED) ─────────────────────────────────────────────── */
+    .waitlist {
+      padding: 110px 28px
+    }
+
+    .wl-card {
+      max-width: 620px;
+      margin: 0 auto;
+      text-align: center;
+      border-radius: 26px;
+      padding: 64px 48px;
+      background: linear-gradient(145deg, rgba(124, 58, 237, .07), rgba(34, 211, 238, .04));
+      border: 1px solid rgba(124, 58, 237, .2);
+      position: relative;
+      overflow: hidden
+    }
+
+    .wl-orb {
+      position: absolute;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 350px;
+      height: 250px;
+      background: radial-gradient(ellipse, rgba(124, 58, 237, .22) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none
+    }
+
+    .wl-avs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1
+    }
+
+    .av-stack {
+      display: flex
+    }
+
+    .av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      margin-left: -7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fh);
+      font-size: .6rem;
+      font-weight: 700
+    }
+
+    .av:first-child {
+      margin-left: 0
+    }
+
+    .av1 {
+      background: linear-gradient(135deg, #f472b6, #c084fc)
+    }
+
+    .av2 {
+      background: linear-gradient(135deg, #60a5fa, #34d399)
+    }
+
+    .av3 {
+      background: linear-gradient(135deg, #fbbf24, #f87171)
+    }
+
+    .av4 {
+      background: linear-gradient(135deg, #a78bfa, #38bdf8)
+    }
+
+    .avm {
+      background: rgba(255, 255, 255, .08);
+      color: var(--tx3);
+      font-size: .52rem;
+      border: 1px solid var(--border)
+    }
+
+    .wl-count {
+      font-size: .78rem;
+      color: var(--tx2)
+    }
+
+    .wl-count strong {
+      color: var(--tx)
+    }
+
+    .wl-card h2 {
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1
+    }
+
+    .wl-card .sub {
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1
+    }
+
+    .wl-form {
+      display: flex;
+      gap: 8px;
+      max-width: 420px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1
+    }
+
+    .wl-input {
+      flex: 1;
+      padding: 13px 16px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--tx);
+      font-family: var(--fb);
+      font-size: .86rem;
+      outline: none;
+      transition: border-color .3s
+    }
+
+    .wl-input:focus {
+      border-color: rgba(124, 58, 237, .5)
+    }
+
+    .wl-input::placeholder {
+      color: var(--tx3)
+    }
+
+    .wl-btn {
+      padding: 13px 20px;
+      background: var(--v);
+      color: #fff;
+      border-radius: 10px;
+      font-size: .82rem;
+      font-weight: 700;
+      font-family: var(--fb);
+      box-shadow: 0 0 24px var(--vg);
+      transition: all .3s;
+      white-space: nowrap
+    }
+
+    .wl-btn:hover {
+      background: #6d28d9;
+      box-shadow: 0 0 40px var(--vg);
+      transform: translateY(-1px)
+    }
+
+    .wl-note {
+      margin-top: 10px;
+      font-size: .69rem;
+      color: var(--tx3);
+      position: relative;
+      z-index: 1
+    }
+
+    /* ── PRICING ─────────────────────────────────────────────────────────── */
+    .pricing {
+      padding: 110px 28px
+    }
+
+    .pt-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 44px
+    }
+
+    .pt-label {
+      font-size: .8rem;
+      color: var(--tx2)
+    }
+
+    .tw {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      cursor: pointer
+    }
+
+    .tw input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute
+    }
+
+    .tw-track {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, .07);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      transition: .3s
+    }
+
+    .tw-thumb {
+      position: absolute;
+      left: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--tx3);
+      transition: .3s
+    }
+
+    .tw input:checked~.tw-track {
+      background: rgba(124, 58, 237, .28);
+      border-color: rgba(124, 58, 237, .45)
+    }
+
+    .tw input:checked~.tw-thumb {
+      left: calc(100% - 16px);
+      background: var(--v2)
+    }
+
+    .save-pill {
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-size: .62rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, .1);
+      color: var(--gr);
+      border: 1px solid rgba(16, 185, 129, .2)
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 920px;
+      margin: 0 auto
+    }
+
+    .pc {
+      padding: 28px 24px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column
+    }
+
+    .pc-tier {
+      font-family: var(--fm);
+      font-size: .6rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--tx3);
+      margin-bottom: 6px
+    }
+
+    .pc-name {
+      font-family: var(--fh);
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: 4px
+    }
+
+    .pc-tag {
+      font-size: .76rem;
+      color: var(--tx2);
+      margin-bottom: 20px;
+      line-height: 1.5
+    }
+
+    .pc-price {
+      font-family: var(--fh);
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -.06em;
+      line-height: 1;
+      margin-bottom: 3px
+    }
+
+    .pc-price sup {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      vertical-align: super
+    }
+
+    .pc-period {
+      font-size: .68rem;
+      color: var(--tx3);
+      margin-bottom: 20px
+    }
+
+    .pc-div {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 18px
+    }
+
+    .pc-feats {
+      list-style: none;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 22px
+    }
+
+    .pf {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: .79rem;
+      color: var(--tx2);
+      line-height: 1.4
+    }
+
+    .pfi {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px
+    }
+
+    .pfi svg {
+      width: 7px;
+      height: 7px;
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .pc-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 10px;
+      font-size: .81rem;
+      font-weight: 700;
+      font-family: var(--fb);
+      transition: all .3s;
+      letter-spacing: -.01em
+    }
+
+    .pc-s {
+      background: var(--surface);
+      border: 1px solid var(--border)
+    }
+
+    .pc-s .pfi {
+      background: rgba(255, 255, 255, .06)
+    }
+
+    .pc-s .pfi svg {
+      stroke: var(--tx3)
+    }
+
+    .pc-s .pc-btn {
+      background: rgba(255, 255, 255, .06);
+      color: var(--tx);
+      border: 1px solid var(--border)
+    }
+
+    .pc-s .pc-btn:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .pc-p {
+      background: linear-gradient(160deg, rgba(124, 58, 237, .1), rgba(34, 211, 238, .04));
+      border: 1px solid rgba(124, 58, 237, .22);
+      box-shadow: 0 0 70px rgba(124, 58, 237, .08)
+    }
+
+    .popular-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-family: var(--fm);
+      font-size: .54rem;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      background: rgba(124, 58, 237, .18);
+      color: var(--v2);
+      border: 1px solid rgba(124, 58, 237, .28);
+      margin-bottom: 8px
+    }
+
+    .pc-p .pfi {
+      background: rgba(124, 58, 237, .1)
+    }
+
+    .pc-p .pfi svg {
+      stroke: var(--v2)
+    }
+
+    .pc-p .pc-btn {
+      background: var(--v);
+      color: #fff;
+      box-shadow: 0 0 20px var(--vg)
+    }
+
+    .pc-p .pc-btn:hover {
+      background: #6d28d9;
+      box-shadow: 0 0 32px var(--vg);
+      transform: translateY(-1px)
+    }
+
+    .pc-a {
+      background: rgba(34, 211, 238, .04);
+      border: 1px solid rgba(34, 211, 238, .14)
+    }
+
+    .pc-a .pfi {
+      background: rgba(34, 211, 238, .1)
+    }
+
+    .pc-a .pfi svg {
+      stroke: var(--el)
+    }
+
+    .pc-a .pc-btn {
+      background: rgba(34, 211, 238, .08);
+      color: var(--el);
+      border: 1px solid rgba(34, 211, 238, .18);
+      font-size: .72rem
+    }
+
+    .pc-a .pc-btn:hover {
+      background: rgba(34, 211, 238, .14)
+    }
+
+    /* ── STICKY BOTTOM BAR (NEW - critical conversion element from OpusClip) */
+    /* This is the floating "Drop a video link" bar at the bottom */
+    .sticky-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 400;
+      padding: 14px 28px;
+      background: rgba(6, 6, 8, .88);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transform: translateY(100%);
+      transition: transform .5s var(--ease)
+    }
+
+    .sticky-bar.visible {
+      transform: translateY(0)
+    }
+
+    .sb-text {
+      font-size: .82rem;
+      color: var(--tx2);
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .sb-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gr);
+      box-shadow: 0 0 6px var(--gr);
+      animation: pulse 2s ease infinite
+    }
+
+    .sb-input {
+      padding: 9px 16px;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--tx);
+      font-family: var(--fb);
+      font-size: .82rem;
+      outline: none;
+      width: 300px;
+      transition: border-color .3s
+    }
+
+    .sb-input:focus {
+      border-color: rgba(124, 58, 237, .4)
+    }
+
+    .sb-input::placeholder {
+      color: var(--tx3)
+    }
+
+    .sb-btn {
+      padding: 9px 18px;
+      background: var(--v);
+      color: #fff;
+      border-radius: 8px;
+      font-size: .78rem;
+      font-weight: 700;
+      font-family: var(--fb);
+      box-shadow: 0 0 18px var(--vg);
+      transition: all .3s;
+      white-space: nowrap
+    }
+
+    .sb-btn:hover {
+      background: #6d28d9
+    }
+
+    .sb-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--tx3);
+      font-size: .9rem;
+      transition: all .3s;
+      flex-shrink: 0
+    }
+
+    .sb-close:hover {
+      color: var(--tx);
+      border-color: var(--border2)
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 56px 28px 36px;
+      position: relative;
+      z-index: 1
+    }
+
+    .footer-grid {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2.5fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 44px
+    }
+
+    .f-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--fh);
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 12px
+    }
+
+    .f-desc {
+      font-size: .76rem;
+      color: var(--tx3);
+      line-height: 1.72;
+      max-width: 280px
+    }
+
+    .f-col h4 {
+      font-family: var(--fm);
+      font-size: .6rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--tx3);
+      margin-bottom: 12px
+    }
+
+    .f-col a {
+      display: block;
+      font-size: .78rem;
+      color: var(--tx3);
+      padding: 3px 0;
+      transition: color .25s
+    }
+
+    .f-col a:hover {
+      color: var(--tx)
+    }
+
+    .fsoon {
+      font-family: var(--fm);
+      font-size: .52rem;
+      background: rgba(245, 158, 11, .1);
+      color: var(--am);
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: 5px
+    }
+
+    .footer-bottom {
+      max-width: 1160px;
+      margin: 0 auto;
+      border-top: 1px solid var(--border);
+      padding-top: 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .f-copy {
+      font-size: .7rem;
+      color: var(--tx3)
+    }
+
+    .f-links {
+      display: flex;
+      gap: 18px
+    }
+
+    .f-links a {
+      font-size: .7rem;
+      color: var(--tx3);
+      transition: color .25s
+    }
+
+    .f-links a:hover {
+      color: var(--tx)
+    }
+
+    /* ── MEDIA QUERIES ───────────────────────────────────────────────────── */
+    @media(max-width:1024px) {
+
+      .pipe-layout,
+      .dir-layout,
+      .score-layout {
+        grid-template-columns: 1fr
+      }
+
+      .pipe-panel {
+        position: relative;
+        top: 0
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px
+      }
+    }
+
+    @media(max-width:768px) {
+      .nav-links {
+        display: none
+      }
+
+      .stats-inner {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .stat-item:nth-child(2) {
+        border-right: none
+      }
+
+      .dna-grid {
+        grid-template-columns: 1fr
+      }
+
+      .hero-form,
+      .wl-form {
+        flex-direction: column
+      }
+
+      .wl-card {
+        padding: 44px 24px
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 360px
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center
+      }
+
+      .sb-input {
+        display: none
+      }
+
+      .mockup-shell {
+        width: 100%
+      }
+
+      .hero-mockup-inner {
+        transform: none
+      }
+    }
+
+    @media(max-width:480px) {
+      .stats-inner {
+        grid-template-columns: 1fr
+      }
+
+      .stat-item {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border)
+      }
+
+      .stat-item:last-child {
+        border-bottom: none
+      }
+
+      .mock-sidebar {
+        display: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="sp"></div>
+
+  <!-- ─── NAV ──────────────────────────────────────────────────────────── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="lmark"><svg viewBox="0 0 24 24">
+            <polygon points="23 7 16 12 23 17 23 7" />
+            <rect x="1" y="5" width="15" height="14" rx="2" />
+          </svg></div>
+        Prognot AI
+      </div>
+      <div class="nav-links">
+        <a href="#pipeline">Pipeline</a>
+        <a href="#director">Director AI <span class="nbadge">NEW</span></a>
+        <a href="#scoring">Scoring</a>
+        <a href="#compare">Compare</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="nav-r">
+        <button class="btn btn-ghost">Log in</button>
+        <button class="btn btn-v" onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})">
+          Join Waitlist
+          <svg viewBox="0 0 24 24">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ──────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-orb orb1"></div>
+    <div class="hero-orb orb2"></div>
+    <div class="hero-orb orb3"></div>
+    <div class="hero-content">
+      <div class="tag-badge" style="animation:fadeUp .6s .1s both"><span class="live-dot"></span>Private Beta · 9-Step
+        AI Pipeline · Live Now</div>
+      <h1>Turn Long Videos Into<br><em>Viral Clips.</em> Automatically.</h1>
+      <p class="hero-desc" style="animation:fadeUp .6s .3s both">
+        While other tools clip and call it done, Prognot runs a <strong>9-step AI pipeline</strong> with Channel DNA
+        that learns your brand, a <strong>Director AI agent</strong> monitoring your channels 24/7, and an editor that
+        handles everything.
+      </p>
+      <div class="hero-form">
+        <input type="text" class="hero-input" placeholder="Paste a YouTube link to try it…" id="heroInput">
+        <button class="btn btn-v" onclick="handleHeroSubmit()" style="padding:14px 26px;font-size:.87rem">
+          Try Free
+          <svg viewBox="0 0 24 24">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      </div>
+      <p class="hero-meta">
+        <span><svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>No credit card</span>
+        <span><svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>Cancel anytime</span>
+        <span><svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>Results in &lt; 2 min</span>
+      </p>
+    </div>
+
+    <!-- ★ NEW: Product UI Mockup — the hero visual OpusClip has but Prognot didn't -->
+    <div class="hero-mockup">
+      <div class="hero-mockup-inner">
+        <div class="mockup-shell">
+          <div class="mockup-bar">
+            <div class="wdot wd-r"></div>
+            <div class="wdot wd-y"></div>
+            <div class="wdot wd-g"></div>
+            <div class="mockup-url">app.prognot.ai · Clip Dashboard</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mock-sidebar">
+              <div
+                style="font-family:var(--fm);font-size:.6rem;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">
+                Recent Jobs</div>
+              <div class="mock-job active">
+                <div class="mock-job-title">Tech Podcast · EP #142</div>
+                <div class="mock-job-meta">7 clips · score avg 91 · done</div>
+              </div>
+              <div class="mock-job">
+                <div class="mock-job-title">Entertainment Channel · Podcast</div>
+                <div class="mock-job-meta">12 clips · score avg 87 · done</div>
+              </div>
+              <div class="mock-job">
+                <div class="mock-job-title">My Channel · Q&A Jul</div>
+                <div class="mock-job-meta">4 clips · processing…</div>
+              </div>
+              <div
+                style="margin-top:auto;padding:10px;border-radius:8px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.15)">
+                <div style="font-family:var(--fm);font-size:.58rem;color:var(--gr);margin-bottom:3px">Director AI</div>
+                <div style="font-size:.72rem;color:var(--tx2)">New insight ready ↗</div>
+              </div>
+            </div>
+            <div class="mock-main">
+              <div class="mock-head">
+                <div>
+                  <div class="mock-label" style="margin-bottom:4px">TOP CLIP · EP #423 · 0:47</div>
+                  <div style="font-size:.88rem;font-weight:600">Host discusses AI's future impact on jobs</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="mock-score-big">96</div>
+                  <div>
+                    <div class="mock-badge">Post it</div>
+                    <div class="mock-label" style="margin-top:4px;text-align:right">humor · revelation</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mock-bars">
+                <div class="mock-bar-row">
+                  <div class="mbl">Humor</div>
+                  <div class="mbt">
+                    <div class="mbf mb1" style="--w:88%;animation-delay:.1s"></div>
+                  </div>
+                </div>
+                <div class="mock-bar-row">
+                  <div class="mbl">Energy</div>
+                  <div class="mbt">
+                    <div class="mbf mb2" style="--w:95%;animation-delay:.2s"></div>
+                  </div>
+                </div>
+                <div class="mock-bar-row">
+                  <div class="mbl">Revelation</div>
+                  <div class="mbt">
+                    <div class="mbf mb3" style="--w:72%;animation-delay:.3s"></div>
+                  </div>
+                </div>
+                <div class="mock-bar-row">
+                  <div class="mbl">Hook</div>
+                  <div class="mbt">
+                    <div class="mbf mb4" style="--w:91%;animation-delay:.4s"></div>
+                  </div>
+                </div>
+                <div class="mock-bar-row">
+                  <div class="mbl">Quotability</div>
+                  <div class="mbt">
+                    <div class="mbf mb5" style="--w:80%;animation-delay:.5s"></div>
+                  </div>
+                </div>
+                <div class="mock-bar-row">
+                  <div class="mbl">Visual</div>
+                  <div class="mbt">
+                    <div class="mbf mb6" style="--w:76%;animation-delay:.6s"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-family:var(--fm);font-size:.6rem;color:var(--tx3);margin-bottom:6px">GENERATED CLIPS
+              </div>
+              <div class="mock-clip-row">
+                <div class="mock-clip mc1">
+                  <div class="mcs">
+                    <div class="mcdot" style="background:#10b981"></div>96
+                  </div>
+                </div>
+                <div class="mock-clip mc2">
+                  <div class="mcs">
+                    <div class="mcdot" style="background:#10b981"></div>91
+                  </div>
+                </div>
+                <div class="mock-clip mc3">
+                  <div class="mcs">
+                    <div class="mcdot" style="background:#10b981"></div>88
+                  </div>
+                </div>
+                <div class="mock-clip mc4">
+                  <div class="mcs">
+                    <div class="mcdot" style="background:#f59e0b"></div>74
+                  </div>
+                </div>
+                <div
+                  style="display:flex;align-items:center;justify-content:center;width:72px;height:128px;border-radius:10px;border:1px dashed rgba(255,255,255,.12);flex-shrink:0">
+                  <div style="font-family:var(--fm);font-size:.58rem;color:var(--tx3);text-align:center">+3 more</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── STATS ─────────────────────────────────────────────────────────── -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item fade">
+        <div class="stat-num" data-target="847">0</div>
+        <div class="stat-label">Clips Generated</div>
+      </div>
+      <div class="stat-item fade">
+        <div class="stat-num" data-target="94" data-suffix="s">0</div>
+        <div class="stat-label">Avg. Processing Time</div>
+      </div>
+      <div class="stat-item fade">
+        <div class="stat-num" data-target="9">0</div>
+        <div class="stat-label">Pipeline Steps</div>
+      </div>
+      <div class="stat-item fade">
+        <div class="stat-num" data-target="12">0</div>
+        <div class="stat-label">Active Channels</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── LOGO MARQUEE (★ NEW) ─────────────────────────────────────────── -->
+  <!-- Trust signal: shows who uses / integrates with the product -->
+  <div class="logos-section">
+    <div class="logos-label">Trusted by creators at</div>
+    <div class="marquee-wrap">
+      <div class="marquee-track" id="logoTrack">
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <line x1="9" y1="9" x2="9.01" y2="9" />
+            <line x1="15" y1="9" x2="15.01" y2="9" />
+          </svg>Podcast Creators</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>Content Studios</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>Creator Agencies</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <polygon points="23 7 16 12 23 17 23 7" />
+            <rect x="1" y="5" width="15" height="14" rx="2" />
+          </svg>YouTube Channels</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4l3 3" />
+          </svg>Faceless Channels</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>Marketing Teams</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>Solo Creators</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>Interview Shows</span>
+        <!-- Duplicated for seamless loop -->
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <line x1="9" y1="9" x2="9.01" y2="9" />
+            <line x1="15" y1="9" x2="15.01" y2="9" />
+          </svg>Podcast Creators</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>Content Studios</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>Creator Agencies</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <polygon points="23 7 16 12 23 17 23 7" />
+            <rect x="1" y="5" width="15" height="14" rx="2" />
+          </svg>YouTube Channels</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4l3 3" />
+          </svg>Faceless Channels</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>Marketing Teams</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>Solo Creators</span>
+        <span class="logo-item"><svg viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>Interview Shows</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PIPELINE ──────────────────────────────────────────────────────── -->
+  <section class="pipeline" id="pipeline">
+    <div class="wrap">
+      <div class="section-head fade">
+        <div class="eyebrow">Architecture</div>
+        <h2 class="sh">Nine steps. One system.</h2>
+        <p class="sub">Every clip is the output of an orchestrated pipeline. Not a single model making one shot at it.
+        </p>
+      </div>
+      <div class="pipe-layout">
+        <div class="pipe-steps" id="pipeSteps">
+          <div class="pipe-step active" data-idx="0">
+            <div class="pnum">S01</div>
+            <div class="ptx">
+              <div class="pname">Audio Extract</div>
+              <div class="psub">Lossless audio isolation</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="1">
+            <div class="pnum">S02</div>
+            <div class="ptx">
+              <div class="pname">Transcribe</div>
+              <div class="psub">Word-level timestamp mapping</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="2">
+            <div class="pnum">S03</div>
+            <div class="ptx">
+              <div class="pname">Speaker Recognition</div>
+              <div class="psub">Automatic voice identification</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="3">
+            <div class="pnum">S04</div>
+            <div class="ptx">
+              <div class="pname">Labeled Transcript</div>
+              <div class="psub">Channel DNA context fusion</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="4">
+            <div class="pnum">S05</div>
+            <div class="ptx">
+              <div class="pname">Clip Discovery</div>
+              <div class="psub">Multimodal video + text analysis</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="5">
+            <div class="pnum">S06</div>
+            <div class="ptx">
+              <div class="pname">Batch Evaluation</div>
+              <div class="psub">8-dimension viral scoring</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="6">
+            <div class="pnum">S07</div>
+            <div class="ptx">
+              <div class="pname">Precision Cut</div>
+              <div class="psub">Word-boundary snapping</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="7">
+            <div class="pnum">S08</div>
+            <div class="ptx">
+              <div class="pname">Export &amp; Deliver</div>
+              <div class="psub">4K encode · cloud delivery</div>
+            </div>
+          </div>
+          <div class="pipe-step" data-idx="8">
+            <div class="pnum">S09</div>
+            <div class="ptx">
+              <div class="pname">AI Editor <span class="pb-soon">Soon</span></div>
+              <div class="psub">Fully automated post-production</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ★ UPGRADED: Panel now shows live waveform + terminal animation -->
+        <div class="pipe-panel fade">
+          <div class="panel-header">
+            <div class="ph-icon" id="ppIcon">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <div>
+              <div class="ph-step" id="ppStep">Step 01 / 09</div>
+              <div class="ph-name" id="ppName">Audio Extract</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="pp-desc" id="ppDesc">Prognot isolates the audio stream with lossless precision. No re-encoding,
+              no quality loss. Any video format is supported: variable framerates, corrupt containers, multi-channel
+              audio all handled automatically.</div>
+            <!-- ★ NEW: Live waveform (shows for audio/transcribe steps) -->
+            <div class="viz-waveform" id="vizWaveform"></div>
+            <!-- ★ NEW: Live terminal output -->
+            <div class="viz-terminal" id="vizTerminal">
+              <div class="vt-line"><span class="vt-p">$</span><span class="vt-t" id="vtTyping"></span><span
+                  class="vcursor"></span></div>
+              <div id="vtHistory"></div>
+            </div>
+            <div class="pp-tags" id="ppTags">
+              <span class="ptag">lossless</span><span class="ptag">any format</span><span
+                class="ptag">multi-channel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── DIRECTOR AI ────────────────────────────────────────────────────── -->
+  <section class="director" id="director">
+    <div class="wrap">
+      <div class="dir-layout">
+        <!-- ★ UPGRADED terminal with alert cards -->
+        <div class="term-wrap fade">
+          <div class="term-bar">
+            <div class="td r"></div>
+            <div class="td y"></div>
+            <div class="td g"></div>
+            <div class="t-title">prognot · director-agent</div>
+            <div class="t-status">running</div>
+          </div>
+          <div class="term-body">
+            <div class="t-line"><span class="t-p">$</span><span class="t-t" id="termTyping"></span><span
+                class="t-cursor"></span></div>
+            <div id="termHistory"></div>
+          </div>
+        </div>
+        <div class="dir-feats fade">
+          <div class="eyebrow">Director AI</div>
+          <h2 class="sh" style="text-align:left">Your channel's<br>autonomous agent.</h2>
+          <p style="font-size:.88rem;color:var(--tx2);line-height:1.78;margin-bottom:28px">Not just a tool you run. An
+            agent that works while you don't. Prognot's Director AI monitors your channel 24/7, surfaces what matters,
+            and tells you exactly what to do.</p>
+          <div class="df">
+            <div class="df-icon dfi-v"><svg viewBox="0 0 24 24">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg></div>
+            <div>
+              <div class="df-label">Proactive anomaly detection</div>
+              <div class="df-desc">Hourly analysis catches engagement drops, viral spikes, and posting pattern issues,
+                with clear explanations and recommended actions.</div>
+            </div>
+          </div>
+          <div class="df">
+            <div class="df-icon dfi-g"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4l3 3" />
+              </svg></div>
+            <div>
+              <div class="df-label">Runs on schedule, automatically</div>
+              <div class="df-desc">No manual triggers. Runs continuously. Dashboard always stocked with fresh
+                intelligence.</div>
+            </div>
+          </div>
+          <div class="df">
+            <div class="df-icon dfi-e"><svg viewBox="0 0 24 24">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              </svg></div>
+            <div>
+              <div class="df-label">Full channel memory</div>
+              <div class="df-desc">The Director has complete context of your channel's history, DNA, and past
+                performance. Every insight is specific to you.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CHANNEL DNA ────────────────────────────────────────────────────── -->
+  <section class="dna" id="dna">
+    <div class="wrap">
+      <div class="section-head fade">
+        <div class="eyebrow">Channel DNA</div>
+        <h2 class="sh">Every channel gets its own brain.</h2>
+        <p class="sub">Prognot doesn't just clip video. It learns what makes your specific audience engage.</p>
+      </div>
+      <div class="dna-grid">
+        <div class="dna-card fade">
+          <div class="dna-glow" style="background:radial-gradient(ellipse,rgba(124,58,237,.3) 0%,transparent 70%)">
+          </div>
+          <div class="dna-icon" style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2)"><svg
+              viewBox="0 0 24 24" style="stroke:var(--v2)">
+              <path d="M2 2l4 4M22 22l-4-4M8 8l8 8M16 8l-8 8M2 22l4-4M22 2l-4 4" />
+            </svg></div>
+          <h3>Brand Voice Mirror</h3>
+          <p>Point Prognot at any channel and it extracts tone, pacing, vocabulary, and content patterns that define
+            that brand. Every downstream decision is made with that DNA locked in.</p>
+        </div>
+        <div class="dna-card fade">
+          <div class="dna-glow" style="background:radial-gradient(ellipse,rgba(34,211,238,.25) 0%,transparent 70%)">
+          </div>
+          <div class="dna-icon" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2)"><svg
+              viewBox="0 0 24 24" style="stroke:var(--el)">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+            </svg></div>
+          <h3>Personalised Scoring</h3>
+          <p>A high score means high-performing <em>for your audience</em> specifically. Scoring is calibrated against
+            your channel's actual engagement history, not generic virality estimates.</p>
+        </div>
+        <div class="dna-card fade">
+          <div class="dna-glow" style="background:radial-gradient(ellipse,rgba(16,185,129,.25) 0%,transparent 70%)">
+          </div>
+          <div class="dna-icon" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)"><svg
+              viewBox="0 0 24 24" style="stroke:var(--gr)">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg></div>
+          <h3>Your Rules, Always On</h3>
+          <p>Define off-limits topics, prioritised moments, posting style, and custom forbidden words. The system
+            applies your preferences consistently, every clip, every channel, every time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SCORING ────────────────────────────────────────────────────────── -->
+  <section class="scoring" id="scoring">
+    <div class="wrap">
+      <div class="score-layout">
+        <div class="fade">
+          <div class="score-card">
+            <div class="score-top">
+              <div>
+                <div style="font-family:var(--fm);font-size:.58rem;color:var(--tx3);margin-bottom:6px">CLIP SCORE ·
+                  SAMPLE OUTPUT</div>
+                <div class="score-num">96<span>/100</span></div>
+              </div>
+              <div class="sv">
+                <div class="sv-badge">Post it</div>
+                <div class="sv-dim">humor · revelation</div>
+              </div>
+            </div>
+            <div class="score-axes">
+              <div class="s-ax">
+                <div class="ax-l">Humor</div>
+                <div class="ax-bg">
+                  <div class="ax-f af1" data-w="88%"></div>
+                </div>
+                <div class="ax-v">88</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Energy</div>
+                <div class="ax-bg">
+                  <div class="ax-f af2" data-w="95%"></div>
+                </div>
+                <div class="ax-v">95</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Revelation</div>
+                <div class="ax-bg">
+                  <div class="ax-f af3" data-w="72%"></div>
+                </div>
+                <div class="ax-v">72</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Hook</div>
+                <div class="ax-bg">
+                  <div class="ax-f af4" data-w="91%"></div>
+                </div>
+                <div class="ax-v">91</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Quotability</div>
+                <div class="ax-bg">
+                  <div class="ax-f af5" data-w="80%"></div>
+                </div>
+                <div class="ax-v">80</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Visual</div>
+                <div class="ax-bg">
+                  <div class="ax-f af6" data-w="76%"></div>
+                </div>
+                <div class="ax-v">76</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Controversy</div>
+                <div class="ax-bg">
+                  <div class="ax-f af7" data-w="60%"></div>
+                </div>
+                <div class="ax-v">60</div>
+              </div>
+              <div class="s-ax">
+                <div class="ax-l">Complete</div>
+                <div class="ax-bg">
+                  <div class="ax-f af8" data-w="84%"></div>
+                </div>
+                <div class="ax-v">84</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="fade">
+          <div class="eyebrow">Viral Scoring</div>
+          <h2 class="sh" style="text-align:left">Not one score.<br>Eight dimensions.</h2>
+          <p style="font-size:.88rem;color:var(--tx2);line-height:1.78;max-width:460px;margin-bottom:28px">A single
+            virality number doesn't tell you why a clip will perform. Prognot breaks it down across eight axes so you
+            understand exactly what's working.</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:.84rem;color:var(--tx2);line-height:1.6">
+              <span style="color:var(--v2);font-family:var(--fm);flex-shrink:0">→</span>Scored on humor, energy,
+              revelation, hook strength, quotability, visual quality, controversy, and completeness.
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:.84rem;color:var(--tx2);line-height:1.6">
+              <span style="color:var(--v2);font-family:var(--fm);flex-shrink:0">→</span>Below-threshold clips filtered
+              out automatically. Only the best reach the cutting stage.
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:.84rem;color:var(--tx2);line-height:1.6">
+              <span style="color:var(--v2);font-family:var(--fm);flex-shrink:0">→</span>Scoring is Channel DNA-aware. A
+              high score means high-performing for <em>your</em> audience.
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;font-size:.84rem;color:var(--tx2);line-height:1.6">
+              <span style="color:var(--v2);font-family:var(--fm);flex-shrink:0">→</span>Every score ships with a natural
+              language explanation. You understand the reasoning, not just the number.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONTENT FINDER ──────────────────────────────────────────────────── -->
+  <section style="padding:110px 28px" id="content-finder">
+    <div class="wrap">
+      <div class="section-head fade">
+        <div class="eyebrow">Content Finder <span class="pb-soon">Soon</span></div>
+        <h2 class="sh">Know what to make before your competitors do.</h2>
+        <p class="sub">An AI research engine that scans trending topics, viral patterns, and competitor channels to surface your next high-performing video idea.</p>
+      </div>
+      <div class="dna-grid" style="max-width:1000px;margin:0 auto 48px">
+        <div class="dna-card fade">
+          <div class="dna-glow" style="background:radial-gradient(ellipse,rgba(124,58,237,.3) 0%,transparent 70%)"></div>
+          <div class="dna-icon" style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2)"><svg viewBox="0 0 24 24" style="stroke:var(--v2);width:18px;height:18px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <h3>Trend Detection</h3>
+          <p>Prognot monitors search trends, viral spikes, and audience behavior shifts across platforms in real time. You see what is rising before it peaks.</p>
+        </div>
+        <div class="dna-card fade">
+          <div class="dna-glow" style="background:radial-gradient(ellipse,rgba(34,211,238,.25) 0%,transparent 70%)"></div>
+          <div class="dna-icon" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2)"><svg viewBox="0 0 24 24" style="stroke:var(--el);width:18px;height:18px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3>Competitor Intelligence</h3>
+          <p>Analyse what topics drive engagement for channels in your niche. The AI surfaces content gaps and opportunities your competitors have missed.</p>
+        </div>
+        <div class="dna-card fade">
+          <div class="dna-glow" style="background:radial-gradient(ellipse,rgba(16,185,129,.25) 0%,transparent 70%)"></div>
+          <div class="dna-icon" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)"><svg viewBox="0 0 24 24" style="stroke:var(--gr);width:18px;height:18px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <h3>Channel DNA Matching</h3>
+          <p>Every discovered topic is scored against your Channel DNA. You only see ideas that fit your voice, audience, and content style, not generic recommendations.</p>
+        </div>
+      </div>
+      <div class="fade" style="text-align:center">
+        <div style="display:inline-flex;align-items:center;gap:14px;padding:16px 24px;border-radius:14px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);flex-wrap:wrap;justify-content:center">
+          <span style="font-family:var(--fm);font-size:.72rem;color:var(--am)">Content Finder is in active development. Business plan includes early access.</span>
+          <button class="btn btn-v" style="font-size:.76rem;padding:8px 16px;white-space:nowrap" onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})">Get Early Access</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TESTIMONIALS (★ NEW SECTION) ──────────────────────────────────── -->
+  <!-- Critical for investor deck: social proof from real creators -->
+  <section class="testimonials">
+    <div class="testi-inner">
+      <div class="section-head fade">
+        <div class="eyebrow">Creators Say</div>
+        <h2 class="sh">Built for people who ship content daily.</h2>
+        <p class="sub">Early beta testers on what changed when they switched to Prognot.</p>
+      </div>
+      <div class="testi-track-wrap">
+        <div class="testi-track" id="testiTrack">
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">The <strong>Director AI caught a drop in my hook engagement</strong> before I even
+              noticed. Told me exactly which clip patterns were underperforming and what to change.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#f472b6,#c084fc)">MK</div>
+              <div>
+                <div class="testi-name">Marcus K.</div>
+                <div class="testi-role">Podcast Creator · 180k subs</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">Other tools just clip randomly. Prognot actually understands my <strong>Channel
+                DNA</strong>. The clips it picks feel like I picked them myself.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#60a5fa,#34d399)">SL</div>
+              <div>
+                <div class="testi-name">Sofia L.</div>
+                <div class="testi-role">Interview Show · 95k subs</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">I manage 6 channels for clients. The <strong>9-step pipeline runs while I
+                sleep</strong>. I come in the morning to a full queue of ready-to-post clips.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#fbbf24,#f87171)">DJ</div>
+              <div>
+                <div class="testi-name">David J.</div>
+                <div class="testi-role">Content Agency · 6 clients</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">The <strong>8-dimension scoring</strong> changed how I think about content. I now
+              understand why certain clips perform. It's not guesswork anymore.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#a78bfa,#38bdf8)">AT</div>
+              <div>
+                <div class="testi-name">Ayasha T.</div>
+                <div class="testi-role">Faceless Channel · 240k subs</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">Went from spending <strong>4 hours editing clips to under 20 minutes</strong>
+              reviewing what Prognot already prepared. My output tripled in the first month.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#34d399,#60a5fa)">JR</div>
+              <div>
+                <div class="testi-name">James R.</div>
+                <div class="testi-role">Tech Podcast · 62k subs</div>
+              </div>
+            </div>
+          </div>
+          <!-- Duplicated for seamless loop -->
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">The <strong>Director AI caught a drop in my hook engagement</strong> before I even
+              noticed. Told me exactly which clip patterns were underperforming and what to change.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#f472b6,#c084fc)">MK</div>
+              <div>
+                <div class="testi-name">Marcus K.</div>
+                <div class="testi-role">Podcast Creator · 180k subs</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">Other tools just clip randomly. Prognot actually understands my <strong>Channel
+                DNA</strong>. The clips it picks feel like I picked them myself.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#60a5fa,#34d399)">SL</div>
+              <div>
+                <div class="testi-name">Sofia L.</div>
+                <div class="testi-role">Interview Show · 95k subs</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">I manage 6 channels for clients. The <strong>9-step pipeline runs while I
+                sleep</strong>. I come in the morning to a full queue of ready-to-post clips.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#fbbf24,#f87171)">DJ</div>
+              <div>
+                <div class="testi-name">David J.</div>
+                <div class="testi-role">Content Agency · 6 clients</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">The <strong>8-dimension scoring</strong> changed how I think about content. I now
+              understand why certain clips perform. It's not guesswork anymore.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#a78bfa,#38bdf8)">AT</div>
+              <div>
+                <div class="testi-name">Ayasha T.</div>
+                <div class="testi-role">Faceless Channel · 240k subs</div>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="testi-text">Went from spending <strong>4 hours editing clips to under 20 minutes</strong>
+              reviewing what Prognot already prepared. My output tripled in the first month.</div>
+            <div class="testi-author">
+              <div class="testi-av" style="background:linear-gradient(135deg,#34d399,#60a5fa)">JR</div>
+              <div>
+                <div class="testi-name">James R.</div>
+                <div class="testi-role">Tech Podcast · 62k subs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── COMPARE ────────────────────────────────────────────────────────── -->
+  <section class="compare" id="compare">
+    <div class="wrap">
+      <div class="section-head fade">
+        <div class="eyebrow">Comparison</div>
+        <h2 class="sh">Why creators switch.</h2>
+        <p class="sub">Prognot vs the tools people are already using.</p>
+      </div>
+      <div class="compare-box fade">
+        <table class="ct">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="oc">
+                <div class="oc-head"><span>Prognot AI</span><span class="oc-b">US</span></div>
+              </th>
+              <th>Basic AI Clippers</th>
+              <th>Traditional Editors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI Pipeline Steps</td>
+              <td class="oc"><strong style="color:#fff">9 steps</strong></td>
+              <td><span class="cp">2–3 steps</span></td>
+              <td><span class="cp">Manual</span></td>
+            </tr>
+            <tr>
+              <td>Director AI Agent</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cn">—</span></td>
+              <td><span class="cn">—</span></td>
+            </tr>
+            <tr>
+              <td>Channel DNA</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cn">—</span></td>
+              <td><span class="cn">—</span></td>
+            </tr>
+            <tr>
+              <td>Multi-Channel (20+)</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cn">—</span></td>
+              <td><span class="cn">—</span></td>
+            </tr>
+            <tr>
+              <td>8-Dim Viral Scoring</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cp">Basic score</span></td>
+              <td><span class="cn">—</span></td>
+            </tr>
+            <tr>
+              <td>AI Editor (auto)</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cn">—</span></td>
+              <td><span class="cp">Manual</span></td>
+            </tr>
+            <tr>
+              <td>Cloud Storage Included</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cp">Extra cost</span></td>
+              <td><span class="cp">Limited</span></td>
+            </tr>
+            <tr>
+              <td>Word-boundary Cuts</td>
+              <td class="oc"><span class="cy">✓</span></td>
+              <td><span class="cp">Approximate</span></td>
+              <td><span class="cy">✓</span></td>
+            </tr>
+            <tr>
+              <td>Avg. Processing Time</td>
+              <td class="oc"><strong style="color:#fff">&lt; 2 min</strong></td>
+              <td><span class="cp">&lt; 5 min</span></td>
+              <td><span class="cp">30+ min</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ (★ NEW SECTION) ───────────────────────────────────────────── -->
+  <!-- Was completely missing — investors & users always scroll to FAQ -->
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="section-head fade">
+        <div class="eyebrow">FAQ</div>
+        <h2 class="sh">Questions answered.</h2>
+      </div>
+      <div class="faq-list fade" id="faqList">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How is Prognot different from other AI clippers?<div
+              class="faq-icon"><svg viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg></div>
+          </div>
+          <div class="faq-a">
+            <div class="faq-a-inner">Other AI tools focus on one or two things: clipping or basic editing. Prognot runs a full 9-step AI pipeline that includes Channel DNA learning, an autonomous Director AI agent monitoring your channels 24/7, and an 8-dimension viral scoring engine. It is not a clipper. It is a content operating system.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">What video formats and platforms are supported?<div
+              class="faq-icon"><svg viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg></div>
+          </div>
+          <div class="faq-a">
+            <div class="faq-a-inner">Prognot accepts any video format including MP4, MOV, MKV, and WebM. You can also
+              paste YouTube links directly. Output clips are optimised for YouTube Shorts, TikTok, Instagram Reels, and
+              LinkedIn Video. 4K export is included on all paid plans.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How does Channel DNA work?<div class="faq-icon"><svg
+                viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg></div>
+          </div>
+          <div class="faq-a">
+            <div class="faq-a-inner">When you connect a channel, Prognot analyses your existing content to extract tone,
+              pacing, vocabulary, content themes, and audience engagement patterns. This DNA is then used to calibrate
+              all clip selection, scoring, and Director AI recommendations specifically for your brand. The model
+              improves with every video you process.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">What is the Director AI and how often does it run?<div
+              class="faq-icon"><svg viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg></div>
+          </div>
+          <div class="faq-a">
+            <div class="faq-a-inner">The Director AI is an autonomous agent that runs on an hourly schedule, analysing
+              your channel's performance data, detecting anomalies (engagement drops, viral spikes, posting pattern
+              issues), and generating actionable recommendations. It has full context of your channel history and
+              Channel DNA. You receive a live dashboard that is always up to date, no manual triggers needed.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How fast is the pipeline? What are the real processing times?<div
+              class="faq-icon"><svg viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg></div>
+          </div>
+          <div class="faq-a">
+            <div class="faq-a-inner">A typical 60-minute podcast episode produces 7–12 scored and cut clips in under 2
+              minutes total. The pipeline runs all 9 steps including transcription, speaker recognition, multimodal clip
+              discovery, viral scoring, precision cutting, and cloud delivery in parallel where possible.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Is there a free plan? Do I need a credit card?<div
+              class="faq-icon"><svg viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg></div>
+          </div>
+          <div class="faq-a">
+            <div class="faq-a-inner">Yes. The Starter plan is free forever with 100 credits per month, enough to
+              process a few hours of video. No credit card required. Paid plans start at $19/month and include 2,000
+              credits, 4K export, Channel DNA for up to 3 channels, and full Director AI access.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── WAITLIST ────────────────────────────────────────────────────────── -->
+  <section class="waitlist" id="waitlist">
+    <div class="wrap">
+      <div class="wl-card fade">
+        <div class="wl-orb"></div>
+        <div class="wl-avs">
+          <div class="av-stack">
+            <div class="av av1">E</div>
+            <div class="av av2">M</div>
+            <div class="av av3">J</div>
+            <div class="av av4">K</div>
+            <div class="av avm">+43</div>
+          </div>
+          <div class="wl-count"><strong>47 creators</strong> waiting for early access</div>
+        </div>
+        <h2 class="sh">Be first in line.</h2>
+        <p class="sub">Join the waitlist for early access, a lifetime discount, and direct input on what we build next.
+        </p>
+        <form class="wl-form" onsubmit="handleWaitlist(event)">
+          <input type="email" class="wl-input" id="wlEmail" placeholder="your@email.com" required>
+          <button type="submit" class="wl-btn">Join Waitlist</button>
+        </form>
+        <div class="wl-note" id="wlMsg">No spam. Unsubscribe whenever.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRICING ────────────────────────────────────────────────────────── -->
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <div class="section-head fade">
+        <div class="eyebrow">Pricing</div>
+        <h2 class="sh">Start free. Scale when ready.</h2>
+        <p class="sub">Credit-based pricing. Use only what you need.</p>
+      </div>
+      <div class="pt-toggle fade">
+        <span class="pt-label">Monthly</span>
+        <label class="tw"><input type="checkbox" id="bt" onchange="toggleBilling()">
+          <div class="tw-track"></div>
+          <div class="tw-thumb"></div>
+        </label>
+        <span class="pt-label">Yearly</span>
+        <span class="save-pill">Save 20%</span>
+      </div>
+      <div class="pricing-grid">
+        <div class="pc pc-s fade">
+          <div class="pc-tier">Free</div>
+          <div class="pc-name">Starter</div>
+          <div class="pc-tag">Try the full pipeline. No commitment.</div>
+          <div class="pc-price"><sup>$</sup><span class="pv" data-m="0" data-y="0">0</span></div>
+          <div class="pc-period">forever free</div>
+          <div class="pc-div"></div>
+          <ul class="pc-feats">
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>100 credits / month
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>720p export
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Basic viral scoring
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>1 channel
+            </li>
+          </ul>
+          <button class="pc-btn">Get Started</button>
+        </div>
+        <div class="pc pc-p fade">
+          <div class="popular-badge">Most Popular</div>
+          <div class="pc-tier">Creator</div>
+          <div class="pc-name">Pro Creator</div>
+          <div class="pc-tag">For creators serious about growth.</div>
+          <div class="pc-price"><sup>$</sup><span class="pv" data-m="19" data-y="15">19</span></div>
+          <div class="pc-period">per month, billed monthly</div>
+          <div class="pc-div"></div>
+          <ul class="pc-feats">
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>2,000 credits / month
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>4K export + cloud storage
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Full 8-dim viral scoring
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Channel DNA (up to 3 channels)
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Director AI agent
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Priority processing
+            </li>
+          </ul>
+          <button class="pc-btn">Start Free Trial</button>
+        </div>
+        <div class="pc pc-a fade">
+          <div class="pc-tier">Business</div>
+          <div class="pc-name">Business</div>
+          <div class="pc-tag">For studios, agencies, and teams.</div>
+          <div class="pc-price"><sup>$</sup><span class="pv" data-m="99" data-y="79">99</span></div>
+          <div class="pc-period">per month, billed monthly</div>
+          <div class="pc-div"></div>
+          <ul class="pc-feats">
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>10,000 credits / month
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Everything in Pro
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>20+ channels
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Content Finder (early access)
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Team seats + API access
+            </li>
+            <li class="pf">
+              <div class="pfi"><svg viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg></div>Dedicated onboarding
+            </li>
+          </ul>
+          <button class="pc-btn"
+            onclick="window.location.href='mailto:akram@prognot.com?subject=Business Plan'">akram@prognot.com →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─────────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="f-logo">
+          <div class="lmark" style="width:24px;height:24px;border-radius:6px"><svg viewBox="0 0 24 24"
+              style="width:12px;height:12px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" />
+            </svg></div>Prognot AI
+        </div>
+        <p class="f-desc">The most advanced AI pipeline for video repurposing. Built for creators who take content
+          seriously.</p>
+      </div>
+      <div class="f-col">
+        <h4>Product</h4><a href="#pipeline">9-Step Pipeline</a><a href="#director">Director AI</a><a
+          href="#scoring">Viral Scoring</a><a href="#dna">Channel DNA</a><a href="#">Content Finder <span
+            class="fsoon">Soon</span></a>
+      </div>
+      <div class="f-col">
+        <h4>Use Cases</h4><a href="#">Podcast Creators</a><a href="#">Content Agencies</a><a href="#">Faceless
+          Channels</a><a href="#">Interview Shows</a>
+      </div>
+      <div class="f-col">
+        <h4>Company</h4><a href="#">About</a><a href="#">Changelog</a><a href="#waitlist">Join Waitlist</a><a
+          href="mailto:akram@prognot.com">akram@prognot.com</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="f-copy">© 2026 Prognot AI. All rights reserved.</div>
+      <div class="f-links"><a href="#">Privacy</a><a href="#">Terms</a></div>
+    </div>
+  </footer>
+
+  <!-- ─── STICKY BAR (★ NEW — the floating bottom CTA from OpusClip) ──── -->
+  <div class="sticky-bar" id="stickyBar">
+    <div class="sb-text"><span class="sb-dot"></span>Try Prognot free</div>
+    <input type="text" class="sb-input" placeholder="Paste a YouTube link…">
+    <button class="sb-btn" onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})">Get Free
+      Clips →</button>
+    <div class="sb-close" onclick="document.getElementById('stickyBar').style.display='none'">✕</div>
+  </div>
+
+  <script>
+    /* ─── SCROLL PROGRESS + NAV ──────────────────────────────────────────── */
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      document.getElementById('sp').style.width = pct + '%';
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 30);
+      // Show sticky bar after 300px scroll
+      document.getElementById('stickyBar').classList.toggle('visible', window.scrollY > 300);
+    }, { passive: true });
+
+    /* ─── FADE IN ON SCROLL ──────────────────────────────────────────────── */
+    const rio = new IntersectionObserver((entries) => {
+      entries.forEach((el, i) => { if (el.isIntersecting) { setTimeout(() => el.target.classList.add('in'), i * 80); rio.unobserve(el.target); } });
+    }, { threshold: .1 });
+    document.querySelectorAll('.fade').forEach(el => rio.observe(el));
+
+    /* ─── COUNT-UP ANIMATION ─────────────────────────────────────────────── */
+    function animCount(el) {
+      const t = parseInt(el.dataset.target), s = el.dataset.suffix || '', dur = 1800, st = performance.now();
+      (function step(n) {
+        const p = Math.min((n - st) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(e * t) + s; if (p < 1) requestAnimationFrame(step);
+      })(st);
+    }
+    const cio = new IntersectionObserver((e) => { e.forEach(el => { if (el.isIntersecting) { animCount(el.target); cio.unobserve(el.target); } }); }, { threshold: .5 });
+    document.querySelectorAll('[data-target]').forEach(el => cio.observe(el));
+
+    /* ─── SCORE BAR ANIMATION ────────────────────────────────────────────── */
+    const bio = new IntersectionObserver((e) => {
+      e.forEach(el => {
+        if (el.isIntersecting) {
+          el.target.querySelectorAll('.ax-f').forEach((b, i) => setTimeout(() => { b.style.width = b.dataset.w; }, i * 100));
+          bio.unobserve(el.target);
+        }
+      });
+    }, { threshold: .3 });
+    const sc = document.querySelector('.score-card'); if (sc) bio.observe(sc);
+
+    /* ─── WAVEFORM GENERATOR ─────────────────────────────────────────────── */
+    /* ★ NEW: Generates animated waveform bars for audio-related pipeline steps */
+    function buildWaveform() {
+      const c = document.getElementById('vizWaveform'); if (!c) return;
+      c.innerHTML = '';
+      const N = 42;
+      for (let i = 0; i < N; i++) {
+        const b = document.createElement('div');
+        b.className = 'wv-bar';
+        const h = 8 + Math.sin(i * .4) * 14 + Math.random() * 22;
+        b.style.setProperty('--h', Math.round(h) + 'px');
+        b.style.setProperty('--d', (0.5 + Math.random() * .8).toFixed(2) + 's');
+        b.style.animationDelay = (i * .04).toFixed(2) + 's';
+        c.appendChild(b);
+      }
+    }
+    buildWaveform();
+
+    /* ─── PIPELINE PANEL DATA ────────────────────────────────────────────── */
+    const pd = [
+      {
+        s: '01/09', n: 'Audio Extract', d: 'Prognot isolates the audio stream with lossless precision. No re-encoding, no quality loss. Any video format is supported: variable framerates, corrupt containers, multi-channel audio all handled.', tags: ['lossless', 'any format', 'multi-channel'],
+        term: [{ t: 'ffmpeg -i input.mp4 -vn -acodec copy audio.aac', c: '' }, { t: '→ Stream copy mode (lossless)', c: 'i' }, { t: '✓  Audio isolated in 0.3s', c: '' }], showWave: true
+      },
+      {
+        s: '02/09', n: 'Transcribe', d: 'Word-level timestamps with confidence scores for every spoken word. Each word pinned to the exact millisecond; cuts never clip mid-syllable no matter how fast the speaker talks.', tags: ['word timestamps', 'ms precision', 'confidence scores'],
+        term: [{ t: 'prognot transcribe --precision word audio.aac', c: '' }, { t: '→ Transcribing with word-level alignment…', c: 'i' }, { t: '→ 3,241 words · 0.97 avg confidence', c: '' }, { t: '✓  Transcript ready', c: '' }], showWave: true
+      },
+      {
+        s: '03/09', n: 'Speaker Recognition', d: 'Every voice in the video automatically identified and labeled. No manual input required. The system distinguishes speakers and maps their contributions throughout.', tags: ['auto voice ID', 'no setup', 'full coverage'],
+        term: [{ t: 'prognot diarize --auto audio.aac', c: '' }, { t: '→ Speaker A detected (38.4 min)', c: 'i' }, { t: '→ Speaker B detected (21.6 min)', c: 'i' }, { t: '✓  2 speakers labeled', c: '' }], showWave: false
+      },
+      {
+        s: '04/09', n: 'Labeled Transcript', d: 'Speaker data, word timestamps, and your Channel DNA fused into a single rich document. Every downstream decision made with this full context loaded.', tags: ['Channel DNA fusion', 'speaker-aware', 'context-rich'],
+        term: [{ t: 'prognot merge --dna channel_123', c: '' }, { t: '→ Loading Channel DNA profile…', c: 'i' }, { t: '→ Fusing 3,241 words + 2 speakers', c: 'i' }, { t: '✓  Labeled transcript ready · 48KB', c: '' }], showWave: false
+      },
+      {
+        s: '05/09', n: 'Clip Discovery', d: "AI simultaneously analyses both video and transcript, detecting high energy moments, emotional peaks, visual events, and strong rhetorical hooks. Multimodal depth no single-model tool can match.", tags: ['video + text', 'multimodal', 'hook detection'],
+        term: [{ t: 'prognot discover --multimodal', c: '' }, { t: '→ Video analysis: 1,524 frames sampled', c: 'i' }, { t: '→ 31 candidate moments detected', c: 'i' }, { t: '⚠  5 below energy threshold — filtered', c: 'w' }, { t: '✓  26 candidates passed to scoring', c: '' }], showWave: false
+      },
+      {
+        s: '06/09', n: 'Batch Evaluation', d: 'Every candidate scored across 8 axes: humor, energy, revelation, controversy, quotability, completeness, hook strength, visual. Below-threshold clips filtered before any cutting happens.', tags: ['8-dim scoring', 'quality gate', 'channel-calibrated'],
+        term: [{ t: 'prognot score --batch candidates.json', c: '' }, { t: '→ Scoring 26 clips via LLM batch…', c: 'i' }, { t: '→ 8 clips score < 70 — filtered out', c: 'w' }, { t: '→ 18 clips passed · avg score 87.4', c: '' }, { t: '✓  Top 7 selected for precision cut', c: '' }], showWave: false
+      },
+      {
+        s: '07/09', n: 'Precision Cut', d: 'Cuts snapped to exact word boundaries from transcript timestamps, never mid-syllable. Lossless stream copy means zero quality degradation and near-instant processing.', tags: ['word-boundary snap', 'lossless', 'instant'],
+        term: [{ t: 'prognot cut --word-snap clips.json', c: '' }, { t: '→ Snapping to word boundaries…', c: 'i' }, { t: '→ 7 clips cut · avg duration 54s', c: '' }, { t: '✓  Cuts complete · no quality loss', c: '' }], showWave: false
+      },
+      {
+        s: '08/09', n: 'Export & Deliver', d: 'A single high-quality re-encode produces the final clip, optimised for social. Files uploaded to cloud. All metadata committed. Ready in under 2 minutes total.', tags: ['4K export', 'cloud delivery', 'social-ready'],
+        term: [{ t: 'prognot export --quality 4k --upload', c: '' }, { t: '→ Encoding 7 clips at 4K…', c: 'i' }, { t: '→ Uploading to cloud storage…', c: 'i' }, { t: '→ Metadata saved to database', c: '' }, { t: '✓  Done · total time: 94s', c: '' }], showWave: false
+      },
+      {
+        s: '09/09', n: 'AI Editor (Coming Soon)', d: 'The final step. Captions, b-roll, colour grading, and formatting handled automatically. A raw video goes from upload to fully post-produced short in under 2 minutes.', tags: ['auto captions', 'b-roll', 'colour grade', 'coming soon'],
+        term: [{ t: 'prognot editor --auto-produce clip.mp4', c: '' }, { t: '→ Generating captions with speaker styles…', c: 'i' }, { t: '→ Selecting b-roll from media library…', c: 'i' }, { t: '→ Applying colour grade: "Punchy"…', c: 'i' }, { t: '✓  Fully produced · ready to upload', c: '' }], showWave: false
+      },
+    ];
+
+    function setPP(i) {
+      const d = pd[i];
+      document.getElementById('ppStep').textContent = 'Step ' + d.s;
+      document.getElementById('ppName').textContent = d.n;
+      document.getElementById('ppDesc').textContent = d.d;
+      document.getElementById('ppTags').innerHTML = d.tags.map(t => `<span class="ptag">${t}</span>`).join('');
+      document.getElementById('vizWaveform').style.display = d.showWave ? 'flex' : 'none';
+      // Animate terminal lines
+      const hist = document.getElementById('vtHistory');
+      const typ = document.getElementById('vtTyping');
+      hist.innerHTML = ''; typ.textContent = '';
+      let li = 0, ci = 0;
+      clearInterval(window._ptInt);
+      function next() {
+        if (li >= d.term.length) return;
+        const line = d.term[li];
+        if (ci <= line.t.length) { typ.textContent = line.t.slice(0, ci); typ.className = 'vt-t ' + line.c; ci++; }
+        else {
+          const row = document.createElement('div'); row.className = 'vt-line';
+          row.innerHTML = `<span class="vt-p"> </span><span class="vt-t ${line.c}">${line.t}</span>`;
+          hist.appendChild(row); typ.textContent = ''; li++; ci = 0;
+        }
+      }
+      window._ptInt = setInterval(next, ci === 0 ? 400 : 18);
+    }
+
+    document.querySelectorAll('.pipe-step').forEach((s, i) => {
+      s.addEventListener('click', () => {
+        document.querySelectorAll('.pipe-step').forEach(x => x.classList.remove('active'));
+        s.classList.add('active'); setPP(i);
+      });
+    });
+    setPP(0);
+
+    /* ─── DIRECTOR TERMINAL ──────────────────────────────────────────────── */
+    const tlines = [
+      { t: 'director-agent --analyze --channel all', c: 'dim' },
+      { t: '→ Fetching 7-day performance data…', c: '' },
+      { t: '→ 14 jobs · 87 clips · avg score 89.4', c: 'i' },
+      { t: '→ Checking posting frequency patterns…', c: 'dim' },
+      { t: '⚠  Engagement drop on Channel #3 (–34%)', c: 'w', alert: { title: 'Anomaly Detected', msg: 'Channel #3 shows –34% engagement over 5 days. Hook length averaged 4.2s vs. 7.1s on top performers.', type: 'warn' } },
+      { t: '→ Likely cause: hook start buffer too short', c: '' },
+      { t: '→ Suggestion: extend clip start by 3–5s', c: '', sugg: 'Try adding 3–5 seconds before the hook. Your top 3 clips averaged 7.1s of context before the key moment.' },
+      { t: '→ Comparing reference clips…', c: 'dim' },
+      { t: '✓  3 matching reference clips identified', c: '' },
+      { t: '→ Report saved · next run in 58 min', c: 'mut' },
+      { t: '✓  All good. Director standing by.', c: '' },
+    ];
+    const tEl = document.getElementById('termTyping');
+    const tH = document.getElementById('termHistory');
+    let ti = 0, ci2 = 0;
+    function typeTerm() {
+      if (ti >= tlines.length) { setTimeout(() => { tH.innerHTML = ''; ti = 0; ci2 = 0; typeTerm(); }, 5000); return; }
+      const l = tlines[ti];
+      if (ci2 <= l.t.length) { tEl.textContent = l.t.slice(0, ci2); tEl.className = 't-t ' + l.c; ci2++; setTimeout(typeTerm, ci2 === 1 ? 350 : 20); }
+      else {
+        const d = document.createElement('div'); d.className = 't-line';
+        d.innerHTML = `<span class="t-p">${ti === 0 ? '$' : ' '}</span><span class="t-t ${l.c}">${l.t}</span>`;
+        tH.appendChild(d);
+        if (l.alert) {
+          const a = document.createElement('div'); a.className = 't-alert';
+          a.innerHTML = `<strong>${l.alert.title}</strong><br>${l.alert.msg}`; tH.appendChild(a);
+        }
+        if (l.sugg) {
+          const s = document.createElement('div'); s.className = 't-sugg'; s.textContent = l.sugg; tH.appendChild(s);
+        }
+        tEl.textContent = ''; ti++; ci2 = 0; setTimeout(typeTerm, ti === 1 ? 250 : 1100);
+      }
+    }
+    typeTerm();
+
+    /* ─── PRICING TOGGLE ─────────────────────────────────────────────────── */
+    function toggleBilling() {
+      const y = document.getElementById('bt').checked;
+      document.querySelectorAll('.pv').forEach(el => { el.textContent = y ? el.dataset.y : el.dataset.m; });
+      document.querySelectorAll('.pc-period').forEach(el => { if (!el.textContent.includes('forever')) el.textContent = y ? 'per month, billed yearly' : 'per month, billed monthly'; });
+    }
+
+    /* ─── FAQ ACCORDION ──────────────────────────────────────────────────── */
+    /* ★ NEW */
+    function toggleFaq(btn) {
+      const item = btn.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+
+    /* ─── MARQUEE LOOPS (RAF — seamless on any screen width) ────────────── */
+    (function(){
+      const logo=document.getElementById('logoTrack');
+      if(logo){const h=logo.scrollWidth/2;let p=0;(function t(){p+=0.4;if(p>=h)p-=h;logo.style.transform='translateX(-'+p+'px)';requestAnimationFrame(t);})();}
+      const testi=document.getElementById('testiTrack');
+      if(testi){const h=testi.scrollWidth/2;let p=0;(function t(){p+=0.38;if(p>=h)p-=h;testi.style.transform='translateX(-'+p+'px)';requestAnimationFrame(t);})();}
+    })();
+
+    /* ─── WAITLIST + HERO ────────────────────────────────────────────────── */
+    function handleWaitlist(e) {
+      e.preventDefault();
+      document.getElementById('wlMsg').textContent = "✓ You're on the list. We'll be in touch.";
+      document.getElementById('wlMsg').style.color = 'var(--gr)';
+      document.getElementById('wlEmail').value = '';
+    }
+    function handleHeroSubmit() { document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' }); }
+
+    /* ─── 3D CARD HOVER ──────────────────────────────────────────────────── */
+    document.querySelectorAll('.dna-card').forEach(c => {
+      c.addEventListener('mousemove', e => {
+        const r = c.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width - .5) * 8, y = ((e.clientY - r.top) / r.height - .5) * -8;
+        c.style.transform = `perspective(600px) rotateY(${x}deg) rotateX(${y}deg) translateY(-4px)`;
+      });
+      c.addEventListener('mouseleave', () => { c.style.transform = ''; });
+    });
+  </script>
+</body>
+
+</html>

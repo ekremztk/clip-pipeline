@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prognot AI — Your AI Content Director</title>
+<meta name="description" content="Not just a clipper. An 8-step AI pipeline with Director AI, Channel DNA, and viral scoring. Built for creators who take content seriously.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────
+   TOKENS
+──────────────────────────────────────── */
+:root {
+  --bg: #05050a;
+  --bg2: #08080f;
+  --card: rgba(255,255,255,.03);
+  --card-hover: rgba(255,255,255,.055);
+  --border: rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.12);
+
+  --violet: #7c3aed;
+  --violet-l: #a78bfa;
+  --violet-glow: rgba(124,58,237,.35);
+  --electric: #0ea5e9;
+  --electric-glow: rgba(14,165,233,.25);
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+
+  --text: #f8fafc;
+  --text-2: #94a3b8;
+  --text-3: #475569;
+  --text-4: #1e293b;
+
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --ease: cubic-bezier(.4,0,.2,1);
+  --spring: cubic-bezier(.34,1.56,.64,1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--violet); color: #fff; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--text-4); border-radius: 2px; }
+a { text-decoration: none; color: inherit; }
+button { font-family: var(--font-body); border: none; outline: none; cursor: pointer; }
+
+/* ── Noise overlay ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: .025;
+  mix-blend-mode: overlay;
+}
+
+/* ── Scroll progress ── */
+#sp {
+  position: fixed; top: 0; left: 0; height: 1px;
+  background: linear-gradient(90deg, var(--violet), var(--electric));
+  z-index: 1000; transition: width .08s linear;
+}
+
+/* ────────────────────────────────────────
+   GRID / LAYOUT
+──────────────────────────────────────── */
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.section-head { text-align: center; margin-bottom: 64px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: .68rem; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--violet-l); margin-bottom: 16px;
+}
+.eyebrow::before {
+  content: ''; width: 20px; height: 1px;
+  background: var(--violet-l); display: block;
+}
+h2 {
+  font-family: var(--font-head); font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1.1;
+  margin-bottom: 14px;
+}
+.sub {
+  font-size: 1rem; color: var(--text-2); max-width: 520px;
+  margin: 0 auto; line-height: 1.75;
+}
+
+/* ────────────────────────────────────────
+   CARD SYSTEM
+──────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  transition: border-color .35s var(--ease), background .35s var(--ease), transform .35s var(--ease);
+}
+.card:hover {
+  border-color: var(--border2);
+  background: var(--card-hover);
+}
+.card-glow {
+  position: relative;
+  overflow: hidden;
+}
+.card-glow::before {
+  content: '';
+  position: absolute; top: -60%; left: -20%; right: -20%;
+  height: 60%;
+  background: radial-gradient(ellipse, var(--violet-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ────────────────────────────────────────
+   NAV
+──────────────────────────────────────── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  height: 62px;
+  border-bottom: 1px solid transparent;
+  transition: border-color .4s, background .4s;
+}
+.nav.scrolled {
+  background: rgba(5,5,10,.85);
+  border-color: var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.nav-inner {
+  max-width: 1160px; margin: 0 auto; padding: 0 24px;
+  height: 100%; display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 9px; font-family: var(--font-head);
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -.03em;
+}
+.nav-logo-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--violet);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 18px var(--violet-glow);
+}
+.nav-logo-mark svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  font-size: .82rem; font-weight: 500; color: var(--text-3);
+  transition: color .25s; letter-spacing: -.01em;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-pill {
+  font-size: .58rem; font-weight: 700; letter-spacing: .08em;
+  background: rgba(124,58,237,.2); color: var(--violet-l);
+  padding: 2px 6px; border-radius: 4px; margin-left: 4px; vertical-align: middle;
+}
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 18px; border-radius: 9px; font-size: .8rem; font-weight: 600;
+  font-family: var(--font-body); transition: all .3s var(--ease);
+  letter-spacing: -.01em;
+}
+.btn-outline {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.btn-outline:hover { border-color: var(--border2); color: var(--text); }
+.btn-primary {
+  background: var(--violet); color: #fff;
+  box-shadow: 0 0 20px var(--violet-glow);
+}
+.btn-primary:hover { background: #6d28d9; box-shadow: 0 0 32px var(--violet-glow); transform: translateY(-1px); }
+.btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ────────────────────────────────────────
+   HERO
+──────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 120px 24px 80px; text-align: center;
+  position: relative; overflow: hidden;
+}
+
+/* Background grid */
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+/* Ambient glows */
+.hero-glow-1 {
+  position: absolute; z-index: 0; pointer-events: none;
+  width: 700px; height: 700px; border-radius: 50%;
+  top: 50%; left: 50%; transform: translate(-50%, -55%);
+  background: radial-gradient(circle, rgba(124,58,237,.18) 0%, transparent 65%);
+  filter: blur(40px);
+}
+.hero-glow-2 {
+  position: absolute; z-index: 0; pointer-events: none;
+  width: 400px; height: 400px; border-radius: 50%;
+  top: 60%; left: 70%;
+  background: radial-gradient(circle, rgba(14,165,233,.12) 0%, transparent 65%);
+  filter: blur(60px);
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 820px; }
+
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 5px 16px 5px 10px; border-radius: 100px;
+  background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.25);
+  font-family: var(--font-mono); font-size: .68rem; font-weight: 500;
+  color: var(--violet-l); margin-bottom: 28px;
+  animation: fadeUp .6s .1s both;
+}
+.tag-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 6px var(--green); animation: tagPulse 2s ease infinite;
+}
+@keyframes tagPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.hero h1 {
+  font-family: var(--font-head); font-weight: 800; letter-spacing: -.05em;
+  font-size: clamp(3rem, 8vw, 6rem); line-height: .98;
+  margin-bottom: 24px; animation: fadeUp .6s .2s both;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #c4b5fd 0%, var(--violet-l) 40%, var(--electric) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradPan 4s ease infinite;
+}
+@keyframes gradPan { 0%{background-position:0% center} 50%{background-position:100% center} 100%{background-position:0% center} }
+
+.hero-desc {
+  font-size: clamp(.95rem, 1.6vw, 1.12rem); color: var(--text-2);
+  max-width: 580px; margin: 0 auto 40px; line-height: 1.75;
+  animation: fadeUp .6s .3s both;
+}
+.hero-desc strong { color: var(--text); font-weight: 600; }
+
+/* Input row */
+.hero-form {
+  display: flex; gap: 8px; max-width: 560px; margin: 0 auto 20px;
+  animation: fadeUp .6s .4s both;
+}
+.hero-input {
+  flex: 1; padding: 13px 18px;
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  border-radius: 11px; color: var(--text); font-size: .9rem;
+  font-family: var(--font-body); outline: none; transition: border-color .3s;
+}
+.hero-input:focus { border-color: rgba(124,58,237,.4); }
+.hero-input::placeholder { color: var(--text-3); }
+.hero-form .btn-primary { padding: 13px 24px; font-size: .88rem; white-space: nowrap; }
+
+.hero-footnote {
+  font-size: .75rem; color: var(--text-3);
+  animation: fadeUp .6s .5s both;
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+}
+.hero-footnote span { display: flex; align-items: center; gap: 5px; }
+.hero-footnote svg { width: 11px; height: 11px; fill: none; stroke: var(--green); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Hero — Clip Strip ── */
+.clip-strip {
+  position: relative; z-index: 1; margin-top: 64px; overflow: hidden;
+  animation: fadeUp .8s .6s both;
+}
+.clip-strip::before, .clip-strip::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 160px; z-index: 2; pointer-events: none;
+}
+.clip-strip::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+.clip-strip::after { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
+.clip-row {
+  display: flex; gap: 14px; animation: stripScroll 22s linear infinite;
+  width: max-content;
+}
+.clip-row:hover { animation-play-state: paused; }
+.clip-thumb {
+  width: 120px; height: 213px; border-radius: 14px; overflow: hidden;
+  flex-shrink: 0; border: 1px solid var(--border); position: relative;
+  cursor: pointer; transition: transform .35s var(--spring), border-color .3s;
+}
+.clip-thumb:hover { transform: scale(1.04) translateY(-4px); border-color: var(--border2); }
+.clip-bg { position: absolute; inset: 0; }
+.clip-overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 10px;
+  background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 60%);
+}
+.clip-score-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 6px;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
+  font-family: var(--font-mono); font-size: .62rem; font-weight: 500; color: #fff;
+  width: fit-content;
+}
+.score-dot { width: 5px; height: 5px; border-radius: 50%; }
+.clip-duration {
+  font-family: var(--font-mono); font-size: .58rem; color: rgba(255,255,255,.6);
+  margin-top: 3px;
+}
+@keyframes stripScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* Clip color palettes */
+.cp1 { background: linear-gradient(160deg, #1a0533 0%, #2d1458 50%, #0f2040 100%); }
+.cp2 { background: linear-gradient(160deg, #0f1a2e 0%, #1a2d4a 50%, #0a1520 100%); }
+.cp3 { background: linear-gradient(160deg, #1a1a0a 0%, #2d2d0f 50%, #0f1a0a 100%); }
+.cp4 { background: linear-gradient(160deg, #1a0a0a 0%, #2d0f0f 50%, #0f0a0a 100%); }
+.cp5 { background: linear-gradient(160deg, #0a1a1a 0%, #0f2d2d 50%, #051515 100%); }
+.cp6 { background: linear-gradient(160deg, #1a0a1a 0%, #2d0f2d 50%, #0a050a 100%); }
+
+/* ────────────────────────────────────────
+   STATS BAR
+──────────────────────────────────────── */
+.stats-bar {
+  padding: 64px 24px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stats-inner {
+  max-width: 900px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.stat-item {
+  padding: 24px 20px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--font-head); font-size: 2.4rem; font-weight: 800;
+  letter-spacing: -.05em; line-height: 1;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #fff 0%, var(--text-2) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.stat-label { font-size: .75rem; color: var(--text-3); font-weight: 500; letter-spacing: .02em; }
+/* DATA: Replace these numbers with real Supabase stats */
+/* stat values are set in data-target attributes */
+
+/* ────────────────────────────────────────
+   PIPELINE SECTION
+──────────────────────────────────────── */
+.pipeline { padding: 100px 24px; }
+
+.pipe-layout {
+  display: grid; grid-template-columns: 380px 1fr; gap: 48px;
+  align-items: start;
+}
+.pipe-steps { display: flex; flex-direction: column; gap: 4px; }
+.pipe-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 16px; border-radius: 14px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .3s var(--ease);
+}
+.pipe-step:hover { background: rgba(255,255,255,.025); border-color: var(--border); }
+.pipe-step.active { background: rgba(124,58,237,.07); border-color: rgba(124,58,237,.2); }
+
+.pipe-step-num {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: .65rem; font-weight: 500;
+  background: rgba(255,255,255,.05); color: var(--text-3);
+  border: 1px solid var(--border);
+  transition: all .3s; margin-top: 1px;
+}
+.pipe-step.active .pipe-step-num {
+  background: var(--violet); color: #fff; border-color: transparent;
+  box-shadow: 0 0 14px var(--violet-glow);
+}
+.pipe-step-text { flex: 1; }
+.pipe-step-name {
+  font-size: .88rem; font-weight: 600; color: var(--text-2);
+  transition: color .3s; margin-bottom: 2px; letter-spacing: -.02em;
+}
+.pipe-step.active .pipe-step-name { color: var(--text); }
+.pipe-step-sub { font-family: var(--font-mono); font-size: .62rem; color: var(--text-3); }
+
+/* Right panel */
+.pipe-panel {
+  position: sticky; top: 80px;
+  border-radius: 22px; padding: 36px;
+  min-height: 400px; display: flex; flex-direction: column; gap: 20px;
+  background: linear-gradient(145deg, rgba(124,58,237,.07) 0%, rgba(14,165,233,.03) 100%);
+  border: 1px solid rgba(124,58,237,.15);
+  transition: all .4s var(--ease);
+}
+.pipe-panel-header { display: flex; align-items: flex-start; gap: 14px; }
+.pipe-panel-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.pipe-panel-icon svg { width: 22px; height: 22px; fill: none; stroke: var(--violet-l); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pipe-panel-step { font-family: var(--font-mono); font-size: .62rem; color: var(--violet-l); margin-bottom: 4px; }
+.pipe-panel-name { font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; letter-spacing: -.03em; }
+.pipe-panel-desc { font-size: .88rem; color: var(--text-2); line-height: 1.72; }
+.pipe-panel-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.pipe-tag {
+  padding: 4px 10px; border-radius: 6px;
+  font-family: var(--font-mono); font-size: .62rem; font-weight: 400;
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+/* ────────────────────────────────────────
+   DIRECTOR AI SECTION
+──────────────────────────────────────── */
+.director { padding: 100px 24px; }
+.director-layout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+.director-terminal-wrap {
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(16,185,129,.15);
+  background: #08080f;
+  box-shadow: 0 0 60px rgba(16,185,129,.06);
+}
+.terminal-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 18px; background: rgba(255,255,255,.03);
+  border-bottom: 1px solid var(--border);
+}
+.t-dot { width: 9px; height: 9px; border-radius: 50%; }
+.t-dot.r { background: #ef4444; }
+.t-dot.y { background: #f59e0b; }
+.t-dot.g { background: #10b981; }
+.t-title { font-family: var(--font-mono); font-size: .66rem; color: var(--text-3); margin-left: 8px; }
+.terminal-body { padding: 20px 22px; min-height: 280px; font-family: var(--font-mono); font-size: .75rem; line-height: 1.8; }
+.t-line { display: flex; gap: 8px; margin-bottom: 2px; }
+.t-prompt { color: var(--text-3); flex-shrink: 0; }
+.t-text { color: var(--green); }
+.t-text.dim { color: var(--text-3); }
+.t-text.warn { color: var(--amber); }
+.t-text.info { color: var(--electric); }
+.t-text.error { color: var(--red); }
+.t-cursor { display: inline-block; width: 7px; height: 13px; background: var(--green); animation: blink .9s step-end infinite; vertical-align: middle; margin-left: 2px; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.director-text { }
+.director-text h2 { text-align: left; margin-bottom: 16px; }
+.director-text .sub { text-align: left; margin-left: 0; margin-bottom: 28px; }
+.director-feature {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px;
+}
+.dir-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.dir-icon svg { width: 16px; height: 16px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.di-violet { background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2); }
+.di-violet svg { stroke: var(--violet-l); }
+.di-green { background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.2); }
+.di-green svg { stroke: var(--green); }
+.di-electric { background: rgba(14,165,233,.1); border: 1px solid rgba(14,165,233,.2); }
+.di-electric svg { stroke: var(--electric); }
+.dir-label { font-weight: 600; font-size: .88rem; margin-bottom: 2px; }
+.dir-desc { font-size: .8rem; color: var(--text-2); line-height: 1.55; }
+
+/* ────────────────────────────────────────
+   CHANNEL DNA
+──────────────────────────────────────── */
+.dna { padding: 100px 24px; background: linear-gradient(180deg, transparent, rgba(124,58,237,.04), transparent); }
+.dna-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto; }
+.dna-card { padding: 28px; border-radius: 18px; position: relative; overflow: hidden; }
+.dna-card-glow {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 100px;
+  background: radial-gradient(ellipse, var(--glow-color, var(--violet-glow)) 0%, transparent 70%);
+  pointer-events: none;
+}
+.dna-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.dna-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dna-card h3 { font-family: var(--font-head); font-size: 1rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+.dna-card p { font-size: .8rem; color: var(--text-2); line-height: 1.65; }
+
+/* ────────────────────────────────────────
+   SCORE SECTION
+──────────────────────────────────────── */
+.scoring { padding: 100px 24px; }
+.score-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.score-visual { }
+.score-card {
+  border-radius: 22px; padding: 32px;
+  background: linear-gradient(145deg, rgba(14,165,233,.06) 0%, rgba(124,58,237,.04) 100%);
+  border: 1px solid rgba(14,165,233,.12);
+}
+.score-headline {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;
+}
+.score-big {
+  font-family: var(--font-head); font-size: 4rem; font-weight: 800; letter-spacing: -.06em;
+  line-height: 1; color: var(--electric);
+  text-shadow: 0 0 30px var(--electric-glow);
+}
+.score-big span { font-size: 1.4rem; opacity: .5; font-weight: 400; }
+.score-verdict {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.verdict-tag {
+  padding: 5px 12px; border-radius: 8px; font-size: .68rem; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.verdict-post { background: rgba(16,185,129,.12); color: var(--green); border: 1px solid rgba(16,185,129,.2); }
+.verdict-dim { font-size: .72rem; color: var(--text-3); font-family: var(--font-mono); }
+
+.score-axes { display: flex; flex-direction: column; gap: 10px; }
+.score-axis { display: flex; align-items: center; gap: 12px; }
+.axis-label { font-size: .75rem; font-weight: 500; color: var(--text-2); width: 90px; flex-shrink: 0; }
+.axis-bar-bg { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); overflow: hidden; }
+.axis-bar { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(.4,0,.2,1); width: 0; }
+.axis-val { font-family: var(--font-mono); font-size: .68rem; color: var(--text-3); width: 28px; text-align: right; flex-shrink: 0; }
+
+/* DATA: Replace axis values with real scoring data from a clip */
+.ax1 .axis-bar { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.ax2 .axis-bar { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+.ax3 .axis-bar { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+.ax4 .axis-bar { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+.ax5 .axis-bar { background: linear-gradient(90deg, #ec4899, #f9a8d4); }
+.ax6 .axis-bar { background: linear-gradient(90deg, #6366f1, #a5b4fc); }
+.ax7 .axis-bar { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+.ax8 .axis-bar { background: linear-gradient(90deg, #8b5cf6, #0ea5e9); }
+
+.score-text {}
+.score-text h2 { text-align: left; }
+.score-text .sub { text-align: left; margin-left: 0; margin-bottom: 28px; }
+.score-points { display: flex; flex-direction: column; gap: 14px; }
+.score-point { display: flex; align-items: flex-start; gap: 10px; font-size: .85rem; color: var(--text-2); line-height: 1.55; }
+.score-point::before { content: '→'; color: var(--violet-l); flex-shrink: 0; font-family: var(--font-mono); font-size: .8rem; margin-top: 1px; }
+
+/* ────────────────────────────────────────
+   COMPARE TABLE
+──────────────────────────────────────── */
+.compare { padding: 100px 24px; }
+.compare-box { max-width: 860px; margin: 0 auto; }
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th {
+  padding: 12px 20px; text-align: left;
+  font-family: var(--font-mono); font-size: .66rem; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th.ours-col { color: var(--violet-l); }
+.compare-table th:not(:first-child) { text-align: center; }
+.compare-table td {
+  padding: 13px 20px; font-size: .82rem; color: var(--text-2);
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  transition: background .2s;
+}
+.compare-table td:not(:first-child) { text-align: center; }
+.compare-table tr:hover td { background: rgba(255,255,255,.015); }
+.ours-col { background: rgba(124,58,237,.04); }
+tr:hover .ours-col { background: rgba(124,58,237,.07) !important; }
+.y { color: var(--green); font-weight: 700; font-size: .9rem; }
+.n { color: rgba(255,255,255,.18); font-size: 1rem; }
+.p { color: var(--amber); font-size: .73rem; font-weight: 600; }
+.compare-ours-head { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.our-badge { font-size: .56rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--violet); color: #fff; padding: 2px 7px; border-radius: 4px; }
+
+/* ────────────────────────────────────────
+   REAL DATA SECTION
+──────────────────────────────────────── */
+.real-data { padding: 100px 24px; }
+.real-data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto; }
+.rd-card {
+  border-radius: 18px; padding: 28px; position: relative; overflow: hidden;
+}
+.rd-card .label {
+  font-family: var(--font-mono); font-size: .62rem; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px;
+}
+.rd-big {
+  font-family: var(--font-head); font-size: 2.6rem; font-weight: 800; letter-spacing: -.05em; line-height: 1;
+  margin-bottom: 6px;
+}
+.rd-sub { font-size: .78rem; color: var(--text-2); line-height: 1.5; }
+
+/* DATA: These cards hold real performance metrics from your channels */
+.rd-v { background: rgba(124,58,237,.07); border: 1px solid rgba(124,58,237,.14); }
+.rd-v .rd-big { background: linear-gradient(135deg, #c4b5fd, #7c3aed); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.rd-e { background: rgba(14,165,233,.06); border: 1px solid rgba(14,165,233,.13); }
+.rd-e .rd-big { background: linear-gradient(135deg, #38bdf8, #0ea5e9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.rd-g { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.13); }
+.rd-g .rd-big { background: linear-gradient(135deg, #6ee7b7, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* ────────────────────────────────────────
+   WAITLIST
+──────────────────────────────────────── */
+.waitlist { padding: 100px 24px; }
+.waitlist-inner {
+  max-width: 640px; margin: 0 auto; text-align: center;
+  border-radius: 28px; padding: 72px 48px;
+  background: linear-gradient(145deg, rgba(124,58,237,.07) 0%, rgba(14,165,233,.04) 100%);
+  border: 1px solid rgba(124,58,237,.2);
+  position: relative; overflow: hidden;
+}
+.waitlist-glow {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 300px; pointer-events: none;
+  background: radial-gradient(ellipse, rgba(124,58,237,.2) 0%, transparent 70%);
+  filter: blur(30px);
+}
+.wl-avatars { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
+.av-stack { display: flex; }
+.av { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--bg); margin-left: -8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: .65rem; font-weight: 700; }
+.av:first-child { margin-left: 0; }
+.av1 { background: linear-gradient(135deg, #f472b6, #c084fc); }
+.av2 { background: linear-gradient(135deg, #60a5fa, #34d399); }
+.av3 { background: linear-gradient(135deg, #fbbf24, #f87171); }
+.av4 { background: linear-gradient(135deg, #a78bfa, #38bdf8); }
+.av-more { background: rgba(255,255,255,.08); color: var(--text-3); font-size: .56rem; border: 1px solid var(--border); }
+/* DATA: Update avatar +N count and text as waitlist grows */
+.wl-count-text { font-size: .8rem; color: var(--text-2); }
+.wl-count-text strong { color: var(--text); }
+
+.waitlist-inner h2 { margin-bottom: 12px; }
+.waitlist-inner .sub { margin-bottom: 32px; }
+
+.wl-form { display: flex; gap: 8px; max-width: 440px; margin: 0 auto; position: relative; z-index: 1; }
+.wl-input {
+  flex: 1; padding: 13px 18px; background: rgba(255,255,255,.06);
+  border: 1px solid var(--border2); border-radius: 11px;
+  color: var(--text); font-family: var(--font-body); font-size: .88rem; outline: none;
+  transition: border-color .3s;
+}
+.wl-input:focus { border-color: rgba(124,58,237,.5); }
+.wl-input::placeholder { color: var(--text-3); }
+.wl-btn { padding: 13px 22px; background: var(--violet); color: #fff; border-radius: 11px; font-size: .86rem; font-weight: 700; font-family: var(--font-body); box-shadow: 0 0 24px var(--violet-glow); transition: all .3s; white-space: nowrap; }
+.wl-btn:hover { background: #6d28d9; box-shadow: 0 0 36px var(--violet-glow); transform: translateY(-1px); }
+.wl-note { margin-top: 12px; font-size: .72rem; color: var(--text-3); position: relative; z-index: 1; }
+
+/* ────────────────────────────────────────
+   PRICING
+──────────────────────────────────────── */
+.pricing { padding: 100px 24px; }
+.price-toggle { display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 48px; }
+.pt-label { font-size: .82rem; color: var(--text-2); font-weight: 500; }
+.toggle-wrap { position: relative; width: 42px; height: 22px; cursor: pointer; }
+.toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,.08); border-radius: 22px; border: 1px solid var(--border); transition: .3s; }
+.toggle-thumb { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; background: var(--text-3); transition: .3s; }
+.toggle-wrap input:checked ~ .toggle-track { background: rgba(124,58,237,.3); border-color: rgba(124,58,237,.5); }
+.toggle-wrap input:checked ~ .toggle-thumb { left: calc(100% - 17px); background: var(--violet-l); }
+.save-pill { padding: 3px 10px; border-radius: 100px; font-size: .65rem; font-weight: 700; background: rgba(16,185,129,.1); color: var(--green); border: 1px solid rgba(16,185,129,.2); }
+
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 940px; margin: 0 auto; }
+.price-card { padding: 32px 26px; border-radius: 22px; display: flex; flex-direction: column; }
+.pc-tier { font-family: var(--font-mono); font-size: .65rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+.pc-name { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; letter-spacing: -.03em; margin-bottom: 4px; }
+.pc-tagline { font-size: .78rem; color: var(--text-2); margin-bottom: 22px; line-height: 1.5; }
+.pc-price { font-family: var(--font-head); font-size: 2.8rem; font-weight: 800; letter-spacing: -.06em; line-height: 1; margin-bottom: 4px; }
+.pc-price sup { font-size: 1.1rem; font-weight: 500; letter-spacing: 0; vertical-align: super; }
+.pc-period { font-size: .72rem; color: var(--text-3); margin-bottom: 24px; }
+.pc-div { height: 1px; background: var(--border); margin-bottom: 20px; }
+.pc-features { list-style: none; flex: 1; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.pf { display: flex; align-items: flex-start; gap: 9px; font-size: .81rem; color: var(--text-2); line-height: 1.45; }
+.pf-icon { width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.pf-icon svg { width: 8px; height: 8px; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.pc-btn { width: 100%; padding: 12px; border-radius: 11px; font-size: .84rem; font-weight: 700; font-family: var(--font-body); transition: all .3s; letter-spacing: -.01em; }
+
+/* Starter */
+.pc-starter { background: var(--card); border: 1px solid var(--border); }
+.pc-starter .pf-icon { background: rgba(255,255,255,.07); }
+.pc-starter .pf-icon svg { stroke: var(--text-3); }
+.pc-starter .pc-btn { background: rgba(255,255,255,.07); color: var(--text); border: 1px solid var(--border); }
+.pc-starter .pc-btn:hover { background: rgba(255,255,255,.12); }
+
+/* Pro */
+.pc-pro {
+  background: linear-gradient(160deg, rgba(124,58,237,.1) 0%, rgba(14,165,233,.05) 100%);
+  border: 1px solid rgba(124,58,237,.25);
+  box-shadow: 0 0 60px rgba(124,58,237,.08);
+}
+.pc-popular { display: inline-block; padding: 4px 10px; border-radius: 6px; font-family: var(--font-mono); font-size: .58rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(124,58,237,.2); color: var(--violet-l); border: 1px solid rgba(124,58,237,.3); margin-bottom: 10px; }
+.pc-pro .pf-icon { background: rgba(124,58,237,.12); }
+.pc-pro .pf-icon svg { stroke: var(--violet-l); }
+.pc-pro .pc-btn { background: var(--violet); color: #fff; box-shadow: 0 0 22px var(--violet-glow); }
+.pc-pro .pc-btn:hover { background: #6d28d9; box-shadow: 0 0 34px var(--violet-glow); transform: translateY(-1px); }
+
+/* Agency */
+.pc-agency { background: rgba(14,165,233,.05); border: 1px solid rgba(14,165,233,.15); }
+.pc-agency .pf-icon { background: rgba(14,165,233,.1); }
+.pc-agency .pf-icon svg { stroke: var(--electric); }
+.pc-agency .pc-btn { background: rgba(14,165,233,.1); color: var(--electric); border: 1px solid rgba(14,165,233,.2); }
+.pc-agency .pc-btn:hover { background: rgba(14,165,233,.15); }
+
+/* ────────────────────────────────────────
+   FOOTER
+──────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border); padding: 56px 24px 36px;
+  position: relative; z-index: 1;
+}
+.footer-grid { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand {}
+.f-logo { display: flex; align-items: center; gap: 9px; font-family: var(--font-head); font-size: .95rem; font-weight: 700; letter-spacing: -.03em; margin-bottom: 14px; }
+.f-logo .nav-logo-mark { width: 26px; height: 26px; }
+.f-desc { font-size: .78rem; color: var(--text-3); line-height: 1.7; max-width: 280px; }
+.f-col h4 { font-family: var(--font-mono); font-size: .65rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 14px; }
+.f-col a { display: block; font-size: .8rem; color: var(--text-3); padding: 4px 0; transition: color .25s; }
+.f-col a:hover { color: var(--text); }
+.f-coming { font-family: var(--font-mono); font-size: .56rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; background: rgba(245,158,11,.1); color: var(--amber); padding: 2px 6px; border-radius: 3px; margin-left: 6px; }
+.footer-bottom { max-width: 1160px; margin: 0 auto; border-top: 1px solid var(--border); padding-top: 28px; display: flex; justify-content: space-between; align-items: center; }
+.footer-copy { font-size: .72rem; color: var(--text-3); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { font-size: .72rem; color: var(--text-3); transition: color .25s; }
+.footer-links a:hover { color: var(--text); }
+
+/* ────────────────────────────────────────
+   ANIMATIONS
+──────────────────────────────────────── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+.fade { opacity: 0; transform: translateY(24px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.fade.in { opacity: 1; transform: translateY(0); }
+
+/* ────────────────────────────────────────
+   RESPONSIVE
+──────────────────────────────────────── */
+@media(max-width:1024px){
+  .pipe-layout { grid-template-columns: 1fr; }
+  .pipe-panel { position: relative; top: 0; }
+  .director-layout { grid-template-columns: 1fr; }
+  .score-layout { grid-template-columns: 1fr; }
+  .score-text h2,.score-text .sub { text-align: center; margin-left: auto; }
+  .director-text h2,.director-text .sub { text-align: center; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+@media(max-width:768px){
+  .nav-links { display: none; }
+  .hero h1 { font-size: 3rem; }
+  .hero-form { flex-direction: column; }
+  .stats-inner { grid-template-columns: repeat(2,1fr); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .dna-grid { grid-template-columns: 1fr; }
+  .compare-table th:nth-child(4),.compare-table td:nth-child(4) { display: none; }
+  .real-data-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 380px; }
+  .waitlist-inner { padding: 48px 24px; }
+  .wl-form { flex-direction: column; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 14px; text-align: center; }
+}
+@media(max-width:480px){
+  .stats-inner { grid-template-columns: 1fr; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="sp"></div>
+
+<!-- NAV ────────────────────────────── -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      </div>
+      Prognot AI
+    </div>
+    <div class="nav-links">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#director">Director AI <span class="nav-pill">New</span></a>
+      <a href="#scoring">Scoring</a>
+      <a href="#compare">vs Opus Clip</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-outline">Log in</button>
+      <button class="btn btn-primary" onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})">
+        Join Waitlist
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO ────────────────────────────── -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">
+      <span class="tag-dot"></span>
+      Private Beta · 8-Step AI Pipeline
+    </div>
+
+    <h1>
+      The Content Director<br>
+      <em>your channel deserves.</em>
+    </h1>
+
+    <p class="hero-desc">
+      Opus Clip runs one model. Prognot orchestrates an <strong>8-step AI pipeline</strong> —
+      with speaker confirmation, <strong>Channel DNA</strong>, and a <strong>Director AI agent</strong>
+      that monitors your channels around the clock.
+    </p>
+
+    <div class="hero-form">
+      <input type="text" class="hero-input" placeholder="Paste a YouTube link to try it…" id="heroInput">
+      <button class="btn btn-primary" onclick="handleHeroSubmit()" style="padding:13px 26px;font-size:.9rem">
+        Try Free
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <p class="hero-footnote">
+      <span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> No credit card</span>
+      <span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Cancel anytime</span>
+      <span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Results in &lt; 2 min</span>
+    </p>
+  </div>
+
+  <!-- Clip strip: shows real generated clips scrolling past -->
+  <div class="clip-strip">
+    <div class="clip-row" id="clipRow">
+      <!-- DATA: Replace these dummy clips with real screenshots from your clip library -->
+      <!-- Each clip-thumb should show: actual thumbnail, real score, real duration -->
+      <div class="clip-thumb"><div class="clip-bg cp1"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>98</div><div class="clip-duration">0:47</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp2"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>95</div><div class="clip-duration">1:12</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp3"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>91</div><div class="clip-duration">0:38</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp4"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#f59e0b"></span>87</div><div class="clip-duration">1:04</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp5"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>93</div><div class="clip-duration">0:55</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp6"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#f59e0b"></span>84</div><div class="clip-duration">0:42</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp1"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>96</div><div class="clip-duration">1:18</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp3"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>90</div><div class="clip-duration">0:51</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp2"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#f59e0b"></span>82</div><div class="clip-duration">0:33</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp5"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>94</div><div class="clip-duration">1:07</div></div></div>
+      <!-- Duplicated for seamless loop -->
+      <div class="clip-thumb"><div class="clip-bg cp1"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>98</div><div class="clip-duration">0:47</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp2"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>95</div><div class="clip-duration">1:12</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp3"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>91</div><div class="clip-duration">0:38</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp4"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#f59e0b"></span>87</div><div class="clip-duration">1:04</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp5"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>93</div><div class="clip-duration">0:55</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp6"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#f59e0b"></span>84</div><div class="clip-duration">0:42</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp1"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>96</div><div class="clip-duration">1:18</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp3"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>90</div><div class="clip-duration">0:51</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp2"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#f59e0b"></span>82</div><div class="clip-duration">0:33</div></div></div>
+      <div class="clip-thumb"><div class="clip-bg cp5"></div><div class="clip-overlay"><div class="clip-score-badge"><span class="score-dot" style="background:#10b981"></span>94</div><div class="clip-duration">1:07</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS ────────────────────────────── -->
+<div class="stats-bar">
+  <!-- DATA: All four stats should come from Supabase — clips COUNT, avg processing seconds, pipeline steps (static: 8), channels COUNT -->
+  <div class="stats-inner">
+    <div class="stat-item fade">
+      <div class="stat-num" data-target="847" data-suffix="">0</div>
+      <div class="stat-label">Clips Generated</div>
+    </div>
+    <div class="stat-item fade">
+      <div class="stat-num" data-target="94" data-suffix="s">0</div>
+      <div class="stat-label">Avg. Processing Time</div>
+    </div>
+    <div class="stat-item fade">
+      <div class="stat-num" data-target="8" data-suffix="">0</div>
+      <div class="stat-label">Pipeline Steps</div>
+    </div>
+    <div class="stat-item fade">
+      <div class="stat-num" data-target="12" data-suffix="">0</div>
+      <div class="stat-label">Active Channels</div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE ────────────────────────────── -->
+<section class="pipeline" id="pipeline">
+  <div class="wrap">
+    <div class="section-head fade">
+      <div class="eyebrow">Architecture</div>
+      <h2>Eight steps. One system.</h2>
+      <p class="sub">Every clip is the output of an orchestrated pipeline — not a single model making one shot at it.</p>
+    </div>
+
+    <div class="pipe-layout">
+      <div class="pipe-steps" id="pipeSteps">
+        <!-- Steps are dynamically activated via JS -->
+        <div class="pipe-step active" data-idx="0">
+          <div class="pipe-step-num">S01</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Audio Extract</div>
+            <div class="pipe-step-sub">FFmpeg · lossless stream copy</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="1">
+          <div class="pipe-step-num">S02</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Transcribe</div>
+            <div class="pipe-step-sub">Deepgram Nova-2 · word timestamps</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="2">
+          <div class="pipe-step-num">S03</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Speaker ID</div>
+            <div class="pipe-step-sub">Diarization · human confirmation</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="3">
+          <div class="pipe-step-num">S04</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Labeled Transcript</div>
+            <div class="pipe-step-sub">Channel DNA fusion · context map</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="4">
+          <div class="pipe-step-num">S05</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Unified Discovery</div>
+            <div class="pipe-step-sub">Gemini Pro · video + text multimodal</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="5">
+          <div class="pipe-step-num">S06</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Batch Evaluation</div>
+            <div class="pipe-step-sub">8-dimension scoring · quality gate</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="6">
+          <div class="pipe-step-num">S07</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Precision Cut</div>
+            <div class="pipe-step-sub">FFmpeg · word boundary snap</div>
+          </div>
+        </div>
+        <div class="pipe-step" data-idx="7">
+          <div class="pipe-step-num">S08</div>
+          <div class="pipe-step-text">
+            <div class="pipe-step-name">Export & Deliver</div>
+            <div class="pipe-step-sub">H.264 4K · AAC 320k · R2 CDN</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-panel card-glow fade" id="pipePanel">
+        <div class="pipe-panel-header">
+          <div class="pipe-panel-icon" id="ppIcon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div>
+            <div class="pipe-panel-step" id="ppStep">Step 01 / 08</div>
+            <div class="pipe-panel-name" id="ppName">Audio Extract</div>
+          </div>
+        </div>
+        <div class="pipe-panel-desc" id="ppDesc">
+          Precision audio extraction from any video format. FFmpeg isolates the audio stream with lossless copy — no re-encoding, no quality loss. Handles variable framerates, corrupt containers, and multi-track audio.
+        </div>
+        <div class="pipe-panel-tags" id="ppTags">
+          <span class="pipe-tag">FFmpeg</span>
+          <span class="pipe-tag">-c copy</span>
+          <span class="pipe-tag">any format</span>
+          <span class="pipe-tag">lossless</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTOR AI ────────────────────────────── -->
+<section class="director" id="director" style="padding:100px 24px">
+  <div class="wrap">
+    <div class="director-layout">
+      <div class="director-terminal-wrap fade">
+        <div class="terminal-bar">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <div class="t-title">director-agent · prognot</div>
+        </div>
+        <!-- DATA: Terminal lines below simulate real Director AI output. Update with actual anomalies/suggestions from your system -->
+        <div class="terminal-body" id="termBody">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-text" id="termTyping"></span><span class="t-cursor" id="termCursor"></span></div>
+          <div id="termHistory"></div>
+        </div>
+      </div>
+
+      <div class="director-text fade">
+        <div class="eyebrow">Director AI</div>
+        <h2>Your channel's<br>autonomous agent.</h2>
+        <p class="sub" style="text-align:left;margin-left:0;margin-bottom:28px">
+          Not just a tool you run — an agent that runs for you.
+          Prognot's Director AI monitors your channel performance 24/7,
+          detects anomalies, and surfaces actionable insights before you even ask.
+        </p>
+
+        <div class="director-feature">
+          <div class="dir-icon di-violet"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <div>
+            <div class="dir-label">Proactive anomaly detection</div>
+            <div class="dir-desc">Hourly analysis catches engagement drops, viral spikes, and posting pattern issues — and tells you what to do about them.</div>
+          </div>
+        </div>
+        <div class="director-feature">
+          <div class="dir-icon di-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+          <div>
+            <!-- DATA: Replace "1h" with actual cron schedule from your config -->
+            <div class="dir-label">Runs every hour, automatically</div>
+            <div class="dir-desc">The Director runs on a schedule — no manual triggers needed. Your dashboard always has fresh intelligence waiting.</div>
+          </div>
+        </div>
+        <div class="director-feature">
+          <div class="dir-icon di-electric"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          <div>
+            <div class="dir-label">Deep analyses on demand</div>
+            <div class="dir-desc">Ask the Director anything about your channel. It has full context of your history, DNA, and past performance.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHANNEL DNA ────────────────────────────── -->
+<section class="dna" style="padding:100px 24px">
+  <div class="wrap">
+    <div class="section-head fade">
+      <div class="eyebrow">Channel DNA</div>
+      <h2>Every channel gets its own brain.</h2>
+      <p class="sub">Gemini learns your brand's tone, audience, and content strategy. Every pipeline decision is personalised — not generic.</p>
+    </div>
+    <div class="dna-grid">
+      <div class="dna-card card fade" style="--glow-color:rgba(124,58,237,.2)">
+        <div class="card-glow dna-card-glow"></div>
+        <div class="dna-icon" style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--violet-l)"><path d="M2 2l4 4M22 22l-4-4M8 8l8 8M16 8l-8 8M2 22l4-4M22 2l-4 4"/></svg>
+        </div>
+        <h3>Brand Persona</h3>
+        <!-- DATA: Replace example with actual DNA fields your system generates -->
+        <p>Define your tone, vocabulary, and off-limit topics. The AI respects your brand voice when scoring and selecting clips.</p>
+      </div>
+      <div class="dna-card card fade" style="--glow-color:rgba(14,165,233,.18)">
+        <div class="card-glow dna-card-glow"></div>
+        <div class="dna-icon" style="background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--electric)"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Audience Context</h3>
+        <p>Who is your audience? Their age, interests, and cultural references influence which moments the pipeline rates as highly engaging.</p>
+      </div>
+      <div class="dna-card card fade" style="--glow-color:rgba(16,185,129,.18)">
+        <div class="card-glow dna-card-glow"></div>
+        <div class="dna-icon" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--green)"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Performance Memory</h3>
+        <!-- DATA: This references your viral_library and director_memories tables -->
+        <p>The system remembers which clip styles performed best on your channel. It gets sharper over time — not just on the first run.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIRAL SCORING ────────────────────────────── -->
+<section class="scoring" id="scoring" style="padding:100px 24px">
+  <div class="wrap">
+    <div class="score-layout">
+      <div class="score-visual fade">
+        <!-- DATA: Replace score values (data-w attributes) with a real clip's scores from your system -->
+        <!-- Real clip title could be added here too -->
+        <div class="score-card">
+          <div class="score-headline">
+            <div>
+              <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-3);margin-bottom:8px">CLIP SCORE · SAMPLE OUTPUT</div>
+              <div class="score-big">96<span>/100</span></div>
+            </div>
+            <div class="score-verdict">
+              <div class="verdict-tag verdict-post">Post it</div>
+              <!-- DATA: Show real clip category from your system -->
+              <div class="verdict-dim">humor · revelation</div>
+            </div>
+          </div>
+          <div class="score-axes">
+            <div class="score-axis ax1"><div class="axis-label">Humor</div><div class="axis-bar-bg"><div class="axis-bar" data-w="88%"></div></div><div class="axis-val">88</div></div>
+            <div class="score-axis ax2"><div class="axis-label">Energy</div><div class="axis-bar-bg"><div class="axis-bar" data-w="95%"></div></div><div class="axis-val">95</div></div>
+            <div class="score-axis ax3"><div class="axis-label">Revelation</div><div class="axis-bar-bg"><div class="axis-bar" data-w="72%"></div></div><div class="axis-val">72</div></div>
+            <div class="score-axis ax4"><div class="axis-label">Hook</div><div class="axis-bar-bg"><div class="axis-bar" data-w="91%"></div></div><div class="axis-val">91</div></div>
+            <div class="score-axis ax5"><div class="axis-label">Quotability</div><div class="axis-bar-bg"><div class="axis-bar" data-w="80%"></div></div><div class="axis-val">80</div></div>
+            <div class="score-axis ax6"><div class="axis-label">Visual</div><div class="axis-bar-bg"><div class="axis-bar" data-w="76%"></div></div><div class="axis-val">76</div></div>
+            <div class="score-axis ax7"><div class="axis-label">Controversy</div><div class="axis-bar-bg"><div class="axis-bar" data-w="60%"></div></div><div class="axis-val">60</div></div>
+            <div class="score-axis ax8"><div class="axis-label">Complete</div><div class="axis-bar-bg"><div class="axis-bar" data-w="84%"></div></div><div class="axis-val">84</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-text fade">
+        <div class="eyebrow">Viral Scoring</div>
+        <h2>Not one score.<br>Eight dimensions.</h2>
+        <p class="sub" style="text-align:left;margin-left:0;margin-bottom:28px">A single "viral score" doesn't tell you why a clip will perform. Prognot breaks it down — so you know exactly what's working and what to improve.</p>
+        <div class="score-points">
+          <div class="score-point">Scores on humor, energy, revelation, hook strength, quotability, visual quality, controversy, and completeness.</div>
+          <div class="score-point">Clips below a quality threshold are filtered before cutting — saving your storage and your time.</div>
+          <div class="score-point">The scoring model is aware of your Channel DNA, so "high scoring" means high-scoring <em>for your audience</em>.</div>
+          <div class="score-point">Every score comes with a natural language explanation. Know why, not just what.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REAL DATA FROM YOUR CHANNELS ────────────────────────────── -->
+<section class="real-data" style="padding:80px 24px">
+  <div class="wrap">
+    <div class="section-head fade">
+      <div class="eyebrow">Real Results</div>
+      <h2>From our own channels.</h2>
+      <p class="sub">Prognot is built on real production data. These aren't benchmarks — they're from the channels we run it on every day.</p>
+    </div>
+    <!-- DATA: All three cards should be populated with real data from your Supabase + your actual YouTube channels -->
+    <div class="real-data-grid">
+      <div class="rd-card rd-v fade">
+        <div class="label">Clips Approved Rate</div>
+        <!-- DATA: (approved clips / total clips generated) * 100 -->
+        <div class="rd-big">73%</div>
+        <div class="rd-sub">of AI-generated clips pass our internal quality review — vs. industry avg of ~40% for basic tools.</div>
+      </div>
+      <div class="rd-card rd-e fade">
+        <div class="label">Avg. Score on Posted Clips</div>
+        <!-- DATA: AVG(score) WHERE approved=true from your clips table -->
+        <div class="rd-big">91.4</div>
+        <div class="rd-sub">Average viral score across all clips that were reviewed and posted to social channels.</div>
+      </div>
+      <div class="rd-card rd-g fade">
+        <div class="label">Processing Time</div>
+        <!-- DATA: AVG(completed_at - created_at) from jobs table, in seconds -->
+        <div class="rd-big">&lt; 2m</div>
+        <div class="rd-sub">From raw video to scored, ready-to-post clips — on a standard 60-minute podcast episode.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE ────────────────────────────── -->
+<section class="compare" id="compare" style="padding:80px 24px 100px">
+  <div class="wrap">
+    <div class="section-head fade">
+      <div class="eyebrow">Comparison</div>
+      <h2>Why creators switch.</h2>
+      <p class="sub">Feature-for-feature against the tools people are already using.</p>
+    </div>
+    <div class="compare-box fade">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="ours-col"><div class="compare-ours-head"><span>Prognot AI</span><span class="our-badge">US</span></div></th>
+            <th>Opus Clip</th>
+            <th>Descript</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AI Pipeline Steps</td><td class="ours-col"><strong style="color:#fff">8 steps</strong></td><td><span class="p">3 steps</span></td><td><span class="p">2 steps</span></td></tr>
+          <tr><td>Director AI Agent</td><td class="ours-col"><span class="y">✓</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td></tr>
+          <tr><td>Channel DNA</td><td class="ours-col"><span class="y">✓</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td></tr>
+          <tr><td>Speaker Confirmation</td><td class="ours-col"><span class="y">✓</span></td><td><span class="n">—</span></td><td><span class="p">Basic</span></td></tr>
+          <tr><td>Multi-Channel (20+)</td><td class="ours-col"><span class="y">✓</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td></tr>
+          <tr><td>8-Dim Viral Scoring</td><td class="ours-col"><span class="y">✓</span></td><td><span class="p">Basic</span></td><td><span class="n">—</span></td></tr>
+          <tr><td>Content Finder</td><td class="ours-col"><span class="y">✓</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td></tr>
+          <tr><td>Cloud Storage Included</td><td class="ours-col"><span class="y">✓ R2</span></td><td><span class="p">Extra cost</span></td><td><span class="p">Limited</span></td></tr>
+          <tr><td>Word-boundary Cuts</td><td class="ours-col"><span class="y">✓</span></td><td><span class="p">Approx.</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td>Avg. Processing Time</td><td class="ours-col"><strong style="color:#fff">&lt; 2 min</strong></td><td><span class="p">&lt; 5 min</span></td><td><span class="p">Manual</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST ────────────────────────────── -->
+<section class="waitlist" id="waitlist">
+  <div class="wrap">
+    <div class="waitlist-inner fade">
+      <div class="waitlist-glow"></div>
+
+      <!-- DATA: Update avatar count and "47 creators" text dynamically as waitlist grows -->
+      <div class="wl-avatars">
+        <div class="av-stack">
+          <div class="av av1">E</div>
+          <div class="av av2">M</div>
+          <div class="av av3">J</div>
+          <div class="av av4">K</div>
+          <div class="av av-more">+43</div>
+        </div>
+        <div class="wl-count-text"><strong>47 creators</strong> waiting for early access</div>
+      </div>
+
+      <h2>Be first in line.</h2>
+      <p class="sub">Join the waitlist and get early access, a lifetime discount, and direct input on what we build next.</p>
+
+      <form class="wl-form" onsubmit="handleWaitlist(event)">
+        <input type="email" class="wl-input" id="wlEmail" placeholder="your@email.com" required>
+        <button type="submit" class="wl-btn">Join Waitlist</button>
+      </form>
+      <div class="wl-note" id="wlMsg">No spam. Unsubscribe whenever you want.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING ────────────────────────────── -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="section-head fade">
+      <div class="eyebrow">Pricing</div>
+      <h2>Start free. Scale when ready.</h2>
+      <p class="sub">No hidden fees. No per-export charges. Just one clean price for everything.</p>
+    </div>
+
+    <div class="price-toggle fade">
+      <span class="pt-label">Monthly</span>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="bt" onchange="toggleBilling()">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span class="pt-label">Yearly</span>
+      <span class="save-pill">Save 20%</span>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="price-card pc-starter fade">
+        <div class="pc-tier">Free</div>
+        <div class="pc-name">Starter</div>
+        <div class="pc-tagline">Try the pipeline. No commitment.</div>
+        <div class="pc-price"><sup>$</sup><span class="pv" data-m="0" data-y="0">0</span></div>
+        <div class="pc-period">forever free</div>
+        <div class="pc-div"></div>
+        <ul class="pc-features">
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>60 min / month</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>720p export</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Basic viral score</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>1 channel</li>
+        </ul>
+        <button class="pc-btn">Get Started</button>
+      </div>
+
+      <div class="price-card pc-pro fade">
+        <div class="pc-popular">Most Popular</div>
+        <div class="pc-tier">Creator</div>
+        <div class="pc-name">Pro Creator</div>
+        <div class="pc-tagline">For serious content businesses.</div>
+        <div class="pc-price"><sup>$</sup><span class="pv" data-m="29" data-y="23">29</span></div>
+        <div class="pc-period">per month, billed monthly</div>
+        <div class="pc-div"></div>
+        <ul class="pc-features">
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited minutes</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>4K export + R2 storage</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Full 8-dim scoring</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Channel DNA</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Director AI agent</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Up to 5 channels</li>
+        </ul>
+        <button class="pc-btn">Start Free Trial</button>
+      </div>
+
+      <div class="price-card pc-agency fade">
+        <div class="pc-tier">Team</div>
+        <div class="pc-name">Agency</div>
+        <div class="pc-tagline">For content studios and agencies.</div>
+        <div class="pc-price"><sup>$</sup><span class="pv" data-m="99" data-y="79">99</span></div>
+        <div class="pc-period">per month, billed monthly</div>
+        <div class="pc-div"></div>
+        <ul class="pc-features">
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Everything in Pro</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>20+ channels</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Team access</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Content Finder</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>API access</li>
+          <li class="pf"><div class="pf-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Priority support</li>
+        </ul>
+        <button class="pc-btn">Contact Sales</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER ────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="f-logo">
+        <div class="nav-logo-mark">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        Prognot AI
+      </div>
+      <p class="f-desc">The most advanced AI pipeline for video repurposing. Built for creators who take content seriously.</p>
+    </div>
+    <div class="f-col">
+      <h4>Product</h4>
+      <a href="#pipeline">8-Step Pipeline</a>
+      <a href="#director">Director AI</a>
+      <a href="#scoring">Viral Scoring</a>
+      <a href="#">Channel DNA</a>
+      <a href="#">Content Finder <span class="f-coming">Soon</span></a>
+    </div>
+    <div class="f-col">
+      <h4>Use Cases</h4>
+      <a href="#">Podcast Creators</a>
+      <a href="#">Content Agencies</a>
+      <a href="#">Faceless Channels</a>
+      <a href="#">Interview Shows</a>
+    </div>
+    <div class="f-col">
+      <h4>Company</h4>
+      <a href="#">About</a>
+      <a href="#">Changelog</a>
+      <a href="#waitlist">Join Waitlist</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 Prognot AI. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Scroll progress & Nav ── */
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  document.getElementById('sp').style.width = pct + '%';
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 30);
+}, { passive: true });
+
+/* ── Scroll reveal ── */
+const revealIO = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('in'), i * 80);
+      revealIO.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade').forEach(el => revealIO.observe(el));
+
+/* ── Counter animation ── */
+function animCount(el) {
+  const target = parseInt(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const dur = 1800, start = performance.now();
+  (function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(ease * target) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  })(start);
+}
+const cntIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { animCount(e.target); cntIO.unobserve(e.target); } });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-target]').forEach(el => cntIO.observe(el));
+
+/* ── Score bars animation ── */
+const barIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.axis-bar').forEach((bar, i) => {
+        setTimeout(() => { bar.style.width = bar.dataset.w; }, i * 90);
+      });
+      barIO.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+const scoreCard = document.querySelector('.score-card');
+if (scoreCard) barIO.observe(scoreCard);
+
+/* ── Pipeline panel ── */
+const pipeData = [
+  { step: '01 / 08', name: 'Audio Extract', desc: 'Precision audio extraction from any video format. FFmpeg isolates the audio stream with lossless copy (-c copy) — no re-encoding, no quality loss. Handles variable framerates, corrupt containers, and multi-track audio.', tags: ['FFmpeg', '-c copy', 'any format', 'lossless'], icon: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>' },
+  { step: '02 / 08', name: 'Transcribe', desc: 'Deepgram Nova-2 produces word-level timestamps with confidence scores. Every word is pinned to the exact millisecond — enabling precision cuts that never clip mid-syllable, no matter how fast the speaker talks.', tags: ['Deepgram Nova-2', 'word timestamps', 'confidence scores', 'diarization-ready'], icon: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>' },
+  { step: '03 / 08', name: 'Speaker ID', desc: 'Automatic diarization identifies who\'s speaking at every moment. The pipeline then pauses for human confirmation — you label speakers once, the system remembers forever and applies it across all future jobs.', tags: ['Deepgram diarization', 'human-in-the-loop', 'speaker labels', 'pause/resume'], icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { step: '04 / 08', name: 'Labeled Transcript', desc: 'Merges speaker labels, timestamps, and your Channel DNA into a rich structured document. Every downstream AI decision — what to clip, how to score — is made with this full context in hand.', tags: ['Channel DNA fusion', 'context mapping', 'structured data', 'speaker-aware'], icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>' },
+  { step: '05 / 08', name: 'Unified Discovery', desc: 'Gemini Pro simultaneously analyzes the video stream and the labeled transcript — detecting laughs, energy peaks, visual events, gestures, and rhetorical hooks. No other tool does this multimodal analysis at this depth.', tags: ['Gemini Pro', 'multimodal', 'video + text', 'hook detection'], icon: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' },
+  { step: '06 / 08', name: 'Batch Evaluation', desc: 'Every candidate clip is scored across 8 axes: humor, energy, revelation, controversy, quotability, completeness, hook strength, and visual interest. Clips below the quality threshold are filtered — only the best proceed.', tags: ['8-dim scoring', 'quality gate', 'batch processing', 'Channel DNA aware'], icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+  { step: '07 / 08', name: 'Precision Cut', desc: 'FFmpeg cuts are snapped to exact word boundaries from Deepgram timestamps — never mid-syllable. Lossless stream copy means zero quality degradation and near-instant processing at this stage.', tags: ['FFmpeg -c copy', 'word-boundary snap', 'lossless', 'instant'], icon: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/>' },
+  { step: '08 / 08', name: 'Export & Deliver', desc: 'One high-quality re-encode: H.264 with libx264 slow preset + CRF 18, AAC 320k audio. Uploaded to Cloudflare R2 CDN, metadata committed to Supabase. Ready to download or share in under 2 minutes total.', tags: ['H.264 libx264', 'AAC 320k', 'Cloudflare R2', 'Supabase'], icon: '<rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>' },
+];
+
+function setPipePanel(idx) {
+  const d = pipeData[idx];
+  document.getElementById('ppStep').textContent = 'Step ' + d.step;
+  document.getElementById('ppName').textContent = d.name;
+  document.getElementById('ppDesc').textContent = d.desc;
+  document.getElementById('ppTags').innerHTML = d.tags.map(t => `<span class="pipe-tag">${t}</span>`).join('');
+  document.getElementById('ppIcon').innerHTML = `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:var(--violet-l);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round">${d.icon}</svg>`;
+}
+
+document.querySelectorAll('.pipe-step').forEach((step, i) => {
+  step.addEventListener('click', () => {
+    document.querySelectorAll('.pipe-step').forEach(s => s.classList.remove('active'));
+    step.classList.add('active');
+    setPipePanel(i);
+  });
+});
+
+/* ── Director terminal typing ── */
+const termLines = [
+  { text: 'director-agent --channel default --analyze', type: 'dim' },
+  { text: '→ Fetching last 7 days of job data…', type: '' },
+  { text: '→ 14 jobs processed · 87 clips generated', type: 'info' },
+  { text: '→ Avg score: 89.4 · Top clip: 97/100', type: 'info' },
+  // DATA: Replace with real anomaly detected by your system
+  { text: '⚠ Engagement anomaly on Ch#3 (–34% vs baseline)', type: 'warn' },
+  { text: '→ Hypothesis: hook length too short for this audience', type: '' },
+  { text: '→ Suggestion: increase clip start buffer by 3–5s', type: '' },
+  // DATA: Replace with real suggestion from Director AI
+  { text: '→ Running viral library comparison…', type: '' },
+  { text: '✓ Found 3 similar high-performing clips as reference', type: '' },
+  { text: '→ Report saved to director_analyses table', type: 'info' },
+  { text: '✓ Analysis complete · next run in 58m', type: '' },
+];
+
+const termTyping = document.getElementById('termTyping');
+const termHistory = document.getElementById('termHistory');
+const termCursor = document.getElementById('termCursor');
+let tIdx = 0, cIdx = 0;
+
+function typeTerm() {
+  if (tIdx >= termLines.length) {
+    setTimeout(() => {
+      termHistory.innerHTML = '';
+      tIdx = 0; cIdx = 0;
+      typeTerm();
+    }, 4000);
+    return;
+  }
+  const line = termLines[tIdx];
+  if (cIdx <= line.text.length) {
+    termTyping.textContent = line.text.slice(0, cIdx);
+    termTyping.className = 't-text ' + line.type;
+    cIdx++;
+    setTimeout(typeTerm, cIdx === 1 ? 300 : 22);
+  } else {
+    const div = document.createElement('div');
+    div.className = 't-line';
+    div.innerHTML = `<span class="t-prompt">${tIdx === 0 ? '$' : ' '}</span><span class="t-text ${line.type}">${line.text}</span>`;
+    termHistory.appendChild(div);
+    termTyping.textContent = '';
+    tIdx++; cIdx = 0;
+    setTimeout(typeTerm, tIdx === 1 ? 200 : 1000);
+  }
+}
+typeTerm();
+
+/* ── Billing toggle ── */
+function toggleBilling() {
+  const y = document.getElementById('bt').checked;
+  document.querySelectorAll('.pv').forEach(el => {
+    el.textContent = y ? el.dataset.y : el.dataset.m;
+  });
+  document.querySelectorAll('.pc-period').forEach(el => {
+    if (!el.textContent.includes('forever')) {
+      el.textContent = y ? 'per month, billed yearly' : 'per month, billed monthly';
+    }
+  });
+}
+
+/* ── Waitlist form ── */
+function handleWaitlist(e) {
+  e.preventDefault();
+  const email = document.getElementById('wlEmail').value;
+  const msg = document.getElementById('wlMsg');
+  // TODO: POST email to your backend waitlist endpoint
+  msg.textContent = "✓ You're on the list. We'll reach out soon.";
+  msg.style.color = 'var(--green)';
+  document.getElementById('wlEmail').value = '';
+}
+
+/* ── Hero form ── */
+function handleHeroSubmit() {
+  const val = document.getElementById('heroInput').value.trim();
+  if (!val) {
+    document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  // TODO: redirect to app with pre-filled URL
+  document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ── Tilt cards ── */
+document.querySelectorAll('.dna-card, .rd-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width - .5) * 8;
+    const y = ((e.clientY - r.top) / r.height - .5) * -8;
+    card.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg) translateY(-2px)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
+</script>
+</body>
+</html>

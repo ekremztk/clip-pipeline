@@ -1,24 +1,21 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { BarChart2 } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
-export default function PerformancePage() {
+export default function AnalyticsPage() {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col items-center justify-center h-full text-center py-20"
-        >
-            <div className="w-16 h-16 mb-4 rounded-full bg-white/[0.03] flex items-center justify-center border border-white/[0.06]">
-                <BarChart2 className="w-6 h-6 text-[#6b7280]" />
+        <div className="min-h-screen bg-black p-8">
+            <div className="max-w-5xl mx-auto">
+                <h1 className="text-2xl font-semibold text-white mb-2">Analytics</h1>
+                <p className="text-sm text-[#737373]">Track your video performance and insights</p>
+
+                <div className="mt-16 flex flex-col items-center justify-center h-64 gap-4">
+                    <div className="w-12 h-12 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg flex items-center justify-center">
+                        <BarChart3 className="w-6 h-6 text-[#525252]" />
+                    </div>
+                    <p className="text-sm text-[#525252]">Analytics dashboard — coming soon</p>
+                </div>
             </div>
-            <h2 className="text-xl font-semibold mb-2 capitalize text-white">Performance</h2>
-            <p className="text-[#6b7280] text-sm max-w-sm">
-                Performance — Coming Soon
-            </p>
-        </motion.div>
+        </div>
     );
 }

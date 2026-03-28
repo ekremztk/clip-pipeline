@@ -5,18 +5,19 @@
 
 :root {
   --bg: #000000;
-  --surface: #0d0d0d;
-  --surface-2: #141414;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --accent: #7c3aed;
-  --accent-dim: rgba(124, 58, 237, 0.15);
-  --cyan: #06b6d4;
-  --text: #e5e5e5;
-  --text-muted: #6b7280;
+  --surface: #0a0a0a;
+  --surface-2: #1a1a1a;
+  --border: #1a1a1a;
+  --border-hover: #404040;
+  --text: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  --text-faint: #525252;
   --success: #10b981;
   --error: #ef4444;
   --warning: #f59e0b;
+  /* keep cyan for Director only */
+  --cyan: #06b6d4;
 }
 
 * { -webkit-font-smoothing: antialiased; }
@@ -32,9 +33,9 @@ html, body {
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes shimmer-load {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes pulse-dot {
@@ -47,19 +48,24 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.shimmer {
-  background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 50%, var(--accent) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite linear;
+.shimmer-load {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-load::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: shimmer-load 2s infinite;
 }
 
 .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-
 .fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: #404040 !important;
 }
 
 /* ── Sci-fi Director Dashboard ── */

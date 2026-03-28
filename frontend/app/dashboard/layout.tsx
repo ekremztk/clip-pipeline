@@ -3,21 +3,17 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import {
-    LayoutDashboard,
-    Plus,
-    Film,
-    Scissors,
-    BarChart2,
-    Brain,
+    Home,
+    FolderOpen,
+    Dna,
+    Clapperboard,
+    Search,
+    BarChart3,
     Settings,
-    Bell,
-    PanelLeftClose,
-    PanelLeftOpen,
+    Sparkles,
     ChevronDown,
-    LogOut
 } from "lucide-react";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -35,7 +31,7 @@ export const ChannelContext = createContext<{
 }>({
     channels: [],
     activeChannelId: "speedy_cast",
-    setActiveChannelId: () => { },
+    setActiveChannelId: () => {},
 });
 
 export const useChannel = () => useContext(ChannelContext);
@@ -43,12 +39,13 @@ export const useChannel = () => useContext(ChannelContext);
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<any>(null);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => setUser(data.user));
+
         const fetchChannels = async () => {
             try {
                 const res = await fetch(`${API}/channels`);
@@ -56,7 +53,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 const list = Array.isArray(data) ? data : data.channels || [];
                 setChannels(list);
 
-                // Restore last selected channel from localStorage
                 const saved = localStorage.getItem('selectedChannelId');
                 if (saved && list.find((c: any) => c.id === saved)) {
                     setSelectedChannel(list.find((c: any) => c.id === saved));
@@ -72,14 +68,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }, []);
 
     const handleChannelChange = (channelId: string) => {
-        const ch = channels.find((c: any) => c.id === channelId || c.name === channelId || c.display_name === channelId);
+        const ch = channels.find((c: any) => c.id === channelId);
         if (ch) {
             setSelectedChannel(ch);
             localStorage.setItem('selectedChannelId', ch.id);
-        } else {
-            // Fallback: just save the ID if not found in list yet
-            setSelectedChannel({ id: channelId, display_name: channelId });
-            localStorage.setItem('selectedChannelId', channelId);
         }
     };
 
@@ -89,14 +81,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     const navItems = [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, external: false },
-        { href: "/dashboard/new-job", label: "New Clip Job", icon: Plus, external: false },
-        { href: "/dashboard/clips", label: "Clip Library", icon: Film, external: false },
-        { href: "https://edit.prognot.com", label: "Editor", icon: Scissors, external: true },
-        { href: "/dashboard/performance", label: "Performance", icon: BarChart2, external: false },
-        { href: "/dashboard/memory", label: "Channel Memory", icon: Brain, external: false },
-        { href: "/dashboard/settings", label: "Channel Settings", icon: Settings, external: false },
+        { href: "/dashboard", label: "Dashboard", icon: Home, exact: true },
+        { href: "/dashboard/clips", label: "My Projects", icon: FolderOpen, exact: false },
+        { href: "/dashboard/channel-dna", label: "Channel DNA", icon: Dna, exact: false },
+        { href: "/director", label: "AI Director", icon: Clapperboard, exact: false },
+        { href: "/dashboard/content-finder", label: "Content Finder", icon: Search, exact: false },
+        { href: "/dashboard/performance", label: "Analytics", icon: BarChart3, exact: false },
+        { href: "/dashboard/settings", label: "Settings", icon: Settings, exact: false },
     ];
+
+    const userInitials = user?.user_metadata?.full_name
+        ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+        : user?.email?.slice(0, 2).toUpperCase() || 'U';
+
+    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+    const userEmail = user?.email || '';
 
     return (
         <ChannelContext.Provider value={{
@@ -104,138 +103,99 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             activeChannelId: selectedChannel?.id || "speedy_cast",
             setActiveChannelId: handleChannelChange
         }}>
-            <div className="min-h-screen bg-[#000000] text-[#e5e5e5] font-sans flex">
-                {/* ─── SIDEBAR ──────────────────────────────────────────────────────── */}
-                <aside
-                    className={`fixed left-0 top-0 bottom-0 bg-[#0d0d0d] border-r border-white/[0.06] transition-all duration-300 z-50 flex flex-col ${sidebarOpen ? "w-[240px]" : "w-[60px]"
-                        }`}
-                >
-                    {/* Logo Area */}
-                    <div className="h-16 flex items-center px-4 border-b border-white/[0.06] overflow-hidden whitespace-nowrap">
-                        {sidebarOpen ? (
-                            <div className="flex items-center gap-1.5 font-bold tracking-tight">
-                                <span className="text-white text-lg">PROGNOT</span>
-                                <span className="text-[#7c3aed] text-lg">STUDIO</span>
-                            </div>
-                        ) : (
-                            <div className="w-full flex justify-center text-[#7c3aed] font-bold text-xl">
-                                P
-                            </div>
-                        )}
+            <div className="flex h-screen w-screen bg-black text-white overflow-hidden">
+                {/* Sidebar */}
+                <aside className="w-64 bg-black border-r border-[#1a1a1a] flex flex-col flex-shrink-0">
+                    {/* Logo */}
+                    <div className="h-16 flex items-center px-6 border-b border-[#1a1a1a]">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-white" />
+                            <span className="text-lg font-semibold tracking-tight">PrognoT</span>
+                        </div>
                     </div>
 
-                    {/* Nav Items */}
-                    <div className="flex-1 py-6 flex flex-col gap-1 overflow-y-auto">
-                        {navItems.map((item) => {
-                            const Icon = item.icon;
-                            const isActive = !item.external && pathname === item.href;
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    passHref
-                                    legacyBehavior
-                                    {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                                >
-                                    <motion.a
-                                        whileHover={{ x: 2 }}
-                                        transition={{ duration: 0.15 }}
-                                        className={`relative flex items-center h-10 transition-colors group ${sidebarOpen ? "px-4" : "justify-center"
-                                            } ${isActive
-                                                ? "bg-[#0d0d0d] text-white"
-                                                : "text-[#6b7280] hover:bg-white/[0.03] hover:text-[#e5e5e5]"
-                                            }`}
-                                        title={!sidebarOpen ? item.label : undefined}
-                                    >
-                                        {isActive && (
-                                            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#7c3aed]" />
-                                        )}
-                                        <Icon
-                                            className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-[#7c3aed]" : ""
-                                                }`}
-                                        />
-                                        {sidebarOpen && (
-                                            <span
-                                                className={`ml-3 text-sm font-medium ${isActive ? "text-white" : ""
-                                                    }`}
-                                            >
-                                                {item.label}
-                                            </span>
-                                        )}
-                                    </motion.a>
-                                </Link>
-                            );
-                        })}
-                    </div>
-
-                    {/* Collapse Button */}
-                    <div className="p-2 border-t border-white/[0.06]">
-                        <button
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="w-full flex items-center justify-center h-10 text-[#6b7280] hover:bg-white/[0.03] hover:text-[#e5e5e5] rounded-md transition-colors"
-                        >
-                            {sidebarOpen ? (
-                                <PanelLeftClose className="w-5 h-5" />
-                            ) : (
-                                <PanelLeftOpen className="w-5 h-5" />
-                            )}
-                        </button>
-                    </div>
-                </aside>
-
-                {/* ─── MAIN CONTENT AREA ────────────────────────────────────────────── */}
-                <div
-                    className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? "ml-[240px]" : "ml-[60px]"
-                        }`}
-                >
-                    {/* TOP BAR */}
-                    <header className="h-16 bg-[#000000] border-b border-white/[0.06] flex items-center justify-between px-6 sticky top-0 z-40">
-                        <div className="flex items-center">
-                            {/* Channel Selector Pill */}
+                    {/* Channel Selector */}
+                    {channels.length > 0 && (
+                        <div className="px-3 pt-4 pb-1">
                             <div className="relative">
                                 <select
                                     value={selectedChannel?.id || ''}
                                     onChange={(e) => handleChannelChange(e.target.value)}
-                                    className="appearance-none flex items-center gap-2 pl-4 pr-10 py-1.5 rounded-full border border-[#7c3aed] bg-transparent text-sm font-medium hover:bg-[#7c3aed]/10 transition-colors text-[#e5e5e5] cursor-pointer focus:outline-none"
+                                    className="w-full appearance-none bg-[#0a0a0a] border border-[#262626] rounded-lg px-3 py-2 text-xs text-[#a3a3a3] focus:outline-none focus:border-[#404040] transition-colors cursor-pointer pr-7"
                                 >
-                                    {channels.length > 0 ? (
-                                        channels.map((ch: any) => (
-                                            <option key={ch.id} value={ch.id} className="bg-[#0d0d0d]">
-                                                {ch.display_name || ch.name || ch.id}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="" disabled className="bg-[#0d0d0d]">
-                                            No channels
+                                    {channels.map((ch: any) => (
+                                        <option key={ch.id} value={ch.id} className="bg-[#0a0a0a]">
+                                            {ch.display_name || ch.name || ch.id}
                                         </option>
-                                    )}
+                                    ))}
                                 </select>
-                                <ChevronDown className="w-4 h-4 text-[#6b7280] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <ChevronDown className="w-3 h-3 text-[#525252] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button className="text-[#6b7280] hover:text-white transition-colors relative">
-                                <Bell className="w-5 h-5" />
-                                <span className="absolute top-0 right-0 w-2 h-2 bg-[#7c3aed] rounded-full border-2 border-black" />
-                            </button>
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7c3aed] to-[#06b6d4] flex items-center justify-center cursor-pointer border border-white/10">
-                                <span className="text-xs font-bold text-white">SC</span>
-                            </div>
-                            <button
-                                onClick={handleSignOut}
-                                className="text-[#6b7280] hover:text-white transition-colors flex items-center gap-2 p-1 rounded-md hover:bg-white/[0.03]"
-                                title="Sign Out"
-                            >
-                                <LogOut className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </header>
+                    )}
 
-                    {/* PAGE CONTENT */}
-                    <main className="flex-1 p-6 overflow-y-auto">
-                        {children}
-                    </main>
-                </div>
+                    {/* Navigation */}
+                    <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = item.exact
+                                ? pathname === item.href
+                                : pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                                        isActive
+                                            ? "bg-[#1a1a1a] text-white border-l-2 border-white -ml-[2px] pl-[14px]"
+                                            : "text-[#a3a3a3] hover:bg-[#1a1a1a] hover:text-white"
+                                    }`}
+                                >
+                                    <Icon className="w-4 h-4 flex-shrink-0" />
+                                    <span>{item.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Bottom: Credits + Profile */}
+                    <div className="p-4 space-y-3 border-t border-[#1a1a1a]">
+                        {/* Credits Card */}
+                        <div className="bg-[#0a0a0a] border border-[#262626] rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs text-[#737373]">Credits</span>
+                                <span className="text-xs font-medium text-white">Pro</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                                    <div className="h-full w-3/4 bg-white rounded-full" />
+                                </div>
+                                <span className="text-xs text-[#a3a3a3]">75%</span>
+                            </div>
+                        </div>
+
+                        {/* Profile (click to sign out) */}
+                        <button
+                            onClick={handleSignOut}
+                            title="Sign out"
+                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#1a1a1a] cursor-pointer transition-colors text-left"
+                        >
+                            <div className="w-9 h-9 bg-[#262626] rounded-full flex items-center justify-center flex-shrink-0">
+                                <span className="text-sm font-medium text-white">{userInitials}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{userName}</p>
+                                <p className="text-xs text-[#737373] truncate">{userEmail}</p>
+                            </div>
+                        </button>
+                    </div>
+                </aside>
+
+                {/* Main content */}
+                <main className="flex-1 overflow-y-auto bg-black">
+                    {children}
+                </main>
             </div>
         </ChannelContext.Provider>
     );
