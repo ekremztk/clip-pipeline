@@ -8,8 +8,12 @@ class Settings:
     GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
     GCS_BUCKET_NAME: str = os.getenv("GCS_BUCKET_NAME", "clip-pipeline-audio")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL_PRO: str = "gemini-3.1-pro-preview"
-    GEMINI_MODEL_FLASH: str = "gemini-2.5-flash"
+    # Vertex AI model names — override via env var if Vertex releases a new version string
+    GEMINI_MODEL_PRO: str = os.getenv("GEMINI_MODEL_PRO", "gemini-2.5-pro")
+    GEMINI_MODEL_FLASH: str = os.getenv("GEMINI_MODEL_FLASH", "gemini-2.5-flash")
+    # Claude
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
     # Separate key with Member role for usage/billing API (usage:read scope)
     # Falls back to DEEPGRAM_API_KEY if not set (will still 403 if key lacks permissions)

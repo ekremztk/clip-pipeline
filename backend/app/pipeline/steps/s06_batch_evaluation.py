@@ -151,7 +151,8 @@ def run(
     transcript_data: dict,
     channel_dna: dict,
     channel_id: str,
-    job_id: str
+    job_id: str,
+    video_path: Optional[str] = None,
 ) -> list:
     """
     S06: Batch Evaluation

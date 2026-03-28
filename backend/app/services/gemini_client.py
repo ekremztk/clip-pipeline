@@ -292,18 +292,24 @@ def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 
     print(f"[GeminiClient] Error: Timeout polling file {file_name} after {max_attempts} attempts.")
     raise RuntimeError(f"Timeout waiting for file {file_name} to become active")
 
-def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> str:
+def analyze_video(video_path: str, prompt: str, model: Optional[str] = None, json_mode: bool = False) -> str:
     """
     Analyzes a video file with Gemini.
     If < 20MB, uses inline bytes (fast, no upload needed).
     If >= 20MB, uploads to GCS and uses gs:// URI, then generates.
     Deletes uploaded GCS file in finally block.
     Uses _retry_logic for rate limit handling.
+    json_mode=True sets response_mime_type="application/json" for cleaner output.
     """
     if model is None:
         model = settings.GEMINI_MODEL_PRO
     gcs_uri = None
     t0 = time.time()
+
+    video_config = types.GenerateContentConfig(
+        response_mime_type="application/json"
+    ) if json_mode else None
+
     try:
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"Video file not found: {video_path}")
@@ -323,7 +329,8 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
             def do_generate_inline() -> str:
                 response = client.models.generate_content(
                     model=model,
-                    contents=[video_part, prompt]
+                    contents=[video_part, prompt],
+                    config=video_config,
                 )
                 _last_video_response.clear()
                 _last_video_response.append(response)
@@ -364,7 +371,8 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None) -> 
             def do_generate_uploaded() -> str:
                 response = client.models.generate_content(
                     model=model,
-                    contents=[video_part, prompt]
+                    contents=[video_part, prompt],
+                    config=video_config,
                 )
                 _last_video_response.clear()
                 _last_video_response.append(response)

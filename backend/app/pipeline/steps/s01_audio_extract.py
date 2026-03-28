@@ -15,7 +15,7 @@ def run(video_path: str, job_id: str) -> str:
         "-i", video_path,
         "-vn",
         "-c:a", "aac",
-        "-b:a", "128k",
+        "-b:a", "192k",
         "-movflags", "+faststart",
         audio_path
     ]

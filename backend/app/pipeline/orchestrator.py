@@ -199,7 +199,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             transcript_data=transcript_data,
                             channel_dna=channel_dna,
                             channel_id=channel_id,
-                            job_id=job_id
+                            job_id=job_id,
+                            video_path=video_path,
                         )
                     s06_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
@@ -543,7 +544,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             transcript_data=transcript_data,
                             channel_dna=channel_dna,
                             channel_id=channel_id,
-                            job_id=job_id
+                            job_id=job_id,
+                            video_path=video_path,
                         )
                     s06_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")

@@ -14,7 +14,7 @@ USE ALL OF THESE. A transcript alone would miss 40% of the best moments. You won
 ## VIDEO INFO
 - Duration: VIDEO_DURATION_PLACEHOLDER seconds
 - Find up to MAX_CANDIDATES_PLACEHOLDER candidate moments
-- Only genuinely strong moments — do NOT pad the list with weak candidates
+- Your job is to COLLECT strong candidates, NOT to make the final selection — a separate evaluation stage will ruthlessly judge each one. Capture every genuinely strong moment you observe. Do not self-filter or pre-rank.
 
 ## CHANNEL CONTEXT — YOUR PRIMARY GUIDE
 Everything below defines what THIS specific channel wants. Follow these instructions above all else.
@@ -59,7 +59,6 @@ Schema per candidate:
   "hook_text": "Exact first sentence the viewer will hear",
   "reason": "Why this moment has viral potential for THIS channel",
   "primary_signal": "transcript" | "visual" | "audio_energy" | "humor" | "multi",
-  "strength": integer (1-10, honest — 6 is average, 9+ is exceptional),
   "content_type": "Use a type that fits this channel's preferred content types",
   "needs_context": boolean
 }

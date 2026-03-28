@@ -365,7 +365,7 @@ def run(
 
         # 5. Send to Gemini (video + prompt)
         # analyze_video already uses settings.GEMINI_MODEL_PRO
-        raw_response = analyze_video(video_path, prompt)
+        raw_response = analyze_video(video_path, prompt, json_mode=True)
 
         # 6. Parse response
         candidates = _parse_gemini_json(raw_response)
