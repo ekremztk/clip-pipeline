@@ -15,6 +15,7 @@ import {
     Settings,
     Sparkles,
     ChevronDown,
+    Scissors,
 } from "lucide-react";
 
 type Channel = {
@@ -172,6 +173,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </Link>
                             );
                         })}
+                        {/* Editor — external link */}
+                        <a
+                            href="https://edit.prognot.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-[#a3a3a3] hover:bg-[#1a1a1a] hover:text-white"
+                        >
+                            <Scissors className="w-4 h-4 flex-shrink-0" />
+                            <span>Editor</span>
+                        </a>
                     </nav>
 
                     {/* Bottom: Credits + Profile */}
