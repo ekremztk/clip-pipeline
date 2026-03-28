@@ -86,11 +86,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push('/login');
     };
 
+    const ADMIN_USER_ID = '3ebacaef-8982-4e34-a13a-4b50cdf0cc40';
+    const isAdmin = user?.id === ADMIN_USER_ID;
+
     const navItems = [
         { href: "/dashboard", label: "Dashboard", icon: Home, exact: true },
         { href: "/dashboard/clips", label: "My Projects", icon: FolderOpen, exact: false },
         { href: "/dashboard/channel-dna", label: "Channel DNA", icon: Dna, exact: false },
-        { href: "/director", label: "AI Director", icon: Clapperboard, exact: false },
+        ...(isAdmin ? [{ href: "/director", label: "AI Director", icon: Clapperboard, exact: false }] : []),
         { href: "/dashboard/content-finder", label: "Content Finder", icon: Search, exact: false },
         { href: "/dashboard/performance", label: "Analytics", icon: BarChart3, exact: false },
         { href: "/dashboard/settings", label: "Settings", icon: Settings, exact: false },

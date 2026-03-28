@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 import { authFetch } from "@/lib/api";
 
@@ -1704,7 +1706,10 @@ function DecisionsTab() {
 // Main Page
 // ═══════════════════════════════════════════════
 
+const ADMIN_USER_ID = '3ebacaef-8982-4e34-a13a-4b50cdf0cc40';
+
 export default function DirectorPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "decisions">("dashboard");
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1728,6 +1733,15 @@ export default function DirectorPage() {
     return id;
   });
   const [pastSessions, setPastSessions] = useState<{session_id:string;first_message:string;last_message_at:string;message_count:number}[]>([]);
+
+  // Admin-only guard
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user || data.user.id !== ADMIN_USER_ID) {
+        router.replace('/dashboard');
+      }
+    });
+  }, [router]);
 
   // Load conversation history on mount
   useEffect(() => {
