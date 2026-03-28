@@ -109,10 +109,10 @@ async def create_job(
             upload_dir = storage.UPLOAD_DIR
             video_path = None
             for f in os.listdir(upload_dir):
-                if f.startswith(f"{upload_id}_"):
+                if f.startswith(upload_id):
                     video_path = os.path.join(upload_dir, f)
                     break
-            
+
             if not video_path:
                 raise HTTPException(status_code=404, detail="Uploaded file not found.")
                 
