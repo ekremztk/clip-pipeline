@@ -28,4 +28,10 @@ frontend/.env.local
 # Logs
 *.log
 .mcp.json
-opencut/
+
+# Editor — ignore build artifacts and secrets, not source
+opencut/.next/
+opencut/apps/web/.next/
+opencut/apps/web/.env.local
+opencut/node_modules/
+opencut/apps/web/node_modules/
