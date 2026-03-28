@@ -96,8 +96,8 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                 "suggested_description": clip.get("suggested_description"),
                 "video_landscape_path": file_url,
                 "file_url": file_url,
-                "is_successful": True if clip.get("quality_verdict", "fail") in ("pass", "fixable") else False,
-                "why_failed": clip.get("reject_reason") if clip.get("quality_verdict") == "fail" else None,
+                "is_successful": None,  # user sets this manually via approve/reject UI
+                "quality_notes": clip.get("reject_reason"),  # populated only for fixable clips
             }
 
             # Remove None values to avoid Supabase errors

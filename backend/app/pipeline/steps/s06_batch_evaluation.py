@@ -1,31 +1,31 @@
+import base64
 import json
+import os
 import re
+import subprocess
+import tempfile
 from typing import Optional
+
 from app.config import settings
-from app.services.gemini_client import generate_json
-from app.pipeline.prompts.batch_evaluation import PROMPT
+from app.pipeline.prompts.batch_evaluation import SYSTEM_PROMPT, EVALUATION_PROMPT
 from app.pipeline.steps.s05_unified_discovery import build_channel_context
+from app.services.claude_client import call_claude
 from app.director.events import director_events
 
+
+# ── Transcript segment extractor (unchanged from previous version) ────────────
 
 def _extract_transcript_segment(
     candidate: dict,
     labeled_transcript: str,
     transcript_data: dict,
-    window_seconds: float = 120.0
+    window_seconds: float = 120.0,
 ) -> str:
-    """
-    Extracts ±2 minute transcript segment around the candidate's timestamp.
-    Uses word-level timestamps from Deepgram for precision.
-    Falls back to line-based extraction if word timestamps unavailable.
-    """
     try:
-        # Get candidate center timestamp
         rec_start = candidate.get("recommended_start", 0)
         rec_end = candidate.get("recommended_end", 0)
         center = (rec_start + rec_end) / 2 if rec_start and rec_end else 0
 
-        # If center is 0, try parsing from MM:SS timestamp
         if center == 0:
             ts_str = candidate.get("timestamp", "00:00")
             parts = ts_str.split(":")
@@ -38,26 +38,17 @@ def _extract_transcript_segment(
                 center = 0
 
         if center == 0:
-            return labeled_transcript[:3000]  # Fallback: first 3000 chars
+            return labeled_transcript[:3000]
 
         seg_start = max(0, center - window_seconds)
         seg_end = center + window_seconds
 
-        # Method 1: Word-level extraction (preferred — includes timestamps)
         words = transcript_data.get("words", [])
         if words and len(words) > 10:
-            segment_words = []
-            for w in words:
-                w_start = w.get("start", 0)
-                w_end = w.get("end", 0)
-                if w_start >= seg_start and w_end <= seg_end:
-                    segment_words.append(w)
+            segment_words = [w for w in words if w.get("start", 0) >= seg_start and w.get("end", 0) <= seg_end]
 
             if segment_words:
-                # Build readable segment with timestamps every ~10 words
-                lines = []
-                current_line_words = []
-                last_ts = None
+                lines, current_line_words, last_ts = [], [], None
                 for i, w in enumerate(segment_words):
                     if i % 10 == 0:
                         ts = w.get("start", 0)
@@ -69,81 +60,227 @@ def _extract_transcript_segment(
                             seconds = ts % 60
                             current_line_words.append(f"[{minutes:02d}:{seconds:05.2f}]")
                             last_ts = ts
-                    word_text = w.get("punctuated_word", w.get("word", ""))
-                    current_line_words.append(word_text)
-
+                    current_line_words.append(w.get("punctuated_word", w.get("word", "")))
                 if current_line_words:
                     lines.append(" ".join(current_line_words))
-
                 segment = "\n".join(lines)
                 if len(segment) > 100:
                     return segment
 
-        # Method 2: Line-based extraction from labeled transcript
         pattern = re.compile(r'\[(\d+):(\d+\.?\d*)\]')
-        transcript_lines = labeled_transcript.split("\n")
         segment_lines = []
-
-        for line in transcript_lines:
+        for line in labeled_transcript.split("\n"):
             match = pattern.search(line)
             if match:
-                mm = float(match.group(1))
-                ss = float(match.group(2))
-                line_ts = mm * 60 + ss
+                line_ts = float(match.group(1)) * 60 + float(match.group(2))
                 if seg_start <= line_ts <= seg_end:
                     segment_lines.append(line)
-
         if segment_lines:
             return "\n".join(segment_lines)
 
-        # Final fallback
         return labeled_transcript[:3000]
 
     except Exception as e:
-        print(f"[S06] Error extracting segment for candidate {candidate.get('candidate_id')}: {e}")
+        print(f"[S06] Transcript segment error for candidate {candidate.get('candidate_id')}: {e}")
         return labeled_transcript[:3000]
 
 
-def _evaluate_batch(
-    batch_data: list,
-    channel_context: str
-) -> list:
+# ── Frame extractor ───────────────────────────────────────────────────────────
+
+def _extract_frames(video_path: str, candidate: dict, num_frames: int = 4) -> list:
     """
-    Sends a batch of candidates to Gemini for evaluation.
-    Returns list of evaluated candidates.
+    Extracts num_frames frames from the candidate's time range using FFmpeg.
+    Returns list of {"data": base64_str, "media_type": "image/jpeg", "label": str, "timestamp": float}
+    Returns empty list on failure (non-fatal — Claude will evaluate text-only).
     """
-    prompt = PROMPT
-    prompt = prompt.replace("CHANNEL_CONTEXT_PLACEHOLDER", channel_context)
-    prompt = prompt.replace("BATCH_CANDIDATES_PLACEHOLDER", json.dumps(batch_data, indent=2))
+    frames = []
+    rec_start = float(candidate.get("recommended_start", 0))
+    rec_end = float(candidate.get("recommended_end", rec_start + 30))
+    duration = rec_end - rec_start
 
-    result = generate_json(prompt, model=settings.GEMINI_MODEL_PRO)
+    if duration <= 0 or not video_path or not os.path.exists(video_path):
+        return []
 
-    if isinstance(result, list):
-        return [item for item in result if isinstance(item, dict)]
-    elif isinstance(result, dict):
-        # Handle case where Gemini wraps in an object
-        candidates = result.get("candidates") or result.get("evaluated") or []
-        return [item for item in candidates if isinstance(item, dict)]
+    labels = ["hook", "early", "middle", "final"]
+    # hook at 0.5s in, early at 25%, middle at 50%, final at 90%
+    offsets = [0.5, duration * 0.25, duration * 0.5, duration * 0.90]
 
+    cid = candidate.get("candidate_id", "x")
+    tmp_dir = tempfile.gettempdir()
+
+    for i, (offset, label) in enumerate(zip(offsets[:num_frames], labels[:num_frames])):
+        ts = round(rec_start + min(max(offset, 0), duration - 0.1), 3)
+        tmp_path = os.path.join(tmp_dir, f"s06_frame_{cid}_{i}.jpg")
+        try:
+            subprocess.run(
+                [
+                    "ffmpeg", "-y",
+                    "-ss", str(ts),
+                    "-i", video_path,
+                    "-vframes", "1",
+                    "-q:v", "3",
+                    "-vf", "scale=768:-1",
+                    tmp_path,
+                ],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            if os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0:
+                with open(tmp_path, "rb") as f:
+                    img_b64 = base64.b64encode(f.read()).decode("utf-8")
+                frames.append({
+                    "data": img_b64,
+                    "media_type": "image/jpeg",
+                    "label": label,
+                    "timestamp": ts,
+                })
+        except Exception as e:
+            print(f"[S06] Frame extraction failed at {ts}s (candidate {cid}): {e}")
+        finally:
+            if os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
+
+    return frames
+
+
+# ── Claude message builder ────────────────────────────────────────────────────
+
+def _build_claude_content(batch_items: list, channel_context: str) -> list:
+    """
+    Builds the Claude content array (text + images interleaved) for a batch.
+    Each item in batch_items should have: candidate metadata + "frames" key.
+    """
+    # Build the candidates text (without frames — those are interleaved)
+    candidates_text_parts = []
+    for item in batch_items:
+        cid = item.get("candidate_id")
+        meta = {
+            "candidate_id": cid,
+            "timestamp": item.get("timestamp"),
+            "hook_text": item.get("hook_text"),
+            "reason": item.get("reason"),
+            "primary_signal": item.get("primary_signal"),
+            "content_type": item.get("content_type"),
+            "recommended_start": item.get("recommended_start"),
+            "recommended_end": item.get("recommended_end"),
+            "transcript_segment": item.get("transcript_segment"),
+        }
+        candidates_text_parts.append(f"CANDIDATE {cid}:\n{json.dumps(meta, indent=2)}")
+
+    candidates_block = "\n\n---\n\n".join(candidates_text_parts)
+
+    instructions = EVALUATION_PROMPT.replace(
+        "CHANNEL_CONTEXT_PLACEHOLDER", channel_context
+    ).replace(
+        "CANDIDATES_PLACEHOLDER", candidates_block
+    )
+
+    # Build content: instructions first, then interleave frames per candidate
+    content: list = [{"type": "text", "text": instructions}]
+
+    has_frames = any(item.get("frames") for item in batch_items)
+    if has_frames:
+        content.append({"type": "text", "text": "\n\n## VIDEO FRAMES PER CANDIDATE\n"})
+        for item in batch_items:
+            frames = item.get("frames", [])
+            if not frames:
+                continue
+            cid = item.get("candidate_id")
+            content.append({"type": "text", "text": f"\n### CANDIDATE {cid} frames:"})
+            for frame in frames:
+                content.append({
+                    "type": "text",
+                    "text": f"[{frame['label']} @ {frame['timestamp']}s]",
+                })
+                content.append({
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": frame["media_type"],
+                        "data": frame["data"],
+                    },
+                })
+
+    content.append({
+        "type": "text",
+        "text": "\nReturn ONLY a valid JSON array — no markdown, no extra text.",
+    })
+    return content
+
+
+# ── JSON parser ───────────────────────────────────────────────────────────────
+
+def _parse_claude_json(raw: str) -> list:
+    if not raw:
+        return []
+    cleaned = raw.strip()
+    # Strip markdown fences just in case
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    if cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned.strip())
+    try:
+        result = json.loads(cleaned)
+        if isinstance(result, list):
+            return [item for item in result if isinstance(item, dict)]
+        if isinstance(result, dict):
+            for key in ("candidates", "evaluated", "results"):
+                if key in result and isinstance(result[key], list):
+                    return [item for item in result[key] if isinstance(item, dict)]
+    except json.JSONDecodeError as e:
+        print(f"[S06] Claude JSON parse error: {e}")
+        print(f"[S06] Raw snippet: {cleaned[:400]}")
     return []
 
 
-def _evaluate_single(
-    candidate_data: dict,
-    channel_context: str
+# ── Core evaluation logic ─────────────────────────────────────────────────────
+
+def _evaluate_batch_with_claude(
+    batch_items: list,
+    channel_context: str,
+    video_path: Optional[str],
+) -> list:
+    """
+    Evaluates a batch of candidates with Claude.
+    Extracts frames if video_path is available.
+    Returns all evaluated candidates (pass + fixable + fail).
+    """
+    # Extract frames for each item
+    for item in batch_items:
+        if video_path:
+            item["frames"] = _extract_frames(video_path, item)
+        else:
+            item["frames"] = []
+
+    has_any_frames = any(item.get("frames") for item in batch_items)
+    print(f"[S06] Claude batch: {len(batch_items)} candidates, frames={'yes' if has_any_frames else 'no (text-only)'}")
+
+    content = _build_claude_content(batch_items, channel_context)
+    raw = call_claude(content, system=SYSTEM_PROMPT)
+    return _parse_claude_json(raw)
+
+
+def _evaluate_single_with_claude(
+    item: dict,
+    channel_context: str,
+    video_path: Optional[str],
 ) -> Optional[dict]:
-    """
-    Evaluates a single candidate individually (retry for missed batch items).
-    """
     try:
-        result = _evaluate_batch([candidate_data], channel_context)
-        if result:
-            return result[0]
-        return None
+        results = _evaluate_batch_with_claude([item], channel_context, video_path)
+        return results[0] if results else None
     except Exception as e:
-        print(f"[S06] Single retry failed for candidate {candidate_data.get('candidate_id')}: {e}")
+        print(f"[S06] Single retry failed for candidate {item.get('candidate_id')}: {e}")
         return None
 
+
+# ── Main run function ─────────────────────────────────────────────────────────
 
 def run(
     candidates: list,
@@ -155,41 +292,36 @@ def run(
     video_path: Optional[str] = None,
 ) -> list:
     """
-    S06: Batch Evaluation
-    Evaluates S05 candidates in batches using transcript segments.
-    Returns filtered, sorted list of clips ready for precision cutting.
+    S06: Batch Evaluation (Claude Sonnet)
+    Evaluates S05 candidates using video frames + timestamped transcripts.
+    Returns ONLY pass/fixable clips — fails are dropped here, never reach S07/S08.
     """
-    print(f"[S06] Starting batch evaluation for job {job_id} with {len(candidates)} candidates")
+    print(f"[S06] Starting Claude evaluation for job {job_id}: {len(candidates)} candidates")
 
     if not candidates:
-        print("[S06] No candidates to evaluate. Returning empty list.")
+        print("[S06] No candidates. Returning empty list.")
         return []
 
     try:
-        # 1. Build channel context (same function as S05 for consistency)
         channel_context = build_channel_context(channel_dna, channel_id)
 
-        # 2. Prepare batch data — extract transcript segments for each candidate
+        # Build batch items with transcript segments
         all_batch_data = []
         for candidate in candidates:
-            segment = _extract_transcript_segment(
-                candidate, labeled_transcript, transcript_data
-            )
-            batch_item = {
+            segment = _extract_transcript_segment(candidate, labeled_transcript, transcript_data)
+            all_batch_data.append({
                 "candidate_id": candidate.get("candidate_id"),
                 "timestamp": candidate.get("timestamp", "00:00"),
                 "hook_text": candidate.get("hook_text", ""),
                 "reason": candidate.get("reason", ""),
                 "primary_signal": candidate.get("primary_signal", ""),
-                "strength": candidate.get("strength", 0),
                 "content_type": candidate.get("content_type", ""),
                 "recommended_start": candidate.get("recommended_start", 0),
                 "recommended_end": candidate.get("recommended_end", 0),
-                "transcript_segment": segment
-            }
-            all_batch_data.append(batch_item)
+                "transcript_segment": segment,
+            })
 
-        # 3. Process in batches of 6
+        # Evaluate in batches of 6
         batch_size = 6
         all_evaluated = []
 
@@ -197,95 +329,89 @@ def run(
             batch = all_batch_data[i:i + batch_size]
             batch_num = (i // batch_size) + 1
             total_batches = (len(all_batch_data) + batch_size - 1) // batch_size
-
-            print(f"[S06] Processing batch {batch_num}/{total_batches} ({len(batch)} candidates)")
+            print(f"[S06] Batch {batch_num}/{total_batches} ({len(batch)} candidates)")
 
             try:
-                evaluated = _evaluate_batch(batch, channel_context)
+                evaluated = _evaluate_batch_with_claude(batch, channel_context, video_path)
 
-                # Track which candidates were returned
                 returned_ids = {str(item.get("candidate_id", "")) for item in evaluated}
                 sent_ids = {str(item.get("candidate_id", "")) for item in batch}
                 missing_ids = sent_ids - returned_ids
 
                 all_evaluated.extend(evaluated)
 
-                # 4. Retry missing candidates individually
                 if missing_ids:
-                    print(f"[S06] Batch {batch_num}: Gemini skipped {len(missing_ids)} candidates: {missing_ids}")
+                    print(f"[S06] Batch {batch_num}: Claude missed {len(missing_ids)} candidates — retrying: {missing_ids}")
                     for missing_id in missing_ids:
                         missing_item = next(
                             (item for item in batch if str(item.get("candidate_id")) == missing_id),
-                            None
+                            None,
                         )
                         if missing_item:
-                            retry_result = _evaluate_single(missing_item, channel_context)
-                            if retry_result:
-                                all_evaluated.append(retry_result)
-                                print(f"[S06] Recovered candidate {missing_id} via individual retry")
+                            retry = _evaluate_single_with_claude(missing_item, channel_context, video_path)
+                            if retry:
+                                all_evaluated.append(retry)
+                                print(f"[S06] Recovered candidate {missing_id}")
                             else:
-                                print(f"[S06] Failed to recover candidate {missing_id}")
+                                print(f"[S06] Could not recover candidate {missing_id} — dropping")
 
             except Exception as batch_err:
-                print(f"[S06] Batch {batch_num} failed: {batch_err}")
-                # Fallback: try each candidate individually
-                print(f"[S06] Falling back to individual evaluation for batch {batch_num}")
+                print(f"[S06] Batch {batch_num} failed: {batch_err}. Falling back to individual evaluation.")
                 for item in batch:
                     try:
-                        single_result = _evaluate_single(item, channel_context)
-                        if single_result:
-                            all_evaluated.append(single_result)
+                        single = _evaluate_single_with_claude(item, channel_context, video_path)
+                        if single:
+                            all_evaluated.append(single)
                     except Exception as single_err:
                         print(f"[S06] Individual eval failed for candidate {item.get('candidate_id')}: {single_err}")
 
-        print(f"[S06] Total evaluated: {len(all_evaluated)}")
+        print(f"[S06] Claude evaluated {len(all_evaluated)} total candidates")
 
-        # 5. Log quality gate results (keep ALL clips — failed ones get cut too for manual review)
-        passed_count = 0
-        failed_count = 0
+        # Log quality gate results, then DROP fails immediately
+        passed, failed_log = [], []
         for clip in all_evaluated:
             verdict = clip.get("quality_verdict", "fail")
             if verdict in ("pass", "fixable"):
-                passed_count += 1
+                passed.append(clip)
             else:
-                failed_count += 1
                 cid = clip.get("candidate_id", "?")
                 reason = clip.get("reject_reason", "no reason given")
-                print(f"[S06] Candidate {cid} failed quality gate: {reason}")
+                print(f"[S06] DROPPED candidate {cid}: {reason}")
+                failed_log.append(clip)
 
-        print(f"[S06] Quality gate: {passed_count} passed, {failed_count} failed, {len(all_evaluated)} total proceeding")
+        print(f"[S06] Quality gate: {len(passed)} passed, {len(failed_log)} dropped")
 
-        if not all_evaluated:
-            print("[S06] No candidates evaluated. Returning empty list.")
+        if not passed:
+            print("[S06] No candidates passed quality gate.")
             return []
 
-        # 6. Sort: passed clips first (by posting_order), then failed clips at the end
-        def sort_key(clip):
-            is_failed = 0 if clip.get("quality_verdict", "fail") in ("pass", "fixable") else 1
-            return (is_failed, clip.get("posting_order", 999))
+        # Sort by posting_order
+        passed.sort(key=lambda c: c.get("posting_order", 999))
 
-        all_evaluated.sort(key=sort_key)
+        # Reassign sequential posting_order
+        for order, clip in enumerate(passed, start=1):
+            if clip.get("posting_order") is None or clip.get("posting_order") == 999:
+                clip["posting_order"] = order
+            else:
+                clip["posting_order"] = order  # normalize to sequential
 
-        # 7. Assign posting_order only to passed clips (failed clips keep 999)
-        order = 1
-        for clip in all_evaluated:
-            if clip.get("quality_verdict", "fail") in ("pass", "fixable"):
-                if clip.get("posting_order") is None or clip.get("posting_order") == 999:
-                    clip["posting_order"] = order
-                    order += 1
+        print(f"[S06] Final: {len(passed)} clips proceeding to S07")
 
-        print(f"[S06] Final output: {len(all_evaluated)} clips ({passed_count} passed, {failed_count} failed)")
         try:
-            pass_count = sum(1 for c in all_evaluated if c.get("quality_verdict") == "pass")
-            fail_count = len(all_evaluated) - pass_count
             director_events.emit_sync(
                 module="module_1", event="s06_evaluation_completed",
-                payload={"job_id": job_id, "pass_count": pass_count, "fail_count": fail_count},
+                payload={
+                    "job_id": job_id,
+                    "pass_count": len(passed),
+                    "fail_count": len(failed_log),
+                    "total_evaluated": len(all_evaluated),
+                },
                 channel_id=channel_id,
             )
         except Exception:
             pass
-        return all_evaluated
+
+        return passed
 
     except Exception as e:
         print(f"[S06] Critical error: {e}")

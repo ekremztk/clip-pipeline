@@ -188,11 +188,9 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
-                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
                     if not candidates:
                         print("[Orchestrator] No candidates from S05. Skipping evaluation.")
                     else:
-                        reset_token_accumulator()
                         evaluated_clips = s06_batch_evaluation.run(
                             candidates=candidates,
                             labeled_transcript=labeled_transcript,
@@ -202,20 +200,17 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             job_id=job_id,
                             video_path=video_path,
                         )
-                    s06_token_usage = get_accumulated_token_usage()
-                    print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
+                    print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
-                             duration_ms=duration_ms_s06, token_usage=s06_token_usage)
-                    pass_count = sum(1 for c in evaluated_clips if c.get("quality_verdict") in ("pass", "fixable"))
-                    fail_count = len(evaluated_clips) - pass_count
+                             duration_ms=duration_ms_s06)
+                    pass_count = len(evaluated_clips)
                     avg_standalone = round(
                         sum(float(c.get("standalone_score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
                     )
                     director_events.emit_sync(
                         module="module_1", event="s06_evaluation_completed",
-                        payload={"job_id": job_id, "total_evaluated": len(evaluated_clips),
-                                 "pass_count": pass_count, "fail_count": fail_count,
+                        payload={"job_id": job_id, "pass_count": pass_count,
                                  "avg_standalone": avg_standalone,
                                  "duration_ms": duration_ms_s06},
                         channel_id=channel_id,
@@ -533,11 +528,9 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
-                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
                     if not candidates:
                         print("[Orchestrator] No candidates from S05. Skipping evaluation.")
                     else:
-                        reset_token_accumulator()
                         evaluated_clips = s06_batch_evaluation.run(
                             candidates=candidates,
                             labeled_transcript=labeled_transcript,
@@ -547,20 +540,17 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             job_id=job_id,
                             video_path=video_path,
                         )
-                    s06_token_usage = get_accumulated_token_usage()
-                    print(f"[Orchestrator] S06 returned {len(evaluated_clips)} evaluated clips")
+                    print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
-                             duration_ms=duration_ms_s06, token_usage=s06_token_usage)
-                    pass_count = sum(1 for c in evaluated_clips if c.get("quality_verdict") in ("pass", "fixable"))
-                    fail_count = len(evaluated_clips) - pass_count
+                             duration_ms=duration_ms_s06)
+                    pass_count = len(evaluated_clips)
                     avg_standalone = round(
                         sum(float(c.get("standalone_score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
                     )
                     director_events.emit_sync(
                         module="module_1", event="s06_evaluation_completed",
-                        payload={"job_id": job_id, "total_evaluated": len(evaluated_clips),
-                                 "pass_count": pass_count, "fail_count": fail_count,
+                        payload={"job_id": job_id, "pass_count": pass_count,
                                  "avg_standalone": avg_standalone,
                                  "duration_ms": duration_ms_s06},
                         channel_id=channel_id,
