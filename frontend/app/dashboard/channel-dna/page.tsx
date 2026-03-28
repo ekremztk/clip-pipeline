@@ -73,7 +73,7 @@ const formatText = (text: string) => {
 };
 
 export default function ChannelDNAPage() {
-    const { channels } = useChannel();
+    const { channels, isLoading: channelLoading } = useChannel();
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [referenceClips, setReferenceClips] = useState<ReferenceClip[]>([]);
     const [uploading, setUploading] = useState(false);
@@ -205,7 +205,14 @@ export default function ChannelDNAPage() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                    {channels.map((ch: any) => {
+                    {channelLoading ? (
+                        [...Array(2)].map((_, i) => (
+                            <div key={i} className="p-3 rounded-lg border border-transparent">
+                                <div className="h-3 w-28 bg-[#1a1a1a] rounded animate-pulse mb-1.5" />
+                                <div className="h-2 w-16 bg-[#1a1a1a] rounded animate-pulse" />
+                            </div>
+                        ))
+                    ) : channels.map((ch: any) => {
                         const isSelected = selectedChannel?.id === ch.id;
                         const hasDna = (() => {
                             const raw = ch.channel_dna;

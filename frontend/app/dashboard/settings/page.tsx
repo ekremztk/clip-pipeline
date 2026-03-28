@@ -6,7 +6,7 @@ import { useChannel } from '../layout';
 import { authFetch } from '@/lib/api';
 
 export default function SettingsPage() {
-    const { channels } = useChannel();
+    const { channels, isLoading: channelLoading } = useChannel();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newChannel, setNewChannel] = useState({ name: '', niche: '', description: '' });
     const [creating, setCreating] = useState(false);
@@ -57,7 +57,19 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        {channels.length === 0 ? (
+                        {channelLoading ? (
+                            <div className="space-y-2">
+                                {[...Array(2)].map((_, i) => (
+                                    <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 flex items-center justify-between">
+                                        <div className="space-y-1.5">
+                                            <div className="h-3 w-32 bg-[#1a1a1a] rounded animate-pulse" />
+                                            <div className="h-2 w-20 bg-[#1a1a1a] rounded animate-pulse" />
+                                        </div>
+                                        <div className="h-5 w-24 bg-[#1a1a1a] rounded animate-pulse" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : channels.length === 0 ? (
                             <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-8 text-center">
                                 <p className="text-sm text-[#525252]">No channels yet. Create your first channel.</p>
                             </div>

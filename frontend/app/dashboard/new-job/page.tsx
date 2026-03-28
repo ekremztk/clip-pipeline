@@ -74,7 +74,7 @@ function TimeInput({ value, onChange, max }: { value: number, onChange: (v: numb
 
 export default function NewJobPage() {
     const router = useRouter();
-    const { channels, activeChannelId, setActiveChannelId } = useChannel();
+    const { channels, activeChannelId, setActiveChannelId, isLoading: channelLoading } = useChannel();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRef = useRef<HTMLDivElement>(null);
@@ -99,12 +99,12 @@ export default function NewJobPage() {
     const [jobs, setJobs] = useState<Job[]>([]);
 
     useEffect(() => {
-        if (!activeChannelId) return;
+        if (channelLoading || !activeChannelId) return;
         authFetch(`/jobs?channel_id=${activeChannelId}&limit=5`)
             .then(r => r.ok ? r.json() : [])
             .then(data => setJobs(data))
             .catch(console.error);
-    }, [activeChannelId]);
+    }, [activeChannelId, channelLoading]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -402,17 +402,17 @@ export default function NewJobPage() {
                             </div>
                             <div>
                                 <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Channel</label>
-                                <select
-                                    value={activeChannelId}
-                                    onChange={e => setActiveChannelId(e.target.value)}
-                                    className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
-                                >
-                                    {channels.length > 0 ? (
-                                        channels.map(c => <option key={c.id} value={c.id}>{c.display_name || c.name || c.id}</option>)
-                                    ) : (
-                                        <option value="speedy_cast">Speedy Cast</option>
-                                    )}
-                                </select>
+                                {channelLoading ? (
+                                    <div className="h-10 bg-[#0a0a0a] border border-[#262626] rounded-lg animate-pulse" />
+                                ) : (
+                                    <select
+                                        value={activeChannelId}
+                                        onChange={e => setActiveChannelId(e.target.value)}
+                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
+                                    >
+                                        {channels.map(c => <option key={c.id} value={c.id}>{c.display_name || c.name || c.id}</option>)}
+                                    </select>
+                                )}
                             </div>
                         </div>
 

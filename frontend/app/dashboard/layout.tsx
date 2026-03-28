@@ -28,48 +28,103 @@ export const ChannelContext = createContext<{
     channels: Channel[];
     activeChannelId: string;
     setActiveChannelId: (id: string) => void;
+    isLoading: boolean;
 }>({
     channels: [],
-    activeChannelId: "speedy_cast",
+    activeChannelId: "",
     setActiveChannelId: () => {},
+    isLoading: true,
 });
 
 export const useChannel = () => useContext(ChannelContext);
+
+// ─── Skeleton primitives ───────────────────────────────────────────────────
+function Skeleton({ className }: { className?: string }) {
+    return (
+        <div
+            className={`bg-[#1a1a1a] rounded animate-pulse ${className ?? ""}`}
+        />
+    );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const [channels, setChannels] = useState<Channel[]>([]);
-    const [selectedChannel, setSelectedChannel] = useState<any>(null);
+    const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const init = async () => {
+            // ── Step 1: Fast session read (localStorage, no network call) ──────
+            // getSession() resolves instantly from the stored JWT — no round-trip.
+            const { data: sessionData } = await supabase.auth.getSession();
+            const sessionUser = sessionData.session?.user ?? null;
+
+            if (sessionUser) {
+                const storageKey = `selectedChannelId_${sessionUser.id}`;
+                const cacheKey   = `channelList_${sessionUser.id}`;
+                const cached     = typeof window !== 'undefined' ? localStorage.getItem(cacheKey) : null;
+
+                if (cached) {
+                    // ── Cache HIT: render immediately, zero flicker ──────────
+                    try {
+                        const list = JSON.parse(cached) as Channel[];
+                        if (list.length > 0) {
+                            const saved = localStorage.getItem(storageKey);
+                            const active = (saved ? list.find(c => c.id === saved) : null) ?? list[0];
+                            setChannels(list);
+                            setSelectedChannel(active);
+                            setUser(sessionUser);
+                            setIsLoading(false); // ← UI can paint now, no skeleton needed
+                        }
+                    } catch { /* corrupt cache — ignore, fetch will overwrite */ }
+                }
+            }
+
+            // ── Step 2: Validate session + fetch fresh channel list ──────────
             const { data } = await supabase.auth.getUser();
             const currentUser = data.user;
             setUser(currentUser);
-            if (!currentUser) return;
 
-            // User-scoped localStorage key — different users never share channel selection
+            if (!currentUser) {
+                setIsLoading(false);
+                return;
+            }
+
             const storageKey = `selectedChannelId_${currentUser.id}`;
+            const cacheKey   = `channelList_${currentUser.id}`;
 
             try {
                 const res = await authFetch('/channels');
                 const json = await res.json();
-                const list: Channel[] = Array.isArray(json) ? json : json.channels || [];
+                const list: Channel[] = Array.isArray(json) ? json : json.channels ?? [];
+
+                // Persist to cache (stale-while-revalidate for next load)
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem(cacheKey, JSON.stringify(list));
+                }
+
                 setChannels(list);
 
-                if (list.length === 0) return;
+                if (list.length === 0) {
+                    setSelectedChannel(null);
+                    setIsLoading(false);
+                    return;
+                }
 
                 const saved = localStorage.getItem(storageKey);
-                const match = saved ? list.find((c) => c.id === saved) : null;
-                const active = match || list[0];
+                const active = (saved ? list.find(c => c.id === saved) : null) ?? list[0];
                 setSelectedChannel(active);
                 localStorage.setItem(storageKey, active.id);
             } catch (err) {
                 console.error('Failed to fetch channels', err);
+            } finally {
+                setIsLoading(false);
             }
         };
+
         init();
     }, []);
 
@@ -89,31 +144,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const isAdmin = user?.app_metadata?.role === 'admin';
 
     const navItems = [
-        { href: "/dashboard", label: "Dashboard", icon: Home, exact: true },
-        { href: "/dashboard/clips", label: "My Projects", icon: FolderOpen, exact: false },
-        { href: "/dashboard/channel-dna", label: "Channel DNA", icon: Dna, exact: false },
+        { href: "/dashboard",                label: "Dashboard",      icon: Home,      exact: true  },
+        { href: "/dashboard/clips",          label: "My Projects",    icon: FolderOpen, exact: false },
+        { href: "/dashboard/channel-dna",    label: "Channel DNA",    icon: Dna,       exact: false },
         ...(isAdmin ? [{ href: "/director", label: "AI Director", icon: Clapperboard, exact: false }] : []),
-        { href: "/dashboard/content-finder", label: "Content Finder", icon: Search, exact: false },
-        { href: "/dashboard/performance", label: "Analytics", icon: BarChart3, exact: false },
-        { href: "/dashboard/settings", label: "Settings", icon: Settings, exact: false },
+        { href: "/dashboard/content-finder", label: "Content Finder", icon: Search,    exact: false },
+        { href: "/dashboard/performance",    label: "Analytics",      icon: BarChart3, exact: false },
+        { href: "/dashboard/settings",       label: "Settings",       icon: Settings,  exact: false },
     ];
 
     const userInitials = user?.user_metadata?.full_name
         ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
-        : user?.email?.slice(0, 2).toUpperCase() || 'U';
+        : user?.email?.slice(0, 2).toUpperCase() ?? '  ';
 
-    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
-    const userEmail = user?.email || '';
+    const userName  = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? '';
+    const userEmail = user?.email ?? '';
 
     return (
         <ChannelContext.Provider value={{
             channels,
-            activeChannelId: selectedChannel?.id || "",
-            setActiveChannelId: handleChannelChange
+            activeChannelId: selectedChannel?.id ?? "",
+            setActiveChannelId: handleChannelChange,
+            isLoading,
         }}>
             <div className="flex h-screen w-screen bg-black text-white overflow-hidden">
-                {/* Sidebar */}
+                {/* ── Sidebar ── */}
                 <aside className="w-64 bg-black border-r border-[#1a1a1a] flex flex-col flex-shrink-0">
+
                     {/* Logo */}
                     <div className="h-16 flex items-center px-6 border-b border-[#1a1a1a]">
                         <div className="flex items-center gap-2">
@@ -123,15 +180,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     {/* Channel Selector */}
-                    {channels.length > 0 ? (
-                        <div className="px-3 pt-4 pb-1">
+                    <div className="px-3 pt-4 pb-1">
+                        {isLoading ? (
+                            /* Skeleton — never flickers to "Add Channel" while loading */
+                            <Skeleton className="h-8 w-full rounded-lg" />
+                        ) : channels.length > 0 ? (
                             <div className="relative">
                                 <select
-                                    value={selectedChannel?.id || ''}
+                                    value={selectedChannel?.id ?? ''}
                                     onChange={(e) => handleChannelChange(e.target.value)}
                                     className="w-full appearance-none bg-[#0a0a0a] border border-[#262626] rounded-lg px-3 py-2 text-xs text-[#a3a3a3] focus:outline-none focus:border-[#404040] transition-colors cursor-pointer pr-7"
                                 >
-                                    {channels.map((ch: any) => (
+                                    {channels.map((ch) => (
                                         <option key={ch.id} value={ch.id} className="bg-[#0a0a0a]">
                                             {ch.display_name || ch.name || ch.id}
                                         </option>
@@ -139,9 +199,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </select>
                                 <ChevronDown className="w-3 h-3 text-[#525252] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                             </div>
-                        </div>
-                    ) : (
-                        <div className="px-3 pt-4 pb-1">
+                        ) : (
                             <Link
                                 href="/dashboard/settings"
                                 className="flex items-center justify-center gap-1.5 w-full bg-[#0a0a0a] border border-dashed border-[#262626] hover:border-[#404040] rounded-lg px-3 py-2 text-xs text-[#525252] hover:text-[#a3a3a3] transition-colors"
@@ -149,8 +207,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <span className="text-base leading-none">+</span>
                                 Add Channel
                             </Link>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {/* Navigation */}
                     <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
@@ -175,6 +233,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </Link>
                             );
                         })}
+
                         {/* Editor — external link */}
                         <a
                             href="https://edit.prognot.com"
@@ -203,20 +262,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </div>
                         </div>
 
-                        {/* Profile (click to sign out) */}
-                        <button
-                            onClick={handleSignOut}
-                            title="Sign out"
-                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#1a1a1a] cursor-pointer transition-colors text-left"
-                        >
-                            <div className="w-9 h-9 bg-[#262626] rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-sm font-medium text-white">{userInitials}</span>
+                        {/* Profile */}
+                        {isLoading ? (
+                            <div className="flex items-center gap-3 px-2 py-2">
+                                <Skeleton className="w-9 h-9 rounded-full flex-shrink-0" />
+                                <div className="flex-1 space-y-1.5">
+                                    <Skeleton className="h-3 w-24" />
+                                    <Skeleton className="h-2 w-32" />
+                                </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{userName}</p>
-                                <p className="text-xs text-[#737373] truncate">{userEmail}</p>
-                            </div>
-                        </button>
+                        ) : (
+                            <button
+                                onClick={handleSignOut}
+                                title="Sign out"
+                                className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#1a1a1a] cursor-pointer transition-colors text-left"
+                            >
+                                <div className="w-9 h-9 bg-[#262626] rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span className="text-sm font-medium text-white">{userInitials}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-white truncate">{userName}</p>
+                                    <p className="text-xs text-[#737373] truncate">{userEmail}</p>
+                                </div>
+                            </button>
+                        )}
                     </div>
                 </aside>
 

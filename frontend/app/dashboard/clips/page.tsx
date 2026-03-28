@@ -107,7 +107,7 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
 };
 
 export default function MyProjectsPage() {
-    const { channels, activeChannelId, setActiveChannelId } = useChannel();
+    const { channels, activeChannelId, setActiveChannelId, isLoading: channelLoading } = useChannel();
     const [jobs, setJobs] = useState<any[]>([]);
     const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState(true);
@@ -130,9 +130,10 @@ export default function MyProjectsPage() {
     };
 
     useEffect(() => {
+        if (channelLoading) return;
         if (activeChannelId) fetchData();
         else { setJobs([]); setClips([]); setLoading(false); }
-    }, [activeChannelId]);
+    }, [activeChannelId, channelLoading]);
 
     useEffect(() => {
         if (!activeChannelId) return;
@@ -219,7 +220,7 @@ export default function MyProjectsPage() {
     });
 
     // No channel yet
-    if (!loading && !activeChannelId) {
+    if (!channelLoading && !loading && !activeChannelId) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-8">
                 <div className="text-center max-w-sm">

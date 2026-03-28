@@ -71,17 +71,61 @@ const features = [
     },
 ];
 
+// ─── Skeleton components ───────────────────────────────────────────────────
+function Skeleton({ className }: { className?: string }) {
+    return <div className={`bg-[#0f0f0f] rounded animate-pulse ${className ?? ""}`} />;
+}
+
+function PageSkeleton() {
+    return (
+        <div className="min-h-screen bg-black">
+            <div className="max-w-5xl mx-auto px-8 py-10 space-y-12">
+                {/* Hero */}
+                <div className="text-center space-y-3 pt-4">
+                    <Skeleton className="h-10 w-2/3 mx-auto rounded-xl" />
+                    <Skeleton className="h-4 w-1/3 mx-auto rounded" />
+                </div>
+                {/* Upload area */}
+                <Skeleton className="h-52 w-full rounded-xl border border-[#1a1a1a]" />
+                {/* Recent projects */}
+                <div className="space-y-5">
+                    <div className="space-y-1.5">
+                        <Skeleton className="h-5 w-36" />
+                        <Skeleton className="h-3 w-48" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden">
+                                <Skeleton className="aspect-video w-full rounded-none" />
+                                <div className="p-3 space-y-2">
+                                    <Skeleton className="h-3 w-3/4" />
+                                    <Skeleton className="h-2 w-1/2" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function DashboardPage() {
     const router = useRouter();
-    const { activeChannelId } = useChannel();
+    const { activeChannelId, isLoading: channelLoading } = useChannel();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Wait for the layout to finish resolving channel before deciding anything
+        if (channelLoading) return;
+
         if (!activeChannelId) {
             setLoading(false);
             return;
         }
+
+        setLoading(true);
         const fetchJobs = async () => {
             try {
                 const res = await authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`);
@@ -93,11 +137,11 @@ export default function DashboardPage() {
             }
         };
         fetchJobs();
-    }, [activeChannelId]);
+    }, [activeChannelId, channelLoading]);
 
-    // Auto-refresh when active jobs exist
+    // Auto-refresh active jobs
     useEffect(() => {
-        if (!activeChannelId) return;
+        if (!activeChannelId || channelLoading) return;
         const hasActive = jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
         if (!hasActive) return;
         const interval = setInterval(async () => {
@@ -107,13 +151,18 @@ export default function DashboardPage() {
             } catch { /* silent */ }
         }, 4000);
         return () => clearInterval(interval);
-    }, [activeChannelId, jobs]);
+    }, [activeChannelId, channelLoading, jobs]);
 
-    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
-    const recentJobs = jobs.filter(j => !['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).slice(0, 8);
+    // ── While layout is still resolving channels: show skeleton, never the empty state ──
+    if (channelLoading) {
+        return <PageSkeleton />;
+    }
 
-    // No channel yet — prompt to create one
-    if (!loading && !activeChannelId) {
+    const activeJobs  = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+    const recentJobs  = jobs.filter(j => !['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).slice(0, 8);
+
+    // Confirmed: loading is done and there are genuinely no channels
+    if (!activeChannelId) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-8">
                 <div className="text-center max-w-sm">
@@ -150,7 +199,6 @@ export default function DashboardPage() {
                 {/* Upload Area */}
                 <div className="w-full max-w-4xl mx-auto">
                     <div className="relative">
-                        {/* Corner decorations */}
                         <div className="absolute -left-1 -top-1 w-12 h-12 pointer-events-none">
                             <div className="absolute top-0 left-0 w-12 h-px bg-white/10" />
                             <div className="absolute top-0 left-0 w-px h-12 bg-white/10" />
@@ -172,7 +220,6 @@ export default function DashboardPage() {
                             onClick={() => router.push('/dashboard/new-job')}
                             className="relative border border-dashed border-[#262626] hover:border-[#404040] rounded-xl overflow-hidden transition-all duration-300 cursor-pointer group"
                         >
-                            {/* PROGNOT watermark */}
                             <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none overflow-hidden">
                                 <div className="text-[12rem] font-bold tracking-tighter leading-none whitespace-nowrap text-white">
                                     PROGNOT
@@ -314,10 +361,10 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             {[...Array(4)].map((_, i) => (
                                 <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden">
-                                    <div className="aspect-video bg-[#1a1a1a] shimmer-load" />
-                                    <div className="p-3">
-                                        <div className="h-3 bg-[#1a1a1a] rounded w-3/4 mb-2" />
-                                        <div className="h-2 bg-[#1a1a1a] rounded w-1/2" />
+                                    <div className="aspect-video bg-[#0f0f0f] animate-pulse" />
+                                    <div className="p-3 space-y-2">
+                                        <div className="h-3 bg-[#0f0f0f] rounded w-3/4 animate-pulse" />
+                                        <div className="h-2 bg-[#0f0f0f] rounded w-1/2 animate-pulse" />
                                     </div>
                                 </div>
                             ))}
@@ -339,7 +386,6 @@ export default function DashboardPage() {
                                                 <Play className="w-4 h-4 text-black fill-black ml-0.5" />
                                             </div>
                                         </div>
-                                        {/* Status badge */}
                                         <div className="absolute top-2 right-2">
                                             {job.status === 'completed' && (
                                                 <span className="px-1.5 py-0.5 bg-black/80 text-green-400 text-[10px] rounded">Done</span>
