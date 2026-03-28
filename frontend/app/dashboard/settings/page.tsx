@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useChannel } from '../layout';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { authFetch } from '@/lib/api';
 
 export default function SettingsPage() {
     const { channels } = useChannel();
@@ -16,7 +15,7 @@ export default function SettingsPage() {
         if (!newChannel.name.trim()) return;
         setCreating(true);
         try {
-            const res = await fetch(`${API}/channels`, {
+            const res = await authFetch('/channels', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

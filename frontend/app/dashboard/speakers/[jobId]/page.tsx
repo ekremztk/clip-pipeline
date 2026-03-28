@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { authFetch } from '@/lib/api';
 
 interface SpeakerState {
     role: 'host' | 'guest';
@@ -28,7 +27,7 @@ export default function ConfirmSpeakersPage() {
         async function fetchJob() {
             if (!jobId) return;
             try {
-                const res = await fetch(`${API}/jobs/${jobId}`);
+                const res = await authFetch(`/jobs/${jobId}`);
                 if (!res.ok) throw new Error('Failed to fetch job details');
                 const data = await res.json();
                 setJobTitle(data.video_title || data.job?.video_title || '');
@@ -81,7 +80,7 @@ export default function ConfirmSpeakersPage() {
                 payload[key] = { role: state.role, name: state.name.trim() };
             });
 
-            const res = await fetch(`${API}/jobs/${jobId}/confirm-speakers`, {
+            const res = await authFetch(`/jobs/${jobId}/confirm-speakers`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ speaker_map: payload }),

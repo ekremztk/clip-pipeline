@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Upload, X, Loader2, Dna, Pencil } from 'lucide-react';
 import { useChannel } from '../layout';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { authFetch } from '@/lib/api';
 
 interface Channel {
     id: string;
@@ -101,7 +100,7 @@ export default function ChannelDNAPage() {
 
     const fetchReferenceClips = async (channelId: string) => {
         try {
-            const res = await fetch(`${API}/channels/${channelId}/references`);
+            const res = await authFetch(`/channels/${channelId}/references`);
             if (res.ok) setReferenceClips((await res.json()) || []);
         } catch (e) { console.error(e); }
     };
@@ -112,7 +111,7 @@ export default function ChannelDNAPage() {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            await fetch(`${API}/channels/${selectedChannel.id}/references`, { method: 'POST', body: formData });
+            await authFetch(`/channels/${selectedChannel.id}/references`, { method: 'POST', body: formData });
             fetchReferenceClips(selectedChannel.id);
         } catch (e) { console.error(e); }
         finally { setUploading(false); }
@@ -121,7 +120,7 @@ export default function ChannelDNAPage() {
     const handleSaveHeader = async () => {
         if (!selectedChannel) return;
         try {
-            const res = await fetch(`${API}/channels/${selectedChannel.id}`, {
+            const res = await authFetch(`/channels/${selectedChannel.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ display_name: headerForm.display_name, niche: headerForm.niche })
@@ -165,7 +164,7 @@ export default function ChannelDNAPage() {
         if (!selectedChannel) return;
         setSavingDna(true);
         try {
-            const res = await fetch(`${API}/channels/${selectedChannel.id}`, {
+            const res = await authFetch(`/channels/${selectedChannel.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ channel_dna: dnaForm })

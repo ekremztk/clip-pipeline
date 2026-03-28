@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { useChannel } from "../layout";
+import { authFetch, API_URL } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = API_URL;
 
 type Job = {
     id: string;
@@ -98,7 +100,7 @@ export default function NewJobPage() {
 
     useEffect(() => {
         if (!activeChannelId) return;
-        fetch(`${API}/jobs?channel_id=${activeChannelId}&limit=5`)
+        authFetch(`/jobs?channel_id=${activeChannelId}&limit=5`)
             .then(r => r.ok ? r.json() : [])
             .then(data => setJobs(data))
             .catch(console.error);
@@ -135,7 +137,7 @@ export default function NewJobPage() {
         if (uploadState === 'idle' && e.dataTransfer.files?.length) handleFileSelect(e.dataTransfer.files[0]);
     };
 
-    const handleFileSelect = (selectedFile: File) => {
+    const handleFileSelect = async (selectedFile: File) => {
         setFile(selectedFile);
         const url = URL.createObjectURL(selectedFile);
         setVideoUrl(url);
@@ -143,8 +145,12 @@ export default function NewJobPage() {
         setUploadProgress(0);
         setSubmitError("");
 
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `${API}/jobs/upload-preview`, true);
+        if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         xhr.upload.onprogress = (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); };
         xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -179,7 +185,7 @@ export default function NewJobPage() {
         formData.append("trim_end_seconds", endTime.toString());
 
         try {
-            const response = await fetch(`${API}/jobs`, { method: "POST", body: formData });
+            const response = await authFetch('/jobs', { method: "POST", body: formData });
             if (!response.ok) {
                 const err = await response.json().catch(() => ({}));
                 setSubmitError(err.detail || 'Failed to start processing'); setUploadState('preview_ready'); return;
@@ -193,7 +199,7 @@ export default function NewJobPage() {
             const maxAttempts = 90;
             const pollStatus = async () => {
                 try {
-                    const statusRes = await fetch(`${API}/jobs/${jobId}`);
+                    const statusRes = await authFetch(`/jobs/${jobId}`);
                     const jobData = await statusRes.json();
                     const status = jobData?.job?.status || jobData?.status;
                     if (status === 'awaiting_speaker_confirm') { router.push(`/dashboard/speakers/${jobId}`); return; }

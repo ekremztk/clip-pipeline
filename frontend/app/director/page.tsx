@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 
+import { authFetch } from "@/lib/api";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // ═══════════════════════════════════════════════
@@ -692,14 +694,14 @@ function DashboardTab({ data, loading, days, onDaysChange, onOpenModule, onChatA
   async function completeRec(id: string) {
     setRemovedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
     try {
-      await fetch(`${API_URL}/director/recommendations/${id}/complete`, { method: "POST" });
+      await authFetch(`/director/recommendations/${id}/complete`, { method: "POST" });
     } catch { /* silent */ }
   }
 
   async function deleteRec(id: string) {
     setRemovedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
     try {
-      await fetch(`${API_URL}/director/recommendations/${id}`, { method: "DELETE" });
+      await authFetch(`/director/recommendations/${id}`, { method: "DELETE" });
     } catch { /* silent */ }
   }
 
@@ -1310,7 +1312,7 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
   useEffect(() => {
     async function loadCmds() {
       try {
-        const res = await fetch(`${API_URL}/director/commands`);
+        const res = await authFetch(`/director/commands`);
         if (res.ok) {
           const data = await res.json();
           if (data.commands) setAllCommands(data.commands);
@@ -1375,7 +1377,7 @@ function ChatTab({ messages, setMessages, input, setInput, isLoading, setIsLoadi
     setMessages((p) => [...p, { id: aId, role: "assistant", content: "", toolCalls: [], isStreaming: true }]);
 
     try {
-      const res = await fetch(`${API_URL}/director/chat`, {
+      const res = await authFetch(`/director/chat`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, session_id: sessionId }),
       });
@@ -1577,7 +1579,7 @@ function DecisionsTab() {
   const fetchDecisions = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/director/decisions?limit=50`, { cache: "no-store" });
+      const res = await authFetch(`/director/decisions?limit=50`);
       if (res.ok) setDecisions(await res.json());
     } catch { /* silent */ } finally { setLoading(false); }
   }, []);
@@ -1588,7 +1590,7 @@ function DecisionsTab() {
     if (!form.decision.trim()) return;
     setSubmitting(true);
     try {
-      await fetch(`${API_URL}/director/decisions`, {
+      await authFetch(`/director/decisions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1731,7 +1733,7 @@ export default function DirectorPage() {
   useEffect(() => {
     async function loadHistory() {
       try {
-        const res = await fetch(`${API_URL}/director/conversations/${sessionId}?limit=50`);
+        const res = await authFetch(`/director/conversations/${sessionId}?limit=50`);
         if (!res.ok) return;
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -1751,7 +1753,7 @@ export default function DirectorPage() {
   useEffect(() => {
     async function loadSessions() {
       try {
-        const res = await fetch(`${API_URL}/director/sessions?limit=20`);
+        const res = await authFetch(`/director/sessions?limit=20`);
         if (!res.ok) return;
         const data = await res.json();
         if (data.sessions) setPastSessions(data.sessions);
@@ -1775,7 +1777,7 @@ export default function DirectorPage() {
   const fetchDashboard = useCallback(async (d: number) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/director/dashboard?days=${d}`, { cache: "no-store" });
+      const res = await authFetch(`/director/dashboard?days=${d}`);
       if (res.ok) setDashboardData(await res.json());
     } catch { /* silent */ } finally {
       setLoading(false);
