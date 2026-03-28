@@ -28,11 +28,12 @@ export async function POST(request: Request) {
 		if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
 		const body = await request.json();
-		const { name, fps, canvas_width, canvas_height, project_data, project_version } = body;
+		const { id, name, fps, canvas_width, canvas_height, project_data, project_version } = body;
 
 		const { data, error } = await supabase
 			.from("editor_projects")
 			.insert({
+				...(id ? { id } : {}),
 				user_id: user.id,
 				name,
 				fps: fps ?? 30,

@@ -100,11 +100,12 @@ class ApiStorageService {
 		});
 
 		if (putRes.status === 404) {
-			// Project doesn't exist yet — create it
+			// Project doesn't exist yet — create it, preserving the client-side UUID
 			await apiFetch("/api/projects", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
+					id: project.metadata.id,
 					name: project.metadata.name,
 					fps: project.settings.fps,
 					canvas_width: project.settings.canvasSize?.width,
