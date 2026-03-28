@@ -2,7 +2,6 @@ import json
 import os
 import re
 import time
-import tempfile
 import threading
 from typing import Dict, Any, Optional
 from google import genai
@@ -119,13 +118,23 @@ def get_gemini_client() -> genai.Client:
     global _gemini_client
     if _gemini_client is None:
         try:
+            # DÜŞÜK-1: Use in-memory credentials instead of writing to temp file
             if settings.GCP_CREDENTIALS_JSON:
-                fd, temp_file_path = tempfile.mkstemp(suffix=".json")
-                with os.fdopen(fd, 'w') as f:
-                    f.write(settings.GCP_CREDENTIALS_JSON)
-                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_file_path
-                
-            _gemini_client = genai.Client(vertexai=True, project=settings.GCP_PROJECT, location=settings.GCP_LOCATION)
+                from google.oauth2 import service_account
+                creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
+                credentials = service_account.Credentials.from_service_account_info(
+                    creds_info,
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+                )
+                _gemini_client = genai.Client(
+                    vertexai=True,
+                    project=settings.GCP_PROJECT,
+                    location=settings.GCP_LOCATION,
+                    credentials=credentials,
+                )
+            else:
+                # Application Default Credentials fallback
+                _gemini_client = genai.Client(vertexai=True, project=settings.GCP_PROJECT, location=settings.GCP_LOCATION)
             print(f"[GeminiClient] Vertex AI initialized for project {settings.GCP_PROJECT}")
         except Exception as e:
             print(f"[GeminiClient] Error initializing client: {e}")

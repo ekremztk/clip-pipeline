@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Depends, Request
 from app.services.supabase_client import get_client
 from app.middleware.auth import get_current_user
 from app.services import storage
@@ -7,11 +7,16 @@ from app.pipeline.orchestrator import run_pipeline
 from app.models.schemas import JobResponse
 from app.models.enums import JobStatus
 from app.config import settings
+from app.limiter import limiter
 import uuid
 import shutil
 import os
 import json
 import subprocess
+
+# Allowed video MIME types and extensions
+_ALLOWED_VIDEO_TYPES = {"video/mp4", "video/quicktime", "video/x-msvideo", "video/x-matroska", "video/webm"}
+_ALLOWED_VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -31,25 +36,34 @@ def get_video_duration(file_path: str) -> float:
         return 0.0
 
 @router.post("/upload-preview")
-async def upload_preview(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def upload_preview(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
     """
     Instantly uploads a video file and returns its duration.
     Called as soon as user selects a file, before job creation.
+    Rate limited: 10 uploads/minute per IP.
     """
     try:
-        import uuid, subprocess, json
-        from fastapi import UploadFile, File
-        
+        # YÜKS-3: Validate MIME type
+        if file.content_type not in _ALLOWED_VIDEO_TYPES:
+            raise HTTPException(status_code=400, detail="Unsupported file format")
+
+        # YÜKS-3: Sanitize filename — use only UUID + safe extension, ignore user-provided name
+        original_ext = os.path.splitext(file.filename or "")[1].lower()
+        if original_ext not in _ALLOWED_VIDEO_EXTS:
+            original_ext = ".mp4"
         upload_id = str(uuid.uuid4())
-        filename = f"{upload_id}_{file.filename}"
-        file_path = settings.UPLOAD_DIR / filename
-        
-        # Save file
+        safe_filename = f"{upload_id}{original_ext}"
+        file_path = settings.UPLOAD_DIR / safe_filename
+
         with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
-        
-        # Get duration with ffprobe
+
         ffprobe_cmd = [
             "ffprobe", "-v", "quiet",
             "-show_entries", "format=duration",
@@ -58,22 +72,25 @@ async def upload_preview(file: UploadFile = File(...), current_user: dict = Depe
         result = subprocess.run(ffprobe_cmd, capture_output=True, text=True)
         data = json.loads(result.stdout)
         duration_seconds = float(data["format"]["duration"])
-        
-        print(f"[UploadPreview] Uploaded {filename}, duration: {duration_seconds:.1f}s")
-        
+
+        print(f"[UploadPreview] Uploaded {safe_filename}, duration: {duration_seconds:.1f}s")
+
+        # YÜKS-2: Never return server file_path to client
         return {
             "upload_id": upload_id,
             "duration_seconds": duration_seconds,
-            "file_path": str(file_path),
-            "filename": file.filename
         }
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[UploadPreview] Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Upload failed")
 
 @router.post("")
+@limiter.limit("20/hour")
 async def create_job(
+    request: Request,
     background_tasks: BackgroundTasks,
     upload_id: str = Form(None),
     video: UploadFile = File(None),
@@ -100,11 +117,18 @@ async def create_job(
                 raise HTTPException(status_code=404, detail="Uploaded file not found.")
                 
         elif video:
-            if not video.content_type.startswith("video/"):
-                raise HTTPException(status_code=400, detail="Uploaded file is not a video.")
-            
+            # YÜKS-3: Validate MIME type
+            if video.content_type not in _ALLOWED_VIDEO_TYPES:
+                raise HTTPException(status_code=400, detail="Uploaded file is not a supported video format.")
+
+            # YÜKS-3: Sanitize filename
+            original_ext = os.path.splitext(video.filename or "")[1].lower()
+            if original_ext not in _ALLOWED_VIDEO_EXTS:
+                original_ext = ".mp4"
+            safe_name = f"{job_id}{original_ext}"
+
             file_bytes = await video.read()
-            video_path = storage.save_upload(file_bytes, video.filename, job_id)
+            video_path = storage.save_upload(file_bytes, safe_name, job_id)
             if not video_path:
                 raise HTTPException(status_code=500, detail="Failed to save video file.")
         else:
@@ -132,12 +156,15 @@ async def create_job(
                     trimmed_path
                 ]
                 
-                print(f"[JobsRoute] Trimming video: {' '.join(cmd)}")
+                print(f"[JobsRoute] Trimming video")
                 try:
                     subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
                     video_path = trimmed_path
                 except Exception as e:
                     print(f"[JobsRoute] Error trimming video: {e}")
+                    # Clean up temp file on trim failure
+                    if os.path.exists(trimmed_path):
+                        os.remove(trimmed_path)
                     raise HTTPException(status_code=500, detail="Failed to trim video.")
             
         supabase = get_client()
@@ -184,7 +211,7 @@ async def create_job(
         raise
     except Exception as e:
         print(f"[JobsRoute] Error in POST /jobs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Job creation failed")
 
 
 @router.get("/{job_id}")
@@ -219,7 +246,7 @@ async def get_job(job_id: str, current_user: dict = Depends(get_current_user)):
         raise
     except Exception as e:
         print(f"[JobsRoute] Error in GET /jobs/{job_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("")
@@ -235,7 +262,7 @@ async def list_jobs(channel_id: str, limit: int = 20, current_user: dict = Depen
         
     except Exception as e:
         print(f"[JobsRoute] Error in GET /jobs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.delete("/{job_id}")
@@ -269,4 +296,4 @@ async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)
         raise
     except Exception as e:
         print(f"[JobsRoute] Error in DELETE /jobs/{job_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")

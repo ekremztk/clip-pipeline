@@ -9,7 +9,6 @@ load_dotenv()
 
 from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Form, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -46,11 +45,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 # CORS
+import os as _os
+_ALLOWED_ORIGINS = ["https://clip.prognot.com", "https://prognot.com"]
+if _os.getenv("ENVIRONMENT", "development") == "development":
+    _ALLOWED_ORIGINS += ["http://localhost:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
 # Klasörler
@@ -59,7 +64,7 @@ UPLOAD_DIR = Path("temp_uploads")
 OUTPUT_DIR.mkdir(exist_ok=True)
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-app.mount("/output", StaticFiles(directory="output"), name="output")
+# /output artık public mount edilmiyor (güvenlik)
 
 
 # ══════════════════════════════════════════════════════════════════════

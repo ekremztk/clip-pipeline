@@ -37,40 +37,49 @@ def _run_sql(sql: str, params: tuple = ()) -> list[dict]:
         pool.putconn(conn)
 
 
-DANGEROUS_KEYWORDS = [
-    "DROP", "DELETE", "UPDATE", "INSERT", "ALTER",
-    "TRUNCATE", "EXEC", "EXECUTE", "UNION",
-]
-
-
 def query_database(sql: str) -> list[dict]:
     """
     Run a SELECT query on Supabase. Only SELECT is allowed.
+    Uses sqlparse AST validation — keyword blacklists are bypassable.
     Returns list of row dicts, max 200 rows.
     """
     try:
+        import sqlparse
+        from sqlparse.sql import Statement
+        from sqlparse import tokens as T
+
         sql = sql.strip()
-        if not sql.upper().startswith("SELECT"):
-            return [{"error": "Only SELECT queries are allowed"}]
 
-        # SQL injection protection
-        sql_upper = sql.upper()
-        for kw in DANGEROUS_KEYWORDS:
-            if kw in sql_upper:
-                return [{"error": f"Forbidden keyword: {kw}"}]
-        if "--" in sql:
-            return [{"error": "SQL comments not allowed"}]
-        if sql.count(";") > 0:
-            return [{"error": "Multiple statements not allowed"}]
+        # (1) Parse and count statements — multi-statement is forbidden
+        parsed_stmts = sqlparse.parse(sql)
+        if len(parsed_stmts) != 1:
+            return [{"error": "Exactly one SQL statement is allowed"}]
 
-        # Inject LIMIT safety
-        if "LIMIT" not in sql_upper:
-            sql = sql.rstrip(";") + " LIMIT 200"
+        stmt: Statement = parsed_stmts[0]
 
-        return _run_sql(sql)
+        # (2) AST-level type check — must be SELECT
+        stmt_type = stmt.get_type()
+        if stmt_type != "SELECT":
+            return [{"error": "Only SELECT statements are allowed"}]
+
+        # (3) Walk all tokens — block any DML/DDL token that is not SELECT
+        forbidden_ttypes = {T.Keyword.DDL, T.Keyword.DML}
+        for token in stmt.flatten():
+            if token.ttype in forbidden_ttypes and token.normalized.upper() != "SELECT":
+                return [{"error": f"Forbidden SQL token: {token.normalized}"}]
+            # Block stacked queries via semicolons
+            if token.ttype is T.Punctuation and token.value == ";":
+                return [{"error": "Semicolons are not allowed"}]
+
+        # (4) Inject LIMIT safety
+        sql_clean = sql.rstrip(";")
+        if "LIMIT" not in sql_clean.upper():
+            sql_clean = sql_clean + " LIMIT 200"
+
+        return _run_sql(sql_clean)
     except Exception as e:
         print(f"[DirectorDB] query_database error: {e}")
-        return [{"error": str(e)}]
+        return [{"error": "Query execution failed"}]
 
 
 def get_pipeline_stats(days: int = 7, channel_id: str | None = None) -> dict:

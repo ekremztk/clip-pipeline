@@ -38,3 +38,8 @@ youtube-transcript-api
 sentry-sdk[fastapi]
 langfuse>=2.0.0,<3.0.0
 posthog
+
+# --- Security ---
+slowapi
+sqlparse
+cryptography

@@ -1706,8 +1706,6 @@ function DecisionsTab() {
 // Main Page
 // ═══════════════════════════════════════════════
 
-const ADMIN_USER_ID = '3ebacaef-8982-4e34-a13a-4b50cdf0cc40';
-
 export default function DirectorPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "decisions">("dashboard");
@@ -1734,10 +1732,10 @@ export default function DirectorPage() {
   });
   const [pastSessions, setPastSessions] = useState<{session_id:string;first_message:string;last_message_at:string;message_count:number}[]>([]);
 
-  // Admin-only guard
+  // Admin-only guard — check app_metadata.role claim (set server-side in Supabase)
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user || data.user.id !== ADMIN_USER_ID) {
+      if (!data.user || data.user.app_metadata?.role !== 'admin') {
         router.replace('/dashboard');
       }
     });

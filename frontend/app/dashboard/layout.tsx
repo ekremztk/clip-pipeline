@@ -86,8 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push('/login');
     };
 
-    const ADMIN_USER_ID = '3ebacaef-8982-4e34-a13a-4b50cdf0cc40';
-    const isAdmin = user?.id === ADMIN_USER_ID;
+    const isAdmin = user?.app_metadata?.role === 'admin';
 
     const navItems = [
         { href: "/dashboard", label: "Dashboard", icon: Home, exact: true },

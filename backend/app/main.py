@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 
@@ -177,24 +179,35 @@ async def lifespan(app: FastAPI):
 from app.api.routes import jobs, clips, speakers, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe
 from app.api.websocket import progress
 from app.director.router import router as director_router
+from app.limiter import limiter
+
+# CORS — explicit whitelist only
+_ALLOWED_ORIGINS = [
+    "https://clip.prognot.com",
+    "https://prognot.com",
+    "https://www.prognot.com",
+]
+if settings.ENVIRONMENT == "development":
+    _ALLOWED_ORIGINS += ["http://localhost:3000", "http://localhost:3001"]
 
 app = FastAPI(
     title="Prognot Clip Pipeline",
     lifespan=lifespan
 )
 
-# CORS configuration
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
-# Ensure OUTPUT_DIR exists before mounting to prevent StaticFiles from throwing RuntimeError
+# OUTPUT_DIR still created for pipeline use but NOT publicly mounted
 settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/output", StaticFiles(directory=str(settings.OUTPUT_DIR)), name="output")
 
 app.include_router(jobs.router)
 app.include_router(clips.router)

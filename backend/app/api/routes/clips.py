@@ -61,7 +61,7 @@ async def get_clips(
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error fetching clips: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{clip_id}")
@@ -75,7 +75,7 @@ async def get_clip(clip_id: str, current_user: dict = Depends(get_current_user))
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error fetching clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{clip_id}/approve")
@@ -99,7 +99,7 @@ async def approve_clip(clip_id: str, notes: Optional[str] = Body(default=None, e
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error approving clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{clip_id}/unset-approval")
@@ -121,7 +121,7 @@ async def unset_approval_clip(clip_id: str, current_user: dict = Depends(get_cur
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error unsetting approval clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{clip_id}/publish")
@@ -139,7 +139,7 @@ async def publish_clip(clip_id: str, current_user: dict = Depends(get_current_us
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error publishing clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{clip_id}/unpublish")
@@ -157,7 +157,7 @@ async def unpublish_clip(clip_id: str, current_user: dict = Depends(get_current_
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error unpublishing clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{clip_id}/reject")
@@ -181,4 +181,4 @@ async def reject_clip(clip_id: str, notes: Optional[str] = Body(default=None, em
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error rejecting clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")

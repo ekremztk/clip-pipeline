@@ -2,8 +2,9 @@ import os
 import zipfile
 import tempfile
 import pathlib
+import httpx
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from app.services.supabase_client import get_client
 from app.middleware.auth import get_current_user
 
@@ -23,11 +24,10 @@ async def download_clip(clip_id: str, current_user: dict = Depends(get_current_u
         print(f"[DownloadsRoute] Request to download clip: {clip_id}")
         supabase = get_client()
         result = supabase.table("clips").select("*").eq("id", clip_id).execute()
-        
+
         if not result.data:
-            print(f"[DownloadsRoute] Clip not found: {clip_id}")
             raise HTTPException(status_code=404, detail="Clip not found")
-            
+
         clip = result.data[0]
 
         # Verify ownership via parent job
@@ -38,43 +38,51 @@ async def download_clip(clip_id: str, current_user: dict = Depends(get_current_u
                 raise HTTPException(status_code=404, detail="Clip not found")
 
         file_url = clip.get("file_url")
-        
+
         if not file_url:
-            print(f"[DownloadsRoute] File URL not found for clip {clip_id}")
             raise HTTPException(status_code=404, detail="Video file URL not found")
-            
-        return RedirectResponse(url=file_url)
-        
+
+        # ORTA-5: Stream from R2 instead of redirecting to public URL
+        async def stream_clip():
+            async with httpx.AsyncClient(timeout=120) as client:
+                async with client.stream("GET", file_url) as r:
+                    r.raise_for_status()
+                    async for chunk in r.aiter_bytes(chunk_size=65536):
+                        yield chunk
+
+        return StreamingResponse(
+            stream_clip(),
+            media_type="video/mp4",
+            headers={"Content-Disposition": f'attachment; filename="clip_{clip_id[:8]}.mp4"'},
+        )
+
     except HTTPException:
         raise
     except Exception as e:
         print(f"[DownloadsRoute] Error downloading clip {clip_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/jobs/{job_id}/all")
 async def download_all_clips(job_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         print(f"[DownloadsRoute] Request to download all clips for job: {job_id}")
         supabase = get_client()
-        
+
         # Verify job ownership
         job_check = supabase.table("jobs").select("id").eq("id", job_id).eq("user_id", current_user["id"]).execute()
         if not job_check.data:
             raise HTTPException(status_code=404, detail="Job not found")
 
-        # Query clips table WHERE job_id = job_id AND video_landscape_path IS NOT NULL
-        # ORDER BY posting_order
         result = supabase.table("clips").select("*").eq("job_id", job_id).order("posting_order").execute()
-        
+
         clips = [c for c in result.data if c.get("video_landscape_path") is not None]
-        
+
         if not clips:
-            print(f"[DownloadsRoute] No clips found for job: {job_id}")
             raise HTTPException(status_code=404, detail="No clips found")
-            
+
         fd, zip_path = tempfile.mkstemp(suffix=".zip")
         os.close(fd)
-        
+
         added_count = 0
         try:
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -86,31 +94,30 @@ async def download_all_clips(job_id: str, background_tasks: BackgroundTasks, cur
                         arcname = f"clip_{posting_order:02d}_{content_type}.mp4"
                         zipf.write(video_path, arcname=arcname)
                         added_count += 1
-                        
+
             if added_count == 0:
-                print(f"[DownloadsRoute] No clip files found on disk for job: {job_id}")
                 cleanup_temp_file(zip_path)
                 raise HTTPException(status_code=404, detail="No clip files found on disk")
-                
+
             filename = f"job_{job_id[:8]}_clips.zip"
-            print(f"[DownloadsRoute] Serving ZIP {zip_path} with {added_count} clips as {filename}")
-            
+            print(f"[DownloadsRoute] Serving ZIP with {added_count} clips as {filename}")
+
             background_tasks.add_task(cleanup_temp_file, zip_path)
-            
+
             return FileResponse(
                 path=zip_path,
                 media_type="application/zip",
                 filename=filename
             )
-            
+
         except HTTPException:
             raise
         except Exception as e:
             cleanup_temp_file(zip_path)
             raise e
-            
+
     except HTTPException:
         raise
     except Exception as e:
         print(f"[DownloadsRoute] Error downloading all clips for job {job_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
