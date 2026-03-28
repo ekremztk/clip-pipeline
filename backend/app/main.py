@@ -184,6 +184,7 @@ from app.limiter import limiter
 # CORS — explicit whitelist only
 _ALLOWED_ORIGINS = [
     "https://clip.prognot.com",
+    "https://edit.prognot.com",
     "https://prognot.com",
     "https://www.prognot.com",
 ]

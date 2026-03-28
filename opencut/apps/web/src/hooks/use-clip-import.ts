@@ -7,6 +7,7 @@ import { useEditor } from "@/hooks/use-editor";
 import { useYouTubeStore } from "@/stores/youtube-store";
 import { useReframeMetadataStore } from "@/stores/reframe-metadata-store";
 import { processMediaAssets } from "@/lib/media/processing";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * Reads ?clipUrl, ?clipTitle, ?clipDesc URL params.
@@ -58,7 +59,13 @@ export function useClipImport(projectId: string) {
 					? `${apiBase}/proxy/clip?url=${encodeURIComponent(clipUrl)}`
 					: clipUrl;
 
-				const response = await fetch(proxyUrl);
+				const supabase = createClient();
+				const { data: sessionData } = await supabase.auth.getSession();
+				const token = sessionData?.session?.access_token;
+
+				const response = await fetch(proxyUrl, {
+					headers: token ? { Authorization: `Bearer ${token}` } : {},
+				});
 				if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
 
 				const blob = await response.blob();
