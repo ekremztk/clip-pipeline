@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel
 from datetime import datetime, timezone
 from app.services.supabase_client import get_client
 from app.memory import feedback_processor
 from workers import feedback_worker
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -31,7 +32,7 @@ class ApproveRagRequest(BaseModel):
     approved: bool
 
 @router.post("/clips/{clip_id}/publish")
-async def publish_clip(clip_id: str, request: PublishRequest, background_tasks: BackgroundTasks):
+async def publish_clip(clip_id: str, request: PublishRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
         supabase.table("clips").update({
@@ -55,7 +56,7 @@ async def publish_clip(clip_id: str, request: PublishRequest, background_tasks: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/clips/{clip_id}/approve-rag")
-async def approve_rag(clip_id: str, request: ApproveRagRequest, background_tasks: BackgroundTasks):
+async def approve_rag(clip_id: str, request: ApproveRagRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
         result = supabase.table("clips").select("*").eq("id", clip_id).execute()
@@ -82,7 +83,7 @@ async def approve_rag(clip_id: str, request: ApproveRagRequest, background_tasks
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/collect")
-async def collect_feedback(background_tasks: BackgroundTasks):
+async def collect_feedback(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         background_tasks.add_task(feedback_worker.check_pending_clips)
         return {"started": True, "message": "Feedback collection started"}
@@ -91,7 +92,7 @@ async def collect_feedback(background_tasks: BackgroundTasks):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/clips/{clip_id}/performance")
-async def get_performance(clip_id: str):
+async def get_performance(clip_id: str, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
         result = supabase.table("clips").select(

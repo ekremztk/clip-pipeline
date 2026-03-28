@@ -57,7 +57,7 @@ def log_step(job_id: str, step_number: int, step_name: str, status: str,
 
 
 def run_pipeline(job_id: str, video_path: str, video_title: str,
-                 guest_name: str | None, channel_id: str) -> None:
+                 guest_name: str | None, channel_id: str, user_id: str | None = None) -> None:
     """
     Main pipeline function called by the worker.
     Runs steps exactly as defined.
@@ -251,7 +251,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             job_id=job_id,
                             channel_id=channel_id,
                             video_path=video_path,
-                            video_title=video_title
+                            video_title=video_title,
+                            user_id=user_id
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
                     duration_ms_s08 = int((time.time() - step_start_time) * 1000)
@@ -406,6 +407,7 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
         video_title = job.get("title", "")
         guest_name = job.get("guest_name")
         channel_id = job.get("channel_id")
+        user_id = job.get("user_id")
         if not channel_id:
             print(f"[Orchestrator] WARNING: job {job_id} has no channel_id in database")
             channel_id = "unknown"
@@ -592,7 +594,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             job_id=job_id,
                             channel_id=channel_id,
                             video_path=video_path,
-                            video_title=video_title
+                            video_title=video_title,
+                            user_id=user_id
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
                     director_events.emit_sync(

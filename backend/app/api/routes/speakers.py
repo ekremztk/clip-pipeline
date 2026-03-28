@@ -1,14 +1,15 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from app.services.supabase_client import get_client
 from app.pipeline.orchestrator import run_pipeline
 from app.models.schemas import SpeakerConfirmRequest
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/jobs", tags=["speakers"])
 
 from workers.video_worker import resume_pipeline_from_s04
 
 @router.post("/{job_id}/confirm-speakers")
-async def confirm_speakers(job_id: str, request: SpeakerConfirmRequest, background_tasks: BackgroundTasks):
+async def confirm_speakers(job_id: str, request: SpeakerConfirmRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
         

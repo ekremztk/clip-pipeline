@@ -3,9 +3,10 @@
 import json
 import uuid
 from typing import AsyncGenerator
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from app.middleware.auth import get_current_user
 
 from app.director.agent import run_agent
 from app.director.message_router import should_use_tools
@@ -20,7 +21,7 @@ from app.director.tools.database import (
 )
 from app.services.supabase_client import get_client
 
-router = APIRouter(prefix="/director", tags=["director"])
+router = APIRouter(prefix="/director", tags=["director"], dependencies=[Depends(get_current_user)])
 
 
 def _sanitize_json(obj):

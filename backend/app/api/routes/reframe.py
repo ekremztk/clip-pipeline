@@ -10,11 +10,12 @@ import uuid
 import threading
 from pathlib import Path
 from typing import Optional
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from pydantic import BaseModel
 
 from app.reframe.processor import run_reframe
 from app.config import settings
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/reframe", tags=["reframe"])
 
@@ -42,7 +43,7 @@ class ReframeStatusResponse(BaseModel):
 
 
 @router.post("/upload")
-async def upload_reframe_video(file: UploadFile = File(...)):
+async def upload_reframe_video(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """
     Upload a video file for reframing.
     Returns {"local_path": "..."} to pass to /reframe/process.
@@ -67,7 +68,7 @@ async def upload_reframe_video(file: UploadFile = File(...)):
 
 
 @router.post("/process")
-async def start_reframe(req: ReframeRequest):
+async def start_reframe(req: ReframeRequest, current_user: dict = Depends(get_current_user)):
     """
     Start a reframe job in the background.
     Returns {"reframe_job_id": "..."} immediately.
@@ -123,7 +124,7 @@ async def start_reframe(req: ReframeRequest):
 
 
 @router.get("/status/{reframe_job_id}", response_model=ReframeStatusResponse)
-async def get_reframe_status(reframe_job_id: str):
+async def get_reframe_status(reframe_job_id: str, current_user: dict = Depends(get_current_user)):
     """Poll progress and result of a reframe job."""
     job = _jobs.get(reframe_job_id)
     if not job:

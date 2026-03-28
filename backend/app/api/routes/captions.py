@@ -2,9 +2,10 @@ import os
 import tempfile
 import subprocess
 import httpx
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import Optional
 from app.config import settings
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/captions", tags=["captions"])
 
@@ -101,7 +102,8 @@ def _build_segments_from_words(words: list) -> list:
 @router.post("/generate")
 async def generate_captions(
     audio: UploadFile = File(...),
-    language: Optional[str] = Form(default=None)
+    language: Optional[str] = Form(default=None),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Accepts audio/video blob from the editor (WAV or WebM).

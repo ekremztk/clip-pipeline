@@ -2,9 +2,10 @@ import os
 import zipfile
 import tempfile
 import pathlib
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import FileResponse, RedirectResponse
 from app.services.supabase_client import get_client
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/downloads", tags=["downloads"])
 
@@ -17,7 +18,7 @@ def cleanup_temp_file(path: str):
         print(f"[DownloadsRoute] Error cleaning up temp file: {e}")
 
 @router.get("/clips/{clip_id}")
-async def download_clip(clip_id: str):
+async def download_clip(clip_id: str, current_user: dict = Depends(get_current_user)):
     try:
         print(f"[DownloadsRoute] Request to download clip: {clip_id}")
         supabase = get_client()
@@ -28,6 +29,14 @@ async def download_clip(clip_id: str):
             raise HTTPException(status_code=404, detail="Clip not found")
             
         clip = result.data[0]
+
+        # Verify ownership via parent job
+        job_id = clip.get("job_id")
+        if job_id:
+            job_check = supabase.table("jobs").select("id").eq("id", job_id).eq("user_id", current_user["id"]).execute()
+            if not job_check.data:
+                raise HTTPException(status_code=404, detail="Clip not found")
+
         file_url = clip.get("file_url")
         
         if not file_url:
@@ -43,11 +52,16 @@ async def download_clip(clip_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/jobs/{job_id}/all")
-async def download_all_clips(job_id: str, background_tasks: BackgroundTasks):
+async def download_all_clips(job_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         print(f"[DownloadsRoute] Request to download all clips for job: {job_id}")
         supabase = get_client()
         
+        # Verify job ownership
+        job_check = supabase.table("jobs").select("id").eq("id", job_id).eq("user_id", current_user["id"]).execute()
+        if not job_check.data:
+            raise HTTPException(status_code=404, detail="Job not found")
+
         # Query clips table WHERE job_id = job_id AND video_landscape_path IS NOT NULL
         # ORDER BY posting_order
         result = supabase.table("clips").select("*").eq("job_id", job_id).order("posting_order").execute()

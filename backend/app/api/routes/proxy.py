@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import StreamingResponse
 import httpx
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/proxy", tags=["proxy"])
 
@@ -11,7 +12,7 @@ ALLOWED_HOSTS = [
 
 
 @router.get("/clip")
-async def proxy_clip(url: str = Query(..., description="R2 clip URL to proxy")):
+async def proxy_clip(url: str = Query(..., description="R2 clip URL to proxy"), current_user: dict = Depends(get_current_user)):
     """
     Proxies a clip file from R2 storage to bypass browser CORS restrictions.
     Only allows requests to whitelisted R2 hosts.

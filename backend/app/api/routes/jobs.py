@@ -1,6 +1,7 @@
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Depends
 from app.services.supabase_client import get_client
+from app.middleware.auth import get_current_user
 from app.services import storage
 from app.pipeline.orchestrator import run_pipeline
 from app.models.schemas import JobResponse
@@ -30,7 +31,7 @@ def get_video_duration(file_path: str) -> float:
         return 0.0
 
 @router.post("/upload-preview")
-async def upload_preview(file: UploadFile = File(...)):
+async def upload_preview(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """
     Instantly uploads a video file and returns its duration.
     Called as soon as user selects a file, before job creation.
@@ -80,7 +81,8 @@ async def create_job(
     guest_name: Optional[str] = Form(None),
     channel_id: str = Form(...),
     trim_start_seconds: float = Form(0.0),
-    trim_end_seconds: float = Form(None)
+    trim_end_seconds: float = Form(None),
+    current_user: dict = Depends(get_current_user)
 ):
     channel_id = channel_id.replace("-", "_")
     try:
@@ -139,11 +141,17 @@ async def create_job(
                     raise HTTPException(status_code=500, detail="Failed to trim video.")
             
         supabase = get_client()
-        
+
+        # Verify channel belongs to current user
+        channel_check = supabase.table("channels").select("id").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+        if not channel_check.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+
         # Insert job into Supabase
         job_data = {
             "id": job_id,
             "channel_id": channel_id,
+            "user_id": current_user["id"],
             "video_title": title,
             "guest_name": guest_name,
             "status": JobStatus.QUEUED.value,
@@ -165,7 +173,8 @@ async def create_job(
             video_path,
             title,
             guest_name,
-            channel_id
+            channel_id,
+            current_user["id"]
         )
         
         print(f"[JobsRoute] Started job {job_id} for video '{title}'")
@@ -179,12 +188,12 @@ async def create_job(
 
 
 @router.get("/{job_id}")
-async def get_job(job_id: str):
+async def get_job(job_id: str, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
         
-        # Query job
-        job_response = supabase.table("jobs").select("*").eq("id", job_id).execute()
+        # Query job (ownership check via user_id)
+        job_response = supabase.table("jobs").select("*").eq("id", job_id).eq("user_id", current_user["id"]).execute()
         if not job_response.data:
             raise HTTPException(status_code=404, detail="Job not found")
             
@@ -214,12 +223,12 @@ async def get_job(job_id: str):
 
 
 @router.get("")
-async def list_jobs(channel_id: str, limit: int = 20):
+async def list_jobs(channel_id: str, limit: int = 20, current_user: dict = Depends(get_current_user)):
     channel_id = channel_id.replace("-", "_")
     try:
         supabase = get_client()
         
-        jobs_response = supabase.table("jobs").select("*").eq("channel_id", channel_id).order("created_at", desc=True).limit(limit).execute()
+        jobs_response = supabase.table("jobs").select("*").eq("channel_id", channel_id).eq("user_id", current_user["id"]).order("created_at", desc=True).limit(limit).execute()
         
         print(f"[JobsRoute] Fetched jobs for channel {channel_id}")
         return jobs_response.data if jobs_response.data else []
@@ -230,13 +239,18 @@ async def list_jobs(channel_id: str, limit: int = 20):
 
 
 @router.delete("/{job_id}")
-async def delete_job(job_id: str):
+async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
-        
+
+        # Verify ownership before deleting
+        check = supabase.table("jobs").select("id").eq("id", job_id).eq("user_id", current_user["id"]).execute()
+        if not check.data:
+            raise HTTPException(status_code=404, detail="Job not found")
+
         # Delete clips
         supabase.table("clips").delete().eq("job_id", job_id).execute()
-        
+
         # Delete job
         job_response = supabase.table("jobs").delete().eq("id", job_id).execute()
         if not job_response.data:

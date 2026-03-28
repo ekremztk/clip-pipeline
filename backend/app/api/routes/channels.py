@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Depends
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel
 from app.services.supabase_client import get_client
 from app.services import storage
+from app.middleware.auth import get_current_user
 import sys
 import os
 
@@ -39,20 +40,20 @@ class OnboardExistingRequest(BaseModel):
     youtube_api_key: str
 
 @router.get("")
-async def list_channels():
+async def list_channels(current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
-        result = supabase.table("channels").select("*").order("created_at", desc=True).execute()
+        result = supabase.table("channels").select("*").eq("user_id", current_user["id"]).order("created_at", desc=True).execute()
         return result.data
     except Exception as e:
         print(f"[ChannelsRoute] Error listing channels: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{channel_id}")
-async def get_channel(channel_id: str):
+async def get_channel(channel_id: str, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
-        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
+        result = supabase.table("channels").select("*").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
         if not result.data:
             raise HTTPException(status_code=404, detail="Channel not found")
         return result.data[0]
@@ -63,7 +64,7 @@ async def get_channel(channel_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("")
-async def create_channel(channel: ChannelCreate):
+async def create_channel(channel: ChannelCreate, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
         data = {
@@ -73,7 +74,8 @@ async def create_channel(channel: ChannelCreate):
             "content_format": channel.content_format,
             "clip_duration_min": channel.clip_duration_min,
             "clip_duration_max": channel.clip_duration_max,
-            "channel_vision": channel.channel_vision
+            "channel_vision": channel.channel_vision,
+            "user_id": current_user["id"]
         }
         supabase.table("channels").insert(data).execute()
         print(f"[ChannelsRoute] Created channel: {channel.channel_id}")
@@ -83,30 +85,37 @@ async def create_channel(channel: ChannelCreate):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.patch("/{channel_id}")
-async def update_channel(channel_id: str, updates: Dict[str, Any]):
+async def update_channel(channel_id: str, updates: Dict[str, Any], current_user: dict = Depends(get_current_user)):
     try:
         allowed_fields = {
             "display_name", "niche", "content_format", "clip_duration_min",
             "clip_duration_max", "channel_vision", "channel_dna", "onboarding_status"
         }
-        
+
         filtered_updates = {k: v for k, v in updates.items() if k in allowed_fields}
-        
+
         if not filtered_updates:
             return {"updated": False, "channel_id": channel_id, "detail": "No valid fields to update"}
-            
+
         supabase = get_client()
-        supabase.table("channels").update(filtered_updates).eq("id", channel_id).execute()
+        result = supabase.table("channels").update(filtered_updates).eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
         print(f"[ChannelsRoute] Updated channel {channel_id}: {list(filtered_updates.keys())}")
         return {"updated": True, "channel_id": channel_id}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ChannelsRoute] Error updating channel: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{channel_id}/connect-youtube")
-async def connect_youtube(channel_id: str, data: YouTubeConnect):
+async def connect_youtube(channel_id: str, data: YouTubeConnect, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
+        check = supabase.table("channels").select("id").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+        if not check.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
         update_data = {
             "youtube_channel_id": data.youtube_channel_id,
             "youtube_access_token": data.access_token,
@@ -116,28 +125,30 @@ async def connect_youtube(channel_id: str, data: YouTubeConnect):
         supabase.table("channels").update(update_data).eq("id", channel_id).execute()
         print(f"[ChannelsRoute] Connected YouTube for channel: {channel_id}")
         return {"connected": True, "channel_id": channel_id}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ChannelsRoute] Error connecting YouTube: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{channel_id}/onboard/existing")
-async def onboard_existing_channel(channel_id: str, request: OnboardExistingRequest, background_tasks: BackgroundTasks):
+async def onboard_existing_channel(channel_id: str, request: OnboardExistingRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
-        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
-        
+        result = supabase.table("channels").select("*").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+
         if not result.data:
             raise HTTPException(status_code=404, detail="Channel not found")
-            
+
         channel = result.data[0]
         if channel.get("onboarding_status") == "ready":
             raise HTTPException(status_code=400, detail="Channel onboarding already complete")
-            
+
         update_data = {
             "youtube_channel_id": request.youtube_channel_id
         }
         supabase.table("channels").update(update_data).eq("id", channel_id).execute()
-        
+
         import importlib
         workers_mod = importlib.import_module("workers.onboarding_worker")
 
@@ -147,7 +158,7 @@ async def onboard_existing_channel(channel_id: str, request: OnboardExistingRequ
             request.youtube_channel_id,
             request.youtube_api_key
         )
-        
+
         return {"started": True, "channel_id": channel_id, "type": "existing"}
     except HTTPException:
         raise
@@ -159,22 +170,23 @@ async def onboard_existing_channel(channel_id: str, request: OnboardExistingRequ
 async def onboard_new_channel(
     channel_id: str,
     background_tasks: BackgroundTasks,
-    files: Optional[List[UploadFile]] = File(None)
+    files: Optional[List[UploadFile]] = File(None),
+    current_user: dict = Depends(get_current_user)
 ):
     try:
         supabase = get_client()
-        result = supabase.table("channels").select("*").eq("id", channel_id).execute()
-        
+        result = supabase.table("channels").select("*").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+
         if not result.data:
             raise HTTPException(status_code=404, detail="Channel not found")
-            
+
         reference_clip_paths = []
         if files:
             for file in files:
                 file_bytes = await file.read()
                 path = storage.save_upload(file_bytes, file.filename, f"onboard_ref_{channel_id}")
                 reference_clip_paths.append(path)
-                
+
         import importlib
         workers_mod = importlib.import_module("workers.onboarding_worker")
 
@@ -183,7 +195,7 @@ async def onboard_new_channel(
             channel_id,
             reference_clip_paths
         )
-        
+
         return {
             "started": True,
             "channel_id": channel_id,
@@ -197,14 +209,14 @@ async def onboard_new_channel(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{channel_id}/onboarding-status")
-async def get_onboarding_status(channel_id: str):
+async def get_onboarding_status(channel_id: str, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
-        result = supabase.table("channels").select("id, onboarding_status, channel_dna").eq("id", channel_id).execute()
-        
+        result = supabase.table("channels").select("id, onboarding_status, channel_dna").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+
         if not result.data:
             raise HTTPException(status_code=404, detail="Channel not found")
-            
+
         channel = result.data[0]
         return {
             "channel_id": channel_id,
@@ -218,11 +230,16 @@ async def get_onboarding_status(channel_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{channel_id}/references")
-async def get_references(channel_id: str):
+async def get_references(channel_id: str, current_user: dict = Depends(get_current_user)):
     try:
         supabase = get_client()
+        check = supabase.table("channels").select("id").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+        if not check.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
         result = supabase.table("reference_clips").select("*").eq("channel_id", channel_id).execute()
         return result.data
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ChannelsRoute] Error getting references: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -232,27 +249,34 @@ async def add_reference(
     channel_id: str,
     file: UploadFile = File(...),
     source_url: Optional[str] = Form(None),
-    notes: Optional[str] = Form(None)
+    notes: Optional[str] = Form(None),
+    current_user: dict = Depends(get_current_user)
 ):
     try:
         supabase = get_client()
-        
+        check = supabase.table("channels").select("id").eq("id", channel_id).eq("user_id", current_user["id"]).execute()
+        if not check.data:
+            raise HTTPException(status_code=404, detail="Channel not found")
+
         file_bytes = await file.read()
         storage.save_upload(file_bytes, file.filename, f"ref_{channel_id}")
         print(f"[ChannelsRoute] Saved reference file {file.filename} for channel {channel_id}")
-        
+
         insert_data = {
             "channel_id": channel_id,
+            "user_id": current_user["id"],
             "source": "external_reference",
             "title": file.filename
         }
         if source_url:
             insert_data["source_url"] = source_url
-            
+
         supabase.table("reference_clips").insert(insert_data).execute()
         print(f"[ChannelsRoute] Added reference clip for channel {channel_id}")
-        
+
         return {"added": True, "channel_id": channel_id}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ChannelsRoute] Error adding reference: {e}")
         raise HTTPException(status_code=500, detail=str(e))

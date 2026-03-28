@@ -1,8 +1,9 @@
 from typing import Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from app.services.gemini_client import generate_json
 from app.config import settings
+from app.middleware.auth import get_current_user
 
 router = APIRouter(prefix="/youtube-metadata", tags=["youtube-metadata"])
 
@@ -19,7 +20,7 @@ class GenerateResponse(BaseModel):
 
 
 @router.post("/generate", response_model=GenerateResponse)
-async def generate_youtube_metadata(req: GenerateRequest):
+async def generate_youtube_metadata(req: GenerateRequest, current_user: dict = Depends(get_current_user)):
     try:
         prompt = "You are a YouTube content optimization specialist.\n\n"
         prompt += "Generate an improved title and description for this video clip.\n\n"

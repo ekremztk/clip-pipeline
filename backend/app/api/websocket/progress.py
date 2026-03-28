@@ -1,12 +1,23 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.services.supabase_client import get_client
+from app.middleware.auth import verify_token
 import asyncio
 import json
 
 router = APIRouter()
 
 @router.websocket("/ws/jobs/{job_id}/progress")
-async def job_progress(websocket: WebSocket, job_id: str):
+async def job_progress(websocket: WebSocket, job_id: str, token: str | None = None):
+    # Verify token before accepting the connection
+    if not token:
+        await websocket.close(code=4001)
+        return
+
+    user = await verify_token(token)
+    if not user:
+        await websocket.close(code=4001)
+        return
+
     await websocket.accept()
     print(f"[WSProgress] Client connected for job {job_id}")
     

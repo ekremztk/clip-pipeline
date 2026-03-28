@@ -7,7 +7,7 @@ from app.services.r2_client import upload_clip
 from app.director.events import director_events
 
 
-def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_title: str = "") -> list:
+def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_title: str = "", user_id: str | None = None) -> list:
     """
     Step 8: Export
     For each clip: FFmpeg frame-accurate cut + encode → R2 upload → Supabase insert.
@@ -76,6 +76,7 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
             clip_data = {
                 "job_id": job_id,
                 "channel_id": channel_id,
+                "user_id": user_id,
                 "clip_index": index,
                 "start_time": float(final_start),
                 "end_time": float(clip.get("final_end", 0.0)),
