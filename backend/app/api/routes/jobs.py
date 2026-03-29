@@ -99,6 +99,11 @@ async def create_job(
     channel_id: str = Form(...),
     trim_start_seconds: float = Form(0.0),
     trim_end_seconds: float = Form(None),
+    clip_duration_min: Optional[int] = Form(None),
+    clip_duration_max: Optional[int] = Form(None),
+    aspect_ratio: Optional[str] = Form(None),
+    genre: Optional[str] = Form(None),
+    auto_hook: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user)
 ):
     channel_id = channel_id.replace("-", "_")
@@ -175,6 +180,10 @@ async def create_job(
             raise HTTPException(status_code=404, detail="Channel not found")
 
         # Insert job into Supabase
+        # Log new clip settings for future pipeline use
+        if clip_duration_min is not None or clip_duration_max is not None:
+            print(f"[JobsRoute] Clip duration: {clip_duration_min}–{clip_duration_max}s, aspect: {aspect_ratio}, genre: {genre}, auto_hook: {auto_hook}")
+
         job_data = {
             "id": job_id,
             "channel_id": channel_id,

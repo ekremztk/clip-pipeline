@@ -39,11 +39,13 @@ export const ChannelContext = createContext<{
     activeChannelId: string;
     setActiveChannelId: (id: string) => void;
     isLoading: boolean;
+    refreshChannels: () => Promise<void>;
 }>({
     channels: [],
     activeChannelId: "",
     setActiveChannelId: () => {},
     isLoading: true,
+    refreshChannels: async () => {},
 });
 
 export const useChannel = () => useContext(ChannelContext);
@@ -172,6 +174,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push('/login');
     };
 
+    const refreshChannels = async () => {
+        if (!user) return;
+        try {
+            const res = await authFetch('/channels');
+            const json = await res.json();
+            const list: Channel[] = Array.isArray(json) ? json : json.channels ?? [];
+            const cacheKey = `channelList_${user.id}`;
+            const storageKey = `selectedChannelId_${user.id}`;
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(cacheKey, JSON.stringify(list));
+            }
+            setChannels(list);
+            if (list.length > 0) {
+                const saved = localStorage.getItem(storageKey);
+                const active = (saved ? list.find(c => c.id === saved) : null) ?? list[0];
+                setSelectedChannel(active);
+                localStorage.setItem(storageKey, active.id);
+            }
+        } catch (err) {
+            console.error('Failed to refresh channels', err);
+        }
+    };
+
     const isAdmin = user?.app_metadata?.role === 'admin';
 
     const userInitials = user?.user_metadata?.full_name
@@ -256,6 +281,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             activeChannelId: selectedChannel?.id ?? "",
             setActiveChannelId: handleChannelChange,
             isLoading,
+            refreshChannels,
         }}>
             <div className="flex h-screen w-screen bg-black text-white overflow-hidden">
 
