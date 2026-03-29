@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 function getR2Client() {
 	return new S3Client({
@@ -47,17 +46,43 @@ export async function GET(request: Request) {
 	}
 }
 
-// POST /api/media — generate presigned upload URL + create DB record
+// POST /api/media — upload file to R2 server-side, create DB record
+// Accepts multipart/form-data: file + metadata fields
 export async function POST(request: Request) {
 	try {
 		const supabase = await createClient();
 		const { data: { user } } = await supabase.auth.getUser();
 		if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-		const body = await request.json();
-		const { project_id, name, type, size, width, height, duration, fps, content_type } = body;
+		const contentType = request.headers.get("content-type") ?? "";
+		let project_id: string, name: string, type: string, size: number,
+			width: number | undefined, height: number | undefined,
+			duration: number | undefined, fps: number | undefined,
+			content_type: string, fileBuffer: Buffer | null = null;
 
-		if (!project_id || !name || !type || !content_type) {
+		if (contentType.includes("multipart/form-data")) {
+			// File upload path
+			const form = await request.formData();
+			const file = form.get("file") as File | null;
+			if (!file) return NextResponse.json({ error: "Missing file" }, { status: 400 });
+
+			project_id = form.get("project_id") as string;
+			name = form.get("name") as string ?? file.name;
+			type = form.get("type") as string;
+			content_type = file.type || "application/octet-stream";
+			size = file.size;
+			width = form.get("width") ? Number(form.get("width")) : undefined;
+			height = form.get("height") ? Number(form.get("height")) : undefined;
+			duration = form.get("duration") ? Number(form.get("duration")) : undefined;
+			fps = form.get("fps") ? Number(form.get("fps")) : undefined;
+			fileBuffer = Buffer.from(await file.arrayBuffer());
+		} else {
+			// JSON metadata-only path (legacy — returns upload_url)
+			const body = await request.json();
+			({ project_id, name, type, size, width, height, duration, fps, content_type } = body);
+		}
+
+		if (!project_id || !name || !type) {
 			return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
 		}
 
@@ -78,36 +103,35 @@ export async function POST(request: Request) {
 		// Create DB record
 		const { data: asset, error: dbError } = await supabase
 			.from("editor_media_assets")
-			.insert({
-				user_id: user.id,
-				project_id,
-				name,
-				type,
-				size,
-				width,
-				height,
-				duration,
-				fps,
-				r2_key,
-			})
+			.insert({ user_id: user.id, project_id, name, type, size, width, height, duration, fps, r2_key })
 			.select()
 			.single();
 
 		if (dbError) throw dbError;
 
-		// Generate presigned upload URL (15 min expiry)
 		const r2 = getR2Client();
-		const cmd = new PutObjectCommand({
-			Bucket: process.env.R2_BUCKET_NAME!,
-			Key: r2_key,
-			ContentType: content_type,
-		});
-		const upload_url = await getSignedUrl(r2, cmd, { expiresIn: 900 });
-
-		// Public read URL
 		const public_url = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${r2_key}`;
 
-		return NextResponse.json({ asset, upload_url, public_url }, { status: 201 });
+		if (fileBuffer) {
+			// Server-side upload — no client CORS needed
+			await r2.send(new PutObjectCommand({
+				Bucket: process.env.R2_BUCKET_NAME!,
+				Key: r2_key,
+				Body: fileBuffer,
+				ContentType: content_type!,
+			}));
+			return NextResponse.json({ asset, public_url }, { status: 201 });
+		} else {
+			// Legacy: return presigned URL for client upload
+			const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+			const cmd = new PutObjectCommand({
+				Bucket: process.env.R2_BUCKET_NAME!,
+				Key: r2_key,
+				ContentType: content_type!,
+			});
+			const upload_url = await getSignedUrl(r2, cmd, { expiresIn: 900 });
+			return NextResponse.json({ asset, upload_url, public_url }, { status: 201 });
+		}
 	} catch (err) {
 		console.error("[API /media] POST error:", err);
 		return NextResponse.json({ error: "Internal server error" }, { status: 500 });
