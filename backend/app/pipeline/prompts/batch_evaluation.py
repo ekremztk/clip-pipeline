@@ -20,6 +20,15 @@ For each candidate you will see 4 frames extracted from the clip's time range:
 
 Use what you SEE (expressions, body language, energy, eye contact, gestures) to validate or contradict what the transcript says.
 
+## HOW TO READ THE TRANSCRIPT SECTIONS
+
+Each candidate gives you THREE labeled transcript sections:
+- **PRE_CONTEXT**: The 20 seconds immediately BEFORE the proposed clip start
+- **CLIP_TRANSCRIPT**: The proposed clip window itself
+- **POST_CONTEXT**: The 20 seconds immediately AFTER the proposed clip end
+
+Read all three sections before evaluating. This is not optional.
+
 ## YOUR EVALUATION TASKS FOR EACH CANDIDATE
 
 1. **VISUAL CHECK** — Do the frames confirm this is a strong moment? If the frames show a distracted speaker, low energy, or a dead segment — it FAILS regardless of what the transcript says.
@@ -30,17 +39,36 @@ Use what you SEE (expressions, body language, energy, eye contact, gestures) to 
 
 4. **ARC TEST** — Setup → tension → payoff. Use the MIDDLE and FINAL frames. Does it resolve? Clips that end mid-thought or cut before the punchline FAIL.
 
-5. **PRECISE BOUNDARIES** — Using the word-level timestamps in the transcript, determine the EXACT start and end points. The HOOK frame will help you confirm the visual start point. Don't start mid-word. Don't cut off the final reaction.
+5. **CONTEXT BOUNDARY ANALYSIS** — This is a new mandatory step. After reading the transcript sections:
 
-6. **SCORING** — Rate each dimension honestly. 6 is average. Do NOT inflate. A score of 8+ must be genuinely exceptional.
+   a) **Check PRE_CONTEXT**: Does the story, setup, or crucial context actually START in the 20s before the proposed clip? Look for: introductions that make the clip comprehensible, a setup that primes the hook, a question that the clip is answering.
+      - If YES: move `recommended_start` earlier to capture it. Maximum 20s earlier.
+      - Set `context_adjusted: true` and explain in `context_adjustment_reason`.
 
-7. **QUALITY VERDICT** — pass, fixable, or fail. Be brutal. A borderline clip should FAIL, not get a charity "fixable."
+   b) **Check POST_CONTEXT**: Does the arc, punchline, payoff, or resolution actually FINISH in the 20s after the proposed clip? Look for: the laugh that lands after the punchline, the final answer to a question, a clear emotional resolution.
+      - If YES: move `recommended_end` later to capture it. Maximum 20s later.
+      - Set `context_adjusted: true` and explain in `context_adjustment_reason`.
 
-8. **STRATEGY ROLE** — If passing: assign the optimal role in the posting schedule.
+   c) **Rules for context adjustment**:
+      - Only adjust when the change meaningfully improves standalone comprehension or arc completeness
+      - Do NOT adjust just because more content is available — only if the clip REQUIRES it
+      - Final clip duration after adjustment must remain within 12–60 seconds
+      - If both boundaries need adjustment, apply both
+      - If no adjustment needed: `context_adjusted: false`, `context_adjustment_reason: ""`
 
-9. **YOUTUBE METADATA** — Title and description for YouTube Shorts.
-   - Title: If YOUTUBE TITLE STYLE is in CHANNEL CONTEXT, follow it exactly. Otherwise: guest name or boldest claim first, under 60 chars, no emojis, no clickbait the clip doesn't deliver.
-   - Description: If YOUTUBE DESCRIPTION TEMPLATE is in CHANNEL CONTEXT, fill it in. Otherwise: 2-3 sentences summarizing the clip, name the speaker, end with 3-5 hashtags.
+   d) **Use the pre_context and post_context frames** to visually confirm boundary decisions. The `pre_context` frame shows what is happening 10s before the clip — if the speaker is mid-sentence or mid-gesture, the real start may be earlier.
+
+6. **PRECISE BOUNDARIES** — Using the word-level timestamps in the transcript, determine the EXACT start and end points. The HOOK frame will help you confirm the visual start point. Don't start mid-word. Don't cut off the final reaction.
+
+7. **SCORING** — Rate each dimension honestly. 6 is average. Do NOT inflate. A score of 8+ must be genuinely exceptional.
+
+8. **QUALITY VERDICT** — pass, fixable, or fail. Be brutal. A borderline clip should FAIL, not get a charity "fixable."
+
+9. **STRATEGY ROLE** — If passing: assign the optimal role in the posting schedule.
+
+10. **YOUTUBE METADATA** — Title and description for YouTube Shorts.
+    - Title: If YOUTUBE TITLE STYLE is in CHANNEL CONTEXT, follow it exactly. Otherwise: guest name or boldest claim first, under 60 chars, no emojis, no clickbait the clip doesn't deliver.
+    - Description: If YOUTUBE DESCRIPTION TEMPLATE is in CHANNEL CONTEXT, fill it in. Otherwise: 2-3 sentences summarizing the clip, name the speaker, end with 3-5 hashtags.
 
 ## SCORING GUIDE
 - **standalone_score** (1-10): 1 = incomprehensible without context, 10 = crystal clear to any viewer
@@ -70,8 +98,8 @@ Return ONLY a valid JSON array. Include ALL evaluated candidates (pass, fixable,
 Each candidate MUST follow this exact schema:
 {
   "candidate_id": integer,
-  "recommended_start": float (precise seconds, snapped to word boundary),
-  "recommended_end": float (precise seconds, snapped to word boundary),
+  "recommended_start": float (final seconds after any context adjustment, snapped to word boundary),
+  "recommended_end": float (final seconds after any context adjustment, snapped to word boundary),
   "duration_s": float,
   "hook_text": "The exact first sentence the viewer will hear",
   "standalone_score": integer (1-10),
@@ -81,9 +109,11 @@ Each candidate MUST follow this exact schema:
   "visual_score": integer (1-10),
   "overall_confidence": float (0.0-1.0),
   "content_type": "confirmed or corrected content type",
-  "thinking_steps": ["Visual: ...", "Standalone: ...", "Hook: ...", "Arc: ...", "Verdict: ..."],
+  "thinking_steps": ["Visual: ...", "Standalone: ...", "Hook: ...", "Arc: ...", "Context: ...", "Verdict: ..."],
   "quality_verdict": "pass" | "fixable" | "fail",
   "reject_reason": "Only if fail — one sentence",
+  "context_adjusted": boolean (true if recommended_start or recommended_end was changed by context analysis),
+  "context_adjustment_reason": "One sentence explaining what was found in pre/post context. Empty string if not adjusted.",
   "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
   "posting_order": integer (1 = first, only for pass/fixable; use 999 for fail),
   "suggested_title": "YouTube Shorts title",

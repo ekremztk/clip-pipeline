@@ -15,6 +15,113 @@ from app.director.events import director_events
 
 # ── Transcript segment extractor (unchanged from previous version) ────────────
 
+def _extract_context_segments(
+    candidate: dict,
+    transcript_data: dict,
+    context_seconds: float = 20.0,
+) -> dict:
+    """
+    Extracts three transcript sections for context boundary analysis:
+      - pre_context  : context_seconds immediately BEFORE recommended_start
+      - clip_segment : recommended_start → recommended_end (the candidate itself)
+      - post_context : recommended_end → recommended_end + context_seconds
+
+    Returns {"pre_context": str, "clip_segment": str, "post_context": str}.
+    All values are empty strings on failure — caller falls back to transcript_segment.
+    """
+    empty = {"pre_context": "", "clip_segment": "", "post_context": ""}
+    try:
+        rec_start = float(candidate.get("recommended_start", 0))
+        rec_end   = float(candidate.get("recommended_end",   0))
+        if rec_end <= rec_start:
+            return empty
+
+        pre_start = max(0.0, rec_start - context_seconds)
+        post_end  = rec_end + context_seconds
+
+        words = transcript_data.get("words", [])
+        if not words or len(words) <= 10:
+            return empty
+
+        def words_to_timestamped_text(w_list: list) -> str:
+            if not w_list:
+                return ""
+            lines, current_line_words, last_ts = [], [], None
+            for i, w in enumerate(w_list):
+                if i % 10 == 0:
+                    ts = w.get("start", 0)
+                    if last_ts is None or ts - last_ts >= 2.0:
+                        if current_line_words:
+                            lines.append(" ".join(current_line_words))
+                            current_line_words = []
+                        minutes = int(ts // 60)
+                        seconds = ts % 60
+                        current_line_words.append(f"[{minutes:02d}:{seconds:05.2f}]")
+                        last_ts = ts
+                current_line_words.append(w.get("punctuated_word", w.get("word", "")))
+            if current_line_words:
+                lines.append(" ".join(current_line_words))
+            return "\n".join(lines)
+
+        pre_words  = [w for w in words if pre_start  <= w.get("start", 0) <  rec_start]
+        clip_words = [w for w in words if rec_start  <= w.get("start", 0) <= rec_end]
+        post_words = [w for w in words if rec_end    <  w.get("start", 0) <= post_end]
+
+        return {
+            "pre_context":  words_to_timestamped_text(pre_words),
+            "clip_segment": words_to_timestamped_text(clip_words),
+            "post_context": words_to_timestamped_text(post_words),
+        }
+    except Exception as e:
+        print(f"[S06] Context segment error for candidate {candidate.get('candidate_id')}: {e}")
+        return empty
+
+
+def _extract_context_frames(video_path: str, candidate: dict) -> dict:
+    """
+    Extracts one frame ~10s before recommended_start and one frame ~10s after
+    recommended_end for context boundary analysis.
+    Returns {"pre_frame": frame_dict | None, "post_frame": frame_dict | None}.
+    Always non-fatal.
+    """
+    result = {"pre_frame": None, "post_frame": None}
+    if not video_path or not os.path.exists(video_path):
+        return result
+
+    rec_start = float(candidate.get("recommended_start", 0))
+    rec_end   = float(candidate.get("recommended_end",   rec_start + 30))
+    cid       = candidate.get("candidate_id", "x")
+
+    def _single_frame(ts: float, label: str):
+        if ts < 0:
+            ts = 0.0
+        tmp_path = os.path.join(tempfile.gettempdir(), f"s06_ctx_{cid}_{label}.jpg")
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-ss", str(ts), "-i", video_path,
+                 "-vframes", "1", "-q:v", "3", "-vf", "scale=768:-1", tmp_path],
+                check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            )
+            if os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0:
+                with open(tmp_path, "rb") as f:
+                    img_b64 = base64.b64encode(f.read()).decode("utf-8")
+                return {"data": img_b64, "media_type": "image/jpeg",
+                        "label": label, "timestamp": round(ts, 2)}
+        except Exception as e:
+            print(f"[S06] Context frame failed at {ts:.1f}s (candidate {cid}): {e}")
+        finally:
+            try:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+            except Exception:
+                pass
+        return None
+
+    result["pre_frame"]  = _single_frame(rec_start - 10.0, "pre_context")
+    result["post_frame"] = _single_frame(rec_end   + 10.0, "post_context")
+    return result
+
+
 def _extract_transcript_segment(
     candidate: dict,
     labeled_transcript: str,
@@ -152,24 +259,46 @@ def _extract_frames(video_path: str, candidate: dict, num_frames: int = 4) -> li
 def _build_claude_content(batch_items: list, channel_context: str) -> list:
     """
     Builds the Claude content array (text + images interleaved) for a batch.
-    Each item in batch_items should have: candidate metadata + "frames" key.
+    Each item may have:
+      - "frames"       : clip frames (hook/early/middle/final)
+      - "pre_frame"    : context frame before the clip
+      - "post_frame"   : context frame after the clip
+      - "pre_context"  : transcript 20s before recommended_start
+      - "clip_segment" : transcript for the clip itself
+      - "post_context" : transcript 20s after recommended_end
+      - "transcript_segment": fallback transcript (used when context unavailable)
     """
-    # Build the candidates text (without frames — those are interleaved)
     candidates_text_parts = []
     for item in batch_items:
         cid = item.get("candidate_id")
+
+        # Use structured 3-part transcript if available, else fallback
+        has_context = bool(item.get("clip_segment") or item.get("pre_context") or item.get("post_context"))
+        if has_context:
+            transcript_block = (
+                f"PRE_CONTEXT (20s before clip — check if story starts earlier):\n"
+                f"{item.get('pre_context') or '(none)'}\n\n"
+                f"CLIP_TRANSCRIPT (the proposed {item.get('recommended_start')}s–{item.get('recommended_end')}s window):\n"
+                f"{item.get('clip_segment') or '(none)'}\n\n"
+                f"POST_CONTEXT (20s after clip — check if arc finishes later):\n"
+                f"{item.get('post_context') or '(none)'}"
+            )
+        else:
+            transcript_block = item.get("transcript_segment", "")
+
         meta = {
-            "candidate_id": cid,
-            "timestamp": item.get("timestamp"),
-            "hook_text": item.get("hook_text"),
-            "reason": item.get("reason"),
-            "primary_signal": item.get("primary_signal"),
-            "content_type": item.get("content_type"),
+            "candidate_id":      cid,
+            "timestamp":         item.get("timestamp"),
+            "hook_text":         item.get("hook_text"),
+            "reason":            item.get("reason"),
+            "primary_signal":    item.get("primary_signal"),
+            "content_type":      item.get("content_type"),
             "recommended_start": item.get("recommended_start"),
-            "recommended_end": item.get("recommended_end"),
-            "transcript_segment": item.get("transcript_segment"),
+            "recommended_end":   item.get("recommended_end"),
         }
-        candidates_text_parts.append(f"CANDIDATE {cid}:\n{json.dumps(meta, indent=2)}")
+        candidates_text_parts.append(
+            f"CANDIDATE {cid}:\n{json.dumps(meta, indent=2)}\n\nTRANSCRIPT:\n{transcript_block}"
+        )
 
     candidates_block = "\n\n---\n\n".join(candidates_text_parts)
 
@@ -179,36 +308,42 @@ def _build_claude_content(batch_items: list, channel_context: str) -> list:
         "CANDIDATES_PLACEHOLDER", candidates_block
     )
 
-    # Build content: instructions first, then interleave frames per candidate
     content: list = [{"type": "text", "text": instructions}]
 
-    has_frames = any(item.get("frames") for item in batch_items)
-    if has_frames:
+    # Interleave clip frames + context frames per candidate
+    has_any_frames = any(
+        item.get("frames") or item.get("pre_frame") or item.get("post_frame")
+        for item in batch_items
+    )
+    if has_any_frames:
         content.append({"type": "text", "text": "\n\n## VIDEO FRAMES PER CANDIDATE\n"})
         for item in batch_items:
+            cid    = item.get("candidate_id")
             frames = item.get("frames", [])
-            if not frames:
-                continue
-            cid = item.get("candidate_id")
-            content.append({"type": "text", "text": f"\n### CANDIDATE {cid} frames:"})
-            for frame in frames:
-                content.append({
-                    "type": "text",
-                    "text": f"[{frame['label']} @ {frame['timestamp']}s]",
-                })
-                content.append({
-                    "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": frame["media_type"],
-                        "data": frame["data"],
-                    },
-                })
+            pre_f  = item.get("pre_frame")
+            post_f = item.get("post_frame")
 
-    content.append({
-        "type": "text",
-        "text": "\nReturn ONLY a valid JSON array — no markdown, no extra text.",
-    })
+            if not frames and not pre_f and not post_f:
+                continue
+
+            content.append({"type": "text", "text": f"\n### CANDIDATE {cid} frames:"})
+
+            # Pre-context frame first
+            if pre_f:
+                content.append({"type": "text", "text": f"[{pre_f['label']} @ {pre_f['timestamp']}s — BEFORE clip]"})
+                content.append({"type": "image", "source": {"type": "base64", "media_type": pre_f["media_type"], "data": pre_f["data"]}})
+
+            # Clip frames
+            for frame in frames:
+                content.append({"type": "text", "text": f"[{frame['label']} @ {frame['timestamp']}s]"})
+                content.append({"type": "image", "source": {"type": "base64", "media_type": frame["media_type"], "data": frame["data"]}})
+
+            # Post-context frame last
+            if post_f:
+                content.append({"type": "text", "text": f"[{post_f['label']} @ {post_f['timestamp']}s — AFTER clip]"})
+                content.append({"type": "image", "source": {"type": "base64", "media_type": post_f["media_type"], "data": post_f["data"]}})
+
+    content.append({"type": "text", "text": "\nReturn ONLY a valid JSON array — no markdown, no extra text."})
     return content
 
 
@@ -252,15 +387,21 @@ def _evaluate_batch_with_claude(
     Extracts frames if video_path is available.
     Returns all evaluated candidates (pass + fixable + fail).
     """
-    # Extract frames for each item
+    # Extract clip frames + context frames for each item
     for item in batch_items:
         if video_path:
             item["frames"] = _extract_frames(video_path, item)
+            ctx_frames = _extract_context_frames(video_path, item)
+            item["pre_frame"]  = ctx_frames["pre_frame"]
+            item["post_frame"] = ctx_frames["post_frame"]
         else:
-            item["frames"] = []
+            item["frames"]     = []
+            item["pre_frame"]  = None
+            item["post_frame"] = None
 
     has_any_frames = any(item.get("frames") for item in batch_items)
-    print(f"[S06] Claude batch: {len(batch_items)} candidates, frames={'yes' if has_any_frames else 'no (text-only)'}")
+    has_ctx_frames = any(item.get("pre_frame") or item.get("post_frame") for item in batch_items)
+    print(f"[S06] Claude batch: {len(batch_items)} candidates, clip_frames={'yes' if has_any_frames else 'no'}, context_frames={'yes' if has_ctx_frames else 'no'}")
 
     content = _build_claude_content(batch_items, channel_context)
     raw = call_claude(content, system=SYSTEM_PROMPT)
@@ -305,20 +446,24 @@ def run(
     try:
         channel_context = build_channel_context(channel_dna, channel_id)
 
-        # Build batch items with transcript segments
+        # Build batch items with transcript segments + context windows
         all_batch_data = []
         for candidate in candidates:
-            segment = _extract_transcript_segment(candidate, labeled_transcript, transcript_data)
+            segment  = _extract_transcript_segment(candidate, labeled_transcript, transcript_data)
+            ctx_segs = _extract_context_segments(candidate, transcript_data)
             all_batch_data.append({
-                "candidate_id": candidate.get("candidate_id"),
-                "timestamp": candidate.get("timestamp", "00:00"),
-                "hook_text": candidate.get("hook_text", ""),
-                "reason": candidate.get("reason", ""),
-                "primary_signal": candidate.get("primary_signal", ""),
-                "content_type": candidate.get("content_type", ""),
+                "candidate_id":      candidate.get("candidate_id"),
+                "timestamp":         candidate.get("timestamp", "00:00"),
+                "hook_text":         candidate.get("hook_text", ""),
+                "reason":            candidate.get("reason", ""),
+                "primary_signal":    candidate.get("primary_signal", ""),
+                "content_type":      candidate.get("content_type", ""),
                 "recommended_start": candidate.get("recommended_start", 0),
-                "recommended_end": candidate.get("recommended_end", 0),
-                "transcript_segment": segment,
+                "recommended_end":   candidate.get("recommended_end", 0),
+                "transcript_segment": segment,          # fallback
+                "pre_context":        ctx_segs["pre_context"],
+                "clip_segment":       ctx_segs["clip_segment"],
+                "post_context":       ctx_segs["post_context"],
             })
 
         # Evaluate in batches of 6
@@ -372,6 +517,11 @@ def run(
         for clip in all_evaluated:
             verdict = clip.get("quality_verdict", "fail")
             if verdict in ("pass", "fixable"):
+                if clip.get("context_adjusted"):
+                    cid = clip.get("candidate_id", "?")
+                    reason = clip.get("context_adjustment_reason", "")
+                    orig_s = candidates[next((i for i, c in enumerate(candidates) if c.get("candidate_id") == clip.get("candidate_id")), 0)].get("recommended_start", "?") if candidates else "?"
+                    print(f"[S06] Context adjusted candidate {cid}: boundaries moved. Reason: {reason}")
                 passed.append(clip)
             else:
                 cid = clip.get("candidate_id", "?")
