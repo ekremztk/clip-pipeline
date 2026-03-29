@@ -4,6 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## REPO STRUCTURE
+
+This is a **monorepo with two separate web applications**:
+
+| Directory | App | URL | Stack |
+|-----------|-----|-----|-------|
+| `frontend/` | Prognot Studio (clip pipeline UI) | clip.prognot.com | Next.js 16, npm, Supabase Auth |
+| `opencut/apps/web/` | Video Editor | edit.prognot.com | Next.js 16, Bun, Turbopack, Supabase Auth |
+| `backend/` | API server | Railway | FastAPI, Python 3.11 |
+| `landing/` | Marketing page | prognot.com | Static HTML |
+
+The two frontends are **completely independent** — separate `node_modules`, separate env files, separate deploys.
+
+---
+
 ## DEVELOPMENT COMMANDS
 
 ### Backend (FastAPI + Python 3.11)
@@ -14,12 +29,23 @@ uvicorn app.main:app --reload --port 8000
 ```
 Entry point: `backend/app/main.py` — FastAPI app with lifespan schedulers.
 
-### Frontend (Next.js 16 + TypeScript)
+### Prognot Frontend (clip.prognot.com)
 ```bash
 cd frontend
 npm install
 npm run dev       # dev server on :3000
 npm run build     # production build (Vercel uses this)
+```
+
+### Editor (edit.prognot.com) — uses Bun, not npm
+```bash
+cd opencut
+bun install
+bun dev:web       # Turbopack dev server :3000
+bun build:web     # production build
+bun lint:web      # Biome linter
+bun lint:web:fix  # auto-fix linting
+bun format:web    # Biome formatter
 ```
 
 ### Docker (matches Railway deployment)
@@ -28,15 +54,16 @@ docker build -t prognot .
 docker run -p 8080:8080 --env-file backend/.env prognot
 ```
 
-No test suite exists. No linter is configured.
+No test suite exists. No linter is configured for `frontend/` or `backend/`.
 
 ---
 
 ## DEPLOYMENT
 - Backend → Railway (Docker, CPU only, 8GB RAM)
-- Frontend → Vercel (Next.js)
+- Prognot Frontend → Vercel (`frontend/`)
+- Editor → Vercel (`opencut/apps/web/`)
 - Database → Supabase (PostgreSQL + pgvector)
-- Storage → Cloudflare R2 (clip exports)
+- Storage → Cloudflare R2 (clip exports + editor media)
 - CI/CD → `git push` to main → auto deploy both
 
 ---
@@ -72,7 +99,7 @@ backend/app/
 └── channels/            # Channel isolation system (DO NOT TOUCH)
 ```
 
-### Frontend structure
+### Prognot Frontend structure
 ```
 frontend/app/
 ├── layout.tsx                # Root layout
@@ -92,12 +119,47 @@ frontend/app/
 └── director/                 # Director dashboard — DO NOT TOUCH
 ```
 
+### Editor (OpenCut) structure
+```
+opencut/
+├── apps/web/src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── projects/     # CRUD — Supabase editor_projects table
+│   │   │   ├── media/        # CRUD + R2 presigned upload — editor_media_assets table
+│   │   │   └── sounds/       # Freesound API proxy
+│   │   └── editor/[id]/      # Main editor page
+│   ├── core/                 # EditorCore singleton — orchestrates all subsystems
+│   ├── stores/               # Zustand stores (editor, panel, keybindings, sounds, youtube, reframe)
+│   ├── services/
+│   │   ├── storage/api-service.ts   # apiStorageService — Supabase projects + R2 media
+│   │   └── transcription/           # Deepgram captions via Railway backend
+│   ├── hooks/
+│   │   └── use-clip-import.ts       # Reads ?clipUrl param, imports clip on first load
+│   ├── lib/
+│   │   ├── reframe/engine.ts        # Auto-reframe keyframe engine (calls Railway)
+│   │   └── supabase/                # client.ts + server.ts
+│   └── types/                # TProject, MediaAsset, timeline types
+└── packages/
+    ├── env/src/web.ts        # Shared zod env schema (validated at startup)
+    └── ui/                   # Shared Radix UI components
+```
+
+### EditorCore pattern
+`EditorCore` is a singleton managing all editor subsystems accessed via `useEditor()`:
+- `editor.project` — load/save/settings, writes to Supabase via `apiStorageService`
+- `editor.media` — asset management; generates client-side UUID before upload
+- `editor.timeline` — tracks, elements, keyframes
+- `editor.history` — undo/redo
+
+Media assets are stored in Supabase `editor_media_assets` and uploaded directly to R2 via presigned PUT URLs. The client UUID must flow all the way to the DB — any mismatch breaks timeline references on reload.
+
 ### Key connections
-- Frontend calls backend via `NEXT_PUBLIC_API_URL` (direct fetch + `/lib/api.ts` client)
-- `next.config.js` rewrites `/api/backend/:path*` → backend URL
-- Auth: Supabase SSR middleware in `middleware.ts` protects all routes except `/login`
-- State: React Context for channel selection (persisted to localStorage), no global store
-- All pages are `"use client"` — minimal SSR
+- Prognot Frontend calls backend via `NEXT_PUBLIC_API_URL`; `next.config.js` rewrites `/api/backend/:path*` → backend URL
+- Editor API routes (`/api/projects`, `/api/media`) are Next.js route handlers with Supabase SSR auth
+- Editor calls Railway backend (`NEXT_PUBLIC_PROGNOT_API_URL`) for reframe and captions — **must include** `Authorization: Bearer {supabase_token}`
+- Clip import: Prognot dashboard → editor via `?clipUrl=&clipTitle=&clipJobId=` params → `useClipImport` hook fetches via `/proxy/clip` with Bearer token
+- Auth: Supabase SSR middleware protects routes in both `frontend/middleware.ts` and `opencut/apps/web/src/middleware.ts`
 
 ### Frontend design system
 Design language is Figma-derived: pure black backgrounds, no purple, no glassmorphism.
@@ -131,7 +193,7 @@ POST /jobs → background task → run_pipeline(job_id)
 Pipeline state passed between steps: `transcript_data`, `speaker_data`, `labeled_transcript`, `channel_dna`, `candidates`, `evaluated_clips`, `cut_results`.
 
 ### Supabase tables (key ones)
-`jobs`, `clips`, `transcripts`, `channels`, `director_events`, `director_analyses`, `director_memories`, `viral_library`
+`jobs`, `clips`, `transcripts`, `channels`, `director_events`, `director_analyses`, `director_memories`, `viral_library`, `editor_projects`, `editor_media_assets`
 
 ---
 
@@ -151,11 +213,19 @@ S08 Export (FFmpeg re-encode + R2 upload + DB write)
 
 ## ABSOLUTE RULES
 
-### Gemini model usage
-- S05 Unified Discovery: `gemini-3.1-pro-preview` (video + text, critical)
-- S06 Batch Evaluation: `gemini-3.1-pro-preview` (text only, critical)
-- All other Gemini calls (guest research, channel DNA generation, etc.): `gemini-2.5-flash`
-- Config keys: `settings.GEMINI_MODEL_PRO` and `settings.GEMINI_MODEL_FLASH`
+### Model usage
+| Step / Module | Model | Config key |
+|---------------|-------|------------|
+| S05 Unified Discovery (video analysis) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
+| S05 channel profile lookup (text only) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+| S06 Batch Evaluation | **Claude** `claude-sonnet-4-6` | `settings.CLAUDE_MODEL` |
+| Director agent (tool calling) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
+| Director chat (simple queries) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+| All other Gemini calls (DNA gen, embeddings, etc.) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+
+- Default values live in `config.py`: `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-2.5-flash"`, `CLAUDE_MODEL = "claude-sonnet-4-6"`
+- Override any model via env var without code changes
+- S06 uses `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
 - Never change models without being asked
 
 ### No GPU libraries — ever
@@ -207,6 +277,19 @@ prompt = "Return: {'key': 'value'}"
 prompt = prompt.replace("PLACEHOLDER", value)
 ```
 
+### Editor calls to Railway backend
+Any fetch in `opencut/apps/web/` targeting `NEXT_PUBLIC_PROGNOT_API_URL` must include a Bearer token:
+```typescript
+const supabase = createClient();
+const { data } = await supabase.auth.getSession();
+const token = data?.session?.access_token;
+// then:
+headers: token ? { Authorization: `Bearer ${token}` } : {}
+```
+
+### Editor media asset IDs
+The editor generates a UUID client-side for each media asset. This UUID must be sent as `id` in the POST body to `/api/media` so Supabase uses it instead of generating a new one. A mismatch breaks all timeline element references after a page reload.
+
 ---
 
 ## DO NOT TOUCH
@@ -230,19 +313,25 @@ SUPABASE_SERVICE_KEY=
 DATABASE_URL=           # port 6543 mandatory
 FRONTEND_URL=
 ```
-### Vercel
+
+### Vercel — Prognot Frontend
 ```
 NEXT_PUBLIC_API_URL=    # Railway backend URL
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
-### Cloudflare R2
+
+### Vercel — Editor
 ```
-R2_ACCOUNT_ID=          # hex ID only, no URL
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_PROGNOT_API_URL=   # Railway backend (reframe + captions)
+NEXT_PUBLIC_R2_PUBLIC_URL=     # https://pub-xxxxx.r2.dev
+CLOUDFLARE_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
 R2_BUCKET_NAME=
-R2_PUBLIC_URL=          # https://pub-xxxxx.r2.dev
+FREESOUND_API_KEY=             # freesound.org API key (real key required — placeholder causes 401)
 ```
 
 ---
@@ -255,3 +344,8 @@ R2_PUBLIC_URL=          # https://pub-xxxxx.r2.dev
 | Gemini 429 rate limit | Retry: 30s wait × 2, then 60s, then raise |
 | Docker build slow | COPY requirements.txt before COPY code |
 | Video file not found | Always check `os.path.exists()` before FFmpeg |
+| Editor reframe/captions 401 | All Railway calls from editor need `Authorization: Bearer {supabase_token}` |
+| Editor media disappears after reload | Pass client `id` to POST /api/media; never let Supabase generate a new UUID |
+| Editor project 404 loop | POST /api/projects must receive `id` from client; uses upsert to handle races |
+| Vercel 4.5MB body limit | Never proxy large files through Next.js routes; use R2 presigned PUT URLs |
+| `npm install` fails in opencut/ | Use `bun install` — opencut uses Bun workspaces, not npm |
