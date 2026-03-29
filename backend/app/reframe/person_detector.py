@@ -16,6 +16,37 @@ from app.config import settings
 from app.reframe.models.types import Keypoint, PersonDetection, SceneAnalysis, SceneInterval
 
 
+# ── Filter thresholds ─────────────────────────────────────────────────────────
+
+# Minimum YOLOv8 detection confidence.
+# 0.55 rejects shadows, reflections, background monitor faces, and partial
+# bodies that nano-pose detects at 0.40–0.54 in podcast environments.
+_CONF_THRESHOLD = 0.55
+
+# Minimum bounding box height as fraction of frame height.
+# A real person in a podcast shot occupies at least 20% of the frame height.
+# Reflections in glass, distant people in backgrounds, or partial body parts
+# visible at the frame edge are typically < 0.15.
+_MIN_HEIGHT_NORM = 0.20
+
+# Minimum bounding box width as fraction of frame width.
+# Catches narrow false positives (e.g. a thin arm or reflection column).
+_MIN_WIDTH_NORM  = 0.05
+
+# Reject detections whose center Y is in the bottom 15% of the frame
+# (hands on desk, feet, cropped body artefacts).
+_MAX_CY_NORM = 0.85
+
+# Reject detections whose center Y is in the top 5% of the frame
+# (ceiling fixtures, overhead lights misidentified as people).
+_MIN_CY_NORM = 0.05
+
+# Maximum number of persons returned per frame.
+# Podcast shoots have at most 2–3 people in frame; anything above that
+# is almost certainly noise. We keep the top-N by confidence.
+_MAX_PERSONS = 3
+
+
 # Lazy-loaded global model (loaded once per process)
 _yolo_model = None
 
@@ -47,7 +78,7 @@ def _extract_frame_at(video_path: str, timestamp_s: float) -> Optional[np.ndarra
             "-i", video_path,
             "-frames:v", "1",
             "-q:v", "2",
-            tmp.name
+            tmp.name,
         ]
         subprocess.run(
             cmd,
@@ -125,8 +156,15 @@ def _estimate_gaze(keypoints: List[Keypoint], threshold: float = 0.5) -> str:
 def detect_persons_in_frame(frame: np.ndarray) -> List[PersonDetection]:
     """
     Run YOLOv8 pose inference on a single BGR frame.
-    Returns list of PersonDetection sorted by confidence descending.
-    Rejects detections in bottom 15% of frame (hands / stray body parts).
+    Returns up to _MAX_PERSONS PersonDetections, sorted by confidence descending.
+
+    Filter pipeline (each condition rejects the detection):
+      1. class != 0 (not a person in COCO)
+      2. confidence < _CONF_THRESHOLD (0.55) — eliminates weak false positives
+      3. height_norm < _MIN_HEIGHT_NORM (0.20) — eliminates partial bodies / reflections
+      4. width_norm < _MIN_WIDTH_NORM (0.05) — eliminates thin column artefacts
+      5. cy_norm > _MAX_CY_NORM (0.85) — eliminates bottom-edge body parts
+      6. cy_norm < _MIN_CY_NORM (0.05) — eliminates ceiling / overhead artefacts
     """
     if frame is None:
         return []
@@ -147,35 +185,48 @@ def detect_persons_in_frame(frame: np.ndarray) -> List[PersonDetection]:
         if boxes is None:
             continue
 
-        keypoints_data = result.keypoints  # may be None if pose model returns no kps
+        keypoints_data = result.keypoints
 
         for i, box in enumerate(boxes):
-            # Only process 'person' class (class 0 in COCO)
+            # ── Filter 1: class ──────────────────────────────────────────────
             cls = int(box.cls[0]) if box.cls is not None else -1
             if cls != 0:
                 continue
 
+            # ── Filter 2: confidence ─────────────────────────────────────────
             conf = float(box.conf[0]) if box.conf is not None else 0.0
-            if conf < 0.4:
+            if conf < _CONF_THRESHOLD:
                 continue
 
-            # Normalized center coordinates
+            # ── Compute normalized bbox metrics ──────────────────────────────
             xyxy = box.xyxy[0].cpu().numpy()
             x1, y1, x2, y2 = xyxy
-            cx_norm = float((x1 + x2) / 2 / w)
-            cy_norm = float((y1 + y2) / 2 / h)
-            width_norm = float((x2 - x1) / w)
+            cx_norm     = float((x1 + x2) / 2 / w)
+            cy_norm     = float((y1 + y2) / 2 / h)
+            width_norm  = float((x2 - x1) / w)
             height_norm = float((y2 - y1) / h)
 
-            # Reject bottom-15% detections (hands, cropped shoulders)
-            if cy_norm > 0.85:
+            # ── Filter 3: too short ──────────────────────────────────────────
+            if height_norm < _MIN_HEIGHT_NORM:
                 continue
 
-            # Extract keypoints if available
+            # ── Filter 4: too narrow ─────────────────────────────────────────
+            if width_norm < _MIN_WIDTH_NORM:
+                continue
+
+            # ── Filter 5: bottom-edge artefact ──────────────────────────────
+            if cy_norm > _MAX_CY_NORM:
+                continue
+
+            # ── Filter 6: top-edge artefact ──────────────────────────────────
+            if cy_norm < _MIN_CY_NORM:
+                continue
+
+            # ── Extract keypoints + gaze ─────────────────────────────────────
             kps_list: Optional[List[Keypoint]] = None
             gaze = "unknown"
             if keypoints_data is not None and i < len(keypoints_data.xy):
-                kps_xy = keypoints_data.xy[i].cpu().numpy()     # shape (17, 2)  — pixel coords
+                kps_xy   = keypoints_data.xy[i].cpu().numpy()
                 kps_conf = keypoints_data.conf[i].cpu().numpy() if keypoints_data.conf is not None else None
 
                 # Normalize keypoints to [0, 1]
@@ -196,8 +247,15 @@ def detect_persons_in_frame(frame: np.ndarray) -> List[PersonDetection]:
                 keypoints=kps_list,
             ))
 
-    # Sort by confidence descending
+    # Sort by confidence descending, then cap at _MAX_PERSONS
     detections.sort(key=lambda d: d.confidence, reverse=True)
+    if len(detections) > _MAX_PERSONS:
+        print(
+            f"[PersonDetector] {len(detections)} detections after filters — "
+            f"capping to top {_MAX_PERSONS} by confidence"
+        )
+        detections = detections[:_MAX_PERSONS]
+
     return detections
 
 
@@ -215,8 +273,10 @@ def build_scene_person_detections(
     results: List[SceneAnalysis] = []
 
     for scene in scenes:
-        # Use slightly past the scene start to avoid transition frames
-        sample_t = scene.start_s + min(0.1, scene.duration_s * 0.05)
+        # Sample slightly past scene start to avoid transition frames.
+        # Use 5% of scene duration but cap at 0.3s (long scenes shouldn't
+        # wait too far into the scene to detect the right person).
+        sample_t = scene.start_s + min(0.3, scene.duration_s * 0.05)
         frame = _extract_frame_at(video_path, sample_t)
 
         if frame is None:
@@ -227,8 +287,10 @@ def build_scene_person_detections(
         persons = detect_persons_in_frame(frame)
         print(
             f"[PersonDetector] Scene [{scene.start_s:.2f}-{scene.end_s:.2f}s]: "
-            f"{len(persons)} person(s) detected"
-            + (f" | gazes: {[p.gaze_direction for p in persons]}" if persons else "")
+            f"{len(persons)} person(s)"
+            + (f" conf={[f'{p.confidence:.2f}' for p in persons]} "
+               f"cx={[f'{p.cx_norm:.2f}' for p in persons]} "
+               f"gaze={[p.gaze_direction for p in persons]}" if persons else "")
         )
         results.append(SceneAnalysis(scene=scene, persons=persons))
 

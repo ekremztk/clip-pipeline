@@ -11,25 +11,38 @@ from typing import List
 from app.reframe.models.types import SceneInterval
 
 
-def detect_scene_cuts(video_path: str, threshold: float = 0.30) -> List[float]:
+# Minimum gap between two accepted cuts (seconds).
+# Prevents double-counting a single hard cut that spans 1-2 frames.
+_MIN_CUT_GAP_S = 0.5
+
+
+def detect_scene_cuts(video_path: str, threshold: float = 0.10) -> List[float]:
     """
     Run FFmpeg scene filter and return cut timestamps as floats (seconds).
 
     The 'scene' value is normalized [0.0, 1.0]:
       0.0 = identical consecutive frames
       1.0 = completely different frames
-    Threshold 0.30 catches hard camera switches while ignoring micro-movements.
-    Podcast hard cuts typically score 0.7-0.9.
 
-    Returns sorted, deduplicated list of cut timestamps, excluding t=0.
+    Threshold guidance for podcast/talking-head content:
+      0.10  — safe default: catches hard camera cuts (typically score 0.10–0.25)
+               while ignoring auto-focus pulses, minor lighting flicker (< 0.05)
+      0.05  — more sensitive: use if cuts are still missed at 0.10
+      0.20  — stricter: use only for high-contrast scene changes
+
+    NOTE: `-vsync vfr` was removed. It is deprecated in FFmpeg 5.0+ (replaced by
+    `-fps_mode vfr`) and is unnecessary when the output is `-f null -` (null muxer
+    discards all frames regardless of timing). Removing it avoids deprecation
+    warnings and silent misbehavior on Railway's FFmpeg 6.x.
+
+    Returns sorted list of cut timestamps, excluding t < 0.5s (opening frames).
     Returns [] if no cuts found (single-scene video).
     """
     try:
         cmd = [
             "ffmpeg", "-i", video_path,
             "-vf", f"select='gt(scene,{threshold})',showinfo",
-            "-vsync", "vfr",
-            "-f", "null", "-"
+            "-f", "null", "-",
         ]
         result = subprocess.run(
             cmd,
@@ -38,18 +51,41 @@ def detect_scene_cuts(video_path: str, threshold: float = 0.30) -> List[float]:
             text=True,
             timeout=300,
         )
-        cuts: List[float] = []
+
+        raw: List[float] = []
         for match in re.finditer(r"pts_time:([\d.]+)", result.stderr):
             t = float(match.group(1))
-            if t > 0.1:  # skip the very first frame
-                cuts.append(round(t, 4))
-        return sorted(set(cuts))
+            if t > 0.5:  # skip opening frames — they always carry noise
+                raw.append(round(t, 4))
+
+        if not raw:
+            print(
+                f"[SceneDetector] 0 cuts at threshold={threshold:.2f}. "
+                f"If cuts are expected, lower the threshold (min 0.05)."
+            )
+            return []
+
+        # Merge cuts that are closer than _MIN_CUT_GAP_S to each other.
+        # A single hard cut can trigger showinfo on 2-3 consecutive frames.
+        raw.sort()
+        merged: List[float] = [raw[0]]
+        for t in raw[1:]:
+            if t - merged[-1] >= _MIN_CUT_GAP_S:
+                merged.append(t)
+
+        print(f"[SceneDetector] {len(raw)} raw triggers → {len(merged)} cuts after merge")
+        return merged
+
     except Exception as e:
         print(f"[SceneDetector] Error detecting scenes: {e}")
         return []
 
 
-def get_scene_intervals(video_path: str, duration_s: float, threshold: float = 0.30) -> List[SceneInterval]:
+def get_scene_intervals(
+    video_path: str,
+    duration_s: float,
+    threshold: float = 0.10,
+) -> List[SceneInterval]:
     """
     Returns a list of SceneInterval covering the full video duration.
     Each interval is [start_s, end_s) in float seconds.
