@@ -57,7 +57,9 @@ def log_step(job_id: str, step_number: int, step_name: str, status: str,
 
 
 def run_pipeline(job_id: str, video_path: str, video_title: str,
-                 guest_name: str | None, channel_id: str, user_id: str | None = None) -> None:
+                 guest_name: str | None, channel_id: str, user_id: str | None = None,
+                 clip_duration_min: int | None = None,
+                 clip_duration_max: int | None = None) -> None:
     """
     Main pipeline function called by the worker.
     Runs steps exactly as defined.
@@ -169,7 +171,9 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         channel_id=channel_id,
                         video_duration_s=video_duration_s,
                         job_id=job_id,
-                        audio_path=audio_path
+                        audio_path=audio_path,
+                        clip_duration_min=clip_duration_min,
+                        clip_duration_max=clip_duration_max,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
@@ -199,6 +203,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             channel_id=channel_id,
                             job_id=job_id,
                             video_path=video_path,
+                            clip_duration_min=clip_duration_min,
+                            clip_duration_max=clip_duration_max,
                         )
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)
@@ -404,6 +410,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
         guest_name = job.get("guest_name")
         channel_id = job.get("channel_id")
         user_id = job.get("user_id")
+        clip_duration_min = job.get("clip_duration_min")
+        clip_duration_max = job.get("clip_duration_max")
         if not channel_id:
             print(f"[Orchestrator] WARNING: job {job_id} has no channel_id in database")
             channel_id = "unknown"
@@ -509,7 +517,9 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         channel_id=channel_id,
                         video_duration_s=video_duration_s,
                         job_id=job_id,
-                        audio_path=audio_path
+                        audio_path=audio_path,
+                        clip_duration_min=clip_duration_min,
+                        clip_duration_max=clip_duration_max,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
@@ -539,6 +549,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             channel_id=channel_id,
                             job_id=job_id,
                             video_path=video_path,
+                            clip_duration_min=clip_duration_min,
+                            clip_duration_max=clip_duration_max,
                         )
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)

@@ -47,6 +47,7 @@ import { useTimelineSeek } from "@/hooks/timeline/use-timeline-seek";
 import { useTimelineDragDrop } from "@/hooks/timeline/use-timeline-drag-drop";
 import { TimelineRuler } from "./timeline-ruler";
 import { TimelineBookmarksRow } from "./bookmarks";
+import { SceneCutMarkers } from "./scene-cut-markers";
 import { useBookmarkDrag } from "@/hooks/timeline/use-bookmark-drag";
 import { useEdgeAutoScroll } from "@/hooks/timeline/use-edge-auto-scroll";
 import { useTimelineStore } from "@/stores/timeline-store";
@@ -375,7 +376,7 @@ export function Timeline() {
 							>
 								<div
 									ref={timelineHeaderRef}
-									className="bg-background sticky top-0 flex flex-col"
+									className="bg-background sticky top-0 relative flex flex-col"
 								>
 									<TimelineRuler
 										zoomLevel={zoomLevel}
@@ -397,6 +398,7 @@ export function Timeline() {
 										handleRulerTrackingMouseDown={handleRulerMouseDown}
 										handleRulerMouseDown={handlePlayheadRulerMouseDown}
 									/>
+									<SceneCutMarkers zoomLevel={zoomLevel} />
 								</div>
 								<TimelinePlayhead
 									zoomLevel={zoomLevel}

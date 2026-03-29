@@ -256,7 +256,7 @@ def _extract_frames(video_path: str, candidate: dict, num_frames: int = 4) -> li
 
 # ── Claude message builder ────────────────────────────────────────────────────
 
-def _build_claude_content(batch_items: list, channel_context: str) -> list:
+def _build_claude_content(batch_items: list, channel_context: str, min_duration: int, max_duration: int) -> list:
     """
     Builds the Claude content array (text + images interleaved) for a batch.
     Each item may have:
@@ -306,6 +306,10 @@ def _build_claude_content(batch_items: list, channel_context: str) -> list:
         "CHANNEL_CONTEXT_PLACEHOLDER", channel_context
     ).replace(
         "CANDIDATES_PLACEHOLDER", candidates_block
+    ).replace(
+        "MIN_DURATION_PLACEHOLDER", str(min_duration)
+    ).replace(
+        "MAX_DURATION_PLACEHOLDER", str(max_duration)
     )
 
     content: list = [{"type": "text", "text": instructions}]
@@ -381,6 +385,8 @@ def _evaluate_batch_with_claude(
     batch_items: list,
     channel_context: str,
     video_path: Optional[str],
+    min_duration: int = 12,
+    max_duration: int = 60,
 ) -> list:
     """
     Evaluates a batch of candidates with Claude.
@@ -403,7 +409,7 @@ def _evaluate_batch_with_claude(
     has_ctx_frames = any(item.get("pre_frame") or item.get("post_frame") for item in batch_items)
     print(f"[S06] Claude batch: {len(batch_items)} candidates, clip_frames={'yes' if has_any_frames else 'no'}, context_frames={'yes' if has_ctx_frames else 'no'}")
 
-    content = _build_claude_content(batch_items, channel_context)
+    content = _build_claude_content(batch_items, channel_context, min_duration, max_duration)
     raw = call_claude(content, system=SYSTEM_PROMPT)
     return _parse_claude_json(raw)
 
@@ -412,9 +418,11 @@ def _evaluate_single_with_claude(
     item: dict,
     channel_context: str,
     video_path: Optional[str],
+    min_duration: int = 12,
+    max_duration: int = 60,
 ) -> Optional[dict]:
     try:
-        results = _evaluate_batch_with_claude([item], channel_context, video_path)
+        results = _evaluate_batch_with_claude([item], channel_context, video_path, min_duration, max_duration)
         return results[0] if results else None
     except Exception as e:
         print(f"[S06] Single retry failed for candidate {item.get('candidate_id')}: {e}")
@@ -431,12 +439,29 @@ def run(
     channel_id: str,
     job_id: str,
     video_path: Optional[str] = None,
+    clip_duration_min: Optional[int] = None,
+    clip_duration_max: Optional[int] = None,
 ) -> list:
     """
     S06: Batch Evaluation (Claude Sonnet)
     Evaluates S05 candidates using video frames + timestamped transcripts.
     Returns ONLY pass/fixable clips — fails are dropped here, never reach S07/S08.
+
+    clip_duration_min / clip_duration_max: job-level user selection (highest priority).
+    Falls back to channel DNA, then to config defaults.
     """
+    # Resolve effective duration limits: job-level > channel DNA > config
+    min_duration = int(
+        clip_duration_min
+        if clip_duration_min is not None
+        else channel_dna.get("duration_range", {}).get("min", settings.MIN_CLIP_DURATION)
+    )
+    max_duration = int(
+        clip_duration_max
+        if clip_duration_max is not None
+        else channel_dna.get("duration_range", {}).get("max", settings.MAX_CLIP_DURATION)
+    )
+    print(f"[S06] Duration limits: {min_duration}s–{max_duration}s (job_override={'yes' if clip_duration_min is not None else 'no'})")
     print(f"[S06] Starting Claude evaluation for job {job_id}: {len(candidates)} candidates")
 
     if not candidates:
@@ -477,7 +502,7 @@ def run(
             print(f"[S06] Batch {batch_num}/{total_batches} ({len(batch)} candidates)")
 
             try:
-                evaluated = _evaluate_batch_with_claude(batch, channel_context, video_path)
+                evaluated = _evaluate_batch_with_claude(batch, channel_context, video_path, min_duration, max_duration)
 
                 returned_ids = {str(item.get("candidate_id", "")) for item in evaluated}
                 sent_ids = {str(item.get("candidate_id", "")) for item in batch}
@@ -493,7 +518,7 @@ def run(
                             None,
                         )
                         if missing_item:
-                            retry = _evaluate_single_with_claude(missing_item, channel_context, video_path)
+                            retry = _evaluate_single_with_claude(missing_item, channel_context, video_path, min_duration, max_duration)
                             if retry:
                                 all_evaluated.append(retry)
                                 print(f"[S06] Recovered candidate {missing_id}")
@@ -504,7 +529,7 @@ def run(
                 print(f"[S06] Batch {batch_num} failed: {batch_err}. Falling back to individual evaluation.")
                 for item in batch:
                     try:
-                        single = _evaluate_single_with_claude(item, channel_context, video_path)
+                        single = _evaluate_single_with_claude(item, channel_context, video_path, min_duration, max_duration)
                         if single:
                             all_evaluated.append(single)
                     except Exception as single_err:

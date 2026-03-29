@@ -92,6 +92,8 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
         video_title = job_record.get("title", "")
         guest_name = job_record.get("guest_name")
         channel_id = job_record.get("channel_id")
+        clip_duration_min = job_record.get("clip_duration_min")
+        clip_duration_max = job_record.get("clip_duration_max")
         if not channel_id:
             print(f"[Worker] WARNING: job {job_id} has no channel_id in database")
             channel_id = "unknown"
@@ -141,7 +143,9 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                         guest_name=guest_name,
                         channel_id=channel_id,
                         video_duration_s=video_duration_s,
-                        job_id=job_id
+                        job_id=job_id,
+                        clip_duration_min=clip_duration_min,
+                        clip_duration_max=clip_duration_max,
                     )
                     print(f"[Worker] S05 returned {len(candidates)} candidates")
 
@@ -156,7 +160,9 @@ def resume_pipeline_from_s04(job_id: str, confirmed_speaker_map: dict) -> None:
                             transcript_data=transcript_data,
                             channel_dna=channel_dna,
                             channel_id=channel_id,
-                            job_id=job_id
+                            job_id=job_id,
+                            clip_duration_min=clip_duration_min,
+                            clip_duration_max=clip_duration_max,
                         )
                     print(f"[Worker] S06 returned {len(evaluated_clips)} evaluated clips")
 

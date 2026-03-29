@@ -52,11 +52,13 @@ Read all three sections before evaluating. This is not optional.
    c) **Rules for context adjustment**:
       - Only adjust when the change meaningfully improves standalone comprehension or arc completeness
       - Do NOT adjust just because more content is available — only if the clip REQUIRES it
-      - Final clip duration after adjustment must remain within 12–60 seconds
+      - Final clip duration after adjustment must remain within MIN_DURATION_PLACEHOLDER–MAX_DURATION_PLACEHOLDER seconds
       - If both boundaries need adjustment, apply both
       - If no adjustment needed: `context_adjusted: false`, `context_adjustment_reason: ""`
 
    d) **Use the pre_context and post_context frames** to visually confirm boundary decisions. The `pre_context` frame shows what is happening 10s before the clip — if the speaker is mid-sentence or mid-gesture, the real start may be earlier.
+
+   e) **Duration cap enforcement** — If including the necessary context would push the clip beyond MAX_DURATION_PLACEHOLDER seconds, do NOT crop mechanically. Instead: identify the single best sub-range within the full adjusted window that (1) fits within MAX_DURATION_PLACEHOLDER seconds, (2) preserves standalone comprehension, (3) includes the hook and the payoff if at all possible. Set recommended_start and recommended_end to this optimal sub-range. This is a creative editorial decision — choose the portion that delivers the most value to a first-time viewer.
 
 6. **PRECISE BOUNDARIES** — Using the word-level timestamps in the transcript, determine the EXACT start and end points. The HOOK frame will help you confirm the visual start point. Don't start mid-word. Don't cut off the final reaction.
 

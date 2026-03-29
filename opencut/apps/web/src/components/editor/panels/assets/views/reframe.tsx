@@ -5,11 +5,27 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { useEditor } from "@/hooks/use-editor";
-import { runReframe, type ReframeProgress, type ReframeResult } from "@/lib/reframe/engine";
+import { runReframe, type ReframeProgress, type ReframeResult, type ReframeOptions } from "@/lib/reframe/engine";
+import type { ReframeAspectRatio, ReframeTrackingMode } from "@/lib/reframe/types";
 import { CheckCheck, RotateCcw, Smartphone } from "lucide-react";
+
+const ASPECT_RATIO_OPTIONS: { value: ReframeAspectRatio; label: string }[] = [
+	{ value: "9:16", label: "9:16 — Vertical" },
+	{ value: "1:1", label: "1:1 — Square" },
+	{ value: "4:5", label: "4:5 — Portrait" },
+	{ value: "16:9", label: "16:9 — Landscape" },
+];
+
+const TRACKING_MODE_OPTIONS: { value: ReframeTrackingMode; label: string; description: string }[] = [
+	{ value: "x_only", label: "Horizontal only", description: "Pan left/right to follow speaker" },
+	{ value: "dynamic_xy", label: "Dynamic X+Y", description: "Pan and tilt (experimental)" },
+];
 
 export function ReframeView() {
 	const editor = useEditor();
+
+	const [aspectRatio, setAspectRatio] = useState<ReframeAspectRatio>("9:16");
+	const [trackingMode, setTrackingMode] = useState<ReframeTrackingMode>("x_only");
 
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [progress, setProgress] = useState<ReframeProgress | null>(null);
@@ -28,7 +44,13 @@ export function ReframeView() {
 			setError(null);
 			setResults(null);
 
-			const res = await runReframe(editor, (p) => setProgress(p));
+			const options: ReframeOptions = {
+				strategy: "podcast",
+				aspectRatio,
+				trackingMode,
+			};
+
+			const res = await runReframe(editor, (p) => setProgress(p), options);
 			setResults(res);
 		} catch (err) {
 			console.error("[Reframe]", err);
@@ -46,17 +68,58 @@ export function ReframeView() {
 				<div className="flex flex-col gap-2">
 					<div className="flex items-center gap-2">
 						<Smartphone className="size-4 text-primary" />
-						<span className="text-sm font-medium">Reframe to 9:16</span>
+						<span className="text-sm font-medium">Auto Reframe</span>
 					</div>
 					<p className="text-muted-foreground text-xs leading-relaxed">
 						Analyzes your clip with AI face detection and speaker diarization, then
-						applies position keyframes directly to your timeline. You can drag any
-						keyframe to manually correct the framing.
+						applies position keyframes directly to your timeline. Scene cuts are
+						marked on the ruler. Drag any keyframe to manually adjust framing.
 					</p>
-					<p className="text-muted-foreground text-xs leading-relaxed">
-						Canvas will be set to <strong>1080×1920</strong> and cover mode enabled
-						on each clip.
-					</p>
+				</div>
+
+				{/* Aspect ratio */}
+				<div className="flex flex-col gap-2">
+					<span className="text-xs font-medium">Aspect ratio</span>
+					<div className="grid grid-cols-2 gap-1.5">
+						{ASPECT_RATIO_OPTIONS.map((opt) => (
+							<button
+								key={opt.value}
+								onClick={() => setAspectRatio(opt.value)}
+								disabled={isProcessing}
+								className={`rounded-md border px-2.5 py-1.5 text-left text-xs transition-colors ${
+									aspectRatio === opt.value
+										? "border-white bg-white/10 text-white"
+										: "border-[#262626] bg-black text-[#a3a3a3] hover:border-[#404040] hover:text-white"
+								}`}
+							>
+								{opt.label}
+							</button>
+						))}
+					</div>
+				</div>
+
+				{/* Tracking mode */}
+				<div className="flex flex-col gap-2">
+					<span className="text-xs font-medium">Tracking mode</span>
+					<div className="flex flex-col gap-1.5">
+						{TRACKING_MODE_OPTIONS.map((opt) => (
+							<button
+								key={opt.value}
+								onClick={() => setTrackingMode(opt.value)}
+								disabled={isProcessing}
+								className={`flex flex-col gap-0.5 rounded-md border px-2.5 py-2 text-left transition-colors ${
+									trackingMode === opt.value
+										? "border-white bg-white/10"
+										: "border-[#262626] bg-black hover:border-[#404040]"
+								}`}
+							>
+								<span className={`text-xs font-medium ${trackingMode === opt.value ? "text-white" : "text-[#a3a3a3]"}`}>
+									{opt.label}
+								</span>
+								<span className="text-[#737373] text-xs">{opt.description}</span>
+							</button>
+						))}
+					</div>
 				</div>
 
 				{/* Error */}
@@ -76,7 +139,7 @@ export function ReframeView() {
 						{isProcessing && <Spinner className="mr-2" />}
 						{isProcessing
 							? (progress?.step ?? "Processing...")
-							: "Reframe to 9:16"}
+							: `Reframe to ${aspectRatio}`}
 					</Button>
 				)}
 
@@ -105,7 +168,7 @@ export function ReframeView() {
 								<p className="text-muted-foreground text-xs">
 									{results.reduce((sum, r) => sum + r.keyframeCount, 0)} keyframes
 									added to {results.length} clip{results.length > 1 ? "s" : ""}.
-									Drag keyframes in the timeline to adjust framing manually.
+									Scene cut markers added to timeline ruler.
 								</p>
 							</div>
 						</div>

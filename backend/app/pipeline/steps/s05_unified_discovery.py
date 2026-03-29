@@ -328,12 +328,17 @@ def run(
     channel_id: str,
     video_duration_s: float,
     job_id: str,
-    audio_path: Optional[str] = None
+    audio_path: Optional[str] = None,
+    clip_duration_min: Optional[int] = None,
+    clip_duration_max: Optional[int] = None,
 ) -> list:
     """
     S05: Unified Discovery
     Sends video + transcript + channel context + guest profile to Gemini in one call.
     Returns list of clip candidates.
+
+    clip_duration_min / clip_duration_max: job-level user selection (highest priority).
+    Falls back to channel DNA, then to config defaults.
     """
     print(f"[S05] Starting unified discovery for job {job_id}")
 
@@ -346,10 +351,19 @@ def run(
         guest_profile_text = _get_guest_profile(guest_name)
         print(f"[S05] Guest profile: {guest_profile_text[:100]}...")
 
-        # 3. Calculate limits
+        # 3. Calculate limits — job-level override > channel DNA > config
         max_candidates = _calculate_max_candidates(video_duration_s)
-        min_duration = channel_dna.get("duration_range", {}).get("min", settings.MIN_CLIP_DURATION)
-        max_duration = channel_dna.get("duration_range", {}).get("max", settings.MAX_CLIP_DURATION)
+        min_duration = int(
+            clip_duration_min
+            if clip_duration_min is not None
+            else channel_dna.get("duration_range", {}).get("min", settings.MIN_CLIP_DURATION)
+        )
+        max_duration = int(
+            clip_duration_max
+            if clip_duration_max is not None
+            else channel_dna.get("duration_range", {}).get("max", settings.MAX_CLIP_DURATION)
+        )
+        print(f"[S05] Duration limits: {min_duration}s–{max_duration}s (job_override={'yes' if clip_duration_min is not None else 'no'})")
 
         # 4. Build prompt
         prompt = PROMPT

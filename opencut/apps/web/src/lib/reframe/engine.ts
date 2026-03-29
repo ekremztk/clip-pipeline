@@ -9,7 +9,8 @@
  *   1. Collect video elements from the timeline
  *   2. POST /reframe/process → get reframe_job_id
  *   3. Poll GET /reframe/status/{id} every 2s
- *   4. When done: apply keyframes to element + set canvas to 9:16
+ *   4. When done: apply keyframes to element + set canvas to target aspect ratio
+ *   5. Store scene_cuts in metadata store for timeline markers
  */
 
 import type { EditorCore } from "@/core";
@@ -17,6 +18,8 @@ import type { VideoTrack, VideoElement } from "@/types/timeline";
 import type { AnimationPropertyPath, AnimationInterpolation } from "@/types/animation";
 import { useReframeMetadataStore } from "@/stores/reframe-metadata-store";
 import { createClient } from "@/lib/supabase/client";
+import type { ReframeKeyframe, ReframeOptions } from "./types";
+import { ASPECT_RATIO_CANVAS } from "./types";
 
 async function getAuthToken(): Promise<string | null> {
 	try {
@@ -41,15 +44,12 @@ export interface ReframeResult {
 	keyframeCount: number;
 }
 
-interface BackendKeyframe {
-	time_s: number;
-	offset_x: number;
-	interpolation?: "linear" | "hold";
-}
+export type { ReframeOptions };
 
 export async function runReframe(
 	editor: EditorCore,
 	onProgress: (p: ReframeProgress) => void,
+	options: ReframeOptions = { strategy: "podcast", aspectRatio: "9:16", trackingMode: "x_only" },
 ): Promise<ReframeResult[]> {
 	const videoElements = collectVideoElements(editor);
 	if (videoElements.length === 0) {
@@ -60,10 +60,11 @@ export async function runReframe(
 		throw new Error("NEXT_PUBLIC_PROGNOT_API_URL is not configured");
 	}
 
-	// Get job_id if this clip was opened from the Prognot dashboard
-	const { jobId } = useReframeMetadataStore.getState();
+	const { jobId, clipId } = useReframeMetadataStore.getState();
+	const { setSceneCutMarkers } = useReframeMetadataStore.getState();
 
 	const results: ReframeResult[] = [];
+	const allSceneCuts: number[] = [];
 
 	for (let i = 0; i < videoElements.length; i++) {
 		const { trackId, element } = videoElements[i];
@@ -100,9 +101,13 @@ export async function runReframe(
 			body: JSON.stringify({
 				clip_url: clipUrl,
 				clip_local_path: clipLocalPath,
+				clip_id: clipId ?? undefined,
 				job_id: jobId ?? undefined,
 				clip_start: element.trimStart ?? 0,
 				clip_end: element.trimStart != null ? element.trimStart + element.duration : null,
+				strategy: options.strategy,
+				aspect_ratio: options.aspectRatio,
+				tracking_mode: options.trackingMode,
 			}),
 		});
 
@@ -113,21 +118,33 @@ export async function runReframe(
 		const { reframe_job_id } = await startRes.json();
 
 		// Poll for completion
-		const { keyframes, src_w, src_h } = await pollReframeJob(reframe_job_id, (step, percent) => {
-			onProgress({ step: step + label, percent });
-		});
+		const { keyframes, scene_cuts, src_w, src_h } = await pollReframeJob(
+			reframe_job_id,
+			(step, percent) => {
+				onProgress({ step: step + label, percent });
+			},
+		);
 
 		onProgress({ step: `Applying keyframes${label}...`, percent: 97 });
 
 		// Apply to timeline
 		const keyframeCount = applyReframeToElement(editor, trackId, element, keyframes, src_w, src_h);
 
+		// Collect scene cuts for timeline markers
+		if (scene_cuts.length > 0) {
+			allSceneCuts.push(...scene_cuts);
+		}
+
 		results.push({ elementId: element.id, keyframeCount });
 	}
 
-	// Set canvas to 9:16
+	// Store scene cuts in metadata store so timeline can render markers
+	setSceneCutMarkers(allSceneCuts);
+
+	// Set canvas to target aspect ratio
+	const canvasSize = ASPECT_RATIO_CANVAS[options.aspectRatio];
 	await editor.project.updateSettings({
-		settings: { canvasSize: { width: 1080, height: 1920 } },
+		settings: { canvasSize },
 	});
 
 	onProgress({ step: "Done! Keyframes applied to timeline.", percent: 100 });
@@ -152,12 +169,13 @@ function collectVideoElements(editor: EditorCore): Array<{ trackId: string; elem
 async function pollReframeJob(
 	reframeJobId: string,
 	onProgress: (step: string, percent: number) => void,
-): Promise<{ keyframes: BackendKeyframe[]; src_w: number; src_h: number }> {
+): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number }> {
 	const maxAttempts = 300; // ~10 minutes
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
 		await sleep(POLL_INTERVAL_MS);
 
+		// Refresh token on each poll to handle session expiry during long jobs
 		const statusToken = await getAuthToken();
 		const res = await fetch(`${PROGNOT_API}/reframe/status/${reframeJobId}`, {
 			headers: statusToken ? { Authorization: `Bearer ${statusToken}` } : {},
@@ -171,9 +189,13 @@ async function pollReframeJob(
 
 		if (data.status === "done") {
 			if (!data.keyframes) throw new Error("Reframe succeeded but no keyframes returned");
-			console.log(`[Reframe] Backend done — ${data.keyframes.length} keyframes, src=${data.src_w}x${data.src_h}`);
+			console.log(
+				`[Reframe] Backend done — ${data.keyframes.length} keyframes, ` +
+				`${(data.scene_cuts ?? []).length} scene cuts, src=${data.src_w}x${data.src_h}`,
+			);
 			return {
-				keyframes: data.keyframes as BackendKeyframe[],
+				keyframes: data.keyframes as ReframeKeyframe[],
+				scene_cuts: (data.scene_cuts ?? []) as number[],
 				src_w: data.src_w as number,
 				src_h: data.src_h as number,
 			};
@@ -191,7 +213,7 @@ function applyReframeToElement(
 	editor: EditorCore,
 	trackId: string,
 	element: VideoElement,
-	keyframes: BackendKeyframe[],
+	keyframes: ReframeKeyframe[],
 	_src_w: number,
 	_src_h: number,
 ): number {
@@ -202,7 +224,7 @@ function applyReframeToElement(
 	);
 	console.log(`[Reframe] Backend keyframes received: ${keyframes.length}`, keyframes.slice(0, 5));
 
-	// Enable cover mode so the video fills the 9:16 canvas
+	// Enable cover mode so the video fills the target canvas
 	editor.timeline.updateElements({
 		updates: [{ trackId, elementId: element.id, updates: { coverMode: true } }],
 	});

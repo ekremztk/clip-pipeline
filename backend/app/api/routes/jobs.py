@@ -195,8 +195,12 @@ async def create_job(
             "progress_pct": 0,
             "video_path": video_path,
             "trim_start_seconds": trim_start_seconds,
-            "trim_end_seconds": trim_end_seconds
+            "trim_end_seconds": trim_end_seconds,
         }
+        if clip_duration_min is not None:
+            job_data["clip_duration_min"] = clip_duration_min
+        if clip_duration_max is not None:
+            job_data["clip_duration_max"] = clip_duration_max
         
         response = supabase.table("jobs").insert(job_data).execute()
         if not response.data:
@@ -210,7 +214,9 @@ async def create_job(
             title,
             guest_name,
             channel_id,
-            current_user["id"]
+            current_user["id"],
+            clip_duration_min,
+            clip_duration_max,
         )
         
         print(f"[JobsRoute] Started job {job_id} for video '{title}'")

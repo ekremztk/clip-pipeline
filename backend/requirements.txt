@@ -26,10 +26,11 @@ anthropic
 librosa
 soundfile
 numpy
-mediapipe
+Pillow
 opencv-python-headless
 
-scenedetect[opencv]==0.6.5.2
+# YOLOv8 for person detection (CPU-only, pulls in torch CPU wheel ~800MB)
+ultralytics>=8.1.0
 
 # --- YouTube Tools ---
 yt-dlp>=2026.3.3
