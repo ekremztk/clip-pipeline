@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 		if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
 		const body = await request.json();
-		const { project_id, name, type, size, width, height, duration, fps, content_type } = body;
+		const { id, project_id, name, type, size, width, height, duration, fps, content_type } = body;
 
 		if (!project_id || !name || !type || !content_type) {
 			return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -79,6 +79,7 @@ export async function POST(request: Request) {
 		const { data: asset, error: dbError } = await supabase
 			.from("editor_media_assets")
 			.insert({
+				...(id ? { id } : {}),
 				user_id: user.id,
 				project_id,
 				name,

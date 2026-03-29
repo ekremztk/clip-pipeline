@@ -32,16 +32,19 @@ export async function POST(request: Request) {
 
 		const { data, error } = await supabase
 			.from("editor_projects")
-			.insert({
-				...(id ? { id } : {}),
-				user_id: user.id,
-				name,
-				fps: fps ?? 30,
-				canvas_width: canvas_width ?? 1920,
-				canvas_height: canvas_height ?? 1080,
-				project_data: project_data ?? {},
-				project_version: project_version ?? 9,
-			})
+			.upsert(
+				{
+					...(id ? { id } : {}),
+					user_id: user.id,
+					name,
+					fps: fps ?? 30,
+					canvas_width: canvas_width ?? 1920,
+					canvas_height: canvas_height ?? 1080,
+					project_data: project_data ?? {},
+					project_version: project_version ?? 9,
+				},
+				{ onConflict: "id", ignoreDuplicates: false },
+			)
 			.select()
 			.single();
 

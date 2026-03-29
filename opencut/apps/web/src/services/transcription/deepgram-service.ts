@@ -1,4 +1,5 @@
 import type { TranscriptionResult, TranscriptionSegment } from "@/types/transcription";
+import { createClient } from "@/lib/supabase/client";
 
 const PROGNOT_API = process.env.NEXT_PUBLIC_PROGNOT_API_URL || "http://localhost:8000";
 
@@ -35,9 +36,17 @@ export async function transcribeWithDeepgram({
 		formData.append("language", language);
 	}
 
+	let authToken: string | null = null;
+	try {
+		const supabase = createClient();
+		const { data } = await supabase.auth.getSession();
+		authToken = data?.session?.access_token ?? null;
+	} catch {}
+
 	const response = await fetch(`${PROGNOT_API}/captions/generate`, {
 		method: "POST",
 		body: formData,
+		headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 	});
 
 	if (!response.ok) {

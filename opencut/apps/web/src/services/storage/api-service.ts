@@ -101,7 +101,7 @@ class ApiStorageService {
 
 		if (putRes.status === 404) {
 			// Project doesn't exist yet — create it, preserving the client-side UUID
-			await apiFetch("/api/projects", {
+			const postRes = await apiFetch("/api/projects", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -114,6 +114,9 @@ class ApiStorageService {
 					project_version: project.version,
 				}),
 			});
+			if (!postRes.ok && postRes.status !== 409) {
+				throw new Error(`Failed to create project: ${postRes.status}`);
+			}
 		} else if (!putRes.ok) {
 			throw new Error(`Failed to save project: ${putRes.status}`);
 		}
@@ -185,6 +188,7 @@ class ApiStorageService {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
+				id: mediaAsset.id,
 				project_id: projectId,
 				name: mediaAsset.name,
 				type: mediaAsset.type,

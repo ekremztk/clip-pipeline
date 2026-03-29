@@ -200,6 +200,13 @@ export async function GET(request: NextRequest) {
 
 		const sortParam = buildSortParameter({ query, sort });
 
+		if (!webEnv.FREESOUND_API_KEY) {
+			return NextResponse.json(
+				{ error: "Sound search is not configured" },
+				{ status: 503 },
+			);
+		}
+
 		const params = new URLSearchParams({
 			query: query || "",
 			token: webEnv.FREESOUND_API_KEY,

@@ -16,6 +16,17 @@ import type { EditorCore } from "@/core";
 import type { VideoTrack, VideoElement } from "@/types/timeline";
 import type { AnimationPropertyPath, AnimationInterpolation } from "@/types/animation";
 import { useReframeMetadataStore } from "@/stores/reframe-metadata-store";
+import { createClient } from "@/lib/supabase/client";
+
+async function getAuthToken(): Promise<string | null> {
+	try {
+		const supabase = createClient();
+		const { data } = await supabase.auth.getSession();
+		return data?.session?.access_token ?? null;
+	} catch {
+		return null;
+	}
+}
 
 const PROGNOT_API = process.env.NEXT_PUBLIC_PROGNOT_API_URL ?? "";
 const POLL_INTERVAL_MS = 2000;
@@ -81,9 +92,11 @@ export async function runReframe(
 		}
 
 		// Start reframe job on backend
+		const token = await getAuthToken();
+		const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 		const startRes = await fetch(`${PROGNOT_API}/reframe/process`, {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: { "Content-Type": "application/json", ...authHeaders },
 			body: JSON.stringify({
 				clip_url: clipUrl,
 				clip_local_path: clipLocalPath,
@@ -145,7 +158,10 @@ async function pollReframeJob(
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
 		await sleep(POLL_INTERVAL_MS);
 
-		const res = await fetch(`${PROGNOT_API}/reframe/status/${reframeJobId}`);
+		const statusToken = await getAuthToken();
+		const res = await fetch(`${PROGNOT_API}/reframe/status/${reframeJobId}`, {
+			headers: statusToken ? { Authorization: `Bearer ${statusToken}` } : {},
+		});
 		if (!res.ok) {
 			throw new Error(`Status check failed: ${res.status}`);
 		}
@@ -216,9 +232,11 @@ async function uploadFileToBackend(file: File): Promise<string> {
 	const formData = new FormData();
 	formData.append("file", file);
 
+	const uploadToken = await getAuthToken();
 	const res = await fetch(`${PROGNOT_API}/reframe/upload`, {
 		method: "POST",
 		body: formData,
+		headers: uploadToken ? { Authorization: `Bearer ${uploadToken}` } : {},
 	});
 
 	if (!res.ok) {
