@@ -178,21 +178,37 @@ class ApiStorageService {
 		if (mediaAsset.ephemeral) return; // Ephemeral assets are not persisted
 
 		const file = mediaAsset.file;
+		const contentType = file.type || "application/octet-stream";
 
-		// Upload via server — avoids R2 CORS restrictions
-		const form = new FormData();
-		form.append("file", file, mediaAsset.name);
-		form.append("project_id", projectId);
-		form.append("name", mediaAsset.name);
-		form.append("type", mediaAsset.type);
-		form.append("size", String(file.size));
-		if (mediaAsset.width != null) form.append("width", String(mediaAsset.width));
-		if (mediaAsset.height != null) form.append("height", String(mediaAsset.height));
-		if (mediaAsset.duration != null) form.append("duration", String(mediaAsset.duration));
-		if ((mediaAsset as any).fps != null) form.append("fps", String((mediaAsset as any).fps));
+		// Request presigned upload URL from server
+		const initRes = await apiFetch("/api/media", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				project_id: projectId,
+				name: mediaAsset.name,
+				type: mediaAsset.type,
+				size: file.size,
+				width: mediaAsset.width,
+				height: mediaAsset.height,
+				duration: mediaAsset.duration,
+				fps: (mediaAsset as any).fps,
+				content_type: contentType,
+			}),
+		});
 
-		const res = await apiFetch("/api/media", { method: "POST", body: form });
-		if (!res.ok) throw new Error(`Failed to upload media: ${res.status}`);
+		if (!initRes.ok) throw new Error(`Failed to init media upload: ${initRes.status}`);
+
+		const { upload_url } = await initRes.json();
+
+		// Upload file directly to R2 via presigned URL (R2 CORS allows edit.prognot.com)
+		const uploadRes = await fetch(upload_url, {
+			method: "PUT",
+			body: file,
+			headers: { "Content-Type": contentType },
+		});
+
+		if (!uploadRes.ok) throw new Error(`R2 upload failed: ${uploadRes.status}`);
 	}
 
 	async loadMediaAsset({
