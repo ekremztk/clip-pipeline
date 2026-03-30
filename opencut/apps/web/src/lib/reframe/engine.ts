@@ -128,7 +128,7 @@ export async function runReframe(
 		onProgress({ step: `Applying keyframes${label}...`, percent: 97 });
 
 		// Apply to timeline
-		const keyframeCount = applyReframeToElement(editor, trackId, element, keyframes, src_w, src_h);
+		const keyframeCount = applyReframeToElement(editor, trackId, element, keyframes, src_w, src_h, options);
 
 		// Collect scene cuts for timeline markers
 		if (scene_cuts.length > 0) {
@@ -214,8 +214,9 @@ function applyReframeToElement(
 	trackId: string,
 	element: VideoElement,
 	keyframes: ReframeKeyframe[],
-	_src_w: number,
-	_src_h: number,
+	src_w: number,
+	src_h: number,
+	options: ReframeOptions,
 ): number {
 	const trimStart = element.trimStart ?? 0;
 
@@ -229,17 +230,33 @@ function applyReframeToElement(
 		updates: [{ trackId, elementId: element.id, updates: { coverMode: true } }],
 	});
 
+	// Convert backend offset_x (source-pixel crop left edge) to transform.position.x
+	// (canvas-pixel offset from center).
+	//
+	// The renderer draws: x = canvasWidth/2 + posX - scaledWidth/2
+	// To show source pixel `offset_x` at the canvas left edge (x=0):
+	//   posX = scaledWidth/2 - canvasWidth/2 - offset_x * containScale
+	//
+	// where containScale = max(canvasW/srcW, canvasH/srcH) (coverMode fill scale)
+	//       scaledWidth   = src_w * containScale
+	const { width: canvasWidth, height: canvasHeight } = ASPECT_RATIO_CANVAS[options.aspectRatio];
+	const containScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
+	const scaledWidth = src_w * containScale;
+
 	// Convert backend keyframes (absolute video time) to element-local time.
 	// Clamp negative times to 0 (pre-trim frames) rather than filtering them out.
 	// upsertKeyframes already bounds time to [0, element.duration] internally.
-	const kfBatch = keyframes.map((kf) => ({
-		trackId,
-		elementId: element.id,
-		propertyPath: "transform.position.x" as AnimationPropertyPath,
-		time: Math.max(0, kf.time_s - trimStart),
-		value: kf.offset_x,
-		interpolation: (kf.interpolation ?? "linear") as AnimationInterpolation,
-	}));
+	const kfBatch = keyframes.map((kf) => {
+		const posX = scaledWidth / 2 - canvasWidth / 2 - kf.offset_x * containScale;
+		return {
+			trackId,
+			elementId: element.id,
+			propertyPath: "transform.position.x" as AnimationPropertyPath,
+			time: Math.max(0, kf.time_s - trimStart),
+			value: posX,
+			interpolation: (kf.interpolation ?? "linear") as AnimationInterpolation,
+		};
+	});
 
 	console.log(`[Reframe] Applying ${kfBatch.length} keyframes to element ${element.id}`);
 

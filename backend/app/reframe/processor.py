@@ -123,6 +123,8 @@ def run_reframe(
             src_w=src_w,
             src_h=src_h,
             aspect_ratio=aspect_ratio,
+            scene_analyses=scene_analyses,
+            speaker_segments=speaker_segments,
         )
         print(f"[Reframe] {len(keyframes)} keyframes, {len(scene_cuts)} cut markers")
 
