@@ -49,7 +49,7 @@ export type { ReframeOptions };
 export async function runReframe(
 	editor: EditorCore,
 	onProgress: (p: ReframeProgress) => void,
-	options: ReframeOptions = { strategy: "podcast", aspectRatio: "9:16", trackingMode: "x_only" },
+	options: ReframeOptions = { strategy: "podcast", aspectRatio: "9:16", trackingMode: "x_only", contentType: "auto" },
 ): Promise<ReframeResult[]> {
 	const videoElements = collectVideoElements(editor);
 	if (videoElements.length === 0) {
@@ -108,6 +108,7 @@ export async function runReframe(
 				strategy: options.strategy,
 				aspect_ratio: options.aspectRatio,
 				tracking_mode: options.trackingMode,
+				content_type: options.contentType ?? "auto",
 			}),
 		});
 
@@ -242,21 +243,48 @@ function applyReframeToElement(
 	const { width: canvasWidth, height: canvasHeight } = ASPECT_RATIO_CANVAS[options.aspectRatio];
 	const containScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
 	const scaledWidth = src_w * containScale;
+	const scaledHeight = src_h * containScale;
 
 	// Convert backend keyframes (absolute video time) to element-local time.
 	// Clamp negative times to 0 (pre-trim frames) rather than filtering them out.
 	// upsertKeyframes already bounds time to [0, element.duration] internally.
-	const kfBatch = keyframes.map((kf) => {
+	const kfBatch: Array<{
+		trackId: string;
+		elementId: string;
+		propertyPath: AnimationPropertyPath;
+		time: number;
+		value: number;
+		interpolation: AnimationInterpolation;
+	}> = [];
+
+	for (const kf of keyframes) {
+		const localTime = Math.max(0, kf.time_s - trimStart);
+		const interp = (kf.interpolation ?? "linear") as AnimationInterpolation;
+
+		// X keyframe — her zaman eklenir
 		const posX = scaledWidth / 2 - canvasWidth / 2 - kf.offset_x * containScale;
-		return {
+		kfBatch.push({
 			trackId,
 			elementId: element.id,
 			propertyPath: "transform.position.x" as AnimationPropertyPath,
-			time: Math.max(0, kf.time_s - trimStart),
+			time: localTime,
 			value: posX,
-			interpolation: (kf.interpolation ?? "linear") as AnimationInterpolation,
-		};
-	});
+			interpolation: interp,
+		});
+
+		// Y keyframe — sadece dynamic_xy modda ve offset_y mevcutsa
+		if (options.trackingMode === "dynamic_xy" && kf.offset_y !== undefined && kf.offset_y !== 0) {
+			const posY = scaledHeight / 2 - canvasHeight / 2 - kf.offset_y * containScale;
+			kfBatch.push({
+				trackId,
+				elementId: element.id,
+				propertyPath: "transform.position.y" as AnimationPropertyPath,
+				time: localTime,
+				value: posY,
+				interpolation: interp,
+			});
+		}
+	}
 
 	console.log(`[Reframe] Applying ${kfBatch.length} keyframes to element ${element.id}`);
 
@@ -264,7 +292,7 @@ function applyReframeToElement(
 		editor.timeline.upsertKeyframes({ keyframes: kfBatch });
 	}
 
-	return kfBatch.length;
+	return keyframes.length;
 }
 
 async function uploadFileToBackend(file: File): Promise<string> {

@@ -1,0 +1,1954 @@
+# Prognot Reframer v2 — Sıfırdan Mimari Tasarım
+
+## Mevcut Sistemin Teşhisi
+
+Mevcut reframe sistemi 5 temel noktada kırılıyor:
+
+**1. Sahne başına TEK frame analizi**
+Bu en büyük sorun. `person_detector.py` her sahnenin sadece ilk frame'ini analiz ediyor. Yani 10 saniyelik bir sahnede kişi hareket ederse, sola dönerse, öne eğilirse — sistem bunları görmüyor. Tüm sahne boyunca ilk frame'deki pozisyon sabit kalıyor. Sonuç: kişi frame dışına çıkıyor veya kötü konumlanıyor.
+
+**2. Görsel-işitsel korelasyon yok**
+Deepgram diarization'dan gelen konuşmacı segmentleri ile YOLOv8'in tespit ettiği kişiler arasında bağlantı kurulmuyor. `podcast.py:_dominant_speaker` sadece zaman overlap'ine bakıyor — "sahne içinde kim daha çok konuştu?" Ama hangi kişi (YOLOv8 detection) hangi konuşmacı (Deepgram speaker 0/1) — bu eşleştirme yapılmıyor. Sistem sadece solda HOST sağda GUEST varsayıyor.
+
+**3. Sahne içi konuşmacı geçişi primitive**
+`crop_calculator.py`'deki intra-scene geçiş bugün eklenmiş ama süre bazlı minimum yok. Birisi 0.3 saniye "evet" dese bile sistem oraya sert kesim yapıyor. Profesyonel yapımlarda minimum 1.5-2 saniye konuşma olmadan geçiş yapılmaz.
+
+**4. Smoothing mekanizması sıfır**
+EMA yok, Kalman yok, dead zone yok. Sadece MIN_DELTA_PX = 20px eşiği var. Bu, aynı sahne içinde mikro hareketleri filtreliyor ama sahne geçişlerinde veya konuşmacı değişimlerinde hiçbir yumuşatma yok.
+
+**5. Tek strateji, tek mod**
+Sadece podcast stratejisi var. Gaming, vlog, tek kişi gibi türler için aynı podcast stratejisi fallback olarak çalışıyor — ki bu tamamen yanlış sonuçlar üretiyor.
+
+---
+
+## Yeni Sistemin Temel Felsefesi
+
+### Prensip 1: Multi-Frame Analiz
+Her sahnenin birden fazla frame'i analiz edilecek. Sahne uzunluğuna göre 1-5 fps arasında örnekleme yapılacak. Her frame'deki kişi pozisyonları kaydedilecek ve sahne boyunca bir "hareket yolu" (trajectory) oluşturulacak.
+
+### Prensip 2: İki Fazlı Mimari (Analiz → Uygulama)
+Faz 1: Video analiz edilir, tüm veriler toplanır, reframe PLANI üretilir (JSON).
+Faz 2: Plan timeline'a keyframe olarak uygulanır.
+Kullanıcı planı önizleyebilir ve beğenmezse sadece ilgili kısmı düzenleyebilir.
+
+### Prensip 3: Strateji Deseni (Strategy Pattern)
+Her içerik türü (podcast, gaming, vlog, single-speaker) kendi strateji sınıfına sahip olacak. Ortak bir BaseStrategy'den türeyecek ve türe özgü davranışları override edecek.
+
+### Prensip 4: Ses Öncelikli Konuşmacı Tespiti
+Deepgram diarization verisini YOLOv8 person detection ile korelasyon kurarak eşleştirecek. Pozisyon bazlı eşleştirme: "soldaki kişi = speaker 0" gibi basit bir heuristic bile mevcut sistemden 10x daha iyi.
+
+### Prensip 5: Profesyonel Kesim Kuralları
+- Minimum konuşma süresi: 1.5 saniye (bu süre dolmadan geçiş yapılmaz)
+- Minimum sahne süresi: 2.0 saniye (bir konuşmacıda en az 2 sn kalınır)
+- Pre-roll: Konuşmacı değişiminde ses başlangıcından 150ms önce kes
+- Dead zone: Kişi merkez bölgedeyse crop hareket etmez
+
+---
+
+## Backend Pipeline — Yeni Tasarım
+
+### Dosya Yapısı
+
+```
+backend/app/reframe/
+├── processor.py              # Ana orkestratör (mevcut, refactor edilecek)
+├── models/
+│   └── types.py              # Veri tipleri (genişletilecek)
+├── analyzers/
+│   ├── scene_analyzer.py     # Sahne tespiti (FFmpeg + doğrulama)
+│   ├── person_analyzer.py    # Multi-frame kişi tespiti (YOLOv8)
+│   ├── speaker_analyzer.py   # Konuşmacı-kişi eşleştirme
+│   └── content_classifier.py # İçerik türü otomatik tespit
+├── strategies/
+│   ├── base.py               # BaseStrategy — ortak davranışlar
+│   ├── podcast.py            # Podcast/Interview stratejisi
+│   ├── single_speaker.py     # Tek kişi stratejisi
+│   ├── gaming.py             # Gaming/Streaming stratejisi
+│   └── generic.py            # Genel fallback stratejisi
+├── tracking/
+│   ├── trajectory.py         # Kişi hareket yolu hesaplama
+│   ├── smoothing.py          # EMA + Dead zone + Temporal filter
+│   └── crop_engine.py        # Crop penceresi hesaplama
+├── composition/
+│   ├── keyframe_generator.py # Nihai keyframe üretimi
+│   └── transition_rules.py   # Profesyonel kesim kuralları
+└── utils/
+    ├── frame_sampler.py      # Akıllı frame örnekleme
+    └── coord_utils.py        # Koordinat dönüşüm yardımcıları
+```
+
+### Yeni Pipeline Adımları
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ADIM 1: Video Probing                     │
+│  ffprobe → src_w, src_h, fps, duration, codec, audio_info   │
+│  Süre tahmini: <1 saniye                                     │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  ADIM 2: Sahne Tespiti                        │
+│  FFmpeg scene filter (threshold=0.10)                        │
+│  + SSIM doğrulama (yanlış pozitif temizleme)                 │
+│  + Minimum sahne süresi filtresi (0.5s altını birleştir)     │
+│  Çıktı: List[SceneInterval]                                  │
+│  Süre tahmini: 2-5 saniye                                    │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│               ADIM 3: Multi-Frame Kişi Tespiti               │
+│  Her sahne için:                                             │
+│    - Sahne < 3s → 3 frame örnekle (baş, orta, son)          │
+│    - Sahne 3-10s → 1 fps örnekle                             │
+│    - Sahne > 10s → 0.5 fps örnekle                           │
+│  Her frame: YOLOv8 nano-pose → person bbox + pose keypoints  │
+│  Frame'ler arası: Kişi eşleştirme (IoU + pose benzerliği)   │
+│  Çıktı: List[PersonTrajectory] — her kişinin zaman-pozisyon  │
+│  Süre tahmini: 5-30 saniye (video uzunluğuna bağlı)          │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│           ADIM 4: Konuşmacı-Kişi Eşleştirme                 │
+│  Deepgram diarization verisini al (Supabase'den)             │
+│  Her konuşmacı segmenti için:                                │
+│    - O zaman aralığındaki aktif kişileri bul                 │
+│    - Pozisyon bazlı eşleştirme: sol/sağ sıralama             │
+│    - Eşleştirme güvenilirliği hesapla                        │
+│  Çıktı: SpeakerPersonMap (speaker_id → person_id)           │
+│  Süre tahmini: <1 saniye                                     │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│            ADIM 5: İçerik Türü Sınıflandırma                 │
+│  Kullanıcı seçtiyse → o türü kullan                          │
+│  Seçmediyse otomatik tespit:                                 │
+│    - Kişi sayısı, hareket miktarı, sahne süresi dağılımı     │
+│    - 1-2 kişi + az hareket + uzun sahneler → podcast         │
+│    - 1 kişi + çok hareket → vlog                             │
+│    - Yüksek hareket + küçük yüz alanı → gaming              │
+│  Çıktı: ContentType enum                                    │
+│  Süre tahmini: <1 saniye                                     │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│             ADIM 6: Strateji Uygulama                        │
+│  ContentType'a göre uygun Strategy sınıfı seçilir            │
+│  Strategy.generate_decisions() çağrılır                      │
+│  Her strateji kendi kurallarını uygular                      │
+│  Çıktı: List[ReframeDecision]                                │
+│  Süre tahmini: <1 saniye                                     │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│            ADIM 7: Smoothing + Keyframe Üretimi              │
+│  ReframeDecision'ları al                                     │
+│  EMA smoothing uygula                                        │
+│  Dead zone filtrele                                          │
+│  Profesyonel kesim kuralları uygula                          │
+│  Final keyframe'leri üret                                    │
+│  Çıktı: ReframeResult (keyframes + scene_cuts + metadata)    │
+│  Süre tahmini: <1 saniye                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Veri Tipleri — Yeni types.py
+
+```python
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Optional
+
+
+class ContentType(str, Enum):
+    PODCAST = "podcast"           # 1-3 kişi, sabit kamera, konuşma ağırlıklı
+    SINGLE_SPEAKER = "single"     # 1 kişi, hafif hareket, vlog/sunum
+    GAMING = "gaming"             # Oyun ekranı + webcam overlay
+    GENERIC = "generic"           # Hiçbirine uymuyorsa güvenli mod
+
+
+class TrackingMode(str, Enum):
+    X_ONLY = "x_only"             # Sadece yatay takip
+    DYNAMIC_XY = "dynamic_xy"     # Yatay + dikey takip
+
+
+class TransitionType(str, Enum):
+    HARD_CUT = "hard_cut"         # Anında geçiş (konuşmacı değişimi)
+    SMOOTH = "smooth"             # Yumuşak pan (kişi hareketi takibi)
+    NONE = "none"                 # Pozisyon değişmez
+
+
+@dataclass
+class BBox:
+    """Normalize edilmiş bounding box (0.0 - 1.0 arası)"""
+    x: float      # Sol üst köşe x
+    y: float      # Sol üst köşe y
+    w: float      # Genişlik
+    h: float      # Yükseklik
+
+    @property
+    def center_x(self) -> float:
+        return self.x + self.w / 2
+
+    @property
+    def center_y(self) -> float:
+        return self.y + self.h / 2
+
+    def iou(self, other: "BBox") -> float:
+        """Intersection over Union — kişi eşleştirme için"""
+        x1 = max(self.x, other.x)
+        y1 = max(self.y, other.y)
+        x2 = min(self.x + self.w, other.x + other.w)
+        y2 = min(self.y + self.h, other.y + other.h)
+        if x2 <= x1 or y2 <= y1:
+            return 0.0
+        intersection = (x2 - x1) * (y2 - y1)
+        union = self.w * self.h + other.w * other.h - intersection
+        return intersection / union if union > 0 else 0.0
+
+
+@dataclass
+class PersonDetection:
+    """Tek bir frame'deki tek bir kişi tespiti"""
+    bbox: BBox
+    confidence: float
+    pose_keypoints: list[tuple[float, float, float]]  # (x, y, conf) × 17
+    person_id: Optional[int] = None  # Sahne içi tracking ID
+
+    @property
+    def head_center_x(self) -> float:
+        """Kafa merkezi — burun (idx 0) veya göz ortası"""
+        nose = self.pose_keypoints[0]
+        if nose[2] > 0.3:  # burun güvenilir
+            return nose[0]
+        # Burun güvenilir değilse göz ortasını kullan
+        left_eye = self.pose_keypoints[1]
+        right_eye = self.pose_keypoints[2]
+        if left_eye[2] > 0.3 and right_eye[2] > 0.3:
+            return (left_eye[0] + right_eye[0]) / 2
+        # Hiçbiri güvenilir değilse bbox merkezini kullan
+        return self.bbox.center_x
+
+    @property
+    def head_center_y(self) -> float:
+        """Kafa merkezi Y"""
+        nose = self.pose_keypoints[0]
+        if nose[2] > 0.3:
+            return nose[1]
+        left_eye = self.pose_keypoints[1]
+        right_eye = self.pose_keypoints[2]
+        if left_eye[2] > 0.3 and right_eye[2] > 0.3:
+            return (left_eye[1] + right_eye[1]) / 2
+        return self.bbox.center_y
+
+    @property
+    def is_frontal(self) -> bool:
+        """Kişi kameraya dönük mü?"""
+        left_eye = self.pose_keypoints[1]
+        right_eye = self.pose_keypoints[2]
+        left_ear = self.pose_keypoints[3]
+        right_ear = self.pose_keypoints[4]
+        # İki göz de görünüyorsa muhtemelen frontal
+        return left_eye[2] > 0.3 and right_eye[2] > 0.3
+
+    @property
+    def facing_direction(self) -> str:
+        """Kişi hangi yöne bakıyor? left / right / center"""
+        nose = self.pose_keypoints[0]
+        left_ear = self.pose_keypoints[3]
+        right_ear = self.pose_keypoints[4]
+        # Sadece sol kulak görünüyorsa sağa bakıyor
+        if left_ear[2] > 0.3 and right_ear[2] < 0.3:
+            return "right"
+        if right_ear[2] > 0.3 and left_ear[2] < 0.3:
+            return "left"
+        return "center"
+
+
+@dataclass
+class FrameAnalysis:
+    """Tek bir frame'in analiz sonucu"""
+    time_s: float
+    persons: list[PersonDetection]
+    frame_index: int
+
+
+@dataclass
+class PersonTrajectory:
+    """Bir kişinin sahne boyunca hareket yolu"""
+    person_id: int
+    positions: list[tuple[float, float, float]]  # (time_s, center_x, center_y)
+
+    @property
+    def mean_x(self) -> float:
+        return sum(p[1] for p in self.positions) / len(self.positions)
+
+    @property
+    def mean_y(self) -> float:
+        return sum(p[2] for p in self.positions) / len(self.positions)
+
+    @property
+    def x_range(self) -> float:
+        """Yatay hareket miktarı (0-1 arası normalize)"""
+        xs = [p[1] for p in self.positions]
+        return max(xs) - min(xs) if xs else 0.0
+
+    @property
+    def is_static(self) -> bool:
+        """Kişi yerinde mi duruyor?"""
+        return self.x_range < 0.05  # %5'ten az hareket
+
+
+@dataclass
+class SceneInterval:
+    """Bir sahne aralığı"""
+    start_s: float
+    end_s: float
+    scene_type: str = "unknown"  # "wide", "closeup", "transition"
+
+    @property
+    def duration_s(self) -> float:
+        return self.end_s - self.start_s
+
+
+@dataclass
+class SceneAnalysis:
+    """Bir sahnenin tam analiz sonucu"""
+    scene: SceneInterval
+    frame_analyses: list[FrameAnalysis]
+    trajectories: list[PersonTrajectory]
+    person_count: int
+    dominant_speaker_id: Optional[int] = None
+    speaker_segments: list[dict] = field(default_factory=list)
+
+
+@dataclass
+class SpeakerPersonMapping:
+    """Konuşmacı → Kişi eşleştirmesi"""
+    speaker_id: int           # Deepgram speaker ID (0, 1, ...)
+    person_id: int            # YOLOv8 tracking ID
+    confidence: float         # Eşleştirme güvenilirliği
+    avg_position_x: float     # Kişinin ortalama X pozisyonu
+
+
+@dataclass
+class ReframeSegment:
+    """Reframe planındaki bir segment — kesintisiz bir crop pozisyonu"""
+    start_s: float
+    end_s: float
+    target_x: float           # Hedef crop merkezi X (0.0 - 1.0 normalize)
+    target_y: float           # Hedef crop merkezi Y (0.0 - 1.0 normalize)
+    transition_in: TransitionType   # Bu segmente giriş tipi
+    active_speaker_id: Optional[int] = None
+    focused_person_id: Optional[int] = None
+    reason: str = ""          # Debug için: "speaker_change", "person_tracking" vb.
+
+
+@dataclass
+class ReframeDecision:
+    """Bir sahne için reframe kararı"""
+    scene: SceneInterval
+    segments: list[ReframeSegment]
+
+
+@dataclass
+class SmoothingConfig:
+    """Smoothing parametreleri — içerik türüne göre farklı"""
+    ema_alpha: float = 0.2          # EMA katsayısı (düşük = daha yumuşak)
+    dead_zone_x: float = 0.08       # Yatay dead zone (normalize, frame genişliğinin %8'i)
+    dead_zone_y: float = 0.05       # Dikey dead zone
+    min_segment_duration_s: float = 2.0   # Minimum segment süresi
+    min_speech_duration_s: float = 1.5    # Minimum konuşma süresi (geçiş için)
+    pre_roll_s: float = 0.15        # Konuşmacı değişiminde önceden kesim
+    max_pan_speed: float = 0.3      # Maksimum pan hızı (normalize/saniye)
+
+
+@dataclass
+class ReframeKeyframe:
+    """Frontend'e gönderilecek keyframe"""
+    time_s: float
+    offset_x: float           # Kaynak piksel cinsinden X offset
+    offset_y: float           # Kaynak piksel cinsinden Y offset (y_only modda 0)
+    interpolation: str        # "linear" veya "hold"
+
+
+@dataclass
+class ReframeResult:
+    """Tüm reframe sonucu"""
+    keyframes: list[ReframeKeyframe]
+    scene_cuts: list[float]
+    src_w: int
+    src_h: int
+    fps: float
+    duration_s: float
+    content_type: ContentType
+    tracking_mode: TrackingMode
+    metadata: dict = field(default_factory=dict)  # Debug bilgileri
+```
+
+---
+
+## Analyzer Modülleri — Detaylı Tasarım
+
+### scene_analyzer.py
+
+```python
+"""
+Sahne tespiti — FFmpeg scene filter + SSIM doğrulama
+
+Mevcut sistemden farklar:
+- SSIM ile yanlış pozitif temizleme (el hareketi, ışık değişimi gibi)
+- Minimum sahne süresi filtresi
+- İçerik türüne göre ayarlanabilir threshold
+"""
+import subprocess
+import re
+import cv2
+import numpy as np
+from ..models.types import SceneInterval
+
+
+# İçerik türüne göre varsayılan eşikler
+DEFAULT_THRESHOLDS = {
+    "podcast": 0.08,    # Stüdyo ortamı, düşük eşik = daha hassas
+    "gaming": 0.25,     # Oyun ekranı sürekli değişir, yüksek eşik
+    "single": 0.12,     # Tek kişi, orta eşik
+    "generic": 0.10,    # Genel
+}
+
+MIN_SCENE_DURATION_S = 0.5     # 0.5 saniyeden kısa sahneleri birleştir
+MIN_CUT_GAP_S = 0.5            # 0.5 saniyeden yakın kesimler = tek kesim
+SSIM_HARD_CUT_THRESHOLD = 0.4  # SSIM bu değerin altında = kesin sahne geçişi
+SSIM_SOFT_CUT_THRESHOLD = 0.7  # Bu aralıkta = muhtemel geçiş, doğrulama gerek
+
+
+def detect_scenes(
+    video_path: str,
+    threshold: float | None = None,
+    content_hint: str = "generic",
+    fps: float = 30.0,
+) -> list[SceneInterval]:
+    """
+    Sahne geçişlerini tespit et.
+
+    1. FFmpeg scene filter ile aday noktaları bul
+    2. SSIM ile doğrula (yanlış pozitif temizle)
+    3. Çok yakın/kısa sahneleri birleştir
+    """
+    if threshold is None:
+        threshold = DEFAULT_THRESHOLDS.get(content_hint, 0.10)
+
+    # Adım 1: FFmpeg scene filter
+    cut_times = _ffmpeg_scene_detect(video_path, threshold)
+
+    # Adım 2: SSIM doğrulama
+    if len(cut_times) > 0:
+        cut_times = _validate_with_ssim(video_path, cut_times, fps)
+
+    # Adım 3: Yakın kesimleri birleştir
+    cut_times = _merge_nearby_cuts(cut_times, MIN_CUT_GAP_S)
+
+    # Adım 4: Sahne aralıklarını oluştur
+    duration = _get_duration(video_path)
+    scenes = _cuts_to_intervals(cut_times, duration)
+
+    # Adım 5: Çok kısa sahneleri birleştir
+    scenes = _merge_short_scenes(scenes, MIN_SCENE_DURATION_S)
+
+    return scenes
+
+
+def _ffmpeg_scene_detect(video_path: str, threshold: float) -> list[float]:
+    """FFmpeg scene filter ile sahne geçiş zamanlarını bul"""
+    cmd = [
+        "ffmpeg", "-i", video_path,
+        "-vf", f"select='gt(scene,{threshold})',showinfo",
+        "-vsync", "0",
+        "-f", "null", "-",
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    times = []
+    for match in re.finditer(r"pts_time:(\d+\.?\d*)", result.stderr):
+        times.append(float(match.group(1)))
+    return sorted(set(times))
+
+
+def _validate_with_ssim(
+    video_path: str, cut_times: list[float], fps: float
+) -> list[float]:
+    """
+    SSIM ile sahne geçişlerini doğrula.
+    Her geçiş noktasının önceki ve sonraki frame'ini karşılaştır.
+    Düşük SSIM = gerçek sahne geçişi, yüksek SSIM = yanlış alarm.
+    """
+    validated = []
+    cap = cv2.VideoCapture(video_path)
+
+    for cut_time in cut_times:
+        # Geçişin 1 frame öncesi ve sonrasını al
+        before_time = max(0, cut_time - 1.0 / fps)
+        after_time = cut_time + 1.0 / fps
+
+        frame_before = _extract_frame(cap, before_time)
+        frame_after = _extract_frame(cap, after_time)
+
+        if frame_before is None or frame_after is None:
+            validated.append(cut_time)  # Frame alınamadıysa güvenli tarafta kal
+            continue
+
+        # Karşılaştırma için küçült (hız için)
+        h, w = 120, 160
+        before_small = cv2.resize(frame_before, (w, h))
+        after_small = cv2.resize(frame_after, (w, h))
+
+        # Gri tonlamaya çevir
+        before_gray = cv2.cvtColor(before_small, cv2.COLOR_BGR2GRAY)
+        after_gray = cv2.cvtColor(after_small, cv2.COLOR_BGR2GRAY)
+
+        # SSIM hesapla
+        ssim = _compute_ssim(before_gray, after_gray)
+
+        if ssim < SSIM_HARD_CUT_THRESHOLD:
+            # Kesin sahne geçişi
+            validated.append(cut_time)
+        elif ssim < SSIM_SOFT_CUT_THRESHOLD:
+            # Muhtemel geçiş — daha geniş bağlamla doğrula
+            before_wide = _extract_frame(cap, max(0, cut_time - 0.5))
+            after_wide = _extract_frame(cap, cut_time + 0.5)
+            if before_wide is not None and after_wide is not None:
+                bw_small = cv2.resize(
+                    cv2.cvtColor(before_wide, cv2.COLOR_BGR2GRAY), (w, h)
+                )
+                aw_small = cv2.resize(
+                    cv2.cvtColor(after_wide, cv2.COLOR_BGR2GRAY), (w, h)
+                )
+                wide_ssim = _compute_ssim(bw_small, aw_small)
+                if wide_ssim < SSIM_SOFT_CUT_THRESHOLD:
+                    validated.append(cut_time)
+        # else: SSIM yüksek → yanlış alarm, es geç
+
+    cap.release()
+    return validated
+
+
+def _compute_ssim(img1: np.ndarray, img2: np.ndarray) -> float:
+    """Basit SSIM hesaplama (OpenCV dependency olmadan)"""
+    C1 = (0.01 * 255) ** 2
+    C2 = (0.03 * 255) ** 2
+
+    img1 = img1.astype(np.float64)
+    img2 = img2.astype(np.float64)
+
+    mu1 = cv2.GaussianBlur(img1, (11, 11), 1.5)
+    mu2 = cv2.GaussianBlur(img2, (11, 11), 1.5)
+
+    mu1_sq = mu1 ** 2
+    mu2_sq = mu2 ** 2
+    mu1_mu2 = mu1 * mu2
+
+    sigma1_sq = cv2.GaussianBlur(img1 ** 2, (11, 11), 1.5) - mu1_sq
+    sigma2_sq = cv2.GaussianBlur(img2 ** 2, (11, 11), 1.5) - mu2_sq
+    sigma12 = cv2.GaussianBlur(img1 * img2, (11, 11), 1.5) - mu1_mu2
+
+    ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / (
+        (mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2)
+    )
+    return float(ssim_map.mean())
+
+
+def _extract_frame(cap: cv2.VideoCapture, time_s: float) -> np.ndarray | None:
+    """VideoCapture'dan belirli zamandaki frame'i al"""
+    cap.set(cv2.CAP_PROP_POS_MSEC, time_s * 1000)
+    ret, frame = cap.read()
+    return frame if ret else None
+
+
+def _merge_nearby_cuts(cuts: list[float], min_gap: float) -> list[float]:
+    """Çok yakın kesimleri birleştir"""
+    if not cuts:
+        return []
+    merged = [cuts[0]]
+    for cut in cuts[1:]:
+        if cut - merged[-1] >= min_gap:
+            merged.append(cut)
+    return merged
+
+
+def _cuts_to_intervals(cuts: list[float], duration: float) -> list[SceneInterval]:
+    """Kesim noktalarını sahne aralıklarına çevir"""
+    intervals = []
+    boundaries = [0.0] + cuts + [duration]
+    for i in range(len(boundaries) - 1):
+        intervals.append(SceneInterval(
+            start_s=boundaries[i],
+            end_s=boundaries[i + 1],
+        ))
+    return intervals
+
+
+def _merge_short_scenes(
+    scenes: list[SceneInterval], min_duration: float
+) -> list[SceneInterval]:
+    """Çok kısa sahneleri önceki sahneyle birleştir"""
+    if not scenes:
+        return []
+    merged = [scenes[0]]
+    for scene in scenes[1:]:
+        if scene.duration_s < min_duration:
+            # Önceki sahneye ekle
+            merged[-1] = SceneInterval(
+                start_s=merged[-1].start_s,
+                end_s=scene.end_s,
+            )
+        else:
+            merged.append(scene)
+    return merged
+
+
+def _get_duration(video_path: str) -> float:
+    """FFprobe ile video süresini al"""
+    cmd = [
+        "ffprobe", "-v", "quiet",
+        "-show_entries", "format=duration",
+        "-of", "csv=p=0",
+        video_path,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    return float(result.stdout.strip())
+```
+
+### person_analyzer.py
+
+```python
+"""
+Multi-frame kişi tespiti ve takibi.
+
+Mevcut sistemden temel fark: Her sahne için BİRDEN FAZLA frame analiz edilir.
+Frame'ler arası kişi eşleştirmesi IoU ile yapılır.
+Sonuç olarak her kişi için bir "trajectory" (hareket yolu) üretilir.
+"""
+import subprocess
+import tempfile
+import os
+import cv2
+import numpy as np
+from ultralytics import YOLO
+from ..models.types import (
+    BBox, PersonDetection, FrameAnalysis,
+    PersonTrajectory, SceneInterval, SceneAnalysis,
+)
+
+
+CONFIDENCE_THRESHOLD = 0.50
+IOU_MATCH_THRESHOLD = 0.30    # Kişi eşleştirme için minimum IoU
+MAX_PERSONS = 4               # Sahne başına maximum kişi
+ANALYSIS_RESOLUTION = (640, 360)  # Analiz için küçültme (hız için)
+
+
+class PersonAnalyzer:
+    def __init__(self, model_path: str = "yolov8n-pose.pt"):
+        self.model = YOLO(model_path)
+
+    def analyze_scenes(
+        self,
+        video_path: str,
+        scenes: list[SceneInterval],
+        fps: float,
+        src_w: int,
+        src_h: int,
+    ) -> list[SceneAnalysis]:
+        """Tüm sahneleri analiz et"""
+        results = []
+        cap = cv2.VideoCapture(video_path)
+
+        for scene in scenes:
+            analysis = self._analyze_scene(cap, scene, fps, src_w, src_h)
+            results.append(analysis)
+
+        cap.release()
+        return results
+
+    def _analyze_scene(
+        self,
+        cap: cv2.VideoCapture,
+        scene: SceneInterval,
+        fps: float,
+        src_w: int,
+        src_h: int,
+    ) -> SceneAnalysis:
+        """Tek bir sahneyi analiz et — multi-frame"""
+        # Örnekleme zamanlarını belirle
+        sample_times = self._get_sample_times(scene, fps)
+
+        # Her frame'i analiz et
+        frame_analyses = []
+        for i, time_s in enumerate(sample_times):
+            frame = self._extract_frame(cap, time_s)
+            if frame is None:
+                continue
+
+            # YOLOv8 inference
+            detections = self._detect_persons(frame, src_w, src_h)
+
+            frame_analyses.append(FrameAnalysis(
+                time_s=time_s,
+                persons=detections,
+                frame_index=i,
+            ))
+
+        # Frame'ler arası kişi eşleştirmesi
+        self._assign_person_ids(frame_analyses)
+
+        # Trajectory'leri oluştur
+        trajectories = self._build_trajectories(frame_analyses)
+
+        # Kişi sayısını belirle
+        person_count = len(trajectories)
+
+        return SceneAnalysis(
+            scene=scene,
+            frame_analyses=frame_analyses,
+            trajectories=trajectories,
+            person_count=person_count,
+        )
+
+    def _get_sample_times(
+        self, scene: SceneInterval, fps: float
+    ) -> list[float]:
+        """
+        Sahne uzunluğuna göre örnekleme zamanlarını belirle.
+        Kısa sahneler: 3 frame (baş, orta, son)
+        Orta sahneler: 1 fps
+        Uzun sahneler: 0.5 fps
+        """
+        duration = scene.duration_s
+
+        if duration < 1.0:
+            # Çok kısa sahne — sadece ortasını al
+            return [scene.start_s + duration / 2]
+
+        if duration < 3.0:
+            # Kısa sahne — baş, orta, son
+            return [
+                scene.start_s + 0.1,
+                scene.start_s + duration / 2,
+                scene.end_s - 0.1,
+            ]
+
+        if duration <= 10.0:
+            # Orta sahne — 1 fps
+            sample_fps = 1.0
+        else:
+            # Uzun sahne — 0.5 fps
+            sample_fps = 0.5
+
+        times = []
+        t = scene.start_s + 0.1  # İlk frame'i biraz kaydır (geçiş artefaktı)
+        while t < scene.end_s - 0.1:
+            times.append(t)
+            t += 1.0 / sample_fps
+
+        # Son frame'i de ekle
+        if times and (scene.end_s - 0.1 - times[-1]) > 0.3:
+            times.append(scene.end_s - 0.1)
+
+        return times
+
+    def _extract_frame(
+        self, cap: cv2.VideoCapture, time_s: float
+    ) -> np.ndarray | None:
+        """Frame extract et"""
+        cap.set(cv2.CAP_PROP_POS_MSEC, time_s * 1000)
+        ret, frame = cap.read()
+        return frame if ret else None
+
+    def _detect_persons(
+        self, frame: np.ndarray, src_w: int, src_h: int
+    ) -> list[PersonDetection]:
+        """YOLOv8 ile kişi tespiti"""
+        # Küçült (hız için)
+        small = cv2.resize(frame, ANALYSIS_RESOLUTION)
+        scale_x = src_w / ANALYSIS_RESOLUTION[0]
+        scale_y = src_h / ANALYSIS_RESOLUTION[1]
+
+        results = self.model(small, verbose=False, conf=CONFIDENCE_THRESHOLD)
+        detections = []
+
+        for result in results:
+            if result.keypoints is None:
+                continue
+
+            boxes = result.boxes
+            keypoints = result.keypoints
+
+            for i in range(len(boxes)):
+                if int(boxes.cls[i]) != 0:  # Sadece person (class 0)
+                    continue
+
+                # Bbox normalize et
+                x1, y1, x2, y2 = boxes.xyxy[i].cpu().numpy()
+                bbox = BBox(
+                    x=float(x1 * scale_x / src_w),
+                    y=float(y1 * scale_y / src_h),
+                    w=float((x2 - x1) * scale_x / src_w),
+                    h=float((y2 - y1) * scale_y / src_h),
+                )
+
+                # Pose keypoints normalize et
+                kps = keypoints.data[i].cpu().numpy()
+                pose_kps = []
+                for kp in kps:
+                    pose_kps.append((
+                        float(kp[0] * scale_x / src_w),   # x normalize
+                        float(kp[1] * scale_y / src_h),   # y normalize
+                        float(kp[2]),                      # confidence
+                    ))
+
+                detections.append(PersonDetection(
+                    bbox=bbox,
+                    confidence=float(boxes.conf[i]),
+                    pose_keypoints=pose_kps,
+                ))
+
+        # Confidence'a göre sırala, en fazla MAX_PERSONS tane
+        detections.sort(key=lambda d: d.confidence, reverse=True)
+        return detections[:MAX_PERSONS]
+
+    def _assign_person_ids(self, frame_analyses: list[FrameAnalysis]) -> None:
+        """
+        Frame'ler arası kişi eşleştirmesi.
+        İlk frame'deki kişilere ID ata, sonraki frame'lerde
+        IoU ile en yakın eşleşmeyi bul.
+        """
+        if not frame_analyses:
+            return
+
+        # İlk frame'e ID ata
+        for i, person in enumerate(frame_analyses[0].persons):
+            person.person_id = i
+
+        # Sonraki frame'leri eşleştir
+        for f_idx in range(1, len(frame_analyses)):
+            prev_persons = frame_analyses[f_idx - 1].persons
+            curr_persons = frame_analyses[f_idx].persons
+
+            # Her mevcut kişi için önceki frame'deki en yakın eşleşmeyi bul
+            used_prev = set()
+            for curr in curr_persons:
+                best_iou = 0.0
+                best_prev_id = None
+
+                for prev in prev_persons:
+                    if prev.person_id in used_prev:
+                        continue
+                    iou = curr.bbox.iou(prev.bbox)
+                    if iou > best_iou and iou > IOU_MATCH_THRESHOLD:
+                        best_iou = iou
+                        best_prev_id = prev.person_id
+
+                if best_prev_id is not None:
+                    curr.person_id = best_prev_id
+                    used_prev.add(best_prev_id)
+                else:
+                    # Yeni kişi — yeni ID ata
+                    max_id = max(
+                        (p.person_id for fa in frame_analyses for p in fa.persons
+                         if p.person_id is not None),
+                        default=-1,
+                    )
+                    curr.person_id = max_id + 1
+
+    def _build_trajectories(
+        self, frame_analyses: list[FrameAnalysis]
+    ) -> list[PersonTrajectory]:
+        """Frame analizlerinden kişi trajectory'lerini oluştur"""
+        person_positions: dict[int, list[tuple[float, float, float]]] = {}
+
+        for fa in frame_analyses:
+            for person in fa.persons:
+                if person.person_id is None:
+                    continue
+                if person.person_id not in person_positions:
+                    person_positions[person.person_id] = []
+                person_positions[person.person_id].append((
+                    fa.time_s,
+                    person.head_center_x,
+                    person.head_center_y,
+                ))
+
+        trajectories = []
+        for pid, positions in person_positions.items():
+            # En az 2 frame'de görünen kişileri dahil et
+            if len(positions) >= 2 or len(frame_analyses) <= 2:
+                trajectories.append(PersonTrajectory(
+                    person_id=pid,
+                    positions=positions,
+                ))
+
+        # X pozisyonuna göre sırala (soldan sağa)
+        trajectories.sort(key=lambda t: t.mean_x)
+        return trajectories
+```
+
+### speaker_analyzer.py
+
+```python
+"""
+Konuşmacı-kişi eşleştirme.
+
+Deepgram diarization verisindeki konuşmacıları (speaker 0, 1, ...)
+YOLOv8'in tespit ettiği kişilerle eşleştirir.
+
+Strateji: Pozisyon bazlı eşleştirme.
+Podcast düzeninde genellikle soldaki kişi = host, sağdaki = guest.
+Deepgram'da speaker 0 genellikle ilk konuşan kişi.
+"""
+from ..models.types import (
+    SceneAnalysis, PersonTrajectory,
+    SpeakerPersonMapping, SceneInterval,
+)
+
+
+def match_speakers_to_persons(
+    scene_analyses: list[SceneAnalysis],
+    diarization_segments: list[dict],
+    src_w: int,
+) -> list[SpeakerPersonMapping]:
+    """
+    Konuşmacıları tespit edilen kişilerle eşleştir.
+
+    Algoritma:
+    1. Diarization segmentlerinden unique konuşmacıları bul
+    2. Tüm sahnelerdeki kişi trajectory'lerinden ortalama pozisyonları hesapla
+    3. Konuşmacıları pozisyon sırasına göre kişilerle eşleştir
+       (soldaki kişi = ilk konuşmacı — podcast konvansiyonu)
+    4. Eşleştirme güvenilirliğini hesapla
+    """
+    if not diarization_segments or not scene_analyses:
+        return []
+
+    # Unique konuşmacıları bul
+    unique_speakers = sorted(set(
+        seg.get("speaker", 0) for seg in diarization_segments
+    ))
+
+    # Tüm sahnelerdeki kişilerin global ortalama pozisyonlarını hesapla
+    global_person_positions: dict[int, list[float]] = {}
+    for sa in scene_analyses:
+        for traj in sa.trajectories:
+            if traj.person_id not in global_person_positions:
+                global_person_positions[traj.person_id] = []
+            global_person_positions[traj.person_id].append(traj.mean_x)
+
+    if not global_person_positions:
+        return []
+
+    # Her kişinin global ortalama X pozisyonu
+    person_avg_x = {
+        pid: sum(xs) / len(xs)
+        for pid, xs in global_person_positions.items()
+    }
+
+    # Kişileri soldan sağa sırala
+    sorted_persons = sorted(person_avg_x.items(), key=lambda x: x[1])
+
+    # Eşleştirme: soldan sağa kişiler ↔ sırayla konuşmacılar
+    mappings = []
+    for i, speaker_id in enumerate(unique_speakers):
+        if i < len(sorted_persons):
+            person_id, avg_x = sorted_persons[i]
+            # Güvenilirlik: kişi sayısı ve konuşmacı sayısı eşleşiyorsa yüksek
+            confidence = 0.9 if len(unique_speakers) == len(sorted_persons) else 0.6
+            mappings.append(SpeakerPersonMapping(
+                speaker_id=speaker_id,
+                person_id=person_id,
+                confidence=confidence,
+                avg_position_x=avg_x,
+            ))
+
+    return mappings
+
+
+def get_active_speaker_at(
+    time_s: float,
+    diarization_segments: list[dict],
+    min_speech_duration_s: float = 1.5,
+) -> int | None:
+    """
+    Belirli bir zamanda aktif konuşmacıyı bul.
+    Minimum konuşma süresi kuralını uygula.
+    """
+    # O andaki tüm aktif segmentleri bul
+    active_segments = [
+        seg for seg in diarization_segments
+        if seg.get("start", 0) <= time_s <= seg.get("end", 0)
+    ]
+
+    if not active_segments:
+        return None
+
+    # En uzun segmentteki konuşmacıyı döndür
+    longest = max(
+        active_segments,
+        key=lambda s: s.get("end", 0) - s.get("start", 0),
+    )
+
+    duration = longest.get("end", 0) - longest.get("start", 0)
+    if duration < min_speech_duration_s:
+        return None  # Çok kısa — geçiş yapma
+
+    return longest.get("speaker", 0)
+
+
+def build_speaker_timeline(
+    diarization_segments: list[dict],
+    speaker_person_map: list[SpeakerPersonMapping],
+    min_speech_duration_s: float = 1.5,
+    min_segment_gap_s: float = 0.3,
+) -> list[dict]:
+    """
+    Diarization segmentlerinden temizlenmiş konuşmacı timeline'ı oluştur.
+
+    Kurallar:
+    - min_speech_duration_s'den kısa konuşmaları filtrele
+    - Çok yakın segmentleri birleştir
+    - Speaker ID → Person ID eşleştirmesini uygula
+    """
+    if not diarization_segments:
+        return []
+
+    # Speaker → Person mapping dict
+    sp_map = {m.speaker_id: m.person_id for m in speaker_person_map}
+
+    # Filtrele: çok kısa segmentleri çıkar
+    filtered = []
+    for seg in diarization_segments:
+        duration = seg.get("end", 0) - seg.get("start", 0)
+        if duration >= min_speech_duration_s:
+            filtered.append({
+                "start": seg["start"],
+                "end": seg["end"],
+                "speaker_id": seg.get("speaker", 0),
+                "person_id": sp_map.get(seg.get("speaker", 0)),
+            })
+
+    # Aynı konuşmacının ardışık segmentlerini birleştir
+    merged = []
+    for seg in filtered:
+        if (merged and
+            merged[-1]["speaker_id"] == seg["speaker_id"] and
+            seg["start"] - merged[-1]["end"] < min_segment_gap_s):
+            merged[-1]["end"] = seg["end"]
+        else:
+            merged.append(dict(seg))
+
+    return merged
+```
+
+### content_classifier.py
+
+```python
+"""
+İçerik türü otomatik sınıflandırma.
+
+Analiz sonuçlarına bakarak videonun podcast, single_speaker,
+gaming veya generic olduğunu tespit eder.
+"""
+from ..models.types import ContentType, SceneAnalysis
+
+
+def classify_content(
+    scene_analyses: list[SceneAnalysis],
+    diarization_segments: list[dict],
+    user_hint: str | None = None,
+) -> ContentType:
+    """
+    İçerik türünü belirle.
+    Kullanıcı hint verdiyse onu kullan, yoksa otomatik tespit et.
+    """
+    if user_hint:
+        try:
+            return ContentType(user_hint)
+        except ValueError:
+            pass  # Geçersiz hint, otomatik tespite devam
+
+    if not scene_analyses:
+        return ContentType.GENERIC
+
+    # İstatistikleri hesapla
+    total_persons = []
+    total_movement = []
+    scene_durations = []
+
+    for sa in scene_analyses:
+        total_persons.append(sa.person_count)
+        scene_durations.append(sa.scene.duration_s)
+        for traj in sa.trajectories:
+            total_movement.append(traj.x_range)
+
+    avg_persons = sum(total_persons) / len(total_persons) if total_persons else 0
+    avg_movement = sum(total_movement) / len(total_movement) if total_movement else 0
+    avg_scene_duration = (
+        sum(scene_durations) / len(scene_durations) if scene_durations else 0
+    )
+    num_speakers = len(set(
+        seg.get("speaker", 0) for seg in diarization_segments
+    )) if diarization_segments else 0
+
+    # Karar ağacı
+    if avg_persons >= 1.5 and avg_movement < 0.10 and avg_scene_duration > 3.0:
+        # Birden fazla kişi, az hareket, uzun sahneler → podcast
+        return ContentType.PODCAST
+
+    if avg_persons <= 1.2 and avg_movement < 0.15:
+        # Tek kişi, az-orta hareket → single speaker
+        return ContentType.SINGLE_SPEAKER
+
+    if avg_persons <= 1.0 and avg_movement > 0.20:
+        # Tek veya sıfır kişi (küçük webcam), çok hareket → gaming
+        return ContentType.GAMING
+
+    return ContentType.GENERIC
+```
+
+---
+
+## Strateji Modülleri
+
+### base.py — BaseStrategy
+
+```python
+"""
+Tüm stratejilerin temel sınıfı.
+Ortak davranışları (smoothing, dead zone, minimum süre) burada tanımla.
+Türe özgü davranışları alt sınıflar override eder.
+"""
+from abc import ABC, abstractmethod
+from ..models.types import (
+    SceneAnalysis, ReframeDecision, ReframeSegment,
+    SpeakerPersonMapping, SmoothingConfig,
+    TransitionType, TrackingMode,
+)
+
+
+class BaseStrategy(ABC):
+    def __init__(
+        self,
+        tracking_mode: TrackingMode = TrackingMode.X_ONLY,
+        smoothing_config: SmoothingConfig | None = None,
+    ):
+        self.tracking_mode = tracking_mode
+        self.config = smoothing_config or self._default_config()
+
+    @abstractmethod
+    def _default_config(self) -> SmoothingConfig:
+        """Türe özgü varsayılan smoothing ayarları"""
+        ...
+
+    @abstractmethod
+    def generate_decisions(
+        self,
+        scene_analyses: list[SceneAnalysis],
+        speaker_person_map: list[SpeakerPersonMapping],
+        speaker_timeline: list[dict],
+        src_w: int,
+        src_h: int,
+        aspect_ratio: tuple[int, int],
+    ) -> list[ReframeDecision]:
+        """Reframe kararlarını üret"""
+        ...
+
+    def _calculate_crop_center_x(
+        self,
+        target_x_normalized: float,
+        src_w: int,
+        aspect_ratio: tuple[int, int],
+    ) -> float:
+        """
+        Hedef X pozisyonunu crop merkez X'ine çevir.
+        Dead zone ve sınır kontrolü uygula.
+        """
+        # 9:16 için kaynak frame'den kesilecek genişlik
+        out_w, out_h = aspect_ratio
+        crop_w_ratio = (out_w / out_h) * (src_w / src_w)
+        # Normalize: hedefin crop içinde kalmasını sağla
+        half_crop = crop_w_ratio / 2 if crop_w_ratio < 1.0 else 0.5 / (out_h / out_w)
+
+        # Sınır kontrolü: crop frame dışına taşmasın
+        min_x = half_crop
+        max_x = 1.0 - half_crop
+        return max(min_x, min(max_x, target_x_normalized))
+
+    def _apply_dead_zone(
+        self,
+        current_x: float,
+        target_x: float,
+        dead_zone: float,
+    ) -> float:
+        """
+        Dead zone uygula: hedef mevcut pozisyondan
+        dead_zone kadar uzakta değilse hareket etme.
+        """
+        delta = abs(target_x - current_x)
+        if delta < dead_zone:
+            return current_x  # Hareket etme
+        return target_x
+
+    def _apply_ema(
+        self,
+        current: float,
+        previous: float,
+        alpha: float,
+    ) -> float:
+        """Exponential Moving Average"""
+        return alpha * current + (1.0 - alpha) * previous
+```
+
+### podcast.py — PodcastStrategy
+
+```python
+"""
+Podcast/Interview stratejisi.
+
+Özellikler:
+- 2+ kişi genellikle sabit pozisyonlarda oturuyor
+- Konuşmacı değişiminde SERT KESİM
+- Konuşan kişiye odaklan
+- Dead zone BÜYÜK (kişi hareket etmiyorsa crop da hareket etmemeli)
+- Pre-roll: ses başlamadan 150ms önce kes
+"""
+from .base import BaseStrategy
+from ..models.types import (
+    SceneAnalysis, ReframeDecision, ReframeSegment,
+    SpeakerPersonMapping, SmoothingConfig,
+    TransitionType, TrackingMode, PersonTrajectory,
+)
+
+
+class PodcastStrategy(BaseStrategy):
+    def _default_config(self) -> SmoothingConfig:
+        return SmoothingConfig(
+            ema_alpha=0.15,
+            dead_zone_x=0.10,           # Geniş dead zone — sakin görüntü
+            dead_zone_y=0.06,
+            min_segment_duration_s=2.0,  # En az 2 saniye bir konuşmacıda kal
+            min_speech_duration_s=1.5,   # 1.5 sn altı konuşma = geçiş yapma
+            pre_roll_s=0.15,            # 150ms pre-roll
+            max_pan_speed=0.2,
+        )
+
+    def generate_decisions(
+        self,
+        scene_analyses: list[SceneAnalysis],
+        speaker_person_map: list[SpeakerPersonMapping],
+        speaker_timeline: list[dict],
+        src_w: int,
+        src_h: int,
+        aspect_ratio: tuple[int, int],
+    ) -> list[ReframeDecision]:
+        decisions = []
+        sp_map = {m.speaker_id: m for m in speaker_person_map}
+
+        for sa in scene_analyses:
+            scene = sa.scene
+            segments = []
+
+            if sa.person_count == 0:
+                # Kimse tespit edilemedi → merkez crop
+                segments.append(ReframeSegment(
+                    start_s=scene.start_s,
+                    end_s=scene.end_s,
+                    target_x=0.5,
+                    target_y=0.5,
+                    transition_in=TransitionType.NONE,
+                    reason="no_person_detected",
+                ))
+
+            elif sa.person_count == 1:
+                # Tek kişi → o kişiyi takip et
+                traj = sa.trajectories[0]
+                segments.extend(
+                    self._single_person_segments(traj, scene, sa)
+                )
+
+            else:
+                # 2+ kişi → konuşmacıya göre odaklan
+                segments.extend(
+                    self._multi_person_segments(
+                        sa, speaker_timeline, sp_map, scene
+                    )
+                )
+
+            # Minimum segment süresi filtresi
+            segments = self._enforce_min_duration(segments)
+
+            decisions.append(ReframeDecision(
+                scene=scene,
+                segments=segments,
+            ))
+
+        return decisions
+
+    def _single_person_segments(
+        self,
+        trajectory: PersonTrajectory,
+        scene,
+        scene_analysis: SceneAnalysis,
+    ) -> list[ReframeSegment]:
+        """Tek kişili sahne — kişiyi takip et"""
+        if trajectory.is_static:
+            # Kişi yerinde duruyor → sabit crop
+            return [ReframeSegment(
+                start_s=scene.start_s,
+                end_s=scene.end_s,
+                target_x=trajectory.mean_x,
+                target_y=trajectory.mean_y,
+                transition_in=TransitionType.NONE,
+                focused_person_id=trajectory.person_id,
+                reason="static_single_person",
+            )]
+
+        # Kişi hareket ediyor → pozisyon keyframe'leri oluştur
+        segments = []
+        positions = trajectory.positions  # (time_s, x, y)
+
+        prev_x = positions[0][1]
+        segment_start = scene.start_s
+
+        for i, (time_s, x, y) in enumerate(positions):
+            # Dead zone kontrolü
+            x = self._apply_dead_zone(x, prev_x, self.config.dead_zone_x)
+
+            if i == len(positions) - 1 or abs(x - prev_x) > self.config.dead_zone_x:
+                if i > 0:
+                    segments.append(ReframeSegment(
+                        start_s=segment_start,
+                        end_s=time_s,
+                        target_x=prev_x,
+                        target_y=trajectory.mean_y,
+                        transition_in=TransitionType.SMOOTH,
+                        focused_person_id=trajectory.person_id,
+                        reason="person_tracking",
+                    ))
+                    segment_start = time_s
+                prev_x = x
+
+        # Son segment
+        if segment_start < scene.end_s:
+            segments.append(ReframeSegment(
+                start_s=segment_start,
+                end_s=scene.end_s,
+                target_x=prev_x,
+                target_y=trajectory.mean_y,
+                transition_in=TransitionType.SMOOTH,
+                focused_person_id=trajectory.person_id,
+                reason="person_tracking_final",
+            ))
+
+        return segments if segments else [ReframeSegment(
+            start_s=scene.start_s,
+            end_s=scene.end_s,
+            target_x=trajectory.mean_x,
+            target_y=trajectory.mean_y,
+            transition_in=TransitionType.NONE,
+            focused_person_id=trajectory.person_id,
+            reason="single_person_fallback",
+        )]
+
+    def _multi_person_segments(
+        self,
+        scene_analysis: SceneAnalysis,
+        speaker_timeline: list[dict],
+        sp_map: dict,
+        scene,
+    ) -> list[ReframeSegment]:
+        """
+        Çok kişili sahne — konuşmacıya göre SERT KESİM ile odaklan.
+
+        Algoritma:
+        1. Bu sahne içindeki konuşmacı segmentlerini bul
+        2. Her segment için konuşmacının kişisini bul (sp_map)
+        3. O kişinin trajectory'sindeki pozisyonu al
+        4. Segment başlangıcından pre_roll_s önce HARD CUT yap
+        """
+        segments = []
+
+        # Bu sahne aralığındaki konuşmacı segmentlerini filtrele
+        scene_speaker_segs = [
+            s for s in speaker_timeline
+            if s["end"] > scene.start_s and s["start"] < scene.end_s
+        ]
+
+        if not scene_speaker_segs:
+            # Konuşmacı bilgisi yok → eğer kimse konuşmuyorsa ve konuşmacı değişmiyorsa en son ki kişide kal yeni konuşmacı gelene kadar
+            
+
+        # Her konuşmacı segmenti için crop pozisyonu belirle
+        prev_end = scene.start_s
+        for i, sp_seg in enumerate(scene_speaker_segs):
+            person_id = sp_seg.get("person_id")
+            speaker_id = sp_seg.get("speaker_id", 0)
+
+            # Kişinin pozisyonunu bul
+            target_x = 0.5  # Fallback
+            for traj in scene_analysis.trajectories:
+                if traj.person_id == person_id:
+                    target_x = traj.mean_x
+                    break
+
+            # Pre-roll: ses başlamadan 150ms önce kes
+            seg_start = max(
+                prev_end,
+                max(scene.start_s, sp_seg["start"] - self.config.pre_roll_s),
+            )
+            seg_end = min(scene.end_s, sp_seg["end"])
+
+            # Boşluk varsa (konuşmacılar arası sessizlik) → önceki pozisyonda kal
+            if seg_start > prev_end and segments:
+                segments[-1] = ReframeSegment(
+                    start_s=segments[-1].start_s,
+                    end_s=seg_start,
+                    target_x=segments[-1].target_x,
+                    target_y=segments[-1].target_y,
+                    transition_in=segments[-1].transition_in,
+                    active_speaker_id=segments[-1].active_speaker_id,
+                    focused_person_id=segments[-1].focused_person_id,
+                    reason=segments[-1].reason,
+                )
+
+            transition = TransitionType.HARD_CUT if i > 0 else TransitionType.NONE
+            segments.append(ReframeSegment(
+                start_s=seg_start,
+                end_s=seg_end,
+                target_x=target_x,
+                target_y=0.5,
+                transition_in=transition,
+                active_speaker_id=speaker_id,
+                focused_person_id=person_id,
+                reason="speaker_focus",
+            ))
+            prev_end = seg_end
+
+        # Sahne sonuna kadar uzat
+        if segments and segments[-1].end_s < scene.end_s:
+            segments[-1] = ReframeSegment(
+                start_s=segments[-1].start_s,
+                end_s=scene.end_s,
+                target_x=segments[-1].target_x,
+                target_y=segments[-1].target_y,
+                transition_in=segments[-1].transition_in,
+                active_speaker_id=segments[-1].active_speaker_id,
+                focused_person_id=segments[-1].focused_person_id,
+                reason=segments[-1].reason + "_extended",
+            )
+
+        return segments
+
+    def _enforce_min_duration(
+        self, segments: list[ReframeSegment]
+    ) -> list[ReframeSegment]:
+        """
+        Minimum segment süresi kuralını uygula.
+        2 saniyeden kısa segmentleri öncekiyle birleştir.
+        """
+        if len(segments) <= 1:
+            return segments
+
+        merged = [segments[0]]
+        for seg in segments[1:]:
+            duration = seg.end_s - seg.start_s
+            if duration < self.config.min_segment_duration_s:
+                # Önceki segmente birleştir (önceki pozisyonda kal)
+                merged[-1] = ReframeSegment(
+                    start_s=merged[-1].start_s,
+                    end_s=seg.end_s,
+                    target_x=merged[-1].target_x,
+                    target_y=merged[-1].target_y,
+                    transition_in=merged[-1].transition_in,
+                    active_speaker_id=merged[-1].active_speaker_id,
+                    focused_person_id=merged[-1].focused_person_id,
+                    reason=merged[-1].reason + "_merged",
+                )
+            else:
+                merged.append(seg)
+
+        return merged
+```
+
+---
+
+## Smoothing + Keyframe Üretimi
+
+### smoothing.py
+
+```python
+"""
+Temporal smoothing ve dead zone uygulaması.
+ReframeDecision'ları alır, yumuşatılmış pozisyonlar üretir.
+"""
+from ..models.types import SmoothingConfig
+
+
+def smooth_positions(
+    positions: list[tuple[float, float]],  # (time_s, target_x)
+    config: SmoothingConfig,
+) -> list[tuple[float, float]]:
+    """
+    EMA smoothing uygula.
+    Smooth geçişlerde kullanılır (kişi hareketi takibi).
+    Hard cut'larda smoothing UYGULANMAZ.
+    """
+    if len(positions) <= 1:
+        return positions
+
+    smoothed = [positions[0]]
+    for i in range(1, len(positions)):
+        time_s, raw_x = positions[i]
+        _, prev_x = smoothed[i - 1]
+
+        # EMA
+        smooth_x = config.ema_alpha * raw_x + (1 - config.ema_alpha) * prev_x
+
+        # Max pan speed limiti
+        dt = time_s - positions[i - 1][0]
+        if dt > 0:
+            max_delta = config.max_pan_speed * dt
+            delta = smooth_x - prev_x
+            if abs(delta) > max_delta:
+                smooth_x = prev_x + max_delta * (1 if delta > 0 else -1)
+
+        smoothed.append((time_s, smooth_x))
+
+    return smoothed
+```
+
+### keyframe_generator.py
+
+```python
+"""
+ReframeDecision'ları nihai keyframe'lere dönüştürür.
+Bu, frontend'e gönderilecek son çıktıdır.
+"""
+from ..models.types import (
+    ReframeDecision, ReframeKeyframe, ReframeResult,
+    TransitionType, SmoothingConfig, ContentType,
+    TrackingMode,
+)
+from .smoothing import smooth_positions
+
+
+def generate_keyframes(
+    decisions: list[ReframeDecision],
+    src_w: int,
+    src_h: int,
+    fps: float,
+    duration_s: float,
+    content_type: ContentType,
+    tracking_mode: TrackingMode,
+    aspect_ratio: tuple[int, int],
+    config: SmoothingConfig,
+) -> ReframeResult:
+    """Tüm kararlardan keyframe listesi üret"""
+    keyframes: list[ReframeKeyframe] = []
+    scene_cuts: list[float] = []
+
+    # Aspect ratio'ya göre crop genişliğini hesapla
+    out_w, out_h = aspect_ratio
+    crop_w = int(src_h * (out_w / out_h))  # 9:16 → crop_w = 1080 * 9/16 = 607
+    crop_w = min(crop_w, src_w)
+
+    for decision in decisions:
+        scene = decision.scene
+        scene_cuts.append(scene.start_s)
+
+        for seg in decision.segments:
+            # Normalize X → pixel offset
+            offset_x = seg.target_x * src_w - crop_w / 2
+            # Sınır kontrolü
+            offset_x = max(0, min(src_w - crop_w, offset_x))
+
+            offset_y = 0.0
+            if tracking_mode == TrackingMode.DYNAMIC_XY:
+                crop_h = src_h  # 9:16'da tüm yüksekliği kullanıyoruz
+                offset_y = seg.target_y * src_h - crop_h / 2
+                offset_y = max(0, min(src_h - crop_h, offset_y))
+
+            if seg.transition_in == TransitionType.HARD_CUT:
+                # Sert kesim: önceki pozisyonda hold, sonra anında değiş
+                # Hold keyframe (önceki segment sonuna)
+                if keyframes:
+                    hold_time = max(
+                        keyframes[-1].time_s + 0.001,
+                        seg.start_s - 1.0 / fps,
+                    )
+                    keyframes.append(ReframeKeyframe(
+                        time_s=hold_time,
+                        offset_x=keyframes[-1].offset_x,
+                        offset_y=keyframes[-1].offset_y,
+                        interpolation="hold",
+                    ))
+                # Yeni pozisyon
+                keyframes.append(ReframeKeyframe(
+                    time_s=seg.start_s,
+                    offset_x=offset_x,
+                    offset_y=offset_y,
+                    interpolation="linear",
+                ))
+
+            elif seg.transition_in == TransitionType.SMOOTH:
+                # Yumuşak geçiş — linear interpolation
+                keyframes.append(ReframeKeyframe(
+                    time_s=seg.start_s,
+                    offset_x=offset_x,
+                    offset_y=offset_y,
+                    interpolation="linear",
+                ))
+
+            else:  # TransitionType.NONE
+                # İlk segment veya değişim yok
+                keyframes.append(ReframeKeyframe(
+                    time_s=seg.start_s,
+                    offset_x=offset_x,
+                    offset_y=offset_y,
+                    interpolation="linear",
+                ))
+
+    # Duplicate keyframe'leri temizle
+    keyframes = _deduplicate_keyframes(keyframes)
+
+    return ReframeResult(
+        keyframes=keyframes,
+        scene_cuts=scene_cuts[1:],  # İlk sahne başlangıcı kesim değil
+        src_w=src_w,
+        src_h=src_h,
+        fps=fps,
+        duration_s=duration_s,
+        content_type=content_type,
+        tracking_mode=tracking_mode,
+        metadata={
+            "total_segments": sum(len(d.segments) for d in decisions),
+            "total_scenes": len(decisions),
+        },
+    )
+
+
+def _deduplicate_keyframes(
+    keyframes: list[ReframeKeyframe],
+) -> list[ReframeKeyframe]:
+    """Aynı zamanda ve aynı pozisyonda olan keyframe'leri temizle"""
+    if not keyframes:
+        return []
+
+    deduped = [keyframes[0]]
+    for kf in keyframes[1:]:
+        prev = deduped[-1]
+        # Aynı zaman ve aynı pozisyon → atla
+        if (abs(kf.time_s - prev.time_s) < 0.001 and
+            abs(kf.offset_x - prev.offset_x) < 1.0):
+            continue
+        deduped.append(kf)
+
+    return deduped
+```
+
+---
+
+## Ana Orkestratör — Yeni processor.py
+
+```python
+"""
+Reframe pipeline orkestratörü.
+Tüm adımları sırasıyla çağırır ve sonucu döndürür.
+"""
+import logging
+from .analyzers.scene_analyzer import detect_scenes
+from .analyzers.person_analyzer import PersonAnalyzer
+from .analyzers.speaker_analyzer import (
+    match_speakers_to_persons,
+    build_speaker_timeline,
+)
+from .analyzers.content_classifier import classify_content
+from .strategies.podcast import PodcastStrategy
+from .strategies.single_speaker import SingleSpeakerStrategy
+from .strategies.gaming import GamingStrategy
+from .strategies.generic import GenericStrategy
+from .composition.keyframe_generator import generate_keyframes
+from .models.types import (
+    ContentType, TrackingMode, SmoothingConfig, ReframeResult,
+)
+
+logger = logging.getLogger(__name__)
+
+
+STRATEGY_MAP = {
+    ContentType.PODCAST: PodcastStrategy,
+    ContentType.SINGLE_SPEAKER: SingleSpeakerStrategy,
+    ContentType.GAMING: GamingStrategy,
+    ContentType.GENERIC: GenericStrategy,
+}
+
+
+async def process_reframe(
+    video_path: str,
+    src_w: int,
+    src_h: int,
+    fps: float,
+    duration_s: float,
+    diarization_segments: list[dict],
+    aspect_ratio: tuple[int, int] = (9, 16),
+    tracking_mode: str = "x_only",
+    content_type_hint: str | None = None,
+    progress_callback=None,
+) -> ReframeResult:
+    """
+    Ana reframe pipeline'ı.
+
+    Adımlar:
+    1. Sahne tespiti
+    2. Multi-frame kişi tespiti
+    3. Konuşmacı-kişi eşleştirme
+    4. İçerik türü sınıflandırma
+    5. Strateji uygulama
+    6. Keyframe üretimi
+    """
+    tracking = TrackingMode(tracking_mode)
+
+    # ─── ADIM 1: Sahne tespiti ───
+    if progress_callback:
+        await progress_callback("scene_detection", 0.1)
+
+    scenes = detect_scenes(
+        video_path,
+        content_hint=content_type_hint or "generic",
+    )
+    logger.info(f"Sahne tespiti: {len(scenes)} sahne bulundu")
+
+    # ─── ADIM 2: Multi-frame kişi tespiti ───
+    if progress_callback:
+        await progress_callback("person_detection", 0.3)
+
+    analyzer = PersonAnalyzer()
+    scene_analyses = analyzer.analyze_scenes(
+        video_path, scenes, fps, src_w, src_h,
+    )
+    logger.info(
+        f"Kişi tespiti tamamlandı. "
+        f"Toplam frame analizi: "
+        f"{sum(len(sa.frame_analyses) for sa in scene_analyses)}"
+    )
+
+    # ─── ADIM 3: Konuşmacı-kişi eşleştirme ───
+    if progress_callback:
+        await progress_callback("speaker_matching", 0.5)
+
+    speaker_person_map = match_speakers_to_persons(
+        scene_analyses, diarization_segments, src_w,
+    )
+    logger.info(
+        f"Konuşmacı eşleştirme: {len(speaker_person_map)} eşleşme"
+    )
+
+    # ─── ADIM 4: İçerik türü sınıflandırma ───
+    content_type = classify_content(
+        scene_analyses, diarization_segments, content_type_hint,
+    )
+    logger.info(f"İçerik türü: {content_type.value}")
+
+    # ─── ADIM 5: Strateji uygulama ───
+    if progress_callback:
+        await progress_callback("strategy", 0.7)
+
+    strategy_class = STRATEGY_MAP.get(content_type, GenericStrategy)
+    strategy = strategy_class(tracking_mode=tracking)
+    decisions = strategy.generate_decisions(
+        scene_analyses=scene_analyses,
+        speaker_person_map=speaker_person_map,
+        speaker_timeline=build_speaker_timeline(
+            diarization_segments, speaker_person_map,
+            min_speech_duration_s=strategy.config.min_speech_duration_s,
+        ),
+        src_w=src_w,
+        src_h=src_h,
+        aspect_ratio=aspect_ratio,
+    )
+    logger.info(
+        f"Strateji tamamlandı. "
+        f"Toplam segment: {sum(len(d.segments) for d in decisions)}"
+    )
+
+    # ─── ADIM 6: Keyframe üretimi ───
+    if progress_callback:
+        await progress_callback("keyframe_generation", 0.9)
+
+    result = generate_keyframes(
+        decisions=decisions,
+        src_w=src_w,
+        src_h=src_h,
+        fps=fps,
+        duration_s=duration_s,
+        content_type=content_type,
+        tracking_mode=tracking,
+        aspect_ratio=aspect_ratio,
+        config=strategy.config,
+    )
+
+    if progress_callback:
+        await progress_callback("complete", 1.0)
+
+    logger.info(
+        f"Reframe tamamlandı. "
+        f"Keyframe sayısı: {len(result.keyframes)}, "
+        f"Sahne kesimi: {len(result.scene_cuts)}"
+    )
+
+    return result
+```
+
+---
+
+## Frontend Entegrasyon — engine.ts Değişiklikleri
+
+Mevcut `engine.ts` (291 satır) büyük oranda korunacak çünkü orkestrasyon ve
+keyframe uygulama mantığı doğru. Değişecek noktalar:
+
+### 1. Koordinat Dönüşümü (mevcut — DOĞRU, değişmez)
+```typescript
+// Bu formül DOĞRU, dokunma
+const containScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
+const scaledWidth = src_w * containScale;
+const posX = scaledWidth / 2 - canvasWidth / 2 - kf.offset_x * containScale;
+```
+
+### 2. Y-Axis Keyframe Desteği (YENİ)
+```typescript
+// dynamic_xy modda Y keyframe'lerini de uygula
+if (trackingMode === "dynamic_xy" && kf.offset_y !== undefined) {
+  const scaledHeight = src_h * containScale;
+  const posY = scaledHeight / 2 - canvasHeight / 2 - kf.offset_y * containScale;
+  yKeyframes.push({
+    propertyPath: "transform.position.y",
+    time: kf.time_s - trimStart,
+    value: posY,
+    interpolation: kf.interpolation,
+  });
+}
+```
+
+### 3. Progress Callback Genişletme
+```typescript
+// Mevcut progress aşamaları + yeni aşamalar
+type ReframeStage =
+  | "scene_detection"      // YENİ
+  | "person_detection"     // YENİ (eski "detecting" yerine)
+  | "speaker_matching"     // YENİ
+  | "strategy"             // YENİ
+  | "keyframe_generation"  // YENİ
+  | "applying"             // MEVCUT
+  | "complete";            // MEVCUT
+```
+
+### 4. Content Type UI Desteği
+```typescript
+// reframe.tsx'e eklenecek
+const [contentType, setContentType] = useState<ContentType>("auto");
+
+// Seçenekler:
+// "auto" → backend otomatik tespit eder
+// "podcast" → podcast/interview
+// "single" → tek kişi
+// "gaming" → oyun/yayın
+// "generic" → genel
+```
+
+---
+
+## Frontend'de Yapılması Gereken UI Değişiklikleri
+
+### reframe.tsx Panel Güncellemeleri
+
+```
+┌─────────────────────────────────────────────────┐
+│  Auto Reframe                                    │
+│                                                  │
+│  Aspect ratio                                    │
+│  [9:16 Vertical] [1:1 Square]                   │
+│  [4:5 Portrait]  [16:9 Landscape]               │
+│                                                  │
+│  Content type                    ← YENİ          │
+│  [Auto Detect] [Podcast] [Single] [Gaming]      │
+│                                                  │
+│  Tracking mode                                   │
+│  [Horizontal only]                               │
+│  [Dynamic X+Y]                   ← ARTIK ÇALIŞIR │
+│                                                  │
+│  ┌─ Advanced ──────────────────────────────┐     │
+│  │ Min. segment duration  [2.0] s          │     │
+│  │ Dead zone             [|||●|||] %10     │     │
+│  │ Pre-roll              [0.15] s          │     │
+│  └─────────────────────────────────────────┘     │
+│                                                  │
+│  [▶ Analyze & Apply]                             │
+│                                                  │
+│  Progress: ████████░░ 80%                        │
+│  "Konuşmacı eşleştirme..."                      │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## Geliştirme Aşamaları (Roadmap)
+
+### Aşama 1: Temel Altyapı (3-5 gün)
+- [ ] Yeni dosya yapısını oluştur (analyzers/, strategies/, tracking/, composition/)
+- [ ] types.py'yi yaz (yukarıdaki tüm veri tipleri)
+- [ ] scene_analyzer.py'yi yaz (SSIM doğrulamalı)
+- [ ] person_analyzer.py'yi yaz (multi-frame + IoU tracking)
+- [ ] Test: Tek kişili podcast klibinde sahne tespiti + kişi takibi
+
+### Aşama 2: Konuşmacı Sistemi (2-3 gün)
+- [ ] speaker_analyzer.py'yi yaz
+- [ ] content_classifier.py'yi yaz
+- [ ] Podcast stratejisini yaz (sert kesim + pre-roll + min süre)
+- [ ] Test: İki kişilik podcast klibinde konuşmacı geçişleri
+
+### Aşama 3: Smoothing + Keyframe (2-3 gün)
+- [ ] smoothing.py'yi yaz (EMA + dead zone)
+- [ ] keyframe_generator.py'yi yaz
+- [ ] processor.py orkestratörü yaz
+- [ ] Test: Uçtan uca pipeline — video gir, keyframe çık
+
+### Aşama 4: Frontend Entegrasyon (2-3 gün)
+- [ ] engine.ts'i güncelle (Y-axis, content type, progress stages)
+- [ ] reframe.tsx UI güncellemeleri (content type seçimi, advanced ayarlar)
+- [ ] API endpoint'lerini güncelle
+- [ ] Test: Editörde uçtan uca — video yükle, reframe et, önizle
+
+### Aşama 5: Diğer Stratejiler (3-5 gün)
+- [ ] SingleSpeakerStrategy (tek kişi takibi)
+- [ ] GamingStrategy (webcam tespiti + oyun/cam yerleşimi)
+- [ ] GenericStrategy (güvenli fallback)
+- [ ] Test: Her strateji kendi video türüyle
+
+### Aşama 6: Pipeline Entegrasyonu (2-3 gün)
+- [ ] Ana pipeline'a reframe adımı ekle (S07 ile S08 arası)
+- [ ] 9:16 export desteği
+- [ ] reframe_metadata tablosu entegrasyonu
+- [ ] Test: Uzun videodan 9:16 klip çıkart
+
+---
+
+## Profesyonel Kalite Kontrol Listesi
+
+Her aşamadan sonra bu listeyi kontrol et:
+
+□ Crop hiçbir zaman frame dışına taşmıyor mu?
+□ Kişi kaybolduğunda son bilinen pozisyonda mı kalıyor?
+□ Konuşmacı değişiminde sert kesim yapılıyor mu (smooth değil)?
+□ 2 saniyeden kısa segment var mı? (olmamalı)
+□ Pre-roll uygulanıyor mu? (ses başlamadan önce mi kesiliyor?)
+□ Dead zone çalışıyor mu? (kişi yerindeyken crop kıpırdamıyor mu?)
+□ Sahne geçişlerinde gereksiz kesim var mı?
+□ İki kişi konuşmuyorken crop nerede? (son konuşmacıda mı kalıyor?)
+□ Jitter var mı? (crop titremiyor mu?)
+□ İnsan izlese "bu profesyonel" der mi?

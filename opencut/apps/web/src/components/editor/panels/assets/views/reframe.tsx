@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { useEditor } from "@/hooks/use-editor";
 import { runReframe, type ReframeProgress, type ReframeResult, type ReframeOptions } from "@/lib/reframe/engine";
-import type { ReframeAspectRatio, ReframeTrackingMode } from "@/lib/reframe/types";
+import type { ReframeAspectRatio, ReframeContentType, ReframeTrackingMode } from "@/lib/reframe/types";
 import { CheckCheck, RotateCcw, Smartphone } from "lucide-react";
 
 const ASPECT_RATIO_OPTIONS: { value: ReframeAspectRatio; label: string }[] = [
@@ -16,15 +16,23 @@ const ASPECT_RATIO_OPTIONS: { value: ReframeAspectRatio; label: string }[] = [
 	{ value: "16:9", label: "16:9 — Landscape" },
 ];
 
+const CONTENT_TYPE_OPTIONS: { value: ReframeContentType; label: string; description: string }[] = [
+	{ value: "auto", label: "Auto Detect", description: "Let AI decide" },
+	{ value: "podcast", label: "Podcast", description: "Interview / talk show" },
+	{ value: "single", label: "Single Speaker", description: "Vlog / presentation" },
+	{ value: "gaming", label: "Gaming", description: "Stream / gameplay" },
+];
+
 const TRACKING_MODE_OPTIONS: { value: ReframeTrackingMode; label: string; description: string }[] = [
 	{ value: "x_only", label: "Horizontal only", description: "Pan left/right to follow speaker" },
-	{ value: "dynamic_xy", label: "Dynamic X+Y", description: "Pan and tilt (experimental)" },
+	{ value: "dynamic_xy", label: "Dynamic X+Y", description: "Pan and tilt for moving subjects" },
 ];
 
 export function ReframeView() {
 	const editor = useEditor();
 
 	const [aspectRatio, setAspectRatio] = useState<ReframeAspectRatio>("9:16");
+	const [contentType, setContentType] = useState<ReframeContentType>("auto");
 	const [trackingMode, setTrackingMode] = useState<ReframeTrackingMode>("x_only");
 
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -45,9 +53,10 @@ export function ReframeView() {
 			setResults(null);
 
 			const options: ReframeOptions = {
-				strategy: "podcast",
+				strategy: contentType === "auto" ? "podcast" : contentType as any,
 				aspectRatio,
 				trackingMode,
+				contentType,
 			};
 
 			const res = await runReframe(editor, (p) => setProgress(p), options);
@@ -71,9 +80,9 @@ export function ReframeView() {
 						<span className="text-sm font-medium">Auto Reframe</span>
 					</div>
 					<p className="text-muted-foreground text-xs leading-relaxed">
-						Analyzes your clip with AI face detection and speaker diarization, then
-						applies position keyframes directly to your timeline. Scene cuts are
-						marked on the ruler. Drag any keyframe to manually adjust framing.
+						AI face detection and speaker diarization — keyframes applied directly
+						to your timeline. Scene cuts marked on the ruler. Drag any keyframe to
+						manually adjust framing.
 					</p>
 				</div>
 
@@ -93,6 +102,30 @@ export function ReframeView() {
 								}`}
 							>
 								{opt.label}
+							</button>
+						))}
+					</div>
+				</div>
+
+				{/* Content type */}
+				<div className="flex flex-col gap-2">
+					<span className="text-xs font-medium">Content type</span>
+					<div className="grid grid-cols-2 gap-1.5">
+						{CONTENT_TYPE_OPTIONS.map((opt) => (
+							<button
+								key={opt.value}
+								onClick={() => setContentType(opt.value)}
+								disabled={isProcessing}
+								className={`flex flex-col gap-0.5 rounded-md border px-2.5 py-2 text-left transition-colors ${
+									contentType === opt.value
+										? "border-white bg-white/10"
+										: "border-[#262626] bg-black hover:border-[#404040]"
+								}`}
+							>
+								<span className={`text-xs font-medium ${contentType === opt.value ? "text-white" : "text-[#a3a3a3]"}`}>
+									{opt.label}
+								</span>
+								<span className="text-[#525252] text-xs">{opt.description}</span>
 							</button>
 						))}
 					</div>
