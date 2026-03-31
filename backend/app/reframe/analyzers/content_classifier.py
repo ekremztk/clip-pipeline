@@ -46,24 +46,29 @@ def classify_content(
         return ContentType.GENERIC
 
     # İstatistikleri hesapla
-    person_counts: list[int] = []
     movement_values: list[float] = []
     scene_durations: list[float] = []
 
     for sa in scene_analyses:
-        person_counts.append(sa.person_count)
         scene_durations.append(sa.scene.duration_s)
         for traj in sa.trajectories:
             movement_values.append(traj.x_range)
 
-    avg_persons = sum(person_counts) / len(person_counts) if person_counts else 0.0
-    avg_movement = sum(movement_values) / len(movement_values) if movement_values else 0.0
-    avg_scene_duration = sum(scene_durations) / len(scene_durations) if scene_durations else 0.0
-
-    # Konuşmacı sayısı (diarization'dan)
+    # avg_persons: diarization speaker sayısını kullan (trajectory fragmentasyonundan etkilenmez)
+    # Fallback: scene trajectory ortalaması
     num_speakers = len(set(
         seg.get("speaker", 0) for seg in diarization_segments
+        if seg.get("speaker") is not None
     )) if diarization_segments else 0
+
+    if num_speakers > 0:
+        avg_persons = float(num_speakers)
+    else:
+        # Diarization yoksa scene'lerdeki benzersiz trajectory sayılarını kullan
+        person_counts = [sa.person_count for sa in scene_analyses]
+        avg_persons = sum(person_counts) / len(person_counts) if person_counts else 0.0
+    avg_movement = sum(movement_values) / len(movement_values) if movement_values else 0.0
+    avg_scene_duration = sum(scene_durations) / len(scene_durations) if scene_durations else 0.0
 
     print(
         f"[ContentClassifier] avg_persons={avg_persons:.2f}, "

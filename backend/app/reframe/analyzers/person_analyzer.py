@@ -28,7 +28,7 @@ from ..models.types import (
 
 # ─── Sabitler ─────────────────────────────────────────────────────────────────
 
-CONFIDENCE_THRESHOLD = 0.50      # YOLOv8 güven eşiği
+CONFIDENCE_THRESHOLD = 0.35      # YOLOv8 güven eşiği — profil/yandan görünümler için düşürüldü
 IOU_MATCH_THRESHOLD = 0.30       # Frame'ler arası kişi eşleştirme minimum IoU
 MAX_PERSONS_PER_FRAME = 4        # Frame başına maksimum kişi sayısı
 ANALYSIS_RESOLUTION = (640, 360) # YOLOv8 inference için küçültme boyutu
@@ -196,7 +196,7 @@ class PersonAnalyzer:
         > 10s  → 0.5 fps örnekleme
         """
         duration = scene.duration_s
-        offset = 0.05  # Sahne sınırındaki artefaktları atla
+        offset = 0.30  # Sahne başı blur/geçiş karelerini atla (kamera kesim anları)
 
         if duration < 1.0:
             return [scene.start_s + duration / 2]

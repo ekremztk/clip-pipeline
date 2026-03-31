@@ -241,24 +241,46 @@ class PodcastStrategy(BaseStrategy):
 
         segments: list[ReframeSegment] = []
         prev_end = scene.start_s
+        prev_target_x = 0.5  # Boşluk doldurmak için önceki X'i takip et
+        prev_target_y = 0.5
+        prev_speaker_id = None
+        prev_person_id = None
 
         for i, sp_seg in enumerate(scene_speaker_segs):
             speaker_id = sp_seg.get("speaker_id", 0)
             person_id = sp_to_person.get(speaker_id)
 
-            # Kişinin pozisyonunu bul
+            # Kişinin X ve Y pozisyonunu bul
             target_x = 0.5  # Fallback: merkez
+            target_y = 0.5
             if person_id is not None:
                 traj = self._get_trajectory_for_person(scene_analysis, person_id)
                 if traj is not None:
                     target_x = clamp_crop_target(traj.mean_x, crop_w, src_w)
+                    target_y = traj.mean_y  # Gerçek kafa Y pozisyonu
                 else:
-                    # Trajectory yok (sanal/mirror kişi) → speaker_person_map'teki avg_position_x kullan
+                    # Trajectory yok (sanal/mirror kişi) → speaker_person_map'teki avg kullan
                     if speaker_person_map:
                         mapping = next((m for m in speaker_person_map if m.speaker_id == speaker_id), None)
                         if mapping is not None:
                             target_x = clamp_crop_target(mapping.avg_position_x, crop_w, src_w)
                             print(f"[PodcastStrategy] person_{person_id} trajectory yok — mapping avg_x={mapping.avg_position_x:.3f} kullanıldı")
+
+            # Sessizlik boşluğunu doldur: bu segmentten önce boşluk varsa önceki konuşmacı pozisyonunu uzat
+            seg_preroll_start = max(scene.start_s, sp_seg["start"] - self.config.pre_roll_s)
+            if prev_end < seg_preroll_start and segments:
+                # Önceki segmenti bu noktaya kadar uzat (sessizlikte önceki konuşmacıda kal)
+                last = segments[-1]
+                segments[-1] = ReframeSegment(
+                    start_s=last.start_s,
+                    end_s=seg_preroll_start,
+                    target_x=last.target_x,
+                    target_y=last.target_y,
+                    transition_in=last.transition_in,
+                    active_speaker_id=last.active_speaker_id,
+                    focused_person_id=last.focused_person_id,
+                    reason=last.reason + "_gap_filled",
+                )
 
             # Pre-roll: konuşma başlamadan pre_roll_s önce kes
             seg_start = max(
@@ -270,19 +292,23 @@ class PodcastStrategy(BaseStrategy):
             if seg_end <= seg_start:
                 continue
 
-            transition = TransitionType.HARD_CUT if i > 0 else TransitionType.NONE
+            transition = TransitionType.HARD_CUT if segments else TransitionType.NONE
 
             segments.append(ReframeSegment(
                 start_s=seg_start,
                 end_s=seg_end,
                 target_x=target_x,
-                target_y=0.5,
+                target_y=target_y,
                 transition_in=transition,
                 active_speaker_id=speaker_id,
                 focused_person_id=person_id,
                 reason="speaker_focus",
             ))
             prev_end = seg_end
+            prev_target_x = target_x
+            prev_target_y = target_y
+            prev_speaker_id = speaker_id
+            prev_person_id = person_id
 
         for seg in segments:
             print(f"[PodcastStrategy]   Segment {seg.start_s:.2f}-{seg.end_s:.2f}s target_x={seg.target_x:.3f} transition={seg.transition_in} speaker={seg.active_speaker_id} person={seg.focused_person_id} reason={seg.reason}")
