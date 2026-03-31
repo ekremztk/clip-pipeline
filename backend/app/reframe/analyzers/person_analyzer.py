@@ -144,14 +144,21 @@ class PersonAnalyzer:
     ) -> SceneAnalysis:
         """Tek bir sahneyi multi-frame analiz et."""
         sample_times = self._get_sample_times(scene, fps)
+        print(f"[PersonAnalyzer] Sahne {scene.start_s:.2f}-{scene.end_s:.2f}s: {len(sample_times)} frame örnekleniyor")
+        print(f"[PersonAnalyzer] Sample times: {[round(t, 2) for t in sample_times]}")
 
         frame_analyses: list[FrameAnalysis] = []
         for i, time_s in enumerate(sample_times):
             frame = self._extract_frame(cap, time_s)
             if frame is None:
+                print(f"[PersonAnalyzer]   t={time_s:.2f}s: Frame alınamadı")
                 continue
 
             persons = self._detect_persons(frame, src_w, src_h)
+            print(f"[PersonAnalyzer]   t={time_s:.2f}s: {len(persons)} kişi tespit edildi")
+            for p in persons:
+                print(f"[PersonAnalyzer]     bbox=({p.bbox.x:.3f},{p.bbox.y:.3f},{p.bbox.w:.3f},{p.bbox.h:.3f}) head=({p.head_center_x:.3f},{p.head_center_y:.3f}) conf={p.confidence:.2f}")
+
             frame_analyses.append(FrameAnalysis(
                 time_s=time_s,
                 persons=persons,
@@ -163,6 +170,10 @@ class PersonAnalyzer:
 
         # Trajectory'leri oluştur
         trajectories = self._build_trajectories(frame_analyses)
+
+        print(f"[PersonAnalyzer] Trajectory sayısı: {len(trajectories)}")
+        for t in trajectories:
+            print(f"[PersonAnalyzer]   Person {t.person_id}: {len(t.positions)} pozisyon, mean_x={t.mean_x:.3f}, x_range={t.x_range:.3f}, is_static={t.is_static}")
 
         return SceneAnalysis(
             scene=scene,

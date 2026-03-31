@@ -94,6 +94,8 @@ def match_speakers_to_persons(
         f"{len(sorted_persons)} kişi → {len(mappings)} eşleşme "
         f"(güven: {confidence:.2f})"
     )
+    for m in mappings:
+        print(f"[SpeakerAnalyzer]   speaker_{m.speaker_id} → person_{m.person_id} (avg_x={m.avg_position_x:.3f}, conf={m.confidence:.2f})")
     return mappings
 
 
@@ -150,7 +152,9 @@ def build_speaker_timeline(
         else:
             merged.append(dict(seg))
 
-    print(f"[SpeakerAnalyzer] Timeline: {len(diarization_segments)} segment → {len(merged)} birleştirilmiş")
+    print(f"[SpeakerAnalyzer] Timeline: {len(diarization_segments)} segment → {len(filtered)} filtrelenmiş (min={min_speech_duration_s}s) → {len(merged)} birleştirilmiş")
+    for seg in merged:
+        print(f"[SpeakerAnalyzer]   {seg['start']:.2f}-{seg['end']:.2f}s speaker={seg['speaker_id']} person={seg['person_id']} dur={seg['end']-seg['start']:.2f}s")
     return merged
 
 

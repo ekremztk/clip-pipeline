@@ -144,6 +144,8 @@ def run_reframe(
             fps=fps,
         )
         print(f"[Reframe] {len(scenes)} sahne tespit edildi")
+        for s in scenes:
+            print(f"[Reframe]   Sahne {s.start_s:.2f}-{s.end_s:.2f}s ({s.duration_s:.2f}s)")
 
         # ── 4. Multi-Frame Kişi Tespiti ───────────────────────────────────────
         progress("Detecting persons (multi-frame)...", 20)
@@ -174,7 +176,7 @@ def run_reframe(
         speaker_timeline = build_speaker_timeline(
             speaker_segments,
             speaker_person_map,
-            min_speech_duration_s=1.5,
+            min_speech_duration_s=0.8,
         )
 
         # ── 7. İçerik Türü Sınıflandırma ─────────────────────────────────────

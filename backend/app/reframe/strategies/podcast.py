@@ -37,8 +37,8 @@ class PodcastStrategy(BaseStrategy):
             ema_alpha=0.15,               # Çok yumuşak — podcast sakin
             dead_zone_x=0.10,            # Geniş dead zone — crop titremez
             dead_zone_y=0.06,
-            min_segment_duration_s=2.0,  # En az 2 saniye bir konuşmacıda kal
-            min_speech_duration_s=1.5,   # 1.5s altı konuşma → geçiş yapma
+            min_segment_duration_s=1.0,  # En az 1 saniye bir konuşmacıda kal
+            min_speech_duration_s=0.8,   # 0.8s altı konuşma → geçiş yapma
             pre_roll_s=0.15,             # 150ms pre-roll
             max_pan_speed=0.20,
         )
@@ -72,6 +72,7 @@ class PodcastStrategy(BaseStrategy):
 
         for sa in scene_analyses:
             scene = sa.scene
+            print(f"[PodcastStrategy] Sahne {scene.start_s:.2f}-{scene.end_s:.2f}s: person_count={sa.person_count}")
 
             if sa.person_count == 0:
                 # Kimse tespit edilemedi → merkez crop
@@ -231,8 +232,10 @@ class PodcastStrategy(BaseStrategy):
             s for s in speaker_timeline
             if s["end"] > scene.start_s and s["start"] < scene.end_s
         ]
+        print(f"[PodcastStrategy] scene_speaker_segs sayısı: {len(scene_speaker_segs)}")
 
         if not scene_speaker_segs:
+            print(f"[PodcastStrategy] Sahne için speaker seg yok → visual_only")
             return self._visual_only_segments(scene_analysis, scene, crop_w, src_w)
 
         segments: list[ReframeSegment] = []
@@ -273,7 +276,11 @@ class PodcastStrategy(BaseStrategy):
             ))
             prev_end = seg_end
 
+        for seg in segments:
+            print(f"[PodcastStrategy]   Segment {seg.start_s:.2f}-{seg.end_s:.2f}s target_x={seg.target_x:.3f} transition={seg.transition_in} speaker={seg.active_speaker_id} person={seg.focused_person_id} reason={seg.reason}")
+
         if not segments:
+            print(f"[PodcastStrategy] Segment listesi boş → visual_only")
             return self._visual_only_segments(scene_analysis, scene, crop_w, src_w)
 
         # Sahne başında boşluk varsa ilk segmenti geri uzat

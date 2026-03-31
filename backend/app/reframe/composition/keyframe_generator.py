@@ -64,6 +64,10 @@ def generate_keyframes(
     crop_h = compute_crop_height(src_w, src_h, aspect_ratio)
     frame_duration = 1.0 / fps if fps > 0 else 1.0 / 30.0
 
+    total_input_segments = sum(len(d.segments) for d in decisions)
+    print(f"[KeyframeGenerator] crop_w={crop_w}, crop_h={crop_h}, src={src_w}x{src_h}")
+    print(f"[KeyframeGenerator] Giriş: {len(decisions)} decision, {total_input_segments} segment")
+
     keyframes: list[ReframeKeyframe] = []
     scene_cuts: list[float] = []
 
@@ -122,8 +126,13 @@ def generate_keyframes(
                     interpolation="linear",
                 ))
 
+    before_dedup = len(keyframes)
+    for kf in keyframes:
+        print(f"[KeyframeGenerator]   KF t={kf.time_s:.3f}s offset_x={kf.offset_x:.1f} offset_y={kf.offset_y:.1f} interp={kf.interpolation}")
+
     # Duplicate ve gereksiz keyframe'leri temizle
     keyframes = _deduplicate_keyframes(keyframes)
+    print(f"[KeyframeGenerator] Dedup: {before_dedup} → {len(keyframes)} keyframe")
 
     # Video bitişine son pozisyonu sabitle (eğer eksikse)
     if keyframes and keyframes[-1].time_s < duration_s - frame_duration:

@@ -31,8 +31,8 @@ DEFAULT_THRESHOLDS: dict[str, float] = {
 
 MIN_SCENE_DURATION_S = 0.5      # Bu süreden kısa sahneleri öncekiyle birleştir
 MIN_CUT_GAP_S = 0.5             # Bu süreden yakın kesimleri tek kesim say
-SSIM_HARD_CUT_THRESHOLD = 0.40  # SSIM bu değerin altında → kesin sahne geçişi
-SSIM_SOFT_CUT_THRESHOLD = 0.70  # Bu aralıkta → geniş bağlamla doğrula
+SSIM_HARD_CUT_THRESHOLD = 0.75  # SSIM bu değerin altında → kesin sahne geçişi
+SSIM_SOFT_CUT_THRESHOLD = 0.92  # Bu aralıkta → geniş bağlamla doğrula
 SKIP_OPENING_S = 0.5            # İlk 0.5 saniyeyi atla (açılış artefaktları)
 
 
@@ -168,13 +168,16 @@ def _validate_with_ssim(
 
             # Frame alınamazsa güvenli tarafta kal → kabul et
             if frame_before is None or frame_after is None:
+                print(f"[SceneAnalyzer] t={cut_time:.2f}s: Frame alınamadı → kabul edildi")
                 validated.append(cut_time)
                 continue
 
             ssim = _compute_ssim_small(frame_before, frame_after)
+            print(f"[SceneAnalyzer] t={cut_time:.2f}s: SSIM={ssim:.4f} (hard<{SSIM_HARD_CUT_THRESHOLD}, soft<{SSIM_SOFT_CUT_THRESHOLD})")
 
             if ssim < SSIM_HARD_CUT_THRESHOLD:
                 # Kesin geçiş
+                print(f"[SceneAnalyzer]   → KABUL (hard cut)")
                 validated.append(cut_time)
             elif ssim < SSIM_SOFT_CUT_THRESHOLD:
                 # Şüpheli — geniş bağlamla doğrula (0.5s önce/sonra)
@@ -182,11 +185,18 @@ def _validate_with_ssim(
                 after_wide = _extract_frame(cap, cut_time + 0.5)
                 if before_wide is not None and after_wide is not None:
                     wide_ssim = _compute_ssim_small(before_wide, after_wide)
+                    print(f"[SceneAnalyzer]   → Soft — wide SSIM={wide_ssim:.4f}")
                     if wide_ssim < SSIM_SOFT_CUT_THRESHOLD:
+                        print(f"[SceneAnalyzer]   → KABUL (soft cut)")
                         validated.append(cut_time)
+                    else:
+                        print(f"[SceneAnalyzer]   → REDDEDİLDİ (wide SSIM yüksek)")
                 else:
+                    print(f"[SceneAnalyzer]   → KABUL (wide frame alınamadı)")
                     validated.append(cut_time)
-            # else: yüksek SSIM → yanlış alarm, atla
+            else:
+                # Yüksek SSIM → yanlış alarm
+                print(f"[SceneAnalyzer]   → REDDEDİLDİ (SSIM çok yüksek → aynı sahne)")
     finally:
         cap.release()
 

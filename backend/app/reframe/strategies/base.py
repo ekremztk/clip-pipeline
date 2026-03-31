@@ -141,35 +141,56 @@ class BaseStrategy(ABC):
     ) -> list:
         """
         Minimum segment süresi kuralını uygula.
-        min_segment_duration_s'den kısa segmentleri öncekiyle birleştir
-        (önceki konuşmacı/kişi pozisyonunda kal).
+        min_segment_duration_s'den kısa segmentleri sonrakiyle birleştir
+        (yeni konuşmacıya daha erken geç — eski davranış öncekiyle birleştirip
+        hard cut'ı yok ediyordu).
 
-        Bu kural çok kısa geçişleri ortadan kaldırır —
-        profesyonel yapımlarda 2 saniyeden kısa shot olmaz.
+        Son segment kısaysa öncekiyle birleştir (devam ettir).
         """
-        from ..models.types import ReframeSegment
+        from ..models.types import ReframeSegment, TransitionType
 
         if len(segments) <= 1:
             return segments
 
-        merged: list[ReframeSegment] = [segments[0]]
-
-        for seg in segments[1:]:
+        # Kısa segmentleri işaretle
+        result: list[ReframeSegment] = []
+        i = 0
+        while i < len(segments):
+            seg = segments[i]
             duration = seg.end_s - seg.start_s
-            if duration < self.config.min_segment_duration_s:
-                # Önceki segmentin sonunu uzat (pozisyon değişmez)
-                prev = merged[-1]
-                merged[-1] = ReframeSegment(
-                    start_s=prev.start_s,
-                    end_s=seg.end_s,
-                    target_x=prev.target_x,
-                    target_y=prev.target_y,
-                    transition_in=prev.transition_in,
-                    active_speaker_id=prev.active_speaker_id,
-                    focused_person_id=prev.focused_person_id,
-                    reason=prev.reason + "_merged_short",
+            if duration < self.config.min_segment_duration_s and i < len(segments) - 1:
+                # Kısa segment + sonraki var → sonraki segmenti öne uzat
+                next_seg = segments[i + 1]
+                segments[i + 1] = ReframeSegment(
+                    start_s=seg.start_s,
+                    end_s=next_seg.end_s,
+                    target_x=next_seg.target_x,
+                    target_y=next_seg.target_y,
+                    transition_in=seg.transition_in,  # Geçiş tipini koru
+                    active_speaker_id=next_seg.active_speaker_id,
+                    focused_person_id=next_seg.focused_person_id,
+                    reason=next_seg.reason + "_absorbed_short",
                 )
+                print(f"[Strategy] Kısa segment ({duration:.2f}s < {self.config.min_segment_duration_s}s) sonrakiyle birleştirildi")
+            elif duration < self.config.min_segment_duration_s and i == len(segments) - 1:
+                # Son segment kısa → öncekinin sonunu uzat
+                if result:
+                    prev = result[-1]
+                    result[-1] = ReframeSegment(
+                        start_s=prev.start_s,
+                        end_s=seg.end_s,
+                        target_x=prev.target_x,
+                        target_y=prev.target_y,
+                        transition_in=prev.transition_in,
+                        active_speaker_id=prev.active_speaker_id,
+                        focused_person_id=prev.focused_person_id,
+                        reason=prev.reason + "_extended_short",
+                    )
+                    print(f"[Strategy] Son kısa segment ({duration:.2f}s) öncekiyle birleştirildi")
+                else:
+                    result.append(seg)
             else:
-                merged.append(seg)
+                result.append(seg)
+            i += 1
 
-        return merged
+        return result
