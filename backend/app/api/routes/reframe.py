@@ -18,8 +18,8 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.middleware.auth import get_current_user
-from app.reframe.models.types import ReframeKeyframe
-from app.reframe.processor import run_reframe
+from app.reframe.types import ReframeKeyframe
+from app.reframe.pipeline import run_reframe
 from app.services.supabase_client import get_client
 
 router = APIRouter(prefix="/reframe", tags=["reframe"])
