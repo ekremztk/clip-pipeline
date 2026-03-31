@@ -193,7 +193,9 @@ def run_reframe(
         # ── 8. Strateji Seçimi ve Karar Üretimi ──────────────────────────────
         progress("Applying reframe strategy...", 65)
         strategy_class = STRATEGY_MAP.get(content_type, GenericStrategy)
-        strategy_instance = strategy_class(tracking_mode=tracking)
+        # Podcast için her zaman dynamic_xy kullan — Y hareketi için crop_h %88 olarak ayarlı
+        effective_tracking = TrackingMode.DYNAMIC_XY if content_type == ContentType.PODCAST else tracking
+        strategy_instance = strategy_class(tracking_mode=effective_tracking)
 
         decisions = strategy_instance.generate_decisions(
             scene_analyses=scene_analyses,
@@ -215,7 +217,7 @@ def run_reframe(
             fps=fps,
             duration_s=duration_s,
             content_type=content_type,
-            tracking_mode=tracking,
+            tracking_mode=effective_tracking,
             aspect_ratio=ar_tuple,
             config=strategy_instance.config,
         )

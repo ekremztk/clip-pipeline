@@ -55,8 +55,20 @@ def compute_crop_width(src_w: int, src_h: int, aspect_ratio: tuple[int, int]) ->
 def compute_crop_height(src_w: int, src_h: int, aspect_ratio: tuple[int, int]) -> int:
     """
     Crop penceresinin piksel yüksekliğini hesapla.
-    Çoğu durumda src_h ile aynıdır (tam yüksekliği kullan).
+
+    16:9 → 9:16 gibi "yatay kaynak → dikey hedef" dönüşümlerinde crop_h = src_h
+    olursa Y hareketi için sıfır alan kalır. Bu durumda src_h'nin %88'ini kullanarak
+    ±6% dikey hareket alanı açarız (kafa leaning-back durumlarında kaybolmasın).
+
+    Kaynak zaten dikey veya kare ise tam src_h kullan.
     """
+    out_w, out_h = aspect_ratio
+    target_is_taller = out_h > out_w   # 9:16, 4:5, 1:1 gibi
+    source_is_wider = src_w > src_h    # 1920x1080 gibi
+
+    if target_is_taller and source_is_wider:
+        # Dikey crop + geniş kaynak → %88 yükseklik kullan, Y hareketi için alan aç
+        return int(src_h * 0.88)
     return src_h
 
 
