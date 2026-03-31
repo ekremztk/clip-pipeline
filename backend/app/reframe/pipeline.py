@@ -111,10 +111,22 @@ def run_reframe(
             except Exception as e:
                 logger.warning("[Reframe] Diarization yuklenemedi: %s — visual-only", e)
 
-        # 6. Focus selection
+        # 6. Focus selection (Gemini semantic + diarization fallback)
         progress("Selecting focus points...", 65)
+
+        # Build transcript context for Gemini (first 1000 chars of word timestamps)
+        transcript_context = ""
+        if diarization_segments:
+            transcript_context = " | ".join(
+                f"[{s.get('start', 0):.1f}-{s.get('end', 0):.1f}s] speaker_{s.get('speaker', 0)}"
+                for s in diarization_segments[:30]
+            )
+
         focus_points = select_focus_points(
             frame_analyses, diarization_segments, shots, src_w, config.focus_selection,
+            video_path=input_path,
+            transcript_context=transcript_context,
+            gemini_config=config.gemini_director,
         )
 
         # 7. Camera path

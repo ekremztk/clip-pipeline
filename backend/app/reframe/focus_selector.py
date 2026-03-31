@@ -4,15 +4,17 @@ Odak secimi — her frame icin kameranin nereye bakacagini belirler.
 Karar hiyerarsisi:
   0 kisi  → onceki pozisyonu koru (shot basiysa merkez)
   1 kisi  → o kisiye odaklan
-  2+ kisi → diarization'dan aktif konusmacinin tarafindaki kisiye odaklan
+  2+ kisi → Gemini decision varsa onu kullan, yoksa diarization fallback
 
-Konusmaci degisimlerinde pre-roll (150ms once) ve hard cut uygulanir.
+Gemini semantic layer: shot boundaries, speaker changes, long scene checks
+icin annotated frame'ler gondererek hangi kisiye odaklanilacagini sorar.
+Gemini basarisiz olursa veya devre disi ise diarization-only calisir.
 """
 import logging
 from typing import Optional
 
-from .config import FocusSelectionConfig
-from .types import FocusPoint, FrameAnalysis, PersonDetection, Shot
+from .config import FocusSelectionConfig, GeminiDirectorConfig
+from .types import FocusPoint, FrameAnalysis, GeminiDecision, PersonDetection, Shot
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +29,15 @@ def select_focus_points(
     shots: list[Shot],
     src_w: int,
     config: FocusSelectionConfig,
+    video_path: Optional[str] = None,
+    transcript_context: str = "",
+    gemini_config: Optional[GeminiDirectorConfig] = None,
 ) -> list[FocusPoint]:
     """
-    Frame analizleri + diarization'dan her frame icin odak noktasi belirle.
+    Frame analizleri + Gemini + diarization'dan her frame icin odak noktasi belirle.
+
+    Priority: Gemini decision > diarization > largest person
+    Gemini fails gracefully — diarization-only if disabled or API error.
     """
     if not frame_analyses:
         return []
@@ -48,7 +56,15 @@ def select_focus_points(
     speaker_sides = _learn_speaker_sides(frame_analyses, filtered_diar)
     logger.info("[FocusSelector] Speaker sides: %s", speaker_sides)
 
-    # 3. Her frame icin odak noktasi belirle
+    # 3. Gemini semantic decisions (if enabled)
+    gemini_decisions: dict[float, GeminiDecision] = {}
+    if gemini_config and gemini_config.enabled and video_path:
+        gemini_decisions = _run_gemini_director(
+            frame_analyses, filtered_diar, shots, video_path,
+            transcript_context, gemini_config,
+        )
+
+    # 4. Her frame icin odak noktasi belirle
     focus_points: list[FocusPoint] = []
     prev_shot_idx = -1
     prev_x = _DEFAULT_X
@@ -84,8 +100,14 @@ def select_focus_points(
             reason = "single_person"
 
         else:
-            # 2+ kisi: konusmacinin tarafindaki kisiye odaklan
-            if active_speaker is not None and active_speaker in speaker_sides:
+            # 2+ persons: check Gemini decision first
+            gemini_hit = _find_gemini_decision(fa.time_s, gemini_decisions)
+            if gemini_hit and gemini_hit.target_person_index < len(fa.persons):
+                p = fa.persons[gemini_hit.target_person_index]
+                target_x = p.center_x
+                target_y = _headroom_y(p)
+                reason = f"gemini:{gemini_hit.reason}"
+            elif active_speaker is not None and active_speaker in speaker_sides:
                 side = speaker_sides[active_speaker]
                 p = _pick_person_on_side(fa.persons, side)
                 target_x = p.center_x
@@ -112,8 +134,71 @@ def select_focus_points(
         if active_speaker is not None:
             prev_speaker = active_speaker
 
-    logger.info("[FocusSelector] %d focus point uretildi", len(focus_points))
+    # Log Gemini vs diarization usage
+    gemini_count = sum(1 for fp in focus_points if fp.reason.startswith("gemini:"))
+    logger.info(
+        "[FocusSelector] %d focus points (%d gemini, %d diarization/other)",
+        len(focus_points), gemini_count, len(focus_points) - gemini_count,
+    )
     return focus_points
+
+
+def _run_gemini_director(
+    frame_analyses: list[FrameAnalysis],
+    diarization_segments: list[dict],
+    shots: list[Shot],
+    video_path: str,
+    transcript_context: str,
+    config: GeminiDirectorConfig,
+) -> dict[float, GeminiDecision]:
+    """Run Gemini director pipeline, return decisions indexed by time."""
+    try:
+        from .gemini_director import (
+            calculate_decision_points,
+            build_annotated_frames,
+            query_gemini_batch,
+        )
+
+        # Step 1: Find decision points
+        decision_points = calculate_decision_points(
+            frame_analyses, diarization_segments, shots, config,
+        )
+        if not decision_points:
+            return {}
+
+        # Step 2: Build annotated frames
+        annotated = build_annotated_frames(video_path, decision_points, config)
+
+        # Step 3: Query Gemini
+        decisions = query_gemini_batch(annotated, transcript_context, config)
+
+        # Index by time for fast lookup
+        return {d.time_s: d for d in decisions}
+
+    except Exception as e:
+        logger.warning("[FocusSelector] Gemini director failed, using diarization-only: %s", e)
+        return {}
+
+
+def _find_gemini_decision(
+    time_s: float,
+    decisions: dict[float, GeminiDecision],
+    tolerance: float = 0.5,
+) -> Optional[GeminiDecision]:
+    """Find the nearest Gemini decision within tolerance window."""
+    if not decisions:
+        return None
+
+    best: Optional[GeminiDecision] = None
+    best_dist = tolerance
+
+    for t, decision in decisions.items():
+        dist = abs(t - time_s)
+        if dist < best_dist:
+            best = decision
+            best_dist = dist
+
+    return best
 
 
 # --- Speaker side learning ----------------------------------------------------

@@ -68,6 +68,25 @@ class ReframeKeyframe:
 
 
 @dataclass
+class DecisionPoint:
+    """A moment where Gemini should evaluate framing"""
+    time_s: float
+    trigger: str           # "shot_boundary", "speaker_change", "speech_start", "long_scene_check"
+    shot_index: int
+    persons: list[PersonDetection] = field(default_factory=list)
+    active_speaker: Optional[int] = None
+
+
+@dataclass
+class GeminiDecision:
+    """Gemini's framing decision for a decision point"""
+    time_s: float
+    target_person_index: int    # Which person to focus on (0-based index in persons list)
+    reason: str                 # Why this person was chosen
+    confidence: float = 1.0
+
+
+@dataclass
 class ReframeResult:
     """Pipeline'in nihai ciktisi"""
     keyframes: list[ReframeKeyframe] = field(default_factory=list)

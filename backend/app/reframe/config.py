@@ -42,12 +42,24 @@ class CameraPathConfig:
 
 
 @dataclass
+class GeminiDirectorConfig:
+    """Gemini semantic decision layer parameters"""
+    enabled: bool = True
+    model: str = "gemini-2.0-flash-lite"
+    long_scene_check_interval_s: float = 4.0   # Check every N seconds in long scenes
+    max_batch_size: int = 8                     # Max decision points per Gemini call
+    annotation_resolution: tuple[int, int] = (640, 360)  # Frame size for annotation
+    timeout_s: float = 15.0                     # Gemini API timeout
+
+
+@dataclass
 class ReframeConfig:
     """Ana konfigurasyon — tum alt config'leri barindirir"""
     shot_detection: ShotDetectionConfig = field(default_factory=ShotDetectionConfig)
     frame_analysis: FrameAnalysisConfig = field(default_factory=FrameAnalysisConfig)
     focus_selection: FocusSelectionConfig = field(default_factory=FocusSelectionConfig)
     camera_path: CameraPathConfig = field(default_factory=CameraPathConfig)
+    gemini_director: GeminiDirectorConfig = field(default_factory=GeminiDirectorConfig)
 
     # Genel ayarlar
     aspect_ratio: tuple[int, int] = (9, 16)
