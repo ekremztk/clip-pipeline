@@ -98,8 +98,11 @@ def run_reframe(
         if on_progress:
             on_progress(step, pct)
 
-    # content_type_hint: açık kullanıcı seçimi yoksa strategy parametresini kullan
-    effective_hint = content_type_hint or (strategy if strategy != "auto" else None)
+    # content_type_hint: "auto" veya None ise strategy'ye dön
+    # "auto" truthy ama anlamlı değil — skip_ssim ve scene detection için gerçek hint gerekli
+    _ctype = content_type_hint if content_type_hint and content_type_hint != "auto" else None
+    _strategy = strategy if strategy and strategy != "auto" else None
+    effective_hint = _ctype or _strategy
 
     # Aspect ratio parse
     ar_tuple = parse_aspect_ratio(aspect_ratio)

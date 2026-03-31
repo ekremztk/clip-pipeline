@@ -272,8 +272,9 @@ function applyReframeToElement(
 			interpolation: interp,
 		});
 
-		// Y keyframe — sadece dynamic_xy modda ve offset_y mevcutsa
-		if (options.trackingMode === "dynamic_xy" && kf.offset_y !== undefined && kf.offset_y !== 0) {
+		// Y keyframe — backend non-zero offset_y döndürdüğünde uygula
+		// (backend içerik türüne göre DYNAMIC_XY seçer, frontend option'ı beklemez)
+		if (kf.offset_y !== undefined && kf.offset_y !== 0) {
 			const posY = scaledHeight / 2 - canvasHeight / 2 - kf.offset_y * containScale;
 			kfBatch.push({
 				trackId,

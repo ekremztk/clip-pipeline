@@ -101,9 +101,14 @@ def normalize_y_to_offset(
 ) -> float:
     """
     Normalize hedef Y pozisyonunu piksel offset'e çevir.
-    X ile aynı mantık, dikey eksen için.
+
+    Podcast/talk show için özel kural:
+    Kafayı crop penceresinin %25'ine yerleştir (iyi baş boşluğu = portrait framing kuralı).
+    X gibi merkezleme yapılmaz — yüzler frame'in üst %30'unda olduğundan merkezleme
+    her zaman negatif offset (imkânsız) üretir ve Y takibi tamamen devre dışı kalır.
     """
-    offset_y = target_y_norm * src_h - crop_h / 2
+    # Kafa crop penceresinin %25'inden aşağıda olsun (üstte %25 boşluk)
+    offset_y = target_y_norm * src_h - crop_h * 0.25
     return max(0.0, min(float(src_h - crop_h), offset_y))
 
 
