@@ -172,8 +172,10 @@ def query_gemini_batch(
     Returns list of GeminiDecision for each decision point.
     """
     from app.services.gemini_client import get_gemini_client
+    from app.config import settings
 
     client = get_gemini_client()
+    model_name = config.model or settings.GEMINI_MODEL_FLASH
 
     # Filter to only frames with images and 2+ persons
     valid_frames = [(dp, img) for dp, img in annotated_frames if img is not None]
@@ -186,7 +188,7 @@ def query_gemini_batch(
     for batch_start in range(0, len(valid_frames), config.max_batch_size):
         batch = valid_frames[batch_start:batch_start + config.max_batch_size]
         try:
-            batch_decisions = _query_batch(client, config.model, batch, transcript_context, config)
+            batch_decisions = _query_batch(client, model_name, batch, transcript_context, config)
             decisions.extend(batch_decisions)
         except Exception as e:
             logger.warning("[GeminiDirector] Gemini batch failed: %s", e)

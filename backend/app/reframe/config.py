@@ -45,7 +45,7 @@ class CameraPathConfig:
 class GeminiDirectorConfig:
     """Gemini semantic decision layer parameters"""
     enabled: bool = True
-    model: str = "gemini-2.0-flash-lite"
+    model: str = ""  # Empty = use settings.GEMINI_MODEL_FLASH at runtime
     long_scene_check_interval_s: float = 4.0   # Check every N seconds in long scenes
     max_batch_size: int = 8                     # Max decision points per Gemini call
     annotation_resolution: tuple[int, int] = (640, 360)  # Frame size for annotation
