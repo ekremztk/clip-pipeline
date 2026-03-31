@@ -43,6 +43,7 @@ def detect_scenes(
     threshold: Optional[float] = None,
     content_hint: str = "generic",
     fps: float = 30.0,
+    skip_ssim: bool = False,
 ) -> list[SceneInterval]:
     """
     Video dosyasındaki sahne geçişlerini tespit et.
@@ -73,13 +74,15 @@ def detect_scenes(
         # Açılış bölgesini atla
         cut_times = [t for t in cut_times if t >= SKIP_OPENING_S]
 
-        # Adım 2: SSIM doğrulama (eğer aday kesim varsa)
-        if cut_times:
+        # Adım 2: SSIM doğrulama (podcast/talk show için atla — aynı stüdyo SSIM'i her zaman yüksek)
+        if cut_times and not skip_ssim:
             validated = _validate_with_ssim(video_path, cut_times, fps)
             print(
                 f"[SceneAnalyzer] SSIM doğrulama: {len(cut_times)} → {len(validated)} kesim"
             )
             cut_times = validated
+        elif cut_times and skip_ssim:
+            print(f"[SceneAnalyzer] SSIM doğrulama atlandı (skip_ssim=True) — {len(cut_times)} kesim doğrudan kabul edildi")
 
         # Adım 3: Yakın kesimleri birleştir
         cut_times = _merge_nearby_cuts(cut_times, MIN_CUT_GAP_S)

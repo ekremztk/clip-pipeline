@@ -138,10 +138,14 @@ def run_reframe(
 
         # ── 3. Sahne Tespiti ──────────────────────────────────────────────────
         progress("Detecting scene cuts...", 12)
+        # Podcast/talk show için SSIM doğrulamasını atla:
+        # Aynı stüdyo farklı kamera açıları → SSIM her zaman 0.94+ → gerçek kesimler reddediliyor
+        skip_ssim = (effective_hint or "generic") in ("podcast", "single")
         scenes = detect_scenes(
             input_path,
             content_hint=effective_hint or "generic",
             fps=fps,
+            skip_ssim=skip_ssim,
         )
         print(f"[Reframe] {len(scenes)} sahne tespit edildi")
         for s in scenes:

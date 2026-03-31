@@ -79,15 +79,32 @@ def match_speakers_to_persons(
 
     mappings: list[SpeakerPersonMapping] = []
     for i, speaker_id in enumerate(unique_speakers):
-        if i >= len(sorted_persons):
-            break  # Fazla konuşmacı var, eşleştirilecek kişi kalmadı
-        person_id, avg_x = sorted_persons[i]
-        mappings.append(SpeakerPersonMapping(
-            speaker_id=speaker_id,
-            person_id=person_id,
-            confidence=confidence,
-            avg_position_x=avg_x,
-        ))
+        if i < len(sorted_persons):
+            person_id, avg_x = sorted_persons[i]
+            mappings.append(SpeakerPersonMapping(
+                speaker_id=speaker_id,
+                person_id=person_id,
+                confidence=confidence,
+                avg_position_x=avg_x,
+            ))
+        else:
+            # Fazla konuşmacı var — podcast heuristic: karşı tarafı tahmin et
+            # Tespit edilen kişilerin ortalama X'ini al, karşı tarafı hesapla
+            known_xs = [m.avg_position_x for m in mappings]
+            if known_xs:
+                avg_known = sum(known_xs) / len(known_xs)
+                # Karşı taraf: eğer bilinen kişiler sağdaysa (>0.5), yeni kişi solda
+                mirrored_x = 1.0 - avg_known
+                mirrored_x = max(0.15, min(0.85, mirrored_x))
+                # Person ID olarak mevcut en büyük ID + 1 kullan (sanal)
+                virtual_pid = max((m.person_id for m in mappings), default=0) + 100
+                mappings.append(SpeakerPersonMapping(
+                    speaker_id=speaker_id,
+                    person_id=virtual_pid,
+                    confidence=0.30,  # Düşük güven — tahmin
+                    avg_position_x=mirrored_x,
+                ))
+                print(f"[SpeakerAnalyzer] speaker_{speaker_id} için kişi bulunamadı — mirror tahmin: x={mirrored_x:.3f} (person_id={virtual_pid})")
 
     print(
         f"[SpeakerAnalyzer] {len(unique_speakers)} konuşmacı, "

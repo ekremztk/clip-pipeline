@@ -403,7 +403,7 @@ class PersonAnalyzer:
                 ))
 
         trajectories: list[PersonTrajectory] = []
-        min_frames = 2 if len(frame_analyses) > 2 else 1
+        min_frames = 1  # Tek frame'de görülen kişi de dahil — kısa sahnelerde/profil çekimlerinde kayıp önlenir
 
         for pid, positions in person_positions.items():
             if len(positions) >= min_frames:

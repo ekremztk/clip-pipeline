@@ -93,7 +93,7 @@ class PodcastStrategy(BaseStrategy):
             else:
                 # 2+ kişi → speaker timeline'a göre hard cut
                 segments = self._multi_person_segments(
-                    sa, speaker_timeline, sp_to_person, scene, crop_w, src_w
+                    sa, speaker_timeline, sp_to_person, scene, crop_w, src_w, speaker_person_map
                 )
 
             # Minimum segment süresi kuralını uygula
@@ -215,6 +215,7 @@ class PodcastStrategy(BaseStrategy):
         scene: SceneInterval,
         crop_w: int,
         src_w: int,
+        speaker_person_map: list = None,
     ) -> list[ReframeSegment]:
         """
         Çok kişili sahne — konuşmacı timeline'a göre hard cut ile geçiş.
@@ -251,6 +252,13 @@ class PodcastStrategy(BaseStrategy):
                 traj = self._get_trajectory_for_person(scene_analysis, person_id)
                 if traj is not None:
                     target_x = clamp_crop_target(traj.mean_x, crop_w, src_w)
+                else:
+                    # Trajectory yok (sanal/mirror kişi) → speaker_person_map'teki avg_position_x kullan
+                    if speaker_person_map:
+                        mapping = next((m for m in speaker_person_map if m.speaker_id == speaker_id), None)
+                        if mapping is not None:
+                            target_x = clamp_crop_target(mapping.avg_position_x, crop_w, src_w)
+                            print(f"[PodcastStrategy] person_{person_id} trajectory yok — mapping avg_x={mapping.avg_position_x:.3f} kullanıldı")
 
             # Pre-roll: konuşma başlamadan pre_roll_s önce kes
             seg_start = max(
