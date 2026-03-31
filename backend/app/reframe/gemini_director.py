@@ -10,6 +10,7 @@ and focus_selector uses diarization-only logic.
 """
 import json
 import logging
+import re
 import subprocess
 from typing import Optional
 
@@ -34,12 +35,18 @@ For each decision point, choose ONE person number to focus on. Consider:
 - Visual composition and framing quality
 - If someone is presenting/gesturing, they may be more visually interesting than the listener
 
-Respond with ONLY valid JSON — an array of objects:
+CRITICAL OUTPUT RULES — FOLLOW EXACTLY:
+1. Return ONLY a valid JSON array. Nothing else.
+2. Do NOT wrap the JSON in markdown code blocks (no ```json or ```).
+3. Do NOT add any explanation, commentary, or text before or after the JSON.
+4. The response must start with [ and end with ].
+
+Format:
 [{"time_s": 1.5, "target_person_index": 0, "reason": "speaking and gesturing", "confidence": 0.9}]
 
 - target_person_index is 0-based (person [1] = index 0, person [2] = index 1)
 - Keep reasons brief (3-5 words)
-- confidence: 0.0-1.0 (how certain you are)"""
+- confidence: 0.0-1.0"""
 
 
 def calculate_decision_points(
@@ -300,6 +307,52 @@ def _draw_boxes(
         return jpeg_bytes
 
 
+def _extract_json_array(raw: str) -> Optional[list]:
+    """
+    Robustly extract a JSON array from a Gemini response.
+    Handles: markdown fences, leading text, trailing text, control characters.
+    Returns parsed list or None if extraction fails.
+    """
+    if not raw:
+        return None
+
+    # 1. Strip markdown code fences (```json ... ``` or ``` ... ```)
+    raw = re.sub(r"```(?:json)?\s*", "", raw)
+    raw = raw.replace("```", "").strip()
+
+    # 2. Remove control characters that break JSON parsing
+    raw = re.sub(r"[\x00-\x1f\x7f]", " ", raw)
+
+    # 3. Find the outermost [...] block
+    match = re.search(r"\[.*\]", raw, re.DOTALL)
+    if not match:
+        # Try to find a single object and wrap it
+        obj_match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if obj_match:
+            try:
+                return [json.loads(obj_match.group())]
+            except json.JSONDecodeError:
+                pass
+        logger.warning("[GeminiDirector] No JSON array found in response: %s", raw[:200])
+        return None
+
+    candidate = match.group().strip()
+
+    try:
+        parsed = json.loads(candidate)
+        return parsed if isinstance(parsed, list) else [parsed]
+    except json.JSONDecodeError:
+        # Last resort: try to fix common issues (trailing commas, single quotes)
+        fixed = re.sub(r",\s*([}\]])", r"\1", candidate)  # trailing commas
+        fixed = fixed.replace("'", '"')                    # single → double quotes
+        try:
+            parsed = json.loads(fixed)
+            return parsed if isinstance(parsed, list) else [parsed]
+        except json.JSONDecodeError as e:
+            logger.warning("[GeminiDirector] JSON parse failed after cleanup: %s | raw: %s", e, candidate[:200])
+            return None
+
+
 def _query_batch(
     client,
     model_name: str,
@@ -327,7 +380,7 @@ def _query_batch(
         # Add image as inline data
         contents.append(types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"))
 
-    prompt_text += f"\nRespond with a JSON array of {len(batch)} decisions, one per decision point."
+    prompt_text += f"\nReturn a JSON array of exactly {len(batch)} objects, one per decision point above. Start with [ and end with ]."
     contents.append(types.Part.from_text(text=prompt_text))
 
     try:
@@ -340,17 +393,12 @@ def _query_batch(
             ),
         )
 
-        raw = response.text.strip()
-        # Strip markdown code fences if present
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[-1]
-            if raw.endswith("```"):
-                raw = raw[:-3]
-            raw = raw.strip()
+        raw = response.text or ""
+        logger.debug("[GeminiDirector] Raw response: %s", raw[:300])
 
-        parsed = json.loads(raw)
-        if not isinstance(parsed, list):
-            parsed = [parsed]
+        parsed = _extract_json_array(raw)
+        if not parsed:
+            return []
 
         decisions: list[GeminiDecision] = []
         for j, item in enumerate(parsed):
@@ -358,7 +406,6 @@ def _query_batch(
                 break
             dp = batch[j][0]
             target_idx = int(item.get("target_person_index", 0))
-            # Clamp to valid range
             target_idx = max(0, min(target_idx, len(dp.persons) - 1))
 
             decisions.append(GeminiDecision(
@@ -370,9 +417,6 @@ def _query_batch(
 
         return decisions
 
-    except json.JSONDecodeError as e:
-        logger.warning("[GeminiDirector] JSON parse error: %s", e)
-        return []
     except Exception as e:
         logger.warning("[GeminiDirector] Gemini API error: %s", e)
         return []
