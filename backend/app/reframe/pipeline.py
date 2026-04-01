@@ -1,15 +1,17 @@
 """
-Reframe V3 — Ana orkestrator.
+Reframe V4 (Director's Cut) — Main orchestrator.
 
-Pipeline adimlari:
-  1. Video download (gerekirse)
+Pipeline steps:
+  1. Video download (if needed)
   2. ffprobe → src_w, src_h, fps, duration_s
-  3. detect_shots() → Shot listesi
-  4. analyze_shots() → FrameAnalysis listesi
-  5. Diarization yukle (varsa)
-  6. select_focus_points() → FocusPoint listesi
-  7. compute_camera_path() → SmoothedPoint listesi
-  8. emit_keyframes() → ReframeResult
+  3. detect_shots() → Shot list (for scene cut markers)
+  4. analyze_shots() → FrameAnalysis list (YOLO person positions)
+  5. Load diarization (if available)
+  6. analyze_video_focus() → DirectorPlan (Gemini Pro + Video)
+  7. anchor_plan() → AnchoredSegment list (YOLO-snapped positions)
+  8. convert_to_keyframes() → ReframeResult (pixel keyframes)
+
+Fallback: if Gemini fails, step 6 uses diarization-only plan.
 """
 import json
 import logging
@@ -25,9 +27,9 @@ from app.config import settings
 from .config import ReframeConfig
 from .shot_detector import detect_shots
 from .frame_analyzer import analyze_shots
-from .focus_selector import select_focus_points
-from .camera_path import compute_camera_path
-from .keyframe_emitter import emit_keyframes
+from .video_director import analyze_video_focus, build_fallback_plan
+from .plan_anchor import anchor_plan
+from .keyframe_converter import convert_to_keyframes
 from .types import ReframeResult
 
 logger = logging.getLogger(__name__)
@@ -42,15 +44,15 @@ def run_reframe(
     clip_end: Optional[float] = None,
     strategy: str = "podcast",
     aspect_ratio: str = "9:16",
-    tracking_mode: str = "x_only",
+    tracking_mode: str = "dynamic_xy",
     content_type_hint: Optional[str] = None,
     on_progress: Optional[Callable[[str, int], None]] = None,
 ) -> ReframeResult:
     """
-    V3 reframe pipeline. Fonksiyon imzasi V2 ile ayni — frontend degisiklik gerektirmez.
+    V4 reframe pipeline. Function signature matches V2/V3 — frontend needs no changes.
     """
     if not clip_url and not clip_local_path:
-        raise ValueError("clip_url veya clip_local_path zorunlu")
+        raise ValueError("clip_url or clip_local_path required")
 
     def progress(step: str, pct: int) -> None:
         logger.info("[Reframe] %d%% — %s", pct, step)
@@ -64,9 +66,13 @@ def run_reframe(
         tracking_mode=tracking_mode,
     )
 
+    # Map content_type_hint to video director style
+    effective_style = _resolve_content_type(content_type_hint, strategy)
+    config.video_director.content_type = effective_style
+
     temp_path: Optional[str] = None
 
-    # Input path cozumle
+    # Resolve input path
     if clip_local_path and os.path.exists(clip_local_path):
         input_path = clip_local_path
     else:
@@ -77,7 +83,7 @@ def run_reframe(
         input_path = temp_path
 
     try:
-        # 1. Video indir (gerekirse)
+        # 1. Download video (if needed)
         if temp_path:
             progress("Downloading video...", 5)
             _download_video(clip_url, temp_path)
@@ -89,65 +95,87 @@ def run_reframe(
 
         effective_end = clip_end if clip_end is not None else duration_s
 
-        # 3. Shot detection
+        # 3. Shot detection (for scene cut markers)
         progress("Detecting scene cuts...", 12)
         shots = detect_shots(input_path, duration_s, config.shot_detection)
-        logger.info("[Reframe] %d shot tespit edildi", len(shots))
+        logger.info("[Reframe] %d shots detected", len(shots))
 
-        # 4. Frame analysis
+        # 4. Frame analysis (YOLO — needed for position anchoring)
         progress("Analyzing frames...", 20)
         frame_analyses = analyze_shots(
             input_path, shots, src_w, src_h, config.frame_analysis,
         )
-        logger.info("[Reframe] %d frame analiz edildi", len(frame_analyses))
+        logger.info("[Reframe] %d frames analyzed", len(frame_analyses))
 
-        # 5. Diarization yukle
-        progress("Loading speaker data...", 55)
+        # 5. Load diarization
+        progress("Loading speaker data...", 40)
         diarization_segments: list[dict] = []
         if job_id:
             try:
                 diarization_segments = _load_diarization(job_id, clip_start, effective_end)
-                logger.info("[Reframe] %d diarization segmenti", len(diarization_segments))
+                logger.info("[Reframe] %d diarization segments", len(diarization_segments))
             except Exception as e:
-                logger.warning("[Reframe] Diarization yuklenemedi: %s — visual-only", e)
+                logger.warning("[Reframe] Diarization load failed: %s — visual-only", e)
 
-        # 6. Focus selection (Gemini semantic + diarization fallback)
-        progress("Selecting focus points...", 65)
-
-        # Build transcript context for Gemini (first 1000 chars of word timestamps)
-        transcript_context = ""
-        if diarization_segments:
-            transcript_context = " | ".join(
-                f"[{s.get('start', 0):.1f}-{s.get('end', 0):.1f}s] speaker_{s.get('speaker', 0)}"
-                for s in diarization_segments[:30]
+        # 6. Video Director (Gemini Pro + full video analysis)
+        progress("AI analyzing video focus...", 50)
+        try:
+            director_plan = analyze_video_focus(
+                video_path=input_path,
+                diarization_segments=diarization_segments,
+                shots=shots,
+                src_w=src_w,
+                src_h=src_h,
+                fps=fps,
+                duration_s=duration_s,
+                aspect_ratio=ar_tuple,
+                config=config.video_director,
+            )
+            logger.info(
+                "[Reframe] Gemini plan: %s, %d segments",
+                director_plan.content_type, len(director_plan.segments),
+            )
+        except Exception as e:
+            logger.warning("[Reframe] Gemini analysis failed: %s — using fallback", e)
+            director_plan = build_fallback_plan(
+                diarization_segments, shots, duration_s,
             )
 
-        focus_points = select_focus_points(
-            frame_analyses, diarization_segments, shots, src_w, config.focus_selection,
-            video_path=input_path,
-            transcript_context=transcript_context,
-            gemini_config=config.gemini_director,
+        # 7. Plan anchoring (snap timestamps + resolve YOLO positions)
+        progress("Anchoring focus plan to frames...", 75)
+        anchored = anchor_plan(
+            plan=director_plan,
+            frame_analyses=frame_analyses,
+            diarization_segments=diarization_segments,
+            fps=fps,
+            duration_s=duration_s,
+            config=config.anchor,
         )
 
-        # 7. Camera path
-        progress("Computing camera path...", 75)
-        smooth_points = compute_camera_path(focus_points, shots, config.camera_path)
-
-        # 8. Keyframe emission
+        # 8. Keyframe conversion
         progress("Generating keyframes...", 85)
-        result = emit_keyframes(
-            smooth_points, shots, src_w, src_h, fps, duration_s, config,
+        result = convert_to_keyframes(
+            anchored_segments=anchored,
+            shots=shots,
+            src_w=src_w,
+            src_h=src_h,
+            fps=fps,
+            duration_s=duration_s,
+            config=config,
         )
+
+        # Store detected content type
+        result.content_type = director_plan.content_type
 
         progress("Done!", 100)
         logger.info(
-            "[Reframe] Tamamlandi — %d keyframe, %d scene cut",
-            len(result.keyframes), len(result.scene_cuts),
+            "[Reframe] Complete — %d keyframes, %d scene cuts, type=%s",
+            len(result.keyframes), len(result.scene_cuts), result.content_type,
         )
         return result
 
     except Exception as e:
-        logger.error("[Reframe] Pipeline hatasi: %s", e)
+        logger.error("[Reframe] Pipeline error: %s", e)
         import traceback
         traceback.print_exc()
         raise
@@ -160,10 +188,39 @@ def run_reframe(
                 pass
 
 
-# --- Video yardimcilari -------------------------------------------------------
+# --- Content type resolution -------------------------------------------------
+
+def _resolve_content_type(
+    content_type_hint: Optional[str],
+    strategy_fallback: str,
+) -> str:
+    """Map content_type_hint or strategy to a style guide key."""
+    if content_type_hint and content_type_hint != "auto":
+        mapping = {
+            "podcast": "conversation",
+            "interview": "conversation",
+            "single": "presentation",
+            "gaming": "action",
+            "generic": "auto",
+            "conversation": "conversation",
+            "presentation": "presentation",
+            "action": "action",
+        }
+        return mapping.get(content_type_hint, "auto")
+
+    # Fallback from old strategy parameter
+    strategy_mapping = {
+        "podcast": "conversation",
+        "interview": "conversation",
+        "single_speaker": "presentation",
+    }
+    return strategy_mapping.get(strategy_fallback, "auto")
+
+
+# --- Video helpers -----------------------------------------------------------
 
 def _probe_video(video_path: str) -> tuple[int, int, float, float]:
-    """ffprobe ile video boyutlari, FPS ve suresini al."""
+    """Get video dimensions, FPS and duration via ffprobe."""
     cmd = [
         "ffprobe", "-v", "quiet",
         "-print_format", "json",
@@ -176,18 +233,18 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
         text=True, timeout=30,
     )
     if result.returncode != 0:
-        raise RuntimeError(f"ffprobe hatasi: {result.stderr[:200]}")
+        raise RuntimeError(f"ffprobe error: {result.stderr[:200]}")
 
     data = json.loads(result.stdout)
     streams = data.get("streams", [])
     if not streams:
-        raise RuntimeError("ffprobe video stream bulamadi")
+        raise RuntimeError("ffprobe found no video stream")
 
     stream = streams[0]
     src_w = int(stream.get("width", 0))
     src_h = int(stream.get("height", 0))
     if src_w == 0 or src_h == 0:
-        raise RuntimeError(f"Gecersiz video boyutu: {src_w}x{src_h}")
+        raise RuntimeError(f"Invalid video dimensions: {src_w}x{src_h}")
 
     # FPS
     r_frame_rate = stream.get("r_frame_rate", "30/1")
@@ -197,7 +254,7 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
     except Exception:
         fps = 30.0
 
-    # Sure
+    # Duration
     duration_s = float(stream.get("duration", 0.0))
     if duration_s == 0.0:
         cmd2 = [
@@ -215,13 +272,13 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
             duration_s = float(fmt.get("duration", 0.0))
 
     if duration_s == 0.0:
-        raise RuntimeError("Video suresi belirlenemedi")
+        raise RuntimeError("Could not determine video duration")
 
     return src_w, src_h, round(fps, 4), round(duration_s, 4)
 
 
 def _download_video(url: str, dest_path: str) -> None:
-    """Uzak videoyu indir. FFmpeg basarisiz olursa requests ile dene."""
+    """Download remote video. Try FFmpeg copy first, then requests fallback."""
     os.makedirs(os.path.dirname(dest_path) or ".", exist_ok=True)
     try:
         cmd = [
@@ -242,7 +299,7 @@ def _download_video(url: str, dest_path: str) -> None:
 
 
 def _parse_aspect_ratio(ratio_str: str) -> tuple[int, int]:
-    """'9:16' → (9, 16). Gecersizse (9, 16) fallback."""
+    """'9:16' → (9, 16). Invalid → (9, 16) fallback."""
     try:
         parts = ratio_str.strip().split(":")
         w, h = int(parts[0]), int(parts[1])
@@ -253,7 +310,7 @@ def _parse_aspect_ratio(ratio_str: str) -> tuple[int, int]:
     return (9, 16)
 
 
-# --- Diarization yukleyici ----------------------------------------------------
+# --- Diarization loader ------------------------------------------------------
 
 def _load_diarization(
     job_id: str,
@@ -261,9 +318,9 @@ def _load_diarization(
     clip_end: float,
 ) -> list[dict]:
     """
-    Supabase'den diarization verisini yukle.
-    Deepgram word_timestamps'ten konusmaci segmentleri olusturur,
-    clip zamanina gore filtreler ve klip-relative zamana cevirir.
+    Load diarization data from Supabase.
+    Builds speaker segments from Deepgram word timestamps,
+    filters to clip window and converts to clip-relative time.
     """
     from app.services.supabase_client import get_client
 
@@ -276,7 +333,7 @@ def _load_diarization(
     )
 
     if not resp.data:
-        logger.warning("[Diarization] Transcript bulunamadi: job_id=%s", job_id)
+        logger.warning("[Diarization] Transcript not found: job_id=%s", job_id)
         return []
 
     row = resp.data[0]
@@ -296,7 +353,7 @@ def _load_diarization(
         elif role == "GUEST":
             raw_to_index[raw_id] = 1
 
-    # Kelimelerden konusmaci segmentleri olustur
+    # Build speaker segments from words
     segments: list[dict] = []
     current_speaker = None
     current_start = None
@@ -328,7 +385,7 @@ def _load_diarization(
             "end": current_end,
         })
 
-    # Clip penceresine filtrele ve klip-relative zamana cevir
+    # Filter to clip window and convert to clip-relative time
     clip_segments: list[dict] = []
     for seg in segments:
         if seg["end"] <= clip_start or seg["start"] >= clip_end:
@@ -342,5 +399,5 @@ def _load_diarization(
                 "end": round(clipped_end, 3),
             })
 
-    logger.info("[Diarization] %d segment (clip %.1f-%.1fs)", len(clip_segments), clip_start, clip_end)
+    logger.info("[Diarization] %d segments (clip %.1f-%.1fs)", len(clip_segments), clip_start, clip_end)
     return clip_segments
