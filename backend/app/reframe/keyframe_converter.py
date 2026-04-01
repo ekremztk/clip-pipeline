@@ -49,9 +49,18 @@ def convert_to_keyframes(
 
     frame_dur = 1.0 / fps if fps > 0 else 1.0 / 30.0
 
+    # Safety margin: prevent crop from touching video edges (avoids black bars
+    # from rounding mismatches between backend pixel math and frontend scaling)
+    EDGE_MARGIN = 10.0  # pixels
+    ox_min = EDGE_MARGIN
+    ox_max = max(EDGE_MARGIN, src_w - crop_w - EDGE_MARGIN)
+    oy_min = EDGE_MARGIN if config.tracking_mode == "dynamic_xy" else 0.0
+    oy_max = max(0.0, src_h - crop_h - EDGE_MARGIN) if config.tracking_mode == "dynamic_xy" else 0.0
+
     logger.info(
-        "[KeyframeConverter] crop=%dx%d, src=%dx%d, mode=%s, zoom=%.2f",
+        "[KeyframeConverter] crop=%dx%d, src=%dx%d, mode=%s, zoom=%.2f, ox=[%.0f,%.0f], oy=[%.0f,%.0f]",
         crop_w, crop_h, src_w, src_h, config.tracking_mode, kf_config.y_headroom_zoom,
+        ox_min, ox_max, oy_min, oy_max,
     )
 
     keyframes: list[ReframeKeyframe] = []
@@ -66,8 +75,8 @@ def convert_to_keyframes(
         first_pos = seg.positions[0]
         first_ox = _to_offset_x(first_pos.x, src_w, crop_w)
         first_oy = _to_offset_y(first_pos.y, src_h, crop_h) if config.tracking_mode == "dynamic_xy" else 0.0
-        first_ox = _clamp(round(first_ox, 1), 0.0, max(0, src_w - crop_w))
-        first_oy = _clamp(round(first_oy, 1), 0.0, max(0, src_h - crop_h))
+        first_ox = _clamp(round(first_ox, 1), ox_min, ox_max)
+        first_oy = _clamp(round(first_oy, 1), oy_min, oy_max)
 
         # Handle transition INTO this segment
         if seg_idx == 0:
@@ -117,8 +126,8 @@ def convert_to_keyframes(
         for pos in seg.positions[1:]:
             ox = _to_offset_x(pos.x, src_w, crop_w)
             oy = _to_offset_y(pos.y, src_h, crop_h) if config.tracking_mode == "dynamic_xy" else 0.0
-            ox = _clamp(round(ox, 1), 0.0, max(0, src_w - crop_w))
-            oy = _clamp(round(oy, 1), 0.0, max(0, src_h - crop_h))
+            ox = _clamp(round(ox, 1), ox_min, ox_max)
+            oy = _clamp(round(oy, 1), oy_min, oy_max)
 
             # Dedup: skip if movement is below threshold
             if (abs(ox - last_ox) < kf_config.dedup_threshold_px
@@ -145,7 +154,7 @@ def convert_to_keyframes(
 
     # Fallback: at least 1 keyframe (center crop)
     if not keyframes:
-        center_ox = _clamp(_to_offset_x(0.5, src_w, crop_w), 0.0, max(0, src_w - crop_w))
+        center_ox = _clamp(_to_offset_x(0.5, src_w, crop_w), ox_min, ox_max)
         keyframes = [ReframeKeyframe(
             time_s=0.0, offset_x=round(center_ox, 1), offset_y=0.0,
             interpolation="linear",

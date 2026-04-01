@@ -103,11 +103,8 @@ def _build_prompt(
     # Format diarization as human-readable timeline
     diar_text = _format_diarization(diarization_segments)
 
-    # Format scene cuts
-    scene_cuts_text = "None detected (single continuous shot)"
-    if len(shots) > 1:
-        cuts = [f"{s.start_s:.1f}s" for s in shots[1:]]
-        scene_cuts_text = ", ".join(cuts)
+    # Format scene structure with shot types
+    scene_structure_text = _format_scene_structure(shots)
 
     prompt = f"""You are a professional video editor and director. Your specialty is reframing horizontal video into vertical format while maintaining compelling visual storytelling.
 
@@ -120,9 +117,16 @@ AUDIO SPEAKER TIMELINE (precise timestamps from speech analysis):
 {diar_text}
 Note: Speaker numbers (Speaker 0, Speaker 1, etc.) are from audio analysis. You must map them to visual positions (left, right, center) based on what you OBSERVE in the video.
 
-DETECTED SCENE CUTS:
-{scene_cuts_text}
-After a visual scene cut, always use "cut" transition — the image already jumps, so smooth panning would look broken.
+SCENE STRUCTURE (from video analysis — camera angle types with timestamps):
+{scene_structure_text}
+
+CRITICAL — Camera angle rules:
+- "wide" shots show 2+ people. You MUST choose which person to focus on and crop to them.
+- "closeup" shots show only 1 person. Just center on them — do NOT try to switch focus.
+- "b_roll" shots have no clear subject. Center crop, hold still.
+- At EVERY camera angle change (scene cut), use "cut" transition — the image already jumps.
+- Your segment boundaries MUST align with camera angle changes. Never create a segment
+  that spans across two different camera angles.
 
 VIDEO INFO:
 - Duration: {duration_s:.1f} seconds
@@ -179,6 +183,31 @@ COMMON MISTAKES TO AVOID:
 Return the JSON now."""
 
     return prompt
+
+
+def _format_scene_structure(shots: list[Shot]) -> str:
+    """Format shot list with types as readable scene structure."""
+    if not shots:
+        return "Single continuous shot (no scene cuts detected)"
+
+    if len(shots) == 1:
+        shot = shots[0]
+        type_desc = {"wide": "wide (2+ people visible)", "closeup": "close-up (1 person)", "b_roll": "b-roll/other"}
+        return f"[{shot.start_s:.1f}s - {shot.end_s:.1f}s] {type_desc.get(shot.shot_type, shot.shot_type)}"
+
+    lines: list[str] = []
+    type_descs = {
+        "wide": "WIDE (2+ people visible)",
+        "closeup": "CLOSE-UP (1 person only)",
+        "b_roll": "B-ROLL / other",
+    }
+    for i, shot in enumerate(shots):
+        desc = type_descs.get(shot.shot_type, shot.shot_type)
+        lines.append(f"Scene {i + 1}: [{shot.start_s:.1f}s - {shot.end_s:.1f}s] {desc}")
+        if i > 0:
+            lines[-1] += "  ← CAMERA CUT here"
+
+    return "\n".join(lines)
 
 
 def _format_diarization(segments: list[dict]) -> str:
@@ -399,6 +428,19 @@ def _validate_and_repair_segments(
             start_s=merged[0].start_s, end_s=merged[0].end_s, target=merged[0].target,
             transition_in="cut", reason=merged[0].reason,
         )
+
+    # CRITICAL: force "cut" when target changes between segments
+    # "smooth" is ONLY valid when same person continues (same target)
+    for i in range(1, len(merged)):
+        if merged[i].target != merged[i - 1].target and merged[i].transition_in != "cut":
+            logger.debug(
+                "[VideoDirector] Forcing cut at %.1fs: target changed %s → %s",
+                merged[i].start_s, merged[i - 1].target, merged[i].target,
+            )
+            merged[i] = FocusSegment(
+                start_s=merged[i].start_s, end_s=merged[i].end_s, target=merged[i].target,
+                transition_in="cut", reason=merged[i].reason,
+            )
 
     logger.info(
         "[VideoDirector] %d raw segments → %d validated segments",

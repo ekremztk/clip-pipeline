@@ -17,7 +17,7 @@ import cv2
 import numpy as np
 
 from .config import FrameAnalysisConfig
-from .types import FrameAnalysis, PersonDetection, Shot
+from .types import FrameAnalysis, PersonDetection, Shot, SHOT_WIDE, SHOT_CLOSEUP, SHOT_BROLL
 
 logger = logging.getLogger(__name__)
 
@@ -226,3 +226,57 @@ def _detect_persons(
     except Exception as e:
         logger.error("[FrameAnalyzer] Tespit hatasi: %s", e)
         return []
+
+
+# --- Shot Classification -----------------------------------------------------
+
+def classify_shots(
+    shots: list[Shot],
+    frame_analyses: list[FrameAnalysis],
+) -> list[Shot]:
+    """
+    Classify each shot based on YOLO person counts.
+
+    Uses majority vote from all frames in the shot:
+      - Most frames have 2+ persons → "wide"
+      - Most frames have 1 person  → "closeup"
+      - Most frames have 0 persons → "b_roll"
+
+    Mutates shot.shot_type in-place and returns the same list.
+    """
+    for shot_idx, shot in enumerate(shots):
+        # Collect person counts for all frames in this shot
+        counts = [
+            len(fa.persons)
+            for fa in frame_analyses
+            if fa.shot_index == shot_idx
+        ]
+
+        if not counts:
+            shot.shot_type = SHOT_BROLL
+            continue
+
+        # Majority vote
+        wide_count = sum(1 for c in counts if c >= 2)
+        single_count = sum(1 for c in counts if c == 1)
+        empty_count = sum(1 for c in counts if c == 0)
+
+        total = len(counts)
+        if wide_count > total / 2:
+            shot.shot_type = SHOT_WIDE
+        elif single_count > total / 2:
+            shot.shot_type = SHOT_CLOSEUP
+        elif empty_count > total / 2:
+            shot.shot_type = SHOT_BROLL
+        elif wide_count >= single_count:
+            shot.shot_type = SHOT_WIDE
+        else:
+            shot.shot_type = SHOT_CLOSEUP
+
+        logger.info(
+            "[ShotClassifier] Shot %d (%.1f-%.1fs): %s (frames: %d wide, %d single, %d empty)",
+            shot_idx, shot.start_s, shot.end_s, shot.shot_type,
+            wide_count, single_count, empty_count,
+        )
+
+    return shots

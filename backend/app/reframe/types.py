@@ -13,11 +13,18 @@ from typing import Optional
 
 # --- Shared types (shot_detector + frame_analyzer) ---------------------------
 
+# Shot type constants
+SHOT_WIDE = "wide"              # 2+ persons visible — crop to active speaker
+SHOT_CLOSEUP = "closeup"        # 1 person visible — just center, minimal reframing
+SHOT_BROLL = "b_roll"           # 0 persons or ambiguous — center crop, hold still
+
+
 @dataclass
 class Shot:
     """A continuous camera angle / scene."""
     start_s: float
     end_s: float
+    shot_type: str = SHOT_WIDE   # Classified after YOLO analysis
 
     @property
     def duration_s(self) -> float:

@@ -26,7 +26,7 @@ from app.config import settings
 
 from .config import ReframeConfig
 from .shot_detector import detect_shots
-from .frame_analyzer import analyze_shots
+from .frame_analyzer import analyze_shots, classify_shots
 from .video_director import analyze_video_focus, build_fallback_plan
 from .plan_anchor import anchor_plan
 from .keyframe_converter import convert_to_keyframes
@@ -107,6 +107,12 @@ def run_reframe(
         )
         logger.info("[Reframe] %d frames analyzed", len(frame_analyses))
 
+        # 4b. Classify shots by type (wide/closeup/b_roll) based on YOLO data
+        progress("Classifying camera angles...", 35)
+        classify_shots(shots, frame_analyses)
+        for s in shots:
+            logger.info("[Reframe] Shot %.1f-%.1fs: %s", s.start_s, s.end_s, s.shot_type)
+
         # 5. Load diarization
         progress("Loading speaker data...", 40)
         diarization_segments: list[dict] = []
@@ -147,6 +153,7 @@ def run_reframe(
             plan=director_plan,
             frame_analyses=frame_analyses,
             diarization_segments=diarization_segments,
+            shots=shots,
             fps=fps,
             duration_s=duration_s,
             config=config.anchor,
