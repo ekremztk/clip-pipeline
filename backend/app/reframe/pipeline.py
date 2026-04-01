@@ -1,17 +1,16 @@
 """
-Reframe V4 (Director's Cut) — Main orchestrator.
+Reframe V5 — Main orchestrator.
 
 Pipeline steps:
-  1. Video download (if needed)
-  2. ffprobe → src_w, src_h, fps, duration_s
-  3. detect_shots() → Shot list (for scene cut markers)
-  4. analyze_shots() → FrameAnalysis list (YOLO person positions)
-  5. Load diarization (if available)
-  6. analyze_video_focus() → DirectorPlan (Gemini Pro + Video)
-  7. anchor_plan() → AnchoredSegment list (YOLO-snapped positions)
-  8. convert_to_keyframes() → ReframeResult (pixel keyframes)
+  1. ffprobe → video metadata
+  2. shot_detector → shot boundaries (FFmpeg scene filter)
+  3. face_tracker → per-frame face detections (MediaPipe)
+  4. gemini_director → high-level creative plan
+  5. focus_resolver → merge Gemini + detections → focus points
+  6. path_solver → smooth camera paths (AutoFlip algorithm)
+  7. keyframe_emitter → pixel offsets for frontend
 
-Fallback: if Gemini fails, step 6 uses diarization-only plan.
+Fallback: if Gemini fails, step 4 uses diarization-only plan.
 """
 import json
 import logging
@@ -26,13 +25,27 @@ from app.config import settings
 
 from .config import ReframeConfig
 from .shot_detector import detect_shots
-from .frame_analyzer import analyze_shots, classify_shots
-from .video_director import analyze_video_focus, build_fallback_plan
-from .plan_anchor import anchor_plan
-from .keyframe_converter import convert_to_keyframes
-from .types import ReframeResult
+from .face_tracker import analyze_video as track_faces, classify_shots
+from .gemini_director import analyze_video as gemini_analyze, build_fallback_plan
+from .focus_resolver import resolve_focus
+from .path_solver import solve_paths
+from .keyframe_emitter import emit_keyframes
+from .types import Frame, ReframeResult, Shot
 
 logger = logging.getLogger(__name__)
+
+
+def _configure_reframe_logging() -> None:
+    """Ensure all reframe module loggers emit at INFO level."""
+    reframe_logger = logging.getLogger("app.reframe")
+    if not reframe_logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(
+            "%(asctime)s %(levelname)s %(name)s — %(message)s",
+            datefmt="%H:%M:%S",
+        ))
+        reframe_logger.addHandler(handler)
+    reframe_logger.setLevel(logging.INFO)
 
 
 def run_reframe(
@@ -42,15 +55,18 @@ def run_reframe(
     job_id: Optional[str] = None,
     clip_start: float = 0.0,
     clip_end: Optional[float] = None,
-    strategy: str = "podcast",
+    strategy: str = "auto",
     aspect_ratio: str = "9:16",
     tracking_mode: str = "dynamic_xy",
     content_type_hint: Optional[str] = None,
     on_progress: Optional[Callable[[str, int], None]] = None,
 ) -> ReframeResult:
     """
-    V4 reframe pipeline. Function signature matches V2/V3 — frontend needs no changes.
+    V5 reframe pipeline.
+    Function signature unchanged from V4 — frontend needs no changes.
     """
+    _configure_reframe_logging()
+
     if not clip_url and not clip_local_path:
         raise ValueError("clip_url or clip_local_path required")
 
@@ -65,14 +81,12 @@ def run_reframe(
         aspect_ratio=ar_tuple,
         tracking_mode=tracking_mode,
     )
-
-    # Map content_type_hint to video director style
-    effective_style = _resolve_content_type(content_type_hint, strategy)
-    config.video_director.content_type = effective_style
+    if content_type_hint and content_type_hint != "auto":
+        config.gemini_director.content_type_hint = content_type_hint
 
     temp_path: Optional[str] = None
 
-    # Resolve input path
+    # Resolve input
     if clip_local_path and os.path.exists(clip_local_path):
         input_path = clip_local_path
     else:
@@ -83,7 +97,7 @@ def run_reframe(
         input_path = temp_path
 
     try:
-        # 1. Download video (if needed)
+        # 1. Download (if needed)
         if temp_path:
             progress("Downloading video...", 5)
             _download_video(clip_url, temp_path)
@@ -95,74 +109,70 @@ def run_reframe(
 
         effective_end = clip_end if clip_end is not None else duration_s
 
-        # 3. Shot detection (for scene cut markers)
+        # 3. Shot detection
         progress("Detecting scene cuts...", 12)
         shots = detect_shots(input_path, duration_s, config.shot_detection)
         logger.info("[Reframe] %d shots detected", len(shots))
 
-        # 4. Frame analysis (YOLO — needed for position anchoring)
-        progress("Analyzing frames...", 20)
-        frame_analyses = analyze_shots(
-            input_path, shots, src_w, src_h, config.frame_analysis,
-        )
-        logger.info("[Reframe] %d frames analyzed", len(frame_analyses))
+        # 4. Face tracking (MediaPipe)
+        progress("Tracking faces...", 20)
+        frames = track_faces(input_path, shots, src_w, src_h, config.face_tracker)
+        logger.info("[Reframe] %d frames analyzed", len(frames))
 
-        # 4b. Classify shots by type (wide/closeup/b_roll) based on YOLO data
-        progress("Classifying camera angles...", 35)
-        classify_shots(shots, frame_analyses)
+        # 5. Classify shots by face count
+        progress("Classifying shots...", 35)
+        classify_shots(shots, frames)
+
+        # Merge false-positive cuts
+        shots = _merge_false_cuts(shots, frames)
         for s in shots:
-            logger.info("[Reframe] Shot %.1f-%.1fs: %s", s.start_s, s.end_s, s.shot_type)
+            logger.info("[Reframe] Shot %.1f-%.1fs: %s (%.1fs)", s.start_s, s.end_s, s.shot_type, s.duration_s)
 
-        # 5. Load diarization
+        # 6. Load diarization
         progress("Loading speaker data...", 40)
-        diarization_segments: list[dict] = []
+        diarization: list[dict] = []
         if job_id:
             try:
-                diarization_segments = _load_diarization(job_id, clip_start, effective_end)
-                logger.info("[Reframe] %d diarization segments", len(diarization_segments))
+                diarization = _load_diarization(job_id, clip_start, effective_end)
+                logger.info("[Reframe] %d diarization segments for job_id=%s", len(diarization), job_id)
             except Exception as e:
-                logger.warning("[Reframe] Diarization load failed: %s — visual-only", e)
+                logger.warning("[Reframe] Diarization failed: %s — visual only", e)
+        else:
+            logger.warning("[Reframe] No job_id — visual only mode")
 
-        # 6. Video Director (Gemini Pro + full video analysis)
-        progress("AI analyzing video focus...", 50)
+        # 7. Gemini creative direction
+        progress("AI analyzing video...", 50)
         try:
-            director_plan = analyze_video_focus(
+            director_plan = gemini_analyze(
                 video_path=input_path,
-                diarization_segments=diarization_segments,
+                diarization_segments=diarization,
                 shots=shots,
+                frames=frames,
                 src_w=src_w,
                 src_h=src_h,
                 fps=fps,
                 duration_s=duration_s,
                 aspect_ratio=ar_tuple,
-                config=config.video_director,
-            )
-            logger.info(
-                "[Reframe] Gemini plan: %s, %d segments",
-                director_plan.content_type, len(director_plan.segments),
+                config=config.gemini_director,
             )
         except Exception as e:
-            logger.warning("[Reframe] Gemini analysis failed: %s — using fallback", e)
-            director_plan = build_fallback_plan(
-                diarization_segments, shots, duration_s,
-            )
+            logger.warning("[Reframe] Gemini failed: %s — using fallback", e)
+            director_plan = build_fallback_plan(diarization, shots, duration_s)
 
-        # 7. Plan anchoring (snap timestamps + resolve YOLO positions)
-        progress("Anchoring focus plan to frames...", 75)
-        anchored = anchor_plan(
-            plan=director_plan,
-            frame_analyses=frame_analyses,
-            diarization_segments=diarization_segments,
-            shots=shots,
-            fps=fps,
-            duration_s=duration_s,
-            config=config.anchor,
-        )
+        result_content_type = director_plan.content_type
 
-        # 8. Keyframe conversion
+        # 8. Focus resolver
+        progress("Resolving focus targets...", 65)
+        focus_points = resolve_focus(director_plan, frames, shots)
+
+        # 9. Path solver (AutoFlip kinematic)
+        progress("Computing smooth camera paths...", 75)
+        shot_paths = solve_paths(focus_points, shots, fps, config.path_solver)
+
+        # 10. Keyframe emission
         progress("Generating keyframes...", 85)
-        result = convert_to_keyframes(
-            anchored_segments=anchored,
+        result = emit_keyframes(
+            shot_paths=shot_paths,
             shots=shots,
             src_w=src_w,
             src_h=src_h,
@@ -171,8 +181,7 @@ def run_reframe(
             config=config,
         )
 
-        # Store detected content type
-        result.content_type = director_plan.content_type
+        result.content_type = result_content_type
 
         progress("Done!", 100)
         logger.info(
@@ -195,33 +204,39 @@ def run_reframe(
                 pass
 
 
-# --- Content type resolution -------------------------------------------------
+# --- False cut detection -----------------------------------------------------
 
-def _resolve_content_type(
-    content_type_hint: Optional[str],
-    strategy_fallback: str,
-) -> str:
-    """Map content_type_hint or strategy to a style guide key."""
-    if content_type_hint and content_type_hint != "auto":
-        mapping = {
-            "podcast": "conversation",
-            "interview": "conversation",
-            "single": "presentation",
-            "gaming": "action",
-            "generic": "auto",
-            "conversation": "conversation",
-            "presentation": "presentation",
-            "action": "action",
-        }
-        return mapping.get(content_type_hint, "auto")
+def _merge_false_cuts(
+    shots: list[Shot],
+    frames: list[Frame],
+) -> list[Shot]:
+    """Merge adjacent shots with same type + similar face count (false positives)."""
+    if len(shots) <= 1:
+        return shots
 
-    # Fallback from old strategy parameter
-    strategy_mapping = {
-        "podcast": "conversation",
-        "interview": "conversation",
-        "single_speaker": "presentation",
-    }
-    return strategy_mapping.get(strategy_fallback, "auto")
+    def _avg_face_count(shot_idx: int) -> float:
+        counts = [len(f.faces) for f in frames if f.shot_index == shot_idx]
+        return sum(counts) / len(counts) if counts else 0.0
+
+    merged: list[Shot] = [shots[0]]
+    for i in range(1, len(shots)):
+        prev = merged[-1]
+        curr = shots[i]
+
+        same_type = prev.shot_type == curr.shot_type
+        similar_faces = abs(_avg_face_count(i - 1) - _avg_face_count(i)) < 0.5
+        is_short = curr.duration_s < 1.0
+
+        if same_type and similar_faces and is_short:
+            logger.info(
+                "[Reframe] Merging false cut: %.1f-%.1fs + %.1f-%.1fs",
+                prev.start_s, prev.end_s, curr.start_s, curr.end_s,
+            )
+            merged[-1] = Shot(start_s=prev.start_s, end_s=curr.end_s, shot_type=prev.shot_type)
+        else:
+            merged.append(curr)
+
+    return merged
 
 
 # --- Video helpers -----------------------------------------------------------
@@ -253,7 +268,6 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
     if src_w == 0 or src_h == 0:
         raise RuntimeError(f"Invalid video dimensions: {src_w}x{src_h}")
 
-    # FPS
     r_frame_rate = stream.get("r_frame_rate", "30/1")
     try:
         num, den = r_frame_rate.split("/")
@@ -261,7 +275,6 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
     except Exception:
         fps = 30.0
 
-    # Duration
     duration_s = float(stream.get("duration", 0.0))
     if duration_s == 0.0:
         cmd2 = [
@@ -285,13 +298,10 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
 
 
 def _download_video(url: str, dest_path: str) -> None:
-    """Download remote video. Try FFmpeg copy first, then requests fallback."""
+    """Download remote video."""
     os.makedirs(os.path.dirname(dest_path) or ".", exist_ok=True)
     try:
-        cmd = [
-            "ffmpeg", "-y", "-i", url,
-            "-c", "copy", dest_path,
-        ]
+        cmd = ["ffmpeg", "-y", "-i", url, "-c", "copy", dest_path]
         subprocess.run(
             cmd, check=True,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -306,7 +316,7 @@ def _download_video(url: str, dest_path: str) -> None:
 
 
 def _parse_aspect_ratio(ratio_str: str) -> tuple[int, int]:
-    """'9:16' → (9, 16). Invalid → (9, 16) fallback."""
+    """'9:16' -> (9, 16). Invalid -> (9, 16) fallback."""
     try:
         parts = ratio_str.strip().split(":")
         w, h = int(parts[0]), int(parts[1])
@@ -324,11 +334,7 @@ def _load_diarization(
     clip_start: float,
     clip_end: float,
 ) -> list[dict]:
-    """
-    Load diarization data from Supabase.
-    Builds speaker segments from Deepgram word timestamps,
-    filters to clip window and converts to clip-relative time.
-    """
+    """Load diarization data from Supabase."""
     from app.services.supabase_client import get_client
 
     supabase = get_client()
@@ -350,7 +356,6 @@ def _load_diarization(
     if not words:
         return []
 
-    # speaker_map: {"0": "HOST", "1": "GUEST"} → HOST=0, GUEST=1
     raw_to_index: dict[str, int] = {}
     for k, v in speaker_map.items():
         role = str(v).upper()
@@ -360,7 +365,6 @@ def _load_diarization(
         elif role == "GUEST":
             raw_to_index[raw_id] = 1
 
-    # Build speaker segments from words
     segments: list[dict] = []
     current_speaker = None
     current_start = None
@@ -392,7 +396,6 @@ def _load_diarization(
             "end": current_end,
         })
 
-    # Filter to clip window and convert to clip-relative time
     clip_segments: list[dict] = []
     for seg in segments:
         if seg["end"] <= clip_start or seg["start"] >= clip_end:

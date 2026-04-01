@@ -1,22 +1,23 @@
 """
-Reframe V4 (Director's Cut) data types.
+Reframe V5 data types.
 
 Data flow:
-  Shot, FrameAnalysis, PersonDetection  → shared (shot_detector, frame_analyzer)
-  FocusSegment, DirectorPlan            → video_director output
-  AnchoredSegment                       → plan_anchor output
-  ReframeKeyframe, ReframeResult        → keyframe_converter output
+  Shot                    → shot_detector (FFmpeg scene cuts)
+  FaceDetection, Frame    → face_tracker (MediaPipe per-frame detections)
+  SubjectInfo, FocusPlan  → gemini_director (high-level creative plan)
+  FocusPoint              → focus_resolver (merged Gemini + detections)
+  SmoothPath              → path_solver (AutoFlip-style kinematic path)
+  ReframeKeyframe, Result → keyframe_emitter (pixel offsets for frontend)
 """
 from dataclasses import dataclass, field
 from typing import Optional
 
 
-# --- Shared types (shot_detector + frame_analyzer) ---------------------------
+# --- Shot Detection ----------------------------------------------------------
 
-# Shot type constants
-SHOT_WIDE = "wide"              # 2+ persons visible — crop to active speaker
-SHOT_CLOSEUP = "closeup"        # 1 person visible — just center, minimal reframing
-SHOT_BROLL = "b_roll"           # 0 persons or ambiguous — center crop, hold still
+SHOT_WIDE = "wide"
+SHOT_CLOSEUP = "closeup"
+SHOT_BROLL = "b_roll"
 
 
 @dataclass
@@ -24,105 +25,111 @@ class Shot:
     """A continuous camera angle / scene."""
     start_s: float
     end_s: float
-    shot_type: str = SHOT_WIDE   # Classified after YOLO analysis
+    shot_type: str = SHOT_WIDE
 
     @property
     def duration_s(self) -> float:
         return self.end_s - self.start_s
 
 
+# --- Face Tracker (MediaPipe) -----------------------------------------------
+
 @dataclass
-class PersonDetection:
-    """Single person detection in one frame (from YOLO)."""
-    center_x: float      # 0.0-1.0 normalized bbox center
-    center_y: float
-    bbox_width: float     # 0.0-1.0 normalized
-    bbox_height: float
-    confidence: float
-    face_x: Optional[float] = None   # Nose keypoint X (normalized)
-    face_y: Optional[float] = None   # Nose keypoint Y (normalized)
-    stable_id: int = -1              # Position-based: 0=leftmost, 1=next...
-
-    @property
-    def area(self) -> float:
-        return self.bbox_width * self.bbox_height
-
-    @property
-    def framing_x(self) -> float:
-        """Best X for crop centering: face if available, else bbox center."""
-        return self.face_x if self.face_x is not None else self.center_x
-
-    @property
-    def framing_y(self) -> float:
-        """Best Y for crop centering: face if available, else bbox center."""
-        return self.face_y if self.face_y is not None else self.center_y
+class FaceDetection:
+    """Single face detected in one frame by MediaPipe."""
+    face_x: float           # 0.0-1.0 normalized face center X
+    face_y: float           # 0.0-1.0 normalized face center Y
+    face_width: float       # 0.0-1.0 normalized face bbox width
+    face_height: float      # 0.0-1.0 normalized face bbox height
+    confidence: float       # Detection confidence 0.0-1.0
+    person_x: float         # 0.0-1.0 estimated person center X (from pose or face)
+    person_y: float         # 0.0-1.0 estimated person center Y
+    person_height: float    # 0.0-1.0 estimated person height (face-based heuristic or pose)
+    track_id: int = -1      # Stable tracking ID across frames (-1 = unassigned)
 
 
 @dataclass
-class FrameAnalysis:
-    """YOLO analysis result for one sampled frame."""
+class Frame:
+    """Analysis result for one sampled frame."""
     time_s: float
     shot_index: int
-    persons: list[PersonDetection] = field(default_factory=list)
+    faces: list[FaceDetection] = field(default_factory=list)
 
 
-# --- Video Director types (Gemini output) ------------------------------------
-
-@dataclass
-class SpeakerInfo:
-    """A speaker identified by Gemini in the video."""
-    position: str          # "left", "right", "center"
-    description: str       # Brief visual description from Gemini
-
+# --- Gemini Director (creative plan) ----------------------------------------
 
 @dataclass
-class FocusSegment:
-    """One focus segment from Gemini's director plan (raw, not yet anchored)."""
+class SubjectInfo:
+    """A subject identified by Gemini in the video."""
+    id: str                 # "A", "B", "C" etc.
+    position: str           # "left", "right", "center" — visual position in wide shots
+    description: str        # Brief visual description
+
+
+@dataclass
+class FocusDirective:
+    """One focus directive from Gemini's creative plan."""
     start_s: float
     end_s: float
-    target: str            # "left", "right", "center" — matches SpeakerInfo.position
-    transition_in: str     # "cut" or "smooth"
+    subject_id: str         # References SubjectInfo.id
+    importance: str         # "high", "medium", "low"
     reason: str = ""
 
 
 @dataclass
 class DirectorPlan:
     """Complete output from Gemini video analysis."""
-    content_type: str                          # "podcast", "interview", etc.
-    layout: str                                # "side_by_side", "single", etc.
-    speakers: list[SpeakerInfo] = field(default_factory=list)
-    segments: list[FocusSegment] = field(default_factory=list)
+    content_type: str
+    layout: str
+    subjects: list[SubjectInfo] = field(default_factory=list)
+    directives: list[FocusDirective] = field(default_factory=list)
 
 
-# --- Plan Anchor types (YOLO-validated) --------------------------------------
+# --- Focus Resolver (merged) ------------------------------------------------
 
 @dataclass
-class PositionSample:
-    """A single YOLO-validated position within a segment."""
+class FocusPoint:
+    """A single weighted focus target — input to path solver."""
     time_s: float
-    x: float               # Normalized framing X (face or bbox center)
-    y: float               # Normalized framing Y with headroom
+    x: float                # 0.0-1.0 normalized target center X
+    y: float                # 0.0-1.0 normalized target center Y
+    weight: float = 1.0     # Importance weight (higher = path solver prioritizes more)
+    shot_index: int = 0
+
+
+# --- Path Solver (AutoFlip-style) -------------------------------------------
+
+# Strategy constants
+STRATEGY_STATIONARY = "stationary"
+STRATEGY_PANNING = "panning"
+STRATEGY_TRACKING = "tracking"
 
 
 @dataclass
-class AnchoredSegment:
-    """Focus segment after timestamp snapping + YOLO position validation."""
-    start_s: float                     # Frame-snapped start time
-    end_s: float                       # Frame-snapped end time
-    transition_in: str                 # "cut" or "smooth"
-    positions: list[PositionSample] = field(default_factory=list)
-    reason: str = ""
+class PathPoint:
+    """A single point on the smooth camera path."""
+    time_s: float
+    x: float                # 0.0-1.0 smooth crop center X
+    y: float                # 0.0-1.0 smooth crop center Y
 
 
-# --- Final output types ------------------------------------------------------
+@dataclass
+class ShotPath:
+    """Smooth camera path for one shot."""
+    shot_index: int
+    strategy: str           # stationary / panning / tracking
+    points: list[PathPoint] = field(default_factory=list)
+
+
+# --- Final Output ------------------------------------------------------------
 
 @dataclass
 class ReframeKeyframe:
     """Keyframe sent to the frontend editor."""
     time_s: float
-    offset_x: float        # Pixel offset from left edge of source
-    offset_y: float        # Pixel offset from top edge of source
-    interpolation: str     # "linear" or "hold"
+    offset_x: float         # Pixel offset from left edge of source
+    offset_y: float         # Pixel offset from top edge of source
+    interpolation: str      # "linear" or "hold"
 
 
 @dataclass

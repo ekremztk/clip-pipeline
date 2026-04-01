@@ -1,12 +1,12 @@
 """
-Reframe V4 (Director's Cut) configuration.
+Reframe V5 configuration.
 
-All tunable parameters live here. No hardcoded values in modules.
+All tunable parameters live here. Modules read from config, never hardcode values.
 """
 from dataclasses import dataclass, field
 
 
-# --- Stage 1: Shot Detection (unchanged) ------------------------------------
+# --- Stage 1: Shot Detection ------------------------------------------------
 
 @dataclass
 class ShotDetectionConfig:
@@ -16,59 +16,69 @@ class ShotDetectionConfig:
     min_cut_gap_s: float = 0.5
 
 
-# --- Stage 2: Frame Analysis (unchanged) ------------------------------------
+# --- Stage 2: Face Tracker (MediaPipe) --------------------------------------
 
 @dataclass
-class FrameAnalysisConfig:
-    """YOLOv8-pose frame analysis parameters."""
-    model_path: str = "yolov8s-pose.pt"
-    confidence_threshold: float = 0.40
-    analysis_resolution: tuple[int, int] = (640, 360)
-    sample_fps: float = 5.0
-    max_persons_per_frame: int = 4
+class FaceTrackerConfig:
+    """MediaPipe face detection + tracking parameters."""
+    sample_fps: float = 5.0                     # How many frames per second to sample
+    min_detection_confidence: float = 0.5       # MediaPipe face detection threshold
+    max_faces: int = 4                          # Max faces to track per frame
+    person_height_multiplier: float = 3.5       # Estimate person height from face height
+    analysis_resolution: tuple[int, int] = (640, 360)   # Downscale for speed
 
 
-# --- Stage 3: Video Director (Gemini Pro + Video) ---------------------------
+# --- Stage 3: Gemini Director -----------------------------------------------
 
 @dataclass
-class VideoDirectorConfig:
-    """Gemini Pro video analysis parameters."""
-    model: str = ""                    # Empty = use settings.GEMINI_MODEL_PRO at runtime
-    content_type: str = "auto"         # Style guide selector
+class GeminiDirectorConfig:
+    """Gemini video analysis parameters."""
+    model: str = ""                             # Empty = use settings.GEMINI_MODEL_PRO
+    content_type_hint: str = "auto"             # Hint only — Gemini decides for itself
     min_segment_duration_s: float = 1.5
     timeout_s: float = 60.0
 
 
-# --- Stage 4: Plan Anchor (timestamp snapping + YOLO validation) ------------
+# --- Stage 4: Path Solver (AutoFlip-style) ----------------------------------
 
 @dataclass
-class AnchorConfig:
-    """Timestamp anchoring and YOLO validation parameters."""
-    diarization_snap_tolerance_s: float = 0.5   # Max distance to snap to diarization boundary
-    position_smoothing_window: int = 3          # Moving average window for YOLO jitter
-    headroom_ratio: float = 0.05                # Face Y offset: face_y - bbox_h * ratio
+class PathSolverConfig:
+    """Kinematic path solver parameters (ported from AutoFlip)."""
+    # Strategy selection thresholds
+    stationary_threshold: float = 0.06          # Max spread to use stationary mode
+    panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
+
+    # Kinematic constraints
+    max_velocity: float = 0.8                   # Max crop movement per second (normalized)
+    max_acceleration: float = 2.0               # Max velocity change per second (normalized)
+
+    # Smoothing
+    median_filter_window: int = 5               # Median filter size for jitter removal
+    motion_threshold: float = 0.02              # Ignore motion smaller than this (hysteresis)
+
+    # Headroom
+    headroom_ratio: float = 0.15                # How much above face center to place crop center
 
 
-# --- Stage 5: Keyframe Converter ---------------------------------------------
+# --- Stage 5: Keyframe Emitter ----------------------------------------------
 
 @dataclass
-class KeyframeConfig:
+class KeyframeEmitterConfig:
     """Keyframe generation parameters."""
-    dedup_threshold_px: float = 5.0    # Skip keyframes with < N px movement
-    smooth_transition_s: float = 0.3   # Duration of "smooth" transitions
-    y_headroom_zoom: float = 1.12      # Extra zoom for Y panning room
+    dedup_threshold_px: float = 5.0             # Skip keyframes with < N px movement
+    y_headroom_zoom: float = 1.12               # Extra zoom for Y panning room
 
 
-# --- Top-level config ---------------------------------------------------------
+# --- Top-level config --------------------------------------------------------
 
 @dataclass
 class ReframeConfig:
     """Main configuration — nests all sub-configs."""
     shot_detection: ShotDetectionConfig = field(default_factory=ShotDetectionConfig)
-    frame_analysis: FrameAnalysisConfig = field(default_factory=FrameAnalysisConfig)
-    video_director: VideoDirectorConfig = field(default_factory=VideoDirectorConfig)
-    anchor: AnchorConfig = field(default_factory=AnchorConfig)
-    keyframe: KeyframeConfig = field(default_factory=KeyframeConfig)
+    face_tracker: FaceTrackerConfig = field(default_factory=FaceTrackerConfig)
+    gemini_director: GeminiDirectorConfig = field(default_factory=GeminiDirectorConfig)
+    path_solver: PathSolverConfig = field(default_factory=PathSolverConfig)
+    keyframe_emitter: KeyframeEmitterConfig = field(default_factory=KeyframeEmitterConfig)
 
     # Global settings
     aspect_ratio: tuple[int, int] = (9, 16)

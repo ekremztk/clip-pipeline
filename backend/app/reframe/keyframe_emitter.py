@@ -1,0 +1,163 @@
+"""
+Keyframe Emitter — converts smooth paths to pixel-offset keyframes.
+
+Pure math: takes ShotPath objects (normalized positions) and converts
+to ReframeKeyframes (pixel offsets) for the frontend editor.
+
+Shot transitions are always hard cuts (hold + jump).
+Within-shot movement comes from the path solver (already smooth).
+"""
+import logging
+
+from .config import KeyframeEmitterConfig, ReframeConfig
+from .types import ReframeKeyframe, ReframeResult, Shot, ShotPath
+
+logger = logging.getLogger(__name__)
+
+
+def emit_keyframes(
+    shot_paths: list[ShotPath],
+    shots: list[Shot],
+    src_w: int,
+    src_h: int,
+    fps: float,
+    duration_s: float,
+    config: ReframeConfig,
+) -> ReframeResult:
+    """Convert smooth paths into pixel-offset keyframes for the frontend."""
+    kf_config = config.keyframe_emitter
+    ar_w, ar_h = config.aspect_ratio
+
+    # Compute crop dimensions
+    if config.tracking_mode == "dynamic_xy" and kf_config.y_headroom_zoom > 1.0:
+        crop_h = int(src_h / kf_config.y_headroom_zoom)
+        crop_w = min(int(crop_h * (ar_w / ar_h)), src_w)
+    else:
+        crop_w = min(int(src_h * (ar_w / ar_h)), src_w)
+        crop_h = src_h
+
+    frame_dur = 1.0 / fps if fps > 0 else 1.0 / 30.0
+
+    # Safety margin
+    EDGE_MARGIN = 10.0
+    ox_min = EDGE_MARGIN
+    ox_max = max(EDGE_MARGIN, src_w - crop_w - EDGE_MARGIN)
+    oy_min = EDGE_MARGIN if config.tracking_mode == "dynamic_xy" else 0.0
+    oy_max = max(0.0, src_h - crop_h - EDGE_MARGIN) if config.tracking_mode == "dynamic_xy" else 0.0
+
+    logger.info(
+        "[KeyframeEmitter] crop=%dx%d, src=%dx%d, mode=%s, ox=[%.0f,%.0f], oy=[%.0f,%.0f]",
+        crop_w, crop_h, src_w, src_h, config.tracking_mode,
+        ox_min, ox_max, oy_min, oy_max,
+    )
+
+    keyframes: list[ReframeKeyframe] = []
+    last_ox = -999.0
+    last_oy = -999.0
+
+    for path_idx, path in enumerate(shot_paths):
+        if not path.points:
+            continue
+
+        for pt_idx, pt in enumerate(path.points):
+            ox = _to_offset_x(pt.x, src_w, crop_w)
+            oy = _to_offset_y(pt.y, src_h, crop_h) if config.tracking_mode == "dynamic_xy" else 0.0
+            ox = _clamp(round(ox, 1), ox_min, ox_max)
+            oy = _clamp(round(oy, 1), oy_min, oy_max)
+
+            is_first_point = (pt_idx == 0)
+            is_first_path = (path_idx == 0)
+
+            if is_first_point and not is_first_path and last_ox != -999.0:
+                # Shot boundary: hold previous position, then jump
+                hold_time = max(
+                    keyframes[-1].time_s + 0.001 if keyframes else 0.0,
+                    pt.time_s - frame_dur,
+                )
+                keyframes.append(ReframeKeyframe(
+                    time_s=round(hold_time, 4),
+                    offset_x=last_ox,
+                    offset_y=last_oy,
+                    interpolation="hold",
+                ))
+                keyframes.append(ReframeKeyframe(
+                    time_s=round(pt.time_s, 4),
+                    offset_x=ox,
+                    offset_y=oy,
+                    interpolation="linear",
+                ))
+            else:
+                # Dedup: skip tiny movements within a shot
+                if (not is_first_point
+                        and abs(ox - last_ox) < kf_config.dedup_threshold_px
+                        and abs(oy - last_oy) < kf_config.dedup_threshold_px):
+                    continue
+
+                keyframes.append(ReframeKeyframe(
+                    time_s=round(pt.time_s, 4),
+                    offset_x=ox,
+                    offset_y=oy,
+                    interpolation="linear",
+                ))
+
+            last_ox = ox
+            last_oy = oy
+
+    # Pin last position to video end
+    if keyframes and keyframes[-1].time_s < duration_s - frame_dur:
+        keyframes.append(ReframeKeyframe(
+            time_s=round(duration_s, 4),
+            offset_x=keyframes[-1].offset_x,
+            offset_y=keyframes[-1].offset_y,
+            interpolation="linear",
+        ))
+
+    # Fallback: center crop
+    if not keyframes:
+        center_ox = _clamp(_to_offset_x(0.5, src_w, crop_w), ox_min, ox_max)
+        keyframes = [ReframeKeyframe(
+            time_s=0.0, offset_x=round(center_ox, 1), offset_y=0.0,
+            interpolation="linear",
+        )]
+
+    scene_cuts = [s.start_s for s in shots[1:]]
+
+    for kf in keyframes:
+        logger.info(
+            "[KeyframeEmitter] t=%.3fs ox=%.1f oy=%.1f %s",
+            kf.time_s, kf.offset_x, kf.offset_y, kf.interpolation,
+        )
+
+    logger.info("[KeyframeEmitter] %d keyframes, %d scene cuts", len(keyframes), len(scene_cuts))
+
+    return ReframeResult(
+        keyframes=keyframes,
+        scene_cuts=scene_cuts,
+        src_w=src_w,
+        src_h=src_h,
+        fps=fps,
+        duration_s=duration_s,
+        tracking_mode=config.tracking_mode,
+        metadata={
+            "crop_w": crop_w,
+            "crop_h": crop_h,
+            "total_shots": len(shots),
+            "total_paths": len(shot_paths),
+            "strategies": [p.strategy for p in shot_paths],
+            "aspect_ratio": f"{ar_w}:{ar_h}",
+        },
+    )
+
+
+# --- Coordinate conversion ---------------------------------------------------
+
+def _to_offset_x(center_x_norm: float, src_w: int, crop_w: int) -> float:
+    return center_x_norm * src_w - crop_w / 2
+
+def _to_offset_y(center_y_norm: float, src_h: int, crop_h: int) -> float:
+    return center_y_norm * src_h - crop_h / 2
+
+def _clamp(value: float, lo: float, hi: float) -> float:
+    if hi < lo:
+        return lo
+    return max(lo, min(hi, value))

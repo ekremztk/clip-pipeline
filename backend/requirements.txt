@@ -29,7 +29,10 @@ numpy
 Pillow
 opencv-python-headless
 
-# YOLOv8 for person detection (CPU-only, pulls in torch CPU wheel ~800MB)
+# MediaPipe for face detection + tracking (CPU-only, TFLite backend)
+mediapipe>=0.10.0
+
+# YOLOv8 — kept for backward compat, will be removed after V5 is stable
 ultralytics>=8.1.0
 
 # --- YouTube Tools ---
