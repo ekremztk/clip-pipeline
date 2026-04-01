@@ -145,6 +145,13 @@ function PreviewCanvas({
 			});
 			const renderTime = Math.min(time, lastFrameTime);
 			const frame = Math.floor(renderTime * renderer.fps);
+			// Snap to the exact frame boundary (frame / fps) so the animation engine
+			// always queries at a well-defined time. Rendering at the raw float time
+			// can land within TIME_EPSILON of a hold keyframe and incorrectly return
+			// the next keyframe's value, producing a one-frame glitch at shot cuts.
+			// It also prevents the 1ms epsilon overlap where adjacent split elements
+			// both render at the boundary.
+			const frameTime = frame / renderer.fps;
 
 			if (
 				frame !== lastFrameRef.current ||
@@ -156,7 +163,7 @@ function PreviewCanvas({
 				renderer
 					.renderToCanvas({
 						node: renderTree,
-						time: renderTime,
+						time: frameTime,
 						targetCanvas: canvasRef.current,
 					})
 					.then(() => {

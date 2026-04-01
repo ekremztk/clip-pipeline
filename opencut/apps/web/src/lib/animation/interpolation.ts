@@ -218,10 +218,6 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 		const leftKeyframe = keyframes[keyframeIndex];
 		const rightKeyframe = keyframes[keyframeIndex + 1];
 
-		if (Math.abs(time - rightKeyframe.time) <= TIME_EPSILON_SECONDS) {
-			return rightKeyframe.value;
-		}
-
 		const isBetweenPair = isWithinTimePair({
 			time,
 			leftTime: leftKeyframe.time,
@@ -239,6 +235,13 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 		const progress = clamp01({
 			value: (time - leftKeyframe.time) / span,
 		});
+
+		// When progress reaches 1 (time ≥ rightKeyframe.time), always return
+		// rightKeyframe.value — this is the keyframe activation boundary.
+		// getInterpolatedValue handles everything strictly inside [0, 1).
+		if (progress >= 1) {
+			return rightKeyframe.value;
+		}
 
 		return getInterpolatedValue({
 			leftKeyframe,
