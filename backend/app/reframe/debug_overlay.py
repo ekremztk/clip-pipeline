@@ -12,6 +12,7 @@ Upload the result to R2 and return a public URL.
 """
 import logging
 import os
+import subprocess
 import tempfile
 from typing import Optional
 
@@ -233,4 +234,27 @@ def generate_debug_video(
     out.release()
 
     logger.info("[DebugOverlay] Debug video written: %s (%d frames)", output_path, frame_count)
-    return output_path
+
+    # Re-encode to H.264 so browsers can play the video
+    h264_path = output_path.replace("_debug.mp4", "_debug_h264.mp4")
+    if h264_path == output_path:
+        h264_path = output_path + "_h264.mp4"
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-i", output_path,
+                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                "-movflags", "+faststart",
+                h264_path,
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=180,
+        )
+        os.remove(output_path)
+        logger.info("[DebugOverlay] H.264 re-encode done: %s", h264_path)
+        return h264_path
+    except Exception as e:
+        logger.warning("[DebugOverlay] H.264 re-encode failed: %s — returning mp4v file", e)
+        return output_path

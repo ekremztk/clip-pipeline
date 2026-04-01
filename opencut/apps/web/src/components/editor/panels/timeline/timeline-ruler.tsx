@@ -5,6 +5,7 @@ import { useEditor } from "@/hooks/use-editor";
 import { getRulerConfig, shouldShowLabel } from "@/lib/timeline/ruler-utils";
 import { useScrollPosition } from "@/hooks/timeline/use-scroll-position";
 import { TimelineTick } from "./timeline-tick";
+import { useReframeMetadataStore } from "@/stores/reframe-metadata-store";
 
 interface TimelineRulerProps {
 	zoomLevel: number;
@@ -34,6 +35,8 @@ export function TimelineRuler({
 	const effectiveDuration = Math.max(duration, visibleDuration);
 	const project = editor.project.getActive();
 	const fps = project?.settings.fps ?? DEFAULT_FPS;
+	const sceneCutMarkers = useReframeMetadataStore((s) => s.sceneCutMarkers);
+
 	const { labelIntervalSeconds, tickIntervalSeconds } = getRulerConfig({
 		zoomLevel,
 		fps,
@@ -120,6 +123,15 @@ export function TimelineRuler({
 				onMouseDown={handleRulerMouseDown}
 			>
 				{timelineTicks}
+				{sceneCutMarkers
+					.filter((t) => t >= visibleStartTime && t <= visibleEndTime)
+					.map((t) => (
+						<div
+							key={t}
+							className="pointer-events-none absolute top-0 h-full w-px opacity-80"
+							style={{ left: `${t * pixelsPerSecond}px`, backgroundColor: "#f97316" }}
+						/>
+					))}
 			</div>
 		</div>
 	);
