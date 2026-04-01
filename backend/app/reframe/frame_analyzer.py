@@ -9,6 +9,8 @@ Tasarim kararlari:
 - Analiz 640x360'a kucultulerek yapiliyor (hiz icin)
 """
 import logging
+import os
+from pathlib import Path
 from typing import Optional
 
 import cv2
@@ -19,17 +21,33 @@ from .types import FrameAnalysis, PersonDetection, Shot
 
 logger = logging.getLogger(__name__)
 
+# Persistent model directory — always relative to this file, never cwd
+_MODELS_DIR = Path(__file__).parent.parent.parent / "models"
+
 # Lazy-loaded model singleton
 _model = None
 
 
 def _get_model(model_path: str):
-    """YOLOv8 modelini lazy yukle (ilk cagri)."""
+    """YOLOv8 modelini lazy yukle (ilk cagri). Model her zaman models/ klasorune indirilir."""
     global _model
     if _model is None:
         from ultralytics import YOLO
-        _model = YOLO(model_path)
-        logger.info("[FrameAnalyzer] Model yuklendi: %s", model_path)
+
+        _MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+        # If model_path is relative (e.g. "yolov8s-pose.pt"), pin it to _MODELS_DIR
+        p = Path(model_path)
+        if not p.is_absolute():
+            abs_path = _MODELS_DIR / p.name
+        else:
+            abs_path = p
+
+        # Tell Ultralytics where to store downloads
+        os.environ.setdefault("YOLO_CONFIG_DIR", str(_MODELS_DIR))
+
+        _model = YOLO(str(abs_path))
+        logger.info("[FrameAnalyzer] Model yuklendi: %s", abs_path)
     return _model
 
 

@@ -310,46 +310,49 @@ def _draw_boxes(
 def _extract_json_array(raw: str) -> Optional[list]:
     """
     Robustly extract a JSON array from a Gemini response.
-    Handles: markdown fences, leading text, trailing text, control characters.
-    Returns parsed list or None if extraction fails.
+    Uses simple string operations (index/rindex) — no regex that can truncate.
     """
     if not raw:
         return None
 
-    # 1. Strip markdown code fences (```json ... ``` or ``` ... ```)
-    raw = re.sub(r"```(?:json)?\s*", "", raw)
-    raw = raw.replace("```", "").strip()
+    # 1. Strip markdown fences with plain string ops — never regex on the JSON body
+    text = raw.strip()
+    for fence in ("```json", "```"):
+        if text.startswith(fence):
+            text = text[len(fence):]
+        if text.endswith("```"):
+            text = text[:-3]
+    text = text.strip()
 
-    # 2. Remove control characters that break JSON parsing
-    raw = re.sub(r"[\x00-\x1f\x7f]", " ", raw)
+    # 2. Find first [ and last ] — guaranteed to include the full array
+    try:
+        start = text.index("[")
+        end = text.rindex("]")
+        candidate = text[start:end + 1]
+    except ValueError:
+        # No array brackets — try single object fallback
+        try:
+            s = text.index("{")
+            e = text.rindex("}")
+            obj_text = text[s:e + 1]
+            return [json.loads(obj_text)]
+        except (ValueError, json.JSONDecodeError):
+            logger.warning("[GeminiDirector] No JSON array found in response: %s", raw[:200])
+            return None
 
-    # 3. Find the outermost [...] block
-    match = re.search(r"\[.*\]", raw, re.DOTALL)
-    if not match:
-        # Try to find a single object and wrap it
-        obj_match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if obj_match:
-            try:
-                return [json.loads(obj_match.group())]
-            except json.JSONDecodeError:
-                pass
-        logger.warning("[GeminiDirector] No JSON array found in response: %s", raw[:200])
-        return None
-
-    candidate = match.group().strip()
-
+    # 3. Parse
     try:
         parsed = json.loads(candidate)
         return parsed if isinstance(parsed, list) else [parsed]
     except json.JSONDecodeError:
-        # Last resort: try to fix common issues (trailing commas, single quotes)
-        fixed = re.sub(r",\s*([}\]])", r"\1", candidate)  # trailing commas
-        fixed = fixed.replace("'", '"')                    # single → double quotes
+        # Last resort: strip trailing commas, replace single quotes
+        fixed = re.sub(r",\s*([}\]])", r"\1", candidate)
+        fixed = fixed.replace("'", '"')
         try:
             parsed = json.loads(fixed)
             return parsed if isinstance(parsed, list) else [parsed]
         except json.JSONDecodeError as e:
-            logger.warning("[GeminiDirector] JSON parse failed after cleanup: %s | raw: %s", e, candidate[:200])
+            logger.warning("[GeminiDirector] JSON parse failed: %s | candidate: %s", e, candidate[:300])
             return None
 
 
@@ -389,7 +392,7 @@ def _query_batch(
             contents=contents,
             config=types.GenerateContentConfig(
                 temperature=0.1,
-                max_output_tokens=512,
+                max_output_tokens=1024,
             ),
         )
 
