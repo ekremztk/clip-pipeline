@@ -184,6 +184,12 @@ def run_reframe(
 
         result.content_type = result_content_type
 
+        # Attach full pipeline decisions to metadata for debug analyzer
+        result.metadata["pipeline_decisions"] = _build_pipeline_decisions(
+            shots, frames, director_plan, focus_points, shot_paths,
+            diarization, src_w, src_h, fps, duration_s,
+        )
+
         # Debug mode: generate overlay video and upload to R2
         if debug_mode:
             try:
@@ -252,6 +258,61 @@ def run_reframe(
                 os.remove(temp_path)
             except Exception:
                 pass
+
+
+# --- Pipeline decisions builder (for debug analyzer) ------------------------
+
+def _build_pipeline_decisions(
+    shots, frames, director_plan, focus_points, shot_paths,
+    diarization, src_w, src_h, fps, duration_s,
+) -> dict:
+    """Collect all intermediate pipeline decisions into one dict for Gemini analysis."""
+    shot_data = []
+    for i, s in enumerate(shots):
+        shot_frames = [f for f in frames if f.shot_index == i]
+        face_counts = [len(f.faces) for f in shot_frames]
+        avg_faces = round(sum(face_counts) / len(face_counts), 2) if face_counts else 0
+        shot_data.append({
+            "index": i,
+            "start_s": round(s.start_s, 2),
+            "end_s": round(s.end_s, 2),
+            "duration_s": round(s.duration_s, 2),
+            "type": s.shot_type,
+            "frames_sampled": len(shot_frames),
+            "avg_faces_per_frame": avg_faces,
+            "frames_with_2plus_faces": sum(1 for c in face_counts if c >= 2),
+            "frames_with_1_face": sum(1 for c in face_counts if c == 1),
+            "frames_with_0_faces": sum(1 for c in face_counts if c == 0),
+        })
+
+    subjects = [{"id": s.id, "position": s.position, "description": s.description}
+                for s in director_plan.subjects]
+    directives = [{
+        "start_s": round(d.start_s, 2), "end_s": round(d.end_s, 2),
+        "subject_id": d.subject_id, "importance": d.importance, "reason": d.reason,
+    } for d in director_plan.directives]
+
+    path_summaries = [{
+        "shot_index": p.shot_index,
+        "strategy": p.strategy,
+        "num_points": len(p.points),
+        "x_range": [round(min(pt.x for pt in p.points), 3), round(max(pt.x for pt in p.points), 3)] if p.points else [],
+        "y_range": [round(min(pt.y for pt in p.points), 3), round(max(pt.y for pt in p.points), 3)] if p.points else [],
+    } for p in shot_paths]
+
+    return {
+        "video": {"src_w": src_w, "src_h": src_h, "fps": round(fps, 2), "duration_s": round(duration_s, 2)},
+        "shots": shot_data,
+        "diarization_segments": len(diarization),
+        "gemini_director": {
+            "content_type": director_plan.content_type,
+            "layout": director_plan.layout,
+            "subjects": subjects,
+            "directives": directives,
+        },
+        "focus_points_total": len(focus_points),
+        "path_solver": path_summaries,
+    }
 
 
 # --- False cut detection -----------------------------------------------------

@@ -1,10 +1,15 @@
 """
-Debug Video Analyzer — sends the annotated debug video to Gemini 2.5 Pro
-for a comprehensive frame-by-frame quality analysis of the reframe pipeline.
+Debug Video Analyzer — sends the annotated debug video + full pipeline decision
+data to Gemini 2.5 Pro for a comprehensive, adversarial quality analysis.
 
-Answers 8 structured sections covering face detection, focus resolver,
-path solver, crop quality, shot classification, root causes, and scoring.
+Gemini receives:
+  1. The annotated debug video (visual ground truth)
+  2. Every intermediate decision the pipeline made (shot types, Gemini plan,
+     focus resolver choices, path solver strategies, keyframes)
+
+It cross-validates video evidence vs pipeline decisions and reports discrepancies.
 """
+import json
 import logging
 import os
 import tempfile
@@ -13,106 +18,133 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-_ANALYSIS_PROMPT = """You are a world-class video reframing engineer analyzing a debug visualization video of an AI auto-reframe pipeline.
 
-The video has colored overlays showing internal pipeline state:
-- GREEN rectangles: MediaPipe face detection bounding boxes (track ID + confidence score)
-- RED circles: Focus resolver target point — what the path solver receives as input
-- BLUE circles: Path solver smooth camera position
-- YELLOW rectangle: Final crop window — what the viewer sees in the vertical video
-- WHITE text (top-left): timestamp, shot type, reframe strategy + crop offset math
-- Legend (bottom-left): color definitions
+def _build_prompt(pipeline_context: dict) -> str:
+    pipeline_json = json.dumps(pipeline_context, indent=2, ensure_ascii=False)
 
-CRITICAL GOAL: Evaluate whether the YELLOW crop window correctly frames the most important content at every moment.
+    return f"""You are a ruthless video reframing QA engineer. Your job is to FIND BUGS, not to praise the system.
 
-Watch the ENTIRE video carefully frame by frame and provide a COMPREHENSIVE analysis answering ALL sections below. Be SPECIFIC with timestamps (format: 0:03, 0:07-0:12).
+You are given TWO inputs:
+1. A debug visualization video of an AI auto-reframe pipeline
+2. The complete JSON of every decision the pipeline made
 
----
+**Video overlay legend:**
+- GREEN rectangles = MediaPipe face detections (track ID + confidence)
+- RED circles = Focus resolver target (what path solver receives)
+- BLUE circles = Path solver smooth camera position
+- YELLOW rectangle = Final crop window (what viewer sees)
+- WHITE text top-left = timestamp, shot type, strategy
 
-## SECTION 1: Face Detection Quality
-1a. At which specific timestamps are faces MISSED despite people being clearly visible in frame?
-1b. For each missed detection, what is the likely cause? (profile/side-facing, occlusion, small size, motion blur, low contrast, distance)
-1c. Are there any FALSE POSITIVE detections (green boxes on non-face regions)?
-1d. Roughly what percentage of total duration has at least one green box active?
-1e. Which person/subject is detected MOST reliably vs LEAST reliably?
+**Your mandate:** Watch the video with your own eyes. Then look at the pipeline's decisions. Find every place where the pipeline's decisions caused bad output. Be specific. Be brutal. Do not say "acceptable" when it looks wrong.
 
 ---
 
-## SECTION 2: Focus Resolver Accuracy (Red Dot)
-2a. When no faces are detected, where does the red dot go? Is this position reasonable or is it pointing at empty space?
-2b. In shots with multiple detected faces: does the red dot correctly target the most narratively important subject?
-2c. List EVERY timestamp where the red dot is in a clearly WRONG position (e.g. pointing at the desk, empty background, between two people).
-2d. In closeup shots: does the red dot land on the face accurately?
+## PIPELINE DECISIONS (complete JSON):
+```json
+{pipeline_json}
+```
 
 ---
 
-## SECTION 3: Path Solver Smoothness (Blue Dot)
-3a. Does the blue dot track the red dot smoothly, or is there lag/jitter?
-3b. Are there any sudden jumps or snapping in the blue dot? At which timestamps?
-3c. At shot cut boundaries: does the blue dot transition cleanly to the new position?
-3d. Overall: is the blue dot path smooth enough for a good viewing experience?
+Now analyze the video and answer all sections:
+
+## SECTION 1: Face Detection vs Reality
+Compare what you see (green boxes) vs what the pipeline reports.
+- List every timestamp where a person is visible but has NO green box
+- List every timestamp where green box is on the WRONG person or wrong location
+- Is the face detection data in the JSON consistent with what you see?
+- Where does detection loss cause downstream damage?
+
+## SECTION 2: Shot Classification Audit
+The pipeline's `shots` array says each shot's type (closeup/wide/b_roll).
+Compare each shot's VISUAL REALITY to the pipeline's classification:
+- Is each shot type label CORRECT or WRONG?
+- For EVERY misclassified shot: what is it visually, what did the pipeline say?
+- How does the wrong classification cascade into wrong crop behavior?
+
+## SECTION 3: Gemini Director Audit
+The pipeline's `gemini_director` section shows WHO Gemini told the system to focus on and WHY.
+- For each directive: was the focus decision CORRECT from a storytelling standpoint?
+- Where did Gemini pick the wrong subject? At which timestamp?
+- Where did the Gemini plan conflict with what you actually see in the video?
+- Is the content_type and layout classification accurate?
+
+## SECTION 4: Focus Resolver Audit (Red Dot)
+The pipeline picked a focus point per frame. Compare red dot position to what you see:
+- At which timestamps is the red dot on the WRONG person?
+- At which timestamps is the red dot in EMPTY SPACE (no face nearby)?
+- When faces are lost, does the red dot hold position or jump? Where?
+- List all timestamps where the red dot is clearly wrong, with what it should be.
+
+## SECTION 5: Path Solver Audit (Blue Dot)
+The pipeline used TRACKING or STATIONARY strategy per shot.
+- For each shot: was the strategy choice correct given the visual content?
+- Does the blue dot actually track the red dot or does it lag/overshoot?
+- Any jitter, snapping, or sudden jumps WITHIN a shot (not at cut boundaries)?
+- Are there moments where the path solver's smoothing obscures important motion?
+
+## SECTION 6: Crop Window Audit (Yellow Rectangle) — MOST CRITICAL
+For EVERY shot segment, rate the crop 1-10 and explain:
+- Is the primary subject INSIDE the yellow rectangle?
+- Is the subject well-centered or pushed to an edge?
+- Does the crop miss key action (gesture, expression, reaction)?
+- List the 5 worst crop moments with timestamps and descriptions.
+
+## SECTION 7: Shot Transition / Sliding Audit
+At every shot cut (scene_cuts in the JSON), inspect the yellow rectangle:
+- Does it JUMP INSTANTLY to the new position? (correct behavior)
+- Or does it SLIDE/PAN from the old position to the new? (bug: means wrong interpolation)
+- List every transition where sliding occurs instead of hard cut.
+- Also check: is the first frame of each new shot already in the right position?
+
+## SECTION 8: Root Cause Mapping
+For the top 5 worst moments in the video, trace the exact bug path:
+- What does the viewer see wrong?
+- Which pipeline component made the decision that caused it?
+- Which specific field in the JSON shows the wrong decision?
+- What the field SHOULD have been set to instead?
+
+## SECTION 9: Cascading Failure Analysis
+Identify chain reactions where one wrong decision caused multiple downstream failures.
+Format: [wrong decision] → [intermediate effect] → [visible result in video]
+
+## SECTION 10: Priority Fix List
+List the top 5 code changes ranked by viewer impact.
+For each: component name, specific logic to change, expected improvement.
+
+## SECTION 11: Score per Shot + Overall
+Rate each shot 1-10 (10 = perfect vertical reframe).
+Then give an overall pipeline quality score 1-10.
+Be harsh. A score above 7 requires perfect subject framing with no wrong-person tracking.
 
 ---
-
-## SECTION 4: Crop Window Quality — MOST IMPORTANT (Yellow Rectangle)
-For EACH distinct shot segment you observe, evaluate the yellow crop:
-4a. Is the main subject INSIDE the yellow rectangle? Or do they exit the frame?
-4b. Is the subject reasonably centered, or pushed uncomfortably to one edge?
-4c. Rate each shot: PERFECT / GOOD / ACCEPTABLE / BAD / CRITICAL_FAILURE
-4d. List the TOP 3 worst moments where the crop window completely misses the subject.
-
----
-
-## SECTION 5: Shot-by-Shot Breakdown
-For each shot boundary you detect (look for sudden yellow rectangle jumps):
-5a. What type of shot is it visually? (wide/two-shot, closeup, b-roll/cutaway)
-5b. What is the pipeline's classification? (shown in white text top-left)
-5c. Is the classification CORRECT or WRONG?
-5d. What does the crop show vs what it SHOULD show?
-
----
-
-## SECTION 6: Root Cause Diagnosis
-6a. What is the SINGLE PRIMARY reason the reframe fails in the worst moments?
-6b. Is the failure caused by: face detection blindness / wrong fallback position / path solver lag / shot misclassification / or something else?
-6c. Which pipeline component (face_tracker / focus_resolver / path_solver / gemini_director / keyframe_emitter) is responsible for the most failures?
-
----
-
-## SECTION 7: Priority Fix List
-List the TOP 5 improvements ranked by visual impact:
-For each: describe the problem, the timestamp where it's clearest, and what the fix should produce.
-
----
-
-## SECTION 8: Quality Scores
-Score each shot segment 1-10 (10 = perfect vertical reframe, 1 = completely wrong):
-Format: [timestamp range] [shot description] → score/10 — one-line reason
-
-Overall pipeline quality score: X/10
-
----
-
-Be detailed and precise. Your analysis will be used by engineers to fix specific bugs in the pipeline code.
-"""
+Be specific with timestamps (0:03, 0:07-0:12 format).
+Cross-reference video observations with JSON data constantly.
+If the JSON says TRACKING but the crop is not moving, say so explicitly.
+If Gemini said focus on Subject A but the red dot is on Subject B, say so explicitly."""
 
 
-def analyze_debug_video(debug_video_url: str, reframe_job_id: str) -> dict:
+def analyze_debug_video(
+    debug_video_url: str,
+    reframe_job_id: str,
+    pipeline_context: dict,
+) -> dict:
     """
-    Download the debug video from R2, send to Gemini 2.5 Pro, return structured analysis.
-
-    Returns dict with keys: analysis (str), job_id (str), model (str)
+    Download the debug video from R2 (authenticated), combine with full pipeline
+    decision JSON, send to Gemini 2.5 Pro for adversarial cross-validation analysis.
     """
-    logger.info("[DebugAnalyzer] Starting analysis for job %s, url=%s", reframe_job_id, debug_video_url)
+    logger.info(
+        "[DebugAnalyzer] Starting analysis for job %s, url=%s",
+        reframe_job_id, debug_video_url,
+    )
 
     temp_path = None
     try:
-        # Extract R2 key from the public URL and download via R2 SDK
-        # (debug/ path is not public, must use authenticated access)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4",
                                          dir=str(settings.UPLOAD_DIR)) as tmp:
             temp_path = tmp.name
 
+        # Download via R2 SDK (debug/ path is not publicly accessible)
         r2_key = debug_video_url.split(settings.R2_PUBLIC_URL.rstrip("/") + "/", 1)[-1]
         logger.info("[DebugAnalyzer] Downloading via R2 SDK: key=%s", r2_key)
 
@@ -125,14 +157,15 @@ def analyze_debug_video(debug_video_url: str, reframe_job_id: str) -> dict:
         size_mb = os.path.getsize(temp_path) / (1024 * 1024)
         logger.info("[DebugAnalyzer] Downloaded %.1fMB → %s", size_mb, temp_path)
 
-        # Send to Gemini 2.5 Pro
+        prompt = _build_prompt(pipeline_context)
+
         from app.services.gemini_client import analyze_video as gemini_analyze_video
         model = settings.GEMINI_MODEL_PRO
 
-        logger.info("[DebugAnalyzer] Sending to Gemini %s...", model)
+        logger.info("[DebugAnalyzer] Sending to Gemini %s (video + pipeline JSON)...", model)
         raw = gemini_analyze_video(
             video_path=temp_path,
-            prompt=_ANALYSIS_PROMPT,
+            prompt=prompt,
             model=model,
             json_mode=False,
         )

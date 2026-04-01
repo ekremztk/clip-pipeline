@@ -224,6 +224,7 @@ async def start_reframe(
                 src_h=result.src_h,
                 fps=result.fps,
                 duration_s=result.duration_s,
+                pipeline_metadata=result.metadata,
                 error=None,
             )
             print(f"[ReframeRoute] Job {reframe_job_id} tamamlandı — "
@@ -387,6 +388,7 @@ async def start_reframe_debug(
                 src_h=result.src_h,
                 fps=result.fps,
                 duration_s=result.duration_s,
+                pipeline_metadata=result.metadata,
                 error=None,
             )
             print(f"[ReframeDebug] Job {reframe_job_id} done — debug_url={debug_url}")
@@ -416,7 +418,7 @@ async def analyze_debug_video(
         resp = (
             get_client()
             .table("reframe_jobs")
-            .select("id, user_id, status, step")
+            .select("id, user_id, status, step, pipeline_metadata, keyframes, scene_cuts, src_w, src_h, fps, duration_s")
             .eq("id", reframe_job_id)
             .execute()
         )
@@ -441,9 +443,20 @@ async def analyze_debug_video(
     if not debug_video_url.startswith("http"):
         raise HTTPException(status_code=400, detail="Invalid debug video URL")
 
+    # Build pipeline context from DB data
+    pipeline_context = {
+        "pipeline_metadata": job.get("pipeline_metadata") or {},
+        "keyframes": job.get("keyframes") or [],
+        "scene_cuts": job.get("scene_cuts") or [],
+        "src_w": job.get("src_w"),
+        "src_h": job.get("src_h"),
+        "fps": job.get("fps"),
+        "duration_s": job.get("duration_s"),
+    }
+
     try:
         from app.reframe.debug_analyzer import analyze_debug_video as run_analysis
-        result = run_analysis(debug_video_url, reframe_job_id)
+        result = run_analysis(debug_video_url, reframe_job_id, pipeline_context)
         return result
     except Exception as e:
         print(f"[ReframeRoute] Debug analysis failed: {e}")
