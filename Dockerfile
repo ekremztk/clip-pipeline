@@ -14,6 +14,10 @@ RUN apt-get update && apt-get install -y \
     libswresample-dev \
     libswscale-dev \
     pkg-config \
+    libgles2 \
+    libgl1 \
+    libegl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -21,9 +25,6 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir --upgrade yt-dlp
-
-# Pre-download YOLOv8 nano pose model at build time (avoids runtime download)
-RUN python -c "from ultralytics import YOLO; YOLO('yolov8n-pose.pt')" 2>&1 | tail -3
 
 COPY backend/ .
 RUN mkdir -p output temp_uploads
