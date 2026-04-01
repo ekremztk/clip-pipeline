@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 # Model path — always relative to backend/models/
 _MODELS_DIR = Path(__file__).parent.parent.parent / "models"
-_MODEL_FILENAME = "blaze_face_short_range.tflite"
-_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite"
+_MODEL_FILENAME = "blaze_face_full_range.tflite"
+_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/latest/blaze_face_full_range.tflite"
 
 # Lazy-loaded detector
 _detector = None
@@ -56,7 +56,7 @@ def _get_detector(config: FaceTrackerConfig):
         min_detection_confidence=config.min_detection_confidence,
     )
     _detector = vision.FaceDetector.create_from_options(options)
-    logger.info("[FaceTracker] MediaPipe FaceDetector initialized (blaze_face_short_range)")
+    logger.info("[FaceTracker] MediaPipe FaceDetector initialized (blaze_face_full_range)")
     return _detector
 
 
