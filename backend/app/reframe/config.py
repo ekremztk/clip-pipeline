@@ -45,16 +45,20 @@ class GeminiDirectorConfig:
 class PathSolverConfig:
     """Kinematic path solver parameters (ported from AutoFlip)."""
     # Strategy selection thresholds
-    # How to set these two values:
-    #   stationary_threshold > motion_threshold must always hold.
-    #   motion_threshold: below this, frame-to-frame movement is treated as noise and skipped.
-    #     Too high → subtle head nods ignored → camera freezes on closeups/podcasts.
-    #   stationary_threshold: below this, the entire shot is classified as STATIONARY
-    #     (single fixed position, no tracking keyframes emitted).
-    #     Too low → even gentle head movement triggers TRACKING, adding unnecessary keyframes.
-    # The gap between them is the "tracking zone": movement large enough to track per-frame
-    # but not large enough to classify the shot as having significant motion overall.
-    stationary_threshold: float = 0.05          # Max spread to use stationary mode (5% of frame)
+    # Three-zone model (motion_threshold < stationary_threshold < subject_switch_threshold):
+    #   [0, motion_threshold)         → noise, skip this frame's movement entirely
+    #   [motion_threshold, stationary_threshold) → micro-tracking zone: track per-frame but
+    #                                   classify the whole shot as STATIONARY (stable crop)
+    #   [stationary_threshold, subject_switch_threshold) → genuine motion → TRACKING
+    #   [subject_switch_threshold, 1]  → person changed → teleport
+    #
+    # stationary_threshold = 0.15 (15% of frame width):
+    #   Podcast closeup — person nods/leans but stays roughly in place → spread 0.03-0.12
+    #   → STATIONARY → single stable crop (no jitter from chasing micro-movements).
+    #   Subject walking across frame → spread > 0.15 → TRACKING.
+    # motion_threshold = 0.005 (0.5% = ~10px at 1920px):
+    #   Filters sensor/detection noise. Catches genuine micro-movements within a TRACKING shot.
+    stationary_threshold: float = 0.15          # Max spread to use stationary mode (15% of frame)
     panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
 
     # Kinematic constraints
