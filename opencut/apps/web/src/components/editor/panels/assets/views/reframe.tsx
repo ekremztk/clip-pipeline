@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { useEditor } from "@/hooks/use-editor";
-import { runReframe, type ReframeProgress, type ReframeResult, type ReframeOptions } from "@/lib/reframe/engine";
+import { runReframe, analyzeDebugVideo, type ReframeProgress, type ReframeResult, type ReframeOptions } from "@/lib/reframe/engine";
 import type { ReframeAspectRatio, ReframeContentType, ReframeTrackingMode } from "@/lib/reframe/types";
-import { CheckCheck, ExternalLink, RotateCcw, Smartphone } from "lucide-react";
+import { BrainCircuit, CheckCheck, ChevronDown, ChevronUp, ExternalLink, RotateCcw, Smartphone } from "lucide-react";
 
 const ASPECT_RATIO_OPTIONS: { value: ReframeAspectRatio; label: string }[] = [
 	{ value: "9:16", label: "9:16 — Vertical" },
@@ -41,10 +41,33 @@ export function ReframeView() {
 	const [results, setResults] = useState<ReframeResult[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
+	const [analyzingJobId, setAnalyzingJobId] = useState<string | null>(null);
+	const [analysisResults, setAnalysisResults] = useState<Record<string, string>>({});
+	const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
+
 	const reset = () => {
 		setResults(null);
 		setError(null);
 		setProgress(null);
+		setAnalysisResults({});
+		setExpandedAnalysis({});
+	};
+
+	const handleAnalyze = async (jobId: string) => {
+		try {
+			setAnalyzingJobId(jobId);
+			const analysis = await analyzeDebugVideo(jobId);
+			setAnalysisResults((prev) => ({ ...prev, [jobId]: analysis }));
+			setExpandedAnalysis((prev) => ({ ...prev, [jobId]: true }));
+		} catch (err) {
+			setAnalysisResults((prev) => ({
+				...prev,
+				[jobId]: `Analysis failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+			}));
+			setExpandedAnalysis((prev) => ({ ...prev, [jobId]: true }));
+		} finally {
+			setAnalyzingJobId(null);
+		}
 	};
 
 	const handleReframe = async () => {
@@ -230,19 +253,62 @@ export function ReframeView() {
 						</div>
 
 						{results.some((r) => r.debugVideoUrl) && (
-							<div className="flex flex-col gap-1.5">
+							<div className="flex flex-col gap-2">
 								<span className="text-xs font-medium text-[#a3a3a3]">Debug videos</span>
 								{results.filter((r) => r.debugVideoUrl).map((r) => (
-									<a
-										key={r.elementId}
-										href={r.debugVideoUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="flex items-center gap-1.5 rounded-md border border-[#262626] px-2.5 py-2 text-xs text-[#a3a3a3] transition-colors hover:border-[#404040] hover:text-white"
-									>
-										<ExternalLink className="size-3 shrink-0" />
-										<span className="truncate">{r.debugVideoUrl}</span>
-									</a>
+									<div key={r.elementId} className="flex flex-col gap-1.5">
+										<div className="flex items-center gap-1.5">
+											<a
+												href={r.debugVideoUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-[#262626] px-2.5 py-2 text-xs text-[#a3a3a3] transition-colors hover:border-[#404040] hover:text-white"
+											>
+												<ExternalLink className="size-3 shrink-0" />
+												<span className="truncate">{r.debugVideoUrl}</span>
+											</a>
+											{r.reframeJobId && (
+												<button
+													onClick={() => r.reframeJobId && handleAnalyze(r.reframeJobId)}
+													disabled={analyzingJobId === r.reframeJobId}
+													title="Analyze with Gemini 2.5 Pro"
+													className="flex shrink-0 items-center gap-1 rounded-md border border-[#262626] px-2 py-2 text-xs text-[#a3a3a3] transition-colors hover:border-[#404040] hover:text-white disabled:opacity-50"
+												>
+													{analyzingJobId === r.reframeJobId ? (
+														<Spinner className="size-3" />
+													) : (
+														<BrainCircuit className="size-3" />
+													)}
+												</button>
+											)}
+										</div>
+
+										{r.reframeJobId && analysisResults[r.reframeJobId] && (
+											<div className="flex flex-col gap-1 rounded-md border border-[#1a1a1a] bg-[#0a0a0a]">
+												<button
+													onClick={() => r.reframeJobId && setExpandedAnalysis((prev) => ({
+														...prev,
+														[r.reframeJobId!]: !prev[r.reframeJobId!],
+													}))}
+													className="flex items-center justify-between px-3 py-2 text-xs text-[#a3a3a3] hover:text-white"
+												>
+													<span className="font-medium">Gemini Analysis</span>
+													{expandedAnalysis[r.reframeJobId] ? (
+														<ChevronUp className="size-3" />
+													) : (
+														<ChevronDown className="size-3" />
+													)}
+												</button>
+												{expandedAnalysis[r.reframeJobId] && (
+													<div className="border-t border-[#1a1a1a] px-3 pb-3 pt-2">
+														<pre className="whitespace-pre-wrap font-mono text-[10px] leading-relaxed text-[#737373]">
+															{analysisResults[r.reframeJobId]}
+														</pre>
+													</div>
+												)}
+											</div>
+										)}
+									</div>
 								))}
 							</div>
 						)}

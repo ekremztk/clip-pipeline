@@ -70,12 +70,28 @@ def resolve_focus(
         )
 
         # Resolve position based on shot type
-        if shot_type == SHOT_BROLL or not frame.faces:
-            # B-roll or no faces: center crop
+        if shot_type == SHOT_BROLL:
+            # B-roll: center crop — no subject to track
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=0.5, y=0.4,
                 weight=0.3, shot_index=shot_idx,
             ))
+
+        elif not frame.faces:
+            # No faces detected (profile angle, occlusion, etc.)
+            # Use Gemini's subject position hint instead of blindly centering
+            target_pos = subject_positions.get(
+                directive.subject_id if directive else "", "",
+            )
+            x = _position_to_x(target_pos)
+            focus_points.append(FocusPoint(
+                time_s=frame.time_s, x=x, y=0.35,
+                weight=0.4, shot_index=shot_idx,
+            ))
+            logger.debug(
+                "[FocusResolver] t=%.2fs: no faces, using Gemini hint '%s' → x=%.2f",
+                frame.time_s, target_pos, x,
+            )
 
         elif shot_type == SHOT_CLOSEUP:
             # Closeup: center on the largest/most prominent face
@@ -132,6 +148,17 @@ def _get_directive_at(
         if d.start_s <= time_s < d.end_s:
             return d
     return None
+
+
+def _position_to_x(position: str) -> float:
+    """Convert Gemini subject position hint to normalized X coordinate."""
+    if position == "left":
+        return 0.25
+    elif position == "right":
+        return 0.75
+    elif position == "center":
+        return 0.5
+    return 0.5
 
 
 def _pick_face_by_position(

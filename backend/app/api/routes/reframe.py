@@ -400,6 +400,56 @@ async def start_reframe_debug(
     return {"reframe_job_id": reframe_job_id}
 
 
+@router.post("/analyze-debug/{reframe_job_id}")
+async def analyze_debug_video(
+    reframe_job_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Send the debug video for this job to Gemini 2.5 Pro for a comprehensive
+    frame-by-frame quality analysis of the reframe pipeline.
+
+    Returns structured analysis covering face detection, focus resolver,
+    path solver, crop quality, shot classification, and improvement priorities.
+    """
+    try:
+        resp = (
+            get_client()
+            .table("reframe_jobs")
+            .select("id, user_id, status, step")
+            .eq("id", reframe_job_id)
+            .execute()
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database error")
+
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Reframe job not found")
+
+    job = resp.data[0]
+    if str(job.get("user_id")) != str(current_user["id"]):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    if job.get("status") != "done":
+        raise HTTPException(status_code=400, detail="Job is not done yet")
+
+    step = job.get("step", "")
+    if "Debug: " not in step:
+        raise HTTPException(status_code=400, detail="No debug video found for this job. Run with debug mode enabled.")
+
+    debug_video_url = step.split("Debug: ", 1)[1].strip()
+    if not debug_video_url.startswith("http"):
+        raise HTTPException(status_code=400, detail="Invalid debug video URL")
+
+    try:
+        from app.reframe.debug_analyzer import analyze_debug_video as run_analysis
+        result = run_analysis(debug_video_url, reframe_job_id)
+        return result
+    except Exception as e:
+        print(f"[ReframeRoute] Debug analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)[:200]}")
+
+
 @router.get("/metadata/{job_id}/{clip_id}")
 async def get_reframe_metadata(
     job_id: str,

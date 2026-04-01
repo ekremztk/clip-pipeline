@@ -43,6 +43,7 @@ export interface ReframeResult {
 	elementId: string;
 	keyframeCount: number;
 	debugVideoUrl?: string;
+	reframeJobId?: string;
 }
 
 export type { ReframeOptions };
@@ -138,7 +139,7 @@ export async function runReframe(
 			allSceneCuts.push(...scene_cuts);
 		}
 
-		results.push({ elementId: element.id, keyframeCount, debugVideoUrl });
+		results.push({ elementId: element.id, keyframeCount, debugVideoUrl, reframeJobId: reframe_job_id });
 	}
 
 	// Store scene cuts in metadata store so timeline can render markers
@@ -333,6 +334,20 @@ async function uploadFileToBackend(file: File): Promise<string> {
 
 	const { local_path } = await res.json();
 	return local_path as string;
+}
+
+export async function analyzeDebugVideo(reframeJobId: string): Promise<string> {
+	const token = await getAuthToken();
+	const res = await fetch(`${PROGNOT_API}/reframe/analyze-debug/${reframeJobId}`, {
+		method: "POST",
+		headers: token ? { Authorization: `Bearer ${token}` } : {},
+	});
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({ detail: res.statusText }));
+		throw new Error(err.detail ?? `Analysis failed: ${res.status}`);
+	}
+	const data = await res.json();
+	return data.analysis as string;
 }
 
 function sleep(ms: number): Promise<void> {
