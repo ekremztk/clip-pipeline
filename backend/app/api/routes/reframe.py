@@ -311,6 +311,95 @@ async def get_reframe_status(
     )
 
 
+@router.post("/debug", status_code=201)
+async def start_reframe_debug(
+    req: ReframeRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Debug mode: same as /process but generates an annotated overlay video.
+    Result includes metadata.debug_video_url → R2 public URL of debug video.
+    Use this to visually inspect MediaPipe detections, focus points, crop window.
+    """
+    if not req.clip_url and not req.clip_local_path:
+        raise HTTPException(status_code=400, detail="clip_url veya clip_local_path zorunlu")
+
+    aspect_ratio = _sanitize_aspect_ratio(req.aspect_ratio)
+    tracking_mode = _sanitize_tracking_mode(req.tracking_mode)
+    content_type = _sanitize_content_type(req.content_type)
+    effective_hint = content_type or req.strategy
+
+    # Create job row
+    try:
+        row = {
+            "user_id": current_user["id"],
+            "status": "queued",
+            "step": "Queued (debug)",
+            "percent": 0,
+            "clip_url": req.clip_url,
+            "clip_local_path": req.clip_local_path,
+            "clip_id": req.clip_id,
+            "job_id": req.job_id,
+            "clip_start": req.clip_start,
+            "clip_end": req.clip_end,
+            "strategy": req.strategy,
+            "aspect_ratio": aspect_ratio,
+            "tracking_mode": tracking_mode,
+        }
+        resp = get_client().table("reframe_jobs").insert(row).execute()
+        reframe_job_id = resp.data[0]["id"]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Job oluşturulamadı: {e}")
+
+    def _run() -> None:
+        try:
+            _update_job(reframe_job_id, status="processing", step="Starting (debug)...", percent=0)
+
+            def on_progress(step: str, pct: int) -> None:
+                _update_job(reframe_job_id, step=f"[DEBUG] {step}", percent=pct)
+
+            result = run_reframe(
+                clip_url=req.clip_url,
+                clip_local_path=req.clip_local_path,
+                clip_id=req.clip_id,
+                job_id=req.job_id,
+                clip_start=req.clip_start,
+                clip_end=req.clip_end,
+                strategy=req.strategy,
+                aspect_ratio=aspect_ratio,
+                tracking_mode=tracking_mode,
+                content_type_hint=effective_hint,
+                on_progress=on_progress,
+                debug_mode=True,
+            )
+
+            keyframes_dicts = _keyframes_to_dicts(result.keyframes)
+            debug_url = result.metadata.get("debug_video_url", "")
+
+            _update_job(
+                reframe_job_id,
+                status="done",
+                step=f"Done! Debug: {debug_url}",
+                percent=100,
+                keyframes=keyframes_dicts,
+                scene_cuts=result.scene_cuts,
+                src_w=result.src_w,
+                src_h=result.src_h,
+                fps=result.fps,
+                duration_s=result.duration_s,
+                error=None,
+            )
+            print(f"[ReframeDebug] Job {reframe_job_id} done — debug_url={debug_url}")
+
+        except Exception as e:
+            print(f"[ReframeDebug] Job {reframe_job_id} failed: {e}")
+            _update_job(reframe_job_id, status="error", step="Failed", percent=0, error=str(e)[:500])
+
+    import threading
+    threading.Thread(target=_run, daemon=True).start()
+    return {"reframe_job_id": reframe_job_id}
+
+
 @router.get("/metadata/{job_id}/{clip_id}")
 async def get_reframe_metadata(
     job_id: str,

@@ -60,6 +60,7 @@ def run_reframe(
     tracking_mode: str = "dynamic_xy",
     content_type_hint: Optional[str] = None,
     on_progress: Optional[Callable[[str, int], None]] = None,
+    debug_mode: bool = False,
 ) -> ReframeResult:
     """
     V5 reframe pipeline.
@@ -182,6 +183,55 @@ def run_reframe(
         )
 
         result.content_type = result_content_type
+
+        # Debug mode: generate overlay video and upload to R2
+        if debug_mode:
+            try:
+                progress("Generating debug video...", 92)
+                from .debug_overlay import generate_debug_video
+                from app.services.r2_client import get_r2_client
+                from app.config import settings as s
+
+                # Get crop dimensions from result metadata
+                crop_w = result.metadata.get("crop_w", 0)
+                crop_h = result.metadata.get("crop_h", 0)
+
+                debug_path = generate_debug_video(
+                    input_path=input_path,
+                    src_w=src_w,
+                    src_h=src_h,
+                    fps=fps,
+                    shots=shots,
+                    frames=frames,
+                    focus_points=focus_points,
+                    shot_paths=shot_paths,
+                    keyframes=result.keyframes,
+                    crop_w=crop_w,
+                    crop_h=crop_h,
+                )
+
+                # Upload to R2
+                r2 = get_r2_client()
+                debug_key = f"debug/reframe_debug_{uuid.uuid4().hex}.mp4"
+                with open(debug_path, "rb") as f:
+                    r2.put_object(
+                        Bucket=s.R2_BUCKET_NAME,
+                        Key=debug_key,
+                        Body=f,
+                        ContentType="video/mp4",
+                    )
+                debug_url = f"{s.R2_PUBLIC_URL}/{debug_key}"
+                result.metadata["debug_video_url"] = debug_url
+                logger.info("[Reframe] Debug video uploaded: %s", debug_url)
+
+                # Clean up local debug file
+                try:
+                    os.remove(debug_path)
+                except Exception:
+                    pass
+
+            except Exception as e:
+                logger.error("[Reframe] Debug video generation failed: %s", e)
 
         progress("Done!", 100)
         logger.info(
