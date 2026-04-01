@@ -293,9 +293,10 @@ function applyReframeToElement(
 			interpolation: interp,
 		});
 
-		// Y keyframe — backend non-zero offset_y döndürdüğünde uygula
-		// (backend içerik türüne göre DYNAMIC_XY seçer, frontend option'ı beklemez)
-		if (kf.offset_y !== undefined && kf.offset_y !== 0) {
+		// Y keyframe — always emit for hold keyframes (shot/subject boundaries) so
+		// Y position resets correctly even when offset_y=0. For linear keyframes,
+		// skip zero-Y to avoid unnecessary keyframes.
+		if (kf.offset_y !== undefined && (interp === "hold" || kf.offset_y !== 0)) {
 			const posY = scaledHeight / 2 - canvasHeight / 2 - kf.offset_y * containScale;
 			kfBatch.push({
 				trackId,

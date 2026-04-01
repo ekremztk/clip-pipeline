@@ -463,6 +463,17 @@ export function splitAnimationsAtTime({
 					? "hold"
 					: "linear";
 
+			// Determine the interpolation of the span containing the split point.
+			// When splitting inside a "hold" segment, the right boundary keyframe
+			// must also be "hold" so the [0, next_kf] range doesn't linear-interpolate
+			// between the two hold values (which would produce a visible glitch slide).
+			const spanLeftKeyframe = [...normalizedChannel.keyframes]
+				.filter((kf) => kf.time <= splitTime)
+				.at(-1);
+			const spanInterpolation =
+				(spanLeftKeyframe as { interpolation?: AnimationInterpolation } | undefined)
+					?.interpolation ?? boundaryInterpolation;
+
 			if (!hasBoundaryOnLeft) {
 				leftKeyframes = [
 					...leftKeyframes,
@@ -483,7 +494,7 @@ export function splitAnimationsAtTime({
 						id: generateUUID(),
 						time: 0,
 						value: boundaryValue,
-						interpolation: boundaryInterpolation,
+						interpolation: spanInterpolation,
 					}),
 					...rightKeyframes,
 				];
