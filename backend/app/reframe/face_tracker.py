@@ -138,18 +138,22 @@ def classify_shots(
         total = len(counts)
         wide = sum(1 for c in counts if c >= 2)
         single = sum(1 for c in counts if c == 1)
-        empty = sum(1 for c in counts if c == 0)
+
+        # Ratio of frames where at least one face was detected
+        face_frame_ratio = (wide + single) / total
 
         if wide > total / 2:
             shot.shot_type = SHOT_WIDE
         elif single > total / 2:
             shot.shot_type = SHOT_CLOSEUP
-        elif empty > total / 2:
-            shot.shot_type = SHOT_BROLL
-        elif wide >= single:
-            shot.shot_type = SHOT_WIDE
+        elif face_frame_ratio >= 0.10:
+            # At least 10% of frames have a face — people are present.
+            # Wide shots with profile faces often get <50% detection,
+            # but they are NOT b-roll. Classify by which is more common.
+            shot.shot_type = SHOT_WIDE if wide >= single else SHOT_CLOSEUP
         else:
-            shot.shot_type = SHOT_CLOSEUP
+            # Zero or near-zero face detections — true b-roll / no people
+            shot.shot_type = SHOT_BROLL
 
         logger.info(
             "[FaceTracker] Shot %d (%.1f-%.1fs): %s — %d wide, %d single, %d empty",

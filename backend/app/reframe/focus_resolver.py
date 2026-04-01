@@ -55,6 +55,11 @@ def resolve_focus(
 
     focus_points: list[FocusPoint] = []
 
+    # Look-back: last known face position per shot index
+    # When faces temporarily disappear (profile angle), hold the last known position
+    last_known_x: dict[int, float] = {}
+    last_known_y: dict[int, float] = {}
+
     for frame in frames:
         shot = _get_shot_at(frame.time_s, shots)
         if shot is None:
@@ -79,24 +84,35 @@ def resolve_focus(
 
         elif not frame.faces:
             # No faces detected (profile angle, occlusion, etc.)
-            # Use Gemini's subject position hint instead of blindly centering
-            target_pos = subject_positions.get(
-                directive.subject_id if directive else "", "",
-            )
-            x = _position_to_x(target_pos)
+            # Priority 1: last known position from this shot (look-back)
+            # Priority 2: Gemini's subject position hint
+            if shot_idx in last_known_x:
+                x = last_known_x[shot_idx]
+                y = last_known_y[shot_idx]
+                logger.debug(
+                    "[FocusResolver] t=%.2fs: no faces, holding last known (%.2f, %.2f)",
+                    frame.time_s, x, y,
+                )
+            else:
+                target_pos = subject_positions.get(
+                    directive.subject_id if directive else "", "",
+                )
+                x = _position_to_x(target_pos)
+                y = 0.35
+                logger.debug(
+                    "[FocusResolver] t=%.2fs: no faces, no history, Gemini hint '%s' → x=%.2f",
+                    frame.time_s, target_pos, x,
+                )
             focus_points.append(FocusPoint(
-                time_s=frame.time_s, x=x, y=0.35,
+                time_s=frame.time_s, x=x, y=y,
                 weight=0.4, shot_index=shot_idx,
             ))
-            logger.debug(
-                "[FocusResolver] t=%.2fs: no faces, using Gemini hint '%s' → x=%.2f",
-                frame.time_s, target_pos, x,
-            )
 
         elif shot_type == SHOT_CLOSEUP:
             # Closeup: center on the largest/most prominent face
-            # Ignore Gemini's subject pick — only 1 person visible
             face = max(frame.faces, key=lambda f: f.face_width * f.face_height)
+            last_known_x[shot_idx] = face.face_x
+            last_known_y[shot_idx] = face.face_y
             focus_points.append(FocusPoint(
                 time_s=frame.time_s,
                 x=face.face_x,
@@ -111,6 +127,8 @@ def resolve_focus(
                 directive.subject_id if directive else "", "",
             )
             face = _pick_face_by_position(frame.faces, target_pos)
+            last_known_x[shot_idx] = face.face_x
+            last_known_y[shot_idx] = face.face_y
             focus_points.append(FocusPoint(
                 time_s=frame.time_s,
                 x=face.face_x,
