@@ -45,7 +45,16 @@ class GeminiDirectorConfig:
 class PathSolverConfig:
     """Kinematic path solver parameters (ported from AutoFlip)."""
     # Strategy selection thresholds
-    stationary_threshold: float = 0.02          # Max spread to use stationary mode
+    # How to set these two values:
+    #   stationary_threshold > motion_threshold must always hold.
+    #   motion_threshold: below this, frame-to-frame movement is treated as noise and skipped.
+    #     Too high → subtle head nods ignored → camera freezes on closeups/podcasts.
+    #   stationary_threshold: below this, the entire shot is classified as STATIONARY
+    #     (single fixed position, no tracking keyframes emitted).
+    #     Too low → even gentle head movement triggers TRACKING, adding unnecessary keyframes.
+    # The gap between them is the "tracking zone": movement large enough to track per-frame
+    # but not large enough to classify the shot as having significant motion overall.
+    stationary_threshold: float = 0.05          # Max spread to use stationary mode (5% of frame)
     panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
 
     # Kinematic constraints
@@ -54,7 +63,8 @@ class PathSolverConfig:
 
     # Smoothing
     median_filter_window: int = 5               # Median filter size for jitter removal
-    motion_threshold: float = 0.02              # Ignore motion smaller than this (hysteresis)
+    motion_threshold: float = 0.005             # Ignore motion smaller than this (hysteresis)
+    # At 1920px wide: 0.005 * 1920 = ~10px — catches subtle head nods in podcasts
 
     # Subject switch detection — large jump in focus means directive changed persons
     # Path solver teleports (bypasses velocity limit) when jump > this threshold (normalized 0-1)
