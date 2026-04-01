@@ -8,7 +8,6 @@ path solver, crop quality, shot classification, root causes, and scoring.
 import logging
 import os
 import tempfile
-import urllib.request
 
 from app.config import settings
 
@@ -108,14 +107,21 @@ def analyze_debug_video(debug_video_url: str, reframe_job_id: str) -> dict:
 
     temp_path = None
     try:
-        # Download debug video to temp file
-        suffix = ".mp4"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix,
+        # Extract R2 key from the public URL and download via R2 SDK
+        # (debug/ path is not public, must use authenticated access)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4",
                                          dir=str(settings.UPLOAD_DIR)) as tmp:
             temp_path = tmp.name
 
-        logger.info("[DebugAnalyzer] Downloading debug video...")
-        urllib.request.urlretrieve(debug_video_url, temp_path)
+        r2_key = debug_video_url.split(settings.R2_PUBLIC_URL.rstrip("/") + "/", 1)[-1]
+        logger.info("[DebugAnalyzer] Downloading via R2 SDK: key=%s", r2_key)
+
+        from app.services.r2_client import get_r2_client
+        r2 = get_r2_client()
+        obj = r2.get_object(Bucket=settings.R2_BUCKET_NAME, Key=r2_key)
+        with open(temp_path, "wb") as f:
+            f.write(obj["Body"].read())
+
         size_mb = os.path.getsize(temp_path) / (1024 * 1024)
         logger.info("[DebugAnalyzer] Downloaded %.1fMB → %s", size_mb, temp_path)
 
