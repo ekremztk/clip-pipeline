@@ -155,9 +155,11 @@ def classify_shots(
             # Zero or near-zero face detections — true b-roll / no people
             shot.shot_type = SHOT_BROLL
 
+        empty = total - wide - single
         logger.info(
-            "[FaceTracker] Shot %d (%.1f-%.1fs): %s — %d wide, %d single, %d empty",
+            "[FaceTracker] Shot %d (%.1f-%.1fs): %s — %d wide, %d single, %d empty (face_ratio=%.0f%%)",
             shot_idx, shot.start_s, shot.end_s, shot.shot_type, wide, single, empty,
+            face_frame_ratio * 100,
         )
 
     return shots
