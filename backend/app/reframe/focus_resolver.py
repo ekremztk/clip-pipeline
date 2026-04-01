@@ -127,15 +127,32 @@ def resolve_focus(
                 directive.subject_id if directive else "", "",
             )
             face = _pick_face_by_position(frame.faces, target_pos)
-            last_known_x[shot_idx] = face.face_x
-            last_known_y[shot_idx] = face.face_y
-            focus_points.append(FocusPoint(
-                time_s=frame.time_s,
-                x=face.face_x,
-                y=face.face_y,
-                weight=weight,
-                shot_index=shot_idx,
-            ))
+
+            # If only 1 face found and it's clearly on the wrong side,
+            # don't lock onto the wrong person — hold last known position instead.
+            if (len(frame.faces) == 1
+                    and shot_idx in last_known_x
+                    and not _face_matches_position(face, target_pos)):
+                x = last_known_x[shot_idx]
+                y = last_known_y[shot_idx]
+                logger.debug(
+                    "[FocusResolver] t=%.2fs: single face on wrong side (x=%.2f, target=%s), holding",
+                    frame.time_s, face.face_x, target_pos,
+                )
+                focus_points.append(FocusPoint(
+                    time_s=frame.time_s, x=x, y=y,
+                    weight=0.4, shot_index=shot_idx,
+                ))
+            else:
+                last_known_x[shot_idx] = face.face_x
+                last_known_y[shot_idx] = face.face_y
+                focus_points.append(FocusPoint(
+                    time_s=frame.time_s,
+                    x=face.face_x,
+                    y=face.face_y,
+                    weight=weight,
+                    shot_index=shot_idx,
+                ))
 
     logger.info(
         "[FocusResolver] %d focus points from %d frames (%d directives)",
@@ -166,6 +183,15 @@ def _get_directive_at(
         if d.start_s <= time_s < d.end_s:
             return d
     return None
+
+
+def _face_matches_position(face: FaceDetection, target_position: str) -> bool:
+    """True if the face is roughly on the expected side."""
+    if target_position == "left":
+        return face.face_x < 0.5
+    elif target_position == "right":
+        return face.face_x > 0.5
+    return True  # center or unknown — accept any face
 
 
 def _position_to_x(position: str) -> float:

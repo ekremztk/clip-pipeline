@@ -80,11 +80,13 @@ def emit_keyframes(
                     offset_y=last_oy,
                     interpolation="hold",
                 ))
+                # Shot start uses "hold" so the frontend jumps instantly
+                # to the new position rather than sliding from the old shot.
                 keyframes.append(ReframeKeyframe(
                     time_s=round(pt.time_s, 4),
                     offset_x=ox,
                     offset_y=oy,
-                    interpolation="linear",
+                    interpolation="hold",
                 ))
             else:
                 # Dedup: skip tiny movements within a shot

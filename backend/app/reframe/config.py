@@ -45,7 +45,7 @@ class GeminiDirectorConfig:
 class PathSolverConfig:
     """Kinematic path solver parameters (ported from AutoFlip)."""
     # Strategy selection thresholds
-    stationary_threshold: float = 0.06          # Max spread to use stationary mode
+    stationary_threshold: float = 0.02          # Max spread to use stationary mode
     panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
 
     # Kinematic constraints
