@@ -55,6 +55,11 @@ def emit_keyframes(
     last_ox = -999.0
     last_oy = -999.0
 
+    # Pixel distance threshold for intra-shot subject switch detection.
+    # A jump larger than this means the focus resolver changed persons (not just head movement).
+    # Matches PathSolverConfig.subject_switch_threshold in normalized space.
+    subject_switch_px = kf_config.subject_switch_threshold * src_w
+
     for path_idx, path in enumerate(shot_paths):
         if not path.points:
             continue
@@ -67,9 +72,19 @@ def emit_keyframes(
 
             is_first_point = (pt_idx == 0)
             is_first_path = (path_idx == 0)
+            is_shot_boundary = is_first_point and not is_first_path and last_ox != -999.0
+            # Intra-shot subject switch: large X jump within the same ShotPath means
+            # the focus person changed (path_solver already teleported the path point).
+            # We emit a hold+hold pair identical to shot boundaries so the frontend
+            # hard-cuts instead of linearly interpolating across the person change.
+            is_subject_switch = (
+                not is_first_point
+                and last_ox != -999.0
+                and abs(ox - last_ox) > subject_switch_px
+            )
 
-            if is_first_point and not is_first_path and last_ox != -999.0:
-                # Shot boundary: hold previous position, then jump
+            if is_shot_boundary:
+                # Shot boundary: hold previous position up to the cut, then hard-cut to new shot
                 hold_time = max(
                     keyframes[-1].time_s + 0.001 if keyframes else 0.0,
                     pt.time_s - frame_dur,
@@ -80,16 +95,39 @@ def emit_keyframes(
                     offset_y=last_oy,
                     interpolation="hold",
                 ))
-                # Shot start uses "hold" so the frontend jumps instantly
-                # to the new position rather than sliding from the old shot.
                 keyframes.append(ReframeKeyframe(
                     time_s=round(pt.time_s, 4),
                     offset_x=ox,
                     offset_y=oy,
                     interpolation="hold",
                 ))
+
+            elif is_subject_switch:
+                # Intra-shot subject switch: same hold+hold pattern as a shot boundary.
+                # Prevents the frontend from smoothly panning between the two people.
+                hold_time = max(
+                    keyframes[-1].time_s + 0.001 if keyframes else 0.0,
+                    pt.time_s - frame_dur,
+                )
+                keyframes.append(ReframeKeyframe(
+                    time_s=round(hold_time, 4),
+                    offset_x=last_ox,
+                    offset_y=last_oy,
+                    interpolation="hold",
+                ))
+                keyframes.append(ReframeKeyframe(
+                    time_s=round(pt.time_s, 4),
+                    offset_x=ox,
+                    offset_y=oy,
+                    interpolation="hold",
+                ))
+                logger.info(
+                    "[KeyframeEmitter] t=%.3fs: subject switch hard-cut (ox %.1f → %.1f, Δ=%.1fpx > %.0fpx threshold)",
+                    pt.time_s, last_ox, ox, abs(ox - last_ox), subject_switch_px,
+                )
+
             else:
-                # Dedup: skip tiny movements within a shot
+                # Normal within-shot movement: dedup tiny changes, then linear keyframe
                 if (not is_first_point
                         and abs(ox - last_ox) < kf_config.dedup_threshold_px
                         and abs(oy - last_oy) < kf_config.dedup_threshold_px):

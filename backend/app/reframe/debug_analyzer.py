@@ -97,6 +97,21 @@ At every shot cut (scene_cuts in the JSON), inspect the yellow rectangle:
 - List every transition where sliding occurs instead of hard cut.
 - Also check: is the first frame of each new shot already in the right position?
 
+## SECTION 7B: Intra-Shot Subject Switch Audit — CRITICAL
+The JSON contains `intra_shot_directive_switches` — a list of times where Gemini changed focus
+from one person to another WITHIN the same continuous shot (not at a camera cut).
+
+For EACH entry in `intra_shot_directive_switches`:
+- Note the switch_time_s, from_subject, to_subject, and which shot it falls inside.
+- Watch the yellow rectangle at that exact timestamp in the video.
+- Does the crop SLIDE SMOOTHLY from Person A to Person B? (BUG — should never happen in talk show reframing)
+- Does the crop JUMP INSTANTLY (hard cut) to Person B? (CORRECT)
+- How long does any slide take? Even a 0.5-second slide is unacceptable.
+
+Context: In talk show reframing, smooth panning between people within a single shot looks
+amateurish and disorienting. The pipeline should always hard-cut (teleport) when switching subjects.
+If `intra_shot_directive_switches` is empty, state that explicitly and skip this section.
+
 ## SECTION 8: Root Cause Mapping
 For the top 5 worst moments in the video, trace the exact bug path:
 - What does the viewer see wrong?

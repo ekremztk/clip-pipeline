@@ -300,6 +300,31 @@ def _build_pipeline_decisions(
         "y_range": [round(min(pt.y for pt in p.points), 3), round(max(pt.y for pt in p.points), 3)] if p.points else [],
     } for p in shot_paths]
 
+    # Compute intra-shot directive switches: cases where a directive boundary falls
+    # INSIDE a shot's time range (not at a shot cut). These are the events that
+    # cause the path solver to teleport and the keyframe emitter to emit a hard cut
+    # mid-shot. The debug analyzer uses this list to verify the hard-cut behavior.
+    intra_shot_switches = []
+    for d_idx in range(1, len(director_plan.directives)):
+        prev_d = director_plan.directives[d_idx - 1]
+        curr_d = director_plan.directives[d_idx]
+        switch_time = curr_d.start_s
+        # Find which shot contains this switch time
+        containing_shot = None
+        for s_idx, s in enumerate(shots):
+            if s.start_s < switch_time < s.end_s:
+                containing_shot = s_idx
+                break
+        if containing_shot is not None and prev_d.subject_id != curr_d.subject_id:
+            intra_shot_switches.append({
+                "switch_time_s": round(switch_time, 2),
+                "shot_index": containing_shot,
+                "from_subject": prev_d.subject_id,
+                "to_subject": curr_d.subject_id,
+                "shot_start_s": round(shots[containing_shot].start_s, 2),
+                "shot_end_s": round(shots[containing_shot].end_s, 2),
+            })
+
     return {
         "video": {"src_w": src_w, "src_h": src_h, "fps": round(fps, 2), "duration_s": round(duration_s, 2)},
         "shots": shot_data,
@@ -312,6 +337,7 @@ def _build_pipeline_decisions(
         },
         "focus_points_total": len(focus_points),
         "path_solver": path_summaries,
+        "intra_shot_directive_switches": intra_shot_switches,
     }
 
 

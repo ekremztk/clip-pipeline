@@ -49,12 +49,17 @@ class PathSolverConfig:
     panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
 
     # Kinematic constraints
-    max_velocity: float = 0.8                   # Max crop movement per second (normalized)
+    max_velocity: float = 1.5                   # Max crop movement per second (normalized)
     max_acceleration: float = 2.0               # Max velocity change per second (normalized)
 
     # Smoothing
     median_filter_window: int = 5               # Median filter size for jitter removal
     motion_threshold: float = 0.02              # Ignore motion smaller than this (hysteresis)
+
+    # Subject switch detection — large jump in focus means directive changed persons
+    # Path solver teleports (bypasses velocity limit) when jump > this threshold (normalized 0-1)
+    # Keyframe emitter emits hold+hold hard cut when pixel jump > threshold * src_w
+    subject_switch_threshold: float = 0.30
 
     # Headroom
     headroom_ratio: float = 0.15                # How much above face center to place crop center
@@ -67,6 +72,9 @@ class KeyframeEmitterConfig:
     """Keyframe generation parameters."""
     dedup_threshold_px: float = 5.0             # Skip keyframes with < N px movement
     y_headroom_zoom: float = 1.12               # Extra zoom for Y panning room
+    # Subject switch: emit hold+hold hard cut when X offset jumps > threshold * src_w
+    # Matches PathSolverConfig.subject_switch_threshold so both layers agree on what's a switch
+    subject_switch_threshold: float = 0.30
 
 
 # --- Top-level config --------------------------------------------------------

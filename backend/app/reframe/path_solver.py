@@ -304,7 +304,7 @@ def _compute_tracking_path(
         dy = target_y - curr_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
 
-        # Motion threshold — ignore tiny movements
+        # Motion threshold — ignore tiny movements (hysteresis)
         if distance < config.motion_threshold:
             path.append(PathPoint(
                 time_s=round(points[i].time_s, 4),
@@ -313,15 +313,26 @@ def _compute_tracking_path(
             ))
             continue
 
-        # Velocity limit
-        max_move = config.max_velocity * dt
-        if distance > max_move:
-            scale = max_move / distance
-            dx *= scale
-            dy *= scale
-
-        curr_x += dx
-        curr_y += dy
+        # Subject switch detection: large jump means Gemini changed focus person.
+        # Bypass velocity limit entirely — teleport the camera to the new subject.
+        # The keyframe emitter will emit a hold+hold pair at this point so the
+        # frontend hard-cuts instead of interpolating across the jump.
+        if distance > config.subject_switch_threshold:
+            curr_x = target_x
+            curr_y = target_y
+            logger.debug(
+                "[PathSolver] t=%.3fs: subject switch (dist=%.3f > %.2f), teleporting to (%.3f, %.3f)",
+                points[i].time_s, distance, config.subject_switch_threshold, curr_x, curr_y,
+            )
+        else:
+            # Normal velocity-limited smooth tracking
+            max_move = config.max_velocity * dt
+            if distance > max_move:
+                scale = max_move / distance
+                dx *= scale
+                dy *= scale
+            curr_x += dx
+            curr_y += dy
 
         # Clamp to valid range
         curr_x = max(0.0, min(1.0, curr_x))

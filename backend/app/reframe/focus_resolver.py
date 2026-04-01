@@ -109,8 +109,21 @@ def resolve_focus(
             ))
 
         elif shot_type == SHOT_CLOSEUP:
-            # Closeup: center on the largest/most prominent face
-            face = max(frame.faces, key=lambda f: f.face_width * f.face_height)
+            if len(frame.faces) == 1:
+                # True closeup: one face in frame, just use it
+                face = frame.faces[0]
+            else:
+                # Multiple faces in a "closeup" — most likely a misclassified two-shot.
+                # Apply Gemini's subject directive exactly like wide shots so the right
+                # person is chosen instead of always defaulting to the biggest face.
+                target_pos = subject_positions.get(
+                    directive.subject_id if directive else "", "",
+                )
+                face = _pick_face_by_position(frame.faces, target_pos)
+                logger.debug(
+                    "[FocusResolver] t=%.2fs: CLOSEUP with %d faces — using Gemini target '%s' → x=%.2f",
+                    frame.time_s, len(frame.faces), target_pos, face.face_x,
+                )
             last_known_x[shot_idx] = face.face_x
             last_known_y[shot_idx] = face.face_y
             focus_points.append(FocusPoint(

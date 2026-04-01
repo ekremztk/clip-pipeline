@@ -142,10 +142,16 @@ def classify_shots(
         # Ratio of frames where at least one face was detected
         face_frame_ratio = (wide + single) / total
 
-        # Even if majority of frames show 1 face (profile/occlusion),
-        # if 25%+ of frames show 2+ faces it's a two-shot — classify as WIDE.
-        wide_ratio = wide / total
-        if wide_ratio >= 0.25 or wide > total / 2:
+        # Compute wide_ratio against detection frames only (not total).
+        # If total includes many empty frames (profile blindness), dividing by total
+        # artificially deflates the ratio and causes two-shots to be mis-labelled CLOSEUP.
+        # E.g. 9 wide + 21 single + 10 empty → total=40, but detection_frames=30.
+        #   old: 9/40 = 22.5% → below 0.25 → CLOSEUP (WRONG)
+        #   new: 9/30 = 30%   → above 0.20 → WIDE   (CORRECT)
+        detection_frames = wide + single
+        wide_ratio = wide / detection_frames if detection_frames > 0 else 0.0
+
+        if wide_ratio >= 0.20 or wide > total / 2:
             shot.shot_type = SHOT_WIDE
         elif single > total / 2:
             shot.shot_type = SHOT_CLOSEUP
