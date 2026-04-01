@@ -44,7 +44,7 @@ class ReframeRequest(BaseModel):
     clip_end: Optional[float] = None
     strategy: str = "podcast"                  # Geriye dönük uyumluluk için korundu
     aspect_ratio: str = "9:16"
-    tracking_mode: str = "x_only"
+    tracking_mode: str = "dynamic_xy"
     content_type: Optional[str] = None        # YENİ: "auto" | "podcast" | "single" | "gaming" | "generic"
 
 
@@ -78,7 +78,7 @@ def _sanitize_aspect_ratio(value: str) -> str:
 
 
 def _sanitize_tracking_mode(value: str) -> str:
-    return value if value in _VALID_TRACKING_MODES else "x_only"
+    return value if value in _VALID_TRACKING_MODES else "dynamic_xy"
 
 
 def _sanitize_content_type(value: Optional[str]) -> Optional[str]:

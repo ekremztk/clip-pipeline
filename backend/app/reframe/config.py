@@ -28,14 +28,15 @@ class FocusSelectionConfig:
     """Odak secimi parametreleri"""
     min_speech_duration_s: float = 1.0   # Bu sureden kisa konusmada gecis yapma
     speaker_change_pre_roll_s: float = 0.15  # Konusmaci degisiminde pre-roll
+    hard_cut_x_threshold: float = 0.15   # X jump > 15% of frame → force hard cut
 
 
 @dataclass
 class CameraPathConfig:
     """Kamera yolu ve smoothing parametreleri"""
-    dead_zone_x: float = 0.05           # X ekseninde %5'ten az hareket -> kipirdama
+    dead_zone_x: float = 0.08           # X ekseninde %8'den az hareket -> kipirdama
     dead_zone_y: float = 0.04           # Y ekseninde %4'ten az hareket -> kipirdama
-    smoothing_strength: float = 0.3      # EMA alpha (dusuk = daha yumusak)
+    smoothing_strength: float = 0.15     # EMA alpha (dusuk = daha yumusak takip)
     # AutoFlip'in stationary/tracking karari icin:
     motion_stability_threshold: float = 0.5  # Hareket bu oranin altindaysa -> stationary
     min_segment_duration_s: float = 1.5  # Bir pozisyonda minimum kalma suresi
@@ -63,4 +64,5 @@ class ReframeConfig:
 
     # Genel ayarlar
     aspect_ratio: tuple[int, int] = (9, 16)
-    tracking_mode: str = "x_only"  # "x_only" veya "dynamic_xy"
+    tracking_mode: str = "dynamic_xy"  # "x_only" veya "dynamic_xy"
+    y_headroom_zoom: float = 1.12      # Extra zoom for Y panning room (1.0 = no Y room)

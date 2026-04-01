@@ -33,7 +33,7 @@ export function ReframeView() {
 
 	const [aspectRatio, setAspectRatio] = useState<ReframeAspectRatio>("9:16");
 	const [contentType, setContentType] = useState<ReframeContentType>("auto");
-	const [trackingMode, setTrackingMode] = useState<ReframeTrackingMode>("x_only");
+	const [trackingMode, setTrackingMode] = useState<ReframeTrackingMode>("dynamic_xy");
 
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [progress, setProgress] = useState<ReframeProgress | null>(null);

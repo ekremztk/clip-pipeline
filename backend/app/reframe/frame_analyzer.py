@@ -143,9 +143,10 @@ def _detect_persons(
     config: FrameAnalysisConfig,
 ) -> list[PersonDetection]:
     """
-    YOLOv8 ile kisileri tespit et.
-    Sadece bbox merkezi kullaniliyor (pose keypoints yok).
+    YOLOv8-pose ile kisileri tespit et.
+    Bbox merkezi + nose keypoint (varsa) kullaniliyor.
     Sonuclar normalize (0-1) koordinat olarak doner.
+    Stable_id: X pozisyonuna gore atanir (leftmost=0).
     """
     try:
         res_w, res_h = config.analysis_resolution
@@ -160,6 +161,12 @@ def _detect_persons(
             if result.boxes is None:
                 continue
             boxes = result.boxes
+            has_keypoints = (
+                result.keypoints is not None
+                and result.keypoints.xy is not None
+                and result.keypoints.conf is not None
+            )
+
             for i in range(len(boxes)):
                 # Sadece person (class 0)
                 if int(boxes.cls[i]) != 0:
@@ -182,17 +189,39 @@ def _detect_persons(
                 if h_norm < 0.15 or w_norm < 0.04:
                     continue
 
+                # Nose keypoint (index 0) — for face-centered framing
+                face_x = None
+                face_y = None
+                if has_keypoints and i < len(result.keypoints.xy):
+                    kps = result.keypoints.xy[i].cpu().numpy()      # (17, 2)
+                    kp_conf = result.keypoints.conf[i].cpu().numpy() # (17,)
+                    # Nose = keypoint 0
+                    if kp_conf[0] > 0.5:
+                        nose_x_px = float(kps[0][0]) * scale_x
+                        nose_y_px = float(kps[0][1]) * scale_y
+                        face_x = nose_x_px / src_w
+                        face_y = nose_y_px / src_h
+
                 detections.append(PersonDetection(
                     center_x=cx,
                     center_y=cy,
                     bbox_width=w_norm,
                     bbox_height=h_norm,
                     confidence=float(boxes.conf[i]),
+                    face_x=face_x,
+                    face_y=face_y,
                 ))
 
-        # Area'ya gore sirala, en fazla max tane tut
+        # Keep largest N by area, then sort by X for stable ordering
         detections.sort(key=lambda d: d.area, reverse=True)
-        return detections[: config.max_persons_per_frame]
+        detections = detections[: config.max_persons_per_frame]
+
+        # Assign stable_id by X position (leftmost=0, rightmost=1, ...)
+        detections.sort(key=lambda d: d.center_x)
+        for idx, det in enumerate(detections):
+            det.stable_id = idx
+
+        return detections
 
     except Exception as e:
         logger.error("[FrameAnalyzer] Tespit hatasi: %s", e)

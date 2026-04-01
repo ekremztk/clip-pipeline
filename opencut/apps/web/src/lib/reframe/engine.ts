@@ -49,7 +49,7 @@ export type { ReframeOptions };
 export async function runReframe(
 	editor: EditorCore,
 	onProgress: (p: ReframeProgress) => void,
-	options: ReframeOptions = { strategy: "podcast", aspectRatio: "9:16", trackingMode: "x_only", contentType: "auto" },
+	options: ReframeOptions = { strategy: "podcast", aspectRatio: "9:16", trackingMode: "dynamic_xy", contentType: "auto" },
 ): Promise<ReframeResult[]> {
 	const videoElements = collectVideoElements(editor);
 	if (videoElements.length === 0) {
@@ -231,17 +231,29 @@ function applyReframeToElement(
 		updates: [{ trackId, elementId: element.id, updates: { coverMode: true } }],
 	});
 
-	// Convert backend offset_x (source-pixel crop left edge) to transform.position.x
-	// (canvas-pixel offset from center).
+	// Convert backend offset_x/offset_y (source-pixel crop position) to
+	// transform.position.x/y (canvas-pixel offset from center).
 	//
 	// The renderer draws: x = canvasWidth/2 + posX - scaledWidth/2
 	// To show source pixel `offset_x` at the canvas left edge (x=0):
 	//   posX = scaledWidth/2 - canvasWidth/2 - offset_x * containScale
 	//
-	// where containScale = max(canvasW/srcW, canvasH/srcH) (coverMode fill scale)
-	//       scaledWidth   = src_w * containScale
+	// For dynamic_xy: the backend zooms in slightly (y_headroom_zoom) so the
+	// video overflows the canvas vertically, giving Y panning room.
+	// containScale is derived from crop dimensions (sent in metadata) to match.
 	const { width: canvasWidth, height: canvasHeight } = ASPECT_RATIO_CANVAS[options.aspectRatio];
-	const containScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
+
+	// Compute crop dimensions matching the backend formula
+	const Y_HEADROOM_ZOOM = 1.12; // Must match backend config.y_headroom_zoom
+	const trackingMode = options.trackingMode ?? "dynamic_xy";
+	let containScale: number;
+	if (trackingMode === "dynamic_xy") {
+		const cropH = Math.floor(src_h / Y_HEADROOM_ZOOM);
+		const cropW = Math.floor(cropH * (canvasWidth / canvasHeight));
+		containScale = Math.max(canvasWidth / cropW, canvasHeight / cropH);
+	} else {
+		containScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
+	}
 	const scaledWidth = src_w * containScale;
 	const scaledHeight = src_h * containScale;
 

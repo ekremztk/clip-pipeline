@@ -90,16 +90,24 @@ def _smooth_segment(
     is_first_point = True
 
     if x_range < config.motion_stability_threshold:
-        # --- STATIONARY: ortalama pozisyon, crop sabit ---
-        avg_x = sum(xs) / len(xs)
-        avg_y = sum(fp.target_y for fp in segment) / len(segment)
+        # --- STATIONARY: dominant position (most common X region) ---
+        # Instead of simple average (which drifts between speakers),
+        # use the median X to pick the dominant target
+        sorted_xs = sorted(xs)
+        median_x = sorted_xs[len(sorted_xs) // 2]
+        # Select points near the median (within dead zone) for Y average
+        nearby = [fp for fp in segment if abs(fp.target_x - median_x) < config.dead_zone_x * 2]
+        if not nearby:
+            nearby = segment
+        dom_x = sum(fp.target_x for fp in nearby) / len(nearby)
+        dom_y = sum(fp.target_y for fp in nearby) / len(nearby)
 
         result: list[SmoothedPoint] = []
         for fp in segment:
             result.append(SmoothedPoint(
                 time_s=fp.time_s,
-                center_x=avg_x,
-                center_y=avg_y,
+                center_x=dom_x,
+                center_y=dom_y,
                 is_hard_cut=fp.is_shot_boundary,
             ))
         return result

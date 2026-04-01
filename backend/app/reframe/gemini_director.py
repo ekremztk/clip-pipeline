@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 _SYSTEM_PROMPT = """You are a video reframing AI. You analyze podcast/interview frames to decide which person the camera should focus on when cropping from 16:9 to 9:16 vertical format.
 
-Each frame has numbered boxes [1], [2], etc. drawn around detected persons.
+Each frame has persons labeled by POSITION: [L] = leftmost person, [R] = rightmost person. In 3+ person scenes, [C] = center person.
 
-For each decision point, choose ONE person number to focus on. Consider:
+For each decision point, choose ONE person to focus on. Consider:
 - Who is actively speaking (if indicated)
 - Who is reacting interestingly (facial expressions, gestures)
 - Visual composition and framing quality
@@ -37,14 +37,15 @@ For each decision point, choose ONE person number to focus on. Consider:
 
 CRITICAL OUTPUT RULES — FOLLOW EXACTLY:
 1. Return ONLY a valid JSON array. Nothing else.
-2. Do NOT wrap the JSON in markdown code blocks (no ```json or ```).
-3. Do NOT add any explanation, commentary, or text before or after the JSON.
+2. Do NOT wrap the JSON in markdown code blocks.
+3. Do NOT add any explanation before or after the JSON.
 4. The response must start with [ and end with ].
 
 Format:
 [{"time_s": 1.5, "target_person_index": 0, "reason": "speaking and gesturing", "confidence": 0.9}]
 
-- target_person_index is 0-based (person [1] = index 0, person [2] = index 1)
+- target_person_index: 0 = leftmost [L], 1 = rightmost [R], 2 = center [C] if present
+- These positions are STABLE across frames within the same scene
 - Keep reasons brief (3-5 words)
 - confidence: 0.0-1.0"""
 
@@ -270,10 +271,15 @@ def _draw_boxes(
         w, h = resolution
 
         colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"]
+        # Position labels: persons are sorted by X (stable_id order)
+        pos_labels = {0: "[L]", 1: "[R]"}  # 2-person default
+        if len(persons) >= 3:
+            pos_labels = {0: "[L]", len(persons) - 1: "[R]"}
+            for mid in range(1, len(persons) - 1):
+                pos_labels[mid] = "[C]"
 
         for i, person in enumerate(persons):
             color = colors[i % len(colors)]
-            # Convert normalized coords to pixel coords
             cx = person.center_x * w
             cy = person.center_y * h
             bw = person.bbox_width * w
@@ -284,11 +290,9 @@ def _draw_boxes(
             x2 = min(w, cx + bw / 2)
             y2 = min(h, cy + bh / 2)
 
-            # Draw box
             draw.rectangle([x1, y1, x2, y2], outline=color, width=2)
 
-            # Draw label
-            label = f"[{i + 1}]"
+            label = pos_labels.get(i, f"[{i}]")
             try:
                 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16)
             except Exception:
@@ -375,15 +379,16 @@ def _query_batch(
 
     for i, (dp, img_bytes) in enumerate(batch):
         speaker_info = f" (speaker {dp.active_speaker} is talking)" if dp.active_speaker is not None else ""
-        prompt_text += f"Decision point {i + 1}: t={dp.time_s:.2f}s, trigger={dp.trigger}, {len(dp.persons)} persons{speaker_info}\n"
+        n = len(dp.persons)
+        pos_desc = "[L]=leftmost, [R]=rightmost" + (", [C]=center" if n >= 3 else "")
+        prompt_text += f"Decision point {i + 1}: t={dp.time_s:.2f}s, trigger={dp.trigger}, {n} persons ({pos_desc}){speaker_info}\n"
 
         contents.append(types.Part.from_text(text=prompt_text))
         prompt_text = ""  # Reset after first text block
 
-        # Add image as inline data
         contents.append(types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"))
 
-    prompt_text += f"\nReturn a JSON array of exactly {len(batch)} objects, one per decision point above. Start with [ and end with ]."
+    prompt_text += f"\nReturn a JSON array of exactly {len(batch)} objects, one per decision point above. Start with [ and end with ]. target_person_index: 0=[L] leftmost, 1=[R] rightmost."
     contents.append(types.Part.from_text(text=prompt_text))
 
     try:

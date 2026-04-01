@@ -25,10 +25,23 @@ class PersonDetection:
     bbox_width: float    # 0.0-1.0 normalize
     bbox_height: float   # 0.0-1.0 normalize
     confidence: float
+    face_x: Optional[float] = None   # Nose keypoint X (normalize), None if not detected
+    face_y: Optional[float] = None   # Nose keypoint Y (normalize), None if not detected
+    stable_id: int = -1              # Position-based ID within shot (0=leftmost, 1=next...)
 
     @property
     def area(self) -> float:
         return self.bbox_width * self.bbox_height
+
+    @property
+    def framing_x(self) -> float:
+        """Best X for crop centering: face if available, else bbox center."""
+        return self.face_x if self.face_x is not None else self.center_x
+
+    @property
+    def framing_y(self) -> float:
+        """Best Y for crop centering: face if available, else bbox center."""
+        return self.face_y if self.face_y is not None else self.center_y
 
 
 @dataclass

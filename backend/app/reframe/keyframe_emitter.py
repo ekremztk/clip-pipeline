@@ -31,14 +31,22 @@ def emit_keyframes(
     Smoothed kamera pozisyonlarindan frontend keyframe'leri uret.
     """
     ar_w, ar_h = config.aspect_ratio
-    crop_w = min(int(src_h * (ar_w / ar_h)), src_w)
-    crop_h = src_h  # x_only: tam yukseklik
+
+    if config.tracking_mode == "dynamic_xy" and config.y_headroom_zoom > 1.0:
+        # Y headroom: zoom in slightly so video overflows canvas vertically
+        # crop_h < src_h → Y panning room exists
+        crop_h = int(src_h / config.y_headroom_zoom)
+        crop_w = min(int(crop_h * (ar_w / ar_h)), src_w)
+    else:
+        # x_only: full height, no Y panning
+        crop_w = min(int(src_h * (ar_w / ar_h)), src_w)
+        crop_h = src_h
 
     frame_dur = 1.0 / fps if fps > 0 else 1.0 / 30.0
 
     logger.info(
-        "[KeyframeEmitter] crop=%dx%d, src=%dx%d, mode=%s",
-        crop_w, crop_h, src_w, src_h, config.tracking_mode,
+        "[KeyframeEmitter] crop=%dx%d, src=%dx%d, mode=%s, zoom=%.2f",
+        crop_w, crop_h, src_w, src_h, config.tracking_mode, config.y_headroom_zoom,
     )
 
     keyframes: list[ReframeKeyframe] = []
@@ -49,7 +57,7 @@ def emit_keyframes(
         ox = _clamp(_to_offset_x(sp.center_x, src_w, crop_w), 0.0, src_w - crop_w)
         oy = 0.0
         if config.tracking_mode == "dynamic_xy":
-            oy = _clamp(_to_offset_y(sp.center_y, src_h, crop_h), 0.0, src_h - crop_h)
+            oy = _clamp(_to_offset_y(sp.center_y, src_h, crop_h), 0.0, max(0, src_h - crop_h))
 
         ox = round(ox, 1)
         oy = round(oy, 1)
