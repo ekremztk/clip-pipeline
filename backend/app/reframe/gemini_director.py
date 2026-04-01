@@ -392,7 +392,7 @@ def _query_batch(
             contents=contents,
             config=types.GenerateContentConfig(
                 temperature=0.1,
-                max_output_tokens=1024,
+                max_output_tokens=8192,
             ),
         )
 
