@@ -19,7 +19,8 @@ export interface ReframeOptions {
 	strategy: ReframeStrategy;
 	aspectRatio: ReframeAspectRatio;
 	trackingMode: ReframeTrackingMode;
-	contentType: ReframeContentType;  // V2 YENİ — "auto" = backend otomatik tespit
+	contentType: ReframeContentType;
+	debugMode?: boolean;
 }
 
 /** Her hedef aspect ratio için canvas boyutu (piksel). */

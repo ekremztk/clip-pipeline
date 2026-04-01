@@ -42,6 +42,7 @@ export interface ReframeProgress {
 export interface ReframeResult {
 	elementId: string;
 	keyframeCount: number;
+	debugVideoUrl?: string;
 }
 
 export type { ReframeOptions };
@@ -95,7 +96,8 @@ export async function runReframe(
 		// Start reframe job on backend
 		const token = await getAuthToken();
 		const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
-		const startRes = await fetch(`${PROGNOT_API}/reframe/process`, {
+		const endpoint = options.debugMode ? "debug" : "process";
+		const startRes = await fetch(`${PROGNOT_API}/reframe/${endpoint}`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json", ...authHeaders },
 			body: JSON.stringify({
@@ -119,7 +121,7 @@ export async function runReframe(
 		const { reframe_job_id } = await startRes.json();
 
 		// Poll for completion
-		const { keyframes, scene_cuts, src_w, src_h } = await pollReframeJob(
+		const { keyframes, scene_cuts, src_w, src_h, debugVideoUrl } = await pollReframeJob(
 			reframe_job_id,
 			(step, percent) => {
 				onProgress({ step: step + label, percent });
@@ -136,7 +138,7 @@ export async function runReframe(
 			allSceneCuts.push(...scene_cuts);
 		}
 
-		results.push({ elementId: element.id, keyframeCount });
+		results.push({ elementId: element.id, keyframeCount, debugVideoUrl });
 	}
 
 	// Store scene cuts in metadata store so timeline can render markers
@@ -170,7 +172,7 @@ function collectVideoElements(editor: EditorCore): Array<{ trackId: string; elem
 async function pollReframeJob(
 	reframeJobId: string,
 	onProgress: (step: string, percent: number) => void,
-): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number }> {
+): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number; debugVideoUrl?: string }> {
 	const maxAttempts = 300; // ~10 minutes
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -190,15 +192,21 @@ async function pollReframeJob(
 
 		if (data.status === "done") {
 			if (!data.keyframes) throw new Error("Reframe succeeded but no keyframes returned");
+			// Debug mode: backend stores debug URL as "Done! Debug: <url>" in step field
+			const debugVideoUrl = data.step?.includes("Debug: ")
+				? (data.step.split("Debug: ")[1] ?? undefined)
+				: undefined;
 			console.log(
 				`[Reframe] Backend done — ${data.keyframes.length} keyframes, ` +
-				`${(data.scene_cuts ?? []).length} scene cuts, src=${data.src_w}x${data.src_h}`,
+				`${(data.scene_cuts ?? []).length} scene cuts, src=${data.src_w}x${data.src_h}` +
+				(debugVideoUrl ? `, debug=${debugVideoUrl}` : ""),
 			);
 			return {
 				keyframes: data.keyframes as ReframeKeyframe[],
 				scene_cuts: (data.scene_cuts ?? []) as number[],
 				src_w: data.src_w as number,
 				src_h: data.src_h as number,
+				debugVideoUrl,
 			};
 		}
 

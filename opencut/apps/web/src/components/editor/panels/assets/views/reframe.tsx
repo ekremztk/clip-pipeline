@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useEditor } from "@/hooks/use-editor";
 import { runReframe, type ReframeProgress, type ReframeResult, type ReframeOptions } from "@/lib/reframe/engine";
 import type { ReframeAspectRatio, ReframeContentType, ReframeTrackingMode } from "@/lib/reframe/types";
-import { CheckCheck, RotateCcw, Smartphone } from "lucide-react";
+import { CheckCheck, ExternalLink, RotateCcw, Smartphone } from "lucide-react";
 
 const ASPECT_RATIO_OPTIONS: { value: ReframeAspectRatio; label: string }[] = [
 	{ value: "9:16", label: "9:16 — Vertical" },
@@ -34,6 +34,7 @@ export function ReframeView() {
 	const [aspectRatio, setAspectRatio] = useState<ReframeAspectRatio>("9:16");
 	const [contentType, setContentType] = useState<ReframeContentType>("auto");
 	const [trackingMode, setTrackingMode] = useState<ReframeTrackingMode>("dynamic_xy");
+	const [debugMode, setDebugMode] = useState(false);
 
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [progress, setProgress] = useState<ReframeProgress | null>(null);
@@ -57,6 +58,7 @@ export function ReframeView() {
 				aspectRatio,
 				trackingMode,
 				contentType,
+				debugMode,
 			};
 
 			const res = await runReframe(editor, (p) => setProgress(p), options);
@@ -155,6 +157,27 @@ export function ReframeView() {
 					</div>
 				</div>
 
+				{/* Debug mode */}
+				<div className="flex items-center justify-between">
+					<div className="flex flex-col gap-0.5">
+						<span className="text-xs font-medium">Debug mode</span>
+						<span className="text-[#525252] text-xs">Burns pipeline internals onto video</span>
+					</div>
+					<button
+						onClick={() => setDebugMode((v) => !v)}
+						disabled={isProcessing}
+						className={`relative h-5 w-9 rounded-full transition-colors ${
+							debugMode ? "bg-white" : "bg-[#262626]"
+						}`}
+					>
+						<span
+							className={`absolute top-0.5 h-4 w-4 rounded-full transition-transform ${
+								debugMode ? "translate-x-4 bg-black" : "translate-x-0.5 bg-[#737373]"
+							}`}
+						/>
+					</button>
+				</div>
+
 				{/* Error */}
 				{error && (
 					<div className="bg-destructive/10 border-destructive/20 rounded-md border p-3">
@@ -205,6 +228,24 @@ export function ReframeView() {
 								</p>
 							</div>
 						</div>
+
+						{results.some((r) => r.debugVideoUrl) && (
+							<div className="flex flex-col gap-1.5">
+								<span className="text-xs font-medium text-[#a3a3a3]">Debug videos</span>
+								{results.filter((r) => r.debugVideoUrl).map((r) => (
+									<a
+										key={r.elementId}
+										href={r.debugVideoUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex items-center gap-1.5 rounded-md border border-[#262626] px-2.5 py-2 text-xs text-[#a3a3a3] transition-colors hover:border-[#404040] hover:text-white"
+									>
+										<ExternalLink className="size-3 shrink-0" />
+										<span className="truncate">{r.debugVideoUrl}</span>
+									</a>
+								))}
+							</div>
+						)}
 
 						<button
 							onClick={reset}
