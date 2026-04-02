@@ -183,6 +183,10 @@ async function pollReframeJob(
 	onProgress: (step: string, percent: number) => void,
 ): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number; fps: number; debugVideoUrl?: string }> {
 	const maxAttempts = 300; // ~10 minutes
+	// Allow up to 5 consecutive transient server errors (Supabase 502, Railway restart, etc.)
+	// before giving up. 4xx errors (auth, not found) still throw immediately.
+	const MAX_TRANSIENT_ERRORS = 5;
+	let transientErrorCount = 0;
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
 		await sleep(POLL_INTERVAL_MS);
@@ -193,8 +197,18 @@ async function pollReframeJob(
 			headers: statusToken ? { Authorization: `Bearer ${statusToken}` } : {},
 		});
 		if (!res.ok) {
+			if (res.status >= 500) {
+				// Transient server error — pipeline may still be running
+				transientErrorCount++;
+				console.warn(`[Reframe] Status check returned ${res.status} (${transientErrorCount}/${MAX_TRANSIENT_ERRORS} transient errors)`);
+				if (transientErrorCount >= MAX_TRANSIENT_ERRORS) {
+					throw new Error(`Status check failed with ${transientErrorCount} consecutive server errors: ${res.status}`);
+				}
+				continue; // retry next poll cycle
+			}
 			throw new Error(`Status check failed: ${res.status}`);
 		}
+		transientErrorCount = 0; // reset on successful response
 
 		const data = await res.json();
 		onProgress(data.step ?? "Processing...", data.percent ?? 0);

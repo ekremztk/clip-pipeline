@@ -265,7 +265,13 @@ async def get_reframe_status(
         )
     except Exception as e:
         print(f"[ReframeRoute] Status sorgusu hatası: {e}")
-        raise HTTPException(status_code=500, detail="Veritabanı hatası")
+        # Supabase geçici hata (502/503 vb.) — pipeline muhtemelen hala çalışıyor.
+        # 500 fırlatmak yerine "processing" döndür, frontend polling'e devam eder.
+        return ReframeStatusResponse(
+            status="processing",
+            step="Processing...",
+            percent=0,
+        )
 
     if not resp.data:
         raise HTTPException(status_code=404, detail="Reframe job bulunamadı")
