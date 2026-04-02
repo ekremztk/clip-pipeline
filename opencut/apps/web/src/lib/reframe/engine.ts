@@ -1,16 +1,18 @@
 /**
- * Backend-powered reframe engine — keyframe mode.
+ * Backend-powered reframe engine — split-based mode.
  *
- * Instead of rendering a new video, the backend returns per-frame crop
- * positions converted to canvas keyframes. These are applied directly to
- * the timeline element so the user can manually adjust any frame.
+ * Instead of using hold+hold keyframes to simulate scene cuts (which causes
+ * 1-2 frame glitches), we actually SPLIT the video element at each scene
+ * boundary. Each segment gets its own static transform for the crop position.
+ * Within-shot panning still uses linear keyframes.
  *
  * Flow:
  *   1. Collect video elements from the timeline
  *   2. POST /reframe/process → get reframe_job_id
  *   3. Poll GET /reframe/status/{id} every 2s
- *   4. When done: apply keyframes to element + set canvas to target aspect ratio
- *   5. Store scene_cuts in metadata store for timeline markers
+ *   4. When done: split element at scene cuts + apply transforms per segment
+ *   5. Set canvas to target aspect ratio
+ *   6. Store scene_cuts in metadata store for timeline markers
  */
 
 import type { EditorCore } from "@/core";
@@ -129,17 +131,23 @@ export async function runReframe(
 			},
 		);
 
-		onProgress({ step: `Applying keyframes${label}...`, percent: 97 });
+		onProgress({ step: `Applying reframe${label}...`, percent: 97 });
 
-		// Apply to timeline
-		const keyframeCount = applyReframeToElement(editor, trackId, element, keyframes, src_w, src_h, fps, options);
+		// Apply to timeline using split-based approach
+		const segmentCount = applyReframeWithSplits(editor, trackId, element, keyframes, scene_cuts, src_w, src_h, fps, options);
 
-		// Collect scene cuts for timeline markers
+		// Collect scene cuts for timeline markers (convert to timeline time)
 		if (scene_cuts.length > 0) {
-			allSceneCuts.push(...scene_cuts);
+			const trimStart = element.trimStart ?? 0;
+			for (const cut of scene_cuts) {
+				const timelineCut = element.startTime + (cut - trimStart);
+				if (timelineCut > element.startTime && timelineCut < element.startTime + element.duration) {
+					allSceneCuts.push(timelineCut);
+				}
+			}
 		}
 
-		results.push({ elementId: element.id, keyframeCount, debugVideoUrl, reframeJobId: reframe_job_id });
+		results.push({ elementId: element.id, keyframeCount: segmentCount, debugVideoUrl, reframeJobId: reframe_job_id });
 	}
 
 	// Store scene cuts in metadata store so timeline can render markers
@@ -151,7 +159,7 @@ export async function runReframe(
 		settings: { canvasSize },
 	});
 
-	onProgress({ step: "Done! Keyframes applied to timeline.", percent: 100 });
+	onProgress({ step: "Done! Reframe applied to timeline.", percent: 100 });
 	return results;
 }
 
@@ -220,47 +228,50 @@ async function pollReframeJob(
 	throw new Error("Reframe timed out after 10 minutes");
 }
 
-function applyReframeToElement(
+/**
+ * Segment: a contiguous range of the video between scene cuts.
+ * Each segment has its own crop position (static or with panning keyframes).
+ */
+interface Segment {
+	startVideoTime: number; // absolute video time (source)
+	endVideoTime: number;   // absolute video time (source)
+	keyframes: ReframeKeyframe[]; // only linear keyframes within this segment
+}
+
+/**
+ * Split-based reframe: instead of hold+hold keyframes at scene boundaries,
+ * actually split the video element and apply static transforms per segment.
+ *
+ * This eliminates the 1-2 frame glitch caused by keyframe timing mismatch
+ * with the video decoder.
+ */
+function applyReframeWithSplits(
 	editor: EditorCore,
 	trackId: string,
 	element: VideoElement,
 	keyframes: ReframeKeyframe[],
+	sceneCuts: number[],
 	src_w: number,
 	src_h: number,
 	videoFps: number,
 	options: ReframeOptions,
 ): number {
 	const trimStart = element.trimStart ?? 0;
+	const trimEnd = trimStart + element.duration;
 
-	// Snap time to nearest video frame boundary to ensure keyframes
-	// align with actual decoded frames. Without this, hold keyframes
-	// land between frames, causing 1-frame glitches at transitions.
+	// Snap time to nearest video frame boundary for ALL FPS types.
+	// Works for 23.976, 25, 29.97, 30, 50, 59.94, 60 etc.
 	const snapToFrame = (t: number): number => Math.round(t * videoFps) / videoFps;
 
 	console.log(
-		`[Reframe] Element: id=${element.id} duration=${element.duration} trimStart=${trimStart} trimEnd=${element.trimEnd}`,
+		`[Reframe] Element: id=${element.id} duration=${element.duration} trimStart=${trimStart} trimEnd=${trimEnd} fps=${videoFps}`,
 	);
-	console.log(`[Reframe] Backend keyframes received: ${keyframes.length}`, keyframes.slice(0, 5));
+	console.log(`[Reframe] Backend keyframes: ${keyframes.length}, scene cuts: ${sceneCuts.length}`);
 
-	// Enable cover mode so the video fills the target canvas
-	editor.timeline.updateElements({
-		updates: [{ trackId, elementId: element.id, updates: { coverMode: true } }],
-	});
-
-	// Convert backend offset_x/offset_y (source-pixel crop position) to
-	// transform.position.x/y (canvas-pixel offset from center).
-	//
-	// The renderer draws: x = canvasWidth/2 + posX - scaledWidth/2
-	// To show source pixel `offset_x` at the canvas left edge (x=0):
-	//   posX = scaledWidth/2 - canvasWidth/2 - offset_x * containScale
-	//
-	// For dynamic_xy: the backend zooms in slightly (y_headroom_zoom) so the
-	// video overflows the canvas vertically, giving Y panning room.
-	// containScale is derived from crop dimensions (sent in metadata) to match.
+	// ── Step 1: Compute scale and position conversion factors ──
 	const { width: canvasWidth, height: canvasHeight } = ASPECT_RATIO_CANVAS[options.aspectRatio];
 
-	// Compute crop dimensions matching the backend formula
-	const Y_HEADROOM_ZOOM = 1.12; // Must match backend config.y_headroom_zoom
+	const Y_HEADROOM_ZOOM = 1.12;
 	const trackingMode = options.trackingMode ?? "dynamic_xy";
 	let containScale: number;
 	if (trackingMode === "dynamic_xy") {
@@ -273,21 +284,255 @@ function applyReframeToElement(
 	const scaledWidth = src_w * containScale;
 	const scaledHeight = src_h * containScale;
 
-	// The renderer computes its own containScale from sourceWidth/sourceHeight
-	// (the full decoded frame) using coverMode max(). For dynamic_xy the reframe
-	// containScale is larger (zoomed in via crop dimensions). We must set
-	// transform.scale to the ratio so the renderer's final scale matches ours.
 	const rendererContainScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
 	const transformScale = containScale / rendererContainScale;
 
-	// Apply the scale to the element's base transform
+	// ── Step 2: Filter scene cuts to those within this element's range ──
+	// Scene cuts are absolute video times. Filter to within [trimStart, trimEnd).
+	// Each must land exactly on a frame boundary.
+	const validCuts = sceneCuts
+		.map((cut) => snapToFrame(cut))
+		.filter((cut) => cut > trimStart && cut < trimEnd)
+		// Remove duplicates that could arise from snapping
+		.filter((cut, idx, arr) => idx === 0 || Math.abs(cut - arr[idx - 1]) > 0.5 / videoFps);
+
+	console.log(`[Reframe] Valid scene cuts within element: ${validCuts.length}`, validCuts);
+
+	// ── Step 3: Build segments from scene cuts ──
+	// Segment boundaries: [trimStart, cut1, cut2, ..., trimEnd]
+	const boundaries = [trimStart, ...validCuts, trimEnd];
+	const segments: Segment[] = [];
+
+	// Extract only linear keyframes (within-shot panning). Hold keyframes are
+	// scene boundary artifacts that we no longer need since we're splitting.
+	const linearKeyframes = keyframes.filter((kf) => kf.interpolation === "linear");
+
+	for (let s = 0; s < boundaries.length - 1; s++) {
+		const segStart = boundaries[s];
+		const segEnd = boundaries[s + 1];
+
+		// Collect linear keyframes within this segment's video time range
+		const segKfs = linearKeyframes.filter(
+			(kf) => kf.time_s >= segStart - 0.5 / videoFps && kf.time_s < segEnd + 0.5 / videoFps,
+		);
+
+		segments.push({
+			startVideoTime: segStart,
+			endVideoTime: segEnd,
+			keyframes: segKfs,
+		});
+	}
+
+	console.log(`[Reframe] ${segments.length} segments created from ${validCuts.length} scene cuts`);
+
+	// ── Step 4: If no scene cuts, just apply keyframes to the original element ──
+	if (validCuts.length === 0) {
+		applySegmentToElement(editor, trackId, element.id, element, segments[0], trimStart, videoFps, canvasWidth, canvasHeight, scaledWidth, scaledHeight, containScale, transformScale);
+		return 1;
+	}
+
+	// ── Step 5: Split the element at each scene cut (in reverse order!) ──
+	// We split from the last cut to the first to preserve element IDs and
+	// timeline positions. Each split produces a right-side element.
+	//
+	// splitTime is in TIMELINE time: element.startTime + (cutVideoTime - trimStart)
+
+	// First, enable coverMode and set scale on the original element BEFORE splitting.
+	// All split children inherit these properties.
 	editor.timeline.updateElements({
-		updates: [{ trackId, elementId: element.id, updates: { transform: { ...element.transform, scale: transformScale } } }],
+		updates: [{ trackId, elementId: element.id, updates: { coverMode: true, transform: { ...element.transform, scale: transformScale } } }],
 	});
 
-	// Convert backend keyframes (absolute video time) to element-local time.
-	// Clamp negative times to 0 (pre-trim frames) rather than filtering them out.
-	// upsertKeyframes already bounds time to [0, element.duration] internally.
+	// Track element IDs: start with the original, splits produce new right-side IDs
+	// After all splits, we'll have N segments with known IDs.
+	const splitResults: Array<{ elementId: string; segmentIndex: number }> = [];
+
+	// Current element ID being split (starts as original, stays as left side after each split)
+	let currentElementId = element.id;
+
+	// Split from last cut to first (reverse order preserves positions)
+	for (let c = validCuts.length - 1; c >= 0; c--) {
+		const cutVideoTime = validCuts[c];
+		const splitTimelineTime = element.startTime + (cutVideoTime - trimStart);
+
+		// Paranoid validation: splitTime must be within element bounds
+		const elemStart = element.startTime;
+		const elemEnd = element.startTime + element.duration;
+		if (splitTimelineTime <= elemStart || splitTimelineTime >= elemEnd) {
+			console.warn(
+				`[Reframe] SKIP: scene cut at ${cutVideoTime}s maps to timeline ${splitTimelineTime}s ` +
+				`which is outside element bounds [${elemStart}, ${elemEnd}]`,
+			);
+			continue;
+		}
+
+		// Paranoid: verify it's on a frame boundary
+		const frameNumber = Math.round(cutVideoTime * videoFps);
+		const snappedTime = frameNumber / videoFps;
+		if (Math.abs(cutVideoTime - snappedTime) > 0.001 / videoFps) {
+			console.warn(
+				`[Reframe] WARNING: scene cut ${cutVideoTime}s is NOT on frame boundary ` +
+				`(nearest: ${snappedTime}s, delta: ${Math.abs(cutVideoTime - snappedTime) * 1000}ms)`,
+			);
+		}
+
+		console.log(
+			`[Reframe] Splitting at scene cut ${c}: videoTime=${cutVideoTime}s, ` +
+			`timelineTime=${splitTimelineTime}s, frame=${frameNumber}`,
+		);
+
+		const rightElements = editor.timeline.splitElements({
+			elements: [{ trackId, elementId: currentElementId }],
+			splitTime: splitTimelineTime,
+			retainSide: "both",
+		});
+
+		if (rightElements.length > 0) {
+			// Right side = segment index (c + 1) because we're going in reverse
+			splitResults.push({ elementId: rightElements[0].elementId, segmentIndex: c + 1 });
+		}
+		// currentElementId stays the same — it's now the left portion
+	}
+
+	// The original (now leftmost) element is segment 0
+	splitResults.push({ elementId: currentElementId, segmentIndex: 0 });
+
+	// Sort by segment index
+	splitResults.sort((a, b) => a.segmentIndex - b.segmentIndex);
+
+	console.log(`[Reframe] Split complete: ${splitResults.length} segments`);
+
+	// ── Step 6: Apply transforms to each segment ──
+	for (const { elementId, segmentIndex } of splitResults) {
+		if (segmentIndex >= segments.length) {
+			console.warn(`[Reframe] Segment index ${segmentIndex} out of range (${segments.length} segments)`);
+			continue;
+		}
+
+		// Re-fetch element after splits (state has changed)
+		const track = editor.timeline.getTrackById({ trackId });
+		if (!track) continue;
+		const el = track.elements.find((e) => e.id === elementId);
+		if (!el) {
+			console.warn(`[Reframe] Element ${elementId} not found after split`);
+			continue;
+		}
+
+		const segment = segments[segmentIndex];
+		applySegmentToElement(
+			editor, trackId, elementId, el as VideoElement, segment,
+			el.trimStart ?? 0, videoFps,
+			canvasWidth, canvasHeight, scaledWidth, scaledHeight,
+			containScale, transformScale,
+		);
+	}
+
+	return splitResults.length;
+}
+
+/**
+ * Apply crop position to a single segment element.
+ * If the segment has only 1 keyframe or all keyframes are at similar positions,
+ * apply a static transform. Otherwise, use linear keyframes for panning.
+ */
+function applySegmentToElement(
+	editor: EditorCore,
+	trackId: string,
+	elementId: string,
+	element: VideoElement,
+	segment: Segment,
+	elementTrimStart: number,
+	videoFps: number,
+	canvasWidth: number,
+	canvasHeight: number,
+	scaledWidth: number,
+	scaledHeight: number,
+	containScale: number,
+	transformScale: number,
+): void {
+	const toCanvasPosX = (offsetX: number): number => scaledWidth / 2 - canvasWidth / 2 - offsetX * containScale;
+	const toCanvasPosY = (offsetY: number): number => scaledHeight / 2 - canvasHeight / 2 - offsetY * containScale;
+	const snapToFrame = (t: number): number => Math.round(t * videoFps) / videoFps;
+
+	// Enable cover mode and set scale
+	editor.timeline.updateElements({
+		updates: [{
+			trackId,
+			elementId,
+			updates: {
+				coverMode: true,
+				transform: {
+					...element.transform,
+					scale: transformScale,
+				},
+			},
+		}],
+	});
+
+	const kfs = segment.keyframes;
+
+	if (kfs.length === 0) {
+		// No keyframes for this segment — should not happen but handle gracefully.
+		// Use the midpoint of the segment to find the nearest keyframe from any segment.
+		console.warn(`[Reframe] Segment [${segment.startVideoTime}-${segment.endVideoTime}] has no keyframes`);
+		return;
+	}
+
+	// Check if all keyframes are at roughly the same position (static segment)
+	const STATIC_THRESHOLD_PX = 10;
+	const isStatic = kfs.every(
+		(kf) =>
+			Math.abs(kf.offset_x - kfs[0].offset_x) < STATIC_THRESHOLD_PX &&
+			Math.abs((kf.offset_y ?? 0) - (kfs[0].offset_y ?? 0)) < STATIC_THRESHOLD_PX,
+	);
+
+	if (kfs.length === 1 || isStatic) {
+		// Static position: set transform directly, no keyframes needed.
+		// Use the first keyframe's position.
+		const posX = toCanvasPosX(kfs[0].offset_x);
+		const posY = toCanvasPosY(kfs[0].offset_y ?? 0);
+
+		editor.timeline.updateElements({
+			updates: [{
+				trackId,
+				elementId,
+				updates: {
+					transform: {
+						position: { x: posX, y: posY },
+						scale: transformScale,
+						rotate: element.transform.rotate,
+					},
+				},
+			}],
+		});
+
+		console.log(
+			`[Reframe] Segment [${segment.startVideoTime.toFixed(3)}-${segment.endVideoTime.toFixed(3)}]: ` +
+			`STATIC pos=(${posX.toFixed(1)}, ${posY.toFixed(1)})`,
+		);
+		return;
+	}
+
+	// Multiple keyframes with different positions: apply linear keyframes for panning.
+	// Set base position to the first keyframe's position.
+	const basePosX = toCanvasPosX(kfs[0].offset_x);
+	const basePosY = toCanvasPosY(kfs[0].offset_y ?? 0);
+
+	editor.timeline.updateElements({
+		updates: [{
+			trackId,
+			elementId,
+			updates: {
+				transform: {
+					position: { x: basePosX, y: basePosY },
+					scale: transformScale,
+					rotate: element.transform.rotate,
+				},
+			},
+		}],
+	});
+
+	// Build keyframes in element-local time
 	const kfBatch: Array<{
 		trackId: string;
 		elementId: string;
@@ -297,44 +542,43 @@ function applyReframeToElement(
 		interpolation: AnimationInterpolation;
 	}> = [];
 
-	for (const kf of keyframes) {
-		const localTime = snapToFrame(Math.max(0, kf.time_s - trimStart));
-		const interp = (kf.interpolation ?? "linear") as AnimationInterpolation;
+	for (const kf of kfs) {
+		const localTime = snapToFrame(Math.max(0, kf.time_s - elementTrimStart));
 
-		// X keyframe — her zaman eklenir
-		const posX = scaledWidth / 2 - canvasWidth / 2 - kf.offset_x * containScale;
+		// Clamp to element duration
+		if (localTime > (element as VideoElement).duration) continue;
+
+		const posX = toCanvasPosX(kf.offset_x);
 		kfBatch.push({
 			trackId,
-			elementId: element.id,
+			elementId,
 			propertyPath: "transform.position.x" as AnimationPropertyPath,
 			time: localTime,
 			value: posX,
-			interpolation: interp,
+			interpolation: "linear" as AnimationInterpolation,
 		});
 
-		// Y keyframe — always emit for hold keyframes (shot/subject boundaries) so
-		// Y position resets correctly even when offset_y=0. For linear keyframes,
-		// skip zero-Y to avoid unnecessary keyframes.
-		if (kf.offset_y !== undefined && (interp === "hold" || kf.offset_y !== 0)) {
-			const posY = scaledHeight / 2 - canvasHeight / 2 - kf.offset_y * containScale;
+		if (kf.offset_y !== undefined && kf.offset_y !== 0) {
+			const posY = toCanvasPosY(kf.offset_y);
 			kfBatch.push({
 				trackId,
-				elementId: element.id,
+				elementId,
 				propertyPath: "transform.position.y" as AnimationPropertyPath,
 				time: localTime,
 				value: posY,
-				interpolation: interp,
+				interpolation: "linear" as AnimationInterpolation,
 			});
 		}
 	}
-
-	console.log(`[Reframe] Applying ${kfBatch.length} keyframes to element ${element.id}`);
 
 	if (kfBatch.length > 0) {
 		editor.timeline.upsertKeyframes({ keyframes: kfBatch });
 	}
 
-	return keyframes.length;
+	console.log(
+		`[Reframe] Segment [${segment.startVideoTime.toFixed(3)}-${segment.endVideoTime.toFixed(3)}]: ` +
+		`${kfBatch.length} panning keyframes applied`,
+	);
 }
 
 async function uploadFileToBackend(file: File): Promise<string> {

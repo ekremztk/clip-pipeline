@@ -171,7 +171,7 @@ def emit_keyframes(
             interpolation="linear",
         )]
 
-    scene_cuts = [s.start_s for s in shots[1:]]
+    scene_cuts = [_snap(s.start_s) for s in shots[1:]]
 
     for kf in keyframes:
         logger.info(
