@@ -17,7 +17,7 @@ def detect_shots(
     video_path: str,
     duration_s: float,
     config: ShotDetectionConfig,
-    fps: float = 30.0,
+    fps: float,
 ) -> list[Shot]:
     """
     Video'daki sahne kesimlerini tespit et.
