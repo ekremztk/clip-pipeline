@@ -206,11 +206,11 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 		return fallbackValue;
 	}
 
-	if (time <= firstKeyframe.time + TIME_EPSILON_SECONDS) {
+	if (time < firstKeyframe.time) {
 		return firstKeyframe.value;
 	}
 
-	if (time >= lastKeyframe.time - TIME_EPSILON_SECONDS) {
+	if (time >= lastKeyframe.time) {
 		return lastKeyframe.value;
 	}
 
