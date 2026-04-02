@@ -55,9 +55,13 @@ def detect_shots(
 def _ffmpeg_scene_detect(video_path: str, threshold: float, fps: float) -> list[float]:
     """FFmpeg scene filter ile kesim zamanlarini bul.
 
-    pts (tam sayi frame numarasi) kullanir, pts_time float'u degil.
-    time_base = 1/fps → time_s = pts / fps
-    Bu sayede kayan nokta precision hatalari olmadan tam frame sinirinda zaman hesaplanir.
+    pts_time (saniye cinsinden) kullanir — stream'in gercek time_base'ini yansitir.
+    pts tam sayi olsa da stream time_base her zaman 1/fps degildir (H.264/MP4'te
+    genellikle 1/12800 veya 1/90000 gibi degerler kullanilir), dolayisiyla
+    pts * (1/fps) yanlis sonuc verir.
+
+    pts_time degerini aldiktan sonra en yakin frame sinirина snap ederek
+    kayan nokta jitterini giderir: time_s = round(pts_time * fps) / fps
     """
     cmd = [
         "ffmpeg", "-i", video_path,
@@ -69,11 +73,11 @@ def _ffmpeg_scene_detect(video_path: str, threshold: float, fps: float) -> list[
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=120,
         )
-        time_base = 1.0 / fps if fps > 0 else 1.0 / 30.0
         times: list[float] = []
-        for match in re.finditer(r"\bpts:(\d+)\b", result.stderr):
-            pts = int(match.group(1))
-            time_s = round(pts * time_base, 6)
+        for match in re.finditer(r"pts_time:(\d+\.?\d*)", result.stderr):
+            pts_time = float(match.group(1))
+            # Snap to nearest frame boundary to eliminate floating-point jitter
+            time_s = round(round(pts_time * fps) / fps, 6)
             times.append(time_s)
         return sorted(set(times))
     except subprocess.TimeoutExpired:
