@@ -24,12 +24,19 @@ export class VideoNode extends VisualNode<VideoNodeParams> {
 		});
 
 		if (frame) {
+			// Lock transform to the actual decoded frame's timestamp so that
+			// a stale frame (from the previous shot) gets the previous shot's
+			// transform instead of the new shot's transform — eliminating the
+			// 1-frame glitch at shot boundaries.
+			const frameTimelineTime =
+				frame.timestamp + this.params.timeOffset - this.params.trimStart;
+
 			this.renderVisual({
 				renderer,
 				source: frame.canvas,
 				sourceWidth: frame.canvas.width,
 				sourceHeight: frame.canvas.height,
-				timelineTime: time,
+				timelineTime: frameTimelineTime,
 			});
 		}
 	}

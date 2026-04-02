@@ -159,6 +159,19 @@ export class VideoCache {
 			if (frame) {
 				sinkData.currentFrame = frame;
 
+				// Validate the frame actually covers the requested time.
+				// The decoder may return a keyframe before our target time;
+				// if so, iterate forward until we find the correct frame.
+				if (!this.isFrameValid({ frame, time })) {
+					const corrected = await this.iterateToTime({
+						sinkData,
+						targetTime: time,
+					});
+					if (corrected) {
+						return corrected;
+					}
+				}
+
 				// Aggressively fetch next frame immediately to fill buffer
 				// This matches the mediaplayer example which fetches 2 frames on start
 				try {
