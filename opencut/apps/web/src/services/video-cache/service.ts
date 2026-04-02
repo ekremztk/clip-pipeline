@@ -97,10 +97,12 @@ export class VideoCache {
 					await sinkData.prefetchPromise;
 				}
 
-				// Check if the nextFrame (which might have just arrived) is what we need
+				// Check if the nextFrame (which might have just arrived) is what we need.
+				// Tolerance is 1ms — 0.05 was 1.5 frames at 30fps and caused premature
+				// frame advancement at shot boundaries (new frame + old transform = glitch).
 				if (
 					sinkData.nextFrame &&
-					sinkData.nextFrame.timestamp <= targetTime + 0.05 // Tolerance
+					sinkData.nextFrame.timestamp <= targetTime + 0.001
 				) {
 					sinkData.currentFrame = sinkData.nextFrame;
 					sinkData.nextFrame = null;
