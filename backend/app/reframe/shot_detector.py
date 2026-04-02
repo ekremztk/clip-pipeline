@@ -17,6 +17,7 @@ def detect_shots(
     video_path: str,
     duration_s: float,
     config: ShotDetectionConfig,
+    fps: float = 30.0,
 ) -> list[Shot]:
     """
     Video'daki sahne kesimlerini tespit et.
@@ -25,7 +26,7 @@ def detect_shots(
     """
     try:
         # 1. FFmpeg scene filter
-        cut_times = _ffmpeg_scene_detect(video_path, config.threshold)
+        cut_times = _ffmpeg_scene_detect(video_path, config.threshold, fps)
         logger.info("[ShotDetector] FFmpeg ham kesim sayisi: %d", len(cut_times))
 
         # 2. Yakin kesimleri birlestir
@@ -51,8 +52,13 @@ def detect_shots(
 
 # --- FFmpeg -------------------------------------------------------------------
 
-def _ffmpeg_scene_detect(video_path: str, threshold: float) -> list[float]:
-    """FFmpeg scene filter ile kesim zamanlarini bul."""
+def _ffmpeg_scene_detect(video_path: str, threshold: float, fps: float) -> list[float]:
+    """FFmpeg scene filter ile kesim zamanlarini bul.
+
+    pts (tam sayi frame numarasi) kullanir, pts_time float'u degil.
+    time_base = 1/fps → time_s = pts / fps
+    Bu sayede kayan nokta precision hatalari olmadan tam frame sinirinda zaman hesaplanir.
+    """
     cmd = [
         "ffmpeg", "-i", video_path,
         "-vf", f"select='gt(scene,{threshold})',showinfo",
@@ -63,9 +69,12 @@ def _ffmpeg_scene_detect(video_path: str, threshold: float) -> list[float]:
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=120,
         )
+        time_base = 1.0 / fps if fps > 0 else 1.0 / 30.0
         times: list[float] = []
-        for match in re.finditer(r"pts_time:(\d+\.?\d*)", result.stderr):
-            times.append(float(match.group(1)))
+        for match in re.finditer(r"\bpts:(\d+)\b", result.stderr):
+            pts = int(match.group(1))
+            time_s = round(pts * time_base, 6)
+            times.append(time_s)
         return sorted(set(times))
     except subprocess.TimeoutExpired:
         logger.error("[ShotDetector] FFmpeg timeout")

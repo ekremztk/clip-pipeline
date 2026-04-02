@@ -112,7 +112,7 @@ def run_reframe(
 
         # 3. Shot detection
         progress("Detecting scene cuts...", 12)
-        shots = detect_shots(input_path, duration_s, config.shot_detection)
+        shots = detect_shots(input_path, duration_s, config.shot_detection, fps)
         logger.info("[Reframe] %d shots detected", len(shots))
 
         # 4. Face tracking (MediaPipe)
