@@ -122,7 +122,7 @@ export async function runReframe(
 		const { reframe_job_id } = await startRes.json();
 
 		// Poll for completion
-		const { keyframes, scene_cuts, src_w, src_h, debugVideoUrl } = await pollReframeJob(
+		const { keyframes, scene_cuts, src_w, src_h, fps, debugVideoUrl } = await pollReframeJob(
 			reframe_job_id,
 			(step, percent) => {
 				onProgress({ step: step + label, percent });
@@ -132,7 +132,7 @@ export async function runReframe(
 		onProgress({ step: `Applying keyframes${label}...`, percent: 97 });
 
 		// Apply to timeline
-		const keyframeCount = applyReframeToElement(editor, trackId, element, keyframes, src_w, src_h, options);
+		const keyframeCount = applyReframeToElement(editor, trackId, element, keyframes, src_w, src_h, fps, options);
 
 		// Collect scene cuts for timeline markers
 		if (scene_cuts.length > 0) {
@@ -173,7 +173,7 @@ function collectVideoElements(editor: EditorCore): Array<{ trackId: string; elem
 async function pollReframeJob(
 	reframeJobId: string,
 	onProgress: (step: string, percent: number) => void,
-): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number; debugVideoUrl?: string }> {
+): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number; fps: number; debugVideoUrl?: string }> {
 	const maxAttempts = 300; // ~10 minutes
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -207,6 +207,7 @@ async function pollReframeJob(
 				scene_cuts: (data.scene_cuts ?? []) as number[],
 				src_w: data.src_w as number,
 				src_h: data.src_h as number,
+				fps: (data.fps as number) ?? 30,
 				debugVideoUrl,
 			};
 		}
@@ -226,9 +227,15 @@ function applyReframeToElement(
 	keyframes: ReframeKeyframe[],
 	src_w: number,
 	src_h: number,
+	videoFps: number,
 	options: ReframeOptions,
 ): number {
 	const trimStart = element.trimStart ?? 0;
+
+	// Snap time to nearest video frame boundary to ensure keyframes
+	// align with actual decoded frames. Without this, hold keyframes
+	// land between frames, causing 1-frame glitches at transitions.
+	const snapToFrame = (t: number): number => Math.round(t * videoFps) / videoFps;
 
 	console.log(
 		`[Reframe] Element: id=${element.id} duration=${element.duration} trimStart=${trimStart} trimEnd=${element.trimEnd}`,
@@ -291,7 +298,7 @@ function applyReframeToElement(
 	}> = [];
 
 	for (const kf of keyframes) {
-		const localTime = Math.max(0, kf.time_s - trimStart);
+		const localTime = snapToFrame(Math.max(0, kf.time_s - trimStart));
 		const interp = (kf.interpolation ?? "linear") as AnimationInterpolation;
 
 		// X keyframe — her zaman eklenir

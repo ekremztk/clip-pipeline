@@ -38,6 +38,10 @@ def emit_keyframes(
 
     frame_dur = 1.0 / fps if fps > 0 else 1.0 / 30.0
 
+    def _snap(t: float) -> float:
+        """Quantize timestamp to the nearest video frame boundary."""
+        return round(round(t * fps) / fps, 6)
+
     # Safety margin
     EDGE_MARGIN = 10.0
     ox_min = EDGE_MARGIN
@@ -84,19 +88,24 @@ def emit_keyframes(
             )
 
             if is_shot_boundary:
-                # Shot boundary: hold previous position up to the cut, then hard-cut to new shot
+                # Shot boundary: use the actual scene cut time from the shot detector,
+                # NOT the first path point's sample time. The path point can be up to
+                # 200ms after the real scene cut (due to 5 FPS sampling), causing frames
+                # between the cut and the keyframe to show the new shot at the old position.
+                cut_time = _snap(shots[path.shot_index].start_s) if path.shot_index < len(shots) else _snap(pt.time_s)
                 hold_time = max(
-                    keyframes[-1].time_s + 0.001 if keyframes else 0.0,
-                    pt.time_s - frame_dur,
+                    keyframes[-1].time_s + frame_dur if keyframes else 0.0,
+                    cut_time - frame_dur,
                 )
+                hold_time = _snap(hold_time)
                 keyframes.append(ReframeKeyframe(
-                    time_s=round(hold_time, 4),
+                    time_s=round(hold_time, 6),
                     offset_x=last_ox,
                     offset_y=last_oy,
                     interpolation="hold",
                 ))
                 keyframes.append(ReframeKeyframe(
-                    time_s=round(pt.time_s, 4),
+                    time_s=round(cut_time, 6),
                     offset_x=ox,
                     offset_y=oy,
                     interpolation="hold",
@@ -105,18 +114,20 @@ def emit_keyframes(
             elif is_subject_switch:
                 # Intra-shot subject switch: same hold+hold pattern as a shot boundary.
                 # Prevents the frontend from smoothly panning between the two people.
+                switch_time = _snap(pt.time_s)
                 hold_time = max(
-                    keyframes[-1].time_s + 0.001 if keyframes else 0.0,
-                    pt.time_s - frame_dur,
+                    keyframes[-1].time_s + frame_dur if keyframes else 0.0,
+                    switch_time - frame_dur,
                 )
+                hold_time = _snap(hold_time)
                 keyframes.append(ReframeKeyframe(
-                    time_s=round(hold_time, 4),
+                    time_s=round(hold_time, 6),
                     offset_x=last_ox,
                     offset_y=last_oy,
                     interpolation="hold",
                 ))
                 keyframes.append(ReframeKeyframe(
-                    time_s=round(pt.time_s, 4),
+                    time_s=round(switch_time, 6),
                     offset_x=ox,
                     offset_y=oy,
                     interpolation="hold",
@@ -134,7 +145,7 @@ def emit_keyframes(
                     continue
 
                 keyframes.append(ReframeKeyframe(
-                    time_s=round(pt.time_s, 4),
+                    time_s=round(_snap(pt.time_s), 6),
                     offset_x=ox,
                     offset_y=oy,
                     interpolation="linear",
@@ -146,7 +157,7 @@ def emit_keyframes(
     # Pin last position to video end
     if keyframes and keyframes[-1].time_s < duration_s - frame_dur:
         keyframes.append(ReframeKeyframe(
-            time_s=round(duration_s, 4),
+            time_s=round(_snap(duration_s), 6),
             offset_x=keyframes[-1].offset_x,
             offset_y=keyframes[-1].offset_y,
             interpolation="linear",
