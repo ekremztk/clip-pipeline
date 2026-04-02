@@ -79,7 +79,11 @@ export class VideoCache {
 		frame: WrappedCanvas;
 		time: number;
 	}): boolean {
-		return time >= frame.timestamp && time < frame.timestamp + frame.duration;
+		// Subtract a small epsilon from the upper bound to avoid IEEE 754
+		// floating-point errors where frame.timestamp + frame.duration
+		// overshoots the next frame's timestamp by ~2e-16, causing stale
+		// frame returns at ~13% of 30fps boundaries.
+		return time >= frame.timestamp && time < frame.timestamp + frame.duration - 1e-6;
 	}
 	private async iterateToTime({
 		sinkData,

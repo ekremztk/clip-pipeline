@@ -266,6 +266,18 @@ function applyReframeToElement(
 	const scaledWidth = src_w * containScale;
 	const scaledHeight = src_h * containScale;
 
+	// The renderer computes its own containScale from sourceWidth/sourceHeight
+	// (the full decoded frame) using coverMode max(). For dynamic_xy the reframe
+	// containScale is larger (zoomed in via crop dimensions). We must set
+	// transform.scale to the ratio so the renderer's final scale matches ours.
+	const rendererContainScale = Math.max(canvasWidth / src_w, canvasHeight / src_h);
+	const transformScale = containScale / rendererContainScale;
+
+	// Apply the scale to the element's base transform
+	editor.timeline.updateElements({
+		updates: [{ trackId, elementId: element.id, updates: { transform: { ...element.transform, scale: transformScale } } }],
+	});
+
 	// Convert backend keyframes (absolute video time) to element-local time.
 	// Clamp negative times to 0 (pre-trim frames) rather than filtering them out.
 	// upsertKeyframes already bounds time to [0, element.duration] internally.
