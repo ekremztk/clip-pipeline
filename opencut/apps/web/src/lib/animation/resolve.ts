@@ -44,7 +44,6 @@ export function resolveTransformAtTime({
 				}),
 				time: safeLocalTime,
 				fallbackValue: baseTransform.position.x,
-				debugLabel: "transform.position.x",
 			}),
 			y: getNumberChannelValueAtTime({
 				channel: getNumberChannelForPath({

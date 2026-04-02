@@ -182,7 +182,6 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 	time,
 	fallbackValue,
 	getInterpolatedValue,
-	debugLabel,
 }: {
 	keyframes: TKeyframe[] | undefined;
 	time: number;
@@ -196,10 +195,7 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 		rightKeyframe: TKeyframe;
 		progress: number;
 	}) => TValue;
-	debugLabel?: string;
 }): TValue {
-	const dbg = debugLabel === "transform.position.x";
-
 	if (!keyframes || keyframes.length === 0) {
 		return fallbackValue;
 	}
@@ -211,12 +207,10 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 	}
 
 	if (time < firstKeyframe.time) {
-		if (dbg) console.log(`[interp:posX] t=${time.toFixed(4)} → BEFORE_FIRST first=${firstKeyframe.time.toFixed(4)} val=${firstKeyframe.value}`);
 		return firstKeyframe.value;
 	}
 
 	if (time >= lastKeyframe.time) {
-		if (dbg) console.log(`[interp:posX] t=${time.toFixed(4)} → AFTER_LAST last=${lastKeyframe.time.toFixed(4)} val=${lastKeyframe.value}`);
 		return lastKeyframe.value;
 	}
 
@@ -235,7 +229,6 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 
 		const span = rightKeyframe.time - leftKeyframe.time;
 		if (Math.abs(span) <= TIME_EPSILON_SECONDS) {
-			if (dbg) console.log(`[interp:posX] t=${time.toFixed(4)} → ZERO_SPAN pair=[${leftKeyframe.time.toFixed(4)},${rightKeyframe.time.toFixed(4)}] val=${rightKeyframe.value}`);
 			return rightKeyframe.value;
 		}
 
@@ -247,20 +240,16 @@ function evaluateChannelValueAtTime<TKeyframe extends { time: number; value: TVa
 		// rightKeyframe.value — this is the keyframe activation boundary.
 		// getInterpolatedValue handles everything strictly inside [0, 1).
 		if (progress >= 1) {
-			if (dbg) console.log(`[interp:posX] t=${time.toFixed(4)} → PROGRESS_1 pair=[${leftKeyframe.time.toFixed(4)},${rightKeyframe.time.toFixed(4)}] val=${rightKeyframe.value}`);
 			return rightKeyframe.value;
 		}
 
-		const result = getInterpolatedValue({
+		return getInterpolatedValue({
 			leftKeyframe,
 			rightKeyframe,
 			progress,
 		});
-		if (dbg) console.log(`[interp:posX] t=${time.toFixed(4)} → INTERPOLATE pair=[${leftKeyframe.time.toFixed(4)},${rightKeyframe.time.toFixed(4)}] progress=${progress.toFixed(4)} val=${result}`);
-		return result;
 	}
 
-	if (dbg) console.log(`[interp:posX] t=${time.toFixed(4)} → FALLTHROUGH last=${lastKeyframe.time.toFixed(4)} val=${lastKeyframe.value}`);
 	return lastKeyframe.value;
 }
 
@@ -268,18 +257,15 @@ export function getNumberChannelValueAtTime({
 	channel,
 	time,
 	fallbackValue,
-	debugLabel,
 }: {
 	channel: NumberAnimationChannel | undefined;
 	time: number;
 	fallbackValue: number;
-	debugLabel?: string;
 }): number {
 	return evaluateChannelValueAtTime({
 		keyframes: channel?.keyframes,
 		time,
 		fallbackValue,
-		debugLabel,
 		getInterpolatedValue: ({ leftKeyframe, rightKeyframe, progress }) => {
 			if (leftKeyframe.interpolation === "hold") {
 				return leftKeyframe.value;
