@@ -29,7 +29,7 @@ function isWithinTimePair({
 }): boolean {
 	return (
 		time >= leftTime - TIME_EPSILON_SECONDS &&
-		time <= rightTime + TIME_EPSILON_SECONDS
+		time < rightTime
 	);
 }
 
