@@ -502,8 +502,7 @@ function applySegmentToElement(
 			elementId,
 			updates: {
 				coverMode: true,
-				// biome-ignore lint/suspicious/noExplicitAny: clearing old animation keyframes
-				animations: {} as any,
+				animations: { channels: {} },
 				transform: {
 					...element.transform,
 					scale: transformScale,
