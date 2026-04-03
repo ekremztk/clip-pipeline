@@ -202,7 +202,6 @@ export default function NewJobPage() {
                     const statusRes = await authFetch(`/jobs/${jobId}`);
                     const jobData = await statusRes.json();
                     const status = jobData?.job?.status || jobData?.status;
-                    if (status === 'awaiting_speaker_confirm') { router.push(`/dashboard/speakers/${jobId}`); return; }
                     if (status === 'completed' || status === 'done') { router.push('/dashboard'); return; }
                     if (status === 'failed' || status === 'error') { setSubmitError('Pipeline failed. Please try again.'); setUploadState('preview_ready'); return; }
                     const step = jobData?.job?.current_step || jobData?.job?.step || '';

@@ -142,17 +142,6 @@ export async function rejectClip(clipId: string, notes?: string): Promise<Clip> 
     });
 }
 
-// 8. confirmSpeakers(jobId: string, speakerMap: Record<string, {role: string, name?: string}>) -> POST /jobs/{jobId}/confirm-speakers
-export async function confirmSpeakers(jobId: string, speakerMap: Record<string, { role: string, name?: string }>): Promise<any> {
-    return fetchApi<any>(`/jobs/${jobId}/confirm-speakers`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ speaker_map: speakerMap }),
-    });
-}
-
 // 9. getChannels() -> GET /channels
 export async function getChannels(): Promise<Channel[]> {
     return fetchApi<Channel[]>('/channels');

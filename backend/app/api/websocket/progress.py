@@ -79,7 +79,7 @@ async def job_progress(websocket: WebSocket, job_id: str):
                     disconnected = True
                     break
 
-                if job.get("status") in ("completed", "failed", "awaiting_speaker_confirm"):
+                if job.get("status") in ("completed", "failed"):
                     break
 
             except Exception as e:

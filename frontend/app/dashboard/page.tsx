@@ -207,7 +207,7 @@ export default function DashboardPage() {
     // Auto-refresh active jobs
     useEffect(() => {
         if (!activeChannelId || channelLoading) return;
-        const hasActive = jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+        const hasActive = jobs.some(j => ['processing', 'queued', 'running'].includes(j.status));
         if (!hasActive) return;
         const interval = setInterval(async () => {
             try {
@@ -398,10 +398,6 @@ export default function DashboardPage() {
                     const statusRes = await authFetch(`/jobs/${jobId}`);
                     const jobData = await statusRes.json();
                     const status = jobData?.job?.status || jobData?.status;
-                    if (status === 'awaiting_speaker_confirm') {
-                        router.push(`/dashboard/speakers/${jobId}`);
-                        return;
-                    }
                     if (status === 'completed' || status === 'done') {
                         setUploadPhase('idle');
                         resetUpload();
@@ -472,8 +468,8 @@ export default function DashboardPage() {
 
     if (channelLoading) return <PageSkeleton />;
 
-    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
-    const recentJobs = jobs.filter(j => !['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status)).slice(0, 8);
+    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running'].includes(j.status));
+    const recentJobs = jobs.filter(j => !['processing', 'queued', 'running'].includes(j.status)).slice(0, 8);
 
     if (!activeChannelId && uploadPhase === 'idle') {
         return (
@@ -859,7 +855,6 @@ export default function DashboardPage() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             {activeJobs.map((job) => {
-                                const isAwaiting = job.status === 'awaiting_speaker_confirm';
                                 const progress = job.progress_pct ?? job.progress ?? 0;
                                 return (
                                     <div key={job.id} className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#404040] transition-all">
@@ -869,22 +864,10 @@ export default function DashboardPage() {
                                                     <div className="w-2 h-2 rounded-full bg-white pulse-dot" />
                                                     <span className="text-xs text-[#737373] uppercase tracking-wider">Processing</span>
                                                 </div>
-                                                {isAwaiting ? (
-                                                    <div className="space-y-3">
-                                                        <p className="text-sm text-white">Speaker confirmation needed</p>
-                                                        <Link
-                                                            href={`/dashboard/speakers/${job.id}`}
-                                                            className="inline-block px-4 py-1.5 bg-white text-black text-xs font-medium rounded-lg hover:bg-[#e5e5e5] transition-colors"
-                                                        >
-                                                            Confirm Speakers →
-                                                        </Link>
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-sm text-white">
-                                                        {getStepLabel(job.current_step || job.step)}
-                                                        {progress > 0 && <span className="text-[#737373] ml-2">({progress}%)</span>}
-                                                    </p>
-                                                )}
+                                                <p className="text-sm text-white">
+                                                    {getStepLabel(job.current_step || job.step)}
+                                                    {progress > 0 && <span className="text-[#737373] ml-2">({progress}%)</span>}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="p-3 border-t border-[#1a1a1a]">

@@ -137,7 +137,7 @@ export default function MyProjectsPage() {
 
     useEffect(() => {
         if (!activeChannelId) return;
-        const hasActive = jobs.some(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+        const hasActive = jobs.some(j => ['processing', 'queued', 'running'].includes(j.status));
         if (!hasActive) return;
         const interval = setInterval(() => fetchData(true), 4000);
         return () => clearInterval(interval);
@@ -198,7 +198,7 @@ export default function MyProjectsPage() {
         if (clip?.file_url) window.open(clip.file_url, "_blank");
     };
 
-    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running', 'awaiting_speaker_confirm'].includes(j.status));
+    const activeJobs = jobs.filter(j => ['processing', 'queued', 'running'].includes(j.status));
     const completedJobs = jobs.filter(j => ['completed', 'failed', 'error'].includes(j.status));
 
     const filteredProjects = completedJobs.filter(job => {
@@ -293,7 +293,6 @@ export default function MyProjectsPage() {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                                     {activeJobs.map(job => {
-                                        const isAwaiting = job.status === 'awaiting_speaker_confirm';
                                         const progress = job.progress_pct ?? job.progress ?? 0;
                                         return (
                                             <div key={job.id} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden">
@@ -303,13 +302,7 @@ export default function MyProjectsPage() {
                                                             <div className="w-1.5 h-1.5 rounded-full bg-white pulse-dot" />
                                                             <span className="text-[10px] text-[#737373] uppercase tracking-wider">Processing</span>
                                                         </div>
-                                                        {isAwaiting ? (
-                                                            <Link href={`/dashboard/speakers/${job.id}`} className="text-xs px-3 py-1.5 bg-white text-black rounded-lg font-medium hover:bg-[#e5e5e5] transition-colors">
-                                                                Confirm Speakers →
-                                                            </Link>
-                                                        ) : (
-                                                            <p className="text-xs text-white">{getStepLabel(job.current_step || job.step)} {progress > 0 && `(${progress}%)`}</p>
-                                                        )}
+                                                        <p className="text-xs text-white">{getStepLabel(job.current_step || job.step)} {progress > 0 && `(${progress}%)`}</p>
                                                     </div>
                                                 </div>
                                                 <div className="p-3 border-t border-[#1a1a1a]">

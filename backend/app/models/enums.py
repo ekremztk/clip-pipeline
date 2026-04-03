@@ -3,7 +3,6 @@ from enum import Enum
 class JobStatus(str, Enum):
     QUEUED = "queued"
     PROCESSING = "processing"
-    AWAITING_SPEAKER_CONFIRM = "awaiting_speaker_confirm"
     ANALYZING = "analyzing"
     CUTTING = "cutting"
     COMPLETED = "completed"

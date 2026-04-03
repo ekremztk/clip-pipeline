@@ -188,7 +188,7 @@ def get_active_pipelines() -> dict:
             SELECT id, channel_id, video_title, status, current_step,
                    progress_pct, created_at, is_test_run
             FROM jobs
-            WHERE status IN ('queued', 'processing', 'awaiting_speaker_confirm')
+            WHERE status IN ('queued', 'processing')
             ORDER BY created_at DESC
             LIMIT 10
         """)
