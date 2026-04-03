@@ -412,7 +412,23 @@ def _probe_video(video_path: str) -> tuple[int, int, float, float]:
     except Exception:
         fps = 30.0
 
-    duration_s = float(stream.get("duration", 0.0))
+    # Prefer nb_frames/fps: more accurate than container duration field,
+    # which can omit the last frame's duration (e.g. 17.00s instead of 17.04s
+    # for a 426-frame 25fps video). nb_frames is reliable for MP4/MOV; falls
+    # back to stream.duration for containers that report nb_frames as "N/A".
+    duration_s = 0.0
+    nb_frames_raw = stream.get("nb_frames", "")
+    if nb_frames_raw and nb_frames_raw != "N/A" and fps > 0:
+        try:
+            nb_frames = int(nb_frames_raw)
+            if nb_frames > 0:
+                duration_s = nb_frames / fps
+        except (ValueError, TypeError):
+            pass
+
+    if duration_s == 0.0:
+        duration_s = float(stream.get("duration", 0.0))
+
     if duration_s == 0.0:
         cmd2 = [
             "ffprobe", "-v", "quiet",
