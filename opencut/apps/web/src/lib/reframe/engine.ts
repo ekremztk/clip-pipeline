@@ -365,23 +365,29 @@ function applyReframeWithSplits(
 
 	console.log(`[Reframe] ${segments.length} segments created from ${validCuts.length} scene cuts`);
 
-	// ── Step 4: If no scene cuts, just apply keyframes to the original element ──
+	// ── Step 4: Clear old animations on the original element ──
+	// Must happen BEFORE any splits so splitAnimationsAtTime distributes nothing
+	// to child segments. Also sets coverMode + scale inherited by all children.
+	editor.timeline.updateElements({
+		updates: [{ trackId, elementId: element.id, updates: { coverMode: true, animations: { channels: {} }, transform: { ...element.transform, scale: transformScale } } }],
+	});
+
+	// ── Step 5: If no scene cuts, apply directly to original element ──
 	if (validCuts.length === 0) {
-		applySegmentToElement(editor, trackId, element.id, element, segments[0], trimStart, videoFps, canvasWidth, canvasHeight, scaledWidth, scaledHeight, containScale, transformScale);
+		// Re-fetch element state after the updateElements call above
+		const track0 = editor.timeline.getTrackById({ trackId });
+		const el0 = track0?.elements.find((e) => e.id === element.id) as VideoElement | undefined;
+		if (el0) {
+			applySegmentToElement(editor, trackId, element.id, el0, segments[0], trimStart, videoFps, canvasWidth, canvasHeight, scaledWidth, scaledHeight, containScale, transformScale);
+		}
 		return 1;
 	}
 
-	// ── Step 5: Split the element at each scene cut (in reverse order!) ──
+	// ── Step 6: Split the element at each scene cut (in reverse order!) ──
 	// We split from the last cut to the first to preserve element IDs and
 	// timeline positions. Each split produces a right-side element.
 	//
 	// splitTime is in TIMELINE time: element.startTime + (cutVideoTime - trimStart)
-
-	// First, enable coverMode and set scale on the original element BEFORE splitting.
-	// All split children inherit these properties.
-	editor.timeline.updateElements({
-		updates: [{ trackId, elementId: element.id, updates: { coverMode: true, transform: { ...element.transform, scale: transformScale } } }],
-	});
 
 	// Track element IDs: start with the original, splits produce new right-side IDs
 	// After all splits, we'll have N segments with known IDs.
@@ -442,7 +448,7 @@ function applyReframeWithSplits(
 
 	console.log(`[Reframe] Split complete: ${splitResults.length} segments`);
 
-	// ── Step 6: Apply transforms to each segment ──
+	// ── Step 7: Apply transforms to each segment ──
 	for (const { elementId, segmentIndex } of splitResults) {
 		if (segmentIndex >= segments.length) {
 			console.warn(`[Reframe] Segment index ${segmentIndex} out of range (${segments.length} segments)`);
@@ -494,15 +500,14 @@ function applySegmentToElement(
 	const toCanvasPosY = (offsetY: number): number => scaledHeight / 2 - canvasHeight / 2 - offsetY * containScale;
 	const snapToFrame = (t: number): number => Math.round(t * videoFps) / videoFps;
 
-	// Enable cover mode, set scale, and clear any inherited old animations
-	// (from a previous reframe run distributed via splitAnimationsAtTime).
+	// Set coverMode + scale. Animations were already cleared on the original element
+	// before splitting, so splitAnimationsAtTime distributed nothing to this segment.
 	editor.timeline.updateElements({
 		updates: [{
 			trackId,
 			elementId,
 			updates: {
 				coverMode: true,
-				animations: { channels: {} },
 				transform: {
 					...element.transform,
 					scale: transformScale,
