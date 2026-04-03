@@ -4,7 +4,7 @@ def _extract_guest_name_from_title(video_title: str) -> str | None:
     Returns the guest name string or None if not found.
     """
     try:
-        from app.services.gemini_client import call_gemini
+        from app.services.gemini_client import generate
         from app.config import settings
 
         prompt = (
@@ -13,7 +13,7 @@ def _extract_guest_name_from_title(video_title: str) -> str | None:
             "If no guest name is present, return the word NULL.\n\n"
             "Title: " + video_title
         )
-        result = call_gemini(prompt, model=settings.GEMINI_MODEL_FLASH)
+        result = generate(prompt, model=settings.GEMINI_MODEL_FLASH)
         result = result.strip()
         if result and result.upper() != "NULL" and len(result) < 60:
             return result

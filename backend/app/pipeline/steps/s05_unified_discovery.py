@@ -270,6 +270,27 @@ def _get_guest_profile(guest_name: str) -> str:
         return f"Guest: {guest_name} (profile lookup failed)"
 
 
+def _validate_candidates(candidates: list, video_duration_s: float, min_duration: int) -> list:
+    """Filters out candidates with invalid timestamps before sending to S06."""
+    valid = []
+    for c in candidates:
+        if not isinstance(c, dict) or "candidate_id" not in c:
+            continue
+        start = float(c.get("recommended_start", 0) or 0)
+        end = float(c.get("recommended_end", 0) or 0)
+        if video_duration_s > 0 and start >= video_duration_s:
+            print(f"[S05] Dropped candidate {c.get('candidate_id')}: start {start:.1f}s >= video duration {video_duration_s:.1f}s")
+            continue
+        if end <= start:
+            print(f"[S05] Dropped candidate {c.get('candidate_id')}: end {end:.1f}s <= start {start:.1f}s")
+            continue
+        if (end - start) < min_duration:
+            print(f"[S05] Dropped candidate {c.get('candidate_id')}: duration {end - start:.1f}s < min {min_duration}s")
+            continue
+        valid.append(c)
+    return valid
+
+
 def _calculate_max_candidates(duration_s: float) -> int:
     """Returns max candidate count based on video duration."""
     if duration_s < 900:
@@ -386,11 +407,7 @@ def run(
 
         if candidates:
             print(f"[S05] Gemini returned {len(candidates)} candidates")
-            # Validate and clean candidates
-            valid_candidates = []
-            for c in candidates:
-                if isinstance(c, dict) and "candidate_id" in c:
-                    valid_candidates.append(c)
+            valid_candidates = _validate_candidates(candidates, video_duration_s, min_duration)
             print(f"[S05] {len(valid_candidates)} valid candidates after validation")
             try:
                 director_events.emit_sync(
@@ -412,7 +429,9 @@ def run(
                 candidates = _parse_gemini_json(raw_response)
                 if candidates:
                     print(f"[S05] Audio fallback returned {len(candidates)} candidates")
-                    return [c for c in candidates if isinstance(c, dict) and "candidate_id" in c]
+                    valid = _validate_candidates(candidates, video_duration_s, min_duration)
+                    print(f"[S05] {len(valid)} valid candidates after validation")
+                    return valid
             else:
                 print(f"[S05] Audio fallback skipped: audio_path not provided or file not found ({audio_path})")
         except Exception as fb_err:

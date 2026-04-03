@@ -108,6 +108,11 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
             if final_end > video_duration:
                 final_end = video_duration
 
+            # 5. Skip if start >= end after clamping (can happen if S06 extended start beyond video end)
+            if final_start >= final_end:
+                print(f"[S07] Clip {index+1} ({content_type}): start {final_start:.2f}s >= end {final_end:.2f}s after clamping. Skipping.")
+                continue
+
             final_duration_s = final_end - final_start
 
             # 5. Write calculated values into clip dict

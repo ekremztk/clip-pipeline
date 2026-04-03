@@ -352,46 +352,95 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None, jso
             return out
 
         else:
-            print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
-            from google.cloud import storage
-            import uuid
+            # Primary: GCS upload (requires credentials)
+            try:
+                print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
+                from google.cloud import storage
+                import uuid
 
-            storage_client = storage.Client(project=settings.GCP_PROJECT)
-            bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+                gcs_creds = None
+                if settings.GCP_CREDENTIALS_JSON:
+                    from google.oauth2 import service_account as _sa
+                    gcs_creds = _sa.Credentials.from_service_account_info(
+                        json.loads(settings.GCP_CREDENTIALS_JSON)
+                    )
 
-            blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
-            blob = bucket.blob(blob_name)
-            blob.upload_from_filename(video_path)
+                storage_client = storage.Client(project=settings.GCP_PROJECT, credentials=gcs_creds)
+                bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
 
-            gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
-            print(f"[GeminiClient] Uploaded video to {gcs_uri}")
+                blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
+                blob = bucket.blob(blob_name)
+                blob.upload_from_filename(video_path)
 
-            video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
+                gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
+                print(f"[GeminiClient] Uploaded video to {gcs_uri}")
 
-            def do_generate_uploaded() -> str:
-                response = client.models.generate_content(
+                video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
+
+                def do_generate_uploaded() -> str:
+                    response = client.models.generate_content(
+                        model=model,
+                        contents=[video_part, prompt],
+                        config=video_config,
+                    )
+                    _last_video_response.clear()
+                    _last_video_response.append(response)
+                    return str(response.text)
+
+                result = _retry_logic(do_generate_uploaded)
+                out = str(result) if result else "{}"
+                in_tok = out_tok = None
+                if _last_video_response:
+                    u = getattr(_last_video_response[0], "usage_metadata", None)
+                    if u:
+                        in_tok = getattr(u, "prompt_token_count", None)
+                        out_tok = getattr(u, "candidates_token_count", None)
+                _accumulate_tokens(in_tok, out_tok, model)
+                _trace_generation("analyze_video", model, prompt, out,
+                                  input_tokens=in_tok, output_tokens=out_tok,
+                                  metadata={"file_size_mb": round(file_size_mb, 1), "mode": "gcs",
+                                            "duration_ms": int((time.time() - t0) * 1000)})
+                return out
+            except Exception as gcs_err:
+                if gcs_uri:
+                    raise  # GCS uploaded but generation failed — let outer except handle
+                print(f"[GeminiClient] GCS upload failed ({gcs_err}). Falling back to File API...")
+
+            # Fallback: Gemini File API via developer client (no extra credentials needed)
+            uploaded_file_name = None
+            dev_client_ref = None
+            try:
+                dev_client_ref = get_developer_client()
+                response_file = dev_client_ref.files.upload(
+                    file=video_path, config={"mime_type": "video/mp4"}
+                )
+                uploaded_file_name = response_file.name
+                print(f"[GeminiClient] Uploaded to File API: {uploaded_file_name}")
+                _poll_file_active(dev_client_ref, uploaded_file_name)
+
+                file_video_part = types.Part.from_uri(
+                    file_uri=response_file.uri, mime_type="video/mp4"
+                )
+                file_response = dev_client_ref.models.generate_content(
                     model=model,
-                    contents=[video_part, prompt],
+                    contents=[file_video_part, prompt],
                     config=video_config,
                 )
-                _last_video_response.clear()
-                _last_video_response.append(response)
-                return str(response.text)
-
-            result = _retry_logic(do_generate_uploaded)
-            out = str(result) if result else "{}"
-            in_tok = out_tok = None
-            if _last_video_response:
-                u = getattr(_last_video_response[0], "usage_metadata", None)
-                if u:
-                    in_tok = getattr(u, "prompt_token_count", None)
-                    out_tok = getattr(u, "candidates_token_count", None)
-            _accumulate_tokens(in_tok, out_tok, model)
-            _trace_generation("analyze_video", model, prompt, out,
-                              input_tokens=in_tok, output_tokens=out_tok,
-                              metadata={"file_size_mb": round(file_size_mb, 1), "mode": "gcs",
-                                        "duration_ms": int((time.time() - t0) * 1000)})
-            return out
+                out = str(file_response.text) if file_response.text else "{}"
+                _trace_generation("analyze_video", model, prompt, out,
+                                  metadata={"file_size_mb": round(file_size_mb, 1), "mode": "file_api",
+                                            "duration_ms": int((time.time() - t0) * 1000)})
+                return out
+            except Exception as file_err:
+                print(f"[GeminiClient] File API fallback also failed: {file_err}")
+                return "{}"
+            finally:
+                if uploaded_file_name and dev_client_ref:
+                    try:
+                        dev_client_ref.files.delete(name=uploaded_file_name)
+                        print(f"[GeminiClient] Deleted File API video: {uploaded_file_name}")
+                    except Exception:
+                        pass
 
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")

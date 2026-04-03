@@ -476,6 +476,16 @@ def run(
         for candidate in candidates:
             segment  = _extract_transcript_segment(candidate, labeled_transcript, transcript_data)
             ctx_segs = _extract_context_segments(candidate, transcript_data)
+
+            # Skip candidates with no transcript content — Claude cannot evaluate them
+            has_content = bool(
+                segment or ctx_segs["clip_segment"] or
+                ctx_segs["pre_context"] or ctx_segs["post_context"]
+            )
+            if not has_content:
+                print(f"[S06] Skipping candidate {candidate.get('candidate_id')}: no transcript content (start={candidate.get('recommended_start')}, end={candidate.get('recommended_end')})")
+                continue
+
             all_batch_data.append({
                 "candidate_id":      candidate.get("candidate_id"),
                 "timestamp":         candidate.get("timestamp", "00:00"),
@@ -555,6 +565,23 @@ def run(
                 failed_log.append(clip)
 
         print(f"[S06] Quality gate: {len(passed)} passed, {len(failed_log)} dropped")
+
+        # Clamp adjusted boundaries to video duration — prevents start > video_end
+        video_duration = float(transcript_data.get("duration", 0.0)) if transcript_data else 0.0
+        if video_duration > 0:
+            clamped_passed = []
+            for clip in passed:
+                clip_start = float(clip.get("recommended_start", 0) or 0)
+                clip_end = float(clip.get("recommended_end", 0) or 0)
+                clip_end = min(clip_end, video_duration)
+                clip_start = min(clip_start, video_duration)
+                if clip_end - clip_start < min_duration:
+                    print(f"[S06] Dropping candidate {clip.get('candidate_id')}: {clip_end - clip_start:.1f}s after clamping to video bounds ({video_duration:.1f}s)")
+                    continue
+                clip["recommended_start"] = round(clip_start, 3)
+                clip["recommended_end"] = round(clip_end, 3)
+                clamped_passed.append(clip)
+            passed = clamped_passed
 
         if not passed:
             print("[S06] No candidates passed quality gate.")
