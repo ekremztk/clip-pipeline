@@ -317,18 +317,44 @@ function applyReframeWithSplits(
 	const boundaries = [trimStart, ...validCuts, trimEnd];
 	const segments: Segment[] = [];
 
-	// Extract only linear keyframes (within-shot panning). Hold keyframes are
-	// scene boundary artifacts that we no longer need since we're splitting.
+	// Linear keyframes define within-shot panning movement.
+	// Hold keyframes define per-shot static crop positions (at scene cut boundaries).
 	const linearKeyframes = keyframes.filter((kf) => kf.interpolation === "linear");
+	const sortedAllKeyframes = [...keyframes].sort((a, b) => a.time_s - b.time_s);
+
+	// Frame tolerance for matching keyframes to segment boundaries.
+	const FRAME_TOLERANCE = 1.5 / videoFps;
+
+	// For each segment, find the "anchor" keyframe that defines its crop position.
+	// Segment 0  → earliest keyframe overall (linear at t=0).
+	// Segment s>0 → the hold keyframe exactly AT validCuts[s-1] (new-shot position),
+	//               NOT the "before-cut" hold which is ~1 frame earlier.
+	const getAnchorKeyframe = (s: number): ReframeKeyframe | null => {
+		if (s === 0) return sortedAllKeyframes[0] ?? null;
+		const cutTime = validCuts[s - 1];
+		const candidates = sortedAllKeyframes.filter((kf) => Math.abs(kf.time_s - cutTime) < FRAME_TOLERANCE);
+		if (candidates.length === 0) return null;
+		// Among candidates near the cut, take the latest time_s = the "at-cut" hold (new shot)
+		return candidates[candidates.length - 1];
+	};
 
 	for (let s = 0; s < boundaries.length - 1; s++) {
 		const segStart = boundaries[s];
 		const segEnd = boundaries[s + 1];
 
-		// Collect linear keyframes within this segment's video time range
-		const segKfs = linearKeyframes.filter(
-			(kf) => kf.time_s >= segStart - 0.5 / videoFps && kf.time_s < segEnd + 0.5 / videoFps,
+		// Linear panning keyframes within this segment's video time range
+		const segLinearKfs = linearKeyframes.filter(
+			(kf) => kf.time_s >= segStart - FRAME_TOLERANCE && kf.time_s <= segEnd + FRAME_TOLERANCE,
 		);
+
+		// If no linear keyframes, use the anchor (hold) keyframe for static crop position
+		const segKfs =
+			segLinearKfs.length > 0
+				? segLinearKfs
+				: (() => {
+						const anchor = getAnchorKeyframe(s);
+						return anchor ? [anchor] : [];
+					})();
 
 		segments.push({
 			startVideoTime: segStart,
@@ -468,13 +494,16 @@ function applySegmentToElement(
 	const toCanvasPosY = (offsetY: number): number => scaledHeight / 2 - canvasHeight / 2 - offsetY * containScale;
 	const snapToFrame = (t: number): number => Math.round(t * videoFps) / videoFps;
 
-	// Enable cover mode and set scale
+	// Enable cover mode, set scale, and clear any inherited old animations
+	// (from a previous reframe run distributed via splitAnimationsAtTime).
 	editor.timeline.updateElements({
 		updates: [{
 			trackId,
 			elementId,
 			updates: {
 				coverMode: true,
+				// biome-ignore lint/suspicious/noExplicitAny: clearing old animation keyframes
+				animations: {} as any,
 				transform: {
 					...element.transform,
 					scale: transformScale,
@@ -486,9 +515,7 @@ function applySegmentToElement(
 	const kfs = segment.keyframes;
 
 	if (kfs.length === 0) {
-		// No keyframes for this segment — should not happen but handle gracefully.
-		// Use the midpoint of the segment to find the nearest keyframe from any segment.
-		console.warn(`[Reframe] Segment [${segment.startVideoTime}-${segment.endVideoTime}] has no keyframes`);
+		console.warn(`[Reframe] Segment [${segment.startVideoTime}-${segment.endVideoTime}] has no keyframes — skipped`);
 		return;
 	}
 
