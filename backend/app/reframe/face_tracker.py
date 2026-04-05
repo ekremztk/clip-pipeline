@@ -1,16 +1,19 @@
 """
-Face Tracker — MediaPipe Tasks API face detection and tracking.
+Face Tracker — pluggable detection engine.
 
-Replaces YOLO frame_analyzer with MediaPipe FaceDetector (Tasks API).
-Produces per-frame FaceDetection objects with stable tracking IDs.
+Supports two engines (selected at runtime via engine_type param):
+  - "mediapipe" (default): BlazeFace model, face-level detection
+  - "yolo": YOLOv8-nano, person-level detection with head region estimation
 
-Tracking ID assignment uses spatial proximity (center distance)
-across consecutive frames — lightweight, no deep re-identification.
+Both engines produce identical FaceDetection output so the rest of the
+pipeline (focus_resolver, path_solver, etc.) remains unchanged.
 
-Model: blaze_face_short_range.tflite (~224KB, CPU-only, fast)
+Performance (per-frame ms) is logged for each engine to enable comparison.
 """
 import logging
+import time
 import os
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
@@ -22,43 +25,228 @@ from .types import FaceDetection, Frame, Shot, SHOT_WIDE, SHOT_CLOSEUP, SHOT_BRO
 
 logger = logging.getLogger(__name__)
 
-# Model path — always relative to backend/models/
+# Model paths
 _MODELS_DIR = Path(__file__).parent.parent.parent / "models"
-_MODEL_FILENAME = "blaze_face_full_range.tflite"
-_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/latest/blaze_face_full_range.tflite"
-
-# Lazy-loaded detector
-_detector = None
+_MP_MODEL_FILENAME = "blaze_face_full_range.tflite"
+_MP_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/latest/blaze_face_full_range.tflite"
 
 
-def _get_detector(config: FaceTrackerConfig):
-    """Lazy-init MediaPipe FaceDetector (Tasks API)."""
-    global _detector
-    if _detector is not None:
-        return _detector
+# ─── Abstract base ────────────────────────────────────────────────────────────
 
-    from mediapipe.tasks.python import vision
-    from mediapipe.tasks.python.core.base_options import BaseOptions
+class BaseDetector(ABC):
+    """Detection engine interface. Both engines implement this."""
 
-    model_path = _MODELS_DIR / _MODEL_FILENAME
+    @abstractmethod
+    def detect(
+        self,
+        frame: np.ndarray,
+        config: FaceTrackerConfig,
+    ) -> list[FaceDetection]:
+        """Detect persons/faces in a single BGR frame. Returns FaceDetection list."""
 
-    # Auto-download model if missing
-    if not model_path.exists():
-        logger.info("[FaceTracker] Downloading face detection model...")
-        _MODELS_DIR.mkdir(parents=True, exist_ok=True)
-        import urllib.request
-        urllib.request.urlretrieve(_MODEL_URL, str(model_path))
-        logger.info("[FaceTracker] Model downloaded: %s", model_path)
+    @property
+    @abstractmethod
+    def engine_name(self) -> str:
+        pass
 
-    options = vision.FaceDetectorOptions(
-        base_options=BaseOptions(model_asset_path=str(model_path)),
-        running_mode=vision.RunningMode.IMAGE,
-        min_detection_confidence=config.min_detection_confidence,
-    )
-    _detector = vision.FaceDetector.create_from_options(options)
-    logger.info("[FaceTracker] MediaPipe FaceDetector initialized (blaze_face_full_range)")
-    return _detector
 
+# ─── MediaPipe engine ─────────────────────────────────────────────────────────
+
+class MediaPipeDetector(BaseDetector):
+    """BlazeFace face detection via MediaPipe Tasks API."""
+
+    def __init__(self, config: FaceTrackerConfig):
+        from mediapipe.tasks.python import vision
+        from mediapipe.tasks.python.core.base_options import BaseOptions
+
+        model_path = _MODELS_DIR / _MP_MODEL_FILENAME
+        if not model_path.exists():
+            logger.info("[FaceTracker] Downloading MediaPipe model...")
+            _MODELS_DIR.mkdir(parents=True, exist_ok=True)
+            import urllib.request
+            urllib.request.urlretrieve(_MP_MODEL_URL, str(model_path))
+            logger.info("[FaceTracker] Model downloaded: %s", model_path)
+
+        options = vision.FaceDetectorOptions(
+            base_options=BaseOptions(model_asset_path=str(model_path)),
+            running_mode=vision.RunningMode.IMAGE,
+            min_detection_confidence=config.min_detection_confidence,
+        )
+        self._detector = vision.FaceDetector.create_from_options(options)
+        logger.info("[FaceTracker] MediaPipe FaceDetector initialized (blaze_face_full_range)")
+
+    @property
+    def engine_name(self) -> str:
+        return "mediapipe"
+
+    def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
+        try:
+            import mediapipe as mp
+
+            res_w, res_h = config.analysis_resolution
+            small = cv2.resize(frame, (res_w, res_h))
+            rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
+
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
+            result = self._detector.detect(mp_image)
+
+            if not result.detections:
+                return []
+
+            detections: list[FaceDetection] = []
+            for det in result.detections:
+                bbox = det.bounding_box
+                score = det.categories[0].score if det.categories else 0.0
+                if score < config.min_detection_confidence:
+                    continue
+
+                fx = (bbox.origin_x + bbox.width / 2) / res_w
+                fy = (bbox.origin_y + bbox.height / 2) / res_h
+                fw = bbox.width / res_w
+                fh = bbox.height / res_h
+                fx = max(0.0, min(1.0, fx))
+                fy = max(0.0, min(1.0, fy))
+
+                person_h = min(1.0, fh * config.person_height_multiplier)
+                person_x = fx
+                person_y = min(1.0, fy + person_h * 0.2)
+
+                detections.append(FaceDetection(
+                    face_x=round(fx, 5), face_y=round(fy, 5),
+                    face_width=round(fw, 5), face_height=round(fh, 5),
+                    confidence=round(score, 4),
+                    person_x=round(person_x, 5), person_y=round(person_y, 5),
+                    person_height=round(person_h, 5),
+                ))
+
+            detections.sort(key=lambda d: d.face_width * d.face_height, reverse=True)
+            detections = detections[:config.max_faces]
+            detections.sort(key=lambda d: d.face_x)
+            return detections
+
+        except Exception as e:
+            logger.error("[FaceTracker/MediaPipe] Detection error: %s", e)
+            return []
+
+
+# ─── YOLO engine ──────────────────────────────────────────────────────────────
+
+class YoloDetector(BaseDetector):
+    """
+    YOLOv8-nano person detection.
+
+    Detects "person" (class 0) bounding boxes, then estimates head position
+    from the top 30% of each person bbox. This allows tracking even when
+    the face is not directly visible.
+
+    Coordinate conversion:
+      person bbox [x1,y1,x2,y2] (normalized) →
+        face_x   = center X of person bbox
+        face_y   = y1 + body_h * 0.15  (center of top-30% region)
+        face_w   = body_w * 0.55        (approximate head width)
+        face_h   = body_h * 0.30        (top 30% of body = head region)
+    """
+
+    HEAD_FRACTION = 0.30     # Top fraction of body bbox treated as head
+    HEAD_WIDTH_RATIO = 0.55  # Head width relative to body width
+
+    def __init__(self, config: FaceTrackerConfig):
+        try:
+            from ultralytics import YOLO
+        except ImportError:
+            raise RuntimeError(
+                "ultralytics is not installed. "
+                "Run: pip install ultralytics"
+            )
+
+        # yolov8n.pt auto-downloads from ultralytics on first use
+        self._model = YOLO("yolov8n.pt")
+        logger.info("[FaceTracker] YOLOv8-nano initialized")
+
+    @property
+    def engine_name(self) -> str:
+        return "yolo"
+
+    def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
+        try:
+            res_w, res_h = config.analysis_resolution
+            small = cv2.resize(frame, (res_w, res_h))
+            rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
+
+            results = self._model(rgb, classes=[0], verbose=False)  # class 0 = person
+
+            if not results or not results[0].boxes:
+                return []
+
+            boxes = results[0].boxes
+            detections: list[FaceDetection] = []
+
+            for i in range(len(boxes)):
+                conf = float(boxes.conf[i])
+                if conf < config.min_detection_confidence:
+                    continue
+
+                # xyxyn: normalized [x1, y1, x2, y2]
+                x1, y1, x2, y2 = [float(v) for v in boxes.xyxyn[i]]
+                x1 = max(0.0, min(1.0, x1))
+                y1 = max(0.0, min(1.0, y1))
+                x2 = max(0.0, min(1.0, x2))
+                y2 = max(0.0, min(1.0, y2))
+
+                body_w = x2 - x1
+                body_h = y2 - y1
+
+                if body_w <= 0 or body_h <= 0:
+                    continue
+
+                # Head region = top HEAD_FRACTION of body bbox
+                head_h = body_h * self.HEAD_FRACTION
+                head_w = body_w * self.HEAD_WIDTH_RATIO
+                head_cx = x1 + body_w / 2
+                head_cy = y1 + head_h / 2  # center of top-30% region
+
+                # Person center (full body)
+                person_x = head_cx
+                person_y = y1 + body_h / 2
+                person_h = body_h
+
+                detections.append(FaceDetection(
+                    face_x=round(head_cx, 5),
+                    face_y=round(head_cy, 5),
+                    face_width=round(head_w, 5),
+                    face_height=round(head_h, 5),
+                    confidence=round(conf, 4),
+                    person_x=round(person_x, 5),
+                    person_y=round(person_y, 5),
+                    person_height=round(person_h, 5),
+                ))
+
+            detections.sort(key=lambda d: d.face_width * d.face_height, reverse=True)
+            detections = detections[:config.max_faces]
+            detections.sort(key=lambda d: d.face_x)
+            return detections
+
+        except Exception as e:
+            logger.error("[FaceTracker/YOLO] Detection error: %s", e)
+            return []
+
+
+# ─── Factory ──────────────────────────────────────────────────────────────────
+
+_detector_cache: dict[str, BaseDetector] = {}
+
+
+def _get_detector(engine_type: str, config: FaceTrackerConfig) -> BaseDetector:
+    """Lazy-init and cache detector by engine type."""
+    if engine_type not in _detector_cache:
+        if engine_type == "yolo":
+            _detector_cache[engine_type] = YoloDetector(config)
+        else:
+            _detector_cache[engine_type] = MediaPipeDetector(config)
+    return _detector_cache[engine_type]
+
+
+# ─── Public API ───────────────────────────────────────────────────────────────
 
 def analyze_video(
     video_path: str,
@@ -66,13 +254,16 @@ def analyze_video(
     src_w: int,
     src_h: int,
     config: FaceTrackerConfig,
+    engine_type: str = "mediapipe",
 ) -> list[Frame]:
     """
-    Sample frames from each shot and detect faces using MediaPipe.
+    Sample frames from each shot and detect persons/faces.
 
+    engine_type: "mediapipe" (default) | "yolo"
     Returns list of Frame objects with stable tracking IDs.
     """
-    detector = _get_detector(config)
+    detector = _get_detector(engine_type, config)
+    logger.info("[FaceTracker] Engine: %s", detector.engine_name)
 
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -81,6 +272,8 @@ def analyze_video(
 
     frames: list[Frame] = []
     prev_faces: list[FaceDetection] = []
+    total_ms = 0.0
+    frame_count = 0
 
     try:
         for shot_idx, shot in enumerate(shots):
@@ -91,23 +284,20 @@ def analyze_video(
                 if raw_frame is None:
                     continue
 
-                faces = _detect_faces(detector, raw_frame, config)
+                t0 = time.perf_counter()
+                faces = detector.detect(raw_frame, config)
+                elapsed_ms = (time.perf_counter() - t0) * 1000
+                total_ms += elapsed_ms
+                frame_count += 1
 
-                # Assign stable tracking IDs
+                logger.debug(
+                    "[FaceTracker/%s] t=%.2fs shot=%d faces=%d %.1fms",
+                    detector.engine_name, t, shot_idx, len(faces), elapsed_ms,
+                )
+
                 faces = _assign_track_ids(faces, prev_faces)
-
-                frames.append(Frame(
-                    time_s=t,
-                    shot_index=shot_idx,
-                    faces=faces,
-                ))
+                frames.append(Frame(time_s=t, shot_index=shot_idx, faces=faces))
                 prev_faces = faces
-
-                if faces:
-                    logger.debug(
-                        "[FaceTracker] t=%.2fs shot=%d faces=%d pos=(%.3f,%.3f)",
-                        t, shot_idx, len(faces), faces[0].face_x, faces[0].face_y,
-                    )
 
             # Reset tracking at shot boundaries
             prev_faces = []
@@ -115,8 +305,14 @@ def analyze_video(
     finally:
         cap.release()
 
-    logger.info("[FaceTracker] %d frames analyzed, %d total face detections",
-                len(frames), sum(len(f.faces) for f in frames))
+    avg_ms = total_ms / frame_count if frame_count > 0 else 0.0
+    logger.info(
+        "[FaceTracker/%s] %d frames analyzed, %d total detections, avg %.1fms/frame",
+        detector.engine_name,
+        len(frames),
+        sum(len(f.faces) for f in frames),
+        avg_ms,
+    )
     return frames
 
 
@@ -139,15 +335,8 @@ def classify_shots(
         wide = sum(1 for c in counts if c >= 2)
         single = sum(1 for c in counts if c == 1)
 
-        # Ratio of frames where at least one face was detected
         face_frame_ratio = (wide + single) / total
 
-        # Compute wide_ratio against detection frames only (not total).
-        # If total includes many empty frames (profile blindness), dividing by total
-        # artificially deflates the ratio and causes two-shots to be mis-labelled CLOSEUP.
-        # E.g. 9 wide + 21 single + 10 empty → total=40, but detection_frames=30.
-        #   old: 9/40 = 22.5% → below 0.25 → CLOSEUP (WRONG)
-        #   new: 9/30 = 30%   → above 0.20 → WIDE   (CORRECT)
         detection_frames = wide + single
         wide_ratio = wide / detection_frames if detection_frames > 0 else 0.0
 
@@ -170,7 +359,7 @@ def classify_shots(
     return shots
 
 
-# --- Frame sampling ----------------------------------------------------------
+# ─── Frame sampling ───────────────────────────────────────────────────────────
 
 def _get_sample_times(shot: Shot, sample_fps: float) -> list[float]:
     """Generate sample times within a shot, avoiding edge artifacts."""
@@ -199,81 +388,7 @@ def _read_frame(cap: cv2.VideoCapture, time_s: float) -> Optional[np.ndarray]:
     return frame if ret else None
 
 
-# --- MediaPipe detection -----------------------------------------------------
-
-def _detect_faces(
-    detector,
-    frame: np.ndarray,
-    config: FaceTrackerConfig,
-) -> list[FaceDetection]:
-    """
-    Detect faces using MediaPipe Tasks API FaceDetector.
-    Returns normalized face positions with estimated person center/height.
-    """
-    try:
-        import mediapipe as mp
-
-        res_w, res_h = config.analysis_resolution
-        small = cv2.resize(frame, (res_w, res_h))
-        rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
-
-        # MediaPipe Tasks API expects mp.Image
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
-        result = detector.detect(mp_image)
-
-        if not result.detections:
-            return []
-
-        detections: list[FaceDetection] = []
-
-        for det in result.detections:
-            bbox = det.bounding_box
-            score = det.categories[0].score if det.categories else 0.0
-
-            if score < config.min_detection_confidence:
-                continue
-
-            # bbox: origin_x, origin_y, width, height in pixels (of analysis resolution)
-            fx = (bbox.origin_x + bbox.width / 2) / res_w
-            fy = (bbox.origin_y + bbox.height / 2) / res_h
-            fw = bbox.width / res_w
-            fh = bbox.height / res_h
-
-            # Clamp
-            fx = max(0.0, min(1.0, fx))
-            fy = max(0.0, min(1.0, fy))
-
-            # Estimate person center/height from face
-            person_h = min(1.0, fh * config.person_height_multiplier)
-            person_x = fx
-            person_y = min(1.0, fy + person_h * 0.2)
-
-            detections.append(FaceDetection(
-                face_x=round(fx, 5),
-                face_y=round(fy, 5),
-                face_width=round(fw, 5),
-                face_height=round(fh, 5),
-                confidence=round(score, 4),
-                person_x=round(person_x, 5),
-                person_y=round(person_y, 5),
-                person_height=round(person_h, 5),
-            ))
-
-        # Sort by face size (largest first), keep top N
-        detections.sort(key=lambda d: d.face_width * d.face_height, reverse=True)
-        detections = detections[:config.max_faces]
-
-        # Sort by X for stable ordering
-        detections.sort(key=lambda d: d.face_x)
-
-        return detections
-
-    except Exception as e:
-        logger.error("[FaceTracker] Detection error: %s", e)
-        return []
-
-
-# --- Tracking ID assignment --------------------------------------------------
+# ─── Tracking ID assignment ───────────────────────────────────────────────────
 
 def _assign_track_ids(
     current: list[FaceDetection],
@@ -291,7 +406,6 @@ def _assign_track_ids(
     if not current:
         return current
 
-    # Distance pairs
     used_prev: set[int] = set()
     used_curr: set[int] = set()
     pairs: list[tuple[float, int, int]] = []
@@ -301,7 +415,6 @@ def _assign_track_ids(
             dist = ((c.face_x - p.face_x) ** 2 + (c.face_y - p.face_y) ** 2) ** 0.5
             pairs.append((dist, ci, pi))
 
-    # Greedy closest match
     pairs.sort(key=lambda p: p[0])
     max_match_dist = 0.15
 
@@ -314,7 +427,6 @@ def _assign_track_ids(
         used_curr.add(ci)
         used_prev.add(pi)
 
-    # New IDs for unmatched
     next_id = max((p.track_id for p in previous), default=-1) + 1
     for ci, face in enumerate(current):
         if ci not in used_curr:

@@ -59,6 +59,7 @@ def run_reframe(
     aspect_ratio: str = "9:16",
     tracking_mode: str = "dynamic_xy",
     content_type_hint: Optional[str] = None,
+    detection_engine: str = "mediapipe",
     on_progress: Optional[Callable[[str, int], None]] = None,
     debug_mode: bool = False,
 ) -> ReframeResult:
@@ -115,10 +116,11 @@ def run_reframe(
         shots = detect_shots(input_path, duration_s, config.shot_detection, fps)
         logger.info("[Reframe] %d shots detected", len(shots))
 
-        # 4. Face tracking (MediaPipe)
-        progress("Tracking faces...", 20)
-        frames = track_faces(input_path, shots, src_w, src_h, config.face_tracker)
-        logger.info("[Reframe] %d frames analyzed", len(frames))
+        # 4. Face tracking
+        engine_label = detection_engine.upper()
+        progress(f"Tracking faces ({engine_label})...", 20)
+        frames = track_faces(input_path, shots, src_w, src_h, config.face_tracker, engine_type=detection_engine)
+        logger.info("[Reframe] %d frames analyzed (engine=%s)", len(frames), detection_engine)
 
         # 5. Classify shots by face count
         progress("Classifying shots...", 35)

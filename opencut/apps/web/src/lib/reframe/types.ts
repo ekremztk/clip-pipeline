@@ -14,12 +14,14 @@ export type ReframeStrategy = "podcast" | "single" | "gaming" | "generic";
 export type ReframeAspectRatio = "9:16" | "1:1" | "4:5" | "16:9";
 export type ReframeTrackingMode = "x_only" | "dynamic_xy";
 export type ReframeContentType = "auto" | "podcast" | "single" | "gaming" | "generic";
+export type ReframeDetectionEngine = "mediapipe" | "yolo";
 
 export interface ReframeOptions {
 	strategy: ReframeStrategy;
 	aspectRatio: ReframeAspectRatio;
 	trackingMode: ReframeTrackingMode;
 	contentType: ReframeContentType;
+	detectionEngine?: ReframeDetectionEngine;
 	debugMode?: boolean;
 }
 

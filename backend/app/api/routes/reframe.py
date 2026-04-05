@@ -31,6 +31,7 @@ _STALE_MINUTES = 15
 _VALID_ASPECT_RATIOS = {"9:16", "1:1", "4:5", "16:9"}
 _VALID_TRACKING_MODES = {"x_only", "dynamic_xy"}
 _VALID_CONTENT_TYPES = {"auto", "podcast", "single", "gaming", "generic"}
+_VALID_DETECTION_ENGINES = {"mediapipe", "yolo"}
 
 
 # ─── Request / Response Modelleri ─────────────────────────────────────────────
@@ -45,7 +46,8 @@ class ReframeRequest(BaseModel):
     strategy: str = "podcast"                  # Geriye dönük uyumluluk için korundu
     aspect_ratio: str = "9:16"
     tracking_mode: str = "dynamic_xy"
-    content_type: Optional[str] = None        # YENİ: "auto" | "podcast" | "single" | "gaming" | "generic"
+    content_type: Optional[str] = None        # "auto" | "podcast" | "single" | "gaming" | "generic"
+    detection_engine: Optional[str] = "mediapipe"  # "mediapipe" | "yolo"
 
 
 class ReframeStatusResponse(BaseModel):
@@ -85,6 +87,12 @@ def _sanitize_content_type(value: Optional[str]) -> Optional[str]:
     if not value:
         return None
     return value if value in _VALID_CONTENT_TYPES else None
+
+
+def _sanitize_detection_engine(value: Optional[str]) -> str:
+    if not value:
+        return "mediapipe"
+    return value if value in _VALID_DETECTION_ENGINES else "mediapipe"
 
 
 def _keyframes_to_dicts(keyframes: list[ReframeKeyframe]) -> list[dict]:
@@ -159,6 +167,7 @@ async def start_reframe(
     aspect_ratio = _sanitize_aspect_ratio(req.aspect_ratio)
     tracking_mode = _sanitize_tracking_mode(req.tracking_mode)
     content_type = _sanitize_content_type(req.content_type)
+    detection_engine = _sanitize_detection_engine(req.detection_engine)
     user_id = current_user["id"]
 
     # content_type yoksa strategy parametresini fallback olarak kullan
@@ -207,6 +216,7 @@ async def start_reframe(
                 aspect_ratio=aspect_ratio,
                 tracking_mode=tracking_mode,
                 content_type_hint=effective_hint,
+                detection_engine=detection_engine,
                 on_progress=on_progress,
             )
 
@@ -334,6 +344,7 @@ async def start_reframe_debug(
     aspect_ratio = _sanitize_aspect_ratio(req.aspect_ratio)
     tracking_mode = _sanitize_tracking_mode(req.tracking_mode)
     content_type = _sanitize_content_type(req.content_type)
+    detection_engine = _sanitize_detection_engine(req.detection_engine)
     effective_hint = content_type or req.strategy
 
     # Create job row
@@ -376,6 +387,7 @@ async def start_reframe_debug(
                 aspect_ratio=aspect_ratio,
                 tracking_mode=tracking_mode,
                 content_type_hint=effective_hint,
+                detection_engine=detection_engine,
                 on_progress=on_progress,
                 debug_mode=True,
             )

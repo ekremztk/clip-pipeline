@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { useEditor } from "@/hooks/use-editor";
 import { runReframe, analyzeDebugVideo, type ReframeProgress, type ReframeResult, type ReframeOptions } from "@/lib/reframe/engine";
-import type { ReframeAspectRatio, ReframeContentType, ReframeTrackingMode } from "@/lib/reframe/types";
+import type { ReframeAspectRatio, ReframeContentType, ReframeTrackingMode, ReframeDetectionEngine } from "@/lib/reframe/types";
 import { BrainCircuit, CheckCheck, ChevronDown, ChevronUp, ExternalLink, RotateCcw, Smartphone } from "lucide-react";
 
 const ASPECT_RATIO_OPTIONS: { value: ReframeAspectRatio; label: string }[] = [
@@ -28,12 +28,18 @@ const TRACKING_MODE_OPTIONS: { value: ReframeTrackingMode; label: string; descri
 	{ value: "dynamic_xy", label: "Dynamic X+Y", description: "Pan and tilt for moving subjects" },
 ];
 
+const DETECTION_ENGINE_OPTIONS: { value: ReframeDetectionEngine; label: string; description: string }[] = [
+	{ value: "mediapipe", label: "MediaPipe", description: "BlazeFace — fast face detection" },
+	{ value: "yolo", label: "YOLOv8 Nano", description: "Person detection — works without face" },
+];
+
 export function ReframeView() {
 	const editor = useEditor();
 
 	const [aspectRatio, setAspectRatio] = useState<ReframeAspectRatio>("9:16");
 	const [contentType, setContentType] = useState<ReframeContentType>("auto");
 	const [trackingMode, setTrackingMode] = useState<ReframeTrackingMode>("dynamic_xy");
+	const [detectionEngine, setDetectionEngine] = useState<ReframeDetectionEngine>("mediapipe");
 	const [debugMode, setDebugMode] = useState(false);
 
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -81,6 +87,7 @@ export function ReframeView() {
 				aspectRatio,
 				trackingMode,
 				contentType,
+				detectionEngine,
 				debugMode,
 			};
 
@@ -172,6 +179,30 @@ export function ReframeView() {
 								}`}
 							>
 								<span className={`text-xs font-medium ${trackingMode === opt.value ? "text-white" : "text-[#a3a3a3]"}`}>
+									{opt.label}
+								</span>
+								<span className="text-[#737373] text-xs">{opt.description}</span>
+							</button>
+						))}
+					</div>
+				</div>
+
+				{/* Detection engine */}
+				<div className="flex flex-col gap-2">
+					<span className="text-xs font-medium">Detection engine</span>
+					<div className="flex flex-col gap-1.5">
+						{DETECTION_ENGINE_OPTIONS.map((opt) => (
+							<button
+								key={opt.value}
+								onClick={() => setDetectionEngine(opt.value)}
+								disabled={isProcessing}
+								className={`flex flex-col gap-0.5 rounded-md border px-2.5 py-2 text-left transition-colors ${
+									detectionEngine === opt.value
+										? "border-white bg-white/10"
+										: "border-[#262626] bg-black hover:border-[#404040]"
+								}`}
+							>
+								<span className={`text-xs font-medium ${detectionEngine === opt.value ? "text-white" : "text-[#a3a3a3]"}`}>
 									{opt.label}
 								</span>
 								<span className="text-[#737373] text-xs">{opt.description}</span>

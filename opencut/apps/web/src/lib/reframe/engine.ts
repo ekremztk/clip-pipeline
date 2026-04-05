@@ -114,6 +114,7 @@ export async function runReframe(
 				aspect_ratio: options.aspectRatio,
 				tracking_mode: options.trackingMode,
 				content_type: options.contentType ?? "auto",
+				detection_engine: options.detectionEngine ?? "mediapipe",
 			}),
 		});
 
