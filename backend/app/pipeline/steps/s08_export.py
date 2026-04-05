@@ -83,13 +83,8 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                 "duration_s": float(final_duration),
                 "hook_text": clip.get("hook_text"),
                 "content_type": content_type,
-                "confidence": clip.get("overall_confidence"),
-                "standalone_score": clip.get("standalone_score"),
-                "hook_score": clip.get("hook_score"),
-                "arc_score": clip.get("arc_score"),
-                "channel_fit_score": clip.get("channel_fit_score"),
-                "thinking_steps": clip.get("thinking_steps"),
-                "standalone_result": clip.get("quality_verdict"),
+                "standalone_score": clip.get("score"),          # single 0-100 score
+                "standalone_result": clip.get("quality_verdict"),  # "pass" | "fixable"
                 "clip_strategy_role": clip.get("clip_strategy_role"),
                 "posting_order": clip.get("posting_order"),
                 "suggested_title": clip.get("suggested_title"),
@@ -97,7 +92,7 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
                 "video_landscape_path": file_url,
                 "file_url": file_url,
                 "is_successful": None,  # user sets this manually via approve/reject UI
-                "quality_notes": clip.get("reject_reason"),  # populated only for fixable clips
+                "quality_notes": clip.get("quality_notes"),    # non-empty only for fixable clips
             }
 
             # Remove None values to avoid Supabase errors

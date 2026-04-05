@@ -160,6 +160,57 @@ async def unpublish_clip(clip_id: str, current_user: dict = Depends(get_current_
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.get("/{clip_id}/transcript")
+async def get_clip_transcript(clip_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Returns word-level transcript for a clip's time range.
+    Timestamps are relative to clip start (0 = first second of the clip).
+    """
+    try:
+        supabase = get_client()
+        clip = _verify_clip_owner(clip_id, current_user["id"], supabase)
+
+        job_id = clip.get("job_id")
+        clip_start = float(clip.get("start_time") or 0)
+        clip_end = float(clip.get("end_time") or 0)
+
+        if not job_id or clip_end <= clip_start:
+            return {"words": []}
+
+        transcript_res = (
+            supabase.table("transcripts")
+            .select("word_timestamps")
+            .eq("job_id", job_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not transcript_res.data:
+            return {"words": []}
+
+        words = transcript_res.data[0].get("word_timestamps") or []
+
+        # Filter to clip's time range, adjust timestamps to be relative to clip start
+        clip_words = []
+        for w in words:
+            w_start = float(w.get("start", 0))
+            w_end = float(w.get("end", w_start))
+            if clip_start <= w_start <= clip_end:
+                clip_words.append({
+                    "word": w.get("punctuated_word") or w.get("word", ""),
+                    "start": round(w_start - clip_start, 3),
+                    "end": round(w_end - clip_start, 3),
+                })
+
+        return {"words": clip_words}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error fetching transcript for clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 @router.patch("/{clip_id}/reject")
 async def reject_clip(clip_id: str, notes: Optional[str] = Body(default=None, embed=True), current_user: dict = Depends(get_current_user)):
     try:

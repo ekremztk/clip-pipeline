@@ -547,24 +547,19 @@ def run(
 
         print(f"[S06] Claude evaluated {len(all_evaluated)} total candidates")
 
-        # Log quality gate results, then DROP fails immediately
-        passed, failed_log = [], []
+        # Safety filter — fails should not appear in output (Claude omits them), but guard anyway
+        passed = []
         for clip in all_evaluated:
-            verdict = clip.get("quality_verdict", "fail")
+            verdict = clip.get("quality_verdict", "")
             if verdict in ("pass", "fixable"):
-                if clip.get("context_adjusted"):
-                    cid = clip.get("candidate_id", "?")
-                    reason = clip.get("context_adjustment_reason", "")
-                    orig_s = candidates[next((i for i, c in enumerate(candidates) if c.get("candidate_id") == clip.get("candidate_id")), 0)].get("recommended_start", "?") if candidates else "?"
-                    print(f"[S06] Context adjusted candidate {cid}: boundaries moved. Reason: {reason}")
+                notes = clip.get("quality_notes", "")
+                if verdict == "fixable" and notes:
+                    print(f"[S06] Fixable candidate {clip.get('candidate_id', '?')}: {notes}")
                 passed.append(clip)
             else:
-                cid = clip.get("candidate_id", "?")
-                reason = clip.get("reject_reason", "no reason given")
-                print(f"[S06] DROPPED candidate {cid}: {reason}")
-                failed_log.append(clip)
+                print(f"[S06] Safety-filtered unexpected verdict for candidate {clip.get('candidate_id', '?')}: '{verdict}'")
 
-        print(f"[S06] Quality gate: {len(passed)} passed, {len(failed_log)} dropped")
+        print(f"[S06] Quality gate: {len(passed)} passed, {len(all_evaluated) - len(passed)} filtered")
 
         # Clamp adjusted boundaries to video duration — prevents start > video_end
         video_duration = float(transcript_data.get("duration", 0.0)) if transcript_data else 0.0

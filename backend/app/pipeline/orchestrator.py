@@ -208,13 +208,13 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
                              duration_ms=duration_ms_s06)
                     pass_count = len(evaluated_clips)
-                    avg_standalone = round(
-                        sum(float(c.get("standalone_score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
+                    avg_score = round(
+                        sum(float(c.get("score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
                     )
                     director_events.emit_sync(
                         module="module_1", event="s06_evaluation_completed",
                         payload={"job_id": job_id, "pass_count": pass_count,
-                                 "avg_standalone": avg_standalone,
+                                 "avg_score": avg_score,
                                  "duration_ms": duration_ms_s06},
                         channel_id=channel_id,
                     )

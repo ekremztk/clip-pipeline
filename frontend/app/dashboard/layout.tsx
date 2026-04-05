@@ -222,7 +222,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ];
 
     const creativeItems = [
-        { href: "/dashboard/clips",       label: "Projects",    icon: FolderOpen, exact: false },
+        { href: "/dashboard/projects",    label: "Projects",    icon: FolderOpen, exact: false },
         { href: "/dashboard/performance", label: "Analytics",   icon: BarChart3,  exact: false },
         { href: "/dashboard/channel-dna", label: "Channel DNA", icon: Dna,        exact: false },
     ];
