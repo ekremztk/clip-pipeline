@@ -199,6 +199,12 @@ OUTPUT — Return ONLY valid JSON:
   ]
 }}
 
+SUBJECT ID RULES (CRITICAL — violating these causes hard visual bugs):
+- The target output is a VERTICAL frame. Every unique human or active entity visible on screen MUST receive its own Subject ID.
+- Multiple entities must NEVER be grouped under a single Subject ID regardless of their spatial proximity or how close together they appear.
+- If two people are both visible in a wide shot, they are two subjects (e.g. "A" and "B") — never one.
+- A subject_id represents exactly one physical person or entity. Do not reuse an ID for a different person.
+
 STRUCTURAL RULES:
 1. First segment starts at 0.0, last ends at {duration_s:.1f}
 2. Segments are contiguous (no gaps, no overlaps)

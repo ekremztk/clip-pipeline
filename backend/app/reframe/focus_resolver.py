@@ -88,13 +88,14 @@ def resolve_focus(
             # B-roll: center crop — no subject to track
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=0.5, y=0.4,
-                weight=0.3, shot_index=shot_idx,
+                weight=0.3, shot_index=shot_idx, subject_id="",
             ))
 
         elif not frame.faces:
             # No faces detected (profile angle, occlusion, etc.)
             # Priority 1: last known position from this shot (look-back)
             # Priority 2: per-shot Gemini position hint
+            active_subject_id = directive.subject_id if directive else ""
             if shot_idx in last_known_x:
                 x = last_known_x[shot_idx]
                 y = last_known_y[shot_idx]
@@ -103,9 +104,7 @@ def resolve_focus(
                     frame.time_s, x, y,
                 )
             else:
-                target_pos = subject_positions.get(
-                    directive.subject_id if directive else "", "",
-                )
+                target_pos = subject_positions.get(active_subject_id, "")
                 x = _position_to_x(target_pos)
                 y = 0.35
                 logger.debug(
@@ -114,19 +113,18 @@ def resolve_focus(
                 )
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=x, y=y,
-                weight=0.4, shot_index=shot_idx,
+                weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
             ))
 
         elif shot_type == SHOT_CLOSEUP:
+            active_subject_id = directive.subject_id if directive else ""
             if len(frame.faces) == 1:
                 # True closeup: one face in frame, just use it
                 face = frame.faces[0]
             else:
                 # Multiple faces in a "closeup" — most likely a misclassified two-shot.
                 # Apply per-shot subject directive so the right person is chosen.
-                target_pos = subject_positions.get(
-                    directive.subject_id if directive else "", "",
-                )
+                target_pos = subject_positions.get(active_subject_id, "")
                 face = _pick_face_by_position(frame.faces, target_pos)
                 logger.debug(
                     "[FocusResolver] t=%.2fs: CLOSEUP with %d faces — target '%s' → x=%.2f",
@@ -140,13 +138,13 @@ def resolve_focus(
                 y=face.face_y,
                 weight=weight,
                 shot_index=shot_idx,
+                subject_id=active_subject_id,
             ))
 
         else:
             # Wide shot: use per-shot subject positions to select the right face
-            target_pos = subject_positions.get(
-                directive.subject_id if directive else "", "",
-            )
+            active_subject_id = directive.subject_id if directive else ""
+            target_pos = subject_positions.get(active_subject_id, "")
             face = _pick_face_by_position(frame.faces, target_pos)
 
             # If only 1 face found and it's clearly on the wrong side,
@@ -162,7 +160,7 @@ def resolve_focus(
                 )
                 focus_points.append(FocusPoint(
                     time_s=frame.time_s, x=x, y=y,
-                    weight=0.4, shot_index=shot_idx,
+                    weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
                 ))
             else:
                 last_known_x[shot_idx] = face.face_x
@@ -173,6 +171,7 @@ def resolve_focus(
                     y=face.face_y,
                     weight=weight,
                     shot_index=shot_idx,
+                    subject_id=active_subject_id,
                 ))
 
     logger.info(

@@ -95,6 +95,7 @@ class FocusPoint:
     y: float                # 0.0-1.0 normalized target center Y
     weight: float = 1.0     # Importance weight (higher = path solver prioritizes more)
     shot_index: int = 0
+    subject_id: str = ""    # Gemini subject ID — used to detect person changes (hard cut)
 
 
 # --- Path Solver (AutoFlip-style) -------------------------------------------

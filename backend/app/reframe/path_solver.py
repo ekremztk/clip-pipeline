@@ -143,6 +143,7 @@ def _median_filter(
             y=round(med_y, 5),
             weight=max_w,
             shot_index=points[i].shot_index,
+            subject_id=points[i].subject_id,
         ))
 
     return filtered
@@ -313,17 +314,31 @@ def _compute_tracking_path(
             ))
             continue
 
-        # Subject switch detection: large jump means Gemini changed focus person.
-        # Bypass velocity limit entirely — teleport the camera to the new subject.
-        # The keyframe emitter will emit a hold+hold pair at this point so the
-        # frontend hard-cuts instead of interpolating across the jump.
-        if distance > config.subject_switch_threshold:
+        # Subject switch detection: Gemini changed the focus person (subject_id changed)
+        # OR the position jumped beyond the distance threshold.
+        # In either case bypass velocity limit and teleport — hard cut, no interpolation.
+        # subject_id check takes priority: even a small positional jump triggers a hard cut
+        # when the directive switched to a different person.
+        prev_subject_id = points[i - 1].subject_id
+        curr_subject_id = points[i].subject_id
+        is_subject_change = (
+            prev_subject_id != ""
+            and curr_subject_id != ""
+            and prev_subject_id != curr_subject_id
+        )
+        if is_subject_change or distance > config.subject_switch_threshold:
             curr_x = target_x
             curr_y = target_y
-            logger.debug(
-                "[PathSolver] t=%.3fs: subject switch (dist=%.3f > %.2f), teleporting to (%.3f, %.3f)",
-                points[i].time_s, distance, config.subject_switch_threshold, curr_x, curr_y,
-            )
+            if is_subject_change:
+                logger.debug(
+                    "[PathSolver] t=%.3fs: subject_id change (%s → %s), teleporting to (%.3f, %.3f)",
+                    points[i].time_s, prev_subject_id, curr_subject_id, curr_x, curr_y,
+                )
+            else:
+                logger.debug(
+                    "[PathSolver] t=%.3fs: subject switch (dist=%.3f > %.2f), teleporting to (%.3f, %.3f)",
+                    points[i].time_s, distance, config.subject_switch_threshold, curr_x, curr_y,
+                )
         else:
             # Normal velocity-limited smooth tracking
             max_move = config.max_velocity * dt
