@@ -322,39 +322,60 @@ function applyReframeWithSplits(
 	const linearKeyframes = keyframes.filter((kf) => kf.interpolation === "linear");
 	const sortedAllKeyframes = [...keyframes].sort((a, b) => a.time_s - b.time_s);
 
-	// Frame tolerance for matching keyframes to segment boundaries.
+	// Frame tolerance for matching hold keyframes to segment boundaries.
 	const FRAME_TOLERANCE = 1.5 / videoFps;
 
-	// For each segment, find the "anchor" keyframe that defines its crop position.
-	// Segment 0  → earliest keyframe overall (linear at t=0).
-	// Segment s>0 → the hold keyframe exactly AT validCuts[s-1] (new-shot position),
-	//               NOT the "before-cut" hold which is ~1 frame earlier.
+	// For each segment, find the "anchor" HOLD keyframe that defines its crop position.
+	// Segment 0  → earliest keyframe overall.
+	// Segment s>0 → the hold keyframe AT validCuts[s-1] (new-shot position),
+	//               NOT the "before-cut" hold which is 1 frame earlier.
+	// Only searches HOLD keyframes to avoid confusing the old shot's final linear kf
+	// (which is also at cut_time) with the new shot's starting position.
 	const getAnchorKeyframe = (s: number): ReframeKeyframe | null => {
 		if (s === 0) return sortedAllKeyframes[0] ?? null;
 		const cutTime = validCuts[s - 1];
-		const candidates = sortedAllKeyframes.filter((kf) => Math.abs(kf.time_s - cutTime) < FRAME_TOLERANCE);
-		if (candidates.length === 0) return null;
-		// Among candidates near the cut, take the latest time_s = the "at-cut" hold (new shot)
-		return candidates[candidates.length - 1];
+		const holdCandidates = sortedAllKeyframes.filter(
+			(kf) => kf.interpolation === "hold" && Math.abs(kf.time_s - cutTime) < FRAME_TOLERANCE,
+		);
+		if (holdCandidates.length === 0) return null;
+		// Among hold candidates near the cut, take the latest time_s = the "at-cut" hold (new shot)
+		return holdCandidates[holdCandidates.length - 1];
 	};
 
 	for (let s = 0; s < boundaries.length - 1; s++) {
 		const segStart = boundaries[s];
 		const segEnd = boundaries[s + 1];
 
-		// Linear panning keyframes within this segment's video time range
+		// Linear panning keyframes within this segment's video time range.
+		// For s > 0: use STRICT inequality at start (kf.time_s > segStart) to prevent
+		// the previous segment's final keyframe (which sits AT cut_time = segStart) from
+		// leaking into this segment and giving it the wrong starting crop position.
+		// For s == 0: use a 0.5-frame tolerance to safely capture the t=0 keyframe.
 		const segLinearKfs = linearKeyframes.filter(
-			(kf) => kf.time_s >= segStart - FRAME_TOLERANCE && kf.time_s <= segEnd + FRAME_TOLERANCE,
+			(kf) => (s === 0 ? kf.time_s >= segStart - 0.5 / videoFps : kf.time_s > segStart)
+				&& kf.time_s <= segEnd + FRAME_TOLERANCE,
 		);
 
-		// If no linear keyframes, use the anchor (hold) keyframe for static crop position
-		const segKfs =
-			segLinearKfs.length > 0
-				? segLinearKfs
-				: (() => {
-						const anchor = getAnchorKeyframe(s);
-						return anchor ? [anchor] : [];
-					})();
+		// Build this segment's keyframe list:
+		// For s > 0: always prepend the anchor (HOLD kf at the cut boundary) so that:
+		//   - Static segments get the correct new-shot position (no linear kfs).
+		//   - Panning/tracking segments get the correct starting position (t=0 = anchor)
+		//     followed by the within-shot linear kfs that define the animation.
+		// For s == 0: use linear kfs directly; fall back to anchor only if empty.
+		let segKfs: ReframeKeyframe[];
+		if (s === 0) {
+			if (segLinearKfs.length > 0) {
+				segKfs = segLinearKfs;
+			} else {
+				const anchor = getAnchorKeyframe(0);
+				segKfs = anchor ? [anchor] : [];
+			}
+		} else {
+			const anchor = getAnchorKeyframe(s);
+			// Prepend anchor to give the segment its correct starting crop position.
+			// Even for panning segments, the anchor defines t=0; linear kfs animate from there.
+			segKfs = anchor ? [anchor, ...segLinearKfs] : segLinearKfs;
+		}
 
 		segments.push({
 			startVideoTime: segStart,

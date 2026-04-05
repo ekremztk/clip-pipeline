@@ -139,6 +139,7 @@ export default function NewJobPage() {
 
     const handleFileSelect = async (selectedFile: File) => {
         setFile(selectedFile);
+        if (!title) setTitle(selectedFile.name.replace(/\.[^.]+$/, ''));
         const url = URL.createObjectURL(selectedFile);
         setVideoUrl(url);
         setUploadState('uploading');
