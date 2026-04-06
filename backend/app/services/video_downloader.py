@@ -1,58 +1,81 @@
 import os
+import re
 import uuid
 import asyncio
 from typing import Optional
 from pathlib import Path
 
+import httpx
 import yt_dlp
+
+_RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "1dc730a48fmsh7906afc02af405ap1a3adejsn480eb41b8a56")
+_RAPIDAPI_HOST = "youtube86.p.rapidapi.com"
+_RAPIDAPI_BASE = f"https://{_RAPIDAPI_HOST}"
+_RAPIDAPI_HEADERS = {
+    "x-rapidapi-key": _RAPIDAPI_KEY,
+    "x-rapidapi-host": _RAPIDAPI_HOST,
+    "Content-Type": "application/json",
+}
+
+
+def _pick_download_url(links: list, max_quality: str) -> Optional[str]:
+    """
+    Pick the best download URL from the API response that fits within max_quality.
+    Falls back to the first available URL if no quality match is found.
+    """
+    max_height = int(max_quality)
+    best_url = None
+    best_height = 0
+
+    for link in links:
+        url = (
+            link.get("url")
+            or link.get("link")
+            or link.get("downloadUrl")
+            or link.get("download_url")
+        )
+        if not url:
+            continue
+
+        quality_str = str(
+            link.get("quality")
+            or link.get("resolution")
+            or link.get("label")
+            or link.get("qualityLabel")
+            or ""
+        )
+        m = re.search(r"(\d{3,4})", quality_str)
+        height = int(m.group(1)) if m else 0
+
+        if height <= max_height and height > best_height:
+            best_url = url
+            best_height = height
+
+    if best_url:
+        return best_url
+
+    # Fallback: return first URL regardless of quality
+    for link in links:
+        url = (
+            link.get("url")
+            or link.get("link")
+            or link.get("downloadUrl")
+            or link.get("download_url")
+        )
+        if url:
+            return url
+
+    return None
 
 
 class VideoDownloader:
     """
-    yt-dlp wrapper for downloading YouTube videos.
-    Routes traffic through Cloudflare WARP proxy when WARP_PRIVATE_KEY is configured.
+    Downloads YouTube videos via RapidAPI youtube86.
+    Flow: POST /links → poll GET /status/{taskId} → download file.
     """
 
     def __init__(self):
         self.output_dir = Path(os.getenv("UPLOAD_DIR", "temp_uploads"))
-        # Set by start.sh when wireproxy is running
-        self.proxy = os.getenv("WARP_PROXY_URL", "socks5h://127.0.0.1:1080") if os.getenv("WARP_PRIVATE_KEY") else ""
-
-    def _build_ydl_opts(self, output_template: str, max_quality: str = "1080") -> dict:
-        height = int(max_quality)
-        opts = {
-            # android client supports DASH (separate video+audio streams)
-            # tv client only supports combined formats (18=360p, 22=720p)
-            # Fallback chain covers both clients
-            "format": (
-                f"bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]"
-                f"/bestvideo[height<={height}]+bestaudio"
-                f"/best[height<={height}][ext=mp4]"
-                f"/best[height<={height}]"
-                f"/best"
-            ),
-            "outtmpl": output_template,
-            "merge_output_format": "mp4",
-            "quiet": True,
-            "no_warnings": True,
-            "socket_timeout": 30,
-            # TV client avoids SABR (YouTube's new streaming protocol that breaks downloads)
-            # Android client as fallback
-            "extractor_args": {
-                "youtube": {
-                    "player_client": ["tv", "android"],
-                }
-            },
-            # Use Node.js for n-parameter decipher (required since yt-dlp v2025.11)
-            "allow_multiple_video_streams": False,
-            "allow_multiple_audio_streams": False,
-        }
-        if self.proxy:
-            opts["proxy"] = self.proxy
-            print(f"[VideoDownloader] Using WARP proxy: {self.proxy}")
-        else:
-            print("[VideoDownloader] No proxy configured (local dev mode)")
-        return opts
 
     async def download(
         self,
@@ -61,7 +84,7 @@ class VideoDownloader:
         max_quality: str = "1080",
     ) -> str:
         """
-        Downloads a YouTube video and returns the local file path.
+        Downloads a YouTube video via RapidAPI youtube86 and returns the local file path.
 
         Args:
             youtube_url: Full YouTube URL (watch, shorts, youtu.be)
@@ -72,43 +95,129 @@ class VideoDownloader:
             Absolute path to the downloaded mp4 file
 
         Raises:
-            RuntimeError: if yt-dlp fails
-            FileNotFoundError: if downloaded file not found after success
+            RuntimeError: if the API fails or task times out
+            FileNotFoundError: if the saved file is missing after download
         """
         target_dir = Path(output_dir) if output_dir else self.output_dir
         target_dir.mkdir(parents=True, exist_ok=True)
 
+        # ── Step 1: Submit download task ──────────────────────────────────────
+        print(f"[VideoDownloader] Submitting to RapidAPI: {youtube_url}")
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                f"{_RAPIDAPI_BASE}/links",
+                headers=_RAPIDAPI_HEADERS,
+                json={"url": youtube_url},
+            )
+            if resp.status_code != 200:
+                raise RuntimeError(
+                    f"RapidAPI /links returned {resp.status_code}: {resp.text[:300]}"
+                )
+            data = resp.json()
+
+        task_id = (
+            data.get("taskId")
+            or data.get("task_id")
+            or data.get("id")
+            or data.get("requestId")
+        )
+        if not task_id:
+            raise RuntimeError(f"No taskId in /links response: {data}")
+        print(f"[VideoDownloader] Task created: {task_id}")
+
+        # ── Step 2: Poll /status/{taskId} until ready ─────────────────────────
+        download_url = None
+        for attempt in range(60):  # max 5 minutes (60 × 5s)
+            await asyncio.sleep(5)
+            async with httpx.AsyncClient(timeout=15) as client:
+                status_resp = await client.get(
+                    f"{_RAPIDAPI_BASE}/status/{task_id}",
+                    headers=_RAPIDAPI_HEADERS,
+                )
+                if status_resp.status_code != 200:
+                    print(
+                        f"[VideoDownloader] /status returned {status_resp.status_code} "
+                        f"(attempt {attempt + 1}), retrying..."
+                    )
+                    continue
+                status_data = status_resp.json()
+
+            status = str(
+                status_data.get("status")
+                or status_data.get("state")
+                or ""
+            ).lower()
+
+            print(f"[VideoDownloader] Poll {attempt + 1}/60 — status: {status}")
+
+            if status in ("completed", "ready", "done", "finished", "success"):
+                links = (
+                    status_data.get("links")
+                    or status_data.get("formats")
+                    or status_data.get("videos")
+                    or status_data.get("result", {}).get("links")
+                    or []
+                )
+                if isinstance(links, dict):
+                    links = list(links.values())
+
+                download_url = _pick_download_url(links, max_quality)
+                if not download_url:
+                    # Maybe the URL is at the top level
+                    download_url = (
+                        status_data.get("url")
+                        or status_data.get("downloadUrl")
+                        or status_data.get("download_url")
+                    )
+                break
+
+            if status in ("failed", "error", "cancelled"):
+                raise RuntimeError(
+                    f"RapidAPI task {task_id} failed: {status_data}"
+                )
+            # still processing — continue polling
+
+        if not download_url:
+            raise RuntimeError(
+                f"RapidAPI task {task_id} timed out or returned no download URL"
+            )
+
+        print(f"[VideoDownloader] Downloading from: {download_url[:80]}...")
+
+        # ── Step 3: Stream video to disk ──────────────────────────────────────
         file_id = str(uuid.uuid4())
-        output_template = str(target_dir / f"{file_id}.%(ext)s")
+        file_path = target_dir / f"{file_id}.mp4"
 
-        ydl_opts = self._build_ydl_opts(output_template, max_quality)
-        loop = asyncio.get_event_loop()
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=30, read=300, write=300, pool=30),
+            follow_redirects=True,
+        ) as client:
+            async with client.stream("GET", download_url) as stream_resp:
+                if stream_resp.status_code >= 400:
+                    raise RuntimeError(
+                        f"Video download URL returned {stream_resp.status_code}"
+                    )
+                with open(file_path, "wb") as fh:
+                    async for chunk in stream_resp.aiter_bytes(chunk_size=65536):
+                        fh.write(chunk)
 
-        def _run():
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([youtube_url])
+        if not file_path.exists() or file_path.stat().st_size == 0:
+            raise FileNotFoundError(
+                f"Downloaded file missing or empty: {file_path}"
+            )
 
-        try:
-            await loop.run_in_executor(None, _run)
-        except Exception as e:
-            raise RuntimeError(f"yt-dlp download failed: {e}")
-
-        # Find the output file (extension may vary before merging)
-        for f in target_dir.iterdir():
-            if f.stem == file_id:
-                return str(f)
-
-        raise FileNotFoundError(f"Downloaded file not found for id {file_id}")
+        print(
+            f"[VideoDownloader] Saved {file_path.stat().st_size / 1024 / 1024:.1f} MB "
+            f"→ {file_path}"
+        )
+        return str(file_path)
 
     async def get_info(self, youtube_url: str) -> dict:
         """
         Returns video metadata (title, duration) without downloading.
         Uses YouTube oEmbed API for title (reliable, no IP blocks) and
-        YouTube Data API / yt-dlp fallback for duration.
+        yt-dlp fallback for duration.
         """
-        import re
-        import httpx
-
         # Extract video ID
         match = re.search(r'(?:v=|youtu\.be/|shorts/)([a-zA-Z0-9_-]{11})', youtube_url)
         if not match:
@@ -135,7 +244,7 @@ class VideoDownloader:
         except Exception as e:
             print(f"[VideoDownloader] oEmbed failed: {e}")
 
-        # Step 2: yt-dlp for duration (try without proxy first — duration isn't behind bot check on some clients)
+        # Step 2: yt-dlp for duration (non-critical fallback)
         loop = asyncio.get_event_loop()
         ydl_opts = {
             "quiet": True,
@@ -144,8 +253,6 @@ class VideoDownloader:
             "socket_timeout": 15,
             "extractor_args": {"youtube": {"player_client": ["tv"]}},
         }
-        if self.proxy:
-            ydl_opts["proxy"] = self.proxy
 
         def _run_duration():
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
