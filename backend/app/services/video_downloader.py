@@ -31,6 +31,7 @@ class VideoDownloader:
             "merge_output_format": "mp4",
             "quiet": True,
             "no_warnings": True,
+            "socket_timeout": 30,
             # TV client avoids SABR (YouTube's new streaming protocol that breaks downloads)
             # Android client as fallback
             "extractor_args": {
@@ -104,6 +105,7 @@ class VideoDownloader:
             "quiet": True,
             "no_warnings": True,
             "skip_download": True,
+            "socket_timeout": 20,
             "extractor_args": {
                 "youtube": {
                     "player_client": ["tv", "android"],
@@ -120,7 +122,28 @@ class VideoDownloader:
                 return ydl.extract_info(youtube_url, download=False)
 
         try:
-            info = await loop.run_in_executor(None, _run)
+            info = await asyncio.wait_for(
+                loop.run_in_executor(None, _run),
+                timeout=30,
+            )
             return info or {}
+        except asyncio.TimeoutError:
+            # Proxy timed out — retry without proxy to at least get metadata
+            if self.proxy:
+                print("[VideoDownloader] get_info proxy timeout, retrying without proxy for metadata")
+                ydl_opts_noproxy = {**ydl_opts}
+                del ydl_opts_noproxy["proxy"]
+                def _run_noproxy():
+                    with yt_dlp.YoutubeDL(ydl_opts_noproxy) as ydl:
+                        return ydl.extract_info(youtube_url, download=False)
+                try:
+                    info = await asyncio.wait_for(
+                        loop.run_in_executor(None, _run_noproxy),
+                        timeout=20,
+                    )
+                    return info or {}
+                except Exception as e2:
+                    raise RuntimeError(f"yt-dlp get_info failed (proxy + direct): {e2}")
+            raise RuntimeError("Timed out fetching video info (30s).")
         except Exception as e:
             raise RuntimeError(f"yt-dlp get_info failed: {e}")
