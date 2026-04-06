@@ -96,8 +96,10 @@ async def _download_and_run_pipeline(
     user_id: str,
     clip_duration_min: Optional[int],
     clip_duration_max: Optional[int],
+    trim_start_seconds: float = 0.0,
+    trim_end_seconds: Optional[float] = None,
 ) -> None:
-    """Background task: downloads YouTube video then runs the full pipeline."""
+    """Background task: downloads YouTube video, applies trim if needed, then runs pipeline."""
     from app.services.video_downloader import VideoDownloader
     from app.pipeline.orchestrator import run_pipeline, update_job
     from app.models.enums import JobStatus
@@ -105,6 +107,7 @@ async def _download_and_run_pipeline(
 
     downloader = VideoDownloader()
     video_path = None
+    trimmed_path = None
     try:
         update_job(
             job_id,
@@ -115,17 +118,60 @@ async def _download_and_run_pipeline(
         )
         print(f"[JobsRoute] Downloading YouTube video for job {job_id}: {youtube_url}")
         video_path = await downloader.download(youtube_url, max_quality="1080")
-        get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
         print(f"[JobsRoute] Download complete: {video_path}")
+
+        # Apply trim if requested
+        if trim_start_seconds > 0.0 or trim_end_seconds is not None:
+            duration = get_video_duration(video_path)
+            end = trim_end_seconds if trim_end_seconds is not None else duration
+            if trim_start_seconds > 0.0 or end < duration:
+                trimmed_path = video_path.replace(".", "_trimmed.", 1)
+                cmd = [
+                    "ffmpeg", "-y",
+                    "-ss", str(trim_start_seconds),
+                    "-i", video_path,
+                    "-t", str(end - trim_start_seconds),
+                    "-c", "copy",
+                    trimmed_path,
+                ]
+                result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode == 0 and os.path.exists(trimmed_path):
+                    os.remove(video_path)
+                    video_path = trimmed_path
+                    trimmed_path = None
+                else:
+                    print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
+
+        get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
         run_pipeline(job_id, video_path, video_title, guest_name, channel_id, user_id, clip_duration_min, clip_duration_max)
     except Exception as e:
         print(f"[JobsRoute] YouTube download failed for job {job_id}: {e}")
         update_job(job_id, status=JobStatus.FAILED.value, error_message=f"YouTube download failed: {e}")
-        if video_path and os.path.exists(video_path):
-            try:
-                os.remove(video_path)
-            except Exception:
-                pass
+        for path in [video_path, trimmed_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
+
+
+@router.get("/youtube-info")
+async def get_youtube_info(url: str, current_user: dict = Depends(get_current_user)):
+    """Fetch YouTube video metadata (title, duration) without downloading."""
+    from app.services.video_downloader import VideoDownloader
+    if not any(h in url for h in ("youtube.com/watch", "youtu.be/", "youtube.com/shorts/")):
+        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+    try:
+        downloader = VideoDownloader()
+        info = await downloader.get_info(url)
+        return {
+            "title": info.get("title", ""),
+            "duration_seconds": info.get("duration", 0),
+            "thumbnail": info.get("thumbnail", ""),
+            "channel": info.get("uploader", ""),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Could not fetch video info: {e}")
 
 
 @router.post("")
@@ -266,6 +312,8 @@ async def create_job(
                 current_user["id"],
                 clip_duration_min,
                 clip_duration_max,
+                trim_start_seconds,
+                trim_end_seconds,
             )
         else:
             background_tasks.add_task(

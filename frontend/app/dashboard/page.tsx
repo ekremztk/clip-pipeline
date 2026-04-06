@@ -22,6 +22,7 @@ type Job = {
 type UploadPhase = 'idle' | 'uploading' | 'settings' | 'processing';
 
 const STEP_LABELS: Record<string, string> = {
+    "downloading_video": "Downloading YouTube video...",
     "initializing": "Initializing...",
     "s01_audio_extract": "Extracting Audio...",
     "s02_transcribe": "Transcribing...",
@@ -175,6 +176,11 @@ export default function DashboardPage() {
     const [startTime, setStartTime] = useState(0);
     const [endTime, setEndTime] = useState(0);
 
+    // YouTube URL state
+    const [youtubeUrl, setYoutubeUrl] = useState('');
+    const [youtubeFetching, setYoutubeFetching] = useState(false);
+    const [youtubeError, setYoutubeError] = useState('');
+
     // Processing state
     const [statusMsg, setStatusMsg] = useState('');
     const [submitError, setSubmitError] = useState('');
@@ -263,7 +269,43 @@ export default function DashboardPage() {
         setAutoHook(true);
         setSubmitError('');
         setStatusMsg('');
+        setYoutubeUrl('');
+        setYoutubeError('');
+        setYoutubeFetching(false);
         setFormChannelId(activeChannelId);
+    };
+
+    const getYouTubeId = (url: string) => {
+        const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+        return m?.[1] ?? '';
+    };
+
+    const handleYoutubeUrl = async (url: string) => {
+        const isValid = url.includes('youtube.com/watch') || url.includes('youtu.be/') || url.includes('youtube.com/shorts/');
+        if (!isValid) { setYoutubeError('Please enter a valid YouTube URL'); return; }
+        setYoutubeError('');
+        setYoutubeFetching(true);
+
+        let channelId = formChannelId || activeChannelId;
+        if (!channelId) {
+            try { channelId = await autoCreateChannel(); setFormChannelId(channelId); }
+            catch { setYoutubeError('Failed to create channel. Please create one in Settings first.'); setYoutubeFetching(false); return; }
+        }
+
+        try {
+            const res = await authFetch(`/jobs/youtube-info?url=${encodeURIComponent(url)}`);
+            if (!res.ok) { setYoutubeError('Could not fetch video info. Check the URL and try again.'); setYoutubeFetching(false); return; }
+            const info = await res.json();
+            setTitle(info.title || '');
+            const dur = info.duration_seconds || 0;
+            setVideoDuration(dur);
+            setEndTime(dur);
+            setUploadPhase('settings');
+        } catch {
+            setYoutubeError('Could not fetch video info. Check the URL and try again.');
+        } finally {
+            setYoutubeFetching(false);
+        }
     };
 
     const autoCreateChannel = async (): Promise<string> => {
@@ -356,14 +398,18 @@ export default function DashboardPage() {
     };
 
     const handleStartProcessing = async () => {
-        if (!uploadId || !title || !formChannelId) return;
+        if ((!uploadId && !youtubeUrl) || !title || !formChannelId) return;
         setUploadPhase('processing');
         setStatusMsg('Starting pipeline...');
         setSubmitError('');
 
         const preset = DURATION_PRESETS.find(p => p.label === durationPreset) ?? DURATION_PRESETS[1];
         const fd = new FormData();
-        fd.append('upload_id', uploadId);
+        if (youtubeUrl) {
+            fd.append('youtube_url', youtubeUrl);
+        } else {
+            fd.append('upload_id', uploadId);
+        }
         fd.append('title', title);
         fd.append('channel_id', formChannelId);
         if (guestName) fd.append('guest_name', guestName);
@@ -576,11 +622,25 @@ export default function DashboardPage() {
                                             <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#525252]" />
                                             <input
                                                 type="text"
-                                                placeholder="Paste YouTube, Twitch, or video URL"
+                                                value={youtubeUrl}
+                                                onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError(''); }}
+                                                onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
+                                                onPaste={e => {
+                                                    const pasted = e.clipboardData.getData('text');
+                                                    if (pasted.includes('youtube.com') || pasted.includes('youtu.be')) {
+                                                        e.preventDefault();
+                                                        setYoutubeUrl(pasted);
+                                                        handleYoutubeUrl(pasted);
+                                                    }
+                                                }}
+                                                placeholder="Paste YouTube URL"
                                                 className="w-full pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
-                                                readOnly
                                             />
+                                            {youtubeFetching && (
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[#404040] border-t-white rounded-full animate-spin" />
+                                            )}
                                         </div>
+                                        {youtubeError && <p className="mt-1.5 text-xs text-red-400 text-left">{youtubeError}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -622,7 +682,7 @@ export default function DashboardPage() {
                             {/* Panel header */}
                             <div className="flex items-center justify-between px-5 py-3 border-b border-[#1a1a1a]">
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-sm font-medium text-white truncate max-w-xs">{file?.name}</span>
+                                    <span className="text-sm font-medium text-white truncate max-w-xs">{youtubeUrl ? title : file?.name}</span>
                                     <span className="text-[#525252] text-xs flex-shrink-0">· {formatTimeDisplay(videoDuration)}</span>
                                 </div>
                                 <button
@@ -638,14 +698,23 @@ export default function DashboardPage() {
                                 {/* Left: Video Preview + Timeline */}
                                 <div className="space-y-3">
                                     <div className="aspect-video bg-black rounded-lg overflow-hidden border border-[#262626]">
-                                        <video
-                                            ref={videoRef}
-                                            src={videoUrl}
-                                            className="w-full h-full object-contain"
-                                            controls
-                                            muted
-                                            controlsList="nodownload nofullscreen"
-                                        />
+                                        {youtubeUrl ? (
+                                            <iframe
+                                                src={`https://www.youtube.com/embed/${getYouTubeId(youtubeUrl)}`}
+                                                className="w-full h-full"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            />
+                                        ) : (
+                                            <video
+                                                ref={videoRef}
+                                                src={videoUrl}
+                                                className="w-full h-full object-contain"
+                                                controls
+                                                muted
+                                                controlsList="nodownload nofullscreen"
+                                            />
+                                        )}
                                     </div>
 
                                     {/* Timeline trimmer */}
@@ -818,9 +887,9 @@ export default function DashboardPage() {
                                     {/* Submit */}
                                     <button
                                         onClick={handleStartProcessing}
-                                        disabled={!title}
+                                        disabled={!title || (!uploadId && !youtubeUrl)}
                                         className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
-                                            title
+                                            title && (uploadId || youtubeUrl)
                                                 ? 'bg-white text-black hover:bg-[#e5e5e5]'
                                                 : 'bg-[#0f0f0f] border border-[#1a1a1a] text-[#525252] cursor-not-allowed'
                                         }`}
