@@ -338,6 +338,53 @@ async def create_job(
         raise HTTPException(status_code=500, detail="Job creation failed")
 
 
+@router.post("/youtube-preview")
+@limiter.limit("5/minute")
+async def youtube_preview(
+    request: Request,
+    url: str = Form(...),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Downloads a YouTube video (up to 1080p) to temp storage for preview.
+    Returns upload_id and duration so the frontend can show a real <video> element
+    and re-use the pre-downloaded file when starting the pipeline.
+    """
+    from app.services.video_downloader import VideoDownloader
+
+    if not any(h in url for h in ("youtube.com/watch", "youtu.be/", "youtube.com/shorts/")):
+        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+
+    try:
+        downloader = VideoDownloader()
+        video_path = await downloader.download(url, max_quality="1080")
+        upload_id = os.path.splitext(os.path.basename(video_path))[0]
+        duration = get_video_duration(video_path)
+        print(f"[YoutubePreview] Downloaded {upload_id}, duration: {duration:.1f}s")
+        return {"upload_id": upload_id, "duration_seconds": duration}
+    except Exception as e:
+        print(f"[YoutubePreview] Error: {e}")
+        raise HTTPException(status_code=422, detail=f"Could not download video: {e}")
+
+
+@router.get("/video-stream/{upload_id}")
+async def video_stream(upload_id: str, current_user: dict = Depends(get_current_user)):
+    """Stream a pre-downloaded temp video file for browser preview."""
+    import re
+    from fastapi.responses import FileResponse
+
+    if not re.match(r"^[a-f0-9\-]{36}$", upload_id):
+        raise HTTPException(status_code=400, detail="Invalid upload ID")
+
+    upload_dir = settings.UPLOAD_DIR
+    for fname in os.listdir(upload_dir):
+        if os.path.splitext(fname)[0] == upload_id:
+            file_path = os.path.join(upload_dir, fname)
+            return FileResponse(file_path, media_type="video/mp4")
+
+    raise HTTPException(status_code=404, detail="File not found")
+
+
 @router.get("/{job_id}")
 async def get_job(job_id: str, current_user: dict = Depends(get_current_user)):
     try:

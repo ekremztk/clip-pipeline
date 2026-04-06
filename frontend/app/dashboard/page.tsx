@@ -275,11 +275,6 @@ export default function DashboardPage() {
         setFormChannelId(activeChannelId);
     };
 
-    const getYouTubeId = (url: string) => {
-        const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
-        return m?.[1] ?? '';
-    };
-
     const handleYoutubeUrl = async (url: string) => {
         const isValid = url.includes('youtube.com/watch') || url.includes('youtu.be/') || url.includes('youtube.com/shorts/');
         if (!isValid) { setYoutubeError('Please enter a valid YouTube URL'); return; }
@@ -292,20 +287,49 @@ export default function DashboardPage() {
             catch { setYoutubeError('Failed to create channel. Please create one in Settings first.'); setYoutubeFetching(false); return; }
         }
 
+        // Step 1: fetch title quickly via oEmbed (no download)
         try {
-            const res = await authFetch(`/jobs/youtube-info?url=${encodeURIComponent(url)}`);
-            if (!res.ok) { setYoutubeError('Could not fetch video info. Check the URL and try again.'); setYoutubeFetching(false); return; }
-            const info = await res.json();
+            const infoRes = await authFetch(`/jobs/youtube-info?url=${encodeURIComponent(url)}`);
+            if (!infoRes.ok) { setYoutubeError('Could not fetch video info. Check the URL and try again.'); setYoutubeFetching(false); return; }
+            const info = await infoRes.json();
             setTitle(info.title || '');
-            const dur = info.duration_seconds || 0;
-            setVideoDuration(dur);
-            setEndTime(dur);
-            setUploadPhase('settings');
         } catch {
             setYoutubeError('Could not fetch video info. Check the URL and try again.');
-        } finally {
             setYoutubeFetching(false);
+            return;
         }
+
+        // Step 2: download video to server for preview (shows "Downloading..." state)
+        setYoutubeFetching(false);
+        setUploadPhase('uploading');
+
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API_URL}/jobs/youtube-preview`, true);
+        if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                const resp = JSON.parse(xhr.responseText);
+                setUploadId(resp.upload_id);
+                const dur = resp.duration_seconds || 0;
+                setVideoDuration(dur);
+                setEndTime(dur);
+                setVideoUrl(`${API_URL}/jobs/video-stream/${resp.upload_id}`);
+                setUploadPhase('settings');
+            } else {
+                setYoutubeError('Could not download video. Please try again.');
+                setUploadPhase('idle');
+            }
+        };
+        xhr.onerror = () => {
+            setYoutubeError('Network error downloading video. Please try again.');
+            setUploadPhase('idle');
+        };
+        const fd = new FormData();
+        fd.append('url', url);
+        xhr.send(fd);
     };
 
     const autoCreateChannel = async (): Promise<string> => {
@@ -405,10 +429,10 @@ export default function DashboardPage() {
 
         const preset = DURATION_PRESETS.find(p => p.label === durationPreset) ?? DURATION_PRESETS[1];
         const fd = new FormData();
-        if (youtubeUrl) {
-            fd.append('youtube_url', youtubeUrl);
-        } else {
+        if (uploadId) {
             fd.append('upload_id', uploadId);
+        } else if (youtubeUrl) {
+            fd.append('youtube_url', youtubeUrl);
         }
         fd.append('title', title);
         fd.append('channel_id', formChannelId);
@@ -661,21 +685,31 @@ export default function DashboardPage() {
                         </div>
                     )}
 
-                    {/* UPLOADING */}
-                    {uploadPhase === 'uploading' && file && (
+                    {/* UPLOADING / DOWNLOADING */}
+                    {uploadPhase === 'uploading' && (
                         <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-10 flex flex-col items-center text-center">
                             <div className="w-10 h-10 mb-4 rounded-lg bg-[#0f0f0f] border border-[#262626] flex items-center justify-center">
                                 <Upload className="w-5 h-5 text-[#a3a3a3]" />
                             </div>
-                            <p className="text-sm text-white font-medium mb-1 max-w-sm truncate">{file.name}</p>
-                            <p className="text-xs text-[#525252] mb-5">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
-                            <div className="w-64 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden relative mb-3">
-                                <div
-                                    className="absolute top-0 left-0 bottom-0 bg-white rounded-full transition-all duration-300"
-                                    style={{ width: `${uploadProgress}%` }}
-                                />
+                            <p className="text-sm text-white font-medium mb-1 max-w-sm truncate">
+                                {file ? file.name : (title || 'YouTube Video')}
+                            </p>
+                            {file && <p className="text-xs text-[#525252] mb-5">{(file.size / 1024 / 1024).toFixed(1)} MB</p>}
+                            <div className={`w-64 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden relative ${file ? 'mb-3' : 'mb-3 mt-5'}`}>
+                                {file ? (
+                                    <div
+                                        className="absolute top-0 left-0 bottom-0 bg-white rounded-full transition-all duration-300"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 overflow-hidden rounded-full">
+                                        <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '60%', animationDuration: '1.2s' }} />
+                                    </div>
+                                )}
                             </div>
-                            <p className="text-xs text-[#525252]">Uploading... {uploadProgress}%</p>
+                            <p className="text-xs text-[#525252]">
+                                {file ? `Uploading... ${uploadProgress}%` : 'Downloading YouTube video...'}
+                            </p>
                         </div>
                     )}
 
@@ -701,23 +735,14 @@ export default function DashboardPage() {
                                 {/* Left: Video Preview + Timeline */}
                                 <div className="space-y-3">
                                     <div className="aspect-video bg-black rounded-lg overflow-hidden border border-[#262626]">
-                                        {youtubeUrl ? (
-                                            <iframe
-                                                src={`https://www.youtube.com/embed/${getYouTubeId(youtubeUrl)}`}
-                                                className="w-full h-full"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            />
-                                        ) : (
-                                            <video
-                                                ref={videoRef}
-                                                src={videoUrl}
-                                                className="w-full h-full object-contain"
-                                                controls
-                                                muted
-                                                controlsList="nodownload nofullscreen"
-                                            />
-                                        )}
+                                        <video
+                                            ref={videoRef}
+                                            src={videoUrl}
+                                            className="w-full h-full object-contain"
+                                            controls
+                                            muted
+                                            controlsList="nodownload nofullscreen"
+                                        />
                                     </div>
 
                                     {/* Timeline trimmer */}

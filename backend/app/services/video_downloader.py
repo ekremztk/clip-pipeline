@@ -21,11 +21,15 @@ class VideoDownloader:
     def _build_ydl_opts(self, output_template: str, max_quality: str = "1080") -> dict:
         height = int(max_quality)
         opts = {
-            # Prefer mp4 video + m4a audio; fall back to best available
+            # android client supports DASH (separate video+audio streams)
+            # tv client only supports combined formats (18=360p, 22=720p)
+            # Fallback chain covers both clients
             "format": (
                 f"bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]"
                 f"/bestvideo[height<={height}]+bestaudio"
-                f"/best[height<={height}]/best"
+                f"/best[height<={height}][ext=mp4]"
+                f"/best[height<={height}]"
+                f"/best"
             ),
             "outtmpl": output_template,
             "merge_output_format": "mp4",
