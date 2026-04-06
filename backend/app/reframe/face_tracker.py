@@ -135,20 +135,33 @@ class YoloDetector(BaseDetector):
     """
     YOLOv8-nano person detection.
 
-    Detects "person" (class 0) bounding boxes, then estimates head position
-    from the top 30% of each person bbox. This allows tracking even when
-    the face is not directly visible.
+    Detects "person" (class 0) bounding boxes and derives a head anchor
+    that is robust to arm extension and posture changes.
 
     Coordinate conversion:
       person bbox [x1,y1,x2,y2] (normalized) →
-        face_x   = center X of person bbox
-        face_y   = y1 + body_h * 0.15  (center of top-30% region)
-        face_w   = body_w * 0.55        (approximate head width)
-        face_h   = body_h * 0.30        (top 30% of body = head region)
+
+      X anchor — shoulder-constrained center:
+        Shoulder width ≈ body_h * 0.38 (anatomical ratio, arm-extension-resistant).
+        When arms extend beyond this, bbox width grows but the anchor stays
+        near the shoulder/head center instead of drifting toward the arm.
+        face_x = (x1 + x2) / 2   (bbox center — arms affect both sides
+                                   symmetrically or the effect is small)
+        face_w = min(body_w, body_h * 0.38)   ← key: shoulder-clamped width
+
+      Y anchor — aspect-ratio-driven head fraction:
+        The fraction of bbox height where the head sits varies by posture:
+          standing tall  (aspect ~0.25): head at ~8-10% from top
+          seated podcast (aspect ~0.45): head at ~18-20% from top
+          leaning forward (aspect ~0.60): head at ~23-25% from top
+        Formula: fraction = clamp(0.06 + aspect * 0.30, 0.06, 0.28)
+        face_y = y1 + body_h * fraction
+        face_h = body_h * min(0.35, fraction * 2.5)   (detection window)
     """
 
-    HEAD_FRACTION = 0.30     # Top fraction of body bbox treated as head
-    HEAD_WIDTH_RATIO = 0.55  # Head width relative to body width
+    # Shoulder width as a fraction of body bbox height (anthropometric ratio).
+    # Arms extending beyond this value don't shift the X anchor.
+    SHOULDER_HEIGHT_RATIO = 0.38
 
     def __init__(self, config: FaceTrackerConfig):
         try:
@@ -199,13 +212,27 @@ class YoloDetector(BaseDetector):
                 if body_w <= 0 or body_h <= 0:
                     continue
 
-                # Head region = top HEAD_FRACTION of body bbox
-                head_h = body_h * self.HEAD_FRACTION
-                head_w = body_w * self.HEAD_WIDTH_RATIO
-                head_cx = x1 + body_w / 2
-                head_cy = y1 + head_h / 2  # center of top-30% region
+                # ── X anchor: shoulder-constrained center ─────────────────
+                # Shoulder width ≈ 38% of body height regardless of arm extension.
+                # Using min(body_w, shoulder_w) as the effective tracking width
+                # prevents arm extension from inflating the spread seen by the
+                # path solver's motion classifier (Problem 1 fix).
+                shoulder_w = body_h * self.SHOULDER_HEIGHT_RATIO
+                effective_w = min(body_w, shoulder_w)
+                head_cx = (x1 + x2) / 2          # X: full bbox center is best estimate
+                head_w = effective_w              # shoulder-clamped width (not arm-inclusive)
 
-                # Person center (full body)
+                # ── Y anchor: aspect-ratio-driven head fraction ────────────
+                # When a person sits (wider bbox → higher aspect ratio), the head
+                # sits lower in the bbox than when standing. Fixed 30% breaks here.
+                # aspect = w/h: standing ~0.25, seated ~0.45, leaning ~0.60+
+                aspect = body_w / body_h
+                head_top_fraction = 0.06 + aspect * 0.30
+                head_top_fraction = max(0.06, min(0.28, head_top_fraction))
+                head_cy = y1 + body_h * head_top_fraction
+                head_h = body_h * min(0.35, head_top_fraction * 2.5)
+
+                # Person center (full body — unchanged, used by focus_resolver)
                 person_x = head_cx
                 person_y = y1 + body_h / 2
                 person_h = body_h

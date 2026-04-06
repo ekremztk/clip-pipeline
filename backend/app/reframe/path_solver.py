@@ -132,6 +132,17 @@ def _median_filter(
         hi = min(n, i + half + 1)
         neighbors = points[lo:hi]
 
+        # Subject boundary protection: if the window spans a subject change,
+        # restrict the filter to points with the same subject_id as the current
+        # point. This prevents the two speakers' positions from bleeding into
+        # each other across the switch boundary (which would wash out the hard
+        # cut and re-introduce the slow-pan artifact).
+        current_subject = points[i].subject_id
+        if current_subject:
+            same_subject = [fp for fp in neighbors if fp.subject_id == current_subject]
+            if len(same_subject) >= 2:
+                neighbors = same_subject
+
         med_x = statistics.median(fp.x for fp in neighbors)
         med_y = statistics.median(fp.y for fp in neighbors)
         # Weight = max weight in window (preserve importance)
@@ -164,6 +175,20 @@ def _classify_motion(
     """
     if len(points) <= 2:
         return STRATEGY_STATIONARY
+
+    # Multi-subject shot: if this shot's points span more than one subject_id,
+    # a hard-cut teleport is already guaranteed by _compute_tracking_path.
+    # Classifying the combined arc as PANNING would be wrong — the "linear"
+    # trend across the two speakers is not a camera pan, it's a subject switch.
+    # Always return TRACKING so the kinematic loop reaches the subject-switch
+    # branch and teleports rather than smoothly panning across the gap.
+    subject_ids = {fp.subject_id for fp in points if fp.subject_id}
+    if len(subject_ids) > 1:
+        logger.debug(
+            "[PathSolver] Multi-subject shot (%s) → forcing TRACKING to preserve hard cut",
+            ", ".join(sorted(subject_ids)),
+        )
+        return STRATEGY_TRACKING
 
     xs = [fp.x for fp in points]
     ys = [fp.y for fp in points]

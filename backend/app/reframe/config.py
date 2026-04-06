@@ -58,7 +58,11 @@ class PathSolverConfig:
     #   Subject walking across frame → spread > 0.15 → TRACKING.
     # motion_threshold = 0.005 (0.5% = ~10px at 1920px):
     #   Filters sensor/detection noise. Catches genuine micro-movements within a TRACKING shot.
-    stationary_threshold: float = 0.15          # Max spread to use stationary mode (15% of frame)
+    stationary_threshold: float = 0.10          # Max spread to use stationary mode (10% of frame)
+    # Lowered from 0.15: at 1920px wide, 9:16 crop = ~607px.
+    # Face leaving the crop requires ~303px = 0.158 of frame width, which was
+    # just above the old 0.15 threshold — genuine movement was misclassified as
+    # STATIONARY. 0.10 catches movements from ~192px, median filter absorbs noise.
     panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
 
     # Kinematic constraints
@@ -73,7 +77,11 @@ class PathSolverConfig:
     # Subject switch detection — large jump in focus means directive changed persons
     # Path solver teleports (bypasses velocity limit) when jump > this threshold (normalized 0-1)
     # Keyframe emitter emits hold+hold hard cut when pixel jump > threshold * src_w
-    subject_switch_threshold: float = 0.30
+    subject_switch_threshold: float = 0.22
+    # Lowered from 0.30: speakers at x=0.35 and x=0.65 are 0.30 apart — the old
+    # threshold barely caught this. 0.22 reliably triggers hard cut for any
+    # meaningful speaker-to-speaker jump while staying above typical single-person
+    # movement (<0.15 for most seated podcast content).
 
     # Headroom
     headroom_ratio: float = 0.15                # How much above face center to place crop center
@@ -88,7 +96,7 @@ class KeyframeEmitterConfig:
     y_headroom_zoom: float = 1.12               # Extra zoom for Y panning room
     # Subject switch: emit hold+hold hard cut when X offset jumps > threshold * src_w
     # Matches PathSolverConfig.subject_switch_threshold so both layers agree on what's a switch
-    subject_switch_threshold: float = 0.30
+    subject_switch_threshold: float = 0.22
 
 
 # --- Top-level config --------------------------------------------------------
