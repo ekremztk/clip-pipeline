@@ -38,6 +38,7 @@ ultralytics>=8.1.0
 # --- YouTube Tools ---
 yt-dlp>=2026.3.3
 youtube-transcript-api
+bgutil-ytdlp-pot-provider
 
 # --- Director Module ---
 sentry-sdk[fastapi]

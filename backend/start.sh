@@ -6,6 +6,13 @@ set -e
 # Generate credentials once with: docker run --rm ghcr.io/virbr/wgcf:latest register --accept-tos && wgcf generate
 # Then read PrivateKey and Address from the generated wgcf-profile.conf.
 
+# Start bgutil PO token server (bypasses YouTube bot detection on datacenter IPs)
+echo "[bgutil] Starting PO token server on port 4416..."
+node /opt/bgutil/server/build/main.js --port 4416 &
+BGUTIL_PID=$!
+echo "[bgutil] Server started (PID $BGUTIL_PID)"
+sleep 2
+
 if [ -n "$WARP_PRIVATE_KEY" ] && [ -n "$WARP_ADDRESS" ]; then
     echo "[WARP] Writing wireproxy config..."
     cat > /tmp/wireproxy.conf << EOF
@@ -26,10 +33,9 @@ EOF
     wireproxy -c /tmp/wireproxy.conf &
     WIREPROXY_PID=$!
     echo "[WARP] wireproxy started (PID $WIREPROXY_PID) on 127.0.0.1:1080"
-    # Give wireproxy time to establish the WireGuard tunnel
     sleep 4
 else
-    echo "[WARP] WARP_PRIVATE_KEY not set — running without proxy (local dev mode)"
+    echo "[WARP] WARP_PRIVATE_KEY not set — running without proxy"
 fi
 
 exec uvicorn app.main:app --host 0.0.0.0 --port 8080
