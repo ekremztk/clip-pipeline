@@ -98,52 +98,71 @@ class VideoDownloader:
 
     async def get_info(self, youtube_url: str) -> dict:
         """
-        Returns video metadata without downloading.
-        Used to pre-fill title and validate URL before job creation.
+        Returns video metadata (title, duration) without downloading.
+        Uses YouTube oEmbed API for title (reliable, no IP blocks) and
+        YouTube Data API / yt-dlp fallback for duration.
         """
+        import re
+        import httpx
+
+        # Extract video ID
+        match = re.search(r'(?:v=|youtu\.be/|shorts/)([a-zA-Z0-9_-]{11})', youtube_url)
+        if not match:
+            raise RuntimeError("Could not extract video ID from URL")
+        video_id = match.group(1)
+
+        title = ""
+        duration = 0
+        thumbnail = ""
+        channel = ""
+
+        # Step 1: oEmbed for title (public API, works from any IP, no key required)
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.get(
+                    "https://www.youtube.com/oembed",
+                    params={"url": f"https://www.youtube.com/watch?v={video_id}", "format": "json"},
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    title = data.get("title", "")
+                    thumbnail = data.get("thumbnail_url", "")
+                    channel = data.get("author_name", "")
+        except Exception as e:
+            print(f"[VideoDownloader] oEmbed failed: {e}")
+
+        # Step 2: yt-dlp for duration (try without proxy first — duration isn't behind bot check on some clients)
+        loop = asyncio.get_event_loop()
         ydl_opts = {
             "quiet": True,
             "no_warnings": True,
             "skip_download": True,
-            "socket_timeout": 20,
-            "extractor_args": {
-                "youtube": {
-                    "player_client": ["tv", "android"],
-                }
-            },
+            "socket_timeout": 15,
+            "extractor_args": {"youtube": {"player_client": ["tv"]}},
         }
         if self.proxy:
             ydl_opts["proxy"] = self.proxy
 
-        loop = asyncio.get_event_loop()
-
-        def _run():
+        def _run_duration():
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                return ydl.extract_info(youtube_url, download=False)
+                info = ydl.extract_info(youtube_url, download=False)
+                return info.get("duration", 0) if info else 0
 
         try:
-            info = await asyncio.wait_for(
-                loop.run_in_executor(None, _run),
-                timeout=30,
+            duration = await asyncio.wait_for(
+                loop.run_in_executor(None, _run_duration),
+                timeout=25,
             )
-            return info or {}
-        except asyncio.TimeoutError:
-            # Proxy timed out — retry without proxy to at least get metadata
-            if self.proxy:
-                print("[VideoDownloader] get_info proxy timeout, retrying without proxy for metadata")
-                ydl_opts_noproxy = {**ydl_opts}
-                del ydl_opts_noproxy["proxy"]
-                def _run_noproxy():
-                    with yt_dlp.YoutubeDL(ydl_opts_noproxy) as ydl:
-                        return ydl.extract_info(youtube_url, download=False)
-                try:
-                    info = await asyncio.wait_for(
-                        loop.run_in_executor(None, _run_noproxy),
-                        timeout=20,
-                    )
-                    return info or {}
-                except Exception as e2:
-                    raise RuntimeError(f"yt-dlp get_info failed (proxy + direct): {e2}")
-            raise RuntimeError("Timed out fetching video info (30s).")
         except Exception as e:
-            raise RuntimeError(f"yt-dlp get_info failed: {e}")
+            print(f"[VideoDownloader] duration fetch failed (non-critical): {e}")
+            duration = 0
+
+        if not title:
+            raise RuntimeError("Could not fetch video info. Check the URL.")
+
+        return {
+            "title": title,
+            "duration": duration,
+            "thumbnail": thumbnail,
+            "channel": channel,
+        }

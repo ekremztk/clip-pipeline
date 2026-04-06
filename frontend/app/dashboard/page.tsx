@@ -617,7 +617,7 @@ export default function DashboardPage() {
                                         <div className="flex-1 h-px bg-[#1a1a1a]" />
                                     </div>
 
-                                    <div className="mt-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                                    <div className="mt-6 w-full max-w-md space-y-2" onClick={e => e.stopPropagation()}>
                                         <div className="relative">
                                             <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#525252]" />
                                             <input
@@ -625,22 +625,25 @@ export default function DashboardPage() {
                                                 value={youtubeUrl}
                                                 onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError(''); }}
                                                 onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
-                                                onPaste={e => {
-                                                    const pasted = e.clipboardData.getData('text');
-                                                    if (pasted.includes('youtube.com') || pasted.includes('youtu.be')) {
-                                                        e.preventDefault();
-                                                        setYoutubeUrl(pasted);
-                                                        handleYoutubeUrl(pasted);
-                                                    }
-                                                }}
                                                 placeholder="Paste YouTube URL"
-                                                className="w-full pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                                className="w-full pl-10 pr-32 py-2.5 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
                                             />
-                                            {youtubeFetching && (
-                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[#404040] border-t-white rounded-full animate-spin" />
-                                            )}
+                                            <button
+                                                onClick={() => youtubeUrl && handleYoutubeUrl(youtubeUrl)}
+                                                disabled={!youtubeUrl || youtubeFetching}
+                                                className={`absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                                                    youtubeUrl && !youtubeFetching
+                                                        ? 'bg-white text-black hover:bg-[#e5e5e5]'
+                                                        : 'bg-[#1a1a1a] text-[#525252] cursor-not-allowed'
+                                                }`}
+                                            >
+                                                {youtubeFetching
+                                                    ? <><span className="w-3 h-3 border border-[#525252] border-t-white rounded-full animate-spin" />Loading</>
+                                                    : 'Get Clips'
+                                                }
+                                            </button>
                                         </div>
-                                        {youtubeError && <p className="mt-1.5 text-xs text-red-400 text-left">{youtubeError}</p>}
+                                        {youtubeError && <p className="text-xs text-red-400 text-left">{youtubeError}</p>}
                                     </div>
                                 </div>
                             </div>
