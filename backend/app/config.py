@@ -34,6 +34,10 @@ class Settings:
     OUTPUT_DIR = Path("output")
     UPLOAD_DIR = Path("temp_uploads")
 
+    # Cloudflare WARP proxy (wireproxy SOCKS5 — set WARP_PRIVATE_KEY + WARP_ADDRESS to enable)
+    WARP_PRIVATE_KEY: str = os.getenv("WARP_PRIVATE_KEY", "")
+    WARP_ADDRESS: str = os.getenv("WARP_ADDRESS", "")
+
     # Reframe — YOLOv8 model path (pre-downloaded in Docker build)
     YOLOV8_MODEL_PATH: str = os.getenv("YOLOV8_MODEL_PATH", "yolov8n-pose.pt")
     

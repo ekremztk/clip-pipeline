@@ -19,6 +19,7 @@ type Job = {
 };
 
 const STEP_LABELS: Record<string, string> = {
+    "downloading_video": "Downloading YouTube video...",
     "initializing": "Initializing...",
     "s01_audio_extract": "Extracting Audio...",
     "s02_transcribe": "Transcribing...",
@@ -79,10 +80,13 @@ export default function NewJobPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRef = useRef<HTMLDivElement>(null);
 
+    const [inputMode, setInputMode] = useState<'upload' | 'youtube'>('upload');
     const [isDragging, setIsDragging] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [title, setTitle] = useState("");
     const [guestName, setGuestName] = useState("");
+    const [youtubeUrl, setYoutubeUrl] = useState("");
+    const [youtubeUrlError, setYoutubeUrlError] = useState("");
 
     const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'preview_ready' | 'processing'>('idle');
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -173,6 +177,55 @@ export default function NewJobPage() {
         xhr.send(formData);
     };
 
+    const handleYoutubeSubmit = async () => {
+        if (!youtubeUrl || !title || !activeChannelId) return;
+        const isValid = youtubeUrl.includes("youtube.com/watch") || youtubeUrl.includes("youtu.be/") || youtubeUrl.includes("youtube.com/shorts/");
+        if (!isValid) {
+            setYoutubeUrlError("Please enter a valid YouTube URL (youtube.com/watch, youtu.be, or youtube.com/shorts)");
+            return;
+        }
+        setYoutubeUrlError("");
+        setUploadState('processing'); setStatusMsg("Queuing download..."); setSubmitError("");
+
+        const formData = new FormData();
+        formData.append("youtube_url", youtubeUrl);
+        formData.append("title", title);
+        formData.append("channel_id", activeChannelId);
+        if (guestName) formData.append("guest_name", guestName);
+
+        try {
+            const response = await authFetch('/jobs', { method: "POST", body: formData });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                setSubmitError(err.detail || 'Failed to start processing'); setUploadState('idle'); return;
+            }
+            const job = await response.json();
+            const jobId = job?.id || job?.job_id;
+            if (!jobId) { setSubmitError('No job ID returned'); setUploadState('idle'); return; }
+
+            setStatusMsg('Downloading video...');
+            let attempts = 0;
+            const maxAttempts = 180; // 6 min — download can take time
+            const pollStatus = async () => {
+                try {
+                    const statusRes = await authFetch(`/jobs/${jobId}`);
+                    const jobData = await statusRes.json();
+                    const status = jobData?.job?.status || jobData?.status;
+                    if (status === 'completed' || status === 'done') { router.push('/dashboard'); return; }
+                    if (status === 'failed' || status === 'error') { setSubmitError('Pipeline failed. Please try again.'); setUploadState('idle'); return; }
+                    const step = jobData?.job?.current_step || '';
+                    setStatusMsg(getStepLabel(step));
+                    attempts++;
+                    if (attempts < maxAttempts) setTimeout(pollStatus, 2000);
+                    else router.push('/dashboard');
+                } catch { attempts++; if (attempts < maxAttempts) setTimeout(pollStatus, 2000); }
+            };
+            setTimeout(pollStatus, 2000);
+        } catch (err: any) {
+            setSubmitError(err.message || "Failed to start processing."); setUploadState('idle');
+        }
+    };
+
     const handleStartProcessing = async () => {
         if (!uploadId || !title || !activeChannelId) return;
         setUploadState('processing'); setStatusMsg("Starting pipeline..."); setSubmitError("");
@@ -258,44 +311,126 @@ export default function NewJobPage() {
             <p className="text-sm text-[#737373] mb-8">Upload a video and start the AI processing pipeline</p>
 
             <div className="space-y-5">
-                {/* IDLE: Drop zone */}
+                {/* IDLE: Tab switcher */}
                 {uploadState === 'idle' && (
-                    <div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".mp4,.mov,.webm,video/*"
-                            className="hidden"
-                            onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
-                        />
-                        <div
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                            onClick={() => fileInputRef.current?.click()}
-                            className={`border border-dashed rounded-xl p-14 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ${
-                                isDragging
-                                    ? "border-white bg-[#0a0a0a]"
-                                    : "border-[#262626] hover:border-[#404040]"
-                            }`}
-                        >
-                            {/* PROGNOT watermark */}
-                            <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none overflow-hidden rounded-xl">
-                                <div className="text-[8rem] font-bold tracking-tighter leading-none whitespace-nowrap text-white">PROGNOT</div>
-                            </div>
-
-                            <div className={`w-12 h-12 mb-4 rounded-lg border flex items-center justify-center transition-colors ${isDragging ? 'bg-[#1a1a1a] border-[#404040]' : 'bg-[#0a0a0a] border-[#262626]'}`}>
-                                <Upload className={`w-6 h-6 ${isDragging ? 'text-white' : 'text-[#a3a3a3]'}`} />
-                            </div>
-                            <h3 className="text-base font-medium text-white mb-1">Drop your video here</h3>
-                            <p className="text-sm text-[#737373] mb-5">MP4, MOV, WEBM up to 2GB</p>
+                    <div className="space-y-4">
+                        {/* Tabs */}
+                        <div className="flex gap-1 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-1">
                             <button
-                                onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                                className="px-5 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
+                                onClick={() => setInputMode('upload')}
+                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                                    inputMode === 'upload' ? 'bg-[#1a1a1a] text-white' : 'text-[#737373] hover:text-[#a3a3a3]'
+                                }`}
                             >
-                                Select File
+                                Upload File
+                            </button>
+                            <button
+                                onClick={() => setInputMode('youtube')}
+                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                                    inputMode === 'youtube' ? 'bg-[#1a1a1a] text-white' : 'text-[#737373] hover:text-[#a3a3a3]'
+                                }`}
+                            >
+                                YouTube URL
                             </button>
                         </div>
+
+                        {/* Upload tab */}
+                        {inputMode === 'upload' && (
+                            <div>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".mp4,.mov,.webm,video/*"
+                                    className="hidden"
+                                    onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
+                                />
+                                <div
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`border border-dashed rounded-xl p-14 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ${
+                                        isDragging
+                                            ? "border-white bg-[#0a0a0a]"
+                                            : "border-[#262626] hover:border-[#404040]"
+                                    }`}
+                                >
+                                    <div className={`w-12 h-12 mb-4 rounded-lg border flex items-center justify-center transition-colors ${isDragging ? 'bg-[#1a1a1a] border-[#404040]' : 'bg-[#0a0a0a] border-[#262626]'}`}>
+                                        <Upload className={`w-6 h-6 ${isDragging ? 'text-white' : 'text-[#a3a3a3]'}`} />
+                                    </div>
+                                    <h3 className="text-base font-medium text-white mb-1">Drop your video here</h3>
+                                    <p className="text-sm text-[#737373] mb-5">MP4, MOV, WEBM up to 2GB</p>
+                                    <button
+                                        onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                                        className="px-5 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
+                                    >
+                                        Select File
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* YouTube URL tab */}
+                        {inputMode === 'youtube' && (
+                            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-6 space-y-4">
+                                <div>
+                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">YouTube URL *</label>
+                                    <input
+                                        type="url"
+                                        value={youtubeUrl}
+                                        onChange={e => { setYoutubeUrl(e.target.value); setYoutubeUrlError(""); }}
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                    />
+                                    {youtubeUrlError && <p className="mt-1.5 text-xs text-red-400">{youtubeUrlError}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Video Title *</label>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={e => setTitle(e.target.value)}
+                                        placeholder="e.g. Joe Rogan #2054 - Elon Musk"
+                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                    <input
+                                        type="text"
+                                        value={guestName}
+                                        onChange={e => setGuestName(e.target.value)}
+                                        placeholder="e.g. Elon Musk"
+                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Channel</label>
+                                    {channelLoading ? (
+                                        <div className="h-10 bg-[#0a0a0a] border border-[#262626] rounded-lg animate-pulse" />
+                                    ) : (
+                                        <select
+                                            value={activeChannelId}
+                                            onChange={e => setActiveChannelId(e.target.value)}
+                                            className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
+                                        >
+                                            {channels.map(c => <option key={c.id} value={c.id}>{c.display_name || c.name || c.id}</option>)}
+                                        </select>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={handleYoutubeSubmit}
+                                    disabled={!youtubeUrl || !title || !activeChannelId}
+                                    className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
+                                        youtubeUrl && title && activeChannelId
+                                            ? "bg-white text-black hover:bg-[#e5e5e5]"
+                                            : "bg-[#0a0a0a] border border-[#1a1a1a] text-[#525252] cursor-not-allowed"
+                                    }`}
+                                >
+                                    Start Processing
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -313,8 +448,17 @@ export default function NewJobPage() {
                     </div>
                 )}
 
-                {/* PREVIEW READY / PROCESSING */}
-                {(uploadState === 'preview_ready' || uploadState === 'processing') && (
+                {/* PROCESSING (YouTube mode — no video preview) */}
+                {uploadState === 'processing' && inputMode === 'youtube' && (
+                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-10 flex flex-col items-center text-center">
+                        <div className="w-10 h-10 border-2 border-[#262626] border-t-white rounded-full animate-spin mb-5" />
+                        <p className="text-sm text-white font-medium mb-1">{statusMsg || "Processing..."}</p>
+                        <p className="text-xs text-[#525252]">This may take a few minutes</p>
+                    </div>
+                )}
+
+                {/* PREVIEW READY / PROCESSING (upload mode) */}
+                {(uploadState === 'preview_ready' || (uploadState === 'processing' && inputMode === 'upload')) && (
                     <div className="space-y-5">
                         {/* Video Preview */}
                         <div className="w-full aspect-video bg-black border border-[#1a1a1a] rounded-xl overflow-hidden">

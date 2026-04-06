@@ -87,6 +87,47 @@ async def upload_preview(
         print(f"[UploadPreview] Error: {e}")
         raise HTTPException(status_code=500, detail="Upload failed")
 
+async def _download_and_run_pipeline(
+    job_id: str,
+    youtube_url: str,
+    video_title: str,
+    guest_name: Optional[str],
+    channel_id: str,
+    user_id: str,
+    clip_duration_min: Optional[int],
+    clip_duration_max: Optional[int],
+) -> None:
+    """Background task: downloads YouTube video then runs the full pipeline."""
+    from app.services.video_downloader import VideoDownloader
+    from app.pipeline.orchestrator import run_pipeline, update_job
+    from app.models.enums import JobStatus
+    from app.services.supabase_client import get_client
+
+    downloader = VideoDownloader()
+    video_path = None
+    try:
+        update_job(
+            job_id,
+            status=JobStatus.PROCESSING.value,
+            current_step="downloading_video",
+            current_step_number=0,
+            progress_pct=2,
+        )
+        print(f"[JobsRoute] Downloading YouTube video for job {job_id}: {youtube_url}")
+        video_path = await downloader.download(youtube_url, max_quality="1080")
+        get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
+        print(f"[JobsRoute] Download complete: {video_path}")
+        run_pipeline(job_id, video_path, video_title, guest_name, channel_id, user_id, clip_duration_min, clip_duration_max)
+    except Exception as e:
+        print(f"[JobsRoute] YouTube download failed for job {job_id}: {e}")
+        update_job(job_id, status=JobStatus.FAILED.value, error_message=f"YouTube download failed: {e}")
+        if video_path and os.path.exists(video_path):
+            try:
+                os.remove(video_path)
+            except Exception:
+                pass
+
+
 @router.post("")
 @limiter.limit("20/hour")
 async def create_job(
@@ -94,6 +135,7 @@ async def create_job(
     background_tasks: BackgroundTasks,
     upload_id: str = Form(None),
     video: UploadFile = File(None),
+    youtube_url: Optional[str] = Form(None),
     title: str = Form(...),
     guest_name: Optional[str] = Form(None),
     channel_id: str = Form(...),
@@ -109,8 +151,14 @@ async def create_job(
     channel_id = channel_id.replace("-", "_")
     try:
         job_id = str(uuid.uuid4())
-        
-        if upload_id:
+
+        if youtube_url:
+            # Validate it's a real YouTube URL
+            if not any(host in youtube_url for host in ("youtube.com/watch", "youtu.be/", "youtube.com/shorts/")):
+                raise HTTPException(status_code=400, detail="Invalid YouTube URL. Supported: youtube.com/watch, youtu.be, youtube.com/shorts")
+            video_path = ""  # Will be set by background downloader
+
+        elif upload_id:
             upload_dir = storage.UPLOAD_DIR
             video_path = None
             for f in os.listdir(upload_dir):
@@ -120,7 +168,7 @@ async def create_job(
 
             if not video_path:
                 raise HTTPException(status_code=404, detail="Uploaded file not found.")
-                
+
         elif video:
             # YÜKS-3: Validate MIME type
             if video.content_type not in _ALLOWED_VIDEO_TYPES:
@@ -137,10 +185,10 @@ async def create_job(
             if not video_path:
                 raise HTTPException(status_code=500, detail="Failed to save video file.")
         else:
-            raise HTTPException(status_code=400, detail="Must provide either upload_id or video file.")
+            raise HTTPException(status_code=400, detail="Must provide youtube_url, upload_id, or video file.")
             
-        # Trimming logic
-        if trim_start_seconds > 0.0 or (trim_end_seconds is not None):
+        # Trimming logic (skip for YouTube — video isn't downloaded yet)
+        if not youtube_url and (trim_start_seconds > 0.0 or (trim_end_seconds is not None)):
             duration = get_video_duration(video_path)
             if trim_end_seconds is None:
                 trim_end_seconds = duration
@@ -206,20 +254,33 @@ async def create_job(
         if not response.data:
             raise HTTPException(status_code=500, detail="Failed to create job in database.")
             
-        # Add run_pipeline to background tasks
-        background_tasks.add_task(
-            run_pipeline,
-            job_id,
-            video_path,
-            title,
-            guest_name,
-            channel_id,
-            current_user["id"],
-            clip_duration_min,
-            clip_duration_max,
-        )
-        
-        print(f"[JobsRoute] Started job {job_id} for video '{title}'")
+        # Add pipeline task to background
+        if youtube_url:
+            background_tasks.add_task(
+                _download_and_run_pipeline,
+                job_id,
+                youtube_url,
+                title,
+                guest_name,
+                channel_id,
+                current_user["id"],
+                clip_duration_min,
+                clip_duration_max,
+            )
+        else:
+            background_tasks.add_task(
+                run_pipeline,
+                job_id,
+                video_path,
+                title,
+                guest_name,
+                channel_id,
+                current_user["id"],
+                clip_duration_min,
+                clip_duration_max,
+            )
+
+        print(f"[JobsRoute] Started job {job_id} for video '{title}'" + (" (YouTube)" if youtube_url else ""))
         return {"job_id": job_id, "status": "queued", "message": "Processing started"}
         
     except HTTPException:

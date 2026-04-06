@@ -18,7 +18,14 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     libegl1 \
     libglib2.0-0 \
+    curl \
+    nodejs \
     && rm -rf /var/lib/apt/lists/*
+
+# Install wireproxy (userspace WireGuard → SOCKS5 proxy for WARP)
+RUN curl -fsSL https://github.com/pufferffish/wireproxy/releases/download/v1.0.9/wireproxy_linux_amd64.tar.gz \
+    | tar xz -C /usr/local/bin wireproxy \
+    && chmod +x /usr/local/bin/wireproxy
 
 WORKDIR /app
 
@@ -30,7 +37,8 @@ COPY backend/ .
 RUN mkdir -p output temp_uploads
 
 RUN chmod -R 777 output temp_uploads
+RUN chmod +x /app/start.sh
 
 EXPOSE 8080
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/app/start.sh"]
