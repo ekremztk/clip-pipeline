@@ -138,6 +138,29 @@ async def upload_reframe_video(
             f.write(content)
 
         print(f"[ReframeUpload] {len(content):,} byte kaydedildi → {save_path}")
+
+        if os.getenv("MODAL_ENABLED", "").lower() == "true":
+            # Modal worker can't access Railway's local filesystem — upload to R2 instead.
+            try:
+                from app.services.r2_client import get_r2_client
+                r2 = get_r2_client()
+                r2_key = f"reframe-uploads/{temp_id}{ext}"
+                with open(save_path, "rb") as f:
+                    r2.put_object(
+                        Bucket=settings.R2_BUCKET_NAME,
+                        Key=r2_key,
+                        Body=f,
+                        ContentType="video/mp4",
+                    )
+                clip_url = f"{settings.R2_PUBLIC_URL.rstrip('/')}/{r2_key}"
+                print(f"[ReframeUpload] R2 upload OK → {clip_url}")
+                return {"clip_url": clip_url}
+            finally:
+                try:
+                    os.remove(save_path)
+                except Exception:
+                    pass
+
         return {"local_path": save_path}
 
     except HTTPException:

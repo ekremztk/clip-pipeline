@@ -87,7 +87,9 @@ export async function runReframe(
 			clipUrl = asset.url;
 		} else if (asset.file) {
 			onProgress({ step: `Uploading video${label}...`, percent: 5 });
-			clipLocalPath = await uploadFileToBackend(asset.file);
+			const uploaded = await uploadFileToBackend(asset.file);
+			clipUrl = uploaded.clipUrl ?? null;
+			clipLocalPath = uploaded.clipLocalPath ?? null;
 		} else {
 			throw new Error("No accessible video source for reframe");
 		}
@@ -644,7 +646,7 @@ function applySegmentToElement(
 	);
 }
 
-async function uploadFileToBackend(file: File): Promise<string> {
+async function uploadFileToBackend(file: File): Promise<{ clipUrl?: string; clipLocalPath?: string }> {
 	const formData = new FormData();
 	formData.append("file", file);
 
@@ -660,8 +662,13 @@ async function uploadFileToBackend(file: File): Promise<string> {
 		throw new Error(`Video upload failed: ${res.status}`);
 	}
 
-	const { local_path } = await res.json();
-	return local_path as string;
+	const data = await res.json();
+	// MODAL_ENABLED=true → backend uploads to R2 and returns clip_url
+	// MODAL_ENABLED=false → backend saves locally and returns local_path
+	if (data.clip_url) {
+		return { clipUrl: data.clip_url as string };
+	}
+	return { clipLocalPath: data.local_path as string };
 }
 
 export async function analyzeDebugVideo(reframeJobId: string): Promise<string> {
