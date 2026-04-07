@@ -198,60 +198,80 @@ async def start_reframe(
         print(f"[ReframeRoute] Job satırı oluşturulamadı: {e}")
         raise HTTPException(status_code=500, detail="Reframe job oluşturulamadı")
 
-    def _run() -> None:
-        try:
-            _update_job(reframe_job_id, status="processing", step="Starting...", percent=0)
+    if os.getenv("MODAL_ENABLED", "").lower() == "true":
+        import modal
+        fn = modal.Function.from_name("prognot-reframe", "process_reframe")
+        fn.spawn({
+            "reframe_job_id": reframe_job_id,
+            "clip_url": req.clip_url,
+            "clip_local_path": req.clip_local_path,
+            "clip_id": req.clip_id,
+            "job_id": req.job_id,
+            "clip_start": req.clip_start,
+            "clip_end": req.clip_end,
+            "strategy": req.strategy,
+            "aspect_ratio": aspect_ratio,
+            "tracking_mode": tracking_mode,
+            "content_type_hint": effective_hint,
+            "detection_engine": detection_engine,
+            "debug_mode": False,
+        })
+        print(f"[ReframeRoute] Job {reframe_job_id} spawned on Modal")
+    else:
+        def _run() -> None:
+            try:
+                _update_job(reframe_job_id, status="processing", step="Starting...", percent=0)
 
-            def on_progress(step: str, pct: int) -> None:
-                _update_job(reframe_job_id, step=step, percent=pct)
+                def on_progress(step: str, pct: int) -> None:
+                    _update_job(reframe_job_id, step=step, percent=pct)
 
-            result = run_reframe(
-                clip_url=req.clip_url,
-                clip_local_path=req.clip_local_path,
-                clip_id=req.clip_id,
-                job_id=req.job_id,
-                clip_start=req.clip_start,
-                clip_end=req.clip_end,
-                strategy=req.strategy,
-                aspect_ratio=aspect_ratio,
-                tracking_mode=tracking_mode,
-                content_type_hint=effective_hint,
-                detection_engine=detection_engine,
-                on_progress=on_progress,
-            )
+                result = run_reframe(
+                    clip_url=req.clip_url,
+                    clip_local_path=req.clip_local_path,
+                    clip_id=req.clip_id,
+                    job_id=req.job_id,
+                    clip_start=req.clip_start,
+                    clip_end=req.clip_end,
+                    strategy=req.strategy,
+                    aspect_ratio=aspect_ratio,
+                    tracking_mode=tracking_mode,
+                    content_type_hint=effective_hint,
+                    detection_engine=detection_engine,
+                    on_progress=on_progress,
+                )
 
-            # Keyframe'leri JSON-serializable dict'e çevir
-            keyframes_dicts = _keyframes_to_dicts(result.keyframes)
+                # Keyframe'leri JSON-serializable dict'e çevir
+                keyframes_dicts = _keyframes_to_dicts(result.keyframes)
 
-            _update_job(
-                reframe_job_id,
-                status="done",
-                step="Done!",
-                percent=100,
-                keyframes=keyframes_dicts,
-                scene_cuts=result.scene_cuts,
-                src_w=result.src_w,
-                src_h=result.src_h,
-                fps=result.fps,
-                duration_s=result.duration_s,
-                pipeline_metadata=result.metadata,
-                error=None,
-            )
-            print(f"[ReframeRoute] Job {reframe_job_id} tamamlandı — "
-                  f"{len(result.keyframes)} keyframe")
+                _update_job(
+                    reframe_job_id,
+                    status="done",
+                    step="Done!",
+                    percent=100,
+                    keyframes=keyframes_dicts,
+                    scene_cuts=result.scene_cuts,
+                    src_w=result.src_w,
+                    src_h=result.src_h,
+                    fps=result.fps,
+                    duration_s=result.duration_s,
+                    pipeline_metadata=result.metadata,
+                    error=None,
+                )
+                print(f"[ReframeRoute] Job {reframe_job_id} tamamlandı — "
+                      f"{len(result.keyframes)} keyframe")
 
-        except Exception as e:
-            print(f"[ReframeRoute] Job {reframe_job_id} başarısız: {e}")
-            _update_job(
-                reframe_job_id,
-                status="error",
-                step="Failed",
-                percent=0,
-                error=str(e)[:500],
-            )
+            except Exception as e:
+                print(f"[ReframeRoute] Job {reframe_job_id} başarısız: {e}")
+                _update_job(
+                    reframe_job_id,
+                    status="error",
+                    step="Failed",
+                    percent=0,
+                    error=str(e)[:500],
+                )
 
-    thread = threading.Thread(target=_run, daemon=True)
-    thread.start()
+        thread = threading.Thread(target=_run, daemon=True)
+        thread.start()
 
     return {"reframe_job_id": reframe_job_id}
 
