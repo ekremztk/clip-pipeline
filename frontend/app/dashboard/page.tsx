@@ -307,7 +307,7 @@ export default function DashboardPage() {
         const token = sessionData?.session?.access_token;
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${API_URL}/jobs/youtube-preview`, true);
+        xhr.open('POST', '/api/backend/jobs/youtube-preview', true);
         if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
         xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -316,7 +316,7 @@ export default function DashboardPage() {
                 const dur = resp.duration_seconds || 0;
                 setVideoDuration(dur);
                 setEndTime(dur);
-                setVideoUrl(`${API_URL}/jobs/video-stream/${resp.upload_id}`);
+                setVideoUrl(`/api/backend/jobs/video-stream/${resp.upload_id}`);
                 setUploadPhase('settings');
             } else {
                 setYoutubeError('Could not download video. Please try again.');
@@ -378,7 +378,7 @@ export default function DashboardPage() {
         const token = sessionData?.session?.access_token;
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${API_URL}/jobs/upload-preview`, true);
+        xhr.open('POST', '/api/backend/jobs/upload-preview', true);
         if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
         xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));

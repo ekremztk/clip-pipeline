@@ -154,7 +154,7 @@ export default function NewJobPage() {
         const token = sessionData?.session?.access_token;
 
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${API}/jobs/upload-preview`, true);
+        xhr.open("POST", "/api/backend/jobs/upload-preview", true);
         if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         xhr.upload.onprogress = (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); };
         xhr.onload = () => {
