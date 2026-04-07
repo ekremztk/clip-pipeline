@@ -33,7 +33,7 @@ async function getAuthToken(): Promise<string | null> {
 	}
 }
 
-const PROGNOT_API = process.env.NEXT_PUBLIC_PROGNOT_API_URL ?? "";
+const PROGNOT_API = "/api/backend";
 const POLL_INTERVAL_MS = 2000;
 
 export interface ReframeProgress {
@@ -58,10 +58,6 @@ export async function runReframe(
 	const videoElements = collectVideoElements(editor);
 	if (videoElements.length === 0) {
 		throw new Error("No video elements on timeline");
-	}
-
-	if (!PROGNOT_API) {
-		throw new Error("NEXT_PUBLIC_PROGNOT_API_URL is not configured");
 	}
 
 	const { jobId, clipId } = useReframeMetadataStore.getState();

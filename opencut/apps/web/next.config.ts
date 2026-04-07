@@ -3,6 +3,14 @@ import { withBotId } from "botid/next/config";
 import { withContentCollections } from "@content-collections/next";
 
 const nextConfig: NextConfig = {
+	async rewrites() {
+		return [
+			{
+				source: "/api/backend/:path*",
+				destination: `${process.env.NEXT_PUBLIC_PROGNOT_API_URL}/:path*`,
+			},
+		];
+	},
 	turbopack: {
 		rules: {
 			"*.glsl": {
