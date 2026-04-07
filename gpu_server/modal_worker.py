@@ -16,8 +16,12 @@ Required Modal secret (create once via `modal secret create prognot-reframe-secr
     SUPABASE_URL
     SUPABASE_SERVICE_KEY
     GEMINI_API_KEY
-    ANTHROPIC_API_KEY    (only needed if debug_mode=True and debug analyzer runs)
-    R2_BUCKET_NAME       (only needed if debug_mode=True)
+    GCP_CREDENTIALS_JSON   single-line JSON of GCP service account (store as-is from the .json file)
+    GCP_PROJECT            GCP project ID
+    GCP_LOCATION           Vertex AI region (e.g. us-central1)
+    GCS_BUCKET_NAME        GCS bucket used for large video uploads to Gemini
+    ANTHROPIC_API_KEY      only needed if debug_mode=True and debug analyzer runs
+    R2_BUCKET_NAME         only needed if debug_mode=True
     R2_PUBLIC_URL
     R2_ACCESS_KEY_ID
     R2_SECRET_ACCESS_KEY
@@ -122,6 +126,28 @@ def process_reframe(payload: dict) -> dict:
     # ── 2. Set writable UPLOAD_DIR before config module loads ─────────────────
     _upload_dir = "/tmp/reframe_uploads"
     os.makedirs(_upload_dir, exist_ok=True)
+
+    # ── 2b. Normalize GCP_CREDENTIALS_JSON before any import touches it ───────
+    # Modal secret injection can leave the private_key with literal \n (two
+    # chars: backslash + n) instead of real newlines, causing "Unable to load
+    # PEM file" errors. gemini_client.py has the same fix but it runs after
+    # json.loads() — if Modal injected real newlines *inside* the JSON string
+    # value the JSON itself becomes unparseable before that fix can apply.
+    # Fixing it here at the raw env-var level handles both cases.
+    _gcp_raw = os.environ.get("GCP_CREDENTIALS_JSON", "")
+    if _gcp_raw:
+        import json as _json
+        try:
+            _creds = _json.loads(_gcp_raw)
+        except Exception:
+            # JSON is malformed — likely real newlines inside the string value.
+            # Collapse them so json.loads can parse it.
+            _gcp_raw = _gcp_raw.replace("\n", "\\n")
+            _creds = _json.loads(_gcp_raw)
+        if "private_key" in _creds:
+            _creds["private_key"] = _creds["private_key"].replace("\\n", "\n")
+        os.environ["GCP_CREDENTIALS_JSON"] = _json.dumps(_creds)
+        del _json, _creds, _gcp_raw
 
     # ── 3. Deferred imports (path + env must be ready first) ──────────────────
     from app.reframe.pipeline import run_reframe
