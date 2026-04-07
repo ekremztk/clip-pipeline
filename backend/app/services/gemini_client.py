@@ -270,6 +270,23 @@ def generate_json(prompt: str, system: Optional[str] = None, model: Optional[str
         print(f"[GeminiClient] Error in generate_json: {e}")
         raise ValueError(f"Failed to generate or parse JSON: {e}")
 
+def _get_gcs_client():
+    """
+    Returns a GCS storage.Client explicitly authenticated via GCP_CREDENTIALS_JSON.
+    Never falls back to Application Default Credentials / metadata server, which
+    hangs when running outside GCP (Railway, EC2, local Docker).
+    """
+    from google.cloud import storage
+    if not settings.GCP_CREDENTIALS_JSON:
+        raise RuntimeError("GCP_CREDENTIALS_JSON is not set — cannot create GCS client")
+    from google.oauth2 import service_account as _sa
+    creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
+    if "private_key" in creds_info:
+        creds_info["private_key"] = creds_info["private_key"].replace("\\n", "\n")
+    creds = _sa.Credentials.from_service_account_info(creds_info)
+    return storage.Client(project=settings.GCP_PROJECT, credentials=creds)
+
+
 def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 30, delay: int = 3):
     """Polls a file until its state becomes ACTIVE."""
     print(f"[GeminiClient] Polling file {file_name} for ACTIVE state...")
@@ -359,17 +376,9 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None, jso
             # Primary: GCS upload (requires credentials)
             try:
                 print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
-                from google.cloud import storage
                 import uuid
 
-                gcs_creds = None
-                if settings.GCP_CREDENTIALS_JSON:
-                    from google.oauth2 import service_account as _sa
-                    gcs_creds = _sa.Credentials.from_service_account_info(
-                        json.loads(settings.GCP_CREDENTIALS_JSON)
-                    )
-
-                storage_client = storage.Client(project=settings.GCP_PROJECT, credentials=gcs_creds)
+                storage_client = _get_gcs_client()
                 bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
 
                 blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
@@ -452,15 +461,14 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None, jso
     finally:
         if gcs_uri:
             try:
-                from google.cloud import storage
-                storage_client = storage.Client(project=settings.GCP_PROJECT)
+                storage_client = _get_gcs_client()
                 bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
                 blob_name = gcs_uri.split(f"gs://{settings.GCS_BUCKET_NAME}/")[1]
                 blob = bucket.blob(blob_name)
-                blob.delete()
+                blob.delete(timeout=10)
                 print(f"[GeminiClient] Deleted GCS video file {gcs_uri}")
             except Exception as cleanup_err:
-                print(f"[GeminiClient] Warning: Failed to delete GCS file: {cleanup_err}")
+                print(f"[GeminiClient] Warning: Failed to delete GCS video file {gcs_uri}: {cleanup_err}")
 
 def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> str:
     """
@@ -511,10 +519,9 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
             
         else:
             print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Uploading to GCS.")
-            from google.cloud import storage
             import uuid
-            
-            storage_client = storage.Client(project=settings.GCP_PROJECT)
+
+            storage_client = _get_gcs_client()
             bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
             
             blob_name = f"audio_{uuid.uuid4().hex}_{os.path.basename(audio_path)}"
@@ -554,15 +561,14 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
     finally:
         if gcs_uri:
             try:
-                print(f"[GeminiClient] Deleting GCS file {gcs_uri}...")
-                from google.cloud import storage
-                storage_client = storage.Client(project=settings.GCP_PROJECT)
+                storage_client = _get_gcs_client()
                 bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
                 blob_name = gcs_uri.split(f"gs://{settings.GCS_BUCKET_NAME}/")[1]
                 blob = bucket.blob(blob_name)
-                blob.delete()
+                blob.delete(timeout=10)
+                print(f"[GeminiClient] Deleted GCS audio file {gcs_uri}")
             except Exception as e:
-                print(f"[GeminiClient] Error deleting GCS file {gcs_uri}: {e}")
+                print(f"[GeminiClient] Warning: Failed to delete GCS audio file {gcs_uri}: {e}")
 
 def embed_content(text: str) -> list[float]:
     """
