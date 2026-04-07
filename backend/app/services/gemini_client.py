@@ -122,10 +122,14 @@ def get_gemini_client() -> genai.Client:
             if settings.GCP_CREDENTIALS_JSON:
                 from google.oauth2 import service_account
                 creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
-                # Docker --env-file keeps \n as literal backslash-n instead of real newlines.
-                # The RSA parser requires actual newlines in the PEM private key block.
+                # Normalize private_key line endings — env var injection (Docker --env-file,
+                # Railway, Modal) can leave literal \n two-chars or CRLF in the PEM block.
                 if "private_key" in creds_info:
-                    creds_info["private_key"] = creds_info["private_key"].replace("\\n", "\n")
+                    pk = creds_info["private_key"]
+                    pk = pk.replace("\\n", "\n")
+                    pk = pk.replace("\r\n", "\n")
+                    pk = pk.replace("\r", "\n")
+                    creds_info["private_key"] = pk
                 credentials = service_account.Credentials.from_service_account_info(
                     creds_info,
                     scopes=["https://www.googleapis.com/auth/cloud-platform"],
@@ -282,7 +286,11 @@ def _get_gcs_client():
     from google.oauth2 import service_account as _sa
     creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
     if "private_key" in creds_info:
-        creds_info["private_key"] = creds_info["private_key"].replace("\\n", "\n")
+        pk = creds_info["private_key"]
+        pk = pk.replace("\\n", "\n")
+        pk = pk.replace("\r\n", "\n")
+        pk = pk.replace("\r", "\n")
+        creds_info["private_key"] = pk
     creds = _sa.Credentials.from_service_account_info(creds_info)
     return storage.Client(project=settings.GCP_PROJECT, credentials=creds)
 
