@@ -649,7 +649,8 @@ async function uploadFileToBackend(file: File): Promise<string> {
 	formData.append("file", file);
 
 	const uploadToken = await getAuthToken();
-	const res = await fetch(`${PROGNOT_API}/reframe/upload`, {
+	const directApi = process.env.NEXT_PUBLIC_PROGNOT_API_URL ?? "";
+	const res = await fetch(`${directApi}/reframe/upload`, {
 		method: "POST",
 		body: formData,
 		headers: uploadToken ? { Authorization: `Bearer ${uploadToken}` } : {},
