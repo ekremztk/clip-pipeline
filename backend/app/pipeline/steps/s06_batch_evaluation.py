@@ -501,8 +501,8 @@ def run(
                 "post_context":       ctx_segs["post_context"],
             })
 
-        # Evaluate in batches of 6
-        batch_size = 6
+        # Evaluate in batches of 4 — smaller batches prevent Claude from missing candidates
+        batch_size = 4
         all_evaluated = []
 
         for i in range(0, len(all_batch_data), batch_size):
