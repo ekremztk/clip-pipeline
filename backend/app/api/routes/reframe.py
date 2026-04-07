@@ -389,54 +389,74 @@ async def start_reframe_debug(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Job oluşturulamadı: {e}")
 
-    def _run() -> None:
-        try:
-            _update_job(reframe_job_id, status="processing", step="Starting (debug)...", percent=0)
+    if os.getenv("MODAL_ENABLED", "").lower() == "true":
+        import modal
+        fn = modal.Function.from_name("prognot-reframe", "process_reframe")
+        fn.spawn({
+            "reframe_job_id": reframe_job_id,
+            "clip_url": req.clip_url,
+            "clip_local_path": req.clip_local_path,
+            "clip_id": req.clip_id,
+            "job_id": req.job_id,
+            "clip_start": req.clip_start,
+            "clip_end": req.clip_end,
+            "strategy": req.strategy,
+            "aspect_ratio": aspect_ratio,
+            "tracking_mode": tracking_mode,
+            "content_type_hint": effective_hint,
+            "detection_engine": detection_engine,
+            "debug_mode": True,
+        })
+        print(f"[ReframeDebug] Job {reframe_job_id} spawned on Modal (debug)")
+    else:
+        def _run() -> None:
+            try:
+                _update_job(reframe_job_id, status="processing", step="Starting (debug)...", percent=0)
 
-            def on_progress(step: str, pct: int) -> None:
-                _update_job(reframe_job_id, step=f"[DEBUG] {step}", percent=pct)
+                def on_progress(step: str, pct: int) -> None:
+                    _update_job(reframe_job_id, step=f"[DEBUG] {step}", percent=pct)
 
-            result = run_reframe(
-                clip_url=req.clip_url,
-                clip_local_path=req.clip_local_path,
-                clip_id=req.clip_id,
-                job_id=req.job_id,
-                clip_start=req.clip_start,
-                clip_end=req.clip_end,
-                strategy=req.strategy,
-                aspect_ratio=aspect_ratio,
-                tracking_mode=tracking_mode,
-                content_type_hint=effective_hint,
-                detection_engine=detection_engine,
-                on_progress=on_progress,
-                debug_mode=True,
-            )
+                result = run_reframe(
+                    clip_url=req.clip_url,
+                    clip_local_path=req.clip_local_path,
+                    clip_id=req.clip_id,
+                    job_id=req.job_id,
+                    clip_start=req.clip_start,
+                    clip_end=req.clip_end,
+                    strategy=req.strategy,
+                    aspect_ratio=aspect_ratio,
+                    tracking_mode=tracking_mode,
+                    content_type_hint=effective_hint,
+                    detection_engine=detection_engine,
+                    on_progress=on_progress,
+                    debug_mode=True,
+                )
 
-            keyframes_dicts = _keyframes_to_dicts(result.keyframes)
-            debug_url = result.metadata.get("debug_video_url", "")
+                keyframes_dicts = _keyframes_to_dicts(result.keyframes)
+                debug_url = result.metadata.get("debug_video_url", "")
 
-            _update_job(
-                reframe_job_id,
-                status="done",
-                step=f"Done! Debug: {debug_url}",
-                percent=100,
-                keyframes=keyframes_dicts,
-                scene_cuts=result.scene_cuts,
-                src_w=result.src_w,
-                src_h=result.src_h,
-                fps=result.fps,
-                duration_s=result.duration_s,
-                pipeline_metadata=result.metadata,
-                error=None,
-            )
-            print(f"[ReframeDebug] Job {reframe_job_id} done — debug_url={debug_url}")
+                _update_job(
+                    reframe_job_id,
+                    status="done",
+                    step=f"Done! Debug: {debug_url}",
+                    percent=100,
+                    keyframes=keyframes_dicts,
+                    scene_cuts=result.scene_cuts,
+                    src_w=result.src_w,
+                    src_h=result.src_h,
+                    fps=result.fps,
+                    duration_s=result.duration_s,
+                    pipeline_metadata=result.metadata,
+                    error=None,
+                )
+                print(f"[ReframeDebug] Job {reframe_job_id} done — debug_url={debug_url}")
 
-        except Exception as e:
-            print(f"[ReframeDebug] Job {reframe_job_id} failed: {e}")
-            _update_job(reframe_job_id, status="error", step="Failed", percent=0, error=str(e)[:500])
+            except Exception as e:
+                print(f"[ReframeDebug] Job {reframe_job_id} failed: {e}")
+                _update_job(reframe_job_id, status="error", step="Failed", percent=0, error=str(e)[:500])
 
-    import threading
-    threading.Thread(target=_run, daemon=True).start()
+        import threading
+        threading.Thread(target=_run, daemon=True).start()
     return {"reframe_job_id": reframe_job_id}
 
 
