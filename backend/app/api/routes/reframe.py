@@ -201,7 +201,7 @@ async def start_reframe(
     if os.getenv("MODAL_ENABLED", "").lower() == "true":
         import modal
         fn = modal.Function.from_name("prognot-reframe", "process_reframe")
-        fn.spawn({
+        await fn.spawn.aio({
             "reframe_job_id": reframe_job_id,
             "clip_url": req.clip_url,
             "clip_local_path": req.clip_local_path,
@@ -392,7 +392,7 @@ async def start_reframe_debug(
     if os.getenv("MODAL_ENABLED", "").lower() == "true":
         import modal
         fn = modal.Function.from_name("prognot-reframe", "process_reframe")
-        fn.spawn({
+        await fn.spawn.aio({
             "reframe_job_id": reframe_job_id,
             "clip_url": req.clip_url,
             "clip_local_path": req.clip_local_path,
