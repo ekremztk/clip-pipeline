@@ -122,6 +122,10 @@ def get_gemini_client() -> genai.Client:
             if settings.GCP_CREDENTIALS_JSON:
                 from google.oauth2 import service_account
                 creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
+                # Docker --env-file keeps \n as literal backslash-n instead of real newlines.
+                # The RSA parser requires actual newlines in the PEM private key block.
+                if "private_key" in creds_info:
+                    creds_info["private_key"] = creds_info["private_key"].replace("\\n", "\n")
                 credentials = service_account.Credentials.from_service_account_info(
                     creds_info,
                     scopes=["https://www.googleapis.com/auth/cloud-platform"],
