@@ -18,30 +18,35 @@ _RAPIDAPI_HEADERS = {
 }
 
 
-def _pick_download_url(links: list, max_quality: str) -> Optional[str]:
+def _pick_download_url(urls: list, max_quality: str) -> Optional[str]:
     """
-    Pick the best download URL from the API response that fits within max_quality.
-    Falls back to the first available URL if no quality match is found.
+    Pick the best mp4 download URL from the urls array returned by POST /links.
+    Prefers quality == max_quality, falls back to highest available.
     """
     max_height = int(max_quality)
     best_url = None
     best_height = 0
 
-    for link in links:
+    for item in urls:
         url = (
-            link.get("url")
-            or link.get("link")
-            or link.get("downloadUrl")
-            or link.get("download_url")
+            item.get("url")
+            or item.get("link")
+            or item.get("downloadUrl")
+            or item.get("download_url")
         )
         if not url:
             continue
 
+        # Prefer mp4 format
+        fmt = str(item.get("ext") or item.get("format") or item.get("mimeType") or "").lower()
+        if fmt and "mp4" not in fmt and "video" not in fmt:
+            continue
+
         quality_str = str(
-            link.get("quality")
-            or link.get("resolution")
-            or link.get("label")
-            or link.get("qualityLabel")
+            item.get("quality")
+            or item.get("resolution")
+            or item.get("label")
+            or item.get("qualityLabel")
             or ""
         )
         m = re.search(r"(\d{3,4})", quality_str)
@@ -54,13 +59,13 @@ def _pick_download_url(links: list, max_quality: str) -> Optional[str]:
     if best_url:
         return best_url
 
-    # Fallback: return first URL regardless of quality
-    for link in links:
+    # Fallback: return first available URL regardless of format/quality
+    for item in urls:
         url = (
-            link.get("url")
-            or link.get("link")
-            or link.get("downloadUrl")
-            or link.get("download_url")
+            item.get("url")
+            or item.get("link")
+            or item.get("downloadUrl")
+            or item.get("download_url")
         )
         if url:
             return url
@@ -71,7 +76,7 @@ def _pick_download_url(links: list, max_quality: str) -> Optional[str]:
 class VideoDownloader:
     """
     Downloads YouTube videos via RapidAPI youtube86.
-    Flow: POST /links → poll GET /status/{taskId} → download file.
+    Flow: POST /links → parse urls array → stream best quality to disk.
     """
 
     def __init__(self):
@@ -95,15 +100,15 @@ class VideoDownloader:
             Absolute path to the downloaded mp4 file
 
         Raises:
-            RuntimeError: if the API fails or task times out
+            RuntimeError: if the API fails or returns no URLs
             FileNotFoundError: if the saved file is missing after download
         """
         target_dir = Path(output_dir) if output_dir else self.output_dir
         target_dir.mkdir(parents=True, exist_ok=True)
 
-        # ── Step 1: Submit download task ──────────────────────────────────────
-        print(f"[VideoDownloader] Submitting to RapidAPI: {youtube_url}")
-        async with httpx.AsyncClient(timeout=30) as client:
+        # ── POST /links → returns urls array directly ─────────────────────────
+        print(f"[VideoDownloader] Fetching links via RapidAPI: {youtube_url}")
+        async with httpx.AsyncClient(timeout=60) as client:
             resp = await client.post(
                 f"{_RAPIDAPI_BASE}/links",
                 headers=_RAPIDAPI_HEADERS,
@@ -115,72 +120,28 @@ class VideoDownloader:
                 )
             data = resp.json()
 
-        task_id = (
-            data.get("taskId")
-            or data.get("task_id")
-            or data.get("id")
-            or data.get("requestId")
-        )
-        if not task_id:
-            raise RuntimeError(f"No taskId in /links response: {data}")
-        print(f"[VideoDownloader] Task created: {task_id}")
+        print(f"[VideoDownloader] /links response keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
 
-        # ── Step 2: Poll /status/{taskId} until ready ─────────────────────────
-        download_url = None
-        for attempt in range(60):  # max 5 minutes (60 × 5s)
-            await asyncio.sleep(5)
-            async with httpx.AsyncClient(timeout=15) as client:
-                status_resp = await client.get(
-                    f"{_RAPIDAPI_BASE}/status/{task_id}",
-                    headers=_RAPIDAPI_HEADERS,
-                )
-                if status_resp.status_code != 200:
-                    print(
-                        f"[VideoDownloader] /status returned {status_resp.status_code} "
-                        f"(attempt {attempt + 1}), retrying..."
-                    )
-                    continue
-                status_data = status_resp.json()
-
-            status = str(
-                status_data.get("status")
-                or status_data.get("state")
-                or ""
-            ).lower()
-
-            print(f"[VideoDownloader] Poll {attempt + 1}/60 — status: {status}")
-
-            if status in ("completed", "ready", "done", "finished", "success"):
-                links = (
-                    status_data.get("links")
-                    or status_data.get("formats")
-                    or status_data.get("videos")
-                    or status_data.get("result", {}).get("links")
-                    or []
-                )
-                if isinstance(links, dict):
-                    links = list(links.values())
-
-                download_url = _pick_download_url(links, max_quality)
-                if not download_url:
-                    # Maybe the URL is at the top level
-                    download_url = (
-                        status_data.get("url")
-                        or status_data.get("downloadUrl")
-                        or status_data.get("download_url")
-                    )
-                break
-
-            if status in ("failed", "error", "cancelled"):
-                raise RuntimeError(
-                    f"RapidAPI task {task_id} failed: {status_data}"
-                )
-            # still processing — continue polling
-
-        if not download_url:
-            raise RuntimeError(
-                f"RapidAPI task {task_id} timed out or returned no download URL"
+        # Response may be a list directly or a dict containing the list
+        if isinstance(data, list):
+            urls = data
+        else:
+            urls = (
+                data.get("urls")
+                or data.get("links")
+                or data.get("formats")
+                or data.get("videos")
+                or []
             )
+            if isinstance(urls, dict):
+                urls = list(urls.values())
+
+        if not urls:
+            raise RuntimeError(f"RapidAPI /links returned no URLs: {data}")
+
+        download_url = _pick_download_url(urls, max_quality)
+        if not download_url:
+            raise RuntimeError(f"No suitable download URL found in: {urls}")
 
         print(f"[VideoDownloader] Downloading from: {download_url[:80]}...")
 
