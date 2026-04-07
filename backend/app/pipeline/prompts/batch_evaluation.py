@@ -65,9 +65,9 @@ Read all three sections before evaluating. This is not optional.
 
 5. **CONTEXT BOUNDARY ANALYSIS** — Mandatory. After reading all three transcript sections:
 
-   a) **Check PRE_CONTEXT**: Does the story, setup, or crucial context actually START in the 20s before the proposed clip? If YES: move `recommended_start` earlier (max 20s). Explain briefly in `quality_notes` if this was the fix that made it fixable.
+   a) **Check PRE_CONTEXT**: Does the story, setup, or crucial context actually START in the 20s before the proposed clip? If YES: move `recommended_start` earlier (max 20s).
 
-   b) **Check POST_CONTEXT**: Does the arc, punchline, or resolution FINISH in the 20s after the proposed clip? If YES: move `recommended_end` later (max 20s). Explain briefly in `quality_notes` if needed.
+   b) **Check POST_CONTEXT**: Does the arc, punchline, or resolution FINISH in the 20s after the proposed clip? If YES: move `recommended_end` later (max 20s).
 
    c) **Rules**: Only adjust when the change meaningfully improves standalone comprehension or arc completeness. Do NOT adjust just to grab more content. Final clip duration must remain within MIN_DURATION_PLACEHOLDER–MAX_DURATION_PLACEHOLDER seconds.
 
@@ -119,7 +119,7 @@ Each candidate MUST follow this exact schema:
   "hook_text": "The exact first sentence the viewer will hear",
   "score": integer (0-100),
   "quality_verdict": "pass" | "fixable",
-  "quality_notes": "For fixable clips: one sentence on what boundary adjustment was made and why. Empty string for pass.",
+  "quality_notes": "MANDATORY: MAXIMUM 15 WORDS. State EXACTLY what was changed and why. Example: 'Extended start by 5s to include setup hook.' If pass, use empty string.",
   "content_type": "confirmed or corrected content type",
   "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
   "posting_order": integer (1 = post first),
