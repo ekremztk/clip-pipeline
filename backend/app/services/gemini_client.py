@@ -113,23 +113,38 @@ def get_developer_client() -> genai.Client:
             raise
     return _developer_client
 
+def _normalize_private_key(creds_info: dict) -> dict:
+    """
+    Normalize private_key line endings in a parsed GCP credentials dict.
+
+    Env-var injection (Docker --env-file, Railway, Modal) can corrupt the PEM
+    block with literal two-char \\n, CRLF, or bare CR.  This helper strips all
+    variants so the PEM parser never sees stray \\r bytes.
+    """
+    if "private_key" not in creds_info:
+        return creds_info
+    pk = creds_info["private_key"]
+    pk = pk.replace("\\n", "\n")   # literal two-char \n → real newline
+    pk = pk.replace("\r\n", "\n")  # CRLF → LF
+    pk = pk.replace("\r", "")      # bare CR → remove entirely (don't add extra \n)
+    creds_info["private_key"] = pk
+    return creds_info
+
+
 def get_gemini_client() -> genai.Client:
     """Lazy initialization of the Gemini client."""
     global _gemini_client
     if _gemini_client is None:
         try:
-            # DÜŞÜK-1: Use in-memory credentials instead of writing to temp file
-            if settings.GCP_CREDENTIALS_JSON:
+            # Read directly from os.environ — settings.GCP_CREDENTIALS_JSON is
+            # cached at class-definition time and may hold a stale/corrupted
+            # value if the env var was normalised after config.py was imported
+            # (e.g. Modal warm starts).
+            gcp_creds_json = os.environ.get("GCP_CREDENTIALS_JSON", "") or settings.GCP_CREDENTIALS_JSON
+            if gcp_creds_json:
                 from google.oauth2 import service_account
-                creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
-                # Normalize private_key line endings — env var injection (Docker --env-file,
-                # Railway, Modal) can leave literal \n two-chars or CRLF in the PEM block.
-                if "private_key" in creds_info:
-                    pk = creds_info["private_key"]
-                    pk = pk.replace("\\n", "\n")
-                    pk = pk.replace("\r\n", "\n")
-                    pk = pk.replace("\r", "\n")
-                    creds_info["private_key"] = pk
+                creds_info = json.loads(gcp_creds_json)
+                _normalize_private_key(creds_info)
                 credentials = service_account.Credentials.from_service_account_info(
                     creds_info,
                     scopes=["https://www.googleapis.com/auth/cloud-platform"],
@@ -281,16 +296,12 @@ def _get_gcs_client():
     hangs when running outside GCP (Railway, EC2, local Docker).
     """
     from google.cloud import storage
-    if not settings.GCP_CREDENTIALS_JSON:
+    gcp_creds_json = os.environ.get("GCP_CREDENTIALS_JSON", "") or settings.GCP_CREDENTIALS_JSON
+    if not gcp_creds_json:
         raise RuntimeError("GCP_CREDENTIALS_JSON is not set — cannot create GCS client")
     from google.oauth2 import service_account as _sa
-    creds_info = json.loads(settings.GCP_CREDENTIALS_JSON)
-    if "private_key" in creds_info:
-        pk = creds_info["private_key"]
-        pk = pk.replace("\\n", "\n")
-        pk = pk.replace("\r\n", "\n")
-        pk = pk.replace("\r", "\n")
-        creds_info["private_key"] = pk
+    creds_info = json.loads(gcp_creds_json)
+    _normalize_private_key(creds_info)
     creds = _sa.Credentials.from_service_account_info(creds_info)
     return storage.Client(project=settings.GCP_PROJECT, credentials=creds)
 
