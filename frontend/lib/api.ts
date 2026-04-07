@@ -34,7 +34,7 @@ export async function authFetch(input: string, init: RequestInit = {}): Promise<
     const headers = new Headers(init.headers as HeadersInit | undefined);
     headers.set('Authorization', `Bearer ${token}`);
 
-    const response = await fetch(`${API_URL}${input}`, { ...init, headers });
+    const response = await fetch(`/api/backend${input}`, { ...init, headers });
 
     if (response.status === 401) {
         // Token was rejected by backend (expired, revoked, etc.)
