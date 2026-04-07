@@ -145,9 +145,13 @@ def process_reframe(payload: dict) -> dict:
             _gcp_raw = _gcp_raw.replace("\n", "\\n")
             _creds = _json.loads(_gcp_raw)
         if "private_key" in _creds:
-            _creds["private_key"] = _creds["private_key"].replace("\\n", "\n")
+            pk = _creds["private_key"]
+            pk = pk.replace("\\n", "\n")   # literal \n two-chars → real newline
+            pk = pk.replace("\r\n", "\n")  # CRLF → LF (Windows line endings)
+            pk = pk.replace("\r", "\n")    # bare CR → LF (old Mac line endings)
+            _creds["private_key"] = pk
         os.environ["GCP_CREDENTIALS_JSON"] = _json.dumps(_creds)
-        del _json, _creds, _gcp_raw
+        del _json, _creds, _gcp_raw, pk
 
     # ── 3. Deferred imports (path + env must be ready first) ──────────────────
     from app.reframe.pipeline import run_reframe
