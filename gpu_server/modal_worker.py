@@ -128,30 +128,36 @@ def process_reframe(payload: dict) -> dict:
     os.makedirs(_upload_dir, exist_ok=True)
 
     # ── 2b. Normalize GCP_CREDENTIALS_JSON before any import touches it ───────
-    # Modal secret injection can leave the private_key with literal \n (two
-    # chars: backslash + n) instead of real newlines, causing "Unable to load
-    # PEM file" errors. gemini_client.py has the same fix but it runs after
-    # json.loads() — if Modal injected real newlines *inside* the JSON string
-    # value the JSON itself becomes unparseable before that fix can apply.
-    # Fixing it here at the raw env-var level handles both cases.
+    # Modal secret injection can corrupt the private_key PEM block with CRLF,
+    # literal two-char \n, or bare \r. cryptography >= 42 uses a strict Rust
+    # base64 parser that rejects ANY stray byte. We rebuild the PEM from
+    # scratch: extract base64 content, strip non-base64 chars, re-wrap at 64.
     _gcp_raw = os.environ.get("GCP_CREDENTIALS_JSON", "")
     if _gcp_raw:
         import json as _json
+        import re as _re
         try:
             _creds = _json.loads(_gcp_raw)
         except Exception:
             # JSON is malformed — likely real newlines inside the string value.
             # Collapse them so json.loads can parse it.
-            _gcp_raw = _gcp_raw.replace("\n", "\\n")
+            _gcp_raw = _gcp_raw.replace("\r\n", "\\n").replace("\r", "\\n").replace("\n", "\\n")
             _creds = _json.loads(_gcp_raw)
         if "private_key" in _creds:
             pk = _creds["private_key"]
             pk = pk.replace("\\n", "\n")   # literal \n two-chars → real newline
-            pk = pk.replace("\r\n", "\n")  # CRLF → LF (Windows line endings)
-            pk = pk.replace("\r", "\n")    # bare CR → LF (old Mac line endings)
+            pk = pk.replace("\r", "")      # strip all CR
+            _lines = [l.strip() for l in pk.strip().split("\n") if l.strip()]
+            if len(_lines) >= 3 and _lines[0].startswith("-----BEGIN") and _lines[-1].startswith("-----END"):
+                _header = _lines[0]
+                _footer = _lines[-1]
+                _raw_b64 = "".join(_lines[1:-1])
+                _clean_b64 = _re.sub(r"[^A-Za-z0-9+/=]", "", _raw_b64)
+                _wrapped = "\n".join(_clean_b64[i:i+64] for i in range(0, len(_clean_b64), 64))
+                pk = f"{_header}\n{_wrapped}\n{_footer}\n"
             _creds["private_key"] = pk
         os.environ["GCP_CREDENTIALS_JSON"] = _json.dumps(_creds)
-        del _json, _creds, _gcp_raw, pk
+        del _json, _re, _creds, _gcp_raw
 
     # ── 3. Deferred imports (path + env must be ready first) ──────────────────
     from app.reframe.pipeline import run_reframe

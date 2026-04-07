@@ -115,18 +115,35 @@ def get_developer_client() -> genai.Client:
 
 def _normalize_private_key(creds_info: dict) -> dict:
     """
-    Normalize private_key line endings in a parsed GCP credentials dict.
+    Rebuild private_key PEM into canonical format.
 
-    Env-var injection (Docker --env-file, Railway, Modal) can corrupt the PEM
-    block with literal two-char \\n, CRLF, or bare CR.  This helper strips all
-    variants so the PEM parser never sees stray \\r bytes.
+    Env-var injection (Docker, Railway, Modal) can corrupt the PEM block with
+    literal two-char \\n, CRLF, bare CR, trailing whitespace, or other junk.
+    cryptography >= 42 uses a strict Rust PEM/base64 parser that rejects ANY
+    non-base64 byte inside the content area — even a single stray \\r causes
+    InvalidByte errors.
+
+    Fix: extract the raw base64 content, strip every character that isn't a
+    valid base64 symbol, then re-wrap at 64 chars with proper \\n separators.
     """
     if "private_key" not in creds_info:
         return creds_info
     pk = creds_info["private_key"]
-    pk = pk.replace("\\n", "\n")   # literal two-char \n → real newline
-    pk = pk.replace("\r\n", "\n")  # CRLF → LF
-    pk = pk.replace("\r", "")      # bare CR → remove entirely (don't add extra \n)
+    # Handle literal two-char \\n (double-escaped JSON from env injection)
+    pk = pk.replace("\\n", "\n")
+    # Strip all carriage returns
+    pk = pk.replace("\r", "")
+    # Extract PEM header, base64 body, footer
+    lines = [l.strip() for l in pk.strip().split("\n") if l.strip()]
+    if len(lines) >= 3 and lines[0].startswith("-----BEGIN") and lines[-1].startswith("-----END"):
+        header = lines[0]
+        footer = lines[-1]
+        # Join all body lines and keep ONLY valid base64 chars
+        raw_b64 = "".join(lines[1:-1])
+        clean_b64 = re.sub(r"[^A-Za-z0-9+/=]", "", raw_b64)
+        # Re-wrap at 64 characters (PEM standard)
+        wrapped = "\n".join(clean_b64[i:i+64] for i in range(0, len(clean_b64), 64))
+        pk = f"{header}\n{wrapped}\n{footer}\n"
     creds_info["private_key"] = pk
     return creds_info
 
