@@ -1,3 +1,4 @@
+# rebuilt 2026-04-08
 """
 Prognot Reframe — Modal GPU Worker.
 
