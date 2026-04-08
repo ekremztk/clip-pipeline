@@ -1,4 +1,5 @@
 # rebuilt 2026-04-08
+# secret-refresh-2
 """
 Prognot Reframe — Modal GPU Worker.
 
