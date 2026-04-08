@@ -80,7 +80,7 @@ _PIP_PACKAGES = [
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_BUST": "2026-04-08"})
+    .env({"CACHE_DATE": "2026-04-08_1130"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
     # Include backend source tree at /backend inside the container.
