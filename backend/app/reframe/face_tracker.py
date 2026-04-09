@@ -129,81 +129,71 @@ class MediaPipeDetector(BaseDetector):
             return []
 
 
-# ─── YOLO engine ──────────────────────────────────────────────────────────────
+# Face model paths
+_FACE_MODEL_URL = "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8l-face.pt"
+_FACE_MODEL_BAKED = Path("/root/yolov8l-face.pt")          # pre-downloaded in Modal image
+_FACE_MODEL_LOCAL = _MODELS_DIR / "yolov8l-face.pt"        # local fallback / dev
+
+
+# ─── YOLO face engine ─────────────────────────────────────────────────────────
 
 class YoloDetector(BaseDetector):
     """
-    YOLOv8-large person detection.
+    YOLOv8-large face detection (yolov8l-face.pt).
 
-    Detects "person" (class 0) bounding boxes and derives a head anchor
-    that is robust to arm extension and posture changes.
+    Uses a face-specific model that outputs face bounding boxes directly
+    (class 0 = face). No body→head estimation math needed.
 
-    Coordinate conversion:
-      person bbox [x1,y1,x2,y2] (normalized) →
-
-      X anchor — shoulder-constrained center:
-        Shoulder width ≈ body_h * 0.38 (anatomical ratio, arm-extension-resistant).
-        When arms extend beyond this, bbox width grows but the anchor stays
-        near the shoulder/head center instead of drifting toward the arm.
-        face_x = (x1 + x2) / 2   (bbox center — arms affect both sides
-                                   symmetrically or the effect is small)
-        face_w = min(body_w, body_h * 0.38)   ← key: shoulder-clamped width
-
-      Y anchor — aspect-ratio-driven head fraction:
-        The fraction of bbox height where the head sits varies by posture:
-          standing tall  (aspect ~0.25): head at ~8-10% from top
-          seated podcast (aspect ~0.45): head at ~18-20% from top
-          leaning forward (aspect ~0.60): head at ~23-25% from top
-        Formula: fraction = clamp(0.06 + aspect * 0.30, 0.06, 0.28)
-        face_y = y1 + body_h * fraction
-        face_h = body_h * min(0.35, fraction * 2.5)   (detection window)
+    The green debug rectangle is now face-sized, and focus points track
+    actual face centers — correct for podcast / talk-show content.
     """
-
-    # Shoulder width as a fraction of body bbox height (anthropometric ratio).
-    # Arms extending beyond this value don't shift the X anchor.
-    SHOULDER_HEIGHT_RATIO = 0.38
 
     def __init__(self, config: FaceTrackerConfig):
         try:
             from ultralytics import YOLO
         except ImportError:
-            raise RuntimeError(
-                "ultralytics is not installed. "
-                "Run: pip install ultralytics"
-            )
+            raise RuntimeError("ultralytics is not installed. Run: pip install ultralytics")
 
-        # yolov8l.pt auto-downloads from ultralytics on first use
-        self._model = YOLO("yolov8l.pt")
+        # Resolve model: Modal pre-baked path → local models dir → download
+        model_path: Optional[Path] = None
+        for candidate in [_FACE_MODEL_BAKED, _FACE_MODEL_LOCAL]:
+            if candidate.exists():
+                model_path = candidate
+                break
 
-        # Verify which model file was actually loaded (yolov8n ≈ 6MB, yolov8l ≈ 87MB)
+        if model_path is None:
+            logger.info("[FaceTracker] Downloading yolov8l-face.pt from GitHub...")
+            _FACE_MODEL_LOCAL.parent.mkdir(parents=True, exist_ok=True)
+            import urllib.request
+            urllib.request.urlretrieve(_FACE_MODEL_URL, str(_FACE_MODEL_LOCAL))
+            model_path = _FACE_MODEL_LOCAL
+
+        self._model = YOLO(str(model_path))
+
         try:
-            model_path = self._model.ckpt_path if hasattr(self._model, "ckpt_path") else "unknown"
-            model_size_mb = os.path.getsize(str(model_path)) / 1024 / 1024 if model_path != "unknown" and os.path.exists(str(model_path)) else -1
+            size_mb = os.path.getsize(str(model_path)) / 1024 / 1024
             param_count = sum(p.numel() for p in self._model.model.parameters()) if hasattr(self._model, "model") else -1
             logger.info(
-                "[FaceTracker] YOLOv8-large initialized — path=%s size=%.1fMB params=%s",
-                model_path, model_size_mb, f"{param_count/1e6:.1f}M" if param_count > 0 else "unknown",
+                "[FaceTracker] YOLOv8-large-face initialized — path=%s size=%.1fMB params=%s",
+                model_path, size_mb, f"{param_count/1e6:.1f}M" if param_count > 0 else "unknown",
             )
         except Exception as _e:
-            logger.info("[FaceTracker] YOLOv8-large initialized (could not verify model details: %s)", _e)
+            logger.info("[FaceTracker] YOLOv8-large-face initialized (could not verify: %s)", _e)
 
     @property
     def engine_name(self) -> str:
-        return "yolo"
+        return "yolo-face"
 
     def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
         try:
-            # Pass full-resolution frame — YOLO handles internal resize via imgsz.
-            # Pre-resizing to analysis_resolution (640x360) before this call was
-            # causing detail loss that led to background false positives.
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+            # Face model: class 0 = face bbox directly. No class filtering needed.
             results = self._model(
                 rgb,
-                classes=[0],                          # class 0 = person
-                imgsz=config.yolo_imgsz,              # 1280px — better accuracy than default 640
-                conf=config.min_detection_confidence, # 0.55 — cuts low-confidence background hits
-                iou=0.45,                             # NMS threshold — removes overlapping duplicates
+                imgsz=config.yolo_imgsz,
+                conf=config.min_detection_confidence,
+                iou=0.45,
                 verbose=False,
             )
 
@@ -215,52 +205,33 @@ class YoloDetector(BaseDetector):
 
             for i in range(len(boxes)):
                 conf = float(boxes.conf[i])
-                if conf < config.min_detection_confidence:
-                    continue
 
-                # xyxyn: normalized [x1, y1, x2, y2]
+                # xyxyn: normalized [x1, y1, x2, y2] — face bounding box directly
                 x1, y1, x2, y2 = [float(v) for v in boxes.xyxyn[i]]
                 x1 = max(0.0, min(1.0, x1))
                 y1 = max(0.0, min(1.0, y1))
                 x2 = max(0.0, min(1.0, x2))
                 y2 = max(0.0, min(1.0, y2))
 
-                body_w = x2 - x1
-                body_h = y2 - y1
+                face_w = x2 - x1
+                face_h = y2 - y1
 
-                if body_w <= 0 or body_h <= 0:
+                if face_w <= 0 or face_h <= 0:
                     continue
 
-                # ── X anchor: shoulder-constrained center ─────────────────
-                # Shoulder width ≈ 38% of body height regardless of arm extension.
-                # Using min(body_w, shoulder_w) as the effective tracking width
-                # prevents arm extension from inflating the spread seen by the
-                # path solver's motion classifier (Problem 1 fix).
-                shoulder_w = body_h * self.SHOULDER_HEIGHT_RATIO
-                effective_w = min(body_w, shoulder_w)
-                head_cx = (x1 + x2) / 2          # X: full bbox center is best estimate
-                head_w = effective_w              # shoulder-clamped width (not arm-inclusive)
+                face_cx = (x1 + x2) / 2
+                face_cy = (y1 + y2) / 2
 
-                # ── Y anchor: aspect-ratio-driven head fraction ────────────
-                # When a person sits (wider bbox → higher aspect ratio), the head
-                # sits lower in the bbox than when standing. Fixed 30% breaks here.
-                # aspect = w/h: standing ~0.25, seated ~0.45, leaning ~0.60+
-                aspect = body_w / body_h
-                head_top_fraction = 0.06 + aspect * 0.30
-                head_top_fraction = max(0.06, min(0.28, head_top_fraction))
-                head_cy = y1 + body_h * head_top_fraction
-                head_h = body_h * min(0.35, head_top_fraction * 2.5)
-
-                # Person center (full body — unchanged, used by focus_resolver)
-                person_x = head_cx
-                person_y = y1 + body_h / 2
-                person_h = body_h
+                # Estimate body position from face (used by focus_resolver)
+                person_h = min(1.0, face_h * config.person_height_multiplier)
+                person_x = face_cx
+                person_y = min(1.0, face_cy + person_h * 0.2)
 
                 detections.append(FaceDetection(
-                    face_x=round(head_cx, 5),
-                    face_y=round(head_cy, 5),
-                    face_width=round(head_w, 5),
-                    face_height=round(head_h, 5),
+                    face_x=round(face_cx, 5),
+                    face_y=round(face_cy, 5),
+                    face_width=round(face_w, 5),
+                    face_height=round(face_h, 5),
                     confidence=round(conf, 4),
                     person_x=round(person_x, 5),
                     person_y=round(person_y, 5),
@@ -273,7 +244,7 @@ class YoloDetector(BaseDetector):
             return detections
 
         except Exception as e:
-            logger.error("[FaceTracker/YOLO] Detection error: %s", e)
+            logger.error("[FaceTracker/YOLO-face] Detection error: %s", e)
             return []
 
 

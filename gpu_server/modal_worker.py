@@ -80,18 +80,19 @@ _PIP_PACKAGES = [
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_DATE": "2026-04-09_imgsz1280"})
+    .env({"CACHE_DATE": "2026-04-09_yolo-face"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
-    # Pre-download yolov8l.pt at image build time so it's baked into the layer.
-    # Logs the exact path and size so we can verify it's the right model.
+    # Pre-download yolov8l-face.pt (face-specific model) at image build time.
+    # This model detects faces directly — no body→head estimation needed.
     .run_commands(
-        "python -c \""
+        "wget -q -O /root/yolov8l-face.pt "
+        "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8l-face.pt "
+        "&& python -c \""
         "from ultralytics import YOLO; import os; "
-        "m = YOLO('yolov8l.pt'); "
-        "p = m.ckpt_path if hasattr(m, 'ckpt_path') else 'unknown'; "
-        "sz = os.path.getsize(str(p)) / 1024 / 1024 if p != 'unknown' and os.path.exists(str(p)) else -1; "
-        "print(f'[Modal build] yolov8l.pt baked at path={p} size={sz:.1f}MB')"
+        "m = YOLO('/root/yolov8l-face.pt'); "
+        "sz = os.path.getsize('/root/yolov8l-face.pt') / 1024 / 1024; "
+        "print(f'[Modal build] yolov8l-face.pt ready size={sz:.1f}MB')"
         "\""
     )
     # Include backend source tree at /backend inside the container.
