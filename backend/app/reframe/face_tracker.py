@@ -130,7 +130,7 @@ class MediaPipeDetector(BaseDetector):
 
 
 # Face model paths
-_FACE_MODEL_URL = "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8l-face.pt"
+_FACE_MODEL_URL = "https://huggingface.co/arnabdhar/YOLOv8-Face-Detection/resolve/main/model.pt"
 _FACE_MODEL_BAKED = Path("/root/yolov8l-face.pt")          # pre-downloaded in Modal image
 _FACE_MODEL_LOCAL = _MODELS_DIR / "yolov8l-face.pt"        # local fallback / dev
 
@@ -162,10 +162,13 @@ class YoloDetector(BaseDetector):
                 break
 
         if model_path is None:
-            logger.info("[FaceTracker] Downloading yolov8l-face.pt from GitHub...")
+            logger.info("[FaceTracker] Downloading yolov8l-face.pt from HuggingFace...")
             _FACE_MODEL_LOCAL.parent.mkdir(parents=True, exist_ok=True)
-            import urllib.request
-            urllib.request.urlretrieve(_FACE_MODEL_URL, str(_FACE_MODEL_LOCAL))
+            import requests as _req
+            r = _req.get(_FACE_MODEL_URL, stream=True, timeout=300)
+            r.raise_for_status()
+            with open(str(_FACE_MODEL_LOCAL), "wb") as f:
+                f.write(r.content)
             model_path = _FACE_MODEL_LOCAL
 
         self._model = YOLO(str(model_path))
