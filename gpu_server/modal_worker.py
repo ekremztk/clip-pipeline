@@ -108,15 +108,12 @@ app = modal.App("prognot-reframe")
 @app.function(
     image=image,
     gpu="A10G",
-    secrets=[
-        modal.Secret.from_name("prognot-reframe-secrets"),
-        # Langfuse observability — create with:
-        # modal secret create langfuse-secrets \
-        #   LANGFUSE_PUBLIC_KEY=pk-lf-... \
-        #   LANGFUSE_SECRET_KEY=sk-lf-... \
-        #   LANGFUSE_HOST=https://cloud.langfuse.com
-        modal.Secret.from_name("langfuse-secrets", required=False),
-    ],
+    # Langfuse observability: add these keys to prognot-reframe-secrets so Gemini
+    # token costs appear in Langfuse:
+    #   LANGFUSE_PUBLIC_KEY=pk-lf-...
+    #   LANGFUSE_SECRET_KEY=sk-lf-...
+    #   LANGFUSE_HOST=https://cloud.langfuse.com  (optional, defaults to cloud)
+    secrets=[modal.Secret.from_name("prognot-reframe-secrets")],
     timeout=1800,       # 30 minutes — long videos with Gemini analysis can be slow
     memory=8192,        # 8 GB RAM
     retries=0,          # no auto-retry; caller decides whether to requeue
