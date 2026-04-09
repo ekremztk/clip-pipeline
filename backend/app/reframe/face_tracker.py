@@ -193,11 +193,19 @@ class YoloDetector(BaseDetector):
 
     def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
         try:
-            res_w, res_h = config.analysis_resolution
-            small = cv2.resize(frame, (res_w, res_h))
-            rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
+            # Pass full-resolution frame — YOLO handles internal resize via imgsz.
+            # Pre-resizing to analysis_resolution (640x360) before this call was
+            # causing detail loss that led to background false positives.
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            results = self._model(rgb, classes=[0], verbose=False)  # class 0 = person
+            results = self._model(
+                rgb,
+                classes=[0],                          # class 0 = person
+                imgsz=config.yolo_imgsz,              # 1280px — better accuracy than default 640
+                conf=config.min_detection_confidence, # 0.55 — cuts low-confidence background hits
+                iou=0.45,                             # NMS threshold — removes overlapping duplicates
+                verbose=False,
+            )
 
             if not results or not results[0].boxes:
                 return []

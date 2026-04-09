@@ -22,10 +22,11 @@ class ShotDetectionConfig:
 class FaceTrackerConfig:
     """Face detection + tracking parameters (shared by YOLO and MediaPipe engines)."""
     sample_fps: float = 5.0                     # How many frames per second to sample
-    min_detection_confidence: float = 0.5       # Detection confidence threshold
+    min_detection_confidence: float = 0.55      # Detection confidence threshold (raised from 0.5 to cut background false positives)
     max_faces: int = 4                          # Max faces to track per frame
     person_height_multiplier: float = 3.5       # MediaPipe only: estimate person height from face height
-    analysis_resolution: tuple[int, int] = (640, 360)   # Downscale for speed
+    analysis_resolution: tuple[int, int] = (640, 360)   # MediaPipe only: downscale resolution
+    yolo_imgsz: int = 1280                      # YOLO inference resolution — passed directly, no pre-resize
 
 
 # --- Stage 3: Gemini Director -----------------------------------------------

@@ -80,7 +80,7 @@ _PIP_PACKAGES = [
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_DATE": "2026-04-09_verify-yolov8l"})
+    .env({"CACHE_DATE": "2026-04-09_imgsz1280"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
     # Pre-download yolov8l.pt at image build time so it's baked into the layer.
@@ -108,7 +108,15 @@ app = modal.App("prognot-reframe")
 @app.function(
     image=image,
     gpu="A10G",
-    secrets=[modal.Secret.from_name("prognot-reframe-secrets")],
+    secrets=[
+        modal.Secret.from_name("prognot-reframe-secrets"),
+        # Langfuse observability — create with:
+        # modal secret create langfuse-secrets \
+        #   LANGFUSE_PUBLIC_KEY=pk-lf-... \
+        #   LANGFUSE_SECRET_KEY=sk-lf-... \
+        #   LANGFUSE_HOST=https://cloud.langfuse.com
+        modal.Secret.from_name("langfuse-secrets", required=False),
+    ],
     timeout=1800,       # 30 minutes — long videos with Gemini analysis can be slow
     memory=8192,        # 8 GB RAM
     retries=0,          # no auto-retry; caller decides whether to requeue
