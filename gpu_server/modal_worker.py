@@ -84,12 +84,14 @@ image = (
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
     # Pre-download yolov8l-face.pt (face-specific model) at image build time.
-    # This model detects faces directly — no body→head estimation needed.
+    # Uses Python urllib — wget is not available in debian-slim.
     .run_commands(
-        "wget -q -O /root/yolov8l-face.pt "
-        "https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8l-face.pt "
-        "&& python -c \""
-        "from ultralytics import YOLO; import os; "
+        "python -c \""
+        "import urllib.request, os; "
+        "url = 'https://github.com/akanametov/yolo-face/releases/download/v0.0.0/yolov8l-face.pt'; "
+        "print('[Modal build] Downloading yolov8l-face.pt...'); "
+        "urllib.request.urlretrieve(url, '/root/yolov8l-face.pt'); "
+        "from ultralytics import YOLO; "
         "m = YOLO('/root/yolov8l-face.pt'); "
         "sz = os.path.getsize('/root/yolov8l-face.pt') / 1024 / 1024; "
         "print(f'[Modal build] yolov8l-face.pt ready size={sz:.1f}MB')"
