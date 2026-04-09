@@ -133,7 +133,7 @@ class MediaPipeDetector(BaseDetector):
 
 class YoloDetector(BaseDetector):
     """
-    YOLOv8-nano person detection.
+    YOLOv8-large person detection.
 
     Detects "person" (class 0) bounding boxes and derives a head anchor
     that is robust to arm extension and posture changes.
@@ -172,9 +172,9 @@ class YoloDetector(BaseDetector):
                 "Run: pip install ultralytics"
             )
 
-        # yolov8n.pt auto-downloads from ultralytics on first use
-        self._model = YOLO("yolov8n.pt")
-        logger.info("[FaceTracker] YOLOv8-nano initialized")
+        # yolov8l.pt auto-downloads from ultralytics on first use
+        self._model = YOLO("yolov8l.pt")
+        logger.info("[FaceTracker] YOLOv8-large initialized")
 
     @property
     def engine_name(self) -> str:

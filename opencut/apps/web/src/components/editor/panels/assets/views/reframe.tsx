@@ -30,7 +30,7 @@ const TRACKING_MODE_OPTIONS: { value: ReframeTrackingMode; label: string; descri
 
 const DETECTION_ENGINE_OPTIONS: { value: ReframeDetectionEngine; label: string; description: string }[] = [
 	{ value: "mediapipe", label: "MediaPipe", description: "BlazeFace — fast face detection" },
-	{ value: "yolo", label: "YOLOv8 Nano", description: "Person detection — works without face" },
+	{ value: "yolo", label: "YOLOv8 Large", description: "Person detection — works without face" },
 ];
 
 export function ReframeView() {

@@ -86,7 +86,8 @@ function TimeInput({ value, onChange, max }: { value: number; onChange: (v: numb
                 setLocal(n.toString().padStart(2, '0'));
                 onChange(n);
             }}
-            className="w-9 text-center bg-[#0a0a0a] border border-[#262626] rounded py-1 text-xs text-white focus:outline-none focus:border-[#404040] transition-colors"
+            className="w-9 text-center rounded py-1 text-xs focus:outline-none transition-colors"
+            style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.08)', color: '#faf9f5' }}
         />
     );
 }
@@ -113,28 +114,33 @@ const features = [
 ];
 
 function Skeleton({ className }: { className?: string }) {
-    return <div className={`bg-[#0f0f0f] rounded animate-pulse ${className ?? ""}`} />;
+    return (
+        <div
+            className={`rounded animate-pulse ${className ?? ""}`}
+            style={{ background: 'rgba(250,249,245,0.06)' }}
+        />
+    );
 }
 
 function PageSkeleton() {
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen" style={{ background: '#141413' }}>
             <div className="max-w-5xl mx-auto px-8 py-10 space-y-12">
                 <div className="text-center space-y-3 pt-4">
                     <Skeleton className="h-10 w-2/3 mx-auto rounded-xl" />
                     <Skeleton className="h-4 w-1/3 mx-auto rounded" />
                 </div>
-                <Skeleton className="h-52 w-full rounded-xl border border-[#1a1a1a]" />
+                <Skeleton className="h-52 w-full rounded-2xl" />
                 <div className="space-y-5">
                     <div className="space-y-1.5">
                         <Skeleton className="h-5 w-36" />
                         <Skeleton className="h-3 w-48" />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {[...Array(4)].map((_, i) => (
-                            <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden">
+                            <div key={i} className="rounded-2xl overflow-hidden" style={{ background: '#181817' }}>
                                 <Skeleton className="aspect-video w-full rounded-none" />
-                                <div className="p-3 space-y-2">
+                                <div className="p-4 space-y-2">
                                     <Skeleton className="h-3 w-3/4" />
                                     <Skeleton className="h-2 w-1/2" />
                                 </div>
@@ -175,6 +181,9 @@ export default function DashboardPage() {
     const [autoHook, setAutoHook] = useState(true);
     const [startTime, setStartTime] = useState(0);
     const [endTime, setEndTime] = useState(0);
+
+    // Upload tab (link vs file)
+    const [uploadTab, setUploadTab] = useState<'link' | 'file'>('link');
 
     // YouTube URL state
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -273,6 +282,7 @@ export default function DashboardPage() {
         setYoutubeError('');
         setYoutubeFetching(false);
         setFormChannelId(activeChannelId);
+        setUploadTab('link');
     };
 
     const handleYoutubeUrl = async (url: string) => {
@@ -307,7 +317,7 @@ export default function DashboardPage() {
         const token = sessionData?.session?.access_token;
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/backend/jobs/youtube-preview', true);
+        xhr.open('POST', `${API_URL}/jobs/youtube-preview`, true);
         if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
         xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -316,7 +326,7 @@ export default function DashboardPage() {
                 const dur = resp.duration_seconds || 0;
                 setVideoDuration(dur);
                 setEndTime(dur);
-                setVideoUrl(`/api/backend/jobs/video-stream/${resp.upload_id}`);
+                setVideoUrl(`${API_URL}/jobs/video-stream/${resp.upload_id}`);
                 setUploadPhase('settings');
             } else {
                 setYoutubeError('Could not download video. Please try again.');
@@ -378,7 +388,7 @@ export default function DashboardPage() {
         const token = sessionData?.session?.access_token;
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/backend/jobs/upload-preview', true);
+        xhr.open('POST', `${API_URL}/jobs/upload-preview`, true);
         if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
         xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
@@ -516,18 +526,20 @@ export default function DashboardPage() {
         };
         return (
             <div className="flex flex-col items-center gap-1">
-                <span className="text-[9px] text-[#525252] uppercase tracking-widest">{isStart ? 'START' : 'END'}</span>
+                <span className="text-[9px] uppercase tracking-widest" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                    {isStart ? 'START' : 'END'}
+                </span>
                 <div className="flex items-center gap-0.5">
                     <TimeInput value={h} onChange={v => update('h', v)} max={99} />
-                    <span className="text-[#525252] text-xs">:</span>
+                    <span className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>:</span>
                     <TimeInput value={m} onChange={v => update('m', v)} max={59} />
-                    <span className="text-[#525252] text-xs">:</span>
+                    <span className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>:</span>
                     <TimeInput value={s} onChange={v => update('s', v)} max={59} />
                 </div>
                 <div className="flex gap-[22px]">
-                    <span className="text-[9px] text-[#525252]">HH</span>
-                    <span className="text-[9px] text-[#525252]">MM</span>
-                    <span className="text-[9px] text-[#525252]">SS</span>
+                    <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.25)' }}>HH</span>
+                    <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.25)' }}>MM</span>
+                    <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.25)' }}>SS</span>
                 </div>
             </div>
         );
@@ -543,13 +555,16 @@ export default function DashboardPage() {
 
     if (!activeChannelId && uploadPhase === 'idle') {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-8">
+            <div className="min-h-screen flex items-center justify-center p-8" style={{ background: '#141413' }}>
                 <div className="text-center max-w-sm">
-                    <div className="w-14 h-14 bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-5">
-                        <Sparkles className="w-6 h-6 text-[#525252]" />
+                    <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+                        style={{ background: '#181817', border: '1px solid rgba(250,249,245,0.07)' }}
+                    >
+                        <Sparkles className="w-6 h-6" style={{ color: 'rgba(250,249,245,0.25)' }} />
                     </div>
-                    <h2 className="text-lg font-semibold text-white mb-2">Create your first channel</h2>
-                    <p className="text-sm text-[#737373] mb-6">Set up a channel to start extracting viral clips from your videos.</p>
+                    <h2 className="text-lg font-semibold mb-2" style={{ color: '#faf9f5' }}>Create your first channel</h2>
+                    <p className="text-sm mb-6" style={{ color: 'rgba(250,249,245,0.4)' }}>Set up a channel to start extracting viral clips from your videos.</p>
                     <Link
                         href="/dashboard/settings"
                         className="inline-flex items-center gap-2 bg-white hover:bg-[#e5e5e5] text-black text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
@@ -562,17 +577,17 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen" style={{ background: '#141413' }}>
             <div className="max-w-5xl mx-auto px-8 py-10 space-y-12">
 
                 {/* Hero — hidden during settings/processing to give space */}
                 {uploadPhase === 'idle' && (
                     <div className="text-center space-y-3 pt-4">
-                        <h1 className="text-4xl font-semibold text-white tracking-tight">
-                            Transform Long Videos into Viral Shorts
+                        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: '#faf9f5' }}>
+                            Turn Long Videos Into Viral Shorts
                         </h1>
-                        <p className="text-sm text-[#737373] max-w-xl mx-auto">
-                            AI-powered video clipping with Channel DNA, AI Director, and Content Finder
+                        <p className="text-sm max-w-lg mx-auto" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                            Drop a video link or upload a file. Our AI finds the best moments and turns them into ready-to-post clips.
                         </p>
                     </div>
                 )}
@@ -580,27 +595,9 @@ export default function DashboardPage() {
                 {/* ── Upload Zone ── */}
                 <div className="w-full max-w-5xl mx-auto">
 
-                    {/* IDLE */}
+                    {/* IDLE — tabbed upload widget */}
                     {uploadPhase === 'idle' && (
-                        <div className="relative">
-                            {/* Corner accents */}
-                            <div className="absolute -left-1 -top-1 w-12 h-12 pointer-events-none">
-                                <div className="absolute top-0 left-0 w-12 h-px bg-white/10" />
-                                <div className="absolute top-0 left-0 w-px h-12 bg-white/10" />
-                            </div>
-                            <div className="absolute -right-1 -top-1 w-12 h-12 pointer-events-none">
-                                <div className="absolute top-0 right-0 w-12 h-px bg-white/10" />
-                                <div className="absolute top-0 right-0 w-px h-12 bg-white/10" />
-                            </div>
-                            <div className="absolute -left-1 -bottom-1 w-12 h-12 pointer-events-none">
-                                <div className="absolute bottom-0 left-0 w-12 h-px bg-white/10" />
-                                <div className="absolute bottom-0 left-0 w-px h-12 bg-white/10" />
-                            </div>
-                            <div className="absolute -right-1 -bottom-1 w-12 h-12 pointer-events-none">
-                                <div className="absolute bottom-0 right-0 w-12 h-px bg-white/10" />
-                                <div className="absolute bottom-0 right-0 w-px h-12 bg-white/10" />
-                            </div>
-
+                        <div className="relative mx-auto w-full max-w-3xl">
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -609,77 +606,136 @@ export default function DashboardPage() {
                                 onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
                             />
 
+                            {/* Outer card */}
                             <div
-                                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-                                onDragLeave={() => setIsDragging(false)}
-                                onDrop={e => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleFileSelect(e.dataTransfer.files[0]); }}
-                                onClick={() => fileInputRef.current?.click()}
-                                className={`relative border border-dashed rounded-xl overflow-hidden transition-all duration-300 cursor-pointer group ${
-                                    isDragging ? 'border-white bg-[#0a0a0a]' : 'border-[#262626] hover:border-[#404040]'
-                                }`}
+                                className="p-3 w-full relative overflow-hidden"
+                                style={{
+                                    background: '#181817',
+                                    borderRadius: '24px',
+                                    boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)',
+                                }}
                             >
-                                <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none overflow-hidden">
-                                    <div className="text-[12rem] font-bold tracking-tighter leading-none whitespace-nowrap text-white">PROGNOT</div>
+                                {/* Tab selector */}
+                                <div className="flex gap-2 mb-4 px-2 pt-2">
+                                    {[
+                                        { id: 'link' as const, icon: Link2, label: 'Link' },
+                                        { id: 'file' as const, icon: Upload, label: 'File' },
+                                    ].map(tab => {
+                                        const Icon = tab.icon;
+                                        const isActive = uploadTab === tab.id;
+                                        return (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setUploadTab(tab.id)}
+                                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium transition-all"
+                                                style={{
+                                                    background: isActive ? 'rgba(250,249,245,0.05)' : 'transparent',
+                                                    color: isActive ? '#faf9f5' : 'rgba(250,249,245,0.35)',
+                                                }}
+                                            >
+                                                <Icon size={14} />
+                                                {tab.label}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
-                                <div className="relative p-10 flex flex-col items-center justify-center text-center">
-                                    <div className={`w-12 h-12 mb-4 rounded-lg flex items-center justify-center border transition-colors ${isDragging ? 'bg-[#1a1a1a] border-[#404040]' : 'bg-[#0a0a0a] border-[#262626] group-hover:border-[#404040]'}`}>
-                                        <Upload className={`w-6 h-6 ${isDragging ? 'text-white' : 'text-[#a3a3a3]'}`} />
-                                    </div>
-                                    <h3 className="text-lg font-medium text-white mb-1">Drop your video or paste link</h3>
-                                    <p className="text-sm text-[#737373] mb-5">MP4, MOV, AVI, WebM up to 2GB</p>
-                                    <button
-                                        onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                                        className="px-5 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
-                                    >
-                                        Select File
-                                    </button>
-
-                                    <div className="mt-6 flex items-center gap-3 w-full max-w-sm">
-                                        <div className="flex-1 h-px bg-[#1a1a1a]" />
-                                        <span className="text-xs text-[#525252]">OR</span>
-                                        <div className="flex-1 h-px bg-[#1a1a1a]" />
-                                    </div>
-
-                                    <div className="mt-6 w-full max-w-md space-y-2" onClick={e => e.stopPropagation()}>
-                                        <div className="relative">
-                                            <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#525252]" />
-                                            <input
-                                                type="text"
-                                                value={youtubeUrl}
-                                                onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError(''); }}
-                                                onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
-                                                placeholder="Paste YouTube URL"
-                                                className="w-full pl-10 pr-32 py-2.5 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
-                                            />
+                                {/* Input area */}
+                                <div
+                                    className="flex items-center justify-between p-2 pl-4 transition-all min-h-[72px]"
+                                    style={{
+                                        background: isDragging ? 'rgba(250,249,245,0.02)' : '#131312',
+                                        borderRadius: '18px',
+                                        border: isDragging
+                                            ? '1px dashed rgba(250,249,245,0.2)'
+                                            : '1px solid rgba(250,249,245,0.03)',
+                                    }}
+                                    onDragOver={e => { e.preventDefault(); if (uploadTab === 'file') setIsDragging(true); }}
+                                    onDragLeave={() => setIsDragging(false)}
+                                    onDrop={e => {
+                                        e.preventDefault();
+                                        setIsDragging(false);
+                                        if (uploadTab === 'file' && e.dataTransfer.files?.[0]) handleFileSelect(e.dataTransfer.files[0]);
+                                    }}
+                                >
+                                    {uploadTab === 'link' ? (
+                                        <>
+                                            <div className="flex items-center gap-3 flex-1 px-2">
+                                                <Link2 size={16} style={{ color: 'rgba(250,249,245,0.3)' }} />
+                                                <input
+                                                    type="text"
+                                                    value={youtubeUrl}
+                                                    onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError(''); }}
+                                                    onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
+                                                    placeholder="Paste a YouTube, Twitch or Vimeo URL..."
+                                                    className="w-full text-sm outline-none h-full"
+                                                    style={{
+                                                        background: 'transparent',
+                                                        color: '#faf9f5',
+                                                    }}
+                                                />
+                                            </div>
                                             <button
                                                 onClick={() => youtubeUrl && handleYoutubeUrl(youtubeUrl)}
                                                 disabled={!youtubeUrl || youtubeFetching}
-                                                className={`absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                                                    youtubeUrl && !youtubeFetching
-                                                        ? 'bg-white text-black hover:bg-[#e5e5e5]'
-                                                        : 'bg-[#1a1a1a] text-[#525252] cursor-not-allowed'
-                                                }`}
+                                                className="px-6 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ml-2 whitespace-nowrap"
+                                                style={{
+                                                    background: youtubeUrl ? '#faf9f5' : 'rgba(250,249,245,0.05)',
+                                                    color: youtubeUrl ? '#141413' : 'rgba(250,249,245,0.3)',
+                                                }}
                                             >
-                                                {youtubeFetching
-                                                    ? <><span className="w-3 h-3 border border-[#525252] border-t-white rounded-full animate-spin" />Loading</>
-                                                    : 'Get Clips'
-                                                }
+                                                {youtubeFetching ? (
+                                                    <><span className="w-3.5 h-3.5 border-2 border-[rgba(250,249,245,0.3)] border-t-[#141413] rounded-full animate-spin" />Loading</>
+                                                ) : (
+                                                    <>Get Clips <ArrowRight size={15} /></>
+                                                )}
                                             </button>
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center justify-between w-full px-2">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                                                    style={{ background: 'rgba(250,249,245,0.05)' }}
+                                                >
+                                                    <Upload size={16} style={{ color: 'rgba(250,249,245,0.6)' }} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium" style={{ color: '#faf9f5' }}>
+                                                        {isDragging ? 'Release to upload' : 'Drag & Drop your video'}
+                                                    </p>
+                                                    <p className="text-xs" style={{ color: 'rgba(250,249,245,0.3)' }}>MP4, MOV, AVI up to 2GB</p>
+                                                </div>
+                                            </div>
+                                            <label
+                                                className="px-5 py-3 rounded-xl text-sm font-medium cursor-pointer transition-colors hover:bg-white/10"
+                                                style={{ background: 'rgba(250,249,245,0.05)', color: '#faf9f5' }}
+                                            >
+                                                Browse files
+                                                <input
+                                                    type="file"
+                                                    accept="video/*"
+                                                    className="hidden"
+                                                    onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
+                                                />
+                                            </label>
                                         </div>
-                                        {youtubeError && <p className="text-xs text-red-400 text-left">{youtubeError}</p>}
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 
+                            {youtubeError && (
+                                <p className="mt-2 text-xs text-red-400 text-center">{youtubeError}</p>
+                            )}
+
                             {submitError && (
-                                <div className="mt-3 p-3 bg-red-500/5 border border-red-500/20 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                                <div className="mt-3 p-3 rounded-xl text-red-400 text-sm flex items-center gap-2" style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
                                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                                     {submitError}
                                 </div>
                             )}
 
-                            <p className="mt-3 text-center text-xs text-[#525252]">
+                            <p className="mt-3 text-center text-xs" style={{ color: 'rgba(250,249,245,0.25)' }}>
                                 YouTube • Twitch • Vimeo • Direct Upload
                             </p>
                         </div>
@@ -687,27 +743,43 @@ export default function DashboardPage() {
 
                     {/* UPLOADING / DOWNLOADING */}
                     {uploadPhase === 'uploading' && (
-                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-10 flex flex-col items-center text-center">
-                            <div className="w-10 h-10 mb-4 rounded-lg bg-[#0f0f0f] border border-[#262626] flex items-center justify-center">
-                                <Upload className="w-5 h-5 text-[#a3a3a3]" />
+                        <div
+                            className="rounded-2xl p-10 flex flex-col items-center text-center mx-auto w-full max-w-3xl"
+                            style={{ background: '#181817', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)' }}
+                        >
+                            <div
+                                className="w-10 h-10 mb-4 rounded-xl flex items-center justify-center"
+                                style={{ background: 'rgba(250,249,245,0.05)', border: '1px solid rgba(250,249,245,0.08)' }}
+                            >
+                                <Upload className="w-5 h-5" style={{ color: 'rgba(250,249,245,0.5)' }} />
                             </div>
-                            <p className="text-sm text-white font-medium mb-1 max-w-sm truncate">
+                            <p className="text-sm font-medium mb-1 max-w-sm truncate" style={{ color: '#faf9f5' }}>
                                 {file ? file.name : (title || 'YouTube Video')}
                             </p>
-                            {file && <p className="text-xs text-[#525252] mb-5">{(file.size / 1024 / 1024).toFixed(1)} MB</p>}
-                            <div className={`w-64 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden relative ${file ? 'mb-3' : 'mb-3 mt-5'}`}>
+                            {file && (
+                                <p className="text-xs mb-5" style={{ color: 'rgba(250,249,245,0.25)' }}>
+                                    {(file.size / 1024 / 1024).toFixed(1)} MB
+                                </p>
+                            )}
+                            <div
+                                className={`w-64 h-1.5 rounded-full overflow-hidden relative ${file ? 'mb-3' : 'mb-3 mt-5'}`}
+                                style={{ background: 'rgba(250,249,245,0.08)' }}
+                            >
                                 {file ? (
                                     <div
-                                        className="absolute top-0 left-0 bottom-0 bg-white rounded-full transition-all duration-300"
-                                        style={{ width: `${uploadProgress}%` }}
+                                        className="absolute top-0 left-0 bottom-0 rounded-full transition-all duration-300"
+                                        style={{ width: `${uploadProgress}%`, background: '#faf9f5' }}
                                     />
                                 ) : (
                                     <div className="absolute inset-0 overflow-hidden rounded-full">
-                                        <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '60%', animationDuration: '1.2s' }} />
+                                        <div
+                                            className="h-full rounded-full animate-pulse"
+                                            style={{ width: '60%', background: '#faf9f5', animationDuration: '1.2s' }}
+                                        />
                                     </div>
                                 )}
                             </div>
-                            <p className="text-xs text-[#525252]">
+                            <p className="text-xs" style={{ color: 'rgba(250,249,245,0.4)' }}>
                                 {file ? `Uploading... ${uploadProgress}%` : 'Downloading YouTube video...'}
                             </p>
                         </div>
@@ -715,16 +787,24 @@ export default function DashboardPage() {
 
                     {/* SETTINGS */}
                     {uploadPhase === 'settings' && (
-                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl overflow-hidden">
+                        <div className="rounded-2xl overflow-hidden" style={{ background: '#181817', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)' }}>
                             {/* Panel header */}
-                            <div className="flex items-center justify-between px-5 py-3 border-b border-[#1a1a1a]">
+                            <div
+                                className="flex items-center justify-between px-5 py-3"
+                                style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }}
+                            >
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-sm font-medium text-white truncate max-w-xs">{youtubeUrl ? title : file?.name}</span>
-                                    <span className="text-[#525252] text-xs flex-shrink-0">· {formatTimeDisplay(videoDuration)}</span>
+                                    <span className="text-sm font-medium truncate max-w-xs" style={{ color: '#faf9f5' }}>
+                                        {youtubeUrl ? title : file?.name}
+                                    </span>
+                                    <span className="text-xs flex-shrink-0" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                        · {formatTimeDisplay(videoDuration)}
+                                    </span>
                                 </div>
                                 <button
                                     onClick={() => { setUploadPhase('idle'); resetUpload(); }}
-                                    className="flex-shrink-0 p-1.5 rounded-lg text-[#525252] hover:text-white hover:bg-[#1a1a1a] transition-colors ml-3"
+                                    className="flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-white/5"
+                                    style={{ color: 'rgba(250,249,245,0.4)' }}
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -734,7 +814,10 @@ export default function DashboardPage() {
 
                                 {/* Left: Video Preview + Timeline */}
                                 <div className="space-y-3">
-                                    <div className="aspect-video bg-black rounded-lg overflow-hidden border border-[#262626]">
+                                    <div
+                                        className="aspect-video rounded-xl overflow-hidden"
+                                        style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}
+                                    >
                                         <video
                                             ref={videoRef}
                                             src={videoUrl}
@@ -746,15 +829,24 @@ export default function DashboardPage() {
                                     </div>
 
                                     {/* Timeline trimmer */}
-                                    <div className="bg-black border border-[#262626] rounded-lg p-4">
-                                        <p className="text-[9px] text-[#525252] uppercase tracking-widest font-medium mb-3">Processing Range</p>
-                                        <div className="flex justify-between text-xs text-[#737373] mb-2">
+                                    <div
+                                        className="rounded-xl p-4"
+                                        style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}
+                                    >
+                                        <p
+                                            className="text-[9px] uppercase tracking-widest font-medium mb-3"
+                                            style={{ color: 'rgba(250,249,245,0.35)' }}
+                                        >
+                                            Processing Range
+                                        </p>
+                                        <div className="flex justify-between text-xs mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>
                                             <span>{formatTimeDisplay(startTime)}</span>
                                             <span>{formatTimeDisplay(endTime)}</span>
                                         </div>
                                         <div
                                             ref={timelineRef}
-                                            className="relative w-full h-8 bg-[#1a1a1a] rounded-md mb-4 select-none overflow-hidden"
+                                            className="relative w-full h-8 rounded-md mb-4 select-none overflow-hidden"
+                                            style={{ background: 'rgba(250,249,245,0.06)' }}
                                         >
                                             <div className="absolute top-0 bottom-0 left-0 bg-black/50" style={{ width: `${startPercent}%` }} />
                                             <div className="absolute top-0 bottom-0 right-0 bg-black/50" style={{ width: `${100 - endPercent}%` }} />
@@ -763,13 +855,13 @@ export default function DashboardPage() {
                                                 style={{ left: `${startPercent}%`, right: `${100 - endPercent}%` }}
                                             />
                                             <div
-                                                className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-full cursor-ew-resize z-10"
-                                                style={{ left: `calc(${startPercent}% - 2px)` }}
+                                                className="absolute top-1/2 -translate-y-1/2 w-1 h-6 rounded-full cursor-ew-resize z-10"
+                                                style={{ left: `calc(${startPercent}% - 2px)`, background: '#faf9f5' }}
                                                 onMouseDown={e => { e.preventDefault(); setDraggingHandle('start'); }}
                                             />
                                             <div
-                                                className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-full cursor-ew-resize z-10"
-                                                style={{ left: `calc(${endPercent}% - 2px)` }}
+                                                className="absolute top-1/2 -translate-y-1/2 w-1 h-6 rounded-full cursor-ew-resize z-10"
+                                                style={{ left: `calc(${endPercent}% - 2px)`, background: '#faf9f5' }}
                                                 onMouseDown={e => { e.preventDefault(); setDraggingHandle('end'); }}
                                             />
                                         </div>
@@ -777,7 +869,8 @@ export default function DashboardPage() {
                                             <TimeGroup time={startTime} isStart={true} />
                                             <button
                                                 onClick={() => { setStartTime(0); setEndTime(videoDuration); }}
-                                                className="text-[11px] text-[#525252] hover:text-white transition-colors mt-1"
+                                                className="text-[11px] transition-colors mt-1 hover:!text-[#faf9f5]"
+                                                style={{ color: 'rgba(250,249,245,0.35)' }}
                                             >
                                                 Reset
                                             </button>
@@ -791,30 +884,45 @@ export default function DashboardPage() {
 
                                     {/* Title */}
                                     <div>
-                                        <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Video Title *</label>
+                                        <label
+                                            className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                                        >
+                                            Video Title *
+                                        </label>
                                         <input
                                             type="text"
                                             value={title}
                                             onChange={e => setTitle(e.target.value)}
                                             placeholder="e.g. Joe Rogan #2054 – Elon Musk"
-                                            className="w-full bg-black border border-[#262626] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                            className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
+                                            style={{
+                                                background: 'rgba(250,249,245,0.03)',
+                                                color: '#faf9f5',
+                                                border: '1px solid rgba(250,249,245,0.08)',
+                                            }}
                                             autoFocus
                                         />
                                     </div>
 
                                     {/* Duration Preset */}
                                     <div>
-                                        <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Clip Duration</label>
+                                        <label
+                                            className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                                        >
+                                            Clip Duration
+                                        </label>
                                         <div className="flex flex-wrap gap-1.5">
                                             {DURATION_PRESETS.map(p => (
                                                 <button
                                                     key={p.label}
                                                     onClick={() => setDurationPreset(p.label)}
-                                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                                        durationPreset === p.label
-                                                            ? 'bg-white text-black'
-                                                            : 'bg-[#1a1a1a] text-[#a3a3a3] hover:bg-[#262626] hover:text-white'
-                                                    }`}
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                                    style={{
+                                                        background: durationPreset === p.label ? '#faf9f5' : 'rgba(250,249,245,0.06)',
+                                                        color: durationPreset === p.label ? '#141413' : 'rgba(250,249,245,0.5)',
+                                                    }}
                                                 >
                                                     {p.label}
                                                 </button>
@@ -824,17 +932,22 @@ export default function DashboardPage() {
 
                                     {/* Aspect Ratio */}
                                     <div>
-                                        <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Aspect Ratio</label>
+                                        <label
+                                            className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                                        >
+                                            Aspect Ratio
+                                        </label>
                                         <div className="flex gap-2">
                                             {['9:16', '16:9'].map(ar => (
                                                 <button
                                                     key={ar}
                                                     onClick={() => setAspectRatio(ar)}
-                                                    className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                                        aspectRatio === ar
-                                                            ? 'bg-white text-black'
-                                                            : 'bg-[#1a1a1a] text-[#a3a3a3] hover:bg-[#262626] hover:text-white'
-                                                    }`}
+                                                    className="flex-1 py-2 rounded-xl text-xs font-medium transition-colors"
+                                                    style={{
+                                                        background: aspectRatio === ar ? '#faf9f5' : 'rgba(250,249,245,0.06)',
+                                                        color: aspectRatio === ar ? '#141413' : 'rgba(250,249,245,0.5)',
+                                                    }}
                                                 >
                                                     {ar} {ar === '9:16' ? '· Vertical' : '· Horizontal'}
                                                 </button>
@@ -845,29 +958,49 @@ export default function DashboardPage() {
                                     {/* Genre + Guest */}
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Genre</label>
+                                            <label
+                                                className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                            >
+                                                Genre
+                                            </label>
                                             <select
                                                 value={genre}
                                                 onChange={e => setGenre(e.target.value)}
-                                                className="w-full bg-black border border-[#262626] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
+                                                className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors appearance-none"
+                                                style={{
+                                                    background: 'rgba(250,249,245,0.03)',
+                                                    color: '#faf9f5',
+                                                    border: '1px solid rgba(250,249,245,0.08)',
+                                                }}
                                             >
-                                                <option value="">Auto-detect</option>
-                                                <option value="podcast">Podcast</option>
-                                                <option value="interview">Interview</option>
-                                                <option value="talk_show">Talk Show</option>
-                                                <option value="tutorial">Tutorial</option>
-                                                <option value="vlog">Vlog</option>
-                                                <option value="debate">Debate</option>
+                                                <option value="" style={{ background: '#181817' }}>Auto-detect</option>
+                                                <option value="podcast" style={{ background: '#181817' }}>Podcast</option>
+                                                <option value="interview" style={{ background: '#181817' }}>Interview</option>
+                                                <option value="talk_show" style={{ background: '#181817' }}>Talk Show</option>
+                                                <option value="tutorial" style={{ background: '#181817' }}>Tutorial</option>
+                                                <option value="vlog" style={{ background: '#181817' }}>Vlog</option>
+                                                <option value="debate" style={{ background: '#181817' }}>Debate</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Guest Name</label>
+                                            <label
+                                                className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                            >
+                                                Guest Name
+                                            </label>
                                             <input
                                                 type="text"
                                                 value={guestName}
                                                 onChange={e => setGuestName(e.target.value)}
                                                 placeholder="Optional"
-                                                className="w-full bg-black border border-[#262626] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                                className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors"
+                                                style={{
+                                                    background: 'rgba(250,249,245,0.03)',
+                                                    color: '#faf9f5',
+                                                    border: '1px solid rgba(250,249,245,0.08)',
+                                                }}
                                             />
                                         </div>
                                     </div>
@@ -875,16 +1008,26 @@ export default function DashboardPage() {
                                     {/* Auto Hook */}
                                     <div className="flex items-center justify-between py-1">
                                         <div>
-                                            <p className="text-sm text-white">Auto Hook</p>
-                                            <p className="text-xs text-[#525252]">Optimize for the first 3 seconds</p>
+                                            <p className="text-sm" style={{ color: '#faf9f5' }}>Auto Hook</p>
+                                            <p className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>Optimize for the first 3 seconds</p>
                                         </div>
                                         <button
                                             onClick={() => setAutoHook(v => !v)}
-                                            className={`relative w-10 h-5.5 rounded-full transition-colors flex-shrink-0 ${autoHook ? 'bg-white' : 'bg-[#262626]'}`}
-                                            style={{ height: '22px', width: '40px' }}
+                                            className="relative rounded-full transition-all flex-shrink-0"
+                                            style={{
+                                                height: '22px',
+                                                width: '40px',
+                                                background: autoHook ? '#faf9f5' : 'rgba(250,249,245,0.08)',
+                                                transition: 'all 0.3s ease',
+                                            }}
                                         >
                                             <span
-                                                className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform ${autoHook ? 'bg-black translate-x-5' : 'bg-[#737373] translate-x-0.5'}`}
+                                                className="absolute top-0.5 w-4 h-4 rounded-full"
+                                                style={{
+                                                    background: autoHook ? '#141413' : 'rgba(250,249,245,0.4)',
+                                                    left: autoHook ? 'calc(100% - 20px)' : '4px',
+                                                    transition: 'all 0.3s ease',
+                                                }}
                                             />
                                         </button>
                                     </div>
@@ -892,21 +1035,36 @@ export default function DashboardPage() {
                                     {/* Channel */}
                                     {channels.length > 1 && (
                                         <div>
-                                            <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Channel</label>
+                                            <label
+                                                className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                            >
+                                                Channel
+                                            </label>
                                             <select
                                                 value={formChannelId}
                                                 onChange={e => setFormChannelId(e.target.value)}
-                                                className="w-full bg-black border border-[#262626] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
+                                                className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors appearance-none"
+                                                style={{
+                                                    background: 'rgba(250,249,245,0.03)',
+                                                    color: '#faf9f5',
+                                                    border: '1px solid rgba(250,249,245,0.08)',
+                                                }}
                                             >
                                                 {channels.map(c => (
-                                                    <option key={c.id} value={c.id}>{c.display_name || c.id}</option>
+                                                    <option key={c.id} value={c.id} style={{ background: '#181817' }}>
+                                                        {c.display_name || c.id}
+                                                    </option>
                                                 ))}
                                             </select>
                                         </div>
                                     )}
 
                                     {submitError && (
-                                        <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center gap-2">
+                                        <div
+                                            className="p-3 rounded-xl text-red-400 text-xs flex items-center gap-2"
+                                            style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}
+                                        >
                                             <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                                             {submitError}
                                         </div>
@@ -916,11 +1074,12 @@ export default function DashboardPage() {
                                     <button
                                         onClick={handleStartProcessing}
                                         disabled={!title || (!uploadId && !youtubeUrl)}
-                                        className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
-                                            title && (uploadId || youtubeUrl)
-                                                ? 'bg-white text-black hover:bg-[#e5e5e5]'
-                                                : 'bg-[#0f0f0f] border border-[#1a1a1a] text-[#525252] cursor-not-allowed'
-                                        }`}
+                                        className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
+                                        style={{
+                                            background: title && (uploadId || youtubeUrl) ? '#faf9f5' : 'rgba(250,249,245,0.05)',
+                                            color: title && (uploadId || youtubeUrl) ? '#141413' : 'rgba(250,249,245,0.25)',
+                                            cursor: title && (uploadId || youtubeUrl) ? 'pointer' : 'not-allowed',
+                                        }}
                                     >
                                         Start Processing
                                     </button>
@@ -931,14 +1090,20 @@ export default function DashboardPage() {
 
                     {/* PROCESSING */}
                     {uploadPhase === 'processing' && (
-                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-8 flex flex-col items-center text-center">
+                        <div
+                            className="rounded-2xl p-8 flex flex-col items-center text-center mx-auto w-full max-w-3xl"
+                            style={{ background: '#181817', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)' }}
+                        >
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="w-2 h-2 rounded-full bg-white pulse-dot" />
-                                <span className="text-xs text-[#737373] uppercase tracking-wider">Processing</span>
+                                <div className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
+                                <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,249,245,0.4)' }}>Processing</span>
                             </div>
-                            <div className="w-10 h-10 border-2 border-[#262626] border-t-white rounded-full animate-spin mb-5" />
-                            <p className="text-base font-medium text-white mb-1">{title}</p>
-                            <p className="text-sm text-[#737373]">{statusMsg || 'Starting pipeline...'}</p>
+                            <div
+                                className="w-10 h-10 rounded-full border-2 animate-spin mb-5"
+                                style={{ borderColor: 'rgba(250,249,245,0.12)', borderTopColor: '#faf9f5' }}
+                            />
+                            <p className="text-base font-medium mb-1" style={{ color: '#faf9f5' }}>{title}</p>
+                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>{statusMsg || 'Starting pipeline...'}</p>
                         </div>
                     )}
                 </div>
@@ -947,30 +1112,43 @@ export default function DashboardPage() {
                 {activeJobs.length > 0 && (
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <h2 className="text-base font-medium text-white">Active Jobs</h2>
-                            <span className="w-2 h-2 rounded-full bg-white pulse-dot" />
+                            <h2 className="text-base font-medium" style={{ color: '#faf9f5' }}>Active Jobs</h2>
+                            <span className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {activeJobs.map((job) => {
                                 const progress = job.progress_pct ?? job.progress ?? 0;
                                 return (
-                                    <div key={job.id} className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#404040] transition-all">
-                                        <div className="aspect-video bg-[#0a0a0a] flex items-center justify-center p-6">
+                                    <div
+                                        key={job.id}
+                                        className="rounded-2xl overflow-hidden"
+                                        style={{ background: '#181817' }}
+                                    >
+                                        <div
+                                            className="aspect-video flex items-center justify-center p-6"
+                                            style={{ background: '#1c1c1b' }}
+                                        >
                                             <div className="text-center">
                                                 <div className="flex items-center justify-center gap-2 mb-3">
-                                                    <div className="w-2 h-2 rounded-full bg-white pulse-dot" />
-                                                    <span className="text-xs text-[#737373] uppercase tracking-wider">Processing</span>
+                                                    <div className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
+                                                    <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,249,245,0.4)' }}>Processing</span>
                                                 </div>
-                                                <p className="text-sm text-white">
+                                                <p className="text-sm" style={{ color: '#faf9f5' }}>
                                                     {getStepLabel(job.current_step || job.step)}
-                                                    {progress > 0 && <span className="text-[#737373] ml-2">({progress}%)</span>}
+                                                    {progress > 0 && (
+                                                        <span className="ml-2" style={{ color: 'rgba(250,249,245,0.4)' }}>({progress}%)</span>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="p-3 border-t border-[#1a1a1a]">
+                                        <div className="p-4" style={{ borderTop: '1px solid rgba(250,249,245,0.06)' }}>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs font-medium text-white truncate">{job.video_title || "Untitled"}</p>
-                                                <span className="text-xs text-[#525252]">{formatDate(job.created_at)}</span>
+                                                <p className="text-xs font-medium truncate" style={{ color: '#faf9f5' }}>
+                                                    {job.video_title || "Untitled"}
+                                                </p>
+                                                <span className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                                    {formatDate(job.created_at)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -984,24 +1162,36 @@ export default function DashboardPage() {
                 {uploadPhase === 'idle' && (
                     <div>
                         <div className="mb-5">
-                            <h2 className="text-base font-medium text-white">Powered by AI</h2>
-                            <p className="text-xs text-[#525252] mt-0.5">Unique features that set us apart</p>
+                            <h2 className="text-base font-medium" style={{ color: '#faf9f5' }}>Powered by AI</h2>
+                            <p className="text-xs mt-0.5" style={{ color: 'rgba(250,249,245,0.4)' }}>Unique features that set us apart</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {features.map((feature) => (
                                 <Link
                                     key={feature.name}
                                     href={feature.href}
-                                    className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-5 hover:border-[#404040] transition-all duration-300"
+                                    className="group rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1"
+                                    style={{ background: '#181817' }}
                                 >
-                                    <div className="w-10 h-10 mb-3 rounded-lg bg-black flex items-center justify-center border border-[#1a1a1a] group-hover:border-[#404040] transition-colors">
-                                        <feature.icon className="w-5 h-5 text-white" />
+                                    <div
+                                        className="w-10 h-10 mb-3 rounded-xl flex items-center justify-center transition-colors"
+                                        style={{ background: 'rgba(250,249,245,0.06)' }}
+                                    >
+                                        <feature.icon className="w-5 h-5" style={{ color: '#faf9f5' }} />
                                     </div>
-                                    <h3 className="text-sm font-medium text-white mb-1.5 flex items-center justify-between">
+                                    <h3
+                                        className="text-sm font-medium mb-1.5 flex items-center justify-between"
+                                        style={{ color: '#faf9f5' }}
+                                    >
                                         {feature.name}
-                                        <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                        <ArrowRight
+                                            className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                                            style={{ color: 'rgba(250,249,245,0.5)' }}
+                                        />
                                     </h3>
-                                    <p className="text-xs text-[#525252] leading-relaxed">{feature.description}</p>
+                                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                                        {feature.description}
+                                    </p>
                                 </Link>
                             ))}
                         </div>
@@ -1010,68 +1200,100 @@ export default function DashboardPage() {
 
                 {/* ── Recent Projects ── */}
                 <div>
-                    <div className="flex items-center justify-between mb-5">
-                        <div>
-                            <h2 className="text-base font-medium text-white">Recent Projects</h2>
-                            <p className="text-xs text-[#525252] mt-0.5">Continue where you left off</p>
-                        </div>
-                        <Link href="/dashboard/clips" className="text-xs text-[#525252] hover:text-white transition-colors">
-                            View all
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-lg font-medium" style={{ color: '#faf9f5' }}>Recent Projects</h2>
+                        <Link
+                            href="/dashboard/projects"
+                            className="text-sm flex items-center gap-1 transition-colors hover:!text-[#faf9f5]"
+                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                        >
+                            View all <ArrowRight size={14} />
                         </Link>
                     </div>
 
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {[...Array(4)].map((_, i) => (
-                                <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden">
-                                    <div className="aspect-video bg-[#0f0f0f] animate-pulse" />
-                                    <div className="p-3 space-y-2">
-                                        <div className="h-3 bg-[#0f0f0f] rounded w-3/4 animate-pulse" />
-                                        <div className="h-2 bg-[#0f0f0f] rounded w-1/2 animate-pulse" />
+                                <div key={i} className="rounded-2xl overflow-hidden" style={{ background: '#181817' }}>
+                                    <div className="aspect-video animate-pulse" style={{ background: 'rgba(250,249,245,0.04)' }} />
+                                    <div className="p-4 space-y-2">
+                                        <div className="h-3 rounded w-3/4 animate-pulse" style={{ background: 'rgba(250,249,245,0.06)' }} />
+                                        <div className="h-2 rounded w-1/2 animate-pulse" style={{ background: 'rgba(250,249,245,0.04)' }} />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : recentJobs.length === 0 ? (
-                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-12 text-center">
-                            <p className="text-sm text-[#525252]">No projects yet. Upload your first video to get started.</p>
+                        <div
+                            className="rounded-2xl p-12 text-center"
+                            style={{ background: '#181817' }}
+                        >
+                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                                No projects yet. Upload your first video to get started.
+                            </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {recentJobs.map((job) => (
-                                <div
+                                <Link
                                     key={job.id}
-                                    className="group bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#404040] transition-all duration-300 cursor-pointer"
+                                    href="/dashboard/projects"
+                                    className="group rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300"
+                                    style={{ background: '#181817' }}
                                 >
-                                    <div className="relative aspect-video bg-[#0d0d0d] overflow-hidden flex items-center justify-center">
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                            <div className="w-10 h-10 rounded-full bg-white/0 group-hover:bg-white/90 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all">
-                                                <Play className="w-4 h-4 text-black fill-black ml-0.5" />
-                                            </div>
-                                        </div>
-                                        <div className="absolute top-2 right-2">
-                                            {job.status === 'completed' && (
-                                                <span className="px-1.5 py-0.5 bg-black/80 text-green-400 text-[10px] rounded">Done</span>
+                                    {/* Thumbnail */}
+                                    <div
+                                        className="relative aspect-video flex items-center justify-center"
+                                        style={{ background: '#1c1c1b' }}
+                                    >
+                                        <Play
+                                            size={20}
+                                            style={{ color: 'rgba(250,249,245,0.15)' }}
+                                            className="group-hover:opacity-60 transition-opacity"
+                                        />
+                                        {/* Status badge */}
+                                        <div className="absolute top-2.5 left-2.5">
+                                            {(job.status === 'completed' || job.status === 'done') && (
+                                                <div
+                                                    className="text-[10px] font-medium px-2 py-0.5 rounded-lg flex items-center gap-1.5"
+                                                    style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}
+                                                >
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#4ade80]" />
+                                                    Done
+                                                </div>
                                             )}
                                             {job.status === 'failed' && (
-                                                <span className="px-1.5 py-0.5 bg-black/80 text-red-400 text-[10px] rounded">Failed</span>
+                                                <div
+                                                    className="text-[10px] font-medium px-2 py-0.5 rounded-lg flex items-center gap-1.5"
+                                                    style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}
+                                                >
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#f87171]" />
+                                                    Failed
+                                                </div>
                                             )}
                                         </div>
+                                        {/* More button */}
+                                        <button
+                                            className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                            style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(250,249,245,0.6)' }}
+                                            onClick={e => e.preventDefault()}
+                                        >
+                                            <MoreVertical size={14} />
+                                        </button>
                                     </div>
-                                    <div className="p-3">
-                                        <div className="flex items-start justify-between gap-2">
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="text-xs font-medium text-white truncate mb-1">
-                                                    {job.video_title || "Untitled"}
-                                                </h3>
-                                                <p className="text-xs text-[#525252]">{formatDate(job.created_at)}</p>
-                                            </div>
-                                            <button className="p-0.5 hover:bg-[#1a1a1a] rounded transition-colors">
-                                                <MoreVertical className="w-3.5 h-3.5 text-[#525252]" />
-                                            </button>
-                                        </div>
+                                    {/* Info */}
+                                    <div className="p-4">
+                                        <p
+                                            className="text-sm font-medium truncate mb-2"
+                                            style={{ color: '#faf9f5' }}
+                                        >
+                                            {job.video_title || "Untitled"}
+                                        </p>
+                                        <p className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                            {formatDate(job.created_at)}
+                                        </p>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     )}

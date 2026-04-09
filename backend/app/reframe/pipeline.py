@@ -4,7 +4,7 @@ Reframe V5 — Main orchestrator.
 Pipeline steps:
   1. ffprobe → video metadata
   2. shot_detector → shot boundaries (FFmpeg scene filter)
-  3. face_tracker → per-frame face detections (MediaPipe)
+  3. face_tracker → per-frame face detections (YOLO / MediaPipe)
   4. gemini_director → high-level creative plan
   5. focus_resolver → merge Gemini + detections → focus points
   6. path_solver → smooth camera paths (AutoFlip algorithm)
@@ -216,6 +216,7 @@ def run_reframe(
                     keyframes=result.keyframes,
                     crop_w=crop_w,
                     crop_h=crop_h,
+                    engine_name=detection_engine,
                 )
 
                 # Upload to R2

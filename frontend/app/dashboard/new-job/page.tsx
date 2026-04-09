@@ -68,7 +68,8 @@ function TimeInput({ value, onChange, max }: { value: number, onChange: (v: numb
                 setLocalValue(num.toString().padStart(2, '0'));
                 onChange(num);
             }}
-            className="w-10 text-center bg-[#0a0a0a] border border-[#262626] rounded-lg py-1 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors"
+            style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#faf9f5' }}
+            className="w-10 text-center rounded-lg py-1 text-sm focus:outline-none transition-colors"
         />
     );
 }
@@ -205,7 +206,7 @@ export default function NewJobPage() {
 
             setStatusMsg('Downloading video...');
             let attempts = 0;
-            const maxAttempts = 180; // 6 min — download can take time
+            const maxAttempts = 180;
             const pollStatus = async () => {
                 try {
                     const statusRes = await authFetch(`/jobs/${jobId}`);
@@ -285,18 +286,18 @@ export default function NewJobPage() {
         };
         return (
             <div className="flex flex-col items-center gap-1.5">
-                <div className="text-[10px] text-[#525252] uppercase tracking-widest font-medium">{isStart ? 'START' : 'END'}</div>
+                <div style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-widest font-medium">{isStart ? 'START' : 'END'}</div>
                 <div className="flex items-center gap-1">
                     <TimeInput value={h} onChange={v => updateTime('h', v)} max={99} />
-                    <span className="text-[#525252]">:</span>
+                    <span style={{ color: 'rgba(250,249,245,0.3)' }}>:</span>
                     <TimeInput value={m} onChange={v => updateTime('m', v)} max={59} />
-                    <span className="text-[#525252]">:</span>
+                    <span style={{ color: 'rgba(250,249,245,0.3)' }}>:</span>
                     <TimeInput value={s} onChange={v => updateTime('s', v)} max={59} />
                 </div>
                 <div className="flex gap-[28px]">
-                    <span className="text-[10px] text-[#525252]">HH</span>
-                    <span className="text-[10px] text-[#525252]">MM</span>
-                    <span className="text-[10px] text-[#525252]">SS</span>
+                    <span style={{ color: 'rgba(250,249,245,0.25)' }} className="text-[10px]">HH</span>
+                    <span style={{ color: 'rgba(250,249,245,0.25)' }} className="text-[10px]">MM</span>
+                    <span style={{ color: 'rgba(250,249,245,0.25)' }} className="text-[10px]">SS</span>
                 </div>
             </div>
         );
@@ -305,30 +306,40 @@ export default function NewJobPage() {
     const startPercent = videoDuration ? (startTime / videoDuration) * 100 : 0;
     const endPercent = videoDuration ? (endTime / videoDuration) * 100 : 100;
 
+    const inputStyle: React.CSSProperties = {
+        background: '#111110',
+        border: '1px solid rgba(250,249,245,0.1)',
+        color: '#faf9f5',
+    };
+
     return (
-        <div className="max-w-3xl mx-auto px-8 py-10 pb-20">
-            <h1 className="text-2xl font-semibold text-white mb-2">New Clip Job</h1>
-            <p className="text-sm text-[#737373] mb-8">Upload a video and start the AI processing pipeline</p>
+        <div style={{ background: '#141413', color: '#faf9f5', minHeight: '100vh' }} className="max-w-3xl mx-auto px-8 py-10 pb-20">
+            <h1 style={{ color: '#faf9f5' }} className="text-2xl font-semibold mb-1">New Clip Job</h1>
+            <p style={{ color: 'rgba(250,249,245,0.4)' }} className="text-sm mb-8">Upload a video and start the AI processing pipeline</p>
 
             <div className="space-y-5">
                 {/* IDLE: Tab switcher */}
                 {uploadState === 'idle' && (
                     <div className="space-y-4">
                         {/* Tabs */}
-                        <div className="flex gap-1 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-1">
+                        <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="flex gap-1 rounded-xl p-1">
                             <button
                                 onClick={() => setInputMode('upload')}
-                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                                    inputMode === 'upload' ? 'bg-[#1a1a1a] text-white' : 'text-[#737373] hover:text-[#a3a3a3]'
-                                }`}
+                                style={inputMode === 'upload'
+                                    ? { background: 'rgba(250,249,245,0.08)', color: '#faf9f5' }
+                                    : { color: 'rgba(250,249,245,0.4)' }
+                                }
+                                className="flex-1 py-2 text-sm font-medium rounded-xl transition-colors hover:text-[#faf9f5]"
                             >
                                 Upload File
                             </button>
                             <button
                                 onClick={() => setInputMode('youtube')}
-                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                                    inputMode === 'youtube' ? 'bg-[#1a1a1a] text-white' : 'text-[#737373] hover:text-[#a3a3a3]'
-                                }`}
+                                style={inputMode === 'youtube'
+                                    ? { background: 'rgba(250,249,245,0.08)', color: '#faf9f5' }
+                                    : { color: 'rgba(250,249,245,0.4)' }
+                                }
+                                className="flex-1 py-2 text-sm font-medium rounded-xl transition-colors hover:text-[#faf9f5]"
                             >
                                 YouTube URL
                             </button>
@@ -349,20 +360,23 @@ export default function NewJobPage() {
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
                                     onClick={() => fileInputRef.current?.click()}
-                                    className={`border border-dashed rounded-xl p-14 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ${
-                                        isDragging
-                                            ? "border-white bg-[#0a0a0a]"
-                                            : "border-[#262626] hover:border-[#404040]"
-                                    }`}
+                                    style={{
+                                        borderColor: isDragging ? 'rgba(250,249,245,0.4)' : 'rgba(250,249,245,0.12)',
+                                        background: isDragging ? 'rgba(250,249,245,0.04)' : 'transparent',
+                                    }}
+                                    className="border border-dashed rounded-2xl p-14 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300"
                                 >
-                                    <div className={`w-12 h-12 mb-4 rounded-lg border flex items-center justify-center transition-colors ${isDragging ? 'bg-[#1a1a1a] border-[#404040]' : 'bg-[#0a0a0a] border-[#262626]'}`}>
-                                        <Upload className={`w-6 h-6 ${isDragging ? 'text-white' : 'text-[#a3a3a3]'}`} />
+                                    <div style={{
+                                        background: isDragging ? 'rgba(250,249,245,0.08)' : '#1c1c1b',
+                                        border: `1px solid ${isDragging ? 'rgba(250,249,245,0.2)' : 'rgba(250,249,245,0.07)'}`,
+                                    }} className="w-12 h-12 mb-4 rounded-2xl flex items-center justify-center transition-colors">
+                                        <Upload style={{ color: isDragging ? '#faf9f5' : 'rgba(250,249,245,0.4)' }} className="w-5 h-5" />
                                     </div>
-                                    <h3 className="text-base font-medium text-white mb-1">Drop your video here</h3>
-                                    <p className="text-sm text-[#737373] mb-5">MP4, MOV, WEBM up to 2GB</p>
+                                    <h3 style={{ color: '#faf9f5' }} className="text-base font-medium mb-1">Drop your video here</h3>
+                                    <p style={{ color: 'rgba(250,249,245,0.4)' }} className="text-sm mb-5">MP4, MOV, WEBM up to 2GB</p>
                                     <button
                                         onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                                        className="px-5 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
+                                        className="px-5 py-2.5 bg-white text-black rounded-xl text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
                                     >
                                         Select File
                                     </button>
@@ -372,47 +386,51 @@ export default function NewJobPage() {
 
                         {/* YouTube URL tab */}
                         {inputMode === 'youtube' && (
-                            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-6 space-y-4">
+                            <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-6 space-y-4">
                                 <div>
-                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">YouTube URL *</label>
+                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">YouTube URL *</label>
                                     <input
                                         type="url"
                                         value={youtubeUrl}
                                         onChange={e => { setYoutubeUrl(e.target.value); setYoutubeUrlError(""); }}
                                         placeholder="https://www.youtube.com/watch?v=..."
-                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                        style={inputStyle}
+                                        className="w-full rounded-xl px-4 py-2.5 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none transition-colors"
                                     />
                                     {youtubeUrlError && <p className="mt-1.5 text-xs text-red-400">{youtubeUrlError}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Video Title *</label>
+                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Video Title *</label>
                                     <input
                                         type="text"
                                         value={title}
                                         onChange={e => setTitle(e.target.value)}
                                         placeholder="e.g. Joe Rogan #2054 - Elon Musk"
-                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                        style={inputStyle}
+                                        className="w-full rounded-xl px-4 py-2.5 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none transition-colors"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
                                     <input
                                         type="text"
                                         value={guestName}
                                         onChange={e => setGuestName(e.target.value)}
                                         placeholder="e.g. Elon Musk"
-                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                        style={inputStyle}
+                                        className="w-full rounded-xl px-4 py-2.5 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none transition-colors"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Channel</label>
+                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Channel</label>
                                     {channelLoading ? (
-                                        <div className="h-10 bg-[#0a0a0a] border border-[#262626] rounded-lg animate-pulse" />
+                                        <div style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)' }} className="h-10 rounded-xl animate-pulse" />
                                     ) : (
                                         <select
                                             value={activeChannelId}
                                             onChange={e => setActiveChannelId(e.target.value)}
-                                            className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
+                                            style={inputStyle}
+                                            className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none transition-colors appearance-none"
                                         >
                                             {channels.map(c => <option key={c.id} value={c.id}>{c.display_name || c.name || c.id}</option>)}
                                         </select>
@@ -424,8 +442,9 @@ export default function NewJobPage() {
                                     className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
                                         youtubeUrl && title && activeChannelId
                                             ? "bg-white text-black hover:bg-[#e5e5e5]"
-                                            : "bg-[#0a0a0a] border border-[#1a1a1a] text-[#525252] cursor-not-allowed"
+                                            : "cursor-not-allowed"
                                     }`}
+                                    style={(!youtubeUrl || !title || !activeChannelId) ? { background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)', color: 'rgba(250,249,245,0.25)' } : {}}
                                 >
                                     Start Processing
                                 </button>
@@ -436,24 +455,24 @@ export default function NewJobPage() {
 
                 {/* UPLOADING */}
                 {uploadState === 'uploading' && file && (
-                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-10 flex flex-col items-center text-center">
-                        <p className="text-sm text-[#a3a3a3] font-medium mb-5 truncate max-w-sm">{file.name}</p>
-                        <div className="w-64 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden relative mb-3">
+                    <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-10 flex flex-col items-center text-center">
+                        <p style={{ color: 'rgba(250,249,245,0.5)' }} className="text-sm font-medium mb-5 truncate max-w-sm">{file.name}</p>
+                        <div style={{ background: 'rgba(250,249,245,0.08)' }} className="w-64 h-1.5 rounded-full overflow-hidden relative mb-3">
                             <div
                                 className="absolute top-0 left-0 bottom-0 bg-white rounded-full transition-all duration-300"
                                 style={{ width: `${uploadProgress}%` }}
                             />
                         </div>
-                        <p className="text-xs text-[#525252]">Uploading... {uploadProgress}%</p>
+                        <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-xs">Uploading... {uploadProgress}%</p>
                     </div>
                 )}
 
-                {/* PROCESSING (YouTube mode — no video preview) */}
+                {/* PROCESSING (YouTube mode) */}
                 {uploadState === 'processing' && inputMode === 'youtube' && (
-                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-10 flex flex-col items-center text-center">
-                        <div className="w-10 h-10 border-2 border-[#262626] border-t-white rounded-full animate-spin mb-5" />
-                        <p className="text-sm text-white font-medium mb-1">{statusMsg || "Processing..."}</p>
-                        <p className="text-xs text-[#525252]">This may take a few minutes</p>
+                    <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-10 flex flex-col items-center text-center">
+                        <div style={{ borderColor: 'rgba(250,249,245,0.12)', borderTopColor: '#faf9f5' }} className="w-10 h-10 border-2 rounded-full animate-spin mb-5" />
+                        <p style={{ color: '#faf9f5' }} className="text-sm font-medium mb-1">{statusMsg || "Processing..."}</p>
+                        <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-xs">This may take a few minutes</p>
                     </div>
                 )}
 
@@ -461,7 +480,7 @@ export default function NewJobPage() {
                 {(uploadState === 'preview_ready' || (uploadState === 'processing' && inputMode === 'upload')) && (
                     <div className="space-y-5">
                         {/* Video Preview */}
-                        <div className="w-full aspect-video bg-black border border-[#1a1a1a] rounded-xl overflow-hidden">
+                        <div style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.07)' }} className="w-full aspect-video rounded-2xl overflow-hidden">
                             <video
                                 ref={videoRef}
                                 src={videoUrl}
@@ -473,36 +492,30 @@ export default function NewJobPage() {
                         </div>
 
                         {/* Timeline Trimmer */}
-                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-5">
-                            <p className="text-[10px] text-[#525252] uppercase tracking-widest font-medium mb-4">Processing Range</p>
+                        <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-5">
+                            <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-widest font-medium mb-4">Processing Range</p>
 
-                            <div className="flex justify-between text-xs text-[#737373] mb-2">
+                            <div className="flex justify-between text-xs mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>
                                 <span>{formatTimeDisplay(startTime)}</span>
                                 <span>{formatTimeDisplay(endTime)}</span>
                             </div>
 
                             <div
                                 ref={timelineRef}
-                                className="relative w-full h-10 bg-[#1a1a1a] rounded-lg mb-6 select-none overflow-hidden"
+                                style={{ background: 'rgba(250,249,245,0.06)' }}
+                                className="relative w-full h-10 rounded-xl mb-6 select-none overflow-hidden"
                             >
-                                {/* Unselected regions */}
                                 <div className="absolute top-0 bottom-0 left-0 bg-black/40" style={{ width: `${startPercent}%` }} />
                                 <div className="absolute top-0 bottom-0 right-0 bg-black/40" style={{ width: `${100 - endPercent}%` }} />
-
-                                {/* Selected range */}
                                 <div
-                                    className="absolute top-0 bottom-0 bg-white/10 border-y border-white/20"
-                                    style={{ left: `${startPercent}%`, right: `${100 - endPercent}%` }}
+                                    className="absolute top-0 bottom-0"
+                                    style={{ left: `${startPercent}%`, right: `${100 - endPercent}%`, background: 'rgba(250,249,245,0.08)', borderTop: '1px solid rgba(250,249,245,0.15)', borderBottom: '1px solid rgba(250,249,245,0.15)' }}
                                 />
-
-                                {/* Start handle */}
                                 <div
                                     className="absolute top-1/2 -translate-y-1/2 w-1 h-7 bg-white rounded-full cursor-ew-resize hover:scale-110 transition-transform z-10"
                                     style={{ left: `calc(${startPercent}% - 2px)` }}
                                     onMouseDown={e => { e.preventDefault(); setDraggingHandle('start'); }}
                                 />
-
-                                {/* End handle */}
                                 <div
                                     className="absolute top-1/2 -translate-y-1/2 w-1 h-7 bg-white rounded-full cursor-ew-resize hover:scale-110 transition-transform z-10"
                                     style={{ left: `calc(${endPercent}% - 2px)` }}
@@ -514,7 +527,8 @@ export default function NewJobPage() {
                                 <TimeGroup time={startTime} isStart={true} />
                                 <button
                                     onClick={() => { setStartTime(0); setEndTime(videoDuration); }}
-                                    className="text-xs text-[#525252] hover:text-white transition-colors mt-2"
+                                    style={{ color: 'rgba(250,249,245,0.3)' }}
+                                    className="text-xs hover:text-[#faf9f5] transition-colors mt-2"
                                 >
                                     Reset
                                 </button>
@@ -523,36 +537,39 @@ export default function NewJobPage() {
                         </div>
 
                         {/* Form Fields */}
-                        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-5 space-y-4">
+                        <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-5 space-y-4">
                             <div>
-                                <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Video Title *</label>
+                                <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Video Title *</label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={e => setTitle(e.target.value)}
                                     placeholder="e.g. Joe Rogan #2054 - Elon Musk"
-                                    className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                    style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#faf9f5' }}
+                                    className="w-full rounded-xl px-4 py-2.5 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none transition-colors"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
                                 <input
                                     type="text"
                                     value={guestName}
                                     onChange={e => setGuestName(e.target.value)}
                                     placeholder="e.g. Elon Musk"
-                                    className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white placeholder-[#525252] focus:outline-none focus:border-[#404040] transition-colors"
+                                    style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#faf9f5' }}
+                                    className="w-full rounded-xl px-4 py-2.5 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none transition-colors"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] text-[#737373] uppercase tracking-widest mb-1.5">Channel</label>
+                                <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Channel</label>
                                 {channelLoading ? (
-                                    <div className="h-10 bg-[#0a0a0a] border border-[#262626] rounded-lg animate-pulse" />
+                                    <div style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)' }} className="h-10 rounded-xl animate-pulse" />
                                 ) : (
                                     <select
                                         value={activeChannelId}
                                         onChange={e => setActiveChannelId(e.target.value)}
-                                        className="w-full bg-black border border-[#262626] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#404040] transition-colors appearance-none"
+                                        style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#faf9f5' }}
+                                        className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none transition-colors appearance-none"
                                     >
                                         {channels.map(c => <option key={c.id} value={c.id}>{c.display_name || c.name || c.id}</option>)}
                                     </select>
@@ -567,8 +584,9 @@ export default function NewJobPage() {
                             className={`w-full py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                                 title && uploadState === 'preview_ready'
                                     ? "bg-white text-black hover:bg-[#e5e5e5]"
-                                    : "bg-[#0a0a0a] border border-[#1a1a1a] text-[#525252] cursor-not-allowed"
+                                    : "cursor-not-allowed"
                             }`}
+                            style={(!title || uploadState !== 'preview_ready') ? { background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)', color: 'rgba(250,249,245,0.25)' } : {}}
                         >
                             {uploadState === 'processing' ? (
                                 <>
@@ -581,7 +599,7 @@ export default function NewJobPage() {
                 )}
 
                 {submitError && (
-                    <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                    <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 flex-shrink-0" />
                         {submitError}
                     </div>
@@ -590,25 +608,25 @@ export default function NewJobPage() {
 
             {/* Recent Jobs */}
             <div className="mt-12">
-                <h2 className="text-sm font-medium text-[#a3a3a3] mb-4">Recent Jobs</h2>
+                <h2 style={{ color: 'rgba(250,249,245,0.5)' }} className="text-sm font-medium mb-4">Recent Jobs</h2>
                 <div className="space-y-2">
                     {jobs.length === 0 ? (
-                        <p className="text-sm text-[#525252] text-center py-6 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg">No recent jobs</p>
+                        <p style={{ color: 'rgba(250,249,245,0.25)', background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="text-sm text-center py-6 rounded-2xl">No recent jobs</p>
                     ) : (
                         jobs.slice(0, 5).map(job => (
-                            <div key={job.id} className="flex items-center justify-between p-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg">
-                                <p className="text-sm text-[#a3a3a3] truncate flex-1 pr-4">{job.video_title}</p>
+                            <div key={job.id} style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="flex items-center justify-between p-3 rounded-xl">
+                                <p style={{ color: 'rgba(250,249,245,0.5)' }} className="text-sm truncate flex-1 pr-4">{job.video_title}</p>
                                 <div className="flex-shrink-0">
                                     {job.status === "done" || job.status === "completed" ? (
-                                        <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                        <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-lg flex items-center gap-1">
                                             <CheckCircle2 className="w-3 h-3" /> Done
                                         </span>
                                     ) : job.status === "error" || job.status === "failed" ? (
-                                        <span className="text-xs text-red-400 bg-red-400/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                        <span className="text-xs text-red-400 bg-red-400/10 px-2 py-0.5 rounded-lg flex items-center gap-1">
                                             <AlertCircle className="w-3 h-3" /> Failed
                                         </span>
                                     ) : (
-                                        <span className="text-xs text-[#a3a3a3] bg-[#1a1a1a] px-2 py-0.5 rounded flex items-center gap-1">
+                                        <span style={{ color: 'rgba(250,249,245,0.4)', background: 'rgba(250,249,245,0.06)' }} className="text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
                                             <Clock className="w-3 h-3" /> {job.status}
                                         </span>
                                     )}

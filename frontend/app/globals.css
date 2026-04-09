@@ -4,18 +4,19 @@
 @tailwind utilities;
 
 :root {
-  --bg: #000000;
-  --surface: #0a0a0a;
-  --surface-2: #1a1a1a;
-  --border: #1a1a1a;
-  --border-hover: #404040;
-  --text: #ffffff;
-  --text-secondary: #a3a3a3;
-  --text-muted: #737373;
-  --text-faint: #525252;
-  --success: #10b981;
+  --bg: #141413;
+  --surface: #181817;
+  --surface-2: #1c1c1b;
+  --surface-deep: #111110;
+  --border: rgba(250,249,245,0.07);
+  --border-hover: rgba(250,249,245,0.18);
+  --text: #faf9f5;
+  --text-secondary: rgba(250,249,245,0.5);
+  --text-muted: rgba(250,249,245,0.4);
+  --text-faint: rgba(250,249,245,0.25);
+  --success: #4ade80;
   --error: #ef4444;
-  --warning: #f59e0b;
+  --warning: #fbbf24;
   /* keep cyan for Director only */
   --cyan: #06b6d4;
 }
@@ -26,6 +27,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar { width: 6px; }

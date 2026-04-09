@@ -16,15 +16,15 @@ class ShotDetectionConfig:
     min_cut_gap_s: float = 0.5
 
 
-# --- Stage 2: Face Tracker (MediaPipe) --------------------------------------
+# --- Stage 2: Face Tracker --------------------------------------------------
 
 @dataclass
 class FaceTrackerConfig:
-    """MediaPipe face detection + tracking parameters."""
+    """Face detection + tracking parameters (shared by YOLO and MediaPipe engines)."""
     sample_fps: float = 5.0                     # How many frames per second to sample
-    min_detection_confidence: float = 0.5       # MediaPipe face detection threshold
+    min_detection_confidence: float = 0.5       # Detection confidence threshold
     max_faces: int = 4                          # Max faces to track per frame
-    person_height_multiplier: float = 3.5       # Estimate person height from face height
+    person_height_multiplier: float = 3.5       # MediaPipe only: estimate person height from face height
     analysis_resolution: tuple[int, int] = (640, 360)   # Downscale for speed
 
 

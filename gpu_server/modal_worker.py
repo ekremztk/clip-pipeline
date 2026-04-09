@@ -75,7 +75,7 @@ _PIP_PACKAGES = [
     "Pillow",
     "opencv-python-headless",
     "mediapipe>=0.10.0",
-    "ultralytics>=8.1.0",   # YOLOv8 — yolov8n.pt auto-downloaded on first use
+    "ultralytics>=8.1.0",   # YOLOv8 — yolov8l.pt pre-downloaded at image build time
 ]
 
 image = (
@@ -83,6 +83,9 @@ image = (
     .env({"CACHE_DATE": "2026-04-08_1130"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
+    # Pre-download yolov8l.pt at image build time so it's baked into the layer.
+    # This avoids a ~90MB download on every cold start.
+    .run_commands("python -c \"from ultralytics import YOLO; YOLO('yolov8l.pt')\"")
     # Include backend source tree at /backend inside the container.
     # copy=True bakes it into the image layer (required for GPU functions).
     .add_local_dir(str(_BACKEND_DIR), remote_path="/backend", copy=True)
@@ -231,10 +234,12 @@ def process_reframe(payload: dict) -> dict:
         )
 
         keyframes_dicts = _keyframes_to_dicts(result.keyframes)
+        debug_url = result.metadata.get("debug_video_url", "") if debug_mode else ""
+        done_step = f"Done! Debug: {debug_url}" if debug_url else "Done!"
 
         _update_job(
             status="done",
-            step="Done!",
+            step=done_step,
             percent=100,
             keyframes=keyframes_dicts,
             scene_cuts=result.scene_cuts,

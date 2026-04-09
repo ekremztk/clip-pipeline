@@ -2,7 +2,7 @@
 Debug Overlay — burns pipeline internals onto the video for visual QA.
 
 Draws on each frame:
-  GREEN  rectangle → MediaPipe face detection bbox
+  GREEN  rectangle → Detection engine bbox (YOLO person / MediaPipe face)
   RED    circle    → Focus resolver target point (what path solver receives)
   BLUE   circle    → Path solver smooth path position
   YELLOW rectangle → Final crop window (what frontend gets)
@@ -42,6 +42,7 @@ def generate_debug_video(
     keyframes: list[ReframeKeyframe],
     crop_w: int,
     crop_h: int,
+    engine_name: str = "detection",
 ) -> str:
     """
     Generate a debug video with all pipeline overlays burned in.
@@ -137,7 +138,7 @@ def generate_debug_video(
                 best_dist = dist
                 nearest_frame = ff
 
-        # GREEN: MediaPipe face bboxes
+        # GREEN: Detection engine bboxes (YOLO person / MediaPipe face)
         if nearest_frame:
             for face in nearest_frame.faces:
                 x1 = int((face.face_x - face.face_width / 2) * src_w)
@@ -215,7 +216,7 @@ def generate_debug_video(
 
         # Legend (bottom-left)
         legend = [
-            ("GREEN = MediaPipe face bbox", (0, 255, 0)),
+            (f"GREEN = {engine_name.upper()} bbox", (0, 255, 0)),
             ("RED = Focus resolver target", (0, 0, 255)),
             ("BLUE = Path solver smooth pos", (255, 100, 0)),
             ("YELLOW = Final crop window", (0, 255, 255)),
