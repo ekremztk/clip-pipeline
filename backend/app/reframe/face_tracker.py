@@ -174,7 +174,18 @@ class YoloDetector(BaseDetector):
 
         # yolov8l.pt auto-downloads from ultralytics on first use
         self._model = YOLO("yolov8l.pt")
-        logger.info("[FaceTracker] YOLOv8-large initialized")
+
+        # Verify which model file was actually loaded (yolov8n ≈ 6MB, yolov8l ≈ 87MB)
+        try:
+            model_path = self._model.ckpt_path if hasattr(self._model, "ckpt_path") else "unknown"
+            model_size_mb = os.path.getsize(str(model_path)) / 1024 / 1024 if model_path != "unknown" and os.path.exists(str(model_path)) else -1
+            param_count = sum(p.numel() for p in self._model.model.parameters()) if hasattr(self._model, "model") else -1
+            logger.info(
+                "[FaceTracker] YOLOv8-large initialized — path=%s size=%.1fMB params=%s",
+                model_path, model_size_mb, f"{param_count/1e6:.1f}M" if param_count > 0 else "unknown",
+            )
+        except Exception as _e:
+            logger.info("[FaceTracker] YOLOv8-large initialized (could not verify model details: %s)", _e)
 
     @property
     def engine_name(self) -> str:

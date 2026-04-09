@@ -80,12 +80,20 @@ _PIP_PACKAGES = [
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_DATE": "2026-04-08_1130"})
+    .env({"CACHE_DATE": "2026-04-09_verify-yolov8l"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
     # Pre-download yolov8l.pt at image build time so it's baked into the layer.
-    # This avoids a ~90MB download on every cold start.
-    .run_commands("python -c \"from ultralytics import YOLO; YOLO('yolov8l.pt')\"")
+    # Logs the exact path and size so we can verify it's the right model.
+    .run_commands(
+        "python -c \""
+        "from ultralytics import YOLO; import os; "
+        "m = YOLO('yolov8l.pt'); "
+        "p = m.ckpt_path if hasattr(m, 'ckpt_path') else 'unknown'; "
+        "sz = os.path.getsize(str(p)) / 1024 / 1024 if p != 'unknown' and os.path.exists(str(p)) else -1; "
+        "print(f'[Modal build] yolov8l.pt baked at path={p} size={sz:.1f}MB')"
+        "\""
+    )
     # Include backend source tree at /backend inside the container.
     # copy=True bakes it into the image layer (required for GPU functions).
     .add_local_dir(str(_BACKEND_DIR), remote_path="/backend", copy=True)
