@@ -118,6 +118,24 @@ def run_gaming_reframe(
         detected_by = "yolo_fallback"
         logger.info("[Gaming] Webcam (YOLO fallback): x=%d y=%d w=%d h=%d", wc_x, wc_y, wc_w, wc_h)
 
+    # Step 3b: Face-anchored webcam crop — exact 1080:640 ratio, centered on face
+    # The Canny/YOLO height is unreliable (dark BG, green screen, shoulders).
+    # We use only wc_w for sizing and anchor the crop on the YOLO face center.
+    face_cx_px = int(webcam_face.face_x * src_w)
+    face_cy_px = int(webcam_face.face_y * src_h)
+    cam_x, cam_y, cam_w, cam_h = _compute_webcam_crop(
+        wc_w=wc_w,
+        face_cx=face_cx_px,
+        face_cy=face_cy_px,
+        src_w=src_w,
+        src_h=src_h,
+    )
+    logger.info(
+        "[Gaming] Webcam crop (face-anchored 90%%): x=%d y=%d w=%d h=%d ratio=%.4f",
+        cam_x, cam_y, cam_w, cam_h,
+        cam_w / cam_h if cam_h > 0 else 0.0,
+    )
+
     # Step 4: Game crop — center-first, shift only if webcam overlaps
     progress("Computing game crop region (center-first)...", 55)
     game_crop_w = int(round(src_h * OUTPUT_W / GAME_PANEL_H))
@@ -144,11 +162,13 @@ def run_gaming_reframe(
                 input_path=video_path,
                 output_path=debug_path,
                 wc_x=wc_x, wc_y=wc_y, wc_w=wc_w, wc_h=wc_h,
+                cam_x=cam_x, cam_y=cam_y, cam_w=cam_w, cam_h=cam_h,
                 game_x=game_crop_x, game_y=game_crop_y,
                 game_w=game_crop_w, game_h=game_crop_h,
                 detected_by=detected_by,
                 src_w=src_w, src_h=src_h,
                 overlap_pct=overlap_pct,
+                face_cx=face_cx_px, face_cy=face_cy_px,
             )
         except Exception as e:
             try:
@@ -188,8 +208,10 @@ def run_gaming_reframe(
             tracking_mode="x_only",
             metadata={
                 "debug_video_url": debug_url,
-                "webcam_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
-                "game_bounds":   {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
+                "webcam_raw_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
+                "webcam_crop":       {"x": cam_x, "y": cam_y, "w": cam_w, "h": cam_h},
+                "game_bounds":       {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
+                "face_center":       {"x": face_cx_px, "y": face_cy_px},
                 "webcam_detected_by": detected_by,
                 "overlap_pct": round(overlap_pct, 1),
                 "pipeline": "gaming_debug",
@@ -209,7 +231,7 @@ def run_gaming_reframe(
         _run_ffmpeg_gaming(
             input_path=video_path,
             output_path=output_path,
-            wc_x=wc_x, wc_y=wc_y, wc_w=wc_w, wc_h=wc_h,
+            wc_x=cam_x, wc_y=cam_y, wc_w=cam_w, wc_h=cam_h,
             game_x=game_crop_x, game_y=game_crop_y,
             game_w=game_crop_w, game_h=game_crop_h,
         )
@@ -254,8 +276,10 @@ def run_gaming_reframe(
         tracking_mode="x_only",
         metadata={
             "processed_video_url": processed_url,
-            "webcam_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
-            "game_bounds":   {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
+            "webcam_raw_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
+            "webcam_crop":       {"x": cam_x, "y": cam_y, "w": cam_w, "h": cam_h},
+            "game_bounds":       {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
+            "face_center":       {"x": face_cx_px, "y": face_cy_px},
             "webcam_detected_by": detected_by,
             "overlap_pct": round(overlap_pct, 1),
             "pipeline": "gaming_vstack",
@@ -455,6 +479,41 @@ def _webcam_bounds_fallback(
     return wc_x, wc_y, wc_w, wc_h
 
 
+# ─── Step 3b: Face-anchored webcam crop ──────────────────────────────────────
+
+def _compute_webcam_crop(
+    wc_w: int,
+    face_cx: int,
+    face_cy: int,
+    src_w: int,
+    src_h: int,
+    safety_shave: float = 0.90,
+) -> tuple[int, int, int, int]:
+    """
+    Compute a webcam crop rectangle that:
+      1. Takes its WIDTH from the Canny/YOLO detection (× safety_shave to trim edges)
+      2. Derives its HEIGHT so the crop matches the 1080×640 panel ratio exactly
+         → crop_h = crop_w × (640 / 1080)
+      3. Centers the rectangle on the YOLO face center (face_cx, face_cy)
+      4. Clamps to source boundaries without resizing
+
+    This guarantees the subsequent `scale=1080:640` is distortion-free because
+    the input crop already has the exact 1080:640 aspect ratio.
+    Returns (crop_x, crop_y, crop_w, crop_h).
+    """
+    crop_w = max(1, int(wc_w * safety_shave))
+    crop_h = max(1, int(crop_w * WEBCAM_PANEL_H / OUTPUT_W))  # crop_w × (640/1080)
+
+    crop_x = int(face_cx - crop_w / 2)
+    crop_y = int(face_cy - crop_h / 2)
+
+    # Clamp: shift back inside frame without resizing
+    crop_x = max(0, min(src_w - crop_w, crop_x))
+    crop_y = max(0, min(src_h - crop_h, crop_y))
+
+    return crop_x, crop_y, crop_w, crop_h
+
+
 # ─── Step 4: Game crop calculation ───────────────────────────────────────────
 
 def _overlap_ratio(game_x: float, game_w: int, wc_x: int, wc_w: int) -> float:
@@ -520,12 +579,11 @@ def _run_ffmpeg_gaming(
     Top panel    (1080x640) : webcam region, letterboxed to preserve aspect ratio
     Bottom panel (1080x1280): gameplay region, scaled to fill
     """
-    # Webcam panel: fit-and-fill — scale up to cover, then center crop.
-    # Eliminates black bars: webcam always fills the full 1080x640 panel.
+    # Webcam panel: crop is pre-computed at exact 1080:640 ratio (face-anchored),
+    # so a simple scale to target dimensions produces zero letterboxing/squashing.
     webcam_filter = (
         f"[0:v]crop={wc_w}:{wc_h}:{wc_x}:{wc_y},"
-        f"scale={OUTPUT_W}:{WEBCAM_PANEL_H}:force_original_aspect_ratio=increase,"
-        f"crop={OUTPUT_W}:{WEBCAM_PANEL_H}"
+        f"scale={OUTPUT_W}:{WEBCAM_PANEL_H}"
         "[top]"
     )
 
@@ -554,8 +612,8 @@ def _run_ffmpeg_gaming(
     ]
 
     logger.info(
-        "[Gaming] FFmpeg: wc=crop(%d:%d:%d:%d)->%dx%d | game=crop(%d:%d:%d:%d)->%dx%d",
-        wc_w, wc_h, wc_x, wc_y, OUTPUT_W, WEBCAM_PANEL_H,
+        "[Gaming] FFmpeg: wc=crop(%d:%d:%d:%d)->scale(%dx%d) ratio=%.4f | game=crop(%d:%d:%d:%d)->scale(%dx%d)",
+        wc_w, wc_h, wc_x, wc_y, OUTPUT_W, WEBCAM_PANEL_H, wc_w / wc_h if wc_h else 0,
         game_w, game_h, game_x, game_y, OUTPUT_W, GAME_PANEL_H,
     )
 
@@ -579,41 +637,52 @@ def _run_ffmpeg_gaming(
 def _run_ffmpeg_debug(
     input_path: str,
     output_path: str,
+    # Raw Canny/YOLO detection bounds (ORANGE) — what the detector returned
     wc_x: int, wc_y: int, wc_w: int, wc_h: int,
+    # Face-anchored crop (YELLOW) — what actually gets rendered in the top panel
+    cam_x: int, cam_y: int, cam_w: int, cam_h: int,
     game_x: int, game_y: int, game_w: int, game_h: int,
     detected_by: str,
     src_w: int,
     src_h: int,
     overlap_pct: float,
+    face_cx: int,
+    face_cy: int,
 ) -> None:
     """
     Render the original 16:9 video with annotated bounding boxes and labels.
 
     Annotations:
-      YELLOW — webcam overlay region (box + crosshair + semi-transparent fill)
-      BLUE   — game crop column (box + vertical center line + semi-transparent fill)
-      RED    — face center dot (detection anchor)
+      ORANGE — raw Canny/YOLO detection bounds (what the detector returned)
+      YELLOW — face-anchored crop (what actually gets rendered in the top panel)
+      RED    — YOLO face center dot (anchor point for crop positioning)
+      BLUE   — game crop column (box + semi-transparent fill)
       CYAN   — game center crosshair (output alignment reference)
       WHITE text — coordinates, detection method, overlap %, dimensions, timestamp
 
     Falls back to boxes-only if drawtext (freetype) is unavailable in the container.
     """
-    wc_cx = wc_x + wc_w // 2
-    wc_cy = wc_y + wc_h // 2
     game_cx = game_x + game_w // 2
 
     # ── Box annotations (always work, no font required) ───────────────────────
     boxes = [
-        # Webcam: semi-transparent yellow fill
-        f"drawbox=x={wc_x}:y={wc_y}:w={wc_w}:h={wc_h}:color=yellow@0.15:t=fill",
-        # Webcam: solid yellow border (6px)
-        f"drawbox=x={wc_x}:y={wc_y}:w={wc_w}:h={wc_h}:color=yellow@1.0:t=6",
-        # Webcam: horizontal crosshair line
-        f"drawbox=x={wc_x}:y={wc_cy - 1}:w={wc_w}:h=2:color=yellow@0.85:t=fill",
-        # Webcam: vertical crosshair line
-        f"drawbox=x={wc_cx - 1}:y={wc_y}:w=2:h={wc_h}:color=yellow@0.85:t=fill",
-        # Face center: filled red dot (12x12)
-        f"drawbox=x={wc_cx - 6}:y={wc_cy - 6}:w=12:h=12:color=red@1.0:t=fill",
+        # Raw detection: semi-transparent orange fill + dashed border
+        f"drawbox=x={wc_x}:y={wc_y}:w={wc_w}:h={wc_h}:color=orange@0.12:t=fill",
+        f"drawbox=x={wc_x}:y={wc_y}:w={wc_w}:h={wc_h}:color=orange@1.0:t=3",
+
+        # Face-anchored crop (actual top panel): semi-transparent yellow fill
+        f"drawbox=x={cam_x}:y={cam_y}:w={cam_w}:h={cam_h}:color=yellow@0.18:t=fill",
+        # Face-anchored crop: solid yellow border (6px)
+        f"drawbox=x={cam_x}:y={cam_y}:w={cam_w}:h={cam_h}:color=yellow@1.0:t=6",
+        # Crop horizontal center line
+        f"drawbox=x={cam_x}:y={face_cy - 1}:w={cam_w}:h=2:color=yellow@0.80:t=fill",
+        # Crop vertical center line
+        f"drawbox=x={face_cx - 1}:y={cam_y}:w=2:h={cam_h}:color=yellow@0.80:t=fill",
+
+        # Face center: filled red dot (14x14)
+        f"drawbox=x={face_cx - 7}:y={face_cy - 7}:w=14:h=14:color=red@1.0:t=fill",
+        # Face center: red ring outline (22x22 hollow box, 3px)
+        f"drawbox=x={face_cx - 11}:y={face_cy - 11}:w=22:h=22:color=red@1.0:t=3",
 
         # Game crop: semi-transparent blue fill (full source height column)
         f"drawbox=x={game_x}:y=0:w={game_w}:h={src_h}:color=blue@0.10:t=fill",
@@ -633,22 +702,32 @@ def _run_ffmpeg_debug(
         "drawtext=text='GAMING REFRAME DEBUG':x=12:y=12"
         ":fontcolor=white:fontsize=28:box=1:boxcolor=black@0.75:boxborderw=6",
 
-        # Webcam label (just above the box; clamp to ≥0)
-        f"drawtext=text='WEBCAM  {wc_w}x{wc_h}  @({wc_x},{wc_y})  [{detected_by}]'"
-        f":x={wc_x + 4}:y={max(2, wc_y - 34)}"
-        ":fontcolor=yellow:fontsize=20:box=1:boxcolor=black@0.75:boxborderw=4",
+        # Raw detection label (orange)
+        f"drawtext=text='RAW DETECT [{detected_by}]  {wc_w}x{wc_h}  @({wc_x}\\,{wc_y})':"
+        f"x={wc_x + 4}:y={max(2, wc_y - 34)}"
+        ":fontcolor=orange:fontsize=18:box=1:boxcolor=black@0.75:boxborderw=3",
+
+        # Face-anchored crop label (yellow)
+        f"drawtext=text='WEBCAM CROP (face-anchored 90%%)  {cam_w}x{cam_h}  @({cam_x}\\,{cam_y})':"
+        f"x={cam_x + 4}:y={cam_y + cam_h + 6}"
+        ":fontcolor=yellow:fontsize=18:box=1:boxcolor=black@0.75:boxborderw=3",
+
+        # Face center label (red)
+        f"drawtext=text='face @({face_cx}\\,{face_cy})':"
+        f"x={face_cx + 16}:y={face_cy - 10}"
+        ":fontcolor=red:fontsize=16:box=1:boxcolor=black@0.70:boxborderw=3",
 
         # Game crop label (top of column)
-        f"drawtext=text='GAME CROP  {game_w}x{game_h}  @({game_x},0)':"
+        f"drawtext=text='GAME CROP  {game_w}x{game_h}  @({game_x}\\,0)':"
         f"x={game_x + 4}:y=50"
         ":fontcolor=cyan:fontsize=20:box=1:boxcolor=black@0.75:boxborderw=4",
 
-        # Overlap info
+        # Info row 1
         f"drawtext=text='overlap={overlap_pct:.1f}%%  src={src_w}x{src_h}':"
         "x=12:y=52"
         ":fontcolor=white:fontsize=18:box=1:boxcolor=black@0.65:boxborderw=3",
 
-        # Output spec
+        # Info row 2
         f"drawtext=text='output 1080x1920  webcam-panel=1080x{WEBCAM_PANEL_H}  game-panel=1080x{GAME_PANEL_H}':"
         "x=12:y=82"
         ":fontcolor=white:fontsize=16:box=1:boxcolor=black@0.60:boxborderw=3",
