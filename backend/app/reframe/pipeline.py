@@ -111,6 +111,21 @@ def run_reframe(
 
         effective_end = clip_end if clip_end is not None else duration_s
 
+        # Gaming mode: server-side FFmpeg vstack render — no Gemini, no diarization
+        if content_type_hint == "gaming":
+            from .gaming_pipeline import run_gaming_reframe
+            result = run_gaming_reframe(
+                video_path=input_path,
+                src_w=src_w,
+                src_h=src_h,
+                fps=fps,
+                duration_s=duration_s,
+                detection_engine=detection_engine,
+                on_progress=on_progress,
+            )
+            return result
+            # Note: temp_path cleanup is handled by the outer finally block
+
         # 3. Shot detection
         progress("Detecting scene cuts...", 12)
         shots = detect_shots(input_path, duration_s, config.shot_detection, fps)

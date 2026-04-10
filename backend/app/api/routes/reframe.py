@@ -60,8 +60,9 @@ class ReframeStatusResponse(BaseModel):
     src_h: Optional[int] = None
     fps: Optional[float] = None
     duration_s: Optional[float] = None
-    content_type: Optional[str] = None        # YENİ: tespit edilen içerik türü
-    tracking_mode: Optional[str] = None       # YENİ: kullanılan tracking modu
+    content_type: Optional[str] = None
+    tracking_mode: Optional[str] = None
+    processed_video_url: Optional[str] = None  # gaming mode: R2 URL of vstack-rendered video
     error: Optional[str] = None
 
 
@@ -355,6 +356,10 @@ async def get_reframe_status(
             except Exception:
                 pass
 
+    # Extract processed_video_url from pipeline_metadata (gaming mode)
+    pipeline_meta = job.get("pipeline_metadata") or {}
+    processed_video_url = pipeline_meta.get("processed_video_url") or None
+
     return ReframeStatusResponse(
         status=job.get("status", "error"),
         step=job.get("step", ""),
@@ -367,6 +372,7 @@ async def get_reframe_status(
         duration_s=job.get("duration_s"),
         content_type=job.get("content_type"),
         tracking_mode=job.get("tracking_mode"),
+        processed_video_url=processed_video_url,
         error=job.get("error"),
     )
 

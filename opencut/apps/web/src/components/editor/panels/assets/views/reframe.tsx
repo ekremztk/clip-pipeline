@@ -77,17 +77,19 @@ export function ReframeView() {
 	};
 
 	const handleReframe = async () => {
+		if (contentType !== "podcast" && contentType !== "gaming") return;
+
 		try {
 			setIsProcessing(true);
 			setError(null);
 			setResults(null);
 
 			const options: ReframeOptions = {
-				strategy: contentType === "auto" ? "podcast" : contentType as any,
+				strategy: contentType === "gaming" ? "gaming" : "podcast",
 				aspectRatio,
 				trackingMode,
 				contentType,
-				detectionEngine,
+				detectionEngine: contentType === "gaming" ? "yolo" : detectionEngine,
 				debugMode,
 			};
 
@@ -163,8 +165,8 @@ export function ReframeView() {
 					</div>
 				</div>
 
-				{/* Tracking mode */}
-				<div className="flex flex-col gap-2">
+				{/* Tracking mode — not applicable for gaming (static crop) */}
+				{contentType !== "gaming" && <div className="flex flex-col gap-2">
 					<span className="text-xs font-medium">Tracking mode</span>
 					<div className="flex flex-col gap-1.5">
 						{TRACKING_MODE_OPTIONS.map((opt) => (
@@ -185,10 +187,10 @@ export function ReframeView() {
 							</button>
 						))}
 					</div>
-				</div>
+				</div>}
 
-				{/* Detection engine */}
-				<div className="flex flex-col gap-2">
+				{/* Detection engine — not shown for gaming (auto-uses YOLO) */}
+			{contentType !== "gaming" && <div className="flex flex-col gap-2">
 					<span className="text-xs font-medium">Detection engine</span>
 					<div className="flex flex-col gap-1.5">
 						{DETECTION_ENGINE_OPTIONS.map((opt) => (
@@ -209,7 +211,7 @@ export function ReframeView() {
 							</button>
 						))}
 					</div>
-				</div>
+				</div>}
 
 				{/* Debug mode */}
 				<div className="flex items-center justify-between">
@@ -239,18 +241,44 @@ export function ReframeView() {
 					</div>
 				)}
 
-				{/* Reframe button */}
+				{/* Gaming mode info */}
+				{contentType === "gaming" && !results && (
+					<div className="rounded-md border border-[#1a1a1a] bg-[#0a0a0a] p-3">
+						<p className="text-xs font-medium text-[#a3a3a3]">Split-screen render</p>
+						<p className="mt-1 text-[10px] text-[#525252] leading-relaxed">
+							Detects webcam overlay via YOLO + Canny edge detection. Renders a new
+							1080×1920 video: webcam on top (640px), gameplay centered below (1280px).
+							No AI analysis needed.
+						</p>
+					</div>
+				)}
+
+				{/* Reframe button / coming soon */}
 				{!results && (
-					<Button
-						className="w-full"
-						onClick={handleReframe}
-						disabled={isProcessing}
-					>
-						{isProcessing && <Spinner className="mr-2" />}
-						{isProcessing
-							? (progress?.step ?? "Processing...")
-							: `Reframe to ${aspectRatio}`}
-					</Button>
+					contentType === "podcast" || contentType === "gaming" ? (
+						<Button
+							className="w-full"
+							onClick={handleReframe}
+							disabled={isProcessing}
+						>
+							{isProcessing && <Spinner className="mr-2" />}
+							{isProcessing
+								? (progress?.step ?? "Processing...")
+								: contentType === "gaming"
+									? "Render Split-Screen"
+									: `Reframe to ${aspectRatio}`}
+						</Button>
+					) : (
+						<div className="rounded-md border border-[#1a1a1a] bg-[#0a0a0a] p-3 text-center">
+							<p className="text-xs font-medium text-[#a3a3a3]">
+								{contentType === "single" ? "Single Speaker mode" : "Auto Detect"}{" "}
+								coming soon
+							</p>
+							<p className="mt-1 text-[10px] text-[#525252]">
+								Only Podcast and Gaming modes are available right now
+							</p>
+						</div>
+					)
 				)}
 
 				{/* Progress bar */}

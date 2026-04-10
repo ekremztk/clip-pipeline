@@ -20,6 +20,7 @@ import type { VideoTrack, VideoElement } from "@/types/timeline";
 import type { AnimationPropertyPath, AnimationInterpolation } from "@/types/animation";
 import { useReframeMetadataStore } from "@/stores/reframe-metadata-store";
 import { createClient } from "@/lib/supabase/client";
+import { processMediaAssets } from "@/lib/media/processing";
 import type { ReframeKeyframe, ReframeOptions } from "./types";
 import { ASPECT_RATIO_CANVAS } from "./types";
 
@@ -110,7 +111,7 @@ export async function runReframe(
 				clip_end: element.trimStart != null ? element.trimStart + element.duration : null,
 				strategy: options.strategy,
 				aspect_ratio: options.aspectRatio,
-				tracking_mode: options.trackingMode,
+				tracking_mode: options.contentType === "gaming" ? "x_only" : options.trackingMode,
 				content_type: options.contentType ?? "auto",
 				detection_engine: options.detectionEngine ?? "mediapipe",
 			}),
@@ -123,16 +124,24 @@ export async function runReframe(
 		const { reframe_job_id } = await startRes.json();
 
 		// Poll for completion
-		const { keyframes, scene_cuts, src_w, src_h, fps, debugVideoUrl } = await pollReframeJob(
+		const { keyframes, scene_cuts, src_w, src_h, fps, debugVideoUrl, processedVideoUrl } = await pollReframeJob(
 			reframe_job_id,
 			(step, percent) => {
 				onProgress({ step: step + label, percent });
 			},
 		);
 
+		// Gaming mode: backend produced a fully composed 1080x1920 video — replace asset
+		if (processedVideoUrl) {
+			onProgress({ step: `Importing split-screen video${label}...`, percent: 95 });
+			await replaceVideoWithGamingOutput(editor, trackId, element, processedVideoUrl);
+			results.push({ elementId: element.id, keyframeCount: 0, reframeJobId: reframe_job_id });
+			continue;
+		}
+
 		onProgress({ step: `Applying reframe${label}...`, percent: 97 });
 
-		// Apply to timeline using split-based approach
+		// Podcast mode: apply keyframes/splits to existing timeline element
 		const segmentCount = applyReframeWithSplits(editor, trackId, element, keyframes, scene_cuts, src_w, src_h, fps, options);
 
 		// Collect scene cuts for timeline markers (convert to timeline time)
@@ -180,7 +189,7 @@ function collectVideoElements(editor: EditorCore): Array<{ trackId: string; elem
 async function pollReframeJob(
 	reframeJobId: string,
 	onProgress: (step: string, percent: number) => void,
-): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number; fps: number; debugVideoUrl?: string }> {
+): Promise<{ keyframes: ReframeKeyframe[]; scene_cuts: number[]; src_w: number; src_h: number; fps: number; debugVideoUrl?: string; processedVideoUrl?: string }> {
 	const maxAttempts = 300; // ~10 minutes
 	// Allow up to 5 consecutive transient server errors (Supabase 502, Railway restart, etc.)
 	// before giving up. 4xx errors (auth, not found) still throw immediately.
@@ -213,7 +222,7 @@ async function pollReframeJob(
 		onProgress(data.step ?? "Processing...", data.percent ?? 0);
 
 		if (data.status === "done") {
-			if (!data.keyframes) throw new Error("Reframe succeeded but no keyframes returned");
+			if (!data.keyframes && !data.processed_video_url) throw new Error("Reframe succeeded but no keyframes or processed video URL returned");
 			// Debug mode: backend stores debug URL as "Done! Debug: <url>" in step field
 			const debugVideoUrl = data.step?.includes("Debug: ")
 				? (data.step.split("Debug: ")[1] ?? undefined)
@@ -224,12 +233,13 @@ async function pollReframeJob(
 				(debugVideoUrl ? `, debug=${debugVideoUrl}` : ""),
 			);
 			return {
-				keyframes: data.keyframes as ReframeKeyframe[],
+				keyframes: (data.keyframes ?? []) as ReframeKeyframe[],
 				scene_cuts: (data.scene_cuts ?? []) as number[],
 				src_w: data.src_w as number,
 				src_h: data.src_h as number,
 				fps: (data.fps as number) ?? 30,
 				debugVideoUrl,
+				processedVideoUrl: (data.processed_video_url as string) ?? undefined,
 			};
 		}
 
@@ -644,6 +654,62 @@ function applySegmentToElement(
 		`[Reframe] Segment [${segment.startVideoTime.toFixed(3)}-${segment.endVideoTime.toFixed(3)}]: ` +
 		`${kfBatch.length} panning keyframes applied`,
 	);
+}
+
+/**
+ * Gaming mode result handler.
+ *
+ * The backend rendered a new 1080x1920 vstack video (webcam top + gameplay bottom).
+ * We fetch it from R2, register it as a new media asset, then swap the original
+ * timeline element to point to the new asset with identity transforms.
+ */
+async function replaceVideoWithGamingOutput(
+	editor: EditorCore,
+	trackId: string,
+	element: VideoElement,
+	processedVideoUrl: string,
+): Promise<void> {
+	// 1. Fetch the processed video from R2 (public URL)
+	const response = await fetch(processedVideoUrl);
+	if (!response.ok) throw new Error(`Failed to fetch gaming reframe video: ${response.status}`);
+	const blob = await response.blob();
+	const file = new File([blob], "gaming_reframe.mp4", { type: "video/mp4" });
+
+	// 2. Extract metadata (duration, dimensions) via processMediaAssets
+	const processed = await processMediaAssets({ files: [file] });
+	if (processed.length === 0) throw new Error("Failed to process gaming reframe video");
+	const assetData = processed[0];
+
+	// 3. Register as a new media asset — capture the ID by diffing before/after
+	const projectId = editor.project.getActiveOrNull()?.metadata.id ?? "";
+	const idsBefore = new Set(editor.media.getAssets().map((a) => a.id));
+
+	await editor.media.addMediaAsset({ projectId, asset: assetData });
+
+	const newAsset = editor.media.getAssets().find((a) => !idsBefore.has(a.id));
+	if (!newAsset) throw new Error("Gaming reframe asset was not registered in media manager");
+
+	// 4. Swap the original timeline element to the new asset, reset all transforms
+	editor.timeline.updateElements({
+		updates: [{
+			trackId,
+			elementId: element.id,
+			updates: {
+				mediaId: newAsset.id,
+				coverMode: false,
+				animations: { channels: {} },
+				transform: {
+					position: { x: 0, y: 0 },
+					scale: 1,
+					rotate: element.transform.rotate,
+				},
+			},
+		}],
+	});
+
+	// 5. Set canvas to 9:16 — gaming output is always 1080x1920
+	const canvasSize = ASPECT_RATIO_CANVAS["9:16"];
+	await editor.project.updateSettings({ settings: { canvasSize } });
 }
 
 async function uploadFileToBackend(file: File): Promise<{ clipUrl?: string; clipLocalPath?: string }> {
