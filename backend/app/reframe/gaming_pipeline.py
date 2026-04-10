@@ -59,6 +59,7 @@ def run_gaming_reframe(
     fps: float,
     duration_s: float,
     detection_engine: str = "yolo",
+    enable_debug: bool = False,
     on_progress: Optional[Callable[[str, int], None]] = None,
 ) -> ReframeResult:
     """
@@ -124,11 +125,80 @@ def run_gaming_reframe(
     game_crop_x, game_crop_y = _compute_game_crop_x(
         src_w, game_crop_w, wc_x, wc_w,
     )
+    overlap_pct = _overlap_ratio(float(game_crop_x), game_crop_w, wc_x, wc_w) * 100.0
     logger.info(
         "[Gaming] Game crop: x=%d w=%d h=%d in %dx%d",
         game_crop_x, game_crop_w, game_crop_h, src_w, src_h,
     )
 
+    # ── Debug mode: render annotated 16:9 video instead of vstack ────────────
+    if enable_debug:
+        progress("Rendering debug video (drawbox annotations)...", 65)
+        debug_path = os.path.join(
+            str(settings.UPLOAD_DIR),
+            f"gaming_debug_{uuid.uuid4().hex}.mp4",
+        )
+        debug_url = ""
+        try:
+            _run_ffmpeg_debug(
+                input_path=video_path,
+                output_path=debug_path,
+                wc_x=wc_x, wc_y=wc_y, wc_w=wc_w, wc_h=wc_h,
+                game_x=game_crop_x, game_y=game_crop_y,
+                game_w=game_crop_w, game_h=game_crop_h,
+                detected_by=detected_by,
+                src_w=src_w, src_h=src_h,
+                overlap_pct=overlap_pct,
+            )
+        except Exception as e:
+            try:
+                os.remove(debug_path)
+            except Exception:
+                pass
+            raise RuntimeError(f"FFmpeg debug render failed: {e}") from e
+
+        progress("Uploading debug video to R2...", 90)
+        try:
+            r2 = get_r2_client()
+            r2_key = f"gaming-debug/{uuid.uuid4().hex}.mp4"
+            with open(debug_path, "rb") as f:
+                r2.put_object(
+                    Bucket=settings.R2_BUCKET_NAME,
+                    Key=r2_key,
+                    Body=f,
+                    ContentType="video/mp4",
+                )
+            debug_url = f"{settings.R2_PUBLIC_URL.rstrip('/')}/{r2_key}"
+            logger.info("[Gaming] Debug video uploaded: %s", debug_url)
+        finally:
+            try:
+                os.remove(debug_path)
+            except Exception:
+                pass
+
+        progress("Done! (debug)", 100)
+        return ReframeResult(
+            keyframes=[],
+            scene_cuts=[],
+            src_w=src_w,
+            src_h=src_h,
+            fps=fps,
+            duration_s=duration_s,
+            content_type="gaming",
+            tracking_mode="x_only",
+            metadata={
+                "debug_video_url": debug_url,
+                "webcam_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
+                "game_bounds":   {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
+                "webcam_detected_by": detected_by,
+                "overlap_pct": round(overlap_pct, 1),
+                "pipeline": "gaming_debug",
+                "source_w": src_w,
+                "source_h": src_h,
+            },
+        )
+
+    # ── Normal mode: FFmpeg vstack render ─────────────────────────────────────
     # Step 5: FFmpeg render
     progress("Rendering split-screen video (FFmpeg)...", 65)
     output_path = os.path.join(
@@ -187,6 +257,7 @@ def run_gaming_reframe(
             "webcam_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
             "game_bounds":   {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
             "webcam_detected_by": detected_by,
+            "overlap_pct": round(overlap_pct, 1),
             "pipeline": "gaming_vstack",
             "source_w": src_w,
             "source_h": src_h,
@@ -449,11 +520,12 @@ def _run_ffmpeg_gaming(
     Top panel    (1080x640) : webcam region, letterboxed to preserve aspect ratio
     Bottom panel (1080x1280): gameplay region, scaled to fill
     """
-    # Webcam panel: letterbox to preserve webcam aspect ratio (black bars for non-standard shapes)
+    # Webcam panel: fit-and-fill — scale up to cover, then center crop.
+    # Eliminates black bars: webcam always fills the full 1080x640 panel.
     webcam_filter = (
         f"[0:v]crop={wc_w}:{wc_h}:{wc_x}:{wc_y},"
-        f"scale={OUTPUT_W}:{WEBCAM_PANEL_H}:force_original_aspect_ratio=decrease,"
-        f"pad={OUTPUT_W}:{WEBCAM_PANEL_H}:(ow-iw)/2:(oh-ih)/2:black"
+        f"scale={OUTPUT_W}:{WEBCAM_PANEL_H}:force_original_aspect_ratio=increase,"
+        f"crop={OUTPUT_W}:{WEBCAM_PANEL_H}"
         "[top]"
     )
 
@@ -500,3 +572,120 @@ def _run_ffmpeg_gaming(
         )
 
     logger.info("[Gaming] FFmpeg render complete: %s", output_path)
+
+
+# ─── Step 5b: Debug render (annotated 16:9) ──────────────────────────────────
+
+def _run_ffmpeg_debug(
+    input_path: str,
+    output_path: str,
+    wc_x: int, wc_y: int, wc_w: int, wc_h: int,
+    game_x: int, game_y: int, game_w: int, game_h: int,
+    detected_by: str,
+    src_w: int,
+    src_h: int,
+    overlap_pct: float,
+) -> None:
+    """
+    Render the original 16:9 video with annotated bounding boxes and labels.
+
+    Annotations:
+      YELLOW — webcam overlay region (box + crosshair + semi-transparent fill)
+      BLUE   — game crop column (box + vertical center line + semi-transparent fill)
+      RED    — face center dot (detection anchor)
+      CYAN   — game center crosshair (output alignment reference)
+      WHITE text — coordinates, detection method, overlap %, dimensions, timestamp
+
+    Falls back to boxes-only if drawtext (freetype) is unavailable in the container.
+    """
+    wc_cx = wc_x + wc_w // 2
+    wc_cy = wc_y + wc_h // 2
+    game_cx = game_x + game_w // 2
+
+    # ── Box annotations (always work, no font required) ───────────────────────
+    boxes = [
+        # Webcam: semi-transparent yellow fill
+        f"drawbox=x={wc_x}:y={wc_y}:w={wc_w}:h={wc_h}:color=yellow@0.15:t=fill",
+        # Webcam: solid yellow border (6px)
+        f"drawbox=x={wc_x}:y={wc_y}:w={wc_w}:h={wc_h}:color=yellow@1.0:t=6",
+        # Webcam: horizontal crosshair line
+        f"drawbox=x={wc_x}:y={wc_cy - 1}:w={wc_w}:h=2:color=yellow@0.85:t=fill",
+        # Webcam: vertical crosshair line
+        f"drawbox=x={wc_cx - 1}:y={wc_y}:w=2:h={wc_h}:color=yellow@0.85:t=fill",
+        # Face center: filled red dot (12x12)
+        f"drawbox=x={wc_cx - 6}:y={wc_cy - 6}:w=12:h=12:color=red@1.0:t=fill",
+
+        # Game crop: semi-transparent blue fill (full source height column)
+        f"drawbox=x={game_x}:y=0:w={game_w}:h={src_h}:color=blue@0.10:t=fill",
+        # Game crop: solid blue border (6px, full height)
+        f"drawbox=x={game_x}:y=0:w={game_w}:h={src_h}:color=blue@1.0:t=6",
+        # Game center: vertical cyan line
+        f"drawbox=x={game_cx - 1}:y=0:w=2:h={src_h}:color=cyan@0.75:t=fill",
+        # Game center: horizontal cyan line at vertical midpoint
+        f"drawbox=x={game_x}:y={src_h // 2 - 1}:w={game_w}:h=2:color=cyan@0.75:t=fill",
+        # Game center dot: filled cyan dot (14x14)
+        f"drawbox=x={game_cx - 7}:y={src_h // 2 - 7}:w=14:h=14:color=cyan@1.0:t=fill",
+    ]
+
+    # ── Text annotations (require libfreetype — may fail on minimal containers) ─
+    texts = [
+        # Top-left: title
+        "drawtext=text='GAMING REFRAME DEBUG':x=12:y=12"
+        ":fontcolor=white:fontsize=28:box=1:boxcolor=black@0.75:boxborderw=6",
+
+        # Webcam label (just above the box; clamp to ≥0)
+        f"drawtext=text='WEBCAM  {wc_w}x{wc_h}  @({wc_x},{wc_y})  [{detected_by}]'"
+        f":x={wc_x + 4}:y={max(2, wc_y - 34)}"
+        ":fontcolor=yellow:fontsize=20:box=1:boxcolor=black@0.75:boxborderw=4",
+
+        # Game crop label (top of column)
+        f"drawtext=text='GAME CROP  {game_w}x{game_h}  @({game_x},0)':"
+        f"x={game_x + 4}:y=50"
+        ":fontcolor=cyan:fontsize=20:box=1:boxcolor=black@0.75:boxborderw=4",
+
+        # Overlap info
+        f"drawtext=text='overlap={overlap_pct:.1f}%%  src={src_w}x{src_h}':"
+        "x=12:y=52"
+        ":fontcolor=white:fontsize=18:box=1:boxcolor=black@0.65:boxborderw=3",
+
+        # Output spec
+        f"drawtext=text='output 1080x1920  webcam-panel=1080x{WEBCAM_PANEL_H}  game-panel=1080x{GAME_PANEL_H}':"
+        "x=12:y=82"
+        ":fontcolor=white:fontsize=16:box=1:boxcolor=black@0.60:boxborderw=3",
+
+        # Timestamp top-right
+        "drawtext=text='%{pts\\:hms}':x=(w-tw-12):y=12"
+        ":fontcolor=white:fontsize=24:box=1:boxcolor=black@0.75:boxborderw=5",
+    ]
+
+    def _build_cmd(vf: str) -> list[str]:
+        return [
+            "ffmpeg", "-y",
+            "-i", input_path,
+            "-vf", vf,
+            "-c:v", "libx264",
+            "-preset", "fast",
+            "-crf", "18",
+            "-c:a", "copy",
+            "-movflags", "+faststart",
+            output_path,
+        ]
+
+    # Try full annotation (boxes + text)
+    vf_full = ",".join(boxes + texts)
+    result = subprocess.run(_build_cmd(vf_full), capture_output=True, text=True, timeout=600)
+
+    if result.returncode != 0:
+        # Likely missing freetype/fonts — fall back to boxes only
+        logger.warning(
+            "[Gaming] drawtext unavailable, retrying with boxes only: %s",
+            result.stderr[-200:],
+        )
+        vf_boxes = ",".join(boxes)
+        result = subprocess.run(_build_cmd(vf_boxes), capture_output=True, text=True, timeout=600)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"FFmpeg debug render failed (boxes-only fallback): {result.stderr[-600:]}"
+            )
+
+    logger.info("[Gaming] Debug render complete: %s", output_path)

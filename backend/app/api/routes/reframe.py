@@ -356,13 +356,19 @@ async def get_reframe_status(
             except Exception:
                 pass
 
-    # Extract processed_video_url from pipeline_metadata (gaming mode)
+    # Extract gaming mode URLs from pipeline_metadata
     pipeline_meta = job.get("pipeline_metadata") or {}
     processed_video_url = pipeline_meta.get("processed_video_url") or None
+    # Gaming debug mode: debug_video_url in pipeline_metadata; surface it via step field
+    # so the existing frontend debug handler (which reads "Done! Debug: <url>") picks it up.
+    gaming_debug_url = pipeline_meta.get("debug_video_url")
+    step_field = job.get("step", "")
+    if gaming_debug_url and "Debug:" not in step_field and job.get("status") == "done":
+        step_field = f"Done! Debug: {gaming_debug_url}"
 
     return ReframeStatusResponse(
         status=job.get("status", "error"),
-        step=job.get("step", ""),
+        step=step_field,
         percent=job.get("percent", 0),
         keyframes=job.get("keyframes"),
         scene_cuts=job.get("scene_cuts"),

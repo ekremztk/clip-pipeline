@@ -121,6 +121,7 @@ def run_reframe(
                 fps=fps,
                 duration_s=duration_s,
                 detection_engine=detection_engine,
+                enable_debug=debug_mode,
                 on_progress=on_progress,
             )
             return result
