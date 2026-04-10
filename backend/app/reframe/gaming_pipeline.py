@@ -126,6 +126,8 @@ def run_gaming_reframe(
     face_cx_px = int(webcam_face.face_x * src_w)
     face_cy_px = int(webcam_face.face_y * src_h)
     cam_x, cam_y, cam_w, cam_h = _compute_webcam_crop(
+        wc_x=wc_x,
+        wc_y=wc_y,
         wc_w=wc_w,
         face_cx=face_cx_px,
         face_cy=face_cy_px,
@@ -426,6 +428,8 @@ def _webcam_bounds_fallback(
 # ─── Step 3b: Face-anchored webcam crop ──────────────────────────────────────
 
 def _compute_webcam_crop(
+    wc_x: int,
+    wc_y: int,
     wc_w: int,
     face_cx: int,
     face_cy: int,
@@ -435,11 +439,12 @@ def _compute_webcam_crop(
 ) -> tuple[int, int, int, int]:
     """
     Compute a webcam crop rectangle that:
-      1. Takes its WIDTH from the Canny/YOLO detection (× safety_shave to trim edges)
+      1. Takes its WIDTH from the detection (× safety_shave to trim edges)
       2. Derives its HEIGHT so the crop matches the 1080×640 panel ratio exactly
          → crop_h = crop_w × (640 / 1080)
       3. Centers the rectangle on the YOLO face center (face_cx, face_cy)
-      4. Clamps to source boundaries without resizing
+      4. Clamps STRICTLY to the detected webcam bounds (wc_x, wc_y, wc_w, wc_h)
+         by shifting — never resizing — so the box never leaks outside the overlay
 
     This guarantees the subsequent `scale=1080:640` is distortion-free because
     the input crop already has the exact 1080:640 aspect ratio.
@@ -451,9 +456,16 @@ def _compute_webcam_crop(
     crop_x = int(face_cx - crop_w / 2)
     crop_y = int(face_cy - crop_h / 2)
 
-    # Clamp: shift back inside frame without resizing
-    crop_x = max(0, min(src_w - crop_w, crop_x))
-    crop_y = max(0, min(src_h - crop_h, crop_y))
+    # Strict clamp to webcam bounds — shift, never resize
+    if crop_x < wc_x:
+        crop_x = wc_x
+    elif crop_x + crop_w > wc_x + wc_w:
+        crop_x = (wc_x + wc_w) - crop_w
+
+    if crop_y < wc_y:
+        crop_y = wc_y
+    elif crop_y + crop_h > wc_y + wc_h:
+        crop_y = (wc_y + wc_h) - crop_h
 
     return crop_x, crop_y, crop_w, crop_h
 

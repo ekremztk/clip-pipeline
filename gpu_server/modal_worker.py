@@ -80,7 +80,7 @@ _PIP_PACKAGES = [
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_DATE": "2026-04-10_gaming-v4-custom-yolo"})
+    .env({"CACHE_DATE": "2026-04-11_gaming-v5-strict-clamp"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
     # Pre-download yolov8l-face.pt (face-specific model) at image build time.
