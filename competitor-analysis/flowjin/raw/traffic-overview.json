@@ -1,0 +1,454 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=flowjin.com&limit=5",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "videogen.io",
+        "DomainWithoutSub": "videogen.io",
+        "Rank": 98873,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogen.io&t=2&s=1&h=1231c333d4ff3d264881bded48f5bb72641a08e83ce6a04af31e803c16a4cdd1"
+      },
+      {
+        "Domain": "headliner.app",
+        "DomainWithoutSub": "headliner.app",
+        "Rank": 136736,
+        "Favicon": "https://site-images.similarcdn.com/image?url=headliner.app&t=2&s=1&h=7aa01f5fb822917834571d440db06cfdd11cc6df788890f1b4329c36bdaa544a"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=flowjin.com&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "flowjin.com": {
+        "mainDomainName": "flowjin",
+        "icon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "image": "https://site-images.similarcdn.com/image?url=flowjin.com&t=0&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=flowjin.com&t=1&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "title": "How to Measure Social Media ROI: A Practical Guide for Marketers",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Discover how to measure social media roi with this practical guide. See essential metrics and proven formulas to tie social activity to business growth.",
+        "globalRanking": 328457,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 354022,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 3285,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2020",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 34494.880052671535,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=flowjin.com&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 44125.08739831391,
+              "Email": 112.03942100402124,
+              "Direct": 84056.34717045062,
+              "Display Ads": 875.6646554291331,
+              "Referrals": 20299.359030538995,
+              "Organic Search": 132212.81728269617,
+              "Paid Search": 196.0016867859509
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 17440.68034142863,
+                "Email": 29.503156066094583,
+                "Direct": 24803.156472769522,
+                "Display Ads": 267.31463115421195,
+                "Referrals": 6179.663872267383,
+                "Organic Search": 38703.55570640889,
+                "Paid Search": 59.17504606053956
+              },
+              "2026-01-01": {
+                "Social": 22279.34605288955,
+                "Email": 47.148560084807364,
+                "Direct": 28776.115525365552,
+                "Display Ads": 341.43654658633517,
+                "Referrals": 7700.225355213295,
+                "Organic Search": 49448.25537479222,
+                "Paid Search": 82.06248976062848
+              },
+              "2026-02-01": {
+                "Social": 4405.061003995735,
+                "Email": 35.38770485311929,
+                "Direct": 30477.075172315548,
+                "Display Ads": 266.913477688586,
+                "Referrals": 6419.469803058319,
+                "Organic Search": 44061.00620149506,
+                "Paid Search": 54.76415096478288
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=flowjin.com",
+    "body": {
+      "Data": {
+        "Total": {
+          "flowjin.com": {
+            "Organic Search": 132212.81728269617,
+            "Social": 44125.08739831391,
+            "Email": 112.03942100402124,
+            "Display Ads": 875.6646554291333,
+            "Direct": 84056.34717045062,
+            "Referrals": 20299.359030539,
+            "Paid Search": 196.0016867859509
+          }
+        },
+        "Desktop": {
+          "flowjin.com": {
+            "Organic Search": 43006.615,
+            "Social": 3586.375,
+            "Email": 107.042,
+            "Display Ads": 854.113,
+            "Direct": 31491.847999999998,
+            "Referrals": 8417.093,
+            "Paid Search": 159.925
+          }
+        },
+        "MobileWeb": {
+          "flowjin.com": {
+            "Organic Search": 89206.20228269618,
+            "Social": 40538.71239831391,
+            "Email": 4.9974210040212315,
+            "Display Ads": 21.551655429133177,
+            "Direct": 52564.499170450625,
+            "Referrals": 11882.266030538998,
+            "Paid Search": 36.07668678595089
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=flowjin.com&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "videogen.io",
+        "DomainWithoutSub": "videogen.io",
+        "Rank": 98873,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogen.io&t=2&s=1&h=1231c333d4ff3d264881bded48f5bb72641a08e83ce6a04af31e803c16a4cdd1"
+      },
+      {
+        "Domain": "headliner.app",
+        "DomainWithoutSub": "headliner.app",
+        "Rank": 136736,
+        "Favicon": "https://site-images.similarcdn.com/image?url=headliner.app&t=2&s=1&h=7aa01f5fb822917834571d440db06cfdd11cc6df788890f1b4329c36bdaa544a"
+      },
+      {
+        "Domain": "podsqueeze.com",
+        "DomainWithoutSub": "podsqueeze.com",
+        "Rank": 216734,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podsqueeze.com&t=2&s=1&h=a07f551e68e065b43c4eff586ffa654f8411950cf8257de6b6f67f1481ade615"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "diveo.io",
+        "DomainWithoutSub": "diveo.io",
+        "Rank": 161802,
+        "Favicon": "https://site-images.similarcdn.com/image?url=diveo.io&t=2&s=1&h=79d4bfe62a10b261a01e82a62d21d4100116e5be7a7c040d4ea251f4dc750cb4"
+      },
+      {
+        "Domain": "tubemagic.com",
+        "DomainWithoutSub": "tubemagic.com",
+        "Rank": 350635,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tubemagic.com&t=2&s=1&h=ca3e7e0aa71dd6424f926a0e204acc91311843c6166b89f5b8beb742536feb4d"
+      },
+      {
+        "Domain": "boba.video",
+        "DomainWithoutSub": "boba.video",
+        "Rank": 495620,
+        "Favicon": "https://site-images.similarcdn.com/image?url=boba.video&t=2&s=1&h=18e07e56813bb59cc7d56f9568bbeb7e2f7596531ff44fa8ad4ff138c67703ef"
+      },
+      {
+        "Domain": "videogpt.io",
+        "DomainWithoutSub": "videogpt.io",
+        "Rank": 416682,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogpt.io&t=2&s=1&h=82943e02c87a8e2b1fb11773384548c1e8231a5d53078f7e0ec66bf1094f172e"
+      },
+      {
+        "Domain": "higgsfield.cc",
+        "DomainWithoutSub": "higgsfield.cc",
+        "Rank": 427071,
+        "Favicon": "https://site-images.similarcdn.com/image?url=higgsfield.cc&t=2&s=1&h=bb282ef450821b571a12fc7d4849eb4cc6fa9e2d92bac1517ea5ab18fb8c39a9"
+      },
+      {
+        "Domain": "bgrem.ai",
+        "DomainWithoutSub": "bgrem.ai",
+        "Rank": 426609,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bgrem.ai&t=2&s=1&h=cc19ddcb24c27677774813c976138c233acbbbd5cca2e83a84d8dec48c8271d0"
+      },
+      {
+        "Domain": "collov.ai",
+        "DomainWithoutSub": "collov.ai",
+        "Rank": 332182,
+        "Favicon": "https://site-images.similarcdn.com/image?url=collov.ai&t=2&s=1&h=cae1d6a1018d52644000af552c28e1de434413cdbb5d8fa0e73b835c3b01d57f"
+      },
+      {
+        "Domain": "vadoo.tv",
+        "DomainWithoutSub": "vadoo.tv",
+        "Favicon": "https://site-images.similarcdn.com/image?url=vadoo.tv&t=2&s=1&h=afe656cf454711a410103055ec699c4d6a0d2fe74a6257ae04fdf5ff3a78baeb"
+      },
+      {
+        "Domain": "waverai.app",
+        "DomainWithoutSub": "waverai.app",
+        "Rank": 446460,
+        "Favicon": "https://site-images.similarcdn.com/image?url=waverai.app&t=2&s=1&h=f17f0e91bdebc47c17846179471cc363bc645157e48ad17b619048c54e9ee252"
+      },
+      {
+        "Domain": "malloy.sg",
+        "DomainWithoutSub": "malloy.sg",
+        "Rank": 226560,
+        "Favicon": "https://site-images.similarcdn.com/image?url=malloy.sg&t=2&s=1&h=5d47d7f13ad0d26a3832af6d2549cc3339fdd1a4dbe0d090683a2471a75b4921"
+      },
+      {
+        "Domain": "medal.com",
+        "DomainWithoutSub": "medal.com",
+        "Rank": 305866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=medal.com&t=2&s=1&h=7efdc3e2f960388b34144af9dd63e7a081c4606c47cb2cb558f3ebe455849688"
+      },
+      {
+        "Domain": "aidubbing.io",
+        "DomainWithoutSub": "aidubbing.io",
+        "Rank": 170025,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aidubbing.io&t=2&s=1&h=6a6b0b92906d2cb870cc1146b9d517cd55687e2500f793b2eeea46abccae80f3"
+      },
+      {
+        "Domain": "pai.video",
+        "DomainWithoutSub": "pai.video",
+        "Rank": 165505,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pai.video&t=2&s=1&h=f76c274dec48c0abead88c6de0acead4f7c751cf3a282a7a45e643e5e70dad64"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=flowjin.com%2Copus.pro%2Cvizard.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Social": {
+            "Total": {
+              "flowjin.com": 44125.08739831391,
+              "opus.pro": 673984.4084720969,
+              "vizard.ai": 150179.05569652552
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 17440.68034142863,
+                "opus.pro": 231860.73697836994,
+                "vizard.ai": 38549.51233765229
+              },
+              "2026-01-01": {
+                "flowjin.com": 22279.34605288955,
+                "opus.pro": 240925.88066238884,
+                "vizard.ai": 70971.47882401152
+              },
+              "2026-02-01": {
+                "flowjin.com": 4405.061003995735,
+                "opus.pro": 201197.79083133812,
+                "vizard.ai": 40658.06453486172
+              }
+            }
+          },
+          "Email": {
+            "Total": {
+              "flowjin.com": 112.03942100402124,
+              "opus.pro": 5089.864909340666,
+              "vizard.ai": 1397.9544470741353
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 29.503156066094583,
+                "opus.pro": 1646.3655040595736,
+                "vizard.ai": 411.300145592958
+              },
+              "2026-01-01": {
+                "flowjin.com": 47.148560084807364,
+                "opus.pro": 1817.2381972564472,
+                "vizard.ai": 534.1880496299264
+              },
+              "2026-02-01": {
+                "flowjin.com": 35.38770485311929,
+                "opus.pro": 1626.261208024645,
+                "vizard.ai": 452.46625185125095
+              }
+            }
+          },
+          "Direct": {
+            "Total": {
+              "flowjin.com": 84056.34717045062,
+              "opus.pro": 8011831.436297476,
+              "vizard.ai": 2021925.5188155337
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 24803.156472769522,
+                "opus.pro": 2555884.4350669626,
+                "vizard.ai": 565539.1245792733
+              },
+              "2026-01-01": {
+                "flowjin.com": 28776.115525365552,
+                "opus.pro": 2868012.1145987413,
+                "vizard.ai": 924428.8527264197
+              },
+              "2026-02-01": {
+                "flowjin.com": 30477.075172315548,
+                "opus.pro": 2587934.8866317724,
+                "vizard.ai": 531957.5415098406
+              }
+            }
+          },
+          "Display Ads": {
+            "Total": {
+              "flowjin.com": 875.6646554291331,
+              "opus.pro": 40930.148105622444,
+              "vizard.ai": 15522.18513942324
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 267.31463115421195,
+                "opus.pro": 13137.436886281062,
+                "vizard.ai": 4687.570552404961
+              },
+              "2026-01-01": {
+                "flowjin.com": 341.43654658633517,
+                "opus.pro": 15937.58427943839,
+                "vizard.ai": 5665.813507076335
+              },
+              "2026-02-01": {
+                "flowjin.com": 266.913477688586,
+                "opus.pro": 11855.126939902992,
+                "vizard.ai": 5168.801079941945
+              }
+            }
+          },
+          "Referrals": {
+            "Total": {
+              "flowjin.com": 20299.359030538995,
+              "opus.pro": 412831.31160292355,
+              "vizard.ai": 162791.0299241227
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 6179.663872267383,
+                "opus.pro": 137692.5819733433,
+                "vizard.ai": 52245.44191332276
+              },
+              "2026-01-01": {
+                "flowjin.com": 7700.225355213295,
+                "opus.pro": 146100.35662677823,
+                "vizard.ai": 66052.29964906897
+              },
+              "2026-02-01": {
+                "flowjin.com": 6419.469803058319,
+                "opus.pro": 129038.373002802,
+                "vizard.ai": 44493.288361730985
+              }
+            }
+          },
+          "Organic Search": {
+            "Total": {
+              "flowjin.com": 132212.81728269617,
+              "opus.pro": 5134017.258129441,
+              "vizard.ai": 3069294.536379126
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 38703.55570640889,
+                "opus.pro": 1656067.7494010923,
+                "vizard.ai": 846791.9844767111
+              },
+              "2026-01-01": {
+                "flowjin.com": 49448.25537479222,
+                "opus.pro": 1835023.483595443,
+                "vizard.ai": 1412811.7964966798
+              },
+              "2026-02-01": {
+                "flowjin.com": 44061.00620149506,
+                "opus.pro": 1642926.0251329057,
+                "vizard.ai": 809690.7554057352
+              }
+            }
+          },
+          "Paid Search": {
+            "Total": {
+              "flowjin.com": 196.0016867859509,
+              "opus.pro": 990254.4381603817,
+              "vizard.ai": 11812.63702031071
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "flowjin.com": 59.17504606053956,
+                "opus.pro": 290110.3415486292,
+                "vizard.ai": 3889.542145370723
+              },
+              "2026-01-01": {
+                "flowjin.com": 82.06248976062848,
+                "opus.pro": 336249.58050739235,
+                "vizard.ai": 4204.263974603985
+              },
+              "2026-02-01": {
+                "flowjin.com": 54.76415096478288,
+                "opus.pro": 363894.5161043601,
+                "vizard.ai": 3718.8309003360037
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]

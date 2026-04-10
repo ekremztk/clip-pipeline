@@ -1,0 +1,536 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=flowjin.com&limit=5",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "videogen.io",
+        "DomainWithoutSub": "videogen.io",
+        "Rank": 98873,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogen.io&t=2&s=1&h=1231c333d4ff3d264881bded48f5bb72641a08e83ce6a04af31e803c16a4cdd1"
+      },
+      {
+        "Domain": "headliner.app",
+        "DomainWithoutSub": "headliner.app",
+        "Rank": 136736,
+        "Favicon": "https://site-images.similarcdn.com/image?url=headliner.app&t=2&s=1&h=7aa01f5fb822917834571d440db06cfdd11cc6df788890f1b4329c36bdaa544a"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=flowjin.com&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "flowjin.com": {
+        "mainDomainName": "flowjin",
+        "icon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "image": "https://site-images.similarcdn.com/image?url=flowjin.com&t=0&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=flowjin.com&t=1&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "title": "How to Measure Social Media ROI: A Practical Guide for Marketers",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Discover how to measure social media roi with this practical guide. See essential metrics and proven formulas to tie social activity to business growth.",
+        "globalRanking": 328457,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 354022,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 3285,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2020",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 34494.880052671535,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=flowjin.com&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "flowjin.com": {
+        "mainDomainName": "flowjin",
+        "icon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "image": "https://site-images.similarcdn.com/image?url=flowjin.com&t=0&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=flowjin.com&t=1&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "title": "How to Measure Social Media ROI: A Practical Guide for Marketers",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Discover how to measure social media roi with this practical guide. See essential metrics and proven formulas to tie social activity to business growth.",
+        "globalRanking": 328457,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 354022,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 3285,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2020",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 85719.67435563296,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=flowjin.com&mainDomainOnly=true&includeCrossData=false",
+    "body": {
+      "flowjin.com": {
+        "mainDomainName": "flowjin",
+        "icon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "image": "https://site-images.similarcdn.com/image?url=flowjin.com&t=0&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=flowjin.com&t=1&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "title": "How to Measure Social Media ROI: A Practical Guide for Marketers",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Discover how to measure social media roi with this practical guide. See essential metrics and proven formulas to tie social activity to business growth.",
+        "globalRanking": 328457,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 354022,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 3285,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=flowjin.com&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=flowjin.com&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "flowjin.com": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 34055.8912383576,
+            "ReturningUsers": 3397.272275800037
+          },
+          "2026-01-01": {
+            "NewUsers": 44958.129108465255,
+            "ReturningUsers": 5408.200520624391
+          },
+          "2026-02-01": {
+            "NewUsers": 37110.47915471182,
+            "ReturningUsers": 8563.956728010418
+          }
+        },
+        "Total": {
+          "NewUsers": 38708.16650051156,
+          "ReturningUsers": 5789.809841478283
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=flowjin.com&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "flowjin.com": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 34055.8912383576,
+            "ReturningUsers": 3397.272275800037
+          },
+          "2026-01-01": {
+            "NewUsers": 44958.129108465255,
+            "ReturningUsers": 5408.200520624391
+          },
+          "2026-02-01": {
+            "NewUsers": 37110.47915471182,
+            "ReturningUsers": 8563.956728010418
+          }
+        },
+        "Total": {
+          "NewUsers": 38708.16650051156,
+          "ReturningUsers": 5789.809841478283
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=flowjin.com&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "flowjin.com": {
+          "Desktop": 87623.0066533818,
+          "Mobile Web": 194254.302
+        }
+      },
+      "KeysDataVerification": {
+        "flowjin.com": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=flowjin.com&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "flowjin.com": {
+          "TotalVisits": 281877.30865338177,
+          "Change": -0.21122614612636323,
+          "ShareOfVisits": 1,
+          "Trend": [
+            87483,
+            108674,
+            85719
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "flowjin.com": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=flowjin.com&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "flowjin.com": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.36047876211774665,
+          "UniqueUsers": 44497.973333333335,
+          "DedupUniqueUsers": 39246.019498733425,
+          "VisitsPerUser": 2.1115366801228235,
+          "Source": "Total",
+          "Domain": "flowjin.com",
+          "AvgMonthVisits": 93959.10288446059,
+          "AvgVisitDuration": 50.4894665721078,
+          "PagesPerVisit": 3.110720886218145,
+          "TotalPagesViews": 292280.54379301105,
+          "Favicon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=0&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=flowjin.com&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "flowjin.com": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.36047876211774665,
+          "UniqueUsers": 44497.973333333335,
+          "DedupUniqueUsers": 39246.019498733425,
+          "VisitsPerUser": 2.1115366801228235,
+          "Source": "Total",
+          "Domain": "flowjin.com",
+          "AvgMonthVisits": 93959.10288446059,
+          "AvgVisitDuration": 50.4894665721078,
+          "PagesPerVisit": 3.110720886218145,
+          "TotalPagesViews": 292280.54379301105,
+          "Favicon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=0&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=flowjin.com&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "flowjin.com": {
+          "GlobalRank": {
+            "Value": 328457,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 393605
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 323767
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 328457
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 354022,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 401023
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 411372
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 354022
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 3285,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 3977
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 3340
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 3285
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=flowjin.com&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "videogen.io",
+        "DomainWithoutSub": "videogen.io",
+        "Rank": 98873,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogen.io&t=2&s=1&h=1231c333d4ff3d264881bded48f5bb72641a08e83ce6a04af31e803c16a4cdd1"
+      },
+      {
+        "Domain": "headliner.app",
+        "DomainWithoutSub": "headliner.app",
+        "Rank": 136736,
+        "Favicon": "https://site-images.similarcdn.com/image?url=headliner.app&t=2&s=1&h=7aa01f5fb822917834571d440db06cfdd11cc6df788890f1b4329c36bdaa544a"
+      },
+      {
+        "Domain": "podsqueeze.com",
+        "DomainWithoutSub": "podsqueeze.com",
+        "Rank": 216734,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podsqueeze.com&t=2&s=1&h=a07f551e68e065b43c4eff586ffa654f8411950cf8257de6b6f67f1481ade615"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "diveo.io",
+        "DomainWithoutSub": "diveo.io",
+        "Rank": 161802,
+        "Favicon": "https://site-images.similarcdn.com/image?url=diveo.io&t=2&s=1&h=79d4bfe62a10b261a01e82a62d21d4100116e5be7a7c040d4ea251f4dc750cb4"
+      },
+      {
+        "Domain": "tubemagic.com",
+        "DomainWithoutSub": "tubemagic.com",
+        "Rank": 350635,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tubemagic.com&t=2&s=1&h=ca3e7e0aa71dd6424f926a0e204acc91311843c6166b89f5b8beb742536feb4d"
+      },
+      {
+        "Domain": "boba.video",
+        "DomainWithoutSub": "boba.video",
+        "Rank": 495620,
+        "Favicon": "https://site-images.similarcdn.com/image?url=boba.video&t=2&s=1&h=18e07e56813bb59cc7d56f9568bbeb7e2f7596531ff44fa8ad4ff138c67703ef"
+      },
+      {
+        "Domain": "videogpt.io",
+        "DomainWithoutSub": "videogpt.io",
+        "Rank": 416682,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogpt.io&t=2&s=1&h=82943e02c87a8e2b1fb11773384548c1e8231a5d53078f7e0ec66bf1094f172e"
+      },
+      {
+        "Domain": "higgsfield.cc",
+        "DomainWithoutSub": "higgsfield.cc",
+        "Rank": 427071,
+        "Favicon": "https://site-images.similarcdn.com/image?url=higgsfield.cc&t=2&s=1&h=bb282ef450821b571a12fc7d4849eb4cc6fa9e2d92bac1517ea5ab18fb8c39a9"
+      },
+      {
+        "Domain": "bgrem.ai",
+        "DomainWithoutSub": "bgrem.ai",
+        "Rank": 426609,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bgrem.ai&t=2&s=1&h=cc19ddcb24c27677774813c976138c233acbbbd5cca2e83a84d8dec48c8271d0"
+      },
+      {
+        "Domain": "collov.ai",
+        "DomainWithoutSub": "collov.ai",
+        "Rank": 332182,
+        "Favicon": "https://site-images.similarcdn.com/image?url=collov.ai&t=2&s=1&h=cae1d6a1018d52644000af552c28e1de434413cdbb5d8fa0e73b835c3b01d57f"
+      },
+      {
+        "Domain": "vadoo.tv",
+        "DomainWithoutSub": "vadoo.tv",
+        "Favicon": "https://site-images.similarcdn.com/image?url=vadoo.tv&t=2&s=1&h=afe656cf454711a410103055ec699c4d6a0d2fe74a6257ae04fdf5ff3a78baeb"
+      },
+      {
+        "Domain": "waverai.app",
+        "DomainWithoutSub": "waverai.app",
+        "Rank": 446460,
+        "Favicon": "https://site-images.similarcdn.com/image?url=waverai.app&t=2&s=1&h=f17f0e91bdebc47c17846179471cc363bc645157e48ad17b619048c54e9ee252"
+      },
+      {
+        "Domain": "malloy.sg",
+        "DomainWithoutSub": "malloy.sg",
+        "Rank": 226560,
+        "Favicon": "https://site-images.similarcdn.com/image?url=malloy.sg&t=2&s=1&h=5d47d7f13ad0d26a3832af6d2549cc3339fdd1a4dbe0d090683a2471a75b4921"
+      },
+      {
+        "Domain": "medal.com",
+        "DomainWithoutSub": "medal.com",
+        "Rank": 305866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=medal.com&t=2&s=1&h=7efdc3e2f960388b34144af9dd63e7a081c4606c47cb2cb558f3ebe455849688"
+      },
+      {
+        "Domain": "aidubbing.io",
+        "DomainWithoutSub": "aidubbing.io",
+        "Rank": 170025,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aidubbing.io&t=2&s=1&h=6a6b0b92906d2cb870cc1146b9d517cd55687e2500f793b2eeea46abccae80f3"
+      },
+      {
+        "Domain": "pai.video",
+        "DomainWithoutSub": "pai.video",
+        "Rank": 165505,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pai.video&t=2&s=1&h=f76c274dec48c0abead88c6de0acead4f7c751cf3a282a7a45e643e5e70dad64"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Visits/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=flowjin.com&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "flowjin.com": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 26512.156767562225
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 33151.92204455775
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 27958.927841261822
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 60970.892
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 75522.665
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 57760.744999999995
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "flowjin.com": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Duration/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=flowjin.com&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "flowjin.com": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 88.29642827481287
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 80.47227368786156
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 95.56685639259308
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 45.91422899121563
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 25.75482594896674
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 31.278063136895693
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "flowjin.com": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

@@ -1,0 +1,1037 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=flowjin.com&limit=5",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "videogen.io",
+        "DomainWithoutSub": "videogen.io",
+        "Rank": 98873,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogen.io&t=2&s=1&h=1231c333d4ff3d264881bded48f5bb72641a08e83ce6a04af31e803c16a4cdd1"
+      },
+      {
+        "Domain": "headliner.app",
+        "DomainWithoutSub": "headliner.app",
+        "Rank": 136736,
+        "Favicon": "https://site-images.similarcdn.com/image?url=headliner.app&t=2&s=1&h=7aa01f5fb822917834571d440db06cfdd11cc6df788890f1b4329c36bdaa544a"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=flowjin.com&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "flowjin.com": {
+        "mainDomainName": "flowjin",
+        "icon": "https://site-images.similarcdn.com/image?url=flowjin.com&t=2&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "image": "https://site-images.similarcdn.com/image?url=flowjin.com&t=0&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=flowjin.com&t=1&s=1&h=e007f0a256040b3c4dcb1ba26c09f25e0a5896d879ce173077ff4ded2100dfae",
+        "title": "How to Measure Social Media ROI: A Practical Guide for Marketers",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Discover how to measure social media roi with this practical guide. See essential metrics and proven formulas to tie social activity to business growth.",
+        "globalRanking": 328457,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 354022,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 3285,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2020",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 34494.880052671535,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferrals?key=flowjin.com&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&ignoreFilterConsistency=false",
+    "body": {
+      "dictionary": {
+        "flowjin.com": {
+          "VolumeTotal": 281877.3122986006,
+          "Volumes": [
+            [
+              6179.666014126016,
+              null
+            ],
+            [
+              7700.224609941948,
+              null
+            ],
+            [
+              6419.470331250202,
+              null
+            ]
+          ],
+          "Dates": [
+            "2025-12-01",
+            "2026-01-01",
+            "2026-02-01"
+          ],
+          "SearchTotal": 20299.360955318167
+        }
+      },
+      "Categories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 1,
+          "Value": 0
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=flowjin.com&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "videogen.io",
+        "DomainWithoutSub": "videogen.io",
+        "Rank": 98873,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogen.io&t=2&s=1&h=1231c333d4ff3d264881bded48f5bb72641a08e83ce6a04af31e803c16a4cdd1"
+      },
+      {
+        "Domain": "headliner.app",
+        "DomainWithoutSub": "headliner.app",
+        "Rank": 136736,
+        "Favicon": "https://site-images.similarcdn.com/image?url=headliner.app&t=2&s=1&h=7aa01f5fb822917834571d440db06cfdd11cc6df788890f1b4329c36bdaa544a"
+      },
+      {
+        "Domain": "podsqueeze.com",
+        "DomainWithoutSub": "podsqueeze.com",
+        "Rank": 216734,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podsqueeze.com&t=2&s=1&h=a07f551e68e065b43c4eff586ffa654f8411950cf8257de6b6f67f1481ade615"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "diveo.io",
+        "DomainWithoutSub": "diveo.io",
+        "Rank": 161802,
+        "Favicon": "https://site-images.similarcdn.com/image?url=diveo.io&t=2&s=1&h=79d4bfe62a10b261a01e82a62d21d4100116e5be7a7c040d4ea251f4dc750cb4"
+      },
+      {
+        "Domain": "tubemagic.com",
+        "DomainWithoutSub": "tubemagic.com",
+        "Rank": 350635,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tubemagic.com&t=2&s=1&h=ca3e7e0aa71dd6424f926a0e204acc91311843c6166b89f5b8beb742536feb4d"
+      },
+      {
+        "Domain": "boba.video",
+        "DomainWithoutSub": "boba.video",
+        "Rank": 495620,
+        "Favicon": "https://site-images.similarcdn.com/image?url=boba.video&t=2&s=1&h=18e07e56813bb59cc7d56f9568bbeb7e2f7596531ff44fa8ad4ff138c67703ef"
+      },
+      {
+        "Domain": "videogpt.io",
+        "DomainWithoutSub": "videogpt.io",
+        "Rank": 416682,
+        "Favicon": "https://site-images.similarcdn.com/image?url=videogpt.io&t=2&s=1&h=82943e02c87a8e2b1fb11773384548c1e8231a5d53078f7e0ec66bf1094f172e"
+      },
+      {
+        "Domain": "higgsfield.cc",
+        "DomainWithoutSub": "higgsfield.cc",
+        "Rank": 427071,
+        "Favicon": "https://site-images.similarcdn.com/image?url=higgsfield.cc&t=2&s=1&h=bb282ef450821b571a12fc7d4849eb4cc6fa9e2d92bac1517ea5ab18fb8c39a9"
+      },
+      {
+        "Domain": "bgrem.ai",
+        "DomainWithoutSub": "bgrem.ai",
+        "Rank": 426609,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bgrem.ai&t=2&s=1&h=cc19ddcb24c27677774813c976138c233acbbbd5cca2e83a84d8dec48c8271d0"
+      },
+      {
+        "Domain": "collov.ai",
+        "DomainWithoutSub": "collov.ai",
+        "Rank": 332182,
+        "Favicon": "https://site-images.similarcdn.com/image?url=collov.ai&t=2&s=1&h=cae1d6a1018d52644000af552c28e1de434413cdbb5d8fa0e73b835c3b01d57f"
+      },
+      {
+        "Domain": "vadoo.tv",
+        "DomainWithoutSub": "vadoo.tv",
+        "Favicon": "https://site-images.similarcdn.com/image?url=vadoo.tv&t=2&s=1&h=afe656cf454711a410103055ec699c4d6a0d2fe74a6257ae04fdf5ff3a78baeb"
+      },
+      {
+        "Domain": "waverai.app",
+        "DomainWithoutSub": "waverai.app",
+        "Rank": 446460,
+        "Favicon": "https://site-images.similarcdn.com/image?url=waverai.app&t=2&s=1&h=f17f0e91bdebc47c17846179471cc363bc645157e48ad17b619048c54e9ee252"
+      },
+      {
+        "Domain": "malloy.sg",
+        "DomainWithoutSub": "malloy.sg",
+        "Rank": 226560,
+        "Favicon": "https://site-images.similarcdn.com/image?url=malloy.sg&t=2&s=1&h=5d47d7f13ad0d26a3832af6d2549cc3339fdd1a4dbe0d090683a2471a75b4921"
+      },
+      {
+        "Domain": "medal.com",
+        "DomainWithoutSub": "medal.com",
+        "Rank": 305866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=medal.com&t=2&s=1&h=7efdc3e2f960388b34144af9dd63e7a081c4606c47cb2cb558f3ebe455849688"
+      },
+      {
+        "Domain": "aidubbing.io",
+        "DomainWithoutSub": "aidubbing.io",
+        "Rank": 170025,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aidubbing.io&t=2&s=1&h=6a6b0b92906d2cb870cc1146b9d517cd55687e2500f793b2eeea46abccae80f3"
+      },
+      {
+        "Domain": "pai.video",
+        "DomainWithoutSub": "pai.video",
+        "Rank": 165505,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pai.video&t=2&s=1&h=f76c274dec48c0abead88c6de0acead4f7c751cf3a282a7a45e643e5e70dad64"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferralsTable?key=flowjin.com&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&orderBy=TotalShare+desc&ignoreFilterConsistency=false",
+    "body": {
+      "TotalShare": 1,
+      "TotalVisits": 7051.154312110805,
+      "TotalVisitsGlobalList": {
+        "flowjin.com": 1
+      },
+      "TopCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 0,
+          "Value": 0.8450649436804778
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 0,
+          "Value": 0.062123395289713564
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 0,
+          "Value": 0.03134752061348801
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.025351593808260835
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 0,
+          "Value": 0.01722046254585147
+        },
+        {
+          "Name": "Unknown",
+          "Count": 0,
+          "Value": 0.009551769400978842
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 0,
+          "Value": 0.009340314661229476
+        }
+      ],
+      "Categories": {
+        "flowjin.com": [
+          {
+            "Name": "AI_Chatbots_and_Tools",
+            "Count": 4,
+            "Value": 0.8450649436804778
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+            "Count": 1,
+            "Value": 0.062123395289713564
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Email",
+            "Count": 1,
+            "Value": 0.01722046254585147
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Business_Services",
+            "Count": 1,
+            "Value": 0.03134752061348801
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+            "Count": 1,
+            "Value": 0.009340314661229476
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+            "Count": 3,
+            "Value": 0.025351593808260835
+          },
+          {
+            "Name": "Unknown",
+            "Count": 1,
+            "Value": 0.009551769400978842
+          }
+        ]
+      },
+      "AllCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 1,
+          "Value": 0
+        }
+      ],
+      "Topics": [
+        {
+          "Name": "mail",
+          "Value": 0.5
+        },
+        {
+          "Name": "temp",
+          "Value": 0.5
+        }
+      ],
+      "TotalCount": 12,
+      "TotalUnGroupedCount": 12,
+      "Records": [
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": 0.009630949368342944,
+          "NewChange": false,
+          "Share": 0.7393212142080889,
+          "FilteredShare": 0.7393212142080889,
+          "TotalVisits": 5213.067967598363,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Rank": 6,
+          "TotalShare": 0.7393212142080889,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.723904577168061
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.6187024807757104
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.9474355524645951
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 2008.3927209812446
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 1594.6585852613366
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 1610.016661355782
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.09936363934689937,
+          "FilteredShare": 0.09936363934689937,
+          "TotalVisits": 700.6283540479124,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Rank": 19,
+          "TotalShare": 0.09936363934689937,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.2718327952815093
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 700.6283540479124
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.062123395289713564,
+          "FilteredShare": 0.062123395289713564,
+          "TotalVisits": 438.0416465800279,
+          "Domain": "aitools.inc",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aitools.inc&t=2&s=0&h=f1052d3180105065e686b7d2d2bd4be907472c0b228ccf80fcd205229e1609d8",
+          "Rank": 333779,
+          "TotalShare": 0.062123395289713564,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.15788762309125973
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 438.0416465800279
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Business_Services",
+          "SourceType": "ST",
+          "Change": 0.336559629217857,
+          "NewChange": false,
+          "Share": 0.03134752061348801,
+          "FilteredShare": 0.03134752061348801,
+          "TotalVisits": 221.0362051477783,
+          "Domain": "ahrefs.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ahrefs.com&t=2&s=0&h=f71d08d989e923807032141cd53efbd11355d60dcb6062cf80af8c3c2f55f611",
+          "Rank": 5916,
+          "TotalShare": 0.03134752061348801,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.02338506159731827
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0259297661439084
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.05256444753540485
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 64.8792520078905
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 89.32495313988781
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 66.832
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.01722046254585147,
+          "FilteredShare": 0.01722046254585147,
+          "TotalVisits": 121.42413873672322,
+          "Domain": "temp-mail.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=temp-mail.org&t=2&s=0&h=886d4218539c89b27036efbfbd572d071841928549faccc366341937003a473e",
+          "Rank": 2688,
+          "TotalShare": 0.01722046254585147,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.04376608662834546
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 121.42413873672322
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.016949565235684475,
+          "FilteredShare": 0.016949565235684475,
+          "TotalVisits": 119.514,
+          "Domain": "futurepedia.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=futurepedia.io&t=2&s=0&h=9a3f8a8e3454438ed79ffc06efa19428cfb776ab2791e027a2930ed2bf2d2d30",
+          "Rank": 87794,
+          "TotalShare": 0.016949565235684475,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.04636955456851611
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 119.514
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.009551769400978842,
+          "FilteredShare": 0.009551769400978842,
+          "TotalVisits": 67.351,
+          "Domain": "dmzventures.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=dmzventures.com&t=2&s=0&h=c231103c88a0d88e1df91a78729aa71e6447778e5cca0bab6f4bc15817ec820a",
+          "Rank": 6309888,
+          "TotalShare": 0.009551769400978842,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.026131129990997946
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 67.351
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.009340314661229476,
+          "FilteredShare": 0.009340314661229476,
+          "TotalVisits": 65.86,
+          "Domain": "hdrobots.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=hdrobots.com&t=2&s=0&h=c003a3ac27ee5266d6dfdb64dcfa42a28cd1b9bf74235bb371a43ed89aa7b88e",
+          "Rank": 953487,
+          "TotalShare": 0.009340314661229476,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.023738562161784358
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 65.86
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.005657797040617806,
+          "FilteredShare": 0.005657797040617806,
+          "TotalVisits": 39.894,
+          "Domain": "directify.app",
+          "Favicon": "https://site-images.similarcdn.com/image?url=directify.app&t=2&s=0&h=50595d2c4c3e186058753313ebc359a028385af40384a7e530f0a19999e2d1a3",
+          "Rank": 2291405,
+          "TotalShare": 0.005657797040617806,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.014379383523872231
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 39.894
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.005090939498848383,
+          "FilteredShare": 0.005090939498848383,
+          "TotalVisits": 35.897,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Rank": 264,
+          "TotalShare": 0.005090939498848383,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.012938705829358837
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 35.897
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0027442315319585542,
+          "FilteredShare": 0.0027442315319585542,
+          "TotalVisits": 19.35,
+          "Domain": "outrank.so",
+          "Favicon": "https://site-images.similarcdn.com/image?url=outrank.so&t=2&s=0&h=9e9c86c720a0158ded4ec2d3e8ba7c562f59323e6ab33fb5f8ff190ef69901ae",
+          "Rank": 312014,
+          "TotalShare": 0.0027442315319585542,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007507496033107308
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 19.35
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0012891506266409951,
+          "FilteredShare": 0.0012891506266409951,
+          "TotalVisits": 9.09,
+          "Domain": "manus.im",
+          "Favicon": "https://site-images.similarcdn.com/image?url=manus.im&t=2&s=0&h=c0482fc6831db223d41d134ee137a35750133da7dc1941ffa775ae1eba583c93",
+          "Rank": 1930,
+          "TotalShare": 0.0012891506266409951,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0035267772062504096
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 1,
+                "AbsValue": 9.09
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "flowjin.com",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "flowjin.com": 1
+          },
+          "HasAdsense": false
+        }
+      ]
+    }
+  }
+]

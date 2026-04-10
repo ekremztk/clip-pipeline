@@ -1,0 +1,230 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quickreel.io&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "wayin.ai",
+        "DomainWithoutSub": "wayin.ai",
+        "Rank": 40370,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=quickreel.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "quickreel.io": {
+        "mainDomainName": "quickreel",
+        "icon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b",
+        "image": "https://site-images.similarcdn.com/image?url=quickreel.io&t=0&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=quickreel.io&t=1&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b",
+        "title": "QuickReel: #1 AI video clipping & editing tool",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Create engaging viral short videos from your long-form content with AI. QuickReel turns long videos into YouTube Shorts, TikToks, and Instagram Reels in one click. No credit card required.",
+        "globalRanking": 534991,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 61364,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 5272,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2022",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 20977.926942124202,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/graphV2/unified?country=999&key=quickreel.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "quickreel.io": {
+          "desktop": {
+            "total": {
+              "impressions": 0,
+              "spend": 0,
+              "pageViews": 0
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/summary?country=999&key=quickreel.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "quickreel.io": {
+          "advertisers": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/summary?country=999&key=quickreel.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "quickreel.io": {
+          "campaigns": {},
+          "creatives": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quickreel.io&limit=20&country=999&webSource=Desktop",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "wayin.ai",
+        "DomainWithoutSub": "wayin.ai",
+        "Rank": 40370,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "capcut.com",
+        "DomainWithoutSub": "capcut.com",
+        "Rank": 752,
+        "Favicon": "https://site-images.similarcdn.com/image?url=capcut.com&t=2&s=1&h=7aa3f747cf8bdf77ef35235070edd5fd1cf4db542f9a8d6e974139d13d13cac8"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "flixier.com",
+        "DomainWithoutSub": "flixier.com",
+        "Rank": 36732,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flixier.com&t=2&s=1&h=50713cd5741aea133dbe7ff4a331385175cf47a5248f77982c8c5232a89d484c"
+      },
+      {
+        "Domain": "gan.ai",
+        "DomainWithoutSub": "gan.ai",
+        "Rank": 391778,
+        "Favicon": "https://site-images.similarcdn.com/image?url=gan.ai&t=2&s=1&h=f1e1bc935223caa1891c4081b4abf9b054f78f1e40c69bbcab16e8c742d29cb0"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "kling.ai",
+        "DomainWithoutSub": "kling.ai",
+        "Rank": 798311,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kling.ai&t=2&s=1&h=4576b1a92ac3248e1e46a2f479b529ea94095a06c137bba565fe99d2d397d792"
+      },
+      {
+        "Domain": "facengine.ai",
+        "DomainWithoutSub": "facengine.ai",
+        "Rank": 1309200,
+        "Favicon": "https://site-images.similarcdn.com/image?url=facengine.ai&t=2&s=1&h=ed0c7b4c6c56a8d0db2d427da05a7127bb44aee176c5f5848c85a2d626f374df"
+      },
+      {
+        "Domain": "pika-art.net",
+        "DomainWithoutSub": "pika-art.net",
+        "Rank": 652847,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pika-art.net&t=2&s=1&h=aa8a39894ed6fec109d3c58c803da235127da66766aec2c5b0a1e3e2b55e3422"
+      },
+      {
+        "Domain": "usevoe.com",
+        "DomainWithoutSub": "usevoe.com",
+        "Rank": 734710,
+        "Favicon": "https://site-images.similarcdn.com/image?url=usevoe.com&t=2&s=1&h=772f7679002d19bbfe028ebd39bcac1d3a1cc841b1b820b5b5330ee910e00c11"
+      },
+      {
+        "Domain": "labs.heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Favicon": "https://site-images.similarcdn.com/image?url=labs.heygen.com&t=2&s=1&h=13ddd77bf4aba0b2ceaa05e40e378b895ca989035b518db6a3d25de83858a124"
+      },
+      {
+        "Domain": "cartoonyvibe.com",
+        "DomainWithoutSub": "cartoonyvibe.com",
+        "Rank": 533745,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cartoonyvibe.com&t=2&s=1&h=b429df735d46cb08d6184a94bf5f16ea39647dc788c874d44e6a1bdb6215be53"
+      },
+      {
+        "Domain": "reap.video",
+        "DomainWithoutSub": "reap.video",
+        "Rank": 702486,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reap.video&t=2&s=1&h=424c6be2e919b0cfbec34d1402c395a2db3cca0d508d3735b736197e476fc647"
+      }
+    ]
+  }
+]

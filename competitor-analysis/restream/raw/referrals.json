@@ -1,0 +1,6373 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=5",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 1975524.6178922423,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "freeconvert.com",
+        "DomainWithoutSub": "freeconvert.com",
+        "Rank": 1529,
+        "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=1&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18"
+      },
+      {
+        "Domain": "cloudconvert.com",
+        "DomainWithoutSub": "cloudconvert.com",
+        "Rank": 2491,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=1&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83"
+      },
+      {
+        "Domain": "convertio.co",
+        "DomainWithoutSub": "convertio.co",
+        "Favicon": "https://site-images.similarcdn.com/image?url=convertio.co&t=2&s=1&h=e995388c379d89a1afbc5b2ff71b8f86fa9b547a859124c9f7beaafa9678fcaf"
+      },
+      {
+        "Domain": "zamzar.com",
+        "DomainWithoutSub": "zamzar.com",
+        "Rank": 25575,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zamzar.com&t=2&s=1&h=f33f5461a90058eb543109e3df1212141f6a2d73aae9b5b3071fd4bcd661ef8e"
+      },
+      {
+        "Domain": "biteable.com",
+        "DomainWithoutSub": "biteable.com",
+        "Rank": 65412,
+        "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=1&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22"
+      },
+      {
+        "Domain": "uniscribe.co",
+        "DomainWithoutSub": "uniscribe.co",
+        "Rank": 34543,
+        "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=1&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "notta.ai",
+        "DomainWithoutSub": "notta.ai",
+        "Rank": 19207,
+        "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=1&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21"
+      },
+      {
+        "Domain": "descript.com",
+        "DomainWithoutSub": "descript.com",
+        "Rank": 13908,
+        "Favicon": "https://site-images.similarcdn.com/image?url=descript.com&t=2&s=1&h=19b1b9d6d824da80586a1078567284aa3d80d84adbbbb32672d9d63283943881"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "streamlabs.com",
+        "DomainWithoutSub": "streamlabs.com",
+        "Rank": 9969,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=1&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-audio-converter.com",
+        "DomainWithoutSub": "online-audio-converter.com",
+        "Rank": 18174,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-audio-converter.com&t=2&s=1&h=7072bef883704cb884e36073b5327cb009396fe3eac70803d46c75f23bdefd8f"
+      },
+      {
+        "Domain": "podbean.com",
+        "DomainWithoutSub": "podbean.com",
+        "Rank": 19514,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podbean.com&t=2&s=1&h=6bd03331138a96684f3443d0492539934b6c0e774cfbf1ddcb042a82260bedcc"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferrals?key=restream.io&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&ignoreFilterConsistency=false",
+    "body": {
+      "dictionary": {
+        "restream.io": {
+          "VolumeTotal": 10438837.857178964,
+          "Volumes": [
+            [
+              73493.76833560478,
+              null
+            ],
+            [
+              68566.70306393752,
+              null
+            ],
+            [
+              57883.132105216886,
+              null
+            ]
+          ],
+          "Dates": [
+            "2025-12-01",
+            "2026-01-01",
+            "2026-02-01"
+          ],
+          "SearchTotal": 199943.60350475917
+        }
+      },
+      "Categories": [
+        {
+          "Name": "Games/Video_Games_Consoles_and_Accessories",
+          "Count": 13,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 8,
+          "Value": 0
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/TV_Movies_and_Streaming",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 19,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Music",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Finance",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/E-commerce_and_Shopping",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 9,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Tennis",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Games/Games",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "News_and_Media",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Sports",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computer_Hardware",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Arts_and_Entertainment",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Sports",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Performing_Arts",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Jobs_and_Career/Jobs_and_Employment",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Law_and_Government/Government",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Investing",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Soccer",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Community_and_Society/Faith_and_Beliefs",
+          "Count": 1,
+          "Value": 0
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferralsTable?key=restream.io&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&orderBy=TotalShare+desc&ignoreFilterConsistency=false",
+    "body": {
+      "TotalShare": 0.9999999999999998,
+      "TotalVisits": 131112.94924364396,
+      "TotalVisitsGlobalList": {
+        "restream.io": 1
+      },
+      "TopCategories": [
+        {
+          "Name": "Games/Video_Games_Consoles_and_Accessories",
+          "Count": 0,
+          "Value": 0.3740820177464508
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 0,
+          "Value": 0.3010237092553097
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 0,
+          "Value": 0.07880739787157308
+        },
+        {
+          "Name": "Unknown",
+          "Count": 0,
+          "Value": 0.065837438978249
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 0,
+          "Value": 0.049476052985023666
+        },
+        {
+          "Name": "News_and_Media",
+          "Count": 0,
+          "Value": 0.022456620535215334
+        },
+        {
+          "Name": "Arts_and_Entertainment/TV_Movies_and_Streaming",
+          "Count": 0,
+          "Value": 0.021844127699069977
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.014003128237602133
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 0,
+          "Value": 0.008524632685189342
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.007382741411767342
+        }
+      ],
+      "Categories": {
+        "restream.io": [
+          {
+            "Name": "Games/Video_Games_Consoles_and_Accessories",
+            "Count": 13,
+            "Value": 0.3740820177464508
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+            "Count": 8,
+            "Value": 0.014003128237602133
+          },
+          {
+            "Name": "AI_Chatbots_and_Tools",
+            "Count": 5,
+            "Value": 0.3010237092553097
+          },
+          {
+            "Name": "Arts_and_Entertainment/TV_Movies_and_Streaming",
+            "Count": 2,
+            "Value": 0.021844127699069977
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+            "Count": 10,
+            "Value": 0.07880739787157308
+          },
+          {
+            "Name": "Unknown",
+            "Count": 19,
+            "Value": 0.065837438978249
+          },
+          {
+            "Name": "Science_and_Education/Education",
+            "Count": 2,
+            "Value": 0.008524632685189342
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Search_Engines",
+            "Count": 2,
+            "Value": 0.005815741109313021
+          },
+          {
+            "Name": "Arts_and_Entertainment/Music",
+            "Count": 3,
+            "Value": 0.0033027792884593623
+          },
+          {
+            "Name": "Finance/Finance",
+            "Count": 1,
+            "Value": 0.003208767091845228
+          },
+          {
+            "Name": "E-commerce_and_Shopping/E-commerce_and_Shopping",
+            "Count": 1,
+            "Value": 0.002635216233797923
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+            "Count": 9,
+            "Value": 0.049476052985023666
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+            "Count": 2,
+            "Value": 0.004614094082749846
+          },
+          {
+            "Name": "Sports/Tennis",
+            "Count": 1,
+            "Value": 0.002544526875179199
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Business_Services",
+            "Count": 1,
+            "Value": 0.0010659419502870406
+          },
+          {
+            "Name": "Games/Games",
+            "Count": 1,
+            "Value": 0.0009920497898139864
+          },
+          {
+            "Name": "News_and_Media",
+            "Count": 6,
+            "Value": 0.022456620535215334
+          },
+          {
+            "Name": "Sports",
+            "Count": 1,
+            "Value": 0.002068314769591197
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Computer_Hardware",
+            "Count": 1,
+            "Value": 0.0030543329308252995
+          },
+          {
+            "Name": "Arts_and_Entertainment/Arts_and_Entertainment",
+            "Count": 2,
+            "Value": 0.005996115628240855
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+            "Count": 2,
+            "Value": 0.00490010254510825
+          },
+          {
+            "Name": "Sports/Sports",
+            "Count": 3,
+            "Value": 0.006282164932867766
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Online_Marketing",
+            "Count": 1,
+            "Value": 0.0009499479358399573
+          },
+          {
+            "Name": "Arts_and_Entertainment/Performing_Arts",
+            "Count": 1,
+            "Value": 0.0009000647511799687
+          },
+          {
+            "Name": "Jobs_and_Career/Jobs_and_Employment",
+            "Count": 2,
+            "Value": 0.002166678317258464
+          },
+          {
+            "Name": "Law_and_Government/Government",
+            "Count": 1,
+            "Value": 0.001303171295005922
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology",
+            "Count": 1,
+            "Value": 0.007382741411767342
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+            "Count": 1,
+            "Value": 0.0021236193801315003
+          },
+          {
+            "Name": "Finance/Investing",
+            "Count": 2,
+            "Value": 0.0015429826052044762
+          },
+          {
+            "Name": "Sports/Soccer",
+            "Count": 1,
+            "Value": 0.0009548942398309246
+          },
+          {
+            "Name": "Community_and_Society/Faith_and_Beliefs",
+            "Count": 1,
+            "Value": 0.00014062684201952562
+          }
+        ]
+      },
+      "AllCategories": [
+        {
+          "Name": "Games/Video_Games_Consoles_and_Accessories",
+          "Count": 13,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 8,
+          "Value": 0
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/TV_Movies_and_Streaming",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 19,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Music",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Finance",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/E-commerce_and_Shopping",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 9,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Tennis",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Games/Games",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "News_and_Media",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Sports",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computer_Hardware",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Arts_and_Entertainment",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Sports",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Performing_Arts",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Jobs_and_Career/Jobs_and_Employment",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Law_and_Government/Government",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Investing",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Soccer",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Community_and_Society/Faith_and_Beliefs",
+          "Count": 1,
+          "Value": 0
+        }
+      ],
+      "Topics": [
+        {
+          "Name": "live",
+          "Value": 0.05337882793039041
+        },
+        {
+          "Name": "art",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "battlefield",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "box",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "games",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "halo",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "log",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "modern",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "pro",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "reach",
+          "Value": 0.037528596623928885
+        },
+        {
+          "Name": "git",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "github",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "hosting",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "internet tools",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "open source",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "programming",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "ruby",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "ruby on rails",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "source code",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "versioncontrol",
+          "Value": 0.03431361828516038
+        },
+        {
+          "Name": "frame",
+          "Value": 0.014640744913209979
+        },
+        {
+          "Name": "wire",
+          "Value": 0.014640744913209979
+        },
+        {
+          "Name": "channels",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "linux unix",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "locator",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "online",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "online tv",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "qibla",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "tv",
+          "Value": 0.01188642288136533
+        },
+        {
+          "Name": "news",
+          "Value": 0.00532540974850853
+        },
+        {
+          "Name": "tell",
+          "Value": 0.004194079741615182
+        },
+        {
+          "Name": "channel",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "chat",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "counter strike",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "heart",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "playing",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "starcraft",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "summer",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "viewers",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "watch",
+          "Value": 0.003963808425096199
+        },
+        {
+          "Name": "can",
+          "Value": 0.003543281358948181
+        },
+        {
+          "Name": "basketball",
+          "Value": 0.0030180867025758206
+        },
+        {
+          "Name": "sports",
+          "Value": 0.0030180867025758206
+        },
+        {
+          "Name": "colombia",
+          "Value": 0.0023544615208578486
+        },
+        {
+          "Name": "colombianos",
+          "Value": 0.0023544615208578486
+        },
+        {
+          "Name": "compras",
+          "Value": 0.0023544615208578486
+        },
+        {
+          "Name": "entretenimiento",
+          "Value": 0.0023544615208578486
+        },
+        {
+          "Name": "fútbol",
+          "Value": 0.0023544615208578486
+        },
+        {
+          "Name": "información general",
+          "Value": 0.0023544615208578486
+        },
+        {
+          "Name": "más",
+          "Value": 0.0023544615208578486
+        }
+      ],
+      "TotalCount": 95,
+      "TotalUnGroupedCount": 106,
+      "Records": [
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -0.09462188186379963,
+          "NewChange": false,
+          "Share": 0.2598533828754432,
+          "FilteredShare": 0.2598533828754432,
+          "TotalVisits": 34070.143399737164,
+          "Domain": "kick.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=kick.com&t=2&s=0&h=58964f32cf18f499f11ab5202cd771ea8ce388ae8c2caeb7fcd0e78dba3aa6e4",
+          "Rank": 234,
+          "TotalShare": 0.2598533828754432,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.3438805283683493
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.21207576846482049
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.22474705724089017
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 15011.428130681634
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 10002.589558285867
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 9056.125710769666
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "Children": [
+            {
+              "Category": "Games~Video_Games_Consoles_and_Accessories",
+              "Change": -0.09462188186379963,
+              "NewChange": false,
+              "Share": 0.2591198209211687,
+              "FilteredShare": 0.2591198209211687,
+              "TotalVisits": 33973.96392845931,
+              "Domain": "id.kick.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=id.kick.com&t=2&s=0&h=5c95dae5220fb3cb6420a5a3e14677f0787ef9bae5c4b0b4c9674da9b2e57aae",
+              "Rank": -1,
+              "TotalShare": 0.2591198209211687,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+              "NewChange": false,
+              "Share": 0.0007335619542744703,
+              "FilteredShare": 0.0007335619542744703,
+              "TotalVisits": 96.17947127785689,
+              "Domain": "kick.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=kick.com&t=2&s=0&h=58964f32cf18f499f11ab5202cd771ea8ce388ae8c2caeb7fcd0e78dba3aa6e4",
+              "Rank": 234,
+              "TotalShare": 0.0007335619542744703,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.22966312527838395,
+          "NewChange": false,
+          "Share": 0.22768688167310508,
+          "FilteredShare": 0.22768688167310508,
+          "TotalVisits": 29852.698560249395,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Rank": 6,
+          "TotalShare": 0.22768688167310508,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.21982968992599924
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.24259752202229945
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.21874594874171222
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 9596.232758428823
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 11442.153237081433
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 8814.312564739133
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": -0.13600379260888235,
+          "NewChange": false,
+          "Share": 0.07426206025576622,
+          "FilteredShare": 0.07426206025576623,
+          "TotalVisits": 9736.717737042707,
+          "Domain": "twitch.tv",
+          "Favicon": "https://site-images.similarcdn.com/image?url=twitch.tv&t=2&s=0&h=355e363b41e14a959cda6ccf0989ff8444402dd8844820c31b74a89bf3ed2792",
+          "Rank": 43,
+          "TotalShare": 0.07426206025576622,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0677635963422579
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.07710376469667748
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.07797589896702119
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 2958.0865226504366
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 3636.612128025606
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 3142.0190863666653
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "Children": [
+            {
+              "Category": "Games~Video_Games_Consoles_and_Accessories",
+              "Change": -0.11442925560891443,
+              "NewChange": false,
+              "Share": 0.0660607192733755,
+              "FilteredShare": 0.0660607192733755,
+              "TotalVisits": 8661.415733088696,
+              "Domain": "id.twitch.tv",
+              "Favicon": "https://site-images.similarcdn.com/image?url=id.twitch.tv&t=2&s=0&h=ba374c635f16d1e2d54d08d608bfb6645bef8b1d6a07c15502c2a26d451053a1",
+              "Rank": -1,
+              "TotalShare": 0.0660607192733755,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Games~Video_Games_Consoles_and_Accessories",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.006977400147618611,
+              "FilteredShare": 0.006977400147618611,
+              "TotalVisits": 914.8275114073128,
+              "Domain": "twitch.tv",
+              "Favicon": "https://site-images.similarcdn.com/image?url=twitch.tv&t=2&s=0&h=355e363b41e14a959cda6ccf0989ff8444402dd8844820c31b74a89bf3ed2792",
+              "Rank": 43,
+              "TotalShare": 0.006977400147618611,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": true
+            },
+            {
+              "Category": "Games~Video_Games_Consoles_and_Accessories",
+              "Change": -0.2669680242188788,
+              "NewChange": false,
+              "Share": 0.0012239408347721082,
+              "FilteredShare": 0.0012239408347721082,
+              "TotalVisits": 160.47449254669863,
+              "Domain": "dashboard.twitch.tv",
+              "Favicon": "https://site-images.similarcdn.com/image?url=dashboard.twitch.tv&t=2&s=0&h=068f45a27256d2381e6ee22ea494efb95f08871962415fc5082f783e65da2b34",
+              "Rank": -1,
+              "TotalShare": 0.0012239408347721082,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": true,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -0.4754969165025714,
+          "NewChange": false,
+          "Share": 0.06040146737979551,
+          "FilteredShare": 0.06040146737979551,
+          "TotalVisits": 7919.414526808745,
+          "Domain": "github.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=github.com&t=2&s=0&h=6525c30f1af9ea5ee8912788b611744e1debcba39a2d0dd3d410b2916169883b",
+          "Rank": 49,
+          "TotalShare": 0.06040146737979551,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.020829052404331975
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.09749411986569897
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.05985486276285605
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 909.2513166750425
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 4598.32668494929
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 2411.8365251844116
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.7234513547010224,
+          "NewChange": false,
+          "Share": 0.040589757475615884,
+          "FilteredShare": 0.040589757475615884,
+          "TotalVisits": 5321.842811712243,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Rank": 264,
+          "TotalShare": 0.040589757475615884,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.07182522190902842
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.03631462628730731
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.011755093429293274
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 3135.3887984687567
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1712.7855027658595
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 473.6685104776268
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "Change": 0.35623379221893087,
+          "NewChange": false,
+          "Share": 0.03203331589124202,
+          "FilteredShare": 0.03203331589124201,
+          "TotalVisits": 4199.982520554027,
+          "Domain": "google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+          "Rank": 1,
+          "TotalShare": 0.03203331589124202,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.008886949411441946
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.034301861975489366
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.054453428231514875
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 387.9422979365844
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1617.8531329132409
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 2194.1870897042027
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "Children": [
+            {
+              "Category": "AI_Chatbots_and_Tools",
+              "Change": 0.03436837793261648,
+              "NewChange": false,
+              "Share": 0.02806169469071612,
+              "FilteredShare": 0.02806169469071612,
+              "TotalVisits": 3679.251551674496,
+              "Domain": "gemini.google.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+              "Rank": 19,
+              "TotalShare": 0.02806169469071612,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Search_Engines",
+              "Change": 0,
+              "NewChange": true,
+              "Share": 0.003971621200525893,
+              "FilteredShare": 0.003971621200525893,
+              "TotalVisits": 520.7309688795317,
+              "Domain": "google.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+              "Rank": 1,
+              "TotalShare": 0.003971621200525893,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 1.6736073640306788,
+          "NewChange": false,
+          "Share": 0.025771764112489496,
+          "FilteredShare": 0.025771764112489496,
+          "TotalVisits": 3379.012,
+          "Domain": "wireframe.co",
+          "Favicon": "https://site-images.similarcdn.com/image?url=wireframe.co&t=2&s=0&h=374c18c9b6a33b931d537aade64a98169d76485e05590c387bf1f5c4a90fa8d9",
+          "Rank": -1,
+          "TotalShare": 0.025771764112489496,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.03295654147439512
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.011198708836040768
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.03504600774770983
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1438.653
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 528.189
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1412.17
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Arts_and_Entertainment~TV_Movies_and_Streaming",
+          "SourceType": "ST",
+          "Change": 3.471577019976956,
+          "NewChange": false,
+          "Share": 0.020923394844715,
+          "FilteredShare": 0.020923394844715,
+          "TotalVisits": 2743.3280062798394,
+          "Domain": "elahmad.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=elahmad.com&t=2&s=0&h=e445097a401ca05c16f97a71f392ed73c9a5705aed9c3b691e54504dc1f313fc",
+          "Rank": 29429,
+          "TotalShare": 0.020923394844715,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.02792439215608823
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0059067549256911584
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0309159529989095
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1218.9844186091175
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 278.59309703679213
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1245.75049063393
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 1
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -0.20864969280712578,
+          "NewChange": false,
+          "Share": 0.015557166639655024,
+          "FilteredShare": 0.01555716663965502,
+          "TotalVisits": 2039.7459999999999,
+          "Domain": "force.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=force.com&t=2&s=0&h=d410a930728d6d466c397b9e97796d0a8e782c022bf2d286ef217da21ed0e695",
+          "Rank": 151,
+          "TotalShare": 0.015557166639655024,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.032960481635875054
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007112388311781821
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.006588054838113005
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1438.825
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 335.457
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 265.464
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "Children": [
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "NewChange": false,
+              "Share": 0.009406233382091253,
+              "FilteredShare": 0.009406233382091253,
+              "TotalVisits": 1233.279,
+              "Domain": "intercom.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=intercom.lightning.force.com&t=2&s=0&h=fce203ea06f0c73aca5eb6b2accecb30d36474d5aece1cb22bf3bb27f9064017",
+              "Rank": -1,
+              "TotalShare": 0.009406233382091253,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": 0,
+              "NewChange": true,
+              "Share": 0.0025800502692635368,
+              "FilteredShare": 0.0025800502692635368,
+              "TotalVisits": 338.278,
+              "Domain": "mountain.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=mountain.lightning.force.com&t=2&s=0&h=d6c3ce93b8416b10ba91659d229c7f8498cefa43e2c9303c3a8f963db4be326d",
+              "Rank": -1,
+              "TotalShare": 0.0025800502692635368,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": 0,
+              "NewChange": true,
+              "Share": 0.001012348519087519,
+              "FilteredShare": 0.001012348519087519,
+              "TotalVisits": 132.732,
+              "Domain": "trustpilot.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=trustpilot.lightning.force.com&t=2&s=0&h=36317fd34691bf7d301bc7943858187a917105688df7b44fe36404cd1a97b90c",
+              "Rank": -1,
+              "TotalShare": 0.001012348519087519,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.0008528448230709044,
+              "FilteredShare": 0.0008528448230709044,
+              "TotalVisits": 111.819,
+              "Domain": "amplitude.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=amplitude.lightning.force.com&t=2&s=0&h=c13428fff89b8f921b5698fee89a9adf2417d739b172d464379366c9537c6cca",
+              "Rank": -1,
+              "TotalShare": 0.0008528448230709044,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.0008528448230709044,
+              "FilteredShare": 0.0008528448230709044,
+              "TotalVisits": 111.819,
+              "Domain": "paddle-alpaca.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=paddle-alpaca.lightning.force.com&t=2&s=0&h=548773ddd63bd25e059bbdac01193ab1cb0215b7800e328923637146b95ddcf9",
+              "Rank": -1,
+              "TotalShare": 0.0008528448230709044,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.0008528448230709044,
+              "FilteredShare": 0.0008528448230709044,
+              "TotalVisits": 111.819,
+              "Domain": "vercel.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=vercel.lightning.force.com&t=2&s=0&h=c97b64808dd9e8b6c56a5b2552bfa8520b3a770b619ae9684663af10b6c520ef",
+              "Rank": -1,
+              "TotalShare": 0.0008528448230709044,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 1.0899847834269958,
+          "NewChange": false,
+          "Share": 0.014346221071466303,
+          "FilteredShare": 0.014346221071466303,
+          "TotalVisits": 1880.9753551812569,
+          "Domain": "geniun.shop",
+          "Favicon": "https://site-images.similarcdn.com/image?url=geniun.shop&t=2&s=0&h=68a33e8f84d6eeee968cba41a69964292862af144ac0c83c73e91edb47bfa2bd",
+          "Rank": 656180,
+          "TotalShare": 0.014346221071466303,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0195022138223749
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00706495813061914
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.01728326095242178
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 851.3307879711633
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 333.2199474678804
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 696.4246197422129
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": 0.9898910283081216,
+          "NewChange": false,
+          "Share": 0.013922338989156714,
+          "FilteredShare": 0.013922338989156714,
+          "TotalVisits": 1825.3989252381095,
+          "Domain": "obsproject.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=0&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc",
+          "Rank": 11382,
+          "TotalShare": 0.013922338989156714,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0056006260128421
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.011210672208683794
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.026111626135861928
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 244.48431342570692
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 528.7532544980373
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1052.1613573143654
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": -0.7355807179101673,
+          "NewChange": false,
+          "Share": 0.011489200789776496,
+          "FilteredShare": 0.011489200789776496,
+          "TotalVisits": 1506.3829999999998,
+          "Domain": "restre.am",
+          "Favicon": "https://site-images.similarcdn.com/image?url=restre.am&t=2&s=0&h=8f752a48ff333db714b76ac3519284519651b264752d8524525df1920ca8f5a9",
+          "Rank": -1,
+          "TotalShare": 0.011489200789776496,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.016013228596944866
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.013537956235341424
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0041900499303200636
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 699.026
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 638.52
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 168.837
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "News_and_Media",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.008318680243345295,
+          "FilteredShare": 0.008318680243345295,
+          "TotalVisits": 1090.6867005198355,
+          "Domain": "infobae.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=infobae.com&t=2&s=0&h=21edf2d5f301df128b93b5797a27c8ad4e362f4cf83f01830d346a68ac5ad687",
+          "Rank": 209,
+          "TotalShare": 0.008318680243345295,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.023124833706237035
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1090.6867005198355
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "News_and_Media",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.007975374461537245,
+          "FilteredShare": 0.007975374461537245,
+          "TotalVisits": 1045.674866974587,
+          "Domain": "thecable.ng",
+          "Favicon": "https://site-images.similarcdn.com/image?url=thecable.ng&t=2&s=0&h=92a5e34ebe1892ad989300bbec892a75751243e3331f9e6ed9bcf6760a4521f6",
+          "Rank": 28873,
+          "TotalShare": 0.007975374461537245,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.02595065005599667
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1045.674866974587
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0076755881536147074,
+          "FilteredShare": 0.0076755881536147074,
+          "TotalVisits": 1006.369,
+          "Domain": "app.re-stream.dev",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.re-stream.dev&t=2&s=0&h=7034a380195180e393a628902d4d1327632b9c544b88d6b1a125af0052447125",
+          "Rank": -1,
+          "TotalShare": 0.0076755881536147074,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.021337122531172578
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 1006.369
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -0.8689969907320498,
+          "NewChange": false,
+          "Share": 0.007538457083034051,
+          "FilteredShare": 0.007538457083034051,
+          "TotalVisits": 988.3893409032319,
+          "Domain": "asymoy.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=asymoy.com&t=2&s=0&h=ea03ace4f2d1ed2a50d9dc62bdd2d01a7c063cb37744bf94a601233caa5ef007",
+          "Rank": 264531,
+          "TotalShare": 0.007538457083034051,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007038205075199983
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.01276902739418673
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.001957997176877474
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 602.2533409032318
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 307.239
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 78.897
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Education",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.007512284166101823,
+          "FilteredShare": 0.007512284166101823,
+          "TotalVisits": 984.9577325739385,
+          "Domain": "us02web.zoom.us",
+          "Favicon": "https://site-images.similarcdn.com/image?url=us02web.zoom.us&t=2&s=0&h=2355b2b735de7f502a96c73bc53343e879c726d630bd4759ff5d1bc7ddc2c06a",
+          "Rank": -1,
+          "TotalShare": 0.007512284166101823,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.012020110124264455
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00975812174946231
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 524.7142666362208
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 460.2434659377177
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 1
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.007509870635746176,
+          "FilteredShare": 0.007509870635746176,
+          "TotalVisits": 984.6412874909206,
+          "Domain": "restream.worthepenny.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=restream.worthepenny.com&t=2&s=0&h=e2dad8b35f44b72a54becc3a840fdcb1ac619674a37ac320f45c7f3290a48755",
+          "Rank": -1,
+          "TotalShare": 0.007509870635746176,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.02087644969235469
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 984.6412874909206
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.007382741411767342,
+          "FilteredShare": 0.007382741411767342,
+          "TotalVisits": 967.973,
+          "Domain": "tella.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tella.com&t=2&s=0&h=c958021e1c6b1438616c3d928b2c8cb3e439f9bb53e574cc84b3049bb37d596b",
+          "Rank": 170654,
+          "TotalShare": 0.007382741411767342,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0194365187776272
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0025338613507574605
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 848.463
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 119.51
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.007038873618444779,
+          "FilteredShare": 0.007038873618444779,
+          "TotalVisits": 922.8874794675748,
+          "Domain": "ludomedia.it",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ludomedia.it&t=2&s=0&h=6cbf790a907b4a4264c649ad574f40dd68e02fc79af3bb2906e376ffcfeffbfa",
+          "Rank": 234183,
+          "TotalShare": 0.007038873618444779,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.019567140116482782
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 922.8874794675748
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 4.174819126694042,
+          "NewChange": false,
+          "Share": 0.006703548391446225,
+          "FilteredShare": 0.006703548391446225,
+          "TotalVisits": 878.922,
+          "Domain": "sinaisviraisbrasil.com.br",
+          "Favicon": "https://site-images.similarcdn.com/image?url=sinaisviraisbrasil.com.br&t=2&s=0&h=c425f93b3ce3c437845fc60d8bd873910391663b18c86ce82cc700d81ba866ed",
+          "Rank": -1,
+          "TotalShare": 0.006703548391446225,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0013259330617455798
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.002819156625929349
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.017076047346286524
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 57.881
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 132.966
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 688.075
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00642443921770023,
+          "FilteredShare": 0.00642443921770023,
+          "TotalVisits": 842.327173069206,
+          "Domain": "web.voxer.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=web.voxer.com&t=2&s=0&h=fe7c938297ff64134d23c15d9c386f4a3b25e8ce707d467777868862538bc2b0",
+          "Rank": -1,
+          "TotalShare": 0.00642443921770023,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.02090414371746313
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 842.327173069206
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.006287975404076776,
+          "FilteredShare": 0.006287975404076776,
+          "TotalVisits": 824.435,
+          "Domain": "xeefin.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=xeefin.com&t=2&s=0&h=7e13d40174d0e79479c9614b45358c2bc3caa881697e5e58f4c9e28a2e0fdc46",
+          "Rank": 1752139,
+          "TotalShare": 0.006287975404076776,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.017479742136321034
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 824.435
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.006237156094742218,
+          "FilteredShare": 0.006237156094742218,
+          "TotalVisits": 817.7719304746211,
+          "Domain": "canva.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=0&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65",
+          "Rank": 33,
+          "TotalShare": 0.006237156094742218,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.002203271208661216
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.017907854518718555
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 96.17947127785689
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 721.5924591967641
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Finance~Finance",
+          "SourceType": "ST",
+          "Change": -0.5390692413932199,
+          "NewChange": false,
+          "Share": 0.005843983325643151,
+          "FilteredShare": 0.005843983325643151,
+          "TotalVisits": 766.2218891557521,
+          "Domain": "trustpilot.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=trustpilot.com&t=2&s=0&h=6b28e6965b15cc311b02f6082b1ec068adc340d193fe3e170c28f024352afaec",
+          "Rank": 601,
+          "TotalShare": 0.005843983325643151,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.00598937262665207
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007325553501747182
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.003952292747413812
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 261.4542822748979
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 159.2566345728805
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 345.5109723079737
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "Children": [
+            {
+              "Category": "Finance~Finance",
+              "Change": 0,
+              "NewChange": true,
+              "Share": 0.003208767091845228,
+              "FilteredShare": 0.003208767091845228,
+              "TotalVisits": 420.71091684777844,
+              "Domain": "trustpilot.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=trustpilot.com&t=2&s=0&h=6b28e6965b15cc311b02f6082b1ec068adc340d193fe3e170c28f024352afaec",
+              "Rank": 601,
+              "TotalShare": 0.003208767091845228,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "E-commerce_and_Shopping~E-commerce_and_Shopping",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.002635216233797923,
+              "FilteredShare": 0.002635216233797923,
+              "TotalVisits": 345.5109723079737,
+              "Domain": "fr.trustpilot.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=fr.trustpilot.com&t=2&s=0&h=d14abaf7c1b848a68f02738c79badd6b0663630fa5fbd4508566d7519e2bfd04",
+              "Rank": -1,
+              "TotalShare": 0.002635216233797923,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Web_Hosting_and_Domain_Names",
+          "SourceType": "ST",
+          "Change": -0.9268463901400223,
+          "NewChange": false,
+          "Share": 0.004479931260706308,
+          "FilteredShare": 0.004479931260706308,
+          "TotalVisits": 587.3770000000001,
+          "Domain": "affiliate.watch",
+          "Favicon": "https://site-images.similarcdn.com/image?url=affiliate.watch&t=2&s=0&h=bcf0f943b77da4587a2b0600a396fd4dd2395ff0467df9ee8feba8880915b54e",
+          "Rank": 452204,
+          "TotalShare": 0.004479931260706308,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.008237640627107117
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.004500185251618881
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.00038533559153550243
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 359.598
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 212.252
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 15.527
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Arts_and_Entertainment~Arts_and_Entertainment",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.004144504073200055,
+          "FilteredShare": 0.004144504073200055,
+          "TotalVisits": 543.3981521895545,
+          "Domain": "colombia.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=colombia.com&t=2&s=0&h=c96d65fd4bb9efc230c70bcb92826a98eadb701b54567273be448b760a9687b0",
+          "Rank": 14074,
+          "TotalShare": 0.004144504073200055,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.011521174595482658
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 543.3981521895545
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0040493788223266445,
+          "FilteredShare": 0.0040493788223266445,
+          "TotalVisits": 530.926,
+          "Domain": "app.eepmarketing.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.eepmarketing.com&t=2&s=0&h=a3a028685812abf64b1d592930d11f998a0ff10dfb1b6bd3f554a1a993594e76",
+          "Rank": -1,
+          "TotalShare": 0.0040493788223266445,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.013176060041964203
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 530.926
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "SourceType": "ST",
+          "Change": 1.3150313600469923,
+          "NewChange": false,
+          "Share": 0.003880532128475376,
+          "FilteredShare": 0.003880532128475376,
+          "TotalVisits": 508.78801199912164,
+          "Domain": "namu.wiki",
+          "Favicon": "https://site-images.similarcdn.com/image?url=namu.wiki&t=2&s=0&h=48841617f703a6ce22e7b5f64c080b5eef4f5ea5d2e069704156b25292303c29",
+          "Rank": 104,
+          "TotalShare": 0.003880532128475376,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0032540770326893696
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.00881774791204317
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 153.47909468702863
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 355.308917312093
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Business_Services",
+          "SourceType": "ST",
+          "Change": 2.14431672225649,
+          "NewChange": false,
+          "Share": 0.00361046882546624,
+          "FilteredShare": 0.00361046882546624,
+          "TotalVisits": 473.37921585911397,
+          "Domain": "ahrefs.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ahrefs.com&t=2&s=0&h=f71d08d989e923807032141cd53efbd11355d60dcb6062cf80af8c3c2f55f611",
+          "Rank": 5916,
+          "TotalShare": 0.00361046882546624,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007642548486980787
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0007149979611044585
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.002631504150964427
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 333.6204230344583
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 33.723
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 106.03579282465562
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "Children": [
+            {
+              "Category": "Sports~Tennis",
+              "NewChange": false,
+              "Share": 0.002544526875179199,
+              "FilteredShare": 0.002544526875179199,
+              "TotalVisits": 333.6204230344583,
+              "Domain": "app.ahrefs.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=app.ahrefs.com&t=2&s=0&h=2a17aea46b3cf50290cf244565872c201a15aa093c17564efdc327f6104c3c97",
+              "Rank": -1,
+              "TotalShare": 0.002544526875179199,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Business_and_Consumer_Services~Business_Services",
+              "Change": 2.14431672225649,
+              "NewChange": false,
+              "Share": 0.0010659419502870406,
+              "FilteredShare": 0.0010659419502870406,
+              "TotalVisits": 139.75879282465561,
+              "Domain": "ahrefs.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=ahrefs.com&t=2&s=0&h=f71d08d989e923807032141cd53efbd11355d60dcb6062cf80af8c3c2f55f611",
+              "Rank": 5916,
+              "TotalShare": 0.0010659419502870406,
+              "SiteOrigins": {
+                "restream.io": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0034588650672274057,
+          "FilteredShare": 0.0034588650672274057,
+          "TotalVisits": 453.502,
+          "Domain": "cyberbushido.fr",
+          "Favicon": "https://site-images.similarcdn.com/image?url=cyberbushido.fr&t=2&s=0&h=0c117869b8421c87b831f1e642fff530971de926d8fc5262d7b8d1e2193f90c4",
+          "Rank": -1,
+          "TotalShare": 0.0034588650672274057,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.009615188605900844
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 453.502
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.8707424116234118,
+          "NewChange": false,
+          "Share": 0.003202482865280308,
+          "FilteredShare": 0.003202482865280308,
+          "TotalVisits": 419.8869733691365,
+          "Domain": "copilot.microsoft.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=copilot.microsoft.com&t=2&s=0&h=eb2c5d699c15f4d7ff035602d8165b847ac5e2883d42a9d8eae54163cd4b47cb",
+          "Rank": 448,
+          "TotalShare": 0.003202482865280308,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.006330521095963558
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0026950083521389127
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0004077454607411802
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 276.3464477407946
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 127.11052562834199
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 16.43
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computer_Hardware",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0030543329308252995,
+          "FilteredShare": 0.0030543329308252995,
+          "TotalVisits": 400.4625985324878,
+          "Domain": "obsbot.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=obsbot.com&t=2&s=0&h=d5f8bcae507b51087048f56fcb8413a03986252dcc80c2345e91173394783a5a",
+          "Rank": 93660,
+          "TotalShare": 0.0030543329308252995,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.008490642631121849
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 400.4625985324878
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Sports~Sports",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0030378115950018716,
+          "FilteredShare": 0.0030378115950018716,
+          "TotalVisits": 398.2964374672335,
+          "Domain": "fosonline.gr",
+          "Favicon": "https://site-images.similarcdn.com/image?url=fosonline.gr&t=2&s=0&h=184efe3aaa670e7ebd2a5941a3d67322f6455c7a743a2d4bfc767319a69e307b",
+          "Rank": 33780,
+          "TotalShare": 0.0030378115950018716,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009884574826941436
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 398.2964374672335
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "News_and_Media",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0030348210185355737,
+          "FilteredShare": 0.0030348210185355737,
+          "TotalVisits": 397.90433416679855,
+          "Domain": "iol.co.za",
+          "Favicon": "https://site-images.similarcdn.com/image?url=iol.co.za&t=2&s=0&h=59eee38a5c98bead3fca9c15e80ad2f45c7b23edad82ebc48354718813b5408e",
+          "Rank": 8418,
+          "TotalShare": 0.0030348210185355737,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009874843948006926
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 397.90433416679855
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.002734732497695691,
+          "FilteredShare": 0.002734732497695691,
+          "TotalVisits": 358.55884316531876,
+          "Domain": "freeconvert.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=0&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18",
+          "Rank": 1529,
+          "TotalShare": 0.002734732497695691,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007602195587556749
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 358.55884316531876
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.002674727703661855,
+          "FilteredShare": 0.002674727703661855,
+          "TotalVisits": 350.69143765078513,
+          "Domain": "riordanathletics.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=riordanathletics.com&t=2&s=0&h=7416288cc9f0ed139b583aff2105b6a8996f759de631646fb00a8c1fd3473f39",
+          "Rank": 3495543,
+          "TotalShare": 0.002674727703661855,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.008033609848694126
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 350.69143765078513
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0.8045279483598073,
+          "NewChange": false,
+          "Share": 0.0026552432987553124,
+          "FilteredShare": 0.0026552432987553124,
+          "TotalVisits": 348.136779859231,
+          "Domain": "streamyard.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=0&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70",
+          "Rank": 9410,
+          "TotalShare": 0.0026552432987553124,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0026318960753261306
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.005559110668422393
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 124.13382439737653
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 224.00295546185447
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.002291268582189756,
+          "FilteredShare": 0.002291268582189756,
+          "TotalVisits": 300.41498132020155,
+          "Domain": "mp4compress.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=mp4compress.com&t=2&s=0&h=ffecab7afed46098fea000d420d8559ac370c48ffed81ac0f6d1897d9db30189",
+          "Rank": 234746,
+          "TotalShare": 0.002291268582189756,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.006881881031359791
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 300.41498132020155
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Sports~Sports",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.002257102546177379,
+          "FilteredShare": 0.002257102546177379,
+          "TotalVisits": 295.93537157465425,
+          "Domain": "maxpreps.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=maxpreps.com&t=2&s=0&h=3cd9fc8b8a67f89a9623164ac2c32a0e5ceb1d06d28e13a5c354771791fceb36",
+          "Rank": 1817,
+          "TotalShare": 0.002257102546177379,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.007344266855284221
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 295.93537157465425
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Advertising_Networks",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0021236193801315003,
+          "FilteredShare": 0.0021236193801315003,
+          "TotalVisits": 278.434,
+          "Domain": "app.indoleads.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.indoleads.com&t=2&s=0&h=9ea2691fd7a665122c59cd9879217270ee7a2917e6ed2c1b145e2a3fd704e008",
+          "Rank": -1,
+          "TotalShare": 0.0021236193801315003,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.006378342566888424
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 278.434
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00208111188635227,
+          "FilteredShare": 0.00208111188635227,
+          "TotalVisits": 272.8607171256493,
+          "Domain": "idownloadblog.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=idownloadblog.com&t=2&s=0&h=c072cfc821dd9a4082aee6f0953aba981334cc889d8e1264e2ca2ebfabf4ebfa",
+          "Rank": 84408,
+          "TotalShare": 0.00208111188635227,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.006771620135274906
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 272.8607171256493
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Sports",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.002068314769591197,
+          "FilteredShare": 0.002068314769591197,
+          "TotalVisits": 271.1828494052898,
+          "Domain": "si.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=si.com&t=2&s=0&h=0aa56fa532f896379b4a4284db9c8cf7d1776ea5bd3301e57c4ef06786288b15",
+          "Rank": 1648,
+          "TotalShare": 0.002068314769591197,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00574964221484683
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 271.1828494052898
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0020295771627207334,
+          "FilteredShare": 0.0020295771627207334,
+          "TotalVisits": 266.10384752186246,
+          "Domain": "streamlabs.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=0&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954",
+          "Rank": 9969,
+          "TotalShare": 0.0020295771627207334,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.004406542417322432
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0018301369599961566
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 192.35894255571378
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 73.74490496614871
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0019495175836904699,
+          "FilteredShare": 0.0019495175836904699,
+          "TotalVisits": 255.607,
+          "Domain": "claudewithads.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=claudewithads.com&t=2&s=0&h=e152a8848318358e3802c9f8c334fc66fa87361db4759ee5026192c3795668d7",
+          "Rank": 500396,
+          "TotalShare": 0.0019495175836904699,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0063434323787992
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 255.607
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0019435991003428632,
+          "FilteredShare": 0.0019435991003428632,
+          "TotalVisits": 254.8310101932459,
+          "Domain": "lumpics.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=lumpics.ru&t=2&s=0&h=5dec37c77e217431af97c010e1cabc5ac864344697b7914038a31a9f1b1ac323",
+          "Rank": 49757,
+          "TotalShare": 0.0019435991003428632,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.005402949106377259
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 254.8310101932459
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.001940829926663092,
+          "FilteredShare": 0.001940829926663092,
+          "TotalVisits": 254.4679356651232,
+          "Domain": "ref.gamer.com.tw",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ref.gamer.com.tw&t=2&s=0&h=815f2a59c66aebd84d7f413bbac44d4f6f34898a13a9420f94da3c71f21f2e12",
+          "Rank": -1,
+          "TotalShare": 0.001940829926663092,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.005395251168846888
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 254.4679356651232
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0018866557531272347,
+          "FilteredShare": 0.0018866557531272347,
+          "TotalVisits": 247.365,
+          "Domain": "productjobsanywhere.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=productjobsanywhere.com&t=2&s=0&h=5a193136d1f1865b490ceeadf423be7db20a578dea9a12a4ebe273acf18cdbe1",
+          "Rank": 2078026,
+          "TotalShare": 0.0018866557531272347,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.005244654112878581
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 247.365
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0018591654200258948,
+          "FilteredShare": 0.0018591654200258948,
+          "TotalVisits": 243.76066135139314,
+          "Domain": "fi.search.yahoo.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=fi.search.yahoo.com&t=2&s=0&h=34c8400793afc2db7e429dcba13938377ca16296dc921dc8702de738f9e5f03c",
+          "Rank": -1,
+          "TotalShare": 0.0018591654200258948,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.006049440241831929
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 243.76066135139314
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Jobs_and_Career~Jobs_and_Employment",
+          "SourceType": "ST",
+          "Change": 5.201393240162883,
+          "NewChange": false,
+          "Share": 0.001852239505243116,
+          "FilteredShare": 0.001852239505243116,
+          "TotalVisits": 242.8525842380129,
+          "Domain": "app.welcometothejungle.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.welcometothejungle.com&t=2&s=0&h=6d639dc88af6b21a2cf4896581d564c5238ad18d49d687162f0a227074d36731",
+          "Rank": -1,
+          "TotalShare": 0.001852239505243116,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0007149979611044585
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.005189996267786977
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 209.1295842380129
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 33.723
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Arts_and_Entertainment~Arts_and_Entertainment",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0018516115550407997,
+          "FilteredShare": 0.0018516115550407997,
+          "TotalVisits": 242.77025183500905,
+          "Domain": "auth.rumble.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=auth.rumble.com&t=2&s=0&h=1de0412cdef08c2c2273c8333ebf9c24b4e4357a5817bd843703a3ae6c258068",
+          "Rank": -1,
+          "TotalShare": 0.0018516115550407997,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.006024861119215953
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 242.77025183500905
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0018441199087871278,
+          "FilteredShare": 0.0018441199087871278,
+          "TotalVisits": 241.788,
+          "Domain": "qiye.aliyun.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=qiye.aliyun.com&t=2&s=0&h=a5f372e70c108001f292323ce91a9ba8d474e50f55cdcc5bef10f3c688514d25",
+          "Rank": -1,
+          "TotalShare": 0.0018441199087871278,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.00600048444684653
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 241.788
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.001713659873385024,
+          "FilteredShare": 0.001713659873385024,
+          "TotalVisits": 224.683,
+          "Domain": "streamerfreebies.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=streamerfreebies.com&t=2&s=0&h=c93f7162c93af3bf18525056b7060c00d6cc1bceebde0c269ead88a1bd3f5efc",
+          "Rank": 1864177,
+          "TotalShare": 0.001713659873385024,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.00470863041601833
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00040574432825241005
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 205.546
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 19.137
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0017063303151259525,
+          "FilteredShare": 0.0017063303151259525,
+          "TotalVisits": 223.722,
+          "Domain": "oauth.picarto.tv",
+          "Favicon": "https://site-images.similarcdn.com/image?url=oauth.picarto.tv&t=2&s=0&h=93af353204c8b74e16c4f1c8198b3b075ca9e5af1ef93a3f645c05a6b366f13f",
+          "Rank": -1,
+          "TotalShare": 0.0017063303151259525,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.005552138159947554
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 223.722
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "News_and_Media",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0016907273677917837,
+          "FilteredShare": 0.0016907273677917837,
+          "TotalVisits": 221.6762515581239,
+          "Domain": "sarkarnama.esakal.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=sarkarnama.esakal.com&t=2&s=0&h=2546666c077ec19d418f35d7643e5ca48461843ee0d10d59697325de55eb1526",
+          "Rank": -1,
+          "TotalShare": 0.0016907273677917837,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.005501368553070298
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 221.6762515581239
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0015677017501760176,
+          "FilteredShare": 0.0015677017501760176,
+          "TotalVisits": 205.546,
+          "Domain": "providencehhi.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=providencehhi.org&t=2&s=0&h=fbcd22542283e1aafdd1fd342ba20c19db2d269c5e934d23173d2a26fcbfcba7",
+          "Rank": 9999539,
+          "TotalShare": 0.0015677017501760176,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.00470863041601833
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 205.546
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0014828925505922749,
+          "FilteredShare": 0.0014828925505922749,
+          "TotalVisits": 194.42641571958268,
+          "Domain": "claude.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=claude.ai&t=2&s=0&h=a3b3778e02952b653132fb6d019ed0361cff7850429377787fbdc4c86ce1565e",
+          "Rank": 125,
+          "TotalShare": 0.0014828925505922749,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.004122245672815273
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 194.42641571958268
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Arts_and_Entertainment~Music",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0014671239085489406,
+          "FilteredShare": 0.0014671239085489406,
+          "TotalVisits": 192.35894255571378,
+          "Domain": "audio-extractor.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=audio-extractor.net&t=2&s=0&h=e2d6e75b98975881c0dad3cc12ca5d573808454a594529b167fab6ff91e14400",
+          "Rank": 150643,
+          "TotalShare": 0.0014671239085489406,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.004406542417322432
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 192.35894255571378
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0014207924466688548,
+          "FilteredShare": 0.0014207924466688548,
+          "TotalVisits": 186.28428794584627,
+          "Domain": "cloudconvert.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=0&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83",
+          "Rank": 2491,
+          "TotalShare": 0.0014207924466688548,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.003949615575929661
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 186.28428794584627
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0014034006637900418,
+          "FilteredShare": 0.0014034006637900418,
+          "TotalVisits": 184.004,
+          "Domain": "uatechecosystem.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=uatechecosystem.com&t=2&s=0&h=e5153c1cde9e8a33f22d3f7972d671c131dcd71a843267cf8da9d0fc1539ddce",
+          "Rank": 12310642,
+          "TotalShare": 0.0014034006637900418,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.004215148098571788
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 184.004
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Law_and_Government~Government",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.001303171295005922,
+          "FilteredShare": 0.001303171295005922,
+          "TotalVisits": 170.86263185788522,
+          "Domain": "atlaspolicy.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=atlaspolicy.com&t=2&s=0&h=370f725e44bcda61cc5349d7bf18c4ce6b189c33bd2d153b2de39727a4042baf",
+          "Rank": 2599543,
+          "TotalShare": 0.001303171295005922,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.004240320301299091
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 170.86263185788522
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "News_and_Media",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0011343852461264481,
+          "FilteredShare": 0.0011343852461264481,
+          "TotalVisits": 148.73259519811555,
+          "Domain": "substack.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=substack.com&t=2&s=0&h=785873af8cc2020ddb6dd784ab6e4ae1cd0fda96a6aa658c6ce6dc1c17635f09",
+          "Rank": 235,
+          "TotalShare": 0.0011343852461264481,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0036911162846188115
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 148.73259519811555
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0011041167240543773,
+          "FilteredShare": 0.0011041167240543773,
+          "TotalVisits": 144.764,
+          "Domain": "gys-tech.feishu.cn",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gys-tech.feishu.cn&t=2&s=0&h=36778eb3b60d9961d589b23d852fba427ed313bc9bcfac1fa3d0e6536a912eca",
+          "Rank": -1,
+          "TotalShare": 0.0011041167240543773,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.00359262713808498
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 144.764
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.001092461067169165,
+          "FilteredShare": 0.001092461067169165,
+          "TotalVisits": 143.23579245040784,
+          "Domain": "upwork.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=upwork.com&t=2&s=0&h=950f51887566463d99a31f2a8785e9512e06d783a871f726af16f3b139e88881",
+          "Rank": 823,
+          "TotalShare": 0.001092461067169165,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.003554701411279343
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 143.23579245040784
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Arts_and_Entertainment~Music",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.001035396669986782,
+          "FilteredShare": 0.001035396669986782,
+          "TotalVisits": 135.75391103901492,
+          "Domain": "ytmp3.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ytmp3.ai&t=2&s=0&h=9e7716ce2587db67c2974805857d78a5ddda63fcbf813bc4969d899068f6dd62",
+          "Rank": 4013,
+          "TotalShare": 0.001035396669986782,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.003369022580889856
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 135.75391103901492
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.001012348519087519,
+          "FilteredShare": 0.001012348519087519,
+          "TotalVisits": 132.732,
+          "Domain": "restream.okta.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=restream.okta.com&t=2&s=0&h=2f3a5abc5b987bdc0af96887b7aff43818ccc8f9503b8a19726e64456d0bf88e",
+          "Rank": -1,
+          "TotalShare": 0.001012348519087519,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0032940274190565023
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 132.732
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Education",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.001012348519087519,
+          "FilteredShare": 0.001012348519087519,
+          "TotalVisits": 132.732,
+          "Domain": "oceanhero.today",
+          "Favicon": "https://site-images.similarcdn.com/image?url=oceanhero.today&t=2&s=0&h=370ec4768b5a222a30d33d80966f2b0779d5553076dcd402e83c1f69c15c601c",
+          "Rank": 38833,
+          "TotalShare": 0.001012348519087519,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0032940274190565023
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 132.732
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.001012348519087519,
+          "FilteredShare": 0.001012348519087519,
+          "TotalVisits": 132.732,
+          "Domain": "mobalon.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=mobalon.com&t=2&s=0&h=3ccb9090b4b5168a4585f5f31fd045e337e9d637b0a41c4c88966b144ee3f720",
+          "Rank": 2582188,
+          "TotalShare": 0.001012348519087519,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0032940274190565023
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 132.732
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Games~Games",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0009920497898139864,
+          "FilteredShare": 0.0009920497898139864,
+          "TotalVisits": 130.07057373904885,
+          "Domain": "gamejolt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gamejolt.com&t=2&s=0&h=a29d9bce21b43cb2d899b5134e2bc65c25b502b2910632096bb5f8032a42530c",
+          "Rank": 7593,
+          "TotalShare": 0.0009920497898139864,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0029796457227902295
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 130.07057373904885
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Sports~Sports",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0009872507916885156,
+          "FilteredShare": 0.0009872507916885156,
+          "TotalVisits": 129.44136294140367,
+          "Domain": "sport5.co.il",
+          "Favicon": "https://site-images.similarcdn.com/image?url=sport5.co.il&t=2&s=0&h=60ad8e43e6dbf206fa70f0c18bbfbca76b6a102bdf276ec833bfc060d344ec64",
+          "Rank": 3947,
+          "TotalShare": 0.0009872507916885156,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0027444269663341294
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 129.44136294140367
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Sports~Soccer",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0009548942398309246,
+          "FilteredShare": 0.0009548942398309246,
+          "TotalVisits": 125.199,
+          "Domain": "lux.vietwedding.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=lux.vietwedding.net&t=2&s=0&h=8a6a6382f437e5f3cafee833a2dd076806fc97c6c6999337413550590f962035",
+          "Rank": -1,
+          "TotalShare": 0.0009548942398309246,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.003107079971961961
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 125.199
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Online_Marketing",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0009499479358399573,
+          "FilteredShare": 0.0009499479358399573,
+          "TotalVisits": 124.55047549588868,
+          "Domain": "semrush.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=semrush.com&t=2&s=0&h=d8bc8567e8323d7f648e839d39e82b2efb5e7b6d2b1a7801d9c9239f36ce9da3",
+          "Rank": 4070,
+          "TotalShare": 0.0009499479358399573,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0026407299479331977
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 124.55047549588868
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Arts_and_Entertainment~TV_Movies_and_Streaming",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0009207328543549806,
+          "FilteredShare": 0.0009207328543549806,
+          "TotalVisits": 120.72,
+          "Domain": "tv3.ee",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tv3.ee&t=2&s=0&h=23a9179adf83dc858e3828f835e05208558e84b5319488ce8b5ec5e4a6e8dac5",
+          "Rank": 250579,
+          "TotalShare": 0.0009207328543549806,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00255951587535303
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 120.72
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Arts_and_Entertainment~Performing_Arts",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0009000647511799687,
+          "FilteredShare": 0.0009000647511799687,
+          "TotalVisits": 118.01014403745226,
+          "Domain": "backstage.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=backstage.com&t=2&s=0&h=75654989ec14ece5d854ca5efce5ae191a19ffb1e98b7ccbd2a5ff790c2a88a5",
+          "Rank": 9648,
+          "TotalShare": 0.0009000647511799687,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0025020612749880452
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 118.01014403745226
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Finance~Investing",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0008528448230709044,
+          "FilteredShare": 0.0008528448230709044,
+          "TotalVisits": 111.819,
+          "Domain": "sapphireventures.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=sapphireventures.com&t=2&s=0&h=7b405327a8bbf56bb9bda6df75c66273aba32310944541082262e9c8e42f2539",
+          "Rank": 807704,
+          "TotalShare": 0.0008528448230709044,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0023707961039272736
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 111.819
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0008528448230709044,
+          "FilteredShare": 0.0008528448230709044,
+          "TotalVisits": 111.819,
+          "Domain": "gennadych.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gennadych.ru&t=2&s=0&h=4a830dac70bded675dd4e8665d1e66ebb5793d5bf36489b9f9722d07daf0d007",
+          "Rank": 2123824,
+          "TotalShare": 0.0008528448230709044,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0023707961039272736
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 111.819
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0008222101791839582,
+          "FilteredShare": 0.0008222101791839582,
+          "TotalVisits": 107.80240149095373,
+          "Domain": "biteable.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=0&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22",
+          "Rank": 65412,
+          "TotalShare": 0.0008222101791839582,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0026753463094908473
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 107.80240149095373
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Arts_and_Entertainment~Music",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00080025870992364,
+          "FilteredShare": 0.00080025870992364,
+          "TotalVisits": 104.92427961600221,
+          "Domain": "trinidadradiostations.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=trinidadradiostations.net&t=2&s=0&h=0d04d054e8a36c1ac23872f5db5581eacd4d16192678da5be6a752546212d153",
+          "Rank": 230912,
+          "TotalShare": 0.00080025870992364,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0022246136463480617
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 104.92427961600221
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0007999133617618955,
+          "FilteredShare": 0.0007999133617618955,
+          "TotalVisits": 104.879,
+          "Domain": "scheduler.pipelinersales.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=scheduler.pipelinersales.com&t=2&s=0&h=250913865b921734266f5696f1f07f5acbebebc659b7473df1c414c5d0f8d661",
+          "Rank": -1,
+          "TotalShare": 0.0007999133617618955,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.002223653624015494
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 104.879
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0007335619542744703,
+          "FilteredShare": 0.0007335619542744703,
+          "TotalVisits": 96.17947127785689,
+          "Domain": "patreon.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=patreon.com&t=2&s=0&h=61c406293e6ac08612dd97705e4c28196250ea4d0edc03b2f2f040f024a9e75b",
+          "Rank": 285,
+          "TotalShare": 0.0007335619542744703,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.002203271208661216
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 96.17947127785689
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0006901377821335717,
+          "FilteredShare": 0.0006901377821335717,
+          "TotalVisits": 90.486,
+          "Domain": "app.tryingrow.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.tryingrow.com&t=2&s=0&h=d17868b30fa0ac98964d82ff3ae2f5c38315d5492e5652132bc2c2bbb4bda1bb",
+          "Rank": -1,
+          "TotalShare": 0.0006901377821335717,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0020728456492650534
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 90.486
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Finance~Investing",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0006901377821335717,
+          "FilteredShare": 0.0006901377821335717,
+          "TotalVisits": 90.486,
+          "Domain": "insightpartners.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=insightpartners.com&t=2&s=0&h=0771cde91b83dffd500966f80e95d120401645e075e9ee10f8328494889a82a0",
+          "Rank": 270662,
+          "TotalShare": 0.0006901377821335717,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0020728456492650534
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 90.486
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0006901377821335717,
+          "FilteredShare": 0.0006901377821335717,
+          "TotalVisits": 90.486,
+          "Domain": "brandlogos.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=brandlogos.org&t=2&s=0&h=203cf163567873a331ecb00175b6daa2512f74725516fe5301a935418dcac8d2",
+          "Rank": 3621780,
+          "TotalShare": 0.0006901377821335717,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0020728456492650534
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 90.486
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0006901377821335717,
+          "FilteredShare": 0.0006901377821335717,
+          "TotalVisits": 90.486,
+          "Domain": "yoga.heartfulness.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=yoga.heartfulness.org&t=2&s=0&h=e707170b6687c53c627b44524f84083a7b3432502ead4f50d7f93009ecc10996",
+          "Rank": -1,
+          "TotalShare": 0.0006901377821335717,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0020728456492650534
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 90.486
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0005901552855485863,
+          "FilteredShare": 0.0005901552855485863,
+          "TotalVisits": 77.377,
+          "Domain": "pro.metrica.guru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=pro.metrica.guru&t=2&s=0&h=d3936fc87e9e3273208153508874da153ed38cdcef4f2e58b906b230fb19b543",
+          "Rank": -1,
+          "TotalShare": 0.0005901552855485863,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0017725457839133348
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 77.377
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.000517698334993391,
+          "FilteredShare": 0.000517698334993391,
+          "TotalVisits": 67.87695551950746,
+          "Domain": "aitum.tv",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aitum.tv&t=2&s=0&h=8cb53c0fa244b50ed7bcfc9862fe9e5a5b40ee925863820bbcda47dfa9ea2149",
+          "Rank": 159651,
+          "TotalShare": 0.000517698334993391,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.001684511290444928
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 67.87695551950746
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0004965004722388562,
+          "FilteredShare": 0.0004965004722388562,
+          "TotalVisits": 65.09764121609841,
+          "Domain": "uniscribe.co",
+          "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=0&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d",
+          "Rank": 34543,
+          "TotalShare": 0.0004965004722388562,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0014912512695025419
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 65.09764121609841
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0004414590651335374,
+          "FilteredShare": 0.0004414590651335374,
+          "TotalVisits": 57.881,
+          "Domain": "appsumo-content.s3.amazonaws.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=appsumo-content.s3.amazonaws.com&t=2&s=0&h=40490146e9f842bbdb1372d606dffdfe81d071b232f4e08c39ad02a7d568b9c2",
+          "Rank": -1,
+          "TotalShare": 0.0004414590651335374,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0013259330617455798
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 57.881
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Web_Hosting_and_Domain_Names",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0004201712844019421,
+          "FilteredShare": 0.0004201712844019421,
+          "TotalVisits": 55.08989628542852,
+          "Domain": "notta.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=0&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21",
+          "Rank": 19207,
+          "TotalShare": 0.0004201712844019421,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0011680207431586003
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 55.08989628542852
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0004086642795408474,
+          "FilteredShare": 0.0004086642795408474,
+          "TotalVisits": 53.58117894112945,
+          "Domain": "codeberg.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=codeberg.org&t=2&s=0&h=3383e9710fedfbec1b4b7c5575d93d731ba74a1a19bd96704911e801248d6db9",
+          "Rank": 31189,
+          "TotalShare": 0.0004086642795408474,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.001136032787607292
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 53.58117894112945
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0003416275592496683,
+          "FilteredShare": 0.0003416275592496683,
+          "TotalVisits": 44.791796836131724,
+          "Domain": "dashboard.livepix.gg",
+          "Favicon": "https://site-images.similarcdn.com/image?url=dashboard.livepix.gg&t=2&s=0&h=9c413ec7afe053d385da30d2555815e5997729654067b735a2670f2c5f9251ab",
+          "Rank": -1,
+          "TotalShare": 0.0003416275592496683,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0009496795484399169
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 44.791796836131724
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Jobs_and_Career~Jobs_and_Employment",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00031443881201534776,
+          "FilteredShare": 0.00031443881201534776,
+          "TotalVisits": 41.227,
+          "Domain": "euremotejobs.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=euremotejobs.com&t=2&s=0&h=dc3567a10cc7543cfa864acb9e689973041cdb5f348e837924be70681cebddd7",
+          "Rank": 115708,
+          "TotalShare": 0.00031443881201534776,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0008740984177698755
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 41.227
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "News_and_Media",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00030263219787898674,
+          "FilteredShare": 0.00030263219787898674,
+          "TotalVisits": 39.679,
+          "Domain": "newsweek.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=newsweek.com&t=2&s=0&h=5f785446fc1a4333ac862a42453302e13dc8740339bd9f6fcc337f152a703d18",
+          "Rank": 1339,
+          "TotalShare": 0.00030263219787898674,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.000984718937111947
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 39.679
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00025720571609851733,
+          "FilteredShare": 0.00025720571609851733,
+          "TotalVisits": 33.723,
+          "Domain": "digital-expert.online",
+          "Favicon": "https://site-images.similarcdn.com/image?url=digital-expert.online&t=2&s=0&h=c011a2ba1788d459dca022dfc5ad3d21e721d3293b03a9ab493fe1d5f673ee3d",
+          "Rank": 2695296,
+          "TotalShare": 0.00025720571609851733,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0007149979611044585
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 33.723
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Community_and_Society~Faith_and_Beliefs",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00014062684201952562,
+          "FilteredShare": 0.00014062684201952562,
+          "TotalVisits": 18.438,
+          "Domain": "livecontrol.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=livecontrol.io&t=2&s=0&h=838e3c0b1c26b5df3b9bbca4887bdd7e45404f6d6edaa211c4ad011a58f8376f",
+          "Rank": 2254029,
+          "TotalShare": 0.00014062684201952562,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.00045757825959500184
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "restream.io",
+                "Value": 1,
+                "AbsValue": 18.438
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "restream.io",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "HasAdsense": false
+        }
+      ]
+    }
+  }
+]

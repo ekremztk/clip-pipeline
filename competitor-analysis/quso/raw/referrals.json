@@ -1,0 +1,3746 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=5",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=quso.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "quso.ai": {
+        "mainDomainName": "quso",
+        "icon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "image": "https://site-images.similarcdn.com/image?url=quso.ai&t=0&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=quso.ai&t=1&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "title": "quso.ai: Long To Short Video AI & Social Media Scheduling (formerly vidyo.ai)",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "quso.ai (formerly vidyo.ai) is the best AI-powered video repurposing and social media scheduling tool trusted by 4M+ coaches, podcasters, business owners and video creators.",
+        "globalRanking": 93435,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 93758,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 810,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "ai.quso.app",
+              "title": "AI Captions",
+              "author": "CC AI Captions",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2FcEpHbnY-jiSu4JgQXBf2c-2PDa4W4EUnxyGalTaPjyAXSwwQsafCZsapLnAOAhMbKz0%3Ds180&h=932eb95435e614d2d9ee8ae739d295afb6f782671b8d189e17c3a9d2e7834142",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.188679218292236,
+              "ratecount": 888,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2022",
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 162058.94302456797,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferrals?key=quso.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&ignoreFilterConsistency=false",
+    "body": {
+      "dictionary": {
+        "quso.ai": {
+          "VolumeTotal": 1320096.859797963,
+          "Volumes": [
+            [
+              40390.295777413194,
+              null
+            ],
+            [
+              52296.46544153367,
+              null
+            ],
+            [
+              31742.87056847835,
+              null
+            ]
+          ],
+          "Dates": [
+            "2025-12-01",
+            "2026-01-01",
+            "2026-02-01"
+          ],
+          "SearchTotal": 124429.63178742523
+        }
+      },
+      "Categories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Financial_Planning_and_Management",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Adult",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Hobbies_and_Leisure/Photography",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 8,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Finance",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Games/Games",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Humor",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Community_and_Society/Philanthropy",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 1,
+          "Value": 0
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Rank": 3787,
+        "Favicon": "https://site-images.similarcdn.com/image?url=heygen.com&t=2&s=1&h=da761b4500aacead5d6342124f3d9ea128dae354f2ee9191d230f0a756fe735c"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "getmunch.com",
+        "DomainWithoutSub": "getmunch.com",
+        "Rank": 1601445,
+        "Favicon": "https://site-images.similarcdn.com/image?url=getmunch.com&t=2&s=1&h=ead38b278572f50cf6ed47b22699af3d5586e165234e8fe68cdc7af15410397f"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "munchstudio.com",
+        "DomainWithoutSub": "munchstudio.com",
+        "Rank": 288433,
+        "Favicon": "https://site-images.similarcdn.com/image?url=munchstudio.com&t=2&s=1&h=0a1021dc7b70c1a4b7e0b71fe8ad78d2bdc60238661b5135cdf45a4c6f0e6567"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "later.com",
+        "DomainWithoutSub": "later.com",
+        "Rank": 22262,
+        "Favicon": "https://site-images.similarcdn.com/image?url=later.com&t=2&s=1&h=a579fa82672132e2ea35028927f0f10177b82bf2ade18a19ce09dd5aa3d7bb78"
+      },
+      {
+        "Domain": "wevideo.com",
+        "DomainWithoutSub": "wevideo.com",
+        "Rank": 38711,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wevideo.com&t=2&s=1&h=f8eb1ee5018a12c89e116e3c36fbb91a8f10d1f954a9408e26a6a8ee8b3d9866"
+      },
+      {
+        "Domain": "jasper.ai",
+        "DomainWithoutSub": "jasper.ai",
+        "Rank": 58811,
+        "Favicon": "https://site-images.similarcdn.com/image?url=jasper.ai&t=2&s=1&h=2ba38385e969df3f06863d64140edcfe790847e79e10ffadaea233f7673e9e36"
+      },
+      {
+        "Domain": "simplified.com",
+        "DomainWithoutSub": "simplified.com",
+        "Rank": 80268,
+        "Favicon": "https://site-images.similarcdn.com/image?url=simplified.com&t=2&s=1&h=8edc9e35c59f2c240b1875890e3d217c616bc08d4a92055a65a48b1022882a61"
+      },
+      {
+        "Domain": "copy.ai",
+        "DomainWithoutSub": "copy.ai",
+        "Rank": 84979,
+        "Favicon": "https://site-images.similarcdn.com/image?url=copy.ai&t=2&s=1&h=132d3538bbd2d7431cab0097b4f7f3eff4d341c4fcff1bb14da6e0ee83247849"
+      },
+      {
+        "Domain": "claap.io",
+        "DomainWithoutSub": "claap.io",
+        "Rank": 195276,
+        "Favicon": "https://site-images.similarcdn.com/image?url=claap.io&t=2&s=1&h=2bd0dae67879ef64d7e542a0388267accdb6e4a224feb64cdc030c550dd5f219"
+      },
+      {
+        "Domain": "seo.ai",
+        "DomainWithoutSub": "seo.ai",
+        "Rank": 208916,
+        "Favicon": "https://site-images.similarcdn.com/image?url=seo.ai&t=2&s=1&h=6a6f3f0e2d6b80de18302e3923a57c77b70d0281077979e7e220fe55322ad2ec"
+      },
+      {
+        "Domain": "juma.ai",
+        "DomainWithoutSub": "juma.ai",
+        "Rank": 223379,
+        "Favicon": "https://site-images.similarcdn.com/image?url=juma.ai&t=2&s=1&h=2911f727a50186a45bc1d8e2e37796ea7fa108584da6bd9bcbbc952a13c6bf54"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferralsTable?key=quso.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&orderBy=TotalShare+desc&ignoreFilterConsistency=false",
+    "body": {
+      "TotalShare": 0.9999999999999993,
+      "TotalVisits": 60496.629334512916,
+      "TotalVisitsGlobalList": {
+        "quso.ai": 1
+      },
+      "TopCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 0,
+          "Value": 0.5735366575041134
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.1619245527508643
+        },
+        {
+          "Name": "Finance/Financial_Planning_and_Management",
+          "Count": 0,
+          "Value": 0.07776305776967611
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 0,
+          "Value": 0.044074635639879484
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+          "Count": 0,
+          "Value": 0.03204593853128041
+        },
+        {
+          "Name": "Unknown",
+          "Count": 0,
+          "Value": 0.027842580267364966
+        },
+        {
+          "Name": "Hobbies_and_Leisure/Photography",
+          "Count": 0,
+          "Value": 0.01481194009360755
+        },
+        {
+          "Name": "Adult",
+          "Count": 0,
+          "Value": 0.012824688315226858
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 0,
+          "Value": 0.011951577012238868
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 0,
+          "Value": 0.008868757002441614
+        }
+      ],
+      "Categories": {
+        "quso.ai": [
+          {
+            "Name": "AI_Chatbots_and_Tools",
+            "Count": 5,
+            "Value": 0.5735366575041134
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+            "Count": 10,
+            "Value": 0.1619245527508643
+          },
+          {
+            "Name": "Finance/Financial_Planning_and_Management",
+            "Count": 1,
+            "Value": 0.07776305776967611
+          },
+          {
+            "Name": "Adult",
+            "Count": 1,
+            "Value": 0.012824688315226858
+          },
+          {
+            "Name": "Hobbies_and_Leisure/Photography",
+            "Count": 1,
+            "Value": 0.01481194009360755
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+            "Count": 8,
+            "Value": 0.044074635639879484
+          },
+          {
+            "Name": "Finance/Finance",
+            "Count": 1,
+            "Value": 0.0008236484471479845
+          },
+          {
+            "Name": "Games/Games",
+            "Count": 1,
+            "Value": 0.005293338714375585
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+            "Count": 1,
+            "Value": 0.005956859617367041
+          },
+          {
+            "Name": "Science_and_Education/Education",
+            "Count": 1,
+            "Value": 0.006310634119764314
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+            "Count": 6,
+            "Value": 0.011951577012238868
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+            "Count": 1,
+            "Value": 0.008868757002441614
+          },
+          {
+            "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+            "Count": 2,
+            "Value": 0.03204593853128041
+          },
+          {
+            "Name": "Unknown",
+            "Count": 10,
+            "Value": 0.027842580267364966
+          },
+          {
+            "Name": "Arts_and_Entertainment/Humor",
+            "Count": 1,
+            "Value": 0.0050399906091055015
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Online_Marketing",
+            "Count": 1,
+            "Value": 0.0032450758575543128
+          },
+          {
+            "Name": "Community_and_Society/Philanthropy",
+            "Count": 1,
+            "Value": 0.0006192938681433169
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Search_Engines",
+            "Count": 3,
+            "Value": 0.0038812575606761365
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Email",
+            "Count": 1,
+            "Value": 0.0012558385621768411
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+            "Count": 1,
+            "Value": 0.0019296777569953174
+          }
+        ]
+      },
+      "AllCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Financial_Planning_and_Management",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Adult",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Hobbies_and_Leisure/Photography",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 8,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Finance",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Games/Games",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Arts_and_Entertainment/Humor",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Community_and_Society/Philanthropy",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 1,
+          "Value": 0
+        }
+      ],
+      "Topics": [
+        {
+          "Name": "internet",
+          "Value": 0.10000000000000003
+        },
+        {
+          "Name": "blog",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "community",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "links",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "news",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "samsung galaxy",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "web2.0",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "дети",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "интересное",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "развлечения",
+          "Value": 0.08675644587373928
+        },
+        {
+          "Name": "russian",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "search",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "search engine",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "yandex",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "поиск",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "поиск людей",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "поисковики",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "почта",
+          "Value": 0.01324355412626076
+        },
+        {
+          "Name": "яндекс",
+          "Value": 0.01324355412626076
+        }
+      ],
+      "TotalCount": 56,
+      "TotalUnGroupedCount": 57,
+      "Records": [
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.46216523178482044,
+          "NewChange": false,
+          "Share": 0.4757911445060182,
+          "FilteredShare": 0.4757911445060182,
+          "TotalVisits": 28783.760509824257,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Rank": 6,
+          "TotalShare": 0.4757911445060182,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.35004969753757365
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.5475547981772804
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.5357715626606387
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 7403.147626538805
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 13903.06249097224
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 7477.550392313211
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "Finance~Financial_Planning_and_Management",
+          "SourceType": "ST",
+          "Change": -0.9224773524565727,
+          "NewChange": false,
+          "Share": 0.07776305776967611,
+          "FilteredShare": 0.07776305776967611,
+          "TotalVisits": 4704.402881810411,
+          "Domain": "swiy.co",
+          "Favicon": "https://site-images.similarcdn.com/image?url=swiy.co&t=2&s=0&h=a815b4cd683edcf6669654b82efab2da878e118ce85efa00eaa105c95ab2c483",
+          "Rank": 93378,
+          "TotalShare": 0.07776305776967611,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.09573373555722027
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.097945419592079
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.01381388777167362
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 2024.6581618430196
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 2486.9497880872987
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 192.79493188009286
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.07331261950991597,
+          "FilteredShare": 0.07331261950991597,
+          "TotalVisits": 4435.166368033566,
+          "Domain": "vidyo.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=0&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056",
+          "Rank": 470819,
+          "TotalShare": 0.07331261950991597,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.2097119663119325
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 4435.166368033566
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.7395243949859209,
+          "NewChange": false,
+          "Share": 0.0407303438250271,
+          "FilteredShare": 0.0407303438250271,
+          "TotalVisits": 2464.0485130499314,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Rank": 264,
+          "TotalShare": 0.0407303438250271,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.005232969351767537
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.07353163433976907
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.03484532105330081
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 110.6712701333782
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 1867.0549700089332
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 486.3222729076201
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -0.04632313935814412,
+          "NewChange": false,
+          "Share": 0.03730355868046929,
+          "FilteredShare": 0.03730355868046929,
+          "TotalVisits": 2256.7395623506027,
+          "Domain": "app.clickup.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.clickup.com&t=2&s=0&h=640f36fd1ec71062aed8cf8ddc65d875a921507d96885e26c7de38c91cd9b07e",
+          "Rank": -1,
+          "TotalShare": 0.03730355868046929,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.03606668282574858
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.030116637964668916
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.05225296390448327
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 762.7687703684089
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 764.6969783382542
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 729.2738136439395
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": true,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.028493361244431595,
+          "FilteredShare": 0.028493361244431595,
+          "TotalVisits": 1723.7523136987538,
+          "Domain": "copilot.microsoft.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=copilot.microsoft.com&t=2&s=0&h=eb2c5d699c15f4d7ff035602d8165b847ac5e2883d42a9d8eae54163cd4b47cb",
+          "Rank": 448,
+          "TotalShare": 0.028493361244431595,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.04698885725770817
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.028749831265043185
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 993.7601704221834
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 729.9921432765705
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.5998493170454551,
+          "NewChange": false,
+          "Share": 0.026041967288747928,
+          "FilteredShare": 0.026041967288747928,
+          "TotalVisits": 1575.4512422088937,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Rank": 19,
+          "TotalShare": 0.026041967288747928,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.001479465970257014
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.04343454400988235
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.031620011604059146
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 1102.8543291858139
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 441.3079130230799
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 31.289
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "E-commerce_and_Shopping~Coupons_and_Rebates",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.025209822130261926,
+          "FilteredShare": 0.025209822130261926,
+          "TotalVisits": 1525.1092650034566,
+          "Domain": "grabon.in",
+          "Favicon": "https://site-images.similarcdn.com/image?url=grabon.in&t=2&s=0&h=2bbcc60e643d25538b2bfb72540c7e887cdb5b559162803992ef1f48bd81983d",
+          "Rank": 16005,
+          "TotalShare": 0.025209822130261926,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.10927511434481202
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 1525.1092650034566
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -0.8322263572285976,
+          "NewChange": false,
+          "Share": 0.019499849808158533,
+          "FilteredShare": 0.019499849808158533,
+          "TotalVisits": 1179.6751859228395,
+          "Domain": "toolify.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolify.ai&t=2&s=0&h=a274658d0d5c006c07c78f798989130b0de2c0ecebc5c7d1ba530bfef8bdcc7c",
+          "Rank": 30139,
+          "TotalShare": 0.019499849808158533,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.014427320271391075
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.029494773922918233
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009002683906399552
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 305.12119443554013
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 748.9071164611804
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 125.64687502611908
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Hobbies_and_Leisure~Photography",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.01481194009360755,
+          "FilteredShare": 0.01481194009360755,
+          "TotalVisits": 896.0724495679865,
+          "Domain": "fixthephoto.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=fixthephoto.com&t=2&s=0&h=e44601e551dd24114a7d86ad143a4b3747fa22e0f4cf1b2ee406d5dac5e1a55a",
+          "Rank": 45880,
+          "TotalShare": 0.01481194009360755,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.04236980076131165
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 896.0724495679865
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.013696064534988795,
+          "FilteredShare": 0.013696064534988795,
+          "TotalVisits": 828.5657395147852,
+          "Domain": "blogdumoderateur.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=blogdumoderateur.com&t=2&s=0&h=6e493147f4c04cc1899b720a4feb250d153470d74ebd8b4308e42c9e0ee13625",
+          "Rank": 72125,
+          "TotalShare": 0.013696064534988795,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.039177820183865314
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 828.5657395147852
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Adult",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.012824688315226858,
+          "FilteredShare": 0.012824688315226858,
+          "TotalVisits": 775.8504153369381,
+          "Domain": "ai-otaku-labo.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ai-otaku-labo.com&t=2&s=0&h=a2ef55b1ace49267a7988d28af181c1c9b01b3a5c66c77d17fb490afabcd9d35",
+          "Rank": 229610,
+          "TotalShare": 0.012824688315226858,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.03668523402795776
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 775.8504153369381
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.012475127322250099,
+          "FilteredShare": 0.012475127322250099,
+          "TotalVisits": 754.7031535150189,
+          "Domain": "futurepedia.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=futurepedia.io&t=2&s=0&h=9a3f8a8e3454438ed79ffc06efa19428cfb776ab2791e027a2930ed2bf2d2d30",
+          "Rank": 87794,
+          "TotalShare": 0.012475127322250099,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.027497905191504877
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.006819460650704726
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 173.15415351501892
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 581.549
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.010465934085679283,
+          "FilteredShare": 0.010465934085679283,
+          "TotalVisits": 633.1537350207839,
+          "Domain": "aihaven.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aihaven.com&t=2&s=0&h=709f05654ac0aa64171174829fb60de1ce1bf4651c7f8e39f9ec9f7b816d0b7d",
+          "Rank": 848500,
+          "TotalShare": 0.010465934085679283,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.04536589500824005
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 633.1537350207839
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.009800711320981793,
+          "FilteredShare": 0.009800711320981793,
+          "TotalVisits": 592.91,
+          "Domain": "aivideotoolspro.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aivideotoolspro.com&t=2&s=0&h=bbaba7c93d904e92897eec3ed53c3e36f4222f46bedd5bd94a76c5ff0a1ead1b",
+          "Rank": 1044285,
+          "TotalShare": 0.009800711320981793,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.02335102180531079
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 592.91
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.008868757002441614,
+          "FilteredShare": 0.008868757002441614,
+          "TotalVisits": 536.5299050345762,
+          "Domain": "getindevice.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=getindevice.com&t=2&s=0&h=b41fb9c37414e47b34fb6df77c226cb7c2e05c08fc1e9261996adf1c8d753a15",
+          "Rank": 72727,
+          "TotalShare": 0.008868757002441614,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.038442731984800825
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 536.5299050345762
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.008611980152755154,
+          "FilteredShare": 0.008611980152755154,
+          "TotalVisits": 520.9957711374104,
+          "Domain": "dang.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=dang.ai&t=2&s=0&h=870bc8c1844f3962fe4f11d5abf6da238f94b42fad1a522e6caa888d005d6e88",
+          "Rank": 230970,
+          "TotalShare": 0.008611980152755154,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.008129707574487161
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.013747365233878555
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 171.9339446881224
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 349.061826449288
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "E-commerce_and_Shopping~Coupons_and_Rebates",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00683611640101849,
+          "FilteredShare": 0.00683611640101849,
+          "TotalVisits": 413.562,
+          "Domain": "kayipro.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=kayipro.com&t=2&s=0&h=774ca470f40fa84d0584ce4507ff052b839baba2b9602a994a4dec09d61f0c93",
+          "Rank": 1289414,
+          "TotalShare": 0.00683611640101849,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.01628762422601734
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 413.562
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.006642535368011763,
+          "FilteredShare": 0.006642535368011763,
+          "TotalVisits": 401.851,
+          "Domain": "affitor.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=affitor.com&t=2&s=0&h=17452538e3d5e6a24a9c6c8c7aec0392d35811c900dbddd40456a1492d1ae156",
+          "Rank": 2537186,
+          "TotalShare": 0.006642535368011763,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0062001487684464575
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.01066216690263744
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 131.126
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 270.725
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.006553648378793574,
+          "FilteredShare": 0.006553648378793574,
+          "TotalVisits": 396.4736367606064,
+          "Domain": "aixploria.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aixploria.com&t=2&s=0&h=bfab7f4b2d02e37c654c3e731f5f1fe2150d2c5888e66d7c93b2d58e8ba5dbd7",
+          "Rank": 33043,
+          "TotalShare": 0.006553648378793574,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0284076052686104
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 396.4736367606064
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Science_and_Education~Education",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.006310634119764314,
+          "FilteredShare": 0.006310634119764314,
+          "TotalVisits": 381.77209320911186,
+          "Domain": "neural-networked.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=neural-networked.ru&t=2&s=0&h=fbb2d29d9088e6c7ae304ca3bd9d10f807bcd37b84f5183a843f944acdafbbbf",
+          "Rank": 573369,
+          "TotalShare": 0.006310634119764314,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.015035618345423612
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 381.77209320911186
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.006005500258890467,
+          "FilteredShare": 0.006005500258890467,
+          "TotalVisits": 363.3125231304179,
+          "Domain": "newstory-insight1.tistory.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=newstory-insight1.tistory.com&t=2&s=0&h=8fb4c066cca3b26a6dd01a6e24d47921d36164e8c9ea89ab085d1994f14ff64f",
+          "Rank": -1,
+          "TotalShare": 0.006005500258890467,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.02603158896152178
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 363.3125231304179
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Advertising_Networks",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.005956859617367041,
+          "FilteredShare": 0.005956859617367041,
+          "TotalVisits": 360.3699282695823,
+          "Domain": "clubpromptturbo.lovable.app",
+          "Favicon": "https://site-images.similarcdn.com/image?url=clubpromptturbo.lovable.app&t=2&s=0&h=7b22049fc9e9133a4fbff58913f97448f0c9caebb23b106780e3dc98acc302fd",
+          "Rank": -1,
+          "TotalShare": 0.005956859617367041,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.014192720738394194
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 360.3699282695823
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Games~Games",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.005293338714375585,
+          "FilteredShare": 0.005293338714375585,
+          "TotalVisits": 320.22915014560687,
+          "Domain": "sub4unlock.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=sub4unlock.com&t=2&s=0&h=3f269d1626474db82c597a58f6d9423258299db653733ca5136604e07e70eef9",
+          "Rank": 78163,
+          "TotalShare": 0.005293338714375585,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.012611826192417413
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 320.22915014560687
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Arts_and_Entertainment~Humor",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0050399906091055015,
+          "FilteredShare": 0.0050399906091055015,
+          "TotalVisits": 304.9024437284815,
+          "Domain": "pikabu.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=pikabu.ru&t=2&s=0&h=09b46f94dededa42ca6f4e63a59fed6fdea51b5ebb1ac9c5f0991fbf97f354fd",
+          "Rank": 487,
+          "TotalShare": 0.0050399906091055015,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.021846467113532955
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 304.9024437284815
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00457200479215408,
+          "FilteredShare": 0.00457200479215408,
+          "TotalVisits": 276.59087922656215,
+          "Domain": "t.me",
+          "Favicon": "https://site-images.similarcdn.com/image?url=t.me&t=2&s=0&h=3151265a64fa94112029f3e81d07655b605dd870fad655049a47e0f89cb877cc",
+          "Rank": 55,
+          "TotalShare": 0.00457200479215408,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.013078295678965972
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 276.59087922656215
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.004020028501143822,
+          "FilteredShare": 0.004020028501143822,
+          "TotalVisits": 243.1981741478753,
+          "Domain": "topai.tools",
+          "Favicon": "https://site-images.similarcdn.com/image?url=topai.tools&t=2&s=0&h=6641870326f5305db80406b813b721331978543a001a3194ff7c7e9cb0259c0b",
+          "Rank": 90963,
+          "TotalShare": 0.004020028501143822,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010333423667741627
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.015859460364311823
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 221.3441741478753
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 21.854
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0037218106608056835,
+          "FilteredShare": 0.003721810660805683,
+          "TotalVisits": 225.15699999999998,
+          "Domain": "force.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=force.com&t=2&s=0&h=d410a930728d6d466c397b9e97796d0a8e782c022bf2d286ef217da21ed0e695",
+          "Rank": 151,
+          "TotalShare": 0.0037218106608056835,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007093625356831401
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0029590983848173016
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 150.022
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 75.135
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "Children": [
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "NewChange": false,
+              "Share": 0.0024798406398885676,
+              "FilteredShare": 0.0024798406398885676,
+              "TotalVisits": 150.022,
+              "Domain": "trustpilot.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=trustpilot.lightning.force.com&t=2&s=0&h=36317fd34691bf7d301bc7943858187a917105688df7b44fe36404cd1a97b90c",
+              "Rank": -1,
+              "TotalShare": 0.0024798406398885676,
+              "SiteOrigins": {
+                "quso.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.0012419700209171157,
+              "FilteredShare": 0.0012419700209171157,
+              "TotalVisits": 75.135,
+              "Domain": "reddit.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=reddit.lightning.force.com&t=2&s=0&h=7b079674a68bb1f9fca380d0cf2011c036ec722fc9598f21c85aff4017c63982",
+              "Rank": -1,
+              "TotalShare": 0.0012419700209171157,
+              "SiteOrigins": {
+                "quso.ai": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0034321416297741865,
+          "FilteredShare": 0.0034321416297741865,
+          "TotalVisits": 207.633,
+          "Domain": "aiadvancetools.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aiadvancetools.com&t=2&s=0&h=b16e521c6933f0f20b2ac4683c8c4e01c4bd08a8a0ee464b07c763347b612cef",
+          "Rank": 10864976,
+          "TotalShare": 0.0034321416297741865,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.009817698162369349
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 207.633
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Online_Marketing",
+          "SourceType": "ST",
+          "Change": 1.8489589514133888,
+          "NewChange": false,
+          "Share": 0.0032450758575543128,
+          "FilteredShare": 0.0032450758575543128,
+          "TotalVisits": 196.3161513168399,
+          "Domain": "jens.marketing",
+          "Favicon": "https://site-images.similarcdn.com/image?url=jens.marketing&t=2&s=0&h=7d4a4f61fc770615b6d825b5757352bb5960f58b453baab6b962715c7ecf7be5",
+          "Rank": 1328264,
+          "TotalShare": 0.0032450758575543128,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0020087683917961864
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.010411642654133357
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 145.3111513168399
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 51.005
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0032328908593990627,
+          "FilteredShare": 0.0032328908593990627,
+          "TotalVisits": 195.579,
+          "Domain": "qusoai.firebaseapp.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=qusoai.firebaseapp.com&t=2&s=0&h=79134df910aabf24b97372b821eb95e1dd88f4f530820f84c20a18209ce076e3",
+          "Rank": -1,
+          "TotalShare": 0.0032328908593990627,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007702635296522034
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 195.579
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0026814457412130495,
+          "FilteredShare": 0.0026814457412130495,
+          "TotalVisits": 162.2184290867741,
+          "Domain": "aitools.inc",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aitools.inc&t=2&s=0&h=f1052d3180105065e686b7d2d2bd4be907472c0b228ccf80fcd205229e1609d8",
+          "Rank": 333779,
+          "TotalShare": 0.0026814457412130495,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007670320099154107
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 162.2184290867741
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.002668049472764887,
+          "FilteredShare": 0.002668049472764887,
+          "TotalVisits": 161.408,
+          "Domain": "allaboutai.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=allaboutai.com&t=2&s=0&h=9725b1868eed3d2a693e6f100c52e03912b9fd9c260982924cbb69bdb7aca4ed",
+          "Rank": 281976,
+          "TotalShare": 0.002668049472764887,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.006356853025841365
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 161.408
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0024798406398885676,
+          "FilteredShare": 0.0024798406398885676,
+          "TotalVisits": 150.022,
+          "Domain": "app.raindrop.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.raindrop.io&t=2&s=0&h=efa0226985fff4184a3d463a06bb5086c8c0217a85563c8ce0fc024527ef400a",
+          "Rank": -1,
+          "TotalShare": 0.0024798406398885676,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007093625356831401
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 150.022
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0024798406398885676,
+          "FilteredShare": 0.0024798406398885676,
+          "TotalVisits": 150.022,
+          "Domain": "claude.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=claude.ai&t=2&s=0&h=a3b3778e02952b653132fb6d019ed0361cff7850429377787fbdc4c86ce1565e",
+          "Rank": 125,
+          "TotalShare": 0.0024798406398885676,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007093625356831401
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 150.022
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0024798406398885676,
+          "FilteredShare": 0.0024798406398885676,
+          "TotalVisits": 150.022,
+          "Domain": "similarsites.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=similarsites.com&t=2&s=0&h=8184d07d522d2652bbf08a36c3ea327ec2ba30834e1300e3d830d16c653029c9",
+          "Rank": 26441,
+          "TotalShare": 0.0024798406398885676,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007093625356831401
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 150.022
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0021885457924801757,
+          "FilteredShare": 0.0021885457924801757,
+          "TotalVisits": 132.39964358928103,
+          "Domain": "powerfulai.tools",
+          "Favicon": "https://site-images.similarcdn.com/image?url=powerfulai.tools&t=2&s=0&h=85627cdac581ede4393524229754f2084f6a6448b631f7d82c16ec720e6163f4",
+          "Rank": 504288,
+          "TotalShare": 0.0021885457924801757,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009486524358894542
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 132.39964358928103
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Web_Hosting_and_Domain_Names",
+          "SourceType": "ST",
+          "Change": 0.30499210494351997,
+          "NewChange": false,
+          "Share": 0.0019296777569953174,
+          "FilteredShare": 0.0019296777569953174,
+          "TotalVisits": 116.739,
+          "Domain": "affiliate.watch",
+          "Favicon": "https://site-images.similarcdn.com/image?url=affiliate.watch&t=2&s=0&h=bcf0f943b77da4587a2b0600a396fd4dd2395ff0467df9ee8feba8880915b54e",
+          "Rank": 452204,
+          "TotalShare": 0.0019296777569953174,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010333423667741627
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0016212322487656114
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0038490744744049516
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 21.854
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 41.165
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 53.72
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0017035680434761844,
+          "FilteredShare": 0.0017035680434761844,
+          "TotalVisits": 103.06012447230012,
+          "Domain": "exemplary.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=0&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+          "Rank": 267181,
+          "TotalShare": 0.0017035680434761844,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.004058894627870544
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 103.06012447230012
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0016129163074600182,
+          "FilteredShare": 0.0016129163074600182,
+          "TotalVisits": 97.576,
+          "Domain": "creati.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=creati.ai&t=2&s=0&h=4993200c1c087053178524a5746eba1c5e5f3d501ff54b0bb5f889a36ef85f41",
+          "Rank": 81052,
+          "TotalShare": 0.0016129163074600182,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0046137738986160755
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 97.576
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.001378308195303545,
+          "FilteredShare": 0.001378308195303545,
+          "TotalVisits": 83.383,
+          "Domain": "arc.sheincorp.cn",
+          "Favicon": "https://site-images.similarcdn.com/image?url=arc.sheincorp.cn&t=2&s=0&h=c65c5af681a2c95ccbca27d32ee0624c77a1f574fa60a66e586acc47a0f7afee",
+          "Rank": -1,
+          "TotalShare": 0.001378308195303545,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.003942673495411824
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 83.383
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0.8185511171293162,
+          "NewChange": false,
+          "Share": 0.0013762750241772682,
+          "FilteredShare": 0.0013762750241772682,
+          "TotalVisits": 83.25999999999999,
+          "Domain": "quso.firstpromoter.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=quso.firstpromoter.com&t=2&s=0&h=e2524e82cb95ca68f3759ef90e125b90dcd4b2b0d8a3a43c351483bbd410648e",
+          "Rank": -1,
+          "TotalShare": 0.0013762750241772682,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0011633961041791852
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0038490744744049516
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 29.54
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 53.72
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0012558385621768411,
+          "FilteredShare": 0.0012558385621768411,
+          "TotalVisits": 75.974,
+          "Domain": "waimao21.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=waimao21.com&t=2&s=0&h=182d45d137f72a3234fd5fc76096029bfe4b4958c05081771cc3b07434d4143f",
+          "Rank": 304740,
+          "TotalShare": 0.0012558385621768411,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0035923470748284183
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 75.974
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0012419700209171157,
+          "FilteredShare": 0.0012419700209171157,
+          "TotalVisits": 75.135,
+          "Domain": "intelligenzaartificialeia.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=intelligenzaartificialeia.com&t=2&s=0&h=c9d6587e096b0161476310bb03dacd3b2194ebdcdfbaa25fe4ff9038c35d7fb7",
+          "Rank": -1,
+          "TotalShare": 0.0012419700209171157,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0029590983848173016
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 75.135
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0011545932520268798,
+          "FilteredShare": 0.0011545932520268798,
+          "TotalVisits": 69.849,
+          "Domain": "ia.ripol.fr",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ia.ripol.fr&t=2&s=0&h=b992b07b38c322adf944ce0fb67ff9736b5ae31715b326e5fa2efe4903176a8d",
+          "Rank": -1,
+          "TotalShare": 0.0011545932520268798,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0027509158592014865
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 69.849
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0009293906225602559,
+          "FilteredShare": 0.0009293906225602559,
+          "TotalVisits": 56.225,
+          "Domain": "pro.metrica.guru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=pro.metrica.guru&t=2&s=0&h=d3936fc87e9e3273208153508874da153ed38cdcef4f2e58b906b230fb19b543",
+          "Rank": -1,
+          "TotalShare": 0.0009293906225602559,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0022143515896233816
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 56.225
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0008879833569397412,
+          "FilteredShare": 0.0008879833569397412,
+          "TotalVisits": 53.72,
+          "Domain": "admin.aitodays.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=admin.aitodays.net&t=2&s=0&h=57ca5b8139767b6ff6c5f87d9908f20471b394976f78d6149d92749e9afbcbc9",
+          "Rank": -1,
+          "TotalShare": 0.0008879833569397412,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0038490744744049516
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 53.72
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Finance~Finance",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0008236484471479845,
+          "FilteredShare": 0.0008236484471479845,
+          "TotalVisits": 49.827954809058774,
+          "Domain": "joinef.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=joinef.com&t=2&s=0&h=f1057925594a0a68df4a07487bbfe88969d9fbf369afa23465628c21d5c3a944",
+          "Rank": 177654,
+          "TotalShare": 0.0008236484471479845,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0023560600692737635
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 49.827954809058774
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0007693651780603743,
+          "FilteredShare": 0.0007693651780603743,
+          "TotalVisits": 46.544,
+          "Domain": "yandex.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=yandex.ru&t=2&s=0&h=f0674e5e56f12160a4f31738b3aecd42e2ebffde994db0c5ebdd214ef6dde60e",
+          "Rank": 11,
+          "TotalShare": 0.0007693651780603743,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0033349092020979907
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 46.544
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0006320517427271944,
+          "FilteredShare": 0.0006320517427271944,
+          "TotalVisits": 38.237,
+          "Domain": "aiyoufeng.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aiyoufeng.com&t=2&s=0&h=a1d64253a7178c6dbcc1f8435487d2f82bea279a6b04bd0c3376db84f3b403ec",
+          "Rank": 5103900,
+          "TotalShare": 0.0006320517427271944,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0015059166159613916
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 38.237
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Community_and_Society~Philanthropy",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0006192938681433169,
+          "FilteredShare": 0.0006192938681433169,
+          "TotalVisits": 37.46519159020296,
+          "Domain": "tatrck.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tatrck.com&t=2&s=0&h=ec183ccc430927771886dec2896d6a86702eb14e91601f23b7ee8071441eedc1",
+          "Rank": 5251,
+          "TotalShare": 0.0006192938681433169,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0026844064152744098
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 37.46519159020296
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0005720318698856419,
+          "FilteredShare": 0.0005720318698856419,
+          "TotalVisits": 34.606,
+          "Domain": "atomicdesignz.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=atomicdesignz.com&t=2&s=0&h=3efb45b66c9c5a2f4842085129bd1124179d4551993865c428125e6b085c9b97",
+          "Rank": -1,
+          "TotalShare": 0.0005720318698856419,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0016363066690119282
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 34.606
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.000488291667237527,
+          "FilteredShare": 0.000488291667237527,
+          "TotalVisits": 29.54,
+          "Domain": "videaitools.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=videaitools.com&t=2&s=0&h=4481ad7771c58c2d645761022f7af903e6624620e422de4ea2a1e9e0e9f8e171",
+          "Rank": 3274620,
+          "TotalShare": 0.000488291667237527,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0011633961041791852
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 29.54
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 1
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0003612432666150615,
+          "FilteredShare": 0.0003612432666150615,
+          "TotalVisits": 21.854,
+          "Domain": "beacons.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=beacons.ai&t=2&s=0&h=0e8ea333ae0481778218a49544b8f1b3deed00366ac276c12870bc21dd0845af",
+          "Rank": 2397,
+          "TotalShare": 0.0003612432666150615,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010333423667741627
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 21.854
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0003612432666150615,
+          "FilteredShare": 0.0003612432666150615,
+          "TotalVisits": 21.854,
+          "Domain": "codecoupon.today",
+          "Favicon": "https://site-images.similarcdn.com/image?url=codecoupon.today&t=2&s=0&h=dde329ec6a52fd35cbf31497e63fadcd4bf2eb43f0e006c6c4d9a0450e346577",
+          "Rank": -1,
+          "TotalShare": 0.0003612432666150615,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010333423667741627
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 21.854
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0003612432666150615,
+          "FilteredShare": 0.0003612432666150615,
+          "TotalVisits": 21.854,
+          "Domain": "producthunt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=producthunt.com&t=2&s=0&h=8c40e574ce1b54e7618e2e48d8e1069007f1864e0977bb2f7875124bd8e44cc9",
+          "Rank": 16733,
+          "TotalShare": 0.0003612432666150615,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010333423667741627
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 1,
+                "AbsValue": 21.854
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "quso.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,2160 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=5",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 1975524.6178922423,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 3076976.9559280016,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?mainDomainOnly=false&includeCrossData=true&key=restream.io&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 3076976.9559280016,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=restream.io&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "restream.io": {
+          "TotalVisits": 10438837.860342264,
+          "Change": -0.15021953509906746,
+          "ShareOfVisits": 1,
+          "Trend": [
+            3740952,
+            3620908,
+            3076976
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "restream.io": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=restream.io&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "Desktop": 5382575.928342262,
+          "Mobile Web": 5056261.932000003
+        }
+      },
+      "KeysDataVerification": {
+        "restream.io": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=restream.io&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=4&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=restream.io&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "restream.io": false
+      },
+      "Data": [
+        {
+          "Domain": "restream.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=0&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+          "TotalVisits": 10438837.860342264,
+          "Change": -0.15021953509906746,
+          "ShareOfVisits": 1
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementOverview/Table?country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false&includeSubDomains=true&timeGranularity=Monthly&keys=restream.io&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "restream.io": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.6208180109644704,
+          "UniqueUsers": 1374563.3666666665,
+          "DedupUniqueUsers": 1163963.6417611416,
+          "VisitsPerUser": 2.5314312199023545,
+          "Source": "Total",
+          "Domain": "restream.io",
+          "AvgMonthVisits": 3479612.6201140867,
+          "AvgVisitDuration": 115.21195043832621,
+          "PagesPerVisit": 2.881951771571238,
+          "TotalPagesViews": 10028075.75491943,
+          "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=0&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=restream.io&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "GlobalRank": {
+            "Value": 18545,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 16914
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 17744
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 18545
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 12067,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 12034
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 11743
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 12067
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 631,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 589
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 618
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 631
+              }
+            ]
+          },
+          "Category": "Games/Video_Games_Consoles_and_Accessories",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteGeography/Geography/Table?country=999&includeSubDomains=true&webSource=Total&timeGranularity=Monthly&orderBy=TotalShare+desc&keys=restream.io&pageSize=5&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 122,
+      "TotalTopLevelCount": 0,
+      "Filters": {
+        "country": [
+          {
+            "id": "840",
+            "text": "United States",
+            "formattedText": "United States",
+            "icon": "flag flag-us",
+            "count": 0
+          },
+          {
+            "id": "356",
+            "text": "India",
+            "formattedText": "India",
+            "icon": "flag flag-in",
+            "count": 0
+          },
+          {
+            "id": "826",
+            "text": "United Kingdom",
+            "formattedText": "United Kingdom",
+            "icon": "flag flag-gb",
+            "count": 0
+          },
+          {
+            "id": "484",
+            "text": "Mexico",
+            "formattedText": "Mexico",
+            "icon": "flag flag-mx",
+            "count": 0
+          },
+          {
+            "id": "124",
+            "text": "Canada",
+            "formattedText": "Canada",
+            "icon": "flag flag-ca",
+            "count": 0
+          },
+          {
+            "id": "76",
+            "text": "Brazil",
+            "formattedText": "Brazil",
+            "icon": "flag flag-br",
+            "count": 0
+          },
+          {
+            "id": "250",
+            "text": "France",
+            "formattedText": "France",
+            "icon": "flag flag-fr",
+            "count": 0
+          },
+          {
+            "id": "566",
+            "text": "Nigeria",
+            "formattedText": "Nigeria",
+            "icon": "flag flag-ng",
+            "count": 0
+          },
+          {
+            "id": "276",
+            "text": "Germany",
+            "formattedText": "Germany",
+            "icon": "flag flag-de",
+            "count": 0
+          },
+          {
+            "id": "170",
+            "text": "Colombia",
+            "formattedText": "Colombia",
+            "icon": "flag flag-co",
+            "count": 0
+          },
+          {
+            "id": "682",
+            "text": "Saudi Arabia",
+            "formattedText": "Saudi Arabia",
+            "icon": "flag flag-sa",
+            "count": 0
+          },
+          {
+            "id": "608",
+            "text": "Philippines",
+            "formattedText": "Philippines",
+            "icon": "flag flag-ph",
+            "count": 0
+          },
+          {
+            "id": "764",
+            "text": "Thailand",
+            "formattedText": "Thailand",
+            "icon": "flag flag-th",
+            "count": 0
+          },
+          {
+            "id": "528",
+            "text": "Netherlands",
+            "formattedText": "Netherlands",
+            "icon": "flag flag-nl",
+            "count": 0
+          },
+          {
+            "id": "604",
+            "text": "Peru",
+            "formattedText": "Peru",
+            "icon": "flag flag-pe",
+            "count": 0
+          },
+          {
+            "id": "32",
+            "text": "Argentina",
+            "formattedText": "Argentina",
+            "icon": "flag flag-ar",
+            "count": 0
+          },
+          {
+            "id": "156",
+            "text": "China",
+            "formattedText": "China",
+            "icon": "flag flag-cn",
+            "count": 0
+          },
+          {
+            "id": "380",
+            "text": "Italy",
+            "formattedText": "Italy",
+            "icon": "flag flag-it",
+            "count": 0
+          },
+          {
+            "id": "724",
+            "text": "Spain",
+            "formattedText": "Spain",
+            "icon": "flag flag-es",
+            "count": 0
+          },
+          {
+            "id": "218",
+            "text": "Ecuador",
+            "formattedText": "Ecuador",
+            "icon": "flag flag-ec",
+            "count": 0
+          },
+          {
+            "id": "792",
+            "text": "Turkey",
+            "formattedText": "Turkey",
+            "icon": "flag flag-tr",
+            "count": 0
+          },
+          {
+            "id": "616",
+            "text": "Poland",
+            "formattedText": "Poland",
+            "icon": "flag flag-pl",
+            "count": 0
+          },
+          {
+            "id": "710",
+            "text": "South Africa",
+            "formattedText": "South Africa",
+            "icon": "flag flag-za",
+            "count": 0
+          },
+          {
+            "id": "36",
+            "text": "Australia",
+            "formattedText": "Australia",
+            "icon": "flag flag-au",
+            "count": 0
+          },
+          {
+            "id": "620",
+            "text": "Portugal",
+            "formattedText": "Portugal",
+            "icon": "flag flag-pt",
+            "count": 0
+          },
+          {
+            "id": "360",
+            "text": "Indonesia",
+            "formattedText": "Indonesia",
+            "icon": "flag flag-id",
+            "count": 0
+          },
+          {
+            "id": "404",
+            "text": "Kenya",
+            "formattedText": "Kenya",
+            "icon": "flag flag-ke",
+            "count": 0
+          },
+          {
+            "id": "630",
+            "text": "Puerto Rico",
+            "formattedText": "Puerto Rico",
+            "icon": "flag flag-pr",
+            "count": 0
+          },
+          {
+            "id": "800",
+            "text": "Uganda",
+            "formattedText": "Uganda",
+            "icon": "flag flag-ug",
+            "count": 0
+          },
+          {
+            "id": "56",
+            "text": "Belgium",
+            "formattedText": "Belgium",
+            "icon": "flag flag-be",
+            "count": 0
+          },
+          {
+            "id": "368",
+            "text": "Iraq",
+            "formattedText": "Iraq",
+            "icon": "flag flag-iq",
+            "count": 0
+          },
+          {
+            "id": "818",
+            "text": "Egypt",
+            "formattedText": "Egypt",
+            "icon": "flag flag-eg",
+            "count": 0
+          },
+          {
+            "id": "458",
+            "text": "Malaysia",
+            "formattedText": "Malaysia",
+            "icon": "flag flag-my",
+            "count": 0
+          },
+          {
+            "id": "642",
+            "text": "Romania",
+            "formattedText": "Romania",
+            "icon": "flag flag-ro",
+            "count": 0
+          },
+          {
+            "id": "152",
+            "text": "Chile",
+            "formattedText": "Chile",
+            "icon": "flag flag-cl",
+            "count": 0
+          },
+          {
+            "id": "300",
+            "text": "Greece",
+            "formattedText": "Greece",
+            "icon": "flag flag-gr",
+            "count": 0
+          },
+          {
+            "id": "752",
+            "text": "Sweden",
+            "formattedText": "Sweden",
+            "icon": "flag flag-se",
+            "count": 0
+          },
+          {
+            "id": "214",
+            "text": "Dominican Republic",
+            "formattedText": "Dominican Republic",
+            "icon": "flag flag-do",
+            "count": 0
+          },
+          {
+            "id": "784",
+            "text": "United Arab Emirates",
+            "formattedText": "United Arab Emirates",
+            "icon": "flag flag-ae",
+            "count": 0
+          },
+          {
+            "id": "586",
+            "text": "Pakistan",
+            "formattedText": "Pakistan",
+            "icon": "flag flag-pk",
+            "count": 0
+          },
+          {
+            "id": "704",
+            "text": "Vietnam",
+            "formattedText": "Vietnam",
+            "icon": "flag flag-vn",
+            "count": 0
+          },
+          {
+            "id": "392",
+            "text": "Japan",
+            "formattedText": "Japan",
+            "icon": "flag flag-jp",
+            "count": 0
+          },
+          {
+            "id": "372",
+            "text": "Ireland",
+            "formattedText": "Ireland",
+            "icon": "flag flag-ie",
+            "count": 0
+          },
+          {
+            "id": "144",
+            "text": "Sri Lanka",
+            "formattedText": "Sri Lanka",
+            "icon": "flag flag-lk",
+            "count": 0
+          },
+          {
+            "id": "554",
+            "text": "New Zealand",
+            "formattedText": "New Zealand",
+            "icon": "flag flag-nz",
+            "count": 0
+          },
+          {
+            "id": "12",
+            "text": "Algeria",
+            "formattedText": "Algeria",
+            "icon": "flag flag-dz",
+            "count": 0
+          },
+          {
+            "id": "188",
+            "text": "Costa Rica",
+            "formattedText": "Costa Rica",
+            "icon": "flag flag-cr",
+            "count": 0
+          },
+          {
+            "id": "208",
+            "text": "Denmark",
+            "formattedText": "Denmark",
+            "icon": "flag flag-dk",
+            "count": 0
+          },
+          {
+            "id": "203",
+            "text": "Czech Republic",
+            "formattedText": "Czech Republic",
+            "icon": "flag flag-cz",
+            "count": 0
+          },
+          {
+            "id": "400",
+            "text": "Jordan",
+            "formattedText": "Jordan",
+            "icon": "flag flag-jo",
+            "count": 0
+          },
+          {
+            "id": "376",
+            "text": "Israel",
+            "formattedText": "Israel",
+            "icon": "flag flag-il",
+            "count": 0
+          },
+          {
+            "id": "862",
+            "text": "Venezuela",
+            "formattedText": "Venezuela",
+            "icon": "flag flag-ve",
+            "count": 0
+          },
+          {
+            "id": "756",
+            "text": "Switzerland",
+            "formattedText": "Switzerland",
+            "icon": "flag flag-ch",
+            "count": 0
+          },
+          {
+            "id": "348",
+            "text": "Hungary",
+            "formattedText": "Hungary",
+            "icon": "flag flag-hu",
+            "count": 0
+          },
+          {
+            "id": "504",
+            "text": "Morocco",
+            "formattedText": "Morocco",
+            "icon": "flag flag-ma",
+            "count": 0
+          },
+          {
+            "id": "804",
+            "text": "Ukraine",
+            "formattedText": "Ukraine",
+            "icon": "flag flag-ua",
+            "count": 0
+          },
+          {
+            "id": "643",
+            "text": "Russia",
+            "formattedText": "Russia",
+            "icon": "flag flag-ru",
+            "count": 0
+          },
+          {
+            "id": "578",
+            "text": "Norway",
+            "formattedText": "Norway",
+            "icon": "flag flag-no",
+            "count": 0
+          },
+          {
+            "id": "702",
+            "text": "Singapore",
+            "formattedText": "Singapore",
+            "icon": "flag flag-sg",
+            "count": 0
+          },
+          {
+            "id": "686",
+            "text": "Senegal",
+            "formattedText": "Senegal",
+            "icon": "flag flag-sn",
+            "count": 0
+          },
+          {
+            "id": "246",
+            "text": "Finland",
+            "formattedText": "Finland",
+            "icon": "flag flag-fi",
+            "count": 0
+          },
+          {
+            "id": "410",
+            "text": "Korea, Republic of",
+            "formattedText": "Korea, Republic of",
+            "icon": "flag flag-kr",
+            "count": 0
+          },
+          {
+            "id": "116",
+            "text": "Cambodia",
+            "formattedText": "Cambodia",
+            "icon": "flag flag-kh",
+            "count": 0
+          },
+          {
+            "id": "112",
+            "text": "Belarus",
+            "formattedText": "Belarus",
+            "icon": "flag flag-by",
+            "count": 0
+          },
+          {
+            "id": "344",
+            "text": "Hong Kong",
+            "formattedText": "Hong Kong",
+            "icon": "flag flag-hk",
+            "count": 0
+          },
+          {
+            "id": "40",
+            "text": "Austria",
+            "formattedText": "Austria",
+            "icon": "flag flag-at",
+            "count": 0
+          },
+          {
+            "id": "288",
+            "text": "Ghana",
+            "formattedText": "Ghana",
+            "icon": "flag flag-gh",
+            "count": 0
+          },
+          {
+            "id": "268",
+            "text": "Georgia",
+            "formattedText": "Georgia",
+            "icon": "flag flag-ge",
+            "count": 0
+          },
+          {
+            "id": "100",
+            "text": "Bulgaria",
+            "formattedText": "Bulgaria",
+            "icon": "flag flag-bg",
+            "count": 0
+          },
+          {
+            "id": "320",
+            "text": "Guatemala",
+            "formattedText": "Guatemala",
+            "icon": "flag flag-gt",
+            "count": 0
+          },
+          {
+            "id": "414",
+            "text": "Kuwait",
+            "formattedText": "Kuwait",
+            "icon": "flag flag-kw",
+            "count": 0
+          },
+          {
+            "id": "398",
+            "text": "Kazakhstan",
+            "formattedText": "Kazakhstan",
+            "icon": "flag flag-kz",
+            "count": 0
+          },
+          {
+            "id": "788",
+            "text": "Tunisia",
+            "formattedText": "Tunisia",
+            "icon": "flag flag-tn",
+            "count": 0
+          },
+          {
+            "id": "388",
+            "text": "Jamaica",
+            "formattedText": "Jamaica",
+            "icon": "flag flag-jm",
+            "count": 0
+          },
+          {
+            "id": "50",
+            "text": "Bangladesh",
+            "formattedText": "Bangladesh",
+            "icon": "flag flag-bd",
+            "count": 0
+          },
+          {
+            "id": "31",
+            "text": "Azerbaijan",
+            "formattedText": "Azerbaijan",
+            "icon": "flag flag-az",
+            "count": 0
+          },
+          {
+            "id": "158",
+            "text": "Taiwan",
+            "formattedText": "Taiwan",
+            "icon": "flag flag-tw",
+            "count": 0
+          },
+          {
+            "id": "860",
+            "text": "Uzbekistan",
+            "formattedText": "Uzbekistan",
+            "icon": "flag flag-uz",
+            "count": 0
+          },
+          {
+            "id": "600",
+            "text": "Paraguay",
+            "formattedText": "Paraguay",
+            "icon": "flag flag-py",
+            "count": 0
+          },
+          {
+            "id": "688",
+            "text": "Serbia",
+            "formattedText": "Serbia",
+            "icon": "flag flag-rs",
+            "count": 0
+          },
+          {
+            "id": "384",
+            "text": "Côte d'Ivoire",
+            "formattedText": "Côte d'Ivoire",
+            "icon": "flag flag-ci",
+            "count": 0
+          },
+          {
+            "id": "894",
+            "text": "Zambia",
+            "formattedText": "Zambia",
+            "icon": "flag flag-zm",
+            "count": 0
+          },
+          {
+            "id": "440",
+            "text": "Lithuania",
+            "formattedText": "Lithuania",
+            "icon": "flag flag-lt",
+            "count": 0
+          },
+          {
+            "id": "24",
+            "text": "Angola",
+            "formattedText": "Angola",
+            "icon": "flag flag-ao",
+            "count": 0
+          },
+          {
+            "id": "496",
+            "text": "Mongolia",
+            "formattedText": "Mongolia",
+            "icon": "flag flag-mn",
+            "count": 0
+          },
+          {
+            "id": "634",
+            "text": "Qatar",
+            "formattedText": "Qatar",
+            "icon": "flag flag-qa",
+            "count": 0
+          },
+          {
+            "id": "716",
+            "text": "Zimbabwe",
+            "formattedText": "Zimbabwe",
+            "icon": "flag flag-zw",
+            "count": 0
+          },
+          {
+            "id": "340",
+            "text": "Honduras",
+            "formattedText": "Honduras",
+            "icon": "flag flag-hn",
+            "count": 0
+          },
+          {
+            "id": "442",
+            "text": "Luxembourg",
+            "formattedText": "Luxembourg",
+            "icon": "flag flag-lu",
+            "count": 0
+          },
+          {
+            "id": "558",
+            "text": "Nicaragua",
+            "formattedText": "Nicaragua",
+            "icon": "flag flag-ni",
+            "count": 0
+          },
+          {
+            "id": "48",
+            "text": "Bahrain",
+            "formattedText": "Bahrain",
+            "icon": "flag flag-bh",
+            "count": 0
+          },
+          {
+            "id": "222",
+            "text": "El Salvador",
+            "formattedText": "El Salvador",
+            "icon": "flag flag-sv",
+            "count": 0
+          },
+          {
+            "id": "858",
+            "text": "Uruguay",
+            "formattedText": "Uruguay",
+            "icon": "flag flag-uy",
+            "count": 0
+          },
+          {
+            "id": "191",
+            "text": "Croatia",
+            "formattedText": "Croatia",
+            "icon": "flag flag-hr",
+            "count": 0
+          },
+          {
+            "id": "51",
+            "text": "Armenia",
+            "formattedText": "Armenia",
+            "icon": "flag flag-am",
+            "count": 0
+          },
+          {
+            "id": "703",
+            "text": "Slovakia",
+            "formattedText": "Slovakia",
+            "icon": "flag flag-sk",
+            "count": 0
+          },
+          {
+            "id": "231",
+            "text": "Ethiopia",
+            "formattedText": "Ethiopia",
+            "icon": "flag flag-et",
+            "count": 0
+          },
+          {
+            "id": "428",
+            "text": "Latvia",
+            "formattedText": "Latvia",
+            "icon": "flag flag-lv",
+            "count": 0
+          },
+          {
+            "id": "417",
+            "text": "Kyrgyzstan",
+            "formattedText": "Kyrgyzstan",
+            "icon": "flag flag-kg",
+            "count": 0
+          },
+          {
+            "id": "498",
+            "text": "Moldova",
+            "formattedText": "Moldova",
+            "icon": "flag flag-md",
+            "count": 0
+          },
+          {
+            "id": "275",
+            "text": "Palestine",
+            "formattedText": "Palestine",
+            "icon": "flag flag-ps",
+            "count": 0
+          },
+          {
+            "id": "591",
+            "text": "Panama",
+            "formattedText": "Panama",
+            "icon": "flag flag-pa",
+            "count": 0
+          },
+          {
+            "id": "524",
+            "text": "Nepal",
+            "formattedText": "Nepal",
+            "icon": "flag flag-np",
+            "count": 0
+          },
+          {
+            "id": "705",
+            "text": "Slovenia",
+            "formattedText": "Slovenia",
+            "icon": "flag flag-si",
+            "count": 0
+          },
+          {
+            "id": "512",
+            "text": "Oman",
+            "formattedText": "Oman",
+            "icon": "flag flag-om",
+            "count": 0
+          },
+          {
+            "id": "470",
+            "text": "Malta",
+            "formattedText": "Malta",
+            "icon": "flag flag-mt",
+            "count": 0
+          },
+          {
+            "id": "233",
+            "text": "Estonia",
+            "formattedText": "Estonia",
+            "icon": "flag flag-ee",
+            "count": 0
+          },
+          {
+            "id": "807",
+            "text": "Macedonia, the former Yugoslav Republic of",
+            "formattedText": "Macedonia, the former Yugoslav Republic of",
+            "icon": "flag flag-mk",
+            "count": 0
+          },
+          {
+            "id": "68",
+            "text": "Bolivia",
+            "formattedText": "Bolivia",
+            "icon": "flag flag-bo",
+            "count": 0
+          },
+          {
+            "id": "196",
+            "text": "Cyprus",
+            "formattedText": "Cyprus",
+            "icon": "flag flag-cy",
+            "count": 0
+          },
+          {
+            "id": "499",
+            "text": "Montenegro",
+            "formattedText": "Montenegro",
+            "icon": "flag flag-me",
+            "count": 0
+          },
+          {
+            "id": "352",
+            "text": "Iceland",
+            "formattedText": "Iceland",
+            "icon": "flag flag-is",
+            "count": 0
+          },
+          {
+            "id": "516",
+            "text": "Namibia",
+            "formattedText": "Namibia",
+            "icon": "flag flag-na",
+            "count": 0
+          },
+          {
+            "id": "96",
+            "text": "Brunei Darussalam",
+            "formattedText": "Brunei Darussalam",
+            "icon": "flag flag-bn",
+            "count": 0
+          },
+          {
+            "id": "780",
+            "text": "Trinidad and Tobago",
+            "formattedText": "Trinidad and Tobago",
+            "icon": "flag flag-tt",
+            "count": 0
+          },
+          {
+            "id": "480",
+            "text": "Mauritius",
+            "formattedText": "Mauritius",
+            "icon": "flag flag-mu",
+            "count": 0
+          },
+          {
+            "id": "70",
+            "text": "Bosnia and Herzegovina",
+            "formattedText": "Bosnia and Herzegovina",
+            "icon": "flag flag-ba",
+            "count": 0
+          },
+          {
+            "id": "638",
+            "text": "Réunion",
+            "formattedText": "Réunion",
+            "icon": "flag flag-re",
+            "count": 0
+          },
+          {
+            "id": "104",
+            "text": "Myanmar",
+            "formattedText": "Myanmar",
+            "icon": "flag flag-mm",
+            "count": 0
+          },
+          {
+            "id": "646",
+            "text": "Rwanda",
+            "formattedText": "Rwanda",
+            "icon": "flag flag-rw",
+            "count": 0
+          },
+          {
+            "id": "8",
+            "text": "Albania",
+            "formattedText": "Albania",
+            "icon": "flag flag-al",
+            "count": 0
+          },
+          {
+            "id": "887",
+            "text": "Yemen",
+            "formattedText": "Yemen",
+            "icon": "flag flag-ye",
+            "count": 0
+          }
+        ]
+      },
+      "Data": [
+        {
+          "Country": 840,
+          "Share": 0.2316393674152871,
+          "UsersShare": 0.19408493809061877,
+          "ShareList": {
+            "restream.io": 1
+          },
+          "Change": -0.12082856846247314,
+          "AvgVisitDuration": 134.97860439660977,
+          "PagePerVisit": 3.5863915176942442,
+          "BounceRate": 0.6049052600151423,
+          "Rank": 12067
+        },
+        {
+          "Country": 356,
+          "Share": 0.06547020864596291,
+          "UsersShare": 0.09311121214575474,
+          "ShareList": {
+            "restream.io": 1
+          },
+          "Change": -0.08268713106974113,
+          "AvgVisitDuration": 112.72323953634043,
+          "PagePerVisit": 3.163504374522611,
+          "BounceRate": 0.6465493722479602,
+          "Rank": 10680
+        },
+        {
+          "Country": 826,
+          "Share": 0.04582618518608947,
+          "UsersShare": 0.03835746084175881,
+          "ShareList": {
+            "restream.io": 1
+          },
+          "Change": -0.012930145416805594,
+          "AvgVisitDuration": 105.44432751734952,
+          "PagePerVisit": 2.3503462882540207,
+          "BounceRate": 0.6893025007302859,
+          "Rank": 12303
+        },
+        {
+          "Country": 484,
+          "Share": 0.03367026262785714,
+          "UsersShare": 0.02525881637185895,
+          "ShareList": {
+            "restream.io": 1
+          },
+          "Change": -0.1306941588485564,
+          "AvgVisitDuration": 153.41448692743126,
+          "PagePerVisit": 2.635442577942129,
+          "BounceRate": 0.5822503145086253,
+          "Rank": 6748
+        },
+        {
+          "Country": 124,
+          "Share": 0.033255669988344026,
+          "UsersShare": 0.03548585802299604,
+          "ShareList": {
+            "restream.io": 1
+          },
+          "Change": 0.18099365056943606,
+          "AvgVisitDuration": 219.65158247889832,
+          "PagePerVisit": 3.002275246026154,
+          "BounceRate": 0.5259267355697318,
+          "Rank": 7973
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&to=2026%7C02%7C28&webSource=Total&SourceType=Organic&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "extract audio from video",
+          "Change": -0.16155823610836464,
+          "TotalShare": 0.10338689619858087,
+          "TotalVisits": 42400,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.27,
+          "KwVolume": 205924
+        },
+        {
+          "SearchTerm": "convert to mp3",
+          "Change": 2.1756440281030445,
+          "TotalShare": 0.033064299821998974,
+          "TotalVisits": 13560,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.41,
+          "KwVolume": 291356
+        },
+        {
+          "SearchTerm": "hevc to mp4",
+          "Change": -0.30851063829787234,
+          "TotalShare": 0.030113871888030042,
+          "TotalVisits": 12350,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.25,
+          "KwVolume": 46880
+        },
+        {
+          "SearchTerm": "mp4 to mp3",
+          "Change": -0.4872254594352308,
+          "TotalShare": 0.02789495501206993,
+          "TotalVisits": 11440,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.27,
+          "KwVolume": 2545837
+        },
+        {
+          "SearchTerm": "mp3 converter",
+          "Change": 1.4927884615384615,
+          "TotalShare": 0.025285898905171782,
+          "TotalVisits": 10370,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.53,
+          "KwVolume": 2375167
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficSourcesSearchV2/BrandedKeywords/WebsitePerformance/PieChart?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&to=2026%7C02%7C28&webSource=Total&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "Branded": 170124.68092961487,
+          "NoneBranded": 868262.7100995211
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesOverview/PieChart?country=999&webSource=Total&keys=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&includeSubDomains=true",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "Organic Search": 3888292.4525720626,
+          "Paid Search": 1595950.9548086217,
+          "Social": 527500.1860032849,
+          "Mail": 1813.8371248919075,
+          "Direct": 4188046.4124786574,
+          "Paid Referrals": 37290.41049286935,
+          "Referrals": 199943.60335631366
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&to=2026%7C02%7C28&webSource=Total&SourceType=Paid&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "speed test",
+          "Change": 1.7017570664629489,
+          "TotalShare": 0.39522149211032137,
+          "TotalVisits": 176830,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.42,
+          "KwVolume": 57449349
+        },
+        {
+          "SearchTerm": "twitch",
+          "Change": -0.4719212364556405,
+          "TotalShare": 0.21458584774931833,
+          "TotalVisits": 96010,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.59,
+          "KwVolume": 29474220
+        },
+        {
+          "SearchTerm": "speedtest",
+          "Change": 1.2484110169491525,
+          "TotalShare": 0.09487729649993294,
+          "TotalVisits": 42450,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.43,
+          "KwVolume": 29934393
+        },
+        {
+          "SearchTerm": "obs studio",
+          "Change": 0.16511627906976745,
+          "TotalShare": 0.022395065039560146,
+          "TotalVisits": 10020,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.72,
+          "KwVolume": 1347344
+        },
+        {
+          "SearchTerm": "internet speed test",
+          "Change": 0.5508885298869144,
+          "TotalShare": 0.02145634973850074,
+          "TotalVisits": 9600,
+          "SiteOrigins": {
+            "restream.io": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "restream.io",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.41,
+          "KwVolume": 20943531
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationAds/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "studio.youtube.com",
+          "Share": 0.7377059077228698,
+          "Favicon": "https://site-images.similarcdn.com/image?url=studio.youtube.com&t=2&s=0&h=48016cbb3a617a6e3729fcf8d1a160a6484291d023d9c1d0037e33c5a465e9b3",
+          "HasAdsense": false,
+          "TotalShare": 0.7377059077228698,
+          "SiteOrigins": {
+            "restream.io": 1
+          }
+        },
+        {
+          "Domain": "mygutterguards.com",
+          "Share": 0.129581864747022,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=mygutterguards.com&t=2&s=0&h=8bf16f2bf0b3f9e1f63a7ab36e7248d94d789fc0f0ae3bdacabfcddfd3bf3497",
+          "HasAdsense": false,
+          "TotalShare": 0.129581864747022,
+          "SiteOrigins": {
+            "restream.io": 1
+          }
+        },
+        {
+          "Domain": "fortunesdemer.fr",
+          "Share": 0.05513844472271742,
+          "Favicon": "https://site-images.similarcdn.com/image?url=fortunesdemer.fr&t=2&s=0&h=459f03b75351c9c78d2bd10cb040a0d412e5d2765911077426341954f4d49356",
+          "HasAdsense": false,
+          "TotalShare": 0.05513844472271742,
+          "SiteOrigins": {
+            "restream.io": 1
+          }
+        },
+        {
+          "Domain": "brioshein.com",
+          "Share": 0.01898062735995371,
+          "Favicon": "https://site-images.similarcdn.com/image?url=brioshein.com&t=2&s=0&h=74c4b19e77dd7244c6669ccdaeb7e67cb2c7b42f463434883d0aaffc24dde670",
+          "HasAdsense": false,
+          "TotalShare": 0.01898062735995371,
+          "SiteOrigins": {
+            "restream.io": 1
+          }
+        },
+        {
+          "Domain": "zoom.com",
+          "Share": 0.01857806150940796,
+          "Favicon": "https://site-images.similarcdn.com/image?url=zoom.com&t=2&s=0&h=ab3d3e4c4fa82a8d582a5843dce3f9868b254b32850e033f6443f2a213fbf9f2",
+          "HasAdsense": false,
+          "TotalShare": 0.01857806150940796,
+          "SiteOrigins": {
+            "restream.io": 1
+          }
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationReferrals/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "tiktok.com",
+          "Share": 0.3611636548172731,
+          "Change": -0.11390700162429647,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tiktok.com&t=2&s=0&h=398f47f8e1724c54f9f760f76988b2f9cf0c4111523f9d3f26e03d62731b0c17",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "twitch.tv",
+          "Share": 0.19108798180275796,
+          "Change": 0.06229827357758537,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=twitch.tv&t=2&s=0&h=355e363b41e14a959cda6ccf0989ff8444402dd8844820c31b74a89bf3ed2792",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "google.com",
+          "Share": 0.15509059603074987,
+          "Change": -0.623029915236834,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "kick.com",
+          "Share": 0.15508879081833923,
+          "Change": -0.08770651607156207,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=kick.com&t=2&s=0&h=58964f32cf18f499f11ab5202cd771ea8ce388ae8c2caeb7fcd0e78dba3aa6e4",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "obsproject.com",
+          "Share": 0.030441735038721603,
+          "Change": -0.6071616802727191,
+          "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=0&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc",
+          "HasAdsense": false
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesSocial/PieChart?country=999&includeSubDomains=true&webSource=Desktop&timeGranularity=Monthly&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&keys=restream.io",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "Youtube": {
+            "Share": 0.8077168943414782,
+            "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=1&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20"
+          },
+          "Tiktok": {
+            "Share": 0.06119749847010107,
+            "Favicon": "https://site-images.similarcdn.com/image?url=tiktok.com&t=2&s=1&h=398f47f8e1724c54f9f760f76988b2f9cf0c4111523f9d3f26e03d62731b0c17"
+          },
+          "Facebook": {
+            "Share": 0.049510457369789214,
+            "Favicon": "https://site-images.similarcdn.com/image?url=facebook.com&t=2&s=1&h=be773d6b77aa3d59b6a671c5c27ad729b1ae77400e89776e2f749cce6b926c4b"
+          },
+          "X-twitter": {
+            "Share": 0.01930738913929895,
+            "Favicon": "https://site-images.similarcdn.com/image?url=x.com&t=2&s=1&h=181f9f2250b958cc0ca20fb16f33049b6e13425f038a279637ce1da9dc20d56f"
+          },
+          "Instagram": {
+            "Share": 0.018986960153892264,
+            "Favicon": "https://site-images.similarcdn.com/image?url=instagram.com&t=2&s=1&h=acbe9ff09f263f0114ce8473b3d3e401bfdc360d5aff845e04182e8d2335ba49"
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferrals/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 84,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Change": -0.13256133591820252,
+          "Share": 0.2771222297180116,
+          "Domain": "id.kick.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=id.kick.com&t=2&s=0&h=5c95dae5220fb3cb6420a5a3e14677f0787ef9bae5c4b0b4c9674da9b2e57aae",
+          "Category": ""
+        },
+        {
+          "Change": -0.3677750945994879,
+          "Share": 0.20804744572555486,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Category": ""
+        },
+        {
+          "Change": -0.03438890437300362,
+          "Share": 0.07703091497651215,
+          "Domain": "twitch.tv",
+          "Favicon": "https://site-images.similarcdn.com/image?url=twitch.tv&t=2&s=0&h=355e363b41e14a959cda6ccf0989ff8444402dd8844820c31b74a89bf3ed2792",
+          "Category": "-"
+        },
+        {
+          "Change": -0.49596952905471225,
+          "Share": 0.06954880795567824,
+          "Domain": "github.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=github.com&t=2&s=0&h=6525c30f1af9ea5ee8912788b611744e1debcba39a2d0dd3d410b2916169883b",
+          "Category": ""
+        },
+        {
+          "Change": -0.6759858871536568,
+          "Share": 0.04222758172976546,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Category": ""
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=restream.io",
+    "body": {
+      "Data": {
+        "Total": {
+          "restream.io": {
+            "Organic Search": 3888292.4525720626,
+            "Social": 527500.1860032849,
+            "Email": 1813.8371248919075,
+            "Display Ads": 37290.41049286935,
+            "Direct": 4188046.412478658,
+            "Referrals": 199943.60335631366,
+            "Paid Search": 1595950.9548086212
+          }
+        },
+        "Desktop": {
+          "restream.io": {
+            "Organic Search": 1790793.075,
+            "Social": 121654.98799999998,
+            "Email": 1690.562,
+            "Display Ads": 29150.513,
+            "Direct": 2616642.2939999998,
+            "Referrals": 142646.70099999997,
+            "Paid Search": 679997.7949999999
+          }
+        },
+        "MobileWeb": {
+          "restream.io": {
+            "Organic Search": 2097499.377572063,
+            "Social": 405845.19800328487,
+            "Email": 123.27512489190767,
+            "Display Ads": 8139.897492869352,
+            "Direct": 1571404.1184786581,
+            "Referrals": 57296.90235631368,
+            "Paid Search": 915953.1598086213
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "freeconvert.com",
+        "DomainWithoutSub": "freeconvert.com",
+        "Rank": 1529,
+        "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=1&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18"
+      },
+      {
+        "Domain": "cloudconvert.com",
+        "DomainWithoutSub": "cloudconvert.com",
+        "Rank": 2491,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=1&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83"
+      },
+      {
+        "Domain": "convertio.co",
+        "DomainWithoutSub": "convertio.co",
+        "Favicon": "https://site-images.similarcdn.com/image?url=convertio.co&t=2&s=1&h=e995388c379d89a1afbc5b2ff71b8f86fa9b547a859124c9f7beaafa9678fcaf"
+      },
+      {
+        "Domain": "zamzar.com",
+        "DomainWithoutSub": "zamzar.com",
+        "Rank": 25575,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zamzar.com&t=2&s=1&h=f33f5461a90058eb543109e3df1212141f6a2d73aae9b5b3071fd4bcd661ef8e"
+      },
+      {
+        "Domain": "biteable.com",
+        "DomainWithoutSub": "biteable.com",
+        "Rank": 65412,
+        "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=1&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22"
+      },
+      {
+        "Domain": "uniscribe.co",
+        "DomainWithoutSub": "uniscribe.co",
+        "Rank": 34543,
+        "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=1&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "notta.ai",
+        "DomainWithoutSub": "notta.ai",
+        "Rank": 19207,
+        "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=1&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21"
+      },
+      {
+        "Domain": "descript.com",
+        "DomainWithoutSub": "descript.com",
+        "Rank": 13908,
+        "Favicon": "https://site-images.similarcdn.com/image?url=descript.com&t=2&s=1&h=19b1b9d6d824da80586a1078567284aa3d80d84adbbbb32672d9d63283943881"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "streamlabs.com",
+        "DomainWithoutSub": "streamlabs.com",
+        "Rank": 9969,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=1&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-audio-converter.com",
+        "DomainWithoutSub": "online-audio-converter.com",
+        "Rank": 18174,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-audio-converter.com&t=2&s=1&h=7072bef883704cb884e36073b5327cb009396fe3eac70803d46c75f23bdefd8f"
+      },
+      {
+        "Domain": "podbean.com",
+        "DomainWithoutSub": "podbean.com",
+        "Rank": 19514,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podbean.com&t=2&s=1&h=6bd03331138a96684f3443d0492539934b6c0e774cfbf1ddcb042a82260bedcc"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferringCategories/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=restream.io&timeGranularity=Monthly&to=2026%7C02%7C28&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Share": 0.39438818530382336,
+          "Category": "Games/Video_Games_Consoles_and_Accessories"
+        },
+        {
+          "Share": 0.2823341975108108,
+          "Category": "AI_Chatbots_and_Tools"
+        },
+        {
+          "Share": 0.09412021232186368,
+          "Category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software"
+        },
+        {
+          "Share": 0.08039864187645321,
+          "Category": "Unknown"
+        },
+        {
+          "Share": 0.0479638224618096,
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design"
+        },
+        {
+          "Share": 0.016298581959237956,
+          "Category": "Arts_and_Entertainment/TV_Movies_and_Streaming"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/breakdown?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.10703687562735631,
+          "visitsShare": 0.1508577383582424,
+          "spendShare": 0.1912161006963016,
+          "category": "Computers_Electronics_and_Technology~Search_Engines",
+          "rank": 189,
+          "visitsChange": -0.6201898900958774,
+          "isVisitsNew": false,
+          "entity": "ecosia.org",
+          "favicon": "https://site-images.similarcdn.com/image?url=ecosia.org&t=2&s=0&h=5278c0cf0866a10d3c7cfaae91dc127367e2268750ac13451bda62d7b78abde2"
+        },
+        {
+          "impressionsShare": 0.0490124951146877,
+          "visitsShare": 0.09667721560088129,
+          "spendShare": 0.1354927172103578,
+          "category": "News_and_Media",
+          "rank": 24958,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "bangkokpost.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=bangkokpost.com&t=2&s=0&h=2c3c716719ddbd385516ce4475fa257cfa3ded62dc40f0efe72d3b3f4a6f7f88"
+        },
+        {
+          "impressionsShare": 0.03466270896531644,
+          "visitsShare": 0.0963050642253151,
+          "spendShare": 0.09650931619172164,
+          "category": "",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "nortonsafe.search.ask.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=ask.com&t=2&s=0&h=fabebef019c71b937e87357f0a391ebd60ecdf79bd1f62405f3b7eff258ee3c3"
+        },
+        {
+          "impressionsShare": 0.026371421725640824,
+          "visitsShare": 0.0637064915259241,
+          "spendShare": 0.0578787943961999,
+          "category": "Arts_and_Entertainment~TV_Movies_and_Streaming",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "gem.cbc.ca",
+          "favicon": "https://site-images.similarcdn.com/image?url=cbc.ca&t=2&s=0&h=45a954fa53df3c30ca9ffa8db639e0919c55e95ce01e2cc4c7763b3d4d9b0c8c"
+        },
+        {
+          "impressionsShare": 0.035130136112010386,
+          "visitsShare": 0.0637064915259241,
+          "spendShare": 0.07594923432553712,
+          "category": "Sports~Basketball",
+          "rank": 32336,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "nbcsportsbayarea.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=nbcsportsbayarea.com&t=2&s=0&h=dfc0f24f1115193346a49fa4f8b14c5c851136713ad176be05bc487040242a95"
+        }
+      ],
+      "totalCount": 78,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=restream.io&webSource=Total",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 3740952.819472957
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 3620908.0850186287
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 3076976.9558506757
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "restream.io": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=restream.io%2Cstreamyard.com%2Criverside.com%2Cobsproject.com%2Ccastr.com&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "restream.io": false,
+        "streamyard.com": false,
+        "riverside.com": false,
+        "obsproject.com": false,
+        "castr.com": false
+      },
+      "Data": [
+        {
+          "Domain": "restream.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=0&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+          "TotalVisits": 10438837.860342264,
+          "Change": -0.15021953509906746,
+          "ShareOfVisits": 0.1813411414476059
+        },
+        {
+          "Domain": "streamyard.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=0&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70",
+          "TotalVisits": 18609656.007305477,
+          "Change": -0.09360989919512545,
+          "ShareOfVisits": 0.32328275498297887
+        },
+        {
+          "Domain": "riverside.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=0&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b",
+          "TotalVisits": 10916435.613158382,
+          "Change": -0.10397247451047577,
+          "ShareOfVisits": 0.18963786209861971
+        },
+        {
+          "Domain": "obsproject.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=0&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc",
+          "TotalVisits": 16601323.68240859,
+          "Change": -0.13432852597826916,
+          "ShareOfVisits": 0.2883944579258403
+        },
+        {
+          "Domain": "castr.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=0&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636",
+          "TotalVisits": 998388.688112291,
+          "Change": -0.1003524294074164,
+          "ShareOfVisits": 0.01734378354495531
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=restream.io%2Cstreamyard.com%2Criverside.com%2Cobsproject.com%2Ccastr.com&webSource=Total",
+    "body": {
+      "Data": {
+        "restream.io": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 3740952.819472957
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 3620908.0850186287
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 3076976.9558506757
+              }
+            ]
+          ]
+        },
+        "streamyard.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 6004082.811395408
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 6612273.736937692
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 5993299.45897238
+              }
+            ]
+          ]
+        },
+        "riverside.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 3048019.7459726036
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 4149948.1212195363
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 3718467.745966241
+              }
+            ]
+          ]
+        },
+        "obsproject.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 5673579.632518846
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5857271.337452237
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 5070472.712437512
+              }
+            ]
+          ]
+        },
+        "castr.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 333316.3439735279
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 350103.01617752074
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 314969.3279612425
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "restream.io": false,
+        "streamyard.com": false,
+        "riverside.com": false,
+        "obsproject.com": false,
+        "castr.com": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

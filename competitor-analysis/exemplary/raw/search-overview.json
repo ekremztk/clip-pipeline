@@ -1,0 +1,543 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 59774.904225386155,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/brand-split?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=exemplary.ai&includeSubDomains=true",
+    "body": {
+      "exemplary.ai": {
+        "BrandedShareSplitGraph": [
+          {
+            "Key": "2025-12-01",
+            "Value": {
+              "Branded": 0.1320766493532296,
+              "NonBranded": 0.8679233506467706
+            }
+          },
+          {
+            "Key": "2026-01-01",
+            "Value": {
+              "Branded": 0.1382660710925356,
+              "NonBranded": 0.8617339289074645
+            }
+          },
+          {
+            "Key": "2026-02-01",
+            "Value": {
+              "Branded": 0.09788798240485401,
+              "NonBranded": 0.902112017595146
+            }
+          }
+        ],
+        "BrandedShare": 0.11998596372473609,
+        "NonBrandedShare": 0.8800140362752639
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/traffic?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=exemplary.ai&includeSubDomains=true",
+    "body": {
+      "TrafficSourcesVisits": {
+        "exemplary.ai": {
+          "All": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 67956.39129228405
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 72452.5619806576
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 81505.42247400053
+              }
+            ],
+            "Total": 221914.37574694218,
+            "YoyChange": 0.26888044092970415,
+            "Average": 73971.45858231407,
+            "TotalVisits": 357450.6069551527
+          },
+          "Organic": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 67763.41689101419
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 72267.90694719051
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 80933.01361898972
+              }
+            ],
+            "Total": 220964.3374571944,
+            "YoyChange": 0.267420812186317,
+            "Average": 73654.77915239813,
+            "TotalVisits": 221914.37574694218
+          },
+          "Paid": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 192.974401269872
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 184.6550334670967
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 572.4088550108146
+              }
+            ],
+            "Total": 950.0382897477833,
+            "YoyChange": 0.7331041425109848,
+            "Average": 316.67942991592776,
+            "TotalVisits": 221914.37574694218
+          }
+        }
+      },
+      "AdSpend": {
+        "exemplary.ai": {
+          "CostPerVisit": {
+            "CostPerVisit": 0.6853618501764384,
+            "YoyChange": 1.494660228456649
+          },
+          "PayPerClick": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 112.29
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 7.18
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 531.65
+              }
+            ],
+            "Total": 651.12,
+            "YoyChange": 3.3235059760956176,
+            "Average": 217.04,
+            "TotalVisits": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/top-keywords?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=exemplary.ai&includeSubDomains=true&SourceType=all&pageSize=5",
+    "body": {
+      "youtube timestamp generator": {
+        "Clicks": 1740,
+        "ClicksShare": 0.055930568948891035,
+        "YoYChange": 2.1636363636363636,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "exemplary.ai": 1
+        },
+        "OrganicClicks": 1740,
+        "PaidClicks": 0
+      },
+      "opus clip": {
+        "Clicks": 1670,
+        "ClicksShare": 0.053680488588878174,
+        "YoYChange": 3.3947368421052633,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "exemplary.ai": 1
+        },
+        "OrganicClicks": 1670,
+        "PaidClicks": 0
+      },
+      "submagic ai": {
+        "Clicks": 760,
+        "ClicksShare": 0.024429443908711025,
+        "YoYChange": -0.24752475247524752,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "exemplary.ai": 1
+        },
+        "OrganicClicks": 760,
+        "PaidClicks": 0
+      },
+      "youtube video timestamp generator": {
+        "Clicks": 760,
+        "ClicksShare": 0.024429443908711025,
+        "YoYChange": 11.666666666666666,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "exemplary.ai": 1
+        },
+        "OrganicClicks": 760,
+        "PaidClicks": 0
+      },
+      "vidyo ai": {
+        "Clicks": 620,
+        "ClicksShare": 0.01992928318868531,
+        "YoYChange": -0.5,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "exemplary.ai": 1
+        },
+        "OrganicClicks": 620,
+        "PaidClicks": 0
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=exemplary.ai&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 10147.128046597967,
+              "Email": 197.11498084620757,
+              "Direct": 108612.85257186837,
+              "Display Ads": 1570.5652753098084,
+              "Referrals": 15008.570333588184,
+              "Organic Search": 220964.3374571944,
+              "Paid Search": 950.0382897477833
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 3263.5012677481263,
+                "Email": 58.96905077462005,
+                "Direct": 36134.68801644613,
+                "Display Ads": 597.5519633748763,
+                "Referrals": 4740.94418489686,
+                "Organic Search": 67763.41689101419,
+                "Paid Search": 192.974401269872
+              },
+              "2026-01-01": {
+                "Social": 3754.330284503872,
+                "Email": 81.62661555136674,
+                "Direct": 37348.288161478355,
+                "Display Ads": 543.1892787449785,
+                "Referrals": 5491.329394383607,
+                "Organic Search": 72267.90694719051,
+                "Paid Search": 184.6550334670967
+              },
+              "2026-02-01": {
+                "Social": 3129.2964943459683,
+                "Email": 56.51931452022077,
+                "Direct": 35129.87639394388,
+                "Display Ads": 429.82403318995347,
+                "Referrals": 4776.296754307717,
+                "Organic Search": 80933.01361898972,
+                "Paid Search": 572.4088550108146
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=exemplary.ai&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 10147.128046597967,
+              "Email": 197.11498084620757,
+              "Direct": 108612.85257186837,
+              "Display Ads": 1570.5652753098084,
+              "Referrals": 15008.570333588184,
+              "Organic Search": 220964.3374571944,
+              "Paid Search": 950.0382897477833
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 3263.5012677481263,
+                "Email": 58.96905077462005,
+                "Direct": 36134.68801644613,
+                "Display Ads": 597.5519633748763,
+                "Referrals": 4740.94418489686,
+                "Organic Search": 67763.41689101419,
+                "Paid Search": 192.974401269872
+              },
+              "2026-01-01": {
+                "Social": 3754.330284503872,
+                "Email": 81.62661555136674,
+                "Direct": 37348.288161478355,
+                "Display Ads": 543.1892787449785,
+                "Referrals": 5491.329394383607,
+                "Organic Search": 72267.90694719051,
+                "Paid Search": 184.6550334670967
+              },
+              "2026-02-01": {
+                "Social": 3129.2964943459683,
+                "Email": 56.51931452022077,
+                "Direct": 35129.87639394388,
+                "Display Ads": 429.82403318995347,
+                "Referrals": 4776.296754307717,
+                "Organic Search": 80933.01361898972,
+                "Paid Search": 572.4088550108146
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "synthesys.io",
+        "DomainWithoutSub": "synthesys.io",
+        "Rank": 380557,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesys.io&t=2&s=1&h=24e02654696c3a75fd060fd43fe2088b59d92a46fba74eef79c6641b8aad5a38"
+      },
+      {
+        "Domain": "rewriteguru.com",
+        "DomainWithoutSub": "rewriteguru.com",
+        "Rank": 378267,
+        "Favicon": "https://site-images.similarcdn.com/image?url=rewriteguru.com&t=2&s=1&h=d24c246d6852244594cfb6df0be0508b531ac642d3cc92fedf067ea664d98892"
+      },
+      {
+        "Domain": "opus.ai",
+        "DomainWithoutSub": "opus.ai",
+        "Rank": 288346,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.ai&t=2&s=1&h=14b9a2260fcb8eb64f7aa80ab2bd5fa93355a462ef57531a44d75d8edc21971b"
+      },
+      {
+        "Domain": "writeless.ai",
+        "DomainWithoutSub": "writeless.ai",
+        "Rank": 267672,
+        "Favicon": "https://site-images.similarcdn.com/image?url=writeless.ai&t=2&s=1&h=329602731db789f0be144d8839acb4373deb5b3df0946f42b081242d140a3d45"
+      },
+      {
+        "Domain": "tldrthis.com",
+        "DomainWithoutSub": "tldrthis.com",
+        "Rank": 297839,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tldrthis.com&t=2&s=1&h=2ca640bee58ea2c88e5916e793504cc2dda7f371e0f43ba2834eea2a080f3803"
+      },
+      {
+        "Domain": "inkforall.com",
+        "DomainWithoutSub": "inkforall.com",
+        "Rank": 334716,
+        "Favicon": "https://site-images.similarcdn.com/image?url=inkforall.com&t=2&s=1&h=f18c653f06e86202c88bf2ba253214286d5d5c9c9b9e7a374ba7e358f0f08f30"
+      },
+      {
+        "Domain": "aiktp.com",
+        "DomainWithoutSub": "aiktp.com",
+        "Rank": 316059,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aiktp.com&t=2&s=1&h=3cbe9f6ba6903857f9caac5217bab340f46c0dae36fb0a82bb6ae8fa4477e00c"
+      },
+      {
+        "Domain": "wordchiefs.com",
+        "DomainWithoutSub": "wordchiefs.com",
+        "Rank": 190249,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wordchiefs.com&t=2&s=1&h=cf99b4e3e86d7752dd28103b0c8ebb0082d1c2df2d07a7d028d19f1bb375aed6"
+      },
+      {
+        "Domain": "artificialstudio.ai",
+        "DomainWithoutSub": "artificialstudio.ai",
+        "Rank": 279171,
+        "Favicon": "https://site-images.similarcdn.com/image?url=artificialstudio.ai&t=2&s=1&h=e53bc33c70d0f75f4cd9b581e4762dc715ebd1dffd047bf8c0624d28aae608bb"
+      },
+      {
+        "Domain": "zubtitle.com",
+        "DomainWithoutSub": "zubtitle.com",
+        "Rank": 455337,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zubtitle.com&t=2&s=1&h=d36f0cd15e8b6b1dc495febc9175a835dc7c42fe6c00d530435f7dfe29ad2f8b"
+      },
+      {
+        "Domain": "quso.ai",
+        "DomainWithoutSub": "quso.ai",
+        "Rank": 93435,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "echowave.io",
+        "DomainWithoutSub": "echowave.io",
+        "Rank": 127978,
+        "Favicon": "https://site-images.similarcdn.com/image?url=echowave.io&t=2&s=1&h=484550467f2f18765c49b273654a6dd45a0e631c3e221d3ed0bb386c8d1f73c8"
+      },
+      {
+        "Domain": "bytecap.io",
+        "DomainWithoutSub": "bytecap.io",
+        "Rank": 1044866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bytecap.io&t=2&s=1&h=b2e2db95e5bc8d03196e4c6a7672a933a48841e2169b94ca2f9ad13d69e4ec3e"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/rank-distribution?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=exemplary.ai&includeSubDomains=true",
+    "body": {
+      "Country": 840,
+      "RankSplit": {
+        "exemplary.ai": {
+          "Top3": {
+            "2026-01": 17,
+            "2026-02": 12
+          },
+          "RestTo100": {
+            "2026-01": 528,
+            "2026-02": 495
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/landing-pages?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=exemplary.ai&includeSubDomains=true&sourceType=Paid",
+    "body": [
+      {
+        "Url": "exemplary.ai",
+        "Clicks": 180,
+        "ClicksShare": 0.8181818181818182,
+        "MoMChange": 5,
+        "Spend": 521.26,
+        "TopKeyword": "exemplary",
+        "TotalKeywords": 4
+      },
+      {
+        "Url": "exemplary.ai/blog",
+        "Clicks": 10,
+        "ClicksShare": 0.045454545454545456,
+        "MoMChange": 0,
+        "Spend": 0.47,
+        "TopKeyword": "exemplary",
+        "TotalKeywords": 1
+      },
+      {
+        "Url": "exemplary.ai/contactus",
+        "Clicks": 10,
+        "ClicksShare": 0.045454545454545456,
+        "MoMChange": 0,
+        "Spend": 4.71,
+        "TopKeyword": "exemplary",
+        "TotalKeywords": 2
+      },
+      {
+        "Url": "exemplary.ai/pricing",
+        "Clicks": 10,
+        "ClicksShare": 0.045454545454545456,
+        "MoMChange": 0,
+        "Spend": 0.97,
+        "TopKeyword": "exemplary",
+        "TotalKeywords": 2
+      },
+      {
+        "Url": "exemplary.ai/transcription",
+        "Clicks": 10,
+        "ClicksShare": 0.045454545454545456,
+        "MoMChange": 0,
+        "Spend": 4.24,
+        "TopKeyword": "exemplary",
+        "TotalKeywords": 2
+      }
+    ]
+  }
+]

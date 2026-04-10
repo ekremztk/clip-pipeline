@@ -1,0 +1,1355 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=invideo.io&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "renderforest.com",
+        "DomainWithoutSub": "renderforest.com",
+        "Rank": 16565,
+        "Favicon": "https://site-images.similarcdn.com/image?url=renderforest.com&t=2&s=1&h=af037cd28be19417a8cc8427ba124b9a49cb6336fffa765f0013114ce1114a2c"
+      },
+      {
+        "Domain": "clipchamp.com",
+        "DomainWithoutSub": "clipchamp.com",
+        "Rank": 5384,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=1&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=invideo.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "invideo.io": {
+        "mainDomainName": "invideo",
+        "icon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "image": "https://site-images.similarcdn.com/image?url=invideo.io&t=0&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=invideo.io&t=1&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "title": "Privacy Policy for using InVideo online video editor",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "If you do not agree to these terms, please do not access or use this site.This Privacy Policy applies to https://invideo.io/, owned and operated by InVideo.",
+        "globalRanking": 5603,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 7404,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 39,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "io.invideo.ai",
+              "title": "invideo AI: AI Video Generator",
+              "author": "invideo INC",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2F-1kFpnKJcOkQWLSCwGi5HX6bp_hFvEHqrC_pvb7lqbeO-sVJo_hH6SHNqVxjDB2f8Iw%3Ds180&h=fa837319040fad71e9b649bddbcad6e208e2d8ca1d2f6a04c2507648799084f5",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.545665264129639,
+              "ratecount": 114242,
+              "valid": true
+            }
+          ],
+          "apps_1": [
+            {
+              "store": 1,
+              "id": "6471394316",
+              "title": "invideo AI: AI Video Generator",
+              "author": "Invideo Inc",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fis1-ssl.mzstatic.com%2Fimage%2Fthumb%2FPurple211%2Fv4%2Fa6%2F59%2F26%2Fa659263c-9cad-ed85-3cea-bf5969b60261%2FprodAppIcon-0-0-1x_U007epad-0-1-85-220.png%2F175x175bb.jpg&h=4add4750f9e7f60f71f1087dec41ac2750dc62f003ad3d9a101ddb18198a1010",
+              "category": "6008",
+              "price": "Free",
+              "rating": 4.60497,
+              "ratecount": 23697,
+              "valid": true
+            },
+            {
+              "store": 1,
+              "id": "1171358257",
+              "title": "Filmr - Pro Video Editor",
+              "author": "MEF comunicacao e divulgacao ltda- me",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fis1-ssl.mzstatic.com%2Fimage%2Fthumb%2FPurple221%2Fv4%2F4f%2F1e%2F8e%2F4f1e8e31-8929-ca02-25b9-1cef4c1fa3f4%2FAppIcon-0-0-1x_U007emarketing-0-10-0-sRGB-85-220.jpeg%2F175x175bb.jpg&h=f3057dd93031a4c2eb1705181e6563cb941ba50dad1d3680160ed8603ae06e6b",
+              "category": "6008",
+              "price": "Free",
+              "rating": 4.49146,
+              "ratecount": 6794,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2017",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 5883626.247719334,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/GraphV2/unified?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "invideo.io": {
+          "total": {
+            "monthly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 174916.736,
+                  "change": 0,
+                  "desktopShare": 0.17346068901034148
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 152444.78099999993,
+                  "change": -0.12847229781374422,
+                  "desktopShare": 0.18792057987213104
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 106536.07099999998,
+                  "change": -0.2419143130916847,
+                  "desktopShare": 0.2049345856203014
+                }
+              }
+            },
+            "weekly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 37562.271,
+                  "change": 0,
+                  "desktopShare": 0.2135739355322792
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 39182.759,
+                  "change": 0.04314137449250599,
+                  "desktopShare": 0.2135506452468036
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 42290.884000000005,
+                  "change": 0.0793237913644623,
+                  "desktopShare": 0.15203243107900039
+                }
+              },
+              "2025-12-22": {
+                "visits": {
+                  "value": 39548.628000000004,
+                  "change": -0.06484272118785696,
+                  "desktopShare": 0.13592342093384377
+                }
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 43012.363999999994,
+                  "change": 0.08758169815650721,
+                  "desktopShare": 0.1639506567925446
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 38702.965000000004,
+                  "change": -0.10018977334052113,
+                  "desktopShare": 0.18674788755848548
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 33872.195,
+                  "change": -0.1248165353739695,
+                  "desktopShare": 0.19883372922835382
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 29872.654999999995,
+                  "change": -0.11807737880583188,
+                  "desktopShare": 0.18494086049599548
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 27859.236999999997,
+                  "change": -0.06740003524962873,
+                  "desktopShare": 0.1859756342214254
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 28672.587,
+                  "change": 0.029194984772913997,
+                  "desktopShare": 0.227657447791509
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 28400.174,
+                  "change": -0.009500816930122157,
+                  "desktopShare": 0.20764781250988107
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 24293.001,
+                  "change": -0.14461788156650024,
+                  "desktopShare": 0.20037339190822903
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 20627.868000000002,
+                  "change": -0.1508719733720835,
+                  "desktopShare": 0.17519186209646095
+                }
+              }
+            },
+            "daily": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 4733.811,
+                  "change": 0,
+                  "desktopShare": 0.238
+                }
+              },
+              "2025-12-02": {
+                "visits": {
+                  "value": 5520.047,
+                  "change": 0.16608943618577082,
+                  "desktopShare": 0.21700000000000003
+                }
+              },
+              "2025-12-03": {
+                "visits": {
+                  "value": 4999.185,
+                  "change": -0.09435825455833967,
+                  "desktopShare": 0.228
+                }
+              },
+              "2025-12-04": {
+                "visits": {
+                  "value": 5507.029,
+                  "change": 0.1015853584134214,
+                  "desktopShare": 0.218
+                }
+              },
+              "2025-12-05": {
+                "visits": {
+                  "value": 5934.678,
+                  "change": 0.07765512039250191,
+                  "desktopShare": 0.197
+                }
+              },
+              "2025-12-06": {
+                "visits": {
+                  "value": 5749.818,
+                  "change": -0.03114912047460699,
+                  "desktopShare": 0.183
+                }
+              },
+              "2025-12-07": {
+                "visits": {
+                  "value": 5117.703,
+                  "change": -0.1099365232082128,
+                  "desktopShare": 0.222
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 5457.509,
+                  "change": 0.06639814776277551,
+                  "desktopShare": 0.24800000000000003
+                }
+              },
+              "2025-12-09": {
+                "visits": {
+                  "value": 5468.621,
+                  "change": 0.002036093756327306,
+                  "desktopShare": 0.23
+                }
+              },
+              "2025-12-10": {
+                "visits": {
+                  "value": 5053.96,
+                  "change": -0.0758255143298466,
+                  "desktopShare": 0.24199999999999997
+                }
+              },
+              "2025-12-11": {
+                "visits": {
+                  "value": 5141.919,
+                  "change": 0.01740397628790094,
+                  "desktopShare": 0.231
+                }
+              },
+              "2025-12-12": {
+                "visits": {
+                  "value": 6465.093,
+                  "change": 0.257330774755495,
+                  "desktopShare": 0.169
+                }
+              },
+              "2025-12-13": {
+                "visits": {
+                  "value": 5616.794,
+                  "change": -0.1312121882856132,
+                  "desktopShare": 0.185
+                }
+              },
+              "2025-12-14": {
+                "visits": {
+                  "value": 5978.863,
+                  "change": 0.06446186205155476,
+                  "desktopShare": 0.203
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 4540.166,
+                  "change": -0.24063053460164585,
+                  "desktopShare": 0.224
+                }
+              },
+              "2025-12-16": {
+                "visits": {
+                  "value": 6334.175,
+                  "change": 0.39514171948778964,
+                  "desktopShare": 0.164
+                }
+              },
+              "2025-12-17": {
+                "visits": {
+                  "value": 5592.45,
+                  "change": -0.1170989118551351,
+                  "desktopShare": 0.162
+                }
+              },
+              "2025-12-18": {
+                "visits": {
+                  "value": 6415.05,
+                  "change": 0.14709116755625895,
+                  "desktopShare": 0.155
+                }
+              },
+              "2025-12-19": {
+                "visits": {
+                  "value": 7352.116,
+                  "change": 0.14607306256381475,
+                  "desktopShare": 0.124
+                }
+              },
+              "2025-12-20": {
+                "visits": {
+                  "value": 6468.406,
+                  "change": -0.12019804910586286,
+                  "desktopShare": 0.13
+                }
+              },
+              "2025-12-21": {
+                "visits": {
+                  "value": 5588.521,
+                  "change": -0.13602810336889803,
+                  "desktopShare": 0.129
+                }
+              },
+              "2025-12-22": {
+                "visits": {
+                  "value": 5710.958,
+                  "change": 0.02190865883835811,
+                  "desktopShare": 0.149
+                }
+              },
+              "2025-12-23": {
+                "visits": {
+                  "value": 6067.564,
+                  "change": 0.06244241333940833,
+                  "desktopShare": 0.137
+                }
+              },
+              "2025-12-24": {
+                "visits": {
+                  "value": 5205.239,
+                  "change": -0.14212046218218724,
+                  "desktopShare": 0.152
+                }
+              },
+              "2025-12-25": {
+                "visits": {
+                  "value": 5112.654,
+                  "change": -0.01778688740324875,
+                  "desktopShare": 0.166
+                }
+              },
+              "2025-12-26": {
+                "visits": {
+                  "value": 5766.148,
+                  "change": 0.1278189370921638,
+                  "desktopShare": 0.123
+                }
+              },
+              "2025-12-27": {
+                "visits": {
+                  "value": 5934.34,
+                  "change": 0.029168866286470623,
+                  "desktopShare": 0.117
+                }
+              },
+              "2025-12-28": {
+                "visits": {
+                  "value": 5751.725,
+                  "change": -0.03077258802158282,
+                  "desktopShare": 0.11299999999999999
+                }
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 5364.916,
+                  "change": -0.06725095514823817,
+                  "desktopShare": 0.139
+                }
+              },
+              "2025-12-30": {
+                "visits": {
+                  "value": 5763.105,
+                  "change": 0.07422091976836159,
+                  "desktopShare": 0.122
+                }
+              },
+              "2025-12-31": {
+                "visits": {
+                  "value": 5204.173,
+                  "change": -0.09698452483513659,
+                  "desktopShare": 0.134
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 5739.358,
+                  "change": 0.10283766508146451,
+                  "desktopShare": 0.22
+                }
+              },
+              "2026-01-02": {
+                "visits": {
+                  "value": 8298.167,
+                  "change": 0.4458354052840055,
+                  "desktopShare": 0.156
+                }
+              },
+              "2026-01-03": {
+                "visits": {
+                  "value": 7089.931,
+                  "change": -0.1456027578138642,
+                  "desktopShare": 0.16600000000000004
+                }
+              },
+              "2026-01-04": {
+                "visits": {
+                  "value": 5552.714,
+                  "change": -0.21681691965690494,
+                  "desktopShare": 0.211
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 5298.499,
+                  "change": -0.04578211663701753,
+                  "desktopShare": 0.189
+                }
+              },
+              "2026-01-06": {
+                "visits": {
+                  "value": 6191.363,
+                  "change": 0.16851262970890446,
+                  "desktopShare": 0.172
+                }
+              },
+              "2026-01-07": {
+                "visits": {
+                  "value": 4982.048,
+                  "change": -0.19532290385816506,
+                  "desktopShare": 0.209
+                }
+              },
+              "2026-01-08": {
+                "visits": {
+                  "value": 4972.003,
+                  "change": -0.0020162391048821836,
+                  "desktopShare": 0.21700000000000003
+                }
+              },
+              "2026-01-09": {
+                "visits": {
+                  "value": 5871.196,
+                  "change": 0.18085125853705242,
+                  "desktopShare": 0.163
+                }
+              },
+              "2026-01-10": {
+                "visits": {
+                  "value": 6672.003,
+                  "change": 0.1363958893554226,
+                  "desktopShare": 0.159
+                }
+              },
+              "2026-01-11": {
+                "visits": {
+                  "value": 4715.853,
+                  "change": -0.29318781781123293,
+                  "desktopShare": 0.217
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 4873.944,
+                  "change": 0.033523309568809785,
+                  "desktopShare": 0.202
+                }
+              },
+              "2026-01-13": {
+                "visits": {
+                  "value": 5933.26,
+                  "change": 0.21734266950953882,
+                  "desktopShare": 0.192
+                }
+              },
+              "2026-01-14": {
+                "visits": {
+                  "value": 4351.87,
+                  "change": -0.26652969868166915,
+                  "desktopShare": 0.233
+                }
+              },
+              "2026-01-15": {
+                "visits": {
+                  "value": 4086.4,
+                  "change": -0.06100136263261536,
+                  "desktopShare": 0.243
+                }
+              },
+              "2026-01-16": {
+                "visits": {
+                  "value": 5078.391,
+                  "change": 0.2427542580266248,
+                  "desktopShare": 0.17
+                }
+              },
+              "2026-01-17": {
+                "visits": {
+                  "value": 5189.487,
+                  "change": 0.021876220243774152,
+                  "desktopShare": 0.17
+                }
+              },
+              "2026-01-18": {
+                "visits": {
+                  "value": 4358.843,
+                  "change": -0.1600628347272091,
+                  "desktopShare": 0.197
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 4547.34,
+                  "change": 0.04324473260450085,
+                  "desktopShare": 0.218
+                }
+              },
+              "2026-01-20": {
+                "visits": {
+                  "value": 4893.191,
+                  "change": 0.07605567210720986,
+                  "desktopShare": 0.183
+                }
+              },
+              "2026-01-21": {
+                "visits": {
+                  "value": 3856.23,
+                  "change": -0.21191917503322472,
+                  "desktopShare": 0.209
+                }
+              },
+              "2026-01-22": {
+                "visits": {
+                  "value": 3684.715,
+                  "change": -0.044477378164684125,
+                  "desktopShare": 0.203
+                }
+              },
+              "2026-01-23": {
+                "visits": {
+                  "value": 4254.049,
+                  "change": 0.15451235712938444,
+                  "desktopShare": 0.165
+                }
+              },
+              "2026-01-24": {
+                "visits": {
+                  "value": 4709.063,
+                  "change": 0.10696021602007878,
+                  "desktopShare": 0.14
+                }
+              },
+              "2026-01-25": {
+                "visits": {
+                  "value": 3928.067,
+                  "change": -0.16584955435932797,
+                  "desktopShare": 0.184
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 3426.673,
+                  "change": -0.1276439531199443,
+                  "desktopShare": 0.209
+                }
+              },
+              "2026-01-27": {
+                "visits": {
+                  "value": 4522.109,
+                  "change": 0.3196791756902397,
+                  "desktopShare": 0.164
+                }
+              },
+              "2026-01-28": {
+                "visits": {
+                  "value": 3456.253,
+                  "change": -0.235698874131517,
+                  "desktopShare": 0.22099999999999997
+                }
+              },
+              "2026-01-29": {
+                "visits": {
+                  "value": 3784.667,
+                  "change": 0.09502024302040381,
+                  "desktopShare": 0.199
+                }
+              },
+              "2026-01-30": {
+                "visits": {
+                  "value": 4169.273,
+                  "change": 0.10162215064099436,
+                  "desktopShare": 0.156
+                }
+              },
+              "2026-01-31": {
+                "visits": {
+                  "value": 3957.821,
+                  "change": -0.050716755655002735,
+                  "desktopShare": 0.159
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 4542.441,
+                  "change": 0.14771259235826983,
+                  "desktopShare": 0.204
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 4381.902,
+                  "change": -0.035342011046483546,
+                  "desktopShare": 0.215
+                }
+              },
+              "2026-02-03": {
+                "visits": {
+                  "value": 4346.567,
+                  "change": -0.008063849898970821,
+                  "desktopShare": 0.231
+                }
+              },
+              "2026-02-04": {
+                "visits": {
+                  "value": 3674.021,
+                  "change": -0.15473038837316894,
+                  "desktopShare": 0.265
+                }
+              },
+              "2026-02-05": {
+                "visits": {
+                  "value": 4089.474,
+                  "change": 0.11307855888684358,
+                  "desktopShare": 0.222
+                }
+              },
+              "2026-02-06": {
+                "visits": {
+                  "value": 4088.514,
+                  "change": -0.00023474901662170645,
+                  "desktopShare": 0.229
+                }
+              },
+              "2026-02-07": {
+                "visits": {
+                  "value": 4162.602,
+                  "change": 0.018121009246880343,
+                  "desktopShare": 0.216
+                }
+              },
+              "2026-02-08": {
+                "visits": {
+                  "value": 3929.507,
+                  "change": -0.05599742660960616,
+                  "desktopShare": 0.22
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 3791.617,
+                  "change": -0.035090915985134995,
+                  "desktopShare": 0.276
+                }
+              },
+              "2026-02-10": {
+                "visits": {
+                  "value": 4983.27,
+                  "change": 0.31428622669431017,
+                  "desktopShare": 0.223
+                }
+              },
+              "2026-02-11": {
+                "visits": {
+                  "value": 4339.032,
+                  "change": -0.12928017145368406,
+                  "desktopShare": 0.203
+                }
+              },
+              "2026-02-12": {
+                "visits": {
+                  "value": 3881.211,
+                  "change": -0.10551224328375554,
+                  "desktopShare": 0.216
+                }
+              },
+              "2026-02-13": {
+                "visits": {
+                  "value": 3676.688,
+                  "change": -0.05269566637835451,
+                  "desktopShare": 0.188
+                }
+              },
+              "2026-02-14": {
+                "visits": {
+                  "value": 3954.75,
+                  "change": 0.07562839163943198,
+                  "desktopShare": 0.17100000000000004
+                }
+              },
+              "2026-02-15": {
+                "visits": {
+                  "value": 3773.606,
+                  "change": -0.045804159554965494,
+                  "desktopShare": 0.173
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 3545.247,
+                  "change": -0.06051479672228642,
+                  "desktopShare": 0.227
+                }
+              },
+              "2026-02-17": {
+                "visits": {
+                  "value": 4003.633,
+                  "change": 0.1292959277590532,
+                  "desktopShare": 0.178
+                }
+              },
+              "2026-02-18": {
+                "visits": {
+                  "value": 3264.84,
+                  "change": -0.18453065003710373,
+                  "desktopShare": 0.215
+                }
+              },
+              "2026-02-19": {
+                "visits": {
+                  "value": 3335.238,
+                  "change": 0.021562465541956018,
+                  "desktopShare": 0.209
+                }
+              },
+              "2026-02-20": {
+                "visits": {
+                  "value": 3554.326,
+                  "change": 0.0656888653823206,
+                  "desktopShare": 0.203
+                }
+              },
+              "2026-02-21": {
+                "visits": {
+                  "value": 3188.303,
+                  "change": -0.10297958037613886,
+                  "desktopShare": 0.199
+                }
+              },
+              "2026-02-22": {
+                "visits": {
+                  "value": 3401.414,
+                  "change": 0.06684151412208951,
+                  "desktopShare": 0.175
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 3312.271,
+                  "change": -0.026207630120885027,
+                  "desktopShare": 0.192
+                }
+              },
+              "2026-02-24": {
+                "visits": {
+                  "value": 3900.425,
+                  "change": 0.17756820018651853,
+                  "desktopShare": 0.152
+                }
+              },
+              "2026-02-25": {
+                "visits": {
+                  "value": 3449.064,
+                  "change": -0.1157209791240699,
+                  "desktopShare": 0.185
+                }
+              },
+              "2026-02-26": {
+                "visits": {
+                  "value": 3240.438,
+                  "change": -0.06048771492787602,
+                  "desktopShare": 0.19200000000000003
+                }
+              },
+              "2026-02-27": {
+                "visits": {
+                  "value": 3467.346,
+                  "change": 0.07002386714388607,
+                  "desktopShare": 0.15899999999999997
+                }
+              },
+              "2026-02-28": {
+                "visits": {
+                  "value": 3258.324,
+                  "change": -0.06028299454395377,
+                  "desktopShare": 0.176
+                }
+              }
+            },
+            "total": {
+              "visits": 433897.5880000003
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=invideo.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "renderforest.com",
+        "DomainWithoutSub": "renderforest.com",
+        "Rank": 16565,
+        "Favicon": "https://site-images.similarcdn.com/image?url=renderforest.com&t=2&s=1&h=af037cd28be19417a8cc8427ba124b9a49cb6336fffa765f0013114ce1114a2c"
+      },
+      {
+        "Domain": "clipchamp.com",
+        "DomainWithoutSub": "clipchamp.com",
+        "Rank": 5384,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=1&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-video-cutter.com",
+        "DomainWithoutSub": "online-video-cutter.com",
+        "Rank": 10569,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-video-cutter.com&t=2&s=1&h=7b1b1c66ef9ab59bf8107e29f1ebdd789c0a956b9ee89c4f1091204041d6ab22"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "adobe.com",
+        "DomainWithoutSub": "adobe.com",
+        "Rank": 86,
+        "Favicon": "https://site-images.similarcdn.com/image?url=adobe.com&t=2&s=1&h=0343bf8cd29cf34d2087739e2dea12192318f7a5331a9cca4e05c7bbf8a1741f"
+      },
+      {
+        "Domain": "synthesia.io",
+        "DomainWithoutSub": "synthesia.io",
+        "Rank": 19953,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesia.io&t=2&s=1&h=8b08fbf55cb34c8b813dad8d93550cca5a195c81d55968b7299b3e285e0b1f56"
+      },
+      {
+        "Domain": "heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Rank": 3787,
+        "Favicon": "https://site-images.similarcdn.com/image?url=heygen.com&t=2&s=1&h=da761b4500aacead5d6342124f3d9ea128dae354f2ee9191d230f0a756fe735c"
+      },
+      {
+        "Domain": "steve.ai",
+        "DomainWithoutSub": "steve.ai",
+        "Rank": 96150,
+        "Favicon": "https://site-images.similarcdn.com/image?url=steve.ai&t=2&s=1&h=5d161648825e39e6d4b96bb1ca7df87b1a1ff8295e9bba8a0d0a29dc93bbbc1a"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "makereels.ai",
+        "DomainWithoutSub": "makereels.ai",
+        "Rank": 156304,
+        "Favicon": "https://site-images.similarcdn.com/image?url=makereels.ai&t=2&s=1&h=28e7a96df6ac7d09304f54a58457b0d4f817e852e59f7373bd4298f42eecfac1"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      },
+      {
+        "Domain": "faceless.video",
+        "DomainWithoutSub": "faceless.video",
+        "Rank": 85302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=faceless.video&t=2&s=1&h=306f754ed7f423901446ebc9d8c263758591320fd0aa8aa2cc2fb48be002d7ac"
+      },
+      {
+        "Domain": "gan.ai",
+        "DomainWithoutSub": "gan.ai",
+        "Rank": 391778,
+        "Favicon": "https://site-images.similarcdn.com/image?url=gan.ai&t=2&s=1&h=f1e1bc935223caa1891c4081b4abf9b054f78f1e40c69bbcab16e8c742d29cb0"
+      },
+      {
+        "Domain": "mootion.com",
+        "DomainWithoutSub": "mootion.com",
+        "Rank": 88696,
+        "Favicon": "https://site-images.similarcdn.com/image?url=mootion.com&t=2&s=1&h=0fa5b8eda556ce2e768d3c41b2ba19d8ea769ab800c532d5d2363b0fc9058484"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Campaigns/Data?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=100&includeTerms=&isWindow=false&asc=false&sort=lastSeen",
+    "body": {
+      "data": [
+        {
+          "campaign": "Free AI Video Generator | invideo AI",
+          "landingPageLink": "https://invideo.io/make/ai-video-generator-web?adset_name=ADCR_INV07_A_UseAIAsFacelessYouTuberGreenScreen_KentHart_Vid&device=c&campaign_id=21353374283&adset_id=&ad_id=&adset_name=&keyword=&network=x&device=c&matchtype=&placement=x&campaign_id=21353374283&adset_id=&ad_id=",
+          "publishersCount": 0,
+          "creativesCount": 13,
+          "firstSeen": "2025-03-21",
+          "lastSeen": "2026-03-15",
+          "activeDays": 360,
+          "campaignId": "invideo.io/make/ai-video-generator-web"
+        },
+        {
+          "campaign": "Invideo AI - Bring your Ideas to life",
+          "landingPageLink": "https://invideo.io?irclickid=0f4WVcwt3xycTsOxqv0H9xpGUksVS00Fp1Lq2o0&mpid=204240&irgwc=1&gad_source=1&gad_campaignid=22660400117",
+          "publishersCount": 0,
+          "creativesCount": 13,
+          "firstSeen": "2025-08-26",
+          "lastSeen": "2026-02-28",
+          "activeDays": 187,
+          "campaignId": "invideo.io"
+        },
+        {
+          "campaign": "na",
+          "landingPageLink": "http://NA",
+          "publishersCount": 0,
+          "creativesCount": 3,
+          "firstSeen": "2025-09-24",
+          "lastSeen": "2025-10-21",
+          "activeDays": 28,
+          "campaignId": "na"
+        }
+      ],
+      "totalCount": 3,
+      "isFromNewScraper": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Campaigns/Data?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&asc=false&sort=lastSeen",
+    "body": {
+      "data": [
+        {
+          "campaign": "Free AI Video Generator | invideo AI",
+          "landingPageLink": "https://invideo.io/make/ai-video-generator-web?adset_name=INTR_INT08_A_EntireYouTubeVideo_AISavvy_Vid&device=c&campaign_id=21083373793&adset_id=&ad_id=&adset_name=&keyword=&network=x&device=c&matchtype=&placement=x&campaign_id=21083373793&adset_id=&ad_id=&gad_source=0",
+          "publishersCount": 0,
+          "creativesCount": 13,
+          "firstSeen": "2025-03-21",
+          "lastSeen": "2026-03-15",
+          "activeDays": 360,
+          "campaignId": "invideo.io/make/ai-video-generator-web"
+        },
+        {
+          "campaign": "Invideo AI - Bring your Ideas to life",
+          "landingPageLink": "https://invideo.io?irclickid=0f4WVcwt3xycTsOxqv0H9xpGUksVS00Fp1Lq2o0&mpid=204240&irgwc=1&gad_source=1&gad_campaignid=22660400117",
+          "publishersCount": 0,
+          "creativesCount": 13,
+          "firstSeen": "2025-08-26",
+          "lastSeen": "2026-02-28",
+          "activeDays": 187,
+          "campaignId": "invideo.io"
+        },
+        {
+          "campaign": "na",
+          "landingPageLink": "http://NA",
+          "publishersCount": 0,
+          "creativesCount": 3,
+          "firstSeen": "2025-09-24",
+          "lastSeen": "2025-10-21",
+          "activeDays": 28,
+          "campaignId": "na"
+        }
+      ],
+      "totalCount": 3,
+      "isFromNewScraper": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/breakdown?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.1309726251553361,
+          "visitsShare": 0.13406622200671547,
+          "spendShare": 0.09302057859029199,
+          "category": "Computers_Electronics_and_Technology~File_Sharing_and_Hosting",
+          "rank": 1263969,
+          "visitsChange": -0.8704595316016212,
+          "isVisitsNew": false,
+          "entity": "vfxfile.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=vfxfile.com&t=2&s=0&h=899dee500e6dc9e4536142e0e4b0d95e3c3a47fc14a4a9538af5274d52393357"
+        },
+        {
+          "impressionsShare": 0.08522134263875883,
+          "visitsShare": 0.13054831582049284,
+          "spendShare": 0.15267704855379927,
+          "category": "Computers_Electronics_and_Technology~File_Sharing_and_Hosting",
+          "rank": 129383,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "vfxdownload.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=vfxdownload.com&t=2&s=0&h=d473d6d7dd1857684295484eff529edc5242604c3b03721c305f68a05714ed38"
+        },
+        {
+          "impressionsShare": 0.03491774538431026,
+          "visitsShare": 0.0515617192831426,
+          "spendShare": 0.037300563774786584,
+          "category": "Computers_Electronics_and_Technology~File_Sharing_and_Hosting",
+          "rank": 655695,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "oppenit.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=oppenit.com&t=2&s=0&h=8dca8b16176ca35b56e7ddabc9f3bcc0b72269932c7a9339bfae32343ea5cff2"
+        },
+        {
+          "impressionsShare": 0.03195982381427455,
+          "visitsShare": 0.04071655839582293,
+          "spendShare": 0.052136311548253406,
+          "category": "",
+          "rank": 3592760,
+          "visitsChange": -0.706828881409062,
+          "isVisitsNew": false,
+          "entity": "inaivideo.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=inaivideo.com&t=2&s=0&h=f62001c0fbff9237f2a1750cbf160ee9c69b4f36a4af72d04a2b300ef151ccf2"
+        },
+        {
+          "impressionsShare": 0.0409913973284311,
+          "visitsShare": 0.03338351926330279,
+          "spendShare": 0.03364789188346903,
+          "category": "Business_and_Consumer_Services~Online_Marketing",
+          "rank": 0,
+          "visitsChange": 0.7414513905568952,
+          "isVisitsNew": false,
+          "entity": "app.impact.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=impact.com&t=2&s=0&h=0b885cd52378fa960f20a406466ccde64981391d0acb12720d5cbb27b076ce24"
+        }
+      ],
+      "totalCount": 236,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/WorldMap/Data?key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "countrySpendShares": [
+        {
+          "country": 840,
+          "share": 0.28843076615062124,
+          "popChange": 0.47279246997593927
+        },
+        {
+          "country": 826,
+          "share": 0.07065781497497127,
+          "popChange": 0.24544174523678003
+        },
+        {
+          "country": 76,
+          "share": 0.04955036257657638,
+          "popChange": 0.027144009977257695
+        },
+        {
+          "country": 276,
+          "share": 0.034807654680885584,
+          "popChange": 0.06315919514492639
+        },
+        {
+          "country": 250,
+          "share": 0.027623365270811304,
+          "popChange": -0.12867987114470697
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/summary?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "invideo.io": {
+          "campaigns": {
+            "count": 3,
+            "change": 0
+          },
+          "creatives": {
+            "count": 38,
+            "change": -0.6875
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/ads/gallery/unified?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": [
+        {
+          "creativeId": "9e3e25115abc71ed856c565f2bddfa3f7a70845f52d923760502df53*250482",
+          "firstSeen": "2025-04-15",
+          "lastSeen": "2026-03-15",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads-capture-client-side/images/9e3e25115abc71ed856c565f2bddfa3f7a70845f52d923760502df53/482x250?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.jpg%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=da6a9942a54df920fadf26d7bdd2b70095a7c1d224f1bb1050575834b8f519df",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "482x250",
+          "activeDays": 335,
+          "campaignTitle": "Free AI Video Generator | invideo AI",
+          "landingPage": "https://invideo.io/make/ai-video-generator-web?adset_name=INTR_INT04_A_UnderwaterDemo_Vid&device=c&campaign_id=21353374283&adset_id=&ad_id=&adset_name=&keyword=&network=x&device=c&matchtype=&placement=x&campaign_id=21353374283&adset_id=&ad_id=&gad_source=0"
+        },
+        {
+          "creativeId": "471433653da0264714dd0b264a0588e3275885b450ee0faa702b51d9*250482",
+          "firstSeen": "2025-03-27",
+          "lastSeen": "2026-03-06",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads-capture-client-side/images/471433653da0264714dd0b264a0588e3275885b450ee0faa702b51d9/482x250?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.jpg%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=e20a5f0c5f4c5a2cf89c526f5caa51753ce4a77db3ce6333019852e0593abb92",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "482x250",
+          "activeDays": 345,
+          "campaignTitle": "Free AI Video Generator | invideo AI",
+          "landingPage": "https://invideo.io/make/ai-video-generator-web?adset_name=INTR_INT04_A_UnderwaterDemo_Vid&device=c&campaign_id=21353374283&adset_id=&ad_id=&adset_name=&keyword=&network=x&device=c&matchtype=&placement=x&campaign_id=21353374283&adset_id=&ad_id=&gad_source=0"
+        },
+        {
+          "creativeId": "CR17147782290785435649*600300",
+          "firstSeen": "2025-09-24",
+          "lastSeen": "2026-02-28",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-creatives/execution_key%3Datc_capture/display/CR17147782290785435649/300x600?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=859cd4c0ec018caca0653fcdade00c390f5d69e89906e1a6500ce465dc00aa8e",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "300x600",
+          "activeDays": 158
+        },
+        {
+          "creativeId": "CR13726940826360086529*600300",
+          "firstSeen": "2025-08-26",
+          "lastSeen": "2026-02-28",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-creatives/execution_key%3Datc_capture/display/CR13726940826360086529/300x600?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=32357c87643cbcf4e3077917a726a9de02b3f862b21ac83b4ae8d41a677e0ad9",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "300x600",
+          "activeDays": 187
+        },
+        {
+          "creativeId": "CR15304672598411968513*600300",
+          "firstSeen": "2026-02-26",
+          "lastSeen": "2026-02-27",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-creatives/execution_key%3Datc_capture/display/CR15304672598411968513/300x600?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=fcbbca256f51ec047b3e4f7e59c4cd3089154b5d1c8466c58efda7e4d84094cc",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "300x600",
+          "activeDays": 2
+        },
+        {
+          "creativeId": "CR16033525112569331713*600300",
+          "firstSeen": "2026-02-17",
+          "lastSeen": "2026-02-17",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-creatives/execution_key%3Datc_capture/display/CR16033525112569331713/300x600?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=cef5a9e35e5dc6a78bd479f26372220ff6a49f177e47d13d869e8e7b7b9a1e93",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "300x600",
+          "activeDays": 1
+        },
+        {
+          "creativeId": "CR14636075245602078721*600300",
+          "firstSeen": "2026-02-15",
+          "lastSeen": "2026-02-15",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-creatives/execution_key%3Datc_capture/display/CR14636075245602078721/300x600?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=58c68da43e63d07de8fcda002400ad77d62cd4d7ce836e82d28c6999c097674c",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "300x600",
+          "activeDays": 1
+        },
+        {
+          "creativeId": "d66c591f9d1135e96fa4767f90c5440c64f47e4d5aebf27669374027*465897",
+          "firstSeen": "2026-02-12",
+          "lastSeen": "2026-02-12",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads-capture-client-side/images/d66c591f9d1135e96fa4767f90c5440c64f47e4d5aebf27669374027/897x465?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.jpg%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=50ee82c26a3de4dad08e9aabe4fb932cdd946b3adb65de4d5344798b2c0fd72d",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "897x465",
+          "activeDays": 1,
+          "landingPage": "https://invideo.io/make/ai-video-generator-web?adset_name=INTR_INT13_A_TextToFilm_BombayLocale_Vid&device=c&campaign_id=21353374283&adset_id=&ad_id=&adset_name=&keyword=&network=x&device=c&matchtype=&placement=x&campaign_id=21353374283&adset_id=&ad_id="
+        },
+        {
+          "creativeId": "d66c591f9d1135e96fa4767f90c5440c64f47e4d5aebf27669374027*250482",
+          "firstSeen": "2025-03-26",
+          "lastSeen": "2026-02-11",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads-capture-client-side/images/d66c591f9d1135e96fa4767f90c5440c64f47e4d5aebf27669374027/482x250?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.jpg%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=421f5950120b4de5634b1ae1ec734dc01b393e28f4e97fc7ec492d87192e9179",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "482x250",
+          "activeDays": 323,
+          "campaignTitle": "Free AI Video Generator | invideo AI",
+          "landingPage": "https://invideo.io/make/ai-video-generator-web?adset_name=INTR_INT04_A_UnderwaterDemo_Vid&device=c&campaign_id=21353374283&adset_id=&ad_id=&adset_name=&keyword=&network=x&device=c&matchtype=&placement=x&campaign_id=21353374283&adset_id=&ad_id=&gad_source=0"
+        },
+        {
+          "creativeId": "192303229338-791537396070*400300",
+          "firstSeen": "2026-01-08",
+          "lastSeen": "2026-01-24",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-thumbnails/192303229338-791537396070/300x400?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=677ac67176caf76636469f15e77e88ccceeeab6af1e5ab734c32af7e2ec156d4",
+          "adType": "video",
+          "creativeType": "video",
+          "dimensions": "300x400",
+          "activeDays": 17,
+          "videoUrl": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/atc-creatives/execution_key%3Datc_capture/video/192303229338-791537396070/300x400?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.mp4%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T211139Z&X-Amz-SignedHeaders=host&X-Amz-Signature=81c99a7e6dc1c3ed94305b6bc4c86886764b3b304daf7c04f1683ad650605ac0"
+        }
+      ],
+      "totalCount": 35,
+      "totalValidCount": 35,
+      "isFromNewScraper": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/summary?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "invideo.io": {
+          "publishers": {
+            "count": 236,
+            "change": -0.126213592
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/ads/gallery/unified/filteredPublishers?key=invideo.io&country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": [
+      {
+        "domain": "Unknown publisher"
+      },
+      {
+        "domain": "abplive.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=abplive.com&t=2&s=0&h=de82eeaab4eaea5b20f685ce5139cffcc23747f49fd957d7cdbb4496e11c4e7d"
+      },
+      {
+        "domain": "akiba-pc.watch.impress.co.jp",
+        "favicon": "https://site-images.similarcdn.com/image?url=akiba-pc.watch.impress.co.jp&t=2&s=0&h=b92bd9542d1fadb2e2ad25212b147c7a130eba0d36061e6f80886eb53736a34a"
+      },
+      {
+        "domain": "ascii.jp",
+        "favicon": "https://site-images.similarcdn.com/image?url=ascii.jp&t=2&s=0&h=0fdbb0776c43aaa6b8bc3a4cf17ea63c45a1e0d7d96efe32f6141a5c61441632"
+      },
+      {
+        "domain": "fazwaz.vn",
+        "favicon": "https://site-images.similarcdn.com/image?url=fazwaz.vn&t=2&s=0&h=45bbe3fcbcc34542acc53ab66e104fd279aeb8d9089ea7b38897b1225d7a245c"
+      },
+      {
+        "domain": "jetphotos.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=jetphotos.com&t=2&s=0&h=142d64a614d88c65aaf294ccdf452603830d3dfd81b91714b28c8ae807d58d78"
+      },
+      {
+        "domain": "mail.google.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=mail.google.com&t=2&s=0&h=bdc21d597156a9f81824c32b3ddedb24272ba7f1441f554aac2544fd8b723aec"
+      },
+      {
+        "domain": "uiverse.io",
+        "favicon": "https://site-images.similarcdn.com/image?url=uiverse.io&t=2&s=0&h=75ba23e2acbe83518ad6ab086b0e58d5063f6876cdfce88c431b7d1432a8ee3d"
+      }
+    ]
+  }
+]

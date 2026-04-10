@@ -1,0 +1,454 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=5",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 1975524.6178922423,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=restream.io",
+    "body": {
+      "Data": {
+        "Total": {
+          "restream.io": {
+            "Organic Search": 3888292.4525720626,
+            "Social": 527500.1860032849,
+            "Email": 1813.8371248919075,
+            "Display Ads": 37290.41049286935,
+            "Direct": 4188046.412478658,
+            "Referrals": 199943.60335631366,
+            "Paid Search": 1595950.9548086212
+          }
+        },
+        "Desktop": {
+          "restream.io": {
+            "Organic Search": 1790793.075,
+            "Social": 121654.98799999998,
+            "Email": 1690.562,
+            "Display Ads": 29150.513,
+            "Direct": 2616642.2939999998,
+            "Referrals": 142646.70099999997,
+            "Paid Search": 679997.7949999999
+          }
+        },
+        "MobileWeb": {
+          "restream.io": {
+            "Organic Search": 2097499.377572063,
+            "Social": 405845.19800328487,
+            "Email": 123.27512489190767,
+            "Display Ads": 8139.897492869352,
+            "Direct": 1571404.1184786581,
+            "Referrals": 57296.90235631368,
+            "Paid Search": 915953.1598086213
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 527500.1860032849,
+              "Email": 1813.8371248919075,
+              "Direct": 4188046.4124786574,
+              "Display Ads": 37290.41049286935,
+              "Referrals": 199943.60335631366,
+              "Organic Search": 3888292.4525720626,
+              "Paid Search": 1595950.9548086217
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 184060.5387374586,
+                "Email": 589.6929937708999,
+                "Direct": 1476226.559968665,
+                "Display Ads": 14456.892878589577,
+                "Referrals": 73493.76849145157,
+                "Organic Search": 1420114.8078162586,
+                "Paid Search": 572010.5558893384
+              },
+              "2026-01-01": {
+                "Social": 181475.3139921017,
+                "Email": 671.0650007253975,
+                "Direct": 1465096.906515647,
+                "Display Ads": 12794.202015347397,
+                "Referrals": 68566.70144735451,
+                "Organic Search": 1358140.3179150969,
+                "Paid Search": 534163.5770975712
+              },
+              "2026-02-01": {
+                "Social": 161964.33327372457,
+                "Email": 553.0791303956104,
+                "Direct": 1246722.9459943457,
+                "Display Ads": 10039.315598932375,
+                "Referrals": 57883.13341750759,
+                "Organic Search": 1110037.3268407073,
+                "Paid Search": 489776.82182171184
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "freeconvert.com",
+        "DomainWithoutSub": "freeconvert.com",
+        "Rank": 1529,
+        "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=1&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18"
+      },
+      {
+        "Domain": "cloudconvert.com",
+        "DomainWithoutSub": "cloudconvert.com",
+        "Rank": 2491,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=1&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83"
+      },
+      {
+        "Domain": "convertio.co",
+        "DomainWithoutSub": "convertio.co",
+        "Favicon": "https://site-images.similarcdn.com/image?url=convertio.co&t=2&s=1&h=e995388c379d89a1afbc5b2ff71b8f86fa9b547a859124c9f7beaafa9678fcaf"
+      },
+      {
+        "Domain": "zamzar.com",
+        "DomainWithoutSub": "zamzar.com",
+        "Rank": 25575,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zamzar.com&t=2&s=1&h=f33f5461a90058eb543109e3df1212141f6a2d73aae9b5b3071fd4bcd661ef8e"
+      },
+      {
+        "Domain": "biteable.com",
+        "DomainWithoutSub": "biteable.com",
+        "Rank": 65412,
+        "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=1&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22"
+      },
+      {
+        "Domain": "uniscribe.co",
+        "DomainWithoutSub": "uniscribe.co",
+        "Rank": 34543,
+        "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=1&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "notta.ai",
+        "DomainWithoutSub": "notta.ai",
+        "Rank": 19207,
+        "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=1&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21"
+      },
+      {
+        "Domain": "descript.com",
+        "DomainWithoutSub": "descript.com",
+        "Rank": 13908,
+        "Favicon": "https://site-images.similarcdn.com/image?url=descript.com&t=2&s=1&h=19b1b9d6d824da80586a1078567284aa3d80d84adbbbb32672d9d63283943881"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "streamlabs.com",
+        "DomainWithoutSub": "streamlabs.com",
+        "Rank": 9969,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=1&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-audio-converter.com",
+        "DomainWithoutSub": "online-audio-converter.com",
+        "Rank": 18174,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-audio-converter.com&t=2&s=1&h=7072bef883704cb884e36073b5327cb009396fe3eac70803d46c75f23bdefd8f"
+      },
+      {
+        "Domain": "podbean.com",
+        "DomainWithoutSub": "podbean.com",
+        "Rank": 19514,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podbean.com&t=2&s=1&h=6bd03331138a96684f3443d0492539934b6c0e774cfbf1ddcb042a82260bedcc"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=restream.io%2Cstreamyard.com%2Criverside.com&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Social": {
+            "Total": {
+              "restream.io": 527500.1860032849,
+              "streamyard.com": 1753039.1188217576,
+              "riverside.com": 297886.6408889726
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 184060.5387374586,
+                "streamyard.com": 578545.3343288456,
+                "riverside.com": 92474.46905898102
+              },
+              "2026-01-01": {
+                "restream.io": 181475.3139921017,
+                "streamyard.com": 618638.7197552709,
+                "riverside.com": 113912.11333129779
+              },
+              "2026-02-01": {
+                "restream.io": 161964.33327372457,
+                "streamyard.com": 555855.064737641,
+                "riverside.com": 91500.0584986938
+              }
+            }
+          },
+          "Email": {
+            "Total": {
+              "restream.io": 1813.8371248919075,
+              "streamyard.com": 11584.950891584995,
+              "riverside.com": 5028.129443239695
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 589.6929937708999,
+                "streamyard.com": 2641.7498747990317,
+                "riverside.com": 1551.9200118080435
+              },
+              "2026-01-01": {
+                "restream.io": 671.0650007253975,
+                "streamyard.com": 2713.8247015305333,
+                "riverside.com": 1979.9990675193094
+              },
+              "2026-02-01": {
+                "restream.io": 553.0791303956104,
+                "streamyard.com": 6229.37631525543,
+                "riverside.com": 1496.210363912343
+              }
+            }
+          },
+          "Direct": {
+            "Total": {
+              "restream.io": 4188046.4124786574,
+              "streamyard.com": 11855221.034946758,
+              "riverside.com": 6385162.941052045
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 1476226.559968665,
+                "streamyard.com": 3835819.295643485,
+                "riverside.com": 1773025.1237854024
+              },
+              "2026-01-01": {
+                "restream.io": 1465096.906515647,
+                "streamyard.com": 4194943.869938626,
+                "riverside.com": 2431338.6464820807
+              },
+              "2026-02-01": {
+                "restream.io": 1246722.9459943457,
+                "streamyard.com": 3824457.869364647,
+                "riverside.com": 2180799.170784562
+              }
+            }
+          },
+          "Display Ads": {
+            "Total": {
+              "restream.io": 37290.41049286935,
+              "streamyard.com": 108544.33337946216,
+              "riverside.com": 55911.34227270559
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 14456.892878589577,
+                "streamyard.com": 37140.34928375962,
+                "riverside.com": 14753.174939761317
+              },
+              "2026-01-01": {
+                "restream.io": 12794.202015347397,
+                "streamyard.com": 37460.42895378235,
+                "riverside.com": 21365.228752970783
+              },
+              "2026-02-01": {
+                "restream.io": 10039.315598932375,
+                "streamyard.com": 33943.555141920195,
+                "riverside.com": 19792.93857997349
+              }
+            }
+          },
+          "Referrals": {
+            "Total": {
+              "restream.io": 199943.60335631366,
+              "streamyard.com": 611218.2125282077,
+              "riverside.com": 382620.5060174388
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 73493.76849145157,
+                "streamyard.com": 203285.24368431722,
+                "riverside.com": 108499.22113247275
+              },
+              "2026-01-01": {
+                "restream.io": 68566.70144735451,
+                "streamyard.com": 212952.808707626,
+                "riverside.com": 146994.72554644514
+              },
+              "2026-02-01": {
+                "restream.io": 57883.13341750759,
+                "streamyard.com": 194980.16013626446,
+                "riverside.com": 127126.55933852086
+              }
+            }
+          },
+          "Organic Search": {
+            "Total": {
+              "restream.io": 3888292.4525720626,
+              "streamyard.com": 2999258.963469101,
+              "riverside.com": 2755537.7937073377
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 1420114.8078162586,
+                "streamyard.com": 910789.6178835033,
+                "riverside.com": 847434.3574047973
+              },
+              "2026-01-01": {
+                "restream.io": 1358140.3179150969,
+                "streamyard.com": 1111869.4639041312,
+                "riverside.com": 1024884.3086023991
+              },
+              "2026-02-01": {
+                "restream.io": 1110037.3268407073,
+                "streamyard.com": 976599.8816814667,
+                "riverside.com": 883219.1277001412
+              }
+            }
+          },
+          "Paid Search": {
+            "Total": {
+              "restream.io": 1595950.9548086217,
+              "streamyard.com": 1270789.3842852353,
+              "riverside.com": 1034288.2700126925
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "restream.io": 572010.5558893384,
+                "streamyard.com": 435861.2177836664,
+                "riverside.com": 210281.48702990232
+              },
+              "2026-01-01": {
+                "restream.io": 534163.5770975712,
+                "streamyard.com": 433694.6144067531,
+                "riverside.com": 409473.09830477426
+              },
+              "2026-02-01": {
+                "restream.io": 489776.82182171184,
+                "streamyard.com": 401233.5520948159,
+                "riverside.com": 414533.68467801594
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]

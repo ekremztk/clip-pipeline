@@ -1,0 +1,496 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=invideo.io&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "renderforest.com",
+        "DomainWithoutSub": "renderforest.com",
+        "Rank": 16565,
+        "Favicon": "https://site-images.similarcdn.com/image?url=renderforest.com&t=2&s=1&h=af037cd28be19417a8cc8427ba124b9a49cb6336fffa765f0013114ce1114a2c"
+      },
+      {
+        "Domain": "clipchamp.com",
+        "DomainWithoutSub": "clipchamp.com",
+        "Rank": 5384,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=1&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=invideo.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "invideo.io": {
+        "mainDomainName": "invideo",
+        "icon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "image": "https://site-images.similarcdn.com/image?url=invideo.io&t=0&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=invideo.io&t=1&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "title": "Privacy Policy for using InVideo online video editor",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "If you do not agree to these terms, please do not access or use this site.This Privacy Policy applies to https://invideo.io/, owned and operated by InVideo.",
+        "globalRanking": 5603,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 7404,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 39,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "io.invideo.ai",
+              "title": "invideo AI: AI Video Generator",
+              "author": "invideo INC",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2F-1kFpnKJcOkQWLSCwGi5HX6bp_hFvEHqrC_pvb7lqbeO-sVJo_hH6SHNqVxjDB2f8Iw%3Ds180&h=fa837319040fad71e9b649bddbcad6e208e2d8ca1d2f6a04c2507648799084f5",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.545665264129639,
+              "ratecount": 114242,
+              "valid": true
+            }
+          ],
+          "apps_1": [
+            {
+              "store": 1,
+              "id": "6471394316",
+              "title": "invideo AI: AI Video Generator",
+              "author": "Invideo Inc",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fis1-ssl.mzstatic.com%2Fimage%2Fthumb%2FPurple211%2Fv4%2Fa6%2F59%2F26%2Fa659263c-9cad-ed85-3cea-bf5969b60261%2FprodAppIcon-0-0-1x_U007epad-0-1-85-220.png%2F175x175bb.jpg&h=4add4750f9e7f60f71f1087dec41ac2750dc62f003ad3d9a101ddb18198a1010",
+              "category": "6008",
+              "price": "Free",
+              "rating": 4.60497,
+              "ratecount": 23697,
+              "valid": true
+            },
+            {
+              "store": 1,
+              "id": "1171358257",
+              "title": "Filmr - Pro Video Editor",
+              "author": "MEF comunicacao e divulgacao ltda- me",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fis1-ssl.mzstatic.com%2Fimage%2Fthumb%2FPurple221%2Fv4%2F4f%2F1e%2F8e%2F4f1e8e31-8929-ca02-25b9-1cef4c1fa3f4%2FAppIcon-0-0-1x_U007emarketing-0-10-0-sRGB-85-220.jpeg%2F175x175bb.jpg&h=f3057dd93031a4c2eb1705181e6563cb941ba50dad1d3680160ed8603ae06e6b",
+              "category": "6008",
+              "price": "Free",
+              "rating": 4.49146,
+              "ratecount": 6794,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2017",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 5883626.247719334,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=invideo.io",
+    "body": {
+      "Data": {
+        "Total": {
+          "invideo.io": {
+            "Organic Search": 10386517.851220634,
+            "Social": 766299.4288816038,
+            "Email": 7788.001339373861,
+            "Display Ads": 111425.80250572253,
+            "Direct": 11069568.832628973,
+            "Referrals": 1394374.999388702,
+            "Paid Search": 2054899.074772328
+          }
+        },
+        "Desktop": {
+          "invideo.io": {
+            "Organic Search": 6026192.84,
+            "Social": 207310.543,
+            "Email": 7043.914999999999,
+            "Display Ads": 80961.659,
+            "Direct": 6188997.442,
+            "Referrals": 928233.432,
+            "Paid Search": 1615101.765
+          }
+        },
+        "MobileWeb": {
+          "invideo.io": {
+            "Organic Search": 4360325.011220635,
+            "Social": 558988.8858816037,
+            "Email": 744.0863393738621,
+            "Display Ads": 30464.143505722524,
+            "Direct": 4880571.390628972,
+            "Referrals": 466141.5673887019,
+            "Paid Search": 439797.309772328
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 766299.4288816038,
+              "Email": 7788.001339373861,
+              "Direct": 11069568.832628973,
+              "Display Ads": 111425.80250572253,
+              "Referrals": 1394374.9993887017,
+              "Organic Search": 10386517.851220636,
+              "Paid Search": 2054899.074772328
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 285189.8359344499,
+                "Email": 2999.3833478390557,
+                "Direct": 3740830.9341777377,
+                "Display Ads": 43700.279862539704,
+                "Referrals": 489534.98302016174,
+                "Organic Search": 3599835.427656305,
+                "Paid Search": 758097.4850248363
+              },
+              "2026-01-01": {
+                "Social": 271901.8450447397,
+                "Email": 2682.5908534762266,
+                "Direct": 3998184.436849865,
+                "Display Ads": 38116.51434457659,
+                "Referrals": 499623.79122471774,
+                "Organic Search": 3747985.601353484,
+                "Paid Search": 728289.0289985065
+              },
+              "2026-02-01": {
+                "Social": 209207.74790241406,
+                "Email": 2106.0271380585787,
+                "Direct": 3330553.461601369,
+                "Display Ads": 29609.008298606233,
+                "Referrals": 405216.2251438224,
+                "Organic Search": 3038696.822210846,
+                "Paid Search": 568512.5607489853
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=invideo.io%2Cveed.io%2Crenderforest.com&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Social": {
+            "Total": {
+              "invideo.io": 766299.4288816038,
+              "veed.io": 568082.1943540527,
+              "renderforest.com": 230145.86833587434
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 285189.8359344499,
+                "veed.io": 205085.09474635177,
+                "renderforest.com": 87734.88567195144
+              },
+              "2026-01-01": {
+                "invideo.io": 271901.8450447397,
+                "veed.io": 201418.7797330785,
+                "renderforest.com": 74052.17076558733
+              },
+              "2026-02-01": {
+                "invideo.io": 209207.74790241406,
+                "veed.io": 161578.31987462242,
+                "renderforest.com": 68358.8118983356
+              }
+            }
+          },
+          "Email": {
+            "Total": {
+              "invideo.io": 7788.001339373861,
+              "veed.io": 5132.118974190715,
+              "renderforest.com": 2213.7612037727117
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 2999.3833478390557,
+                "veed.io": 1775.128464554964,
+                "renderforest.com": 687.8033724397687
+              },
+              "2026-01-01": {
+                "invideo.io": 2682.5908534762266,
+                "veed.io": 1874.2512900260058,
+                "renderforest.com": 762.1345867951701
+              },
+              "2026-02-01": {
+                "invideo.io": 2106.0271380585787,
+                "veed.io": 1482.7392196097446,
+                "renderforest.com": 763.8232445377731
+              }
+            }
+          },
+          "Direct": {
+            "Total": {
+              "invideo.io": 11069568.832628973,
+              "veed.io": 14377785.888381254,
+              "renderforest.com": 2307413.94111631
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 3740830.9341777377,
+                "veed.io": 4758407.4027539175,
+                "renderforest.com": 867476.2822127626
+              },
+              "2026-01-01": {
+                "invideo.io": 3998184.436849865,
+                "veed.io": 5071626.590074861,
+                "renderforest.com": 759966.4465967475
+              },
+              "2026-02-01": {
+                "invideo.io": 3330553.461601369,
+                "veed.io": 4547751.895552474,
+                "renderforest.com": 679971.2123068
+              }
+            }
+          },
+          "Display Ads": {
+            "Total": {
+              "invideo.io": 111425.80250572253,
+              "veed.io": 82825.50505813885,
+              "renderforest.com": 16969.38957978956
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 43700.279862539704,
+                "veed.io": 28361.039506951885,
+                "renderforest.com": 5630.807480128501
+              },
+              "2026-01-01": {
+                "invideo.io": 38116.51434457659,
+                "veed.io": 29610.614858139583,
+                "renderforest.com": 5796.177441444698
+              },
+              "2026-02-01": {
+                "invideo.io": 29609.008298606233,
+                "veed.io": 24853.85069304738,
+                "renderforest.com": 5542.404658216361
+              }
+            }
+          },
+          "Referrals": {
+            "Total": {
+              "invideo.io": 1394374.9993887017,
+              "veed.io": 1256999.6852413442,
+              "renderforest.com": 230750.05615217172
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 489534.98302016174,
+                "veed.io": 453846.8531008838,
+                "renderforest.com": 88525.43405721876
+              },
+              "2026-01-01": {
+                "invideo.io": 499623.79122471774,
+                "veed.io": 443097.2766096904,
+                "renderforest.com": 76493.84384888434
+              },
+              "2026-02-01": {
+                "invideo.io": 405216.2251438224,
+                "veed.io": 360055.5555307699,
+                "renderforest.com": 65730.7782460686
+              }
+            }
+          },
+          "Organic Search": {
+            "Total": {
+              "invideo.io": 10386517.851220636,
+              "veed.io": 19207166.17055396,
+              "renderforest.com": 4609776.337385807
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 3599835.427656305,
+                "veed.io": 6702133.91677106,
+                "renderforest.com": 1747916.6552516914
+              },
+              "2026-01-01": {
+                "invideo.io": 3747985.601353484,
+                "veed.io": 6805306.33843999,
+                "renderforest.com": 1511878.3648338355
+              },
+              "2026-02-01": {
+                "invideo.io": 3038696.822210846,
+                "veed.io": 5699725.91534291,
+                "renderforest.com": 1349981.317300281
+              }
+            }
+          },
+          "Paid Search": {
+            "Total": {
+              "invideo.io": 2054899.074772328,
+              "veed.io": 2189856.9293225156,
+              "renderforest.com": 20064.541113959443
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "invideo.io": 758097.4850248363,
+                "veed.io": 748205.6778982293,
+                "renderforest.com": 12007.521650693649
+              },
+              "2026-01-01": {
+                "invideo.io": 728289.0289985065,
+                "veed.io": 725634.9176493534,
+                "renderforest.com": 2072.198424792622
+              },
+              "2026-02-01": {
+                "invideo.io": 568512.5607489853,
+                "veed.io": 716016.333774933,
+                "renderforest.com": 5984.82103847317
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=invideo.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "renderforest.com",
+        "DomainWithoutSub": "renderforest.com",
+        "Rank": 16565,
+        "Favicon": "https://site-images.similarcdn.com/image?url=renderforest.com&t=2&s=1&h=af037cd28be19417a8cc8427ba124b9a49cb6336fffa765f0013114ce1114a2c"
+      },
+      {
+        "Domain": "clipchamp.com",
+        "DomainWithoutSub": "clipchamp.com",
+        "Rank": 5384,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=1&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-video-cutter.com",
+        "DomainWithoutSub": "online-video-cutter.com",
+        "Rank": 10569,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-video-cutter.com&t=2&s=1&h=7b1b1c66ef9ab59bf8107e29f1ebdd789c0a956b9ee89c4f1091204041d6ab22"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "adobe.com",
+        "DomainWithoutSub": "adobe.com",
+        "Rank": 86,
+        "Favicon": "https://site-images.similarcdn.com/image?url=adobe.com&t=2&s=1&h=0343bf8cd29cf34d2087739e2dea12192318f7a5331a9cca4e05c7bbf8a1741f"
+      },
+      {
+        "Domain": "synthesia.io",
+        "DomainWithoutSub": "synthesia.io",
+        "Rank": 19953,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesia.io&t=2&s=1&h=8b08fbf55cb34c8b813dad8d93550cca5a195c81d55968b7299b3e285e0b1f56"
+      },
+      {
+        "Domain": "heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Rank": 3787,
+        "Favicon": "https://site-images.similarcdn.com/image?url=heygen.com&t=2&s=1&h=da761b4500aacead5d6342124f3d9ea128dae354f2ee9191d230f0a756fe735c"
+      },
+      {
+        "Domain": "steve.ai",
+        "DomainWithoutSub": "steve.ai",
+        "Rank": 96150,
+        "Favicon": "https://site-images.similarcdn.com/image?url=steve.ai&t=2&s=1&h=5d161648825e39e6d4b96bb1ca7df87b1a1ff8295e9bba8a0d0a29dc93bbbc1a"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "makereels.ai",
+        "DomainWithoutSub": "makereels.ai",
+        "Rank": 156304,
+        "Favicon": "https://site-images.similarcdn.com/image?url=makereels.ai&t=2&s=1&h=28e7a96df6ac7d09304f54a58457b0d4f817e852e59f7373bd4298f42eecfac1"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      },
+      {
+        "Domain": "faceless.video",
+        "DomainWithoutSub": "faceless.video",
+        "Rank": 85302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=faceless.video&t=2&s=1&h=306f754ed7f423901446ebc9d8c263758591320fd0aa8aa2cc2fb48be002d7ac"
+      },
+      {
+        "Domain": "gan.ai",
+        "DomainWithoutSub": "gan.ai",
+        "Rank": 391778,
+        "Favicon": "https://site-images.similarcdn.com/image?url=gan.ai&t=2&s=1&h=f1e1bc935223caa1891c4081b4abf9b054f78f1e40c69bbcab16e8c742d29cb0"
+      },
+      {
+        "Domain": "mootion.com",
+        "DomainWithoutSub": "mootion.com",
+        "Rank": 88696,
+        "Favicon": "https://site-images.similarcdn.com/image?url=mootion.com&t=2&s=1&h=0fa5b8eda556ce2e768d3c41b2ba19d8ea769ab800c532d5d2363b0fc9058484"
+      }
+    ]
+  }
+]

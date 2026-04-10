@@ -1,0 +1,467 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=invideo.io&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "renderforest.com",
+        "DomainWithoutSub": "renderforest.com",
+        "Rank": 16565,
+        "Favicon": "https://site-images.similarcdn.com/image?url=renderforest.com&t=2&s=1&h=af037cd28be19417a8cc8427ba124b9a49cb6336fffa765f0013114ce1114a2c"
+      },
+      {
+        "Domain": "clipchamp.com",
+        "DomainWithoutSub": "clipchamp.com",
+        "Rank": 5384,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=1&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=invideo.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "invideo.io": {
+        "mainDomainName": "invideo",
+        "icon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "image": "https://site-images.similarcdn.com/image?url=invideo.io&t=0&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=invideo.io&t=1&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+        "title": "Privacy Policy for using InVideo online video editor",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "If you do not agree to these terms, please do not access or use this site.This Privacy Policy applies to https://invideo.io/, owned and operated by InVideo.",
+        "globalRanking": 5603,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 7404,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 39,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "io.invideo.ai",
+              "title": "invideo AI: AI Video Generator",
+              "author": "invideo INC",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2F-1kFpnKJcOkQWLSCwGi5HX6bp_hFvEHqrC_pvb7lqbeO-sVJo_hH6SHNqVxjDB2f8Iw%3Ds180&h=fa837319040fad71e9b649bddbcad6e208e2d8ca1d2f6a04c2507648799084f5",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.545665264129639,
+              "ratecount": 114242,
+              "valid": true
+            }
+          ],
+          "apps_1": [
+            {
+              "store": 1,
+              "id": "6471394316",
+              "title": "invideo AI: AI Video Generator",
+              "author": "Invideo Inc",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fis1-ssl.mzstatic.com%2Fimage%2Fthumb%2FPurple211%2Fv4%2Fa6%2F59%2F26%2Fa659263c-9cad-ed85-3cea-bf5969b60261%2FprodAppIcon-0-0-1x_U007epad-0-1-85-220.png%2F175x175bb.jpg&h=4add4750f9e7f60f71f1087dec41ac2750dc62f003ad3d9a101ddb18198a1010",
+              "category": "6008",
+              "price": "Free",
+              "rating": 4.60497,
+              "ratecount": 23697,
+              "valid": true
+            },
+            {
+              "store": 1,
+              "id": "1171358257",
+              "title": "Filmr - Pro Video Editor",
+              "author": "MEF comunicacao e divulgacao ltda- me",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fis1-ssl.mzstatic.com%2Fimage%2Fthumb%2FPurple221%2Fv4%2F4f%2F1e%2F8e%2F4f1e8e31-8929-ca02-25b9-1cef4c1fa3f4%2FAppIcon-0-0-1x_U007emarketing-0-10-0-sRGB-85-220.jpeg%2F175x175bb.jpg&h=f3057dd93031a4c2eb1705181e6563cb941ba50dad1d3680160ed8603ae06e6b",
+              "category": "6008",
+              "price": "Free",
+              "rating": 4.49146,
+              "ratecount": 6794,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2017",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 5883626.247719334,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/graphV2/unified?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "invideo.io": {
+          "desktop": {
+            "monthly": {
+              "2025-12-01": {
+                "spend": {
+                  "value": 114.86333579819745,
+                  "change": -0.8691021355896559
+                },
+                "impressions": {
+                  "value": 2531569.444024433,
+                  "change": -0.9094536023417256
+                },
+                "pageViews": {
+                  "value": 25381276.019642454,
+                  "change": 0.05882392491442339
+                }
+              },
+              "2026-01-01": {
+                "spend": {
+                  "value": 955.8949677456901,
+                  "change": 7.322019912647278
+                },
+                "impressions": {
+                  "value": 4577315.897490538,
+                  "change": 0.8080941481952733
+                },
+                "pageViews": {
+                  "value": 26350517.040456105,
+                  "change": 0.03818724559252105
+                }
+              },
+              "2026-02-01": {
+                "spend": {
+                  "value": 274.17906977381125,
+                  "change": -0.7131702969203674
+                },
+                "impressions": {
+                  "value": 4854020.312716854,
+                  "change": 0.06045123854746778
+                },
+                "pageViews": {
+                  "value": 22104193.339585528,
+                  "change": -0.16114764254345262
+                }
+              }
+            },
+            "total": {
+              "impressions": 11962905.654231824,
+              "spend": 1344.9373733176988,
+              "pageViews": 73835986.39968409
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/summary?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "invideo.io": {
+          "advertisers": {
+            "count": 45,
+            "change": -0.238095238
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=invideo.io&limit=20&country=999&webSource=Desktop",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "renderforest.com",
+        "DomainWithoutSub": "renderforest.com",
+        "Rank": 16565,
+        "Favicon": "https://site-images.similarcdn.com/image?url=renderforest.com&t=2&s=1&h=af037cd28be19417a8cc8427ba124b9a49cb6336fffa765f0013114ce1114a2c"
+      },
+      {
+        "Domain": "clipchamp.com",
+        "DomainWithoutSub": "clipchamp.com",
+        "Rank": 5384,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=1&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-video-cutter.com",
+        "DomainWithoutSub": "online-video-cutter.com",
+        "Rank": 10569,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-video-cutter.com&t=2&s=1&h=7b1b1c66ef9ab59bf8107e29f1ebdd789c0a956b9ee89c4f1091204041d6ab22"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "adobe.com",
+        "DomainWithoutSub": "adobe.com",
+        "Rank": 86,
+        "Favicon": "https://site-images.similarcdn.com/image?url=adobe.com&t=2&s=1&h=0343bf8cd29cf34d2087739e2dea12192318f7a5331a9cca4e05c7bbf8a1741f"
+      },
+      {
+        "Domain": "synthesia.io",
+        "DomainWithoutSub": "synthesia.io",
+        "Rank": 19953,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesia.io&t=2&s=1&h=8b08fbf55cb34c8b813dad8d93550cca5a195c81d55968b7299b3e285e0b1f56"
+      },
+      {
+        "Domain": "heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Rank": 3787,
+        "Favicon": "https://site-images.similarcdn.com/image?url=heygen.com&t=2&s=1&h=da761b4500aacead5d6342124f3d9ea128dae354f2ee9191d230f0a756fe735c"
+      },
+      {
+        "Domain": "steve.ai",
+        "DomainWithoutSub": "steve.ai",
+        "Rank": 96150,
+        "Favicon": "https://site-images.similarcdn.com/image?url=steve.ai&t=2&s=1&h=5d161648825e39e6d4b96bb1ca7df87b1a1ff8295e9bba8a0d0a29dc93bbbc1a"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "makereels.ai",
+        "DomainWithoutSub": "makereels.ai",
+        "Rank": 156304,
+        "Favicon": "https://site-images.similarcdn.com/image?url=makereels.ai&t=2&s=1&h=28e7a96df6ac7d09304f54a58457b0d4f817e852e59f7373bd4298f42eecfac1"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      },
+      {
+        "Domain": "faceless.video",
+        "DomainWithoutSub": "faceless.video",
+        "Rank": 85302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=faceless.video&t=2&s=1&h=306f754ed7f423901446ebc9d8c263758591320fd0aa8aa2cc2fb48be002d7ac"
+      },
+      {
+        "Domain": "gan.ai",
+        "DomainWithoutSub": "gan.ai",
+        "Rank": 391778,
+        "Favicon": "https://site-images.similarcdn.com/image?url=gan.ai&t=2&s=1&h=f1e1bc935223caa1891c4081b4abf9b054f78f1e40c69bbcab16e8c742d29cb0"
+      },
+      {
+        "Domain": "mootion.com",
+        "DomainWithoutSub": "mootion.com",
+        "Rank": 88696,
+        "Favicon": "https://site-images.similarcdn.com/image?url=mootion.com&t=2&s=1&h=0fa5b8eda556ce2e768d3c41b2ba19d8ea769ab800c532d5d2363b0fc9058484"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/breakdown?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.14429331028918121,
+          "visitsShare": 0.38777552754674627,
+          "spendShare": 0.03837547246674503,
+          "category": "Computers_Electronics_and_Technology~Search_Engines",
+          "rank": 1,
+          "visitsChange": -0.2319637580145332,
+          "isVisitsNew": false,
+          "children": [
+            {
+              "impressionsShare": 0,
+              "visitsShare": 0.3105909977820837,
+              "spendShare": 0,
+              "category": "Computers_Electronics_and_Technology~Search_Engines",
+              "rank": 1,
+              "visitsChange": 0,
+              "isVisitsNew": false,
+              "entity": "google.com",
+              "impressions": 0,
+              "impressionsChange": 0,
+              "spend": 0,
+              "spendChange": 0,
+              "favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+              "isImpressionNew": false,
+              "isSpendNew": false
+            },
+            {
+              "impressionsShare": 0.09110454839030667,
+              "visitsShare": 0.0555787405170625,
+              "spendShare": 0.01684491854694338,
+              "category": "AI_Chatbots_and_Tools",
+              "rank": 19,
+              "visitsChange": -0.644698341959865,
+              "isVisitsNew": false,
+              "entity": "gemini.google.com",
+              "impressions": 412606.21904746303,
+              "impressionsChange": 0,
+              "spend": 18.12003775139787,
+              "spendChange": 0,
+              "favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+              "isImpressionNew": false,
+              "isSpendNew": false
+            },
+            {
+              "impressionsShare": 0.010778098270682303,
+              "visitsShare": 0.01486148100939187,
+              "spendShare": 0.0013752215639383323,
+              "category": "Business_and_Consumer_Services~Online_Marketing",
+              "visitsChange": 0,
+              "isVisitsNew": true,
+              "entity": "trends.google.com",
+              "impressions": 48813.26404183556,
+              "impressionsChange": 0,
+              "spend": 1.4793224785061798,
+              "spendChange": 0,
+              "favicon": "https://site-images.similarcdn.com/image?url=trends.google.com&t=2&s=0&h=ab777289c0c7b83b7fe4bdb71e1541477e25fe1c81ed0b32d61e2d05682ff3cc",
+              "isImpressionNew": true,
+              "isSpendNew": true
+            },
+            {
+              "impressionsShare": 0.041221375267456464,
+              "visitsShare": 0.00658020507974692,
+              "spendShare": 0.020095120390617404,
+              "category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "visitsChange": 0,
+              "isVisitsNew": false,
+              "entity": "docs.google.com",
+              "impressions": 186688.76684593118,
+              "impressionsChange": 0,
+              "spend": 21.61627193875302,
+              "spendChange": 0,
+              "favicon": "https://site-images.similarcdn.com/image?url=docs.google.com&t=2&s=0&h=0aab41c700d49dad2edb44243116b177685cc209ce877947385723a54baf680a",
+              "isImpressionNew": false,
+              "isSpendNew": false
+            },
+            {
+              "impressionsShare": 0.001189288360735793,
+              "visitsShare": 0.00016410315846127304,
+              "spendShare": 0.0000602119652459099,
+              "category": "Computers_Electronics_and_Technology~Search_Engines",
+              "visitsChange": 0,
+              "isVisitsNew": true,
+              "entity": "accounts.google.com",
+              "impressions": 5386.204997999431,
+              "impressionsChange": 0,
+              "spend": 0.06476986399793074,
+              "spendChange": 0,
+              "favicon": "https://site-images.similarcdn.com/image?url=accounts.google.com&t=2&s=0&h=e7bbf324f8b1fece5635282a0abeb31cd2f132bd1c09b3aed8dedaf78d53afe1",
+              "isImpressionNew": true,
+              "isSpendNew": true
+            }
+          ],
+          "entity": "google.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461"
+        },
+        {
+          "impressionsShare": 0.11127073486482879,
+          "visitsShare": 0.1591798571907282,
+          "spendShare": 0.018986985552136473,
+          "category": "Arts_and_Entertainment~TV_Movies_and_Streaming",
+          "rank": 1332,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "filmboom.top",
+          "favicon": "https://site-images.similarcdn.com/image?url=filmboom.top&t=2&s=0&h=cfd4f22bbc1d5f85437b4b73e7351f3e5640b4bfc3171cc1e7f63f2004910901"
+        },
+        {
+          "impressionsShare": 0.18948713154790295,
+          "visitsShare": 0.11919145487822064,
+          "spendShare": 0.07759247010119184,
+          "category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "checkout.stripe.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=stripe.com&t=2&s=0&h=d68993ccefeee1fe61031cd46586b3158ad13585abae80195cc41b500863c253"
+        },
+        {
+          "impressionsShare": 0.05202084363195708,
+          "visitsShare": 0.05775357691135719,
+          "spendShare": 0.03456121551578072,
+          "category": "AI_Chatbots_and_Tools",
+          "rank": 6,
+          "visitsChange": -0.31383829959771414,
+          "isVisitsNew": false,
+          "entity": "chatgpt.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0"
+        },
+        {
+          "impressionsShare": 0.006141050565792342,
+          "visitsShare": 0.040867950566175516,
+          "spendShare": 0.0006902636205293503,
+          "category": "Finance~Finance",
+          "rank": 1946,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "bitmart.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=bitmart.com&t=2&s=0&h=eda4aa6a38308fb878e2557cccfb5a66a1db399bdeecca0e6de823d8b10168a9"
+        }
+      ],
+      "totalCount": 45,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/summary?country=999&key=invideo.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "invideo.io": {
+          "campaigns": {},
+          "creatives": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+        }
+      }
+    }
+  }
+]

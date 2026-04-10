@@ -1,0 +1,347 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=5",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 1975524.6178922423,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/graphV2/unified?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "restream.io": {
+          "desktop": {
+            "monthly": {
+              "2025-12-01": {
+                "spend": {
+                  "value": 454.4756999818817,
+                  "change": 1.6632412453001806
+                },
+                "impressions": {
+                  "value": 4723797.720503606,
+                  "change": 4.943219108057076
+                },
+                "pageViews": {
+                  "value": 6909699.3470785925,
+                  "change": 0.015028448337706633
+                }
+              },
+              "2026-01-01": {
+                "spend": {
+                  "value": 96.15776597364936,
+                  "change": -0.7884204458511581
+                },
+                "impressions": {
+                  "value": 349598.6094467775,
+                  "change": -0.925992044932545
+                },
+                "pageViews": {
+                  "value": 6764583.248614696,
+                  "change": -0.021001796340856926
+                }
+              },
+              "2026-02-01": {
+                "spend": {
+                  "value": 116.71146002077089,
+                  "change": 0.2137497043426943
+                },
+                "impressions": {
+                  "value": 897218.6648002763,
+                  "change": 1.5664251531780413
+                },
+                "pageViews": {
+                  "value": 6003948.667065003,
+                  "change": -0.11244367222555234
+                }
+              }
+            },
+            "total": {
+              "impressions": 5970614.994750659,
+              "spend": 667.344925976302,
+              "pageViews": 19678231.262758292
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/summary?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "restream.io": {
+          "advertisers": {
+            "count": 21,
+            "change": 3
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/breakdown?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.48095413727469993,
+          "visitsShare": 0.7377059077135066,
+          "spendShare": 0.2514763157631571,
+          "category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "studio.youtube.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=0&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20"
+        },
+        {
+          "impressionsShare": 0.24247550483057115,
+          "visitsShare": 0.12958186474589797,
+          "spendShare": 0.4402558240164847,
+          "category": "Home_and_Garden~Home_and_Garden",
+          "rank": 106905,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "mygutterguards.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=mygutterguards.com&t=2&s=0&h=8bf16f2bf0b3f9e1f63a7ab36e7248d94d789fc0f0ae3bdacabfcddfd3bf3497"
+        },
+        {
+          "impressionsShare": 0.06448944531255049,
+          "visitsShare": 0.05513844472501793,
+          "spendShare": 0.1473827172742741,
+          "category": "",
+          "rank": 23330,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "fortunesdemer.fr",
+          "favicon": "https://site-images.similarcdn.com/image?url=fortunesdemer.fr&t=2&s=0&h=459f03b75351c9c78d2bd10cb040a0d412e5d2765911077426341954f4d49356"
+        },
+        {
+          "impressionsShare": 0.01098270990187487,
+          "visitsShare": 0.018980627362807864,
+          "spendShare": 0.008980173922867119,
+          "category": "",
+          "rank": 1207917,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "brioshein.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=brioshein.com&t=2&s=0&h=74c4b19e77dd7244c6669ccdaeb7e67cb2c7b42f463434883d0aaffc24dde670"
+        },
+        {
+          "impressionsShare": 0.05064925105179613,
+          "visitsShare": 0.018578061509721324,
+          "spendShare": 0.015180763740649257,
+          "category": "Computers_Electronics_and_Technology~Computer_Hardware",
+          "rank": 2439,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "zoom.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=zoom.com&t=2&s=0&h=ab3d3e4c4fa82a8d582a5843dce3f9868b254b32850e033f6443f2a213fbf9f2"
+        }
+      ],
+      "totalCount": 21,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/summary?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "restream.io": {
+          "campaigns": {
+            "count": 2,
+            "change": -1
+          },
+          "creatives": {
+            "count": 6,
+            "change": -1
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=20&country=999&webSource=Desktop",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "freeconvert.com",
+        "DomainWithoutSub": "freeconvert.com",
+        "Rank": 1529,
+        "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=1&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18"
+      },
+      {
+        "Domain": "cloudconvert.com",
+        "DomainWithoutSub": "cloudconvert.com",
+        "Rank": 2491,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=1&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83"
+      },
+      {
+        "Domain": "convertio.co",
+        "DomainWithoutSub": "convertio.co",
+        "Favicon": "https://site-images.similarcdn.com/image?url=convertio.co&t=2&s=1&h=e995388c379d89a1afbc5b2ff71b8f86fa9b547a859124c9f7beaafa9678fcaf"
+      },
+      {
+        "Domain": "zamzar.com",
+        "DomainWithoutSub": "zamzar.com",
+        "Rank": 25575,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zamzar.com&t=2&s=1&h=f33f5461a90058eb543109e3df1212141f6a2d73aae9b5b3071fd4bcd661ef8e"
+      },
+      {
+        "Domain": "biteable.com",
+        "DomainWithoutSub": "biteable.com",
+        "Rank": 65412,
+        "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=1&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22"
+      },
+      {
+        "Domain": "uniscribe.co",
+        "DomainWithoutSub": "uniscribe.co",
+        "Rank": 34543,
+        "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=1&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "notta.ai",
+        "DomainWithoutSub": "notta.ai",
+        "Rank": 19207,
+        "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=1&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21"
+      },
+      {
+        "Domain": "descript.com",
+        "DomainWithoutSub": "descript.com",
+        "Rank": 13908,
+        "Favicon": "https://site-images.similarcdn.com/image?url=descript.com&t=2&s=1&h=19b1b9d6d824da80586a1078567284aa3d80d84adbbbb32672d9d63283943881"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "streamlabs.com",
+        "DomainWithoutSub": "streamlabs.com",
+        "Rank": 9969,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=1&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-audio-converter.com",
+        "DomainWithoutSub": "online-audio-converter.com",
+        "Rank": 18174,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-audio-converter.com&t=2&s=1&h=7072bef883704cb884e36073b5327cb009396fe3eac70803d46c75f23bdefd8f"
+      },
+      {
+        "Domain": "podbean.com",
+        "DomainWithoutSub": "podbean.com",
+        "Rank": 19514,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podbean.com&t=2&s=1&h=6bd03331138a96684f3443d0492539934b6c0e774cfbf1ddcb042a82260bedcc"
+      }
+    ]
+  }
+]

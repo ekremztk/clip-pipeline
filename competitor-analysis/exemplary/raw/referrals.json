@@ -1,0 +1,1111 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 59774.904225386155,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferrals?key=exemplary.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&ignoreFilterConsistency=false",
+    "body": {
+      "dictionary": {
+        "exemplary.ai": {
+          "VolumeTotal": 357450.60211008805,
+          "Volumes": [
+            [
+              4740.945933243274,
+              null
+            ],
+            [
+              5491.326735423054,
+              null
+            ],
+            [
+              4776.296396502052,
+              null
+            ]
+          ],
+          "Dates": [
+            "2025-12-01",
+            "2026-01-01",
+            "2026-02-01"
+          ],
+          "SearchTotal": 15008.56906516838
+        }
+      },
+      "Categories": [
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 2,
+          "Value": 0
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "synthesys.io",
+        "DomainWithoutSub": "synthesys.io",
+        "Rank": 380557,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesys.io&t=2&s=1&h=24e02654696c3a75fd060fd43fe2088b59d92a46fba74eef79c6641b8aad5a38"
+      },
+      {
+        "Domain": "rewriteguru.com",
+        "DomainWithoutSub": "rewriteguru.com",
+        "Rank": 378267,
+        "Favicon": "https://site-images.similarcdn.com/image?url=rewriteguru.com&t=2&s=1&h=d24c246d6852244594cfb6df0be0508b531ac642d3cc92fedf067ea664d98892"
+      },
+      {
+        "Domain": "opus.ai",
+        "DomainWithoutSub": "opus.ai",
+        "Rank": 288346,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.ai&t=2&s=1&h=14b9a2260fcb8eb64f7aa80ab2bd5fa93355a462ef57531a44d75d8edc21971b"
+      },
+      {
+        "Domain": "writeless.ai",
+        "DomainWithoutSub": "writeless.ai",
+        "Rank": 267672,
+        "Favicon": "https://site-images.similarcdn.com/image?url=writeless.ai&t=2&s=1&h=329602731db789f0be144d8839acb4373deb5b3df0946f42b081242d140a3d45"
+      },
+      {
+        "Domain": "tldrthis.com",
+        "DomainWithoutSub": "tldrthis.com",
+        "Rank": 297839,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tldrthis.com&t=2&s=1&h=2ca640bee58ea2c88e5916e793504cc2dda7f371e0f43ba2834eea2a080f3803"
+      },
+      {
+        "Domain": "inkforall.com",
+        "DomainWithoutSub": "inkforall.com",
+        "Rank": 334716,
+        "Favicon": "https://site-images.similarcdn.com/image?url=inkforall.com&t=2&s=1&h=f18c653f06e86202c88bf2ba253214286d5d5c9c9b9e7a374ba7e358f0f08f30"
+      },
+      {
+        "Domain": "aiktp.com",
+        "DomainWithoutSub": "aiktp.com",
+        "Rank": 316059,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aiktp.com&t=2&s=1&h=3cbe9f6ba6903857f9caac5217bab340f46c0dae36fb0a82bb6ae8fa4477e00c"
+      },
+      {
+        "Domain": "wordchiefs.com",
+        "DomainWithoutSub": "wordchiefs.com",
+        "Rank": 190249,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wordchiefs.com&t=2&s=1&h=cf99b4e3e86d7752dd28103b0c8ebb0082d1c2df2d07a7d028d19f1bb375aed6"
+      },
+      {
+        "Domain": "artificialstudio.ai",
+        "DomainWithoutSub": "artificialstudio.ai",
+        "Rank": 279171,
+        "Favicon": "https://site-images.similarcdn.com/image?url=artificialstudio.ai&t=2&s=1&h=e53bc33c70d0f75f4cd9b581e4762dc715ebd1dffd047bf8c0624d28aae608bb"
+      },
+      {
+        "Domain": "zubtitle.com",
+        "DomainWithoutSub": "zubtitle.com",
+        "Rank": 455337,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zubtitle.com&t=2&s=1&h=d36f0cd15e8b6b1dc495febc9175a835dc7c42fe6c00d530435f7dfe29ad2f8b"
+      },
+      {
+        "Domain": "quso.ai",
+        "DomainWithoutSub": "quso.ai",
+        "Rank": 93435,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "echowave.io",
+        "DomainWithoutSub": "echowave.io",
+        "Rank": 127978,
+        "Favicon": "https://site-images.similarcdn.com/image?url=echowave.io&t=2&s=1&h=484550467f2f18765c49b273654a6dd45a0e631c3e221d3ed0bb386c8d1f73c8"
+      },
+      {
+        "Domain": "bytecap.io",
+        "DomainWithoutSub": "bytecap.io",
+        "Rank": 1044866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bytecap.io&t=2&s=1&h=b2e2db95e5bc8d03196e4c6a7672a933a48841e2169b94ca2f9ad13d69e4ec3e"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferralsTable?key=exemplary.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&orderBy=TotalShare+desc&ignoreFilterConsistency=false",
+    "body": {
+      "TotalShare": 1.0000000000000004,
+      "TotalVisits": 3173.297349760668,
+      "TotalVisitsGlobalList": {
+        "exemplary.ai": 1
+      },
+      "TopCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 0,
+          "Value": 0.4553783275836145
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.22596606785028245
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 0,
+          "Value": 0.18932581906177084
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 0,
+          "Value": 0.10722344239554982
+        },
+        {
+          "Name": "Unknown",
+          "Count": 0,
+          "Value": 0.022106343108782654
+        }
+      ],
+      "Categories": {
+        "exemplary.ai": [
+          {
+            "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+            "Count": 2,
+            "Value": 0.18932581906177084
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+            "Count": 2,
+            "Value": 0.10722344239554982
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+            "Count": 5,
+            "Value": 0.22596606785028245
+          },
+          {
+            "Name": "AI_Chatbots_and_Tools",
+            "Count": 3,
+            "Value": 0.4553783275836145
+          },
+          {
+            "Name": "Unknown",
+            "Count": 2,
+            "Value": 0.022106343108782654
+          }
+        ]
+      },
+      "AllCategories": [
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 2,
+          "Value": 0
+        }
+      ],
+      "Topics": [
+        {
+          "Name": "coupon",
+          "Value": 0.3333333333333333
+        },
+        {
+          "Name": "daily",
+          "Value": 0.3333333333333333
+        },
+        {
+          "Name": "deal",
+          "Value": 0.3333333333333333
+        }
+      ],
+      "TotalCount": 14,
+      "TotalUnGroupedCount": 14,
+      "Records": [
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.8586608307293988,
+          "NewChange": false,
+          "Share": 0.3037184112899955,
+          "FilteredShare": 0.3037184112899955,
+          "TotalVisits": 963.7888296200632,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Rank": 6,
+          "TotalShare": 0.3037184112899955,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.4550632536814783
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.19338963618451588
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 844.4368296200632
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 119.352
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.14261384402444222,
+          "FilteredShare": 0.14261384402444222,
+          "TotalVisits": 452.55613328194374,
+          "Domain": "onehack.us",
+          "Favicon": "https://site-images.similarcdn.com/image?url=onehack.us&t=2&s=0&h=6eb2f9dc4448223ffb01c13c7c8697b6edf17beffbf5ac6be0183e503a67309d",
+          "Rank": 251792,
+          "TotalShare": 0.14261384402444222,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.6460546787305279
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 452.55613328194374
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.12825442262392403,
+          "FilteredShare": 0.12825442262392403,
+          "TotalVisits": 406.9894194075828,
+          "Domain": "theresanaiforthat.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=theresanaiforthat.com&t=2&s=0&h=fd4102738ea78932cf709a19297e733d0a14c70742750091167fb81a14215a83",
+          "Rank": 9351,
+          "TotalShare": 0.12825442262392403,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.21932478891627685
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 406.9894194075828
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.6207491623582063,
+          "NewChange": false,
+          "Share": 0.1085866645863783,
+          "FilteredShare": 0.1085866645863783,
+          "TotalVisits": 344.5777749513049,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Rank": 19,
+          "TotalShare": 0.1085866645863783,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.13463209598383433
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.1535232126825164
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 249.82966516841475
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 94.74810978289015
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0.3037783720770759,
+          "NewChange": false,
+          "Share": 0.08391046795727994,
+          "FilteredShare": 0.08391046795727994,
+          "TotalVisits": 266.2728655860139,
+          "Domain": "toolify.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolify.ai&t=2&s=0&h=a274658d0d5c006c07c78f798989130b0de2c0ecebc5c7d1ba530bfef8bdcc7c",
+          "Rank": 30139,
+          "TotalShare": 0.08391046795727994,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.140319754893506
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.03929356936872835
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.15403667943462196
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 98.29286558601392
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 72.915
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 95.065
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 1
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.050345771993162605,
+          "FilteredShare": 0.050345771993162605,
+          "TotalVisits": 159.76210483755776,
+          "Domain": "billing.stripe.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=billing.stripe.com&t=2&s=0&h=642abb38d59887c626d10d0a6c10def921c0c10c6cb1b268e406894a4d79049a",
+          "Rank": -1,
+          "TotalShare": 0.050345771993162605,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.2588673447500484
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 159.76210483755776
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.04671197503732863,
+          "FilteredShare": 0.04671197503732863,
+          "TotalVisits": 148.23098658804142,
+          "Domain": "eesel.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=eesel.ai&t=2&s=0&h=6ad1e44a2ff99a58c04fa368d5ad73eaf17319b2c7d0a389876efebe12670d14",
+          "Rank": 82886,
+          "TotalShare": 0.04671197503732863,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.24018312694829733
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 148.23098658804142
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.043073251707240696,
+          "FilteredShare": 0.043073251707240696,
+          "TotalVisits": 136.68423548816108,
+          "Domain": "copilot.microsoft.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=copilot.microsoft.com&t=2&s=0&h=eb2c5d699c15f4d7ff035602d8165b847ac5e2883d42a9d8eae54163cd4b47cb",
+          "Rank": 448,
+          "TotalShare": 0.043073251707240696,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0736585268979724
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 136.68423548816108
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.023312974438269875,
+          "FilteredShare": 0.023312974438269875,
+          "TotalVisits": 73.979,
+          "Domain": "toolpilot.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolpilot.ai&t=2&s=0&h=b59280ee061da8f8f0f2dd2605259dc216759c97dea6c1dd997374d752bf2d8a",
+          "Rank": 360072,
+          "TotalShare": 0.023312974438269875,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.10561005710208689
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 73.979
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.022977676518558622,
+          "FilteredShare": 0.022977676518558622,
+          "TotalVisits": 72.915,
+          "Domain": "tooldirectory.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tooldirectory.ai&t=2&s=0&h=d9896dc4a401afdbaca77bcd6d64aa3c203ee0ab892818ed3323d4065bd9b32a",
+          "Rank": 1643060,
+          "TotalShare": 0.022977676518558622,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.03929356936872835
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 72.915
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0176548220431424,
+          "FilteredShare": 0.0176548220431424,
+          "TotalVisits": 56.024,
+          "Domain": "shrix1.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=shrix1.com&t=2&s=0&h=54fb3f9986443fa237f7fb180a17d799cd7439f02bc8e9489e249733b9c8ab33",
+          "Rank": -1,
+          "TotalShare": 0.0176548220431424,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.030191084554805413
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 56.024
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.014940925723073458,
+          "FilteredShare": 0.014940925723073458,
+          "TotalVisits": 47.412,
+          "Domain": "directify.app",
+          "Favicon": "https://site-images.similarcdn.com/image?url=directify.app&t=2&s=0&h=50595d2c4c3e186058753313ebc359a028385af40384a7e530f0a19999e2d1a3",
+          "Rank": 2291405,
+          "TotalShare": 0.014940925723073458,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.06768385659882052
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 47.412
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.009447270991563722,
+          "FilteredShare": 0.009447270991563722,
+          "TotalVisits": 29.979,
+          "Domain": "affitor.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=affitor.com&t=2&s=0&h=17452538e3d5e6a24a9c6c8c7aec0392d35811c900dbddd40456a1492d1ae156",
+          "Rank": 2537186,
+          "TotalShare": 0.009447270991563722,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.02016582633752929
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.008543111228175963
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 14.126
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 15.853
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.004451521065640253,
+          "FilteredShare": 0.004451521065640253,
+          "TotalVisits": 14.126,
+          "Domain": "dailydealcoupon.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=dailydealcoupon.com&t=2&s=0&h=f7a98f23e2bf1493354688551136536c90ed7ba40027528660d484c874c04c27",
+          "Rank": -1,
+          "TotalShare": 0.004451521065640253,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.02016582633752929
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 1,
+                "AbsValue": 14.126
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "exemplary.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "HasAdsense": false
+        }
+      ]
+    }
+  }
+]

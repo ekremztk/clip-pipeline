@@ -1,0 +1,451 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=5",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 809856.594356055,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 139754.64604708884,
+              "Email": 1254.9000159816514,
+              "Direct": 1063397.2768552648,
+              "Display Ads": 12843.637763109933,
+              "Referrals": 90931.97146545531,
+              "Organic Search": 478077.55430410267,
+              "Paid Search": 865824.2610857906
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 45100.33765413494,
+                "Email": 349.33378334230946,
+                "Direct": 321611.15753823525,
+                "Display Ads": 3765.568692072919,
+                "Referrals": 23897.97506231515,
+                "Organic Search": 83426.09511157511,
+                "Paid Search": 310541.7337091147
+              },
+              "2026-01-01": {
+                "Social": 46198.49581244531,
+                "Email": 493.10718716086535,
+                "Direct": 374281.42971397046,
+                "Display Ads": 4410.583536804269,
+                "Referrals": 31650.47923207411,
+                "Organic Search": 162725.4335419946,
+                "Paid Search": 303128.24041488295
+              },
+              "2026-02-01": {
+                "Social": 48455.8125805086,
+                "Email": 412.4590454784767,
+                "Direct": 367504.68960305897,
+                "Display Ads": 4667.485534232745,
+                "Referrals": 35383.51717106606,
+                "Organic Search": 231926.02565053295,
+                "Paid Search": 252154.28696179297
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=wayin.ai",
+    "body": {
+      "Data": {
+        "Total": {
+          "wayin.ai": {
+            "Organic Search": 478077.5543041026,
+            "Social": 139754.64604708884,
+            "Email": 1254.9000159816514,
+            "Display Ads": 12843.637763109933,
+            "Direct": 1063397.2768552648,
+            "Referrals": 90931.97146545531,
+            "Paid Search": 865824.2610857906
+          }
+        },
+        "Desktop": {
+          "wayin.ai": {
+            "Organic Search": 403342.32099999994,
+            "Social": 29590.131,
+            "Email": 1205.6310000000003,
+            "Display Ads": 10906.367,
+            "Direct": 358650.96800000005,
+            "Referrals": 62852.469000000005,
+            "Paid Search": 154310.327
+          }
+        },
+        "MobileWeb": {
+          "wayin.ai": {
+            "Organic Search": 74735.23330410267,
+            "Social": 110164.51504708885,
+            "Email": 49.26901598165125,
+            "Display Ads": 1937.2707631099327,
+            "Direct": 704746.3088552647,
+            "Referrals": 28079.502465455313,
+            "Paid Search": 711513.9340857906
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=wayin.ai%2Cd-id.com%2Cfliki.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Social": {
+            "Total": {
+              "wayin.ai": 139754.64604708884,
+              "d-id.com": 69017.03583998591,
+              "fliki.ai": 119885.90854639758
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 45100.33765413494,
+                "d-id.com": 23465.78586651635,
+                "fliki.ai": 59006.76367576876
+              },
+              "2026-01-01": {
+                "wayin.ai": 46198.49581244531,
+                "d-id.com": 22945.385492421956,
+                "fliki.ai": 36591.65954667458
+              },
+              "2026-02-01": {
+                "wayin.ai": 48455.8125805086,
+                "d-id.com": 22605.864481047607,
+                "fliki.ai": 24287.485323954235
+              }
+            }
+          },
+          "Email": {
+            "Total": {
+              "wayin.ai": 1254.9000159816514,
+              "d-id.com": 1166.2255368851813,
+              "fliki.ai": 1148.072319412437
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 349.33378334230946,
+                "d-id.com": 352.47375438784417,
+                "fliki.ai": 312.85303896660525
+              },
+              "2026-01-01": {
+                "wayin.ai": 493.10718716086535,
+                "d-id.com": 437.57963776191446,
+                "fliki.ai": 360.04892334368645
+              },
+              "2026-02-01": {
+                "wayin.ai": 412.4590454784767,
+                "d-id.com": 376.1721447354228,
+                "fliki.ai": 475.1703571021453
+              }
+            }
+          },
+          "Direct": {
+            "Total": {
+              "wayin.ai": 1063397.2768552648,
+              "d-id.com": 1154965.902095019,
+              "fliki.ai": 981124.2927531407
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 321611.15753823525,
+                "d-id.com": 348151.005199985,
+                "fliki.ai": 360742.8253940063
+              },
+              "2026-01-01": {
+                "wayin.ai": 374281.42971397046,
+                "d-id.com": 422087.82569517626,
+                "fliki.ai": 352496.73490705783
+              },
+              "2026-02-01": {
+                "wayin.ai": 367504.68960305897,
+                "d-id.com": 384727.07119985775,
+                "fliki.ai": 267884.73245207657
+              }
+            }
+          },
+          "Display Ads": {
+            "Total": {
+              "wayin.ai": 12843.637763109933,
+              "d-id.com": 9065.8881046904,
+              "fliki.ai": 22316.008612205253
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 3765.568692072919,
+                "d-id.com": 2642.1037858430595,
+                "fliki.ai": 2290.990941631218
+              },
+              "2026-01-01": {
+                "wayin.ai": 4410.583536804269,
+                "d-id.com": 3101.967107685663,
+                "fliki.ai": 8315.428708630567
+              },
+              "2026-02-01": {
+                "wayin.ai": 4667.485534232745,
+                "d-id.com": 3321.817211161679,
+                "fliki.ai": 11709.588961943466
+              }
+            }
+          },
+          "Referrals": {
+            "Total": {
+              "wayin.ai": 90931.97146545531,
+              "d-id.com": 225461.05877424497,
+              "fliki.ai": 139891.14186038292
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 23897.97506231515,
+                "d-id.com": 68972.86761600777,
+                "fliki.ai": 55791.47747717239
+              },
+              "2026-01-01": {
+                "wayin.ai": 31650.47923207411,
+                "d-id.com": 80019.32783139442,
+                "fliki.ai": 48078.29045141223
+              },
+              "2026-02-01": {
+                "wayin.ai": 35383.51717106606,
+                "d-id.com": 76468.86332684278,
+                "fliki.ai": 36021.37393179828
+              }
+            }
+          },
+          "Organic Search": {
+            "Total": {
+              "wayin.ai": 478077.55430410267,
+              "d-id.com": 882016.3197651345,
+              "fliki.ai": 1035027.3008716195
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 83426.09511157511,
+                "d-id.com": 263419.08812019316,
+                "fliki.ai": 395646.3836589196
+              },
+              "2026-01-01": {
+                "wayin.ai": 162725.4335419946,
+                "d-id.com": 321891.0172468984,
+                "fliki.ai": 360148.99173084757
+              },
+              "2026-02-01": {
+                "wayin.ai": 231926.02565053295,
+                "d-id.com": 296706.21439804306,
+                "fliki.ai": 279231.9254818523
+              }
+            }
+          },
+          "Paid Search": {
+            "Total": {
+              "wayin.ai": 865824.2610857906,
+              "d-id.com": 288577.65473423677,
+              "fliki.ai": 142459.89711061458
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "wayin.ai": 310541.7337091147,
+                "d-id.com": 91413.57545830864,
+                "fliki.ai": 51759.08760283107
+              },
+              "2026-01-01": {
+                "wayin.ai": 303128.24041488295,
+                "d-id.com": 101916.18230441461,
+                "fliki.ai": 59794.54978471601
+              },
+              "2026-02-01": {
+                "wayin.ai": 252154.28696179297,
+                "d-id.com": 95247.89697151352,
+                "fliki.ai": 30906.259723067502
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "vidfly.ai",
+        "DomainWithoutSub": "vidfly.ai",
+        "Rank": 113917,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidfly.ai&t=2&s=1&h=f4e328af0d440be0ce37a0162f417200aee2b198081ca875d302aa5d1af2071a"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "pikzels.com",
+        "DomainWithoutSub": "pikzels.com",
+        "Rank": 110077,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pikzels.com&t=2&s=1&h=19f756ec29f5208bf002c7fd54d3ec2032784579edd763c108430d9469282076"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "sivi.ai",
+        "DomainWithoutSub": "sivi.ai",
+        "Rank": 295300,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sivi.ai&t=2&s=1&h=8aafe428928acc7fa54593b60f7e85bc2e8b537070de63af897f6918a62c5127"
+      },
+      {
+        "Domain": "reccloud.com",
+        "DomainWithoutSub": "reccloud.com",
+        "Rank": 85042,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reccloud.com&t=2&s=1&h=8b7be0c558377be73cca71b9a24ae639ac86c343765f672dd39080aee9658b5c"
+      },
+      {
+        "Domain": "clipto.com",
+        "DomainWithoutSub": "clipto.com",
+        "Rank": 23061,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipto.com&t=2&s=1&h=393dfd5a054efbc9c85d64e14be24461042aa3b2643e2afa54f5740568e47f60"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      }
+    ]
+  }
+]

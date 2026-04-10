@@ -1,0 +1,1522 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 59774.904225386155,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 125027.23536336076,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=exemplary.ai&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?mainDomainOnly=false&includeCrossData=true&key=exemplary.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 125027.23536336076,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=exemplary.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "exemplary.ai": {
+          "TotalVisits": 357450.6051549354,
+          "Change": 0.04475525768584716,
+          "ShareOfVisits": 1,
+          "Trend": [
+            112752,
+            119671,
+            125027
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=exemplary.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Desktop": 128276.51615493537,
+          "Mobile Web": 229174.08900000004
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=exemplary.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "GlobalRank": {
+            "Value": 267181,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 259105
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 309225
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 267181
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 65867,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 62882
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 68251
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 65867
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 6118,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 6010
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 7142
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 6118
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Country": 356
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=exemplary.ai&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Data": [
+        {
+          "Domain": "exemplary.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=0&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+          "TotalVisits": 357450.6051549354,
+          "Change": 0.04475525768584716,
+          "ShareOfVisits": 1
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementOverview/Table?country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false&includeSubDomains=true&timeGranularity=Monthly&keys=exemplary.ai&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.374585616656785,
+          "UniqueUsers": 61371.573333333334,
+          "DedupUniqueUsers": 53877.085315737,
+          "VisitsPerUser": 1.9414558768301378,
+          "Source": "Total",
+          "Domain": "exemplary.ai",
+          "AvgMonthVisits": 119150.20171831177,
+          "AvgVisitDuration": 33.37768956010282,
+          "PagesPerVisit": 3.2537939493305554,
+          "TotalPagesViews": 387690.2054125581,
+          "Favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=0&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=4&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteGeography/Geography/Table?country=999&includeSubDomains=true&webSource=Total&timeGranularity=Monthly&orderBy=TotalShare+desc&keys=exemplary.ai&pageSize=5&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 63,
+      "TotalTopLevelCount": 0,
+      "Filters": {
+        "country": [
+          {
+            "id": "356",
+            "text": "India",
+            "formattedText": "India",
+            "icon": "flag flag-in",
+            "count": 0
+          },
+          {
+            "id": "840",
+            "text": "United States",
+            "formattedText": "United States",
+            "icon": "flag flag-us",
+            "count": 0
+          },
+          {
+            "id": "566",
+            "text": "Nigeria",
+            "formattedText": "Nigeria",
+            "icon": "flag flag-ng",
+            "count": 0
+          },
+          {
+            "id": "144",
+            "text": "Sri Lanka",
+            "formattedText": "Sri Lanka",
+            "icon": "flag flag-lk",
+            "count": 0
+          },
+          {
+            "id": "682",
+            "text": "Saudi Arabia",
+            "formattedText": "Saudi Arabia",
+            "icon": "flag flag-sa",
+            "count": 0
+          },
+          {
+            "id": "36",
+            "text": "Australia",
+            "formattedText": "Australia",
+            "icon": "flag flag-au",
+            "count": 0
+          },
+          {
+            "id": "360",
+            "text": "Indonesia",
+            "formattedText": "Indonesia",
+            "icon": "flag flag-id",
+            "count": 0
+          },
+          {
+            "id": "410",
+            "text": "Korea, Republic of",
+            "formattedText": "Korea, Republic of",
+            "icon": "flag flag-kr",
+            "count": 0
+          },
+          {
+            "id": "276",
+            "text": "Germany",
+            "formattedText": "Germany",
+            "icon": "flag flag-de",
+            "count": 0
+          },
+          {
+            "id": "124",
+            "text": "Canada",
+            "formattedText": "Canada",
+            "icon": "flag flag-ca",
+            "count": 0
+          },
+          {
+            "id": "826",
+            "text": "United Kingdom",
+            "formattedText": "United Kingdom",
+            "icon": "flag flag-gb",
+            "count": 0
+          },
+          {
+            "id": "752",
+            "text": "Sweden",
+            "formattedText": "Sweden",
+            "icon": "flag flag-se",
+            "count": 0
+          },
+          {
+            "id": "76",
+            "text": "Brazil",
+            "formattedText": "Brazil",
+            "icon": "flag flag-br",
+            "count": 0
+          },
+          {
+            "id": "704",
+            "text": "Vietnam",
+            "formattedText": "Vietnam",
+            "icon": "flag flag-vn",
+            "count": 0
+          },
+          {
+            "id": "586",
+            "text": "Pakistan",
+            "formattedText": "Pakistan",
+            "icon": "flag flag-pk",
+            "count": 0
+          },
+          {
+            "id": "792",
+            "text": "Turkey",
+            "formattedText": "Turkey",
+            "icon": "flag flag-tr",
+            "count": 0
+          },
+          {
+            "id": "528",
+            "text": "Netherlands",
+            "formattedText": "Netherlands",
+            "icon": "flag flag-nl",
+            "count": 0
+          },
+          {
+            "id": "702",
+            "text": "Singapore",
+            "formattedText": "Singapore",
+            "icon": "flag flag-sg",
+            "count": 0
+          },
+          {
+            "id": "643",
+            "text": "Russia",
+            "formattedText": "Russia",
+            "icon": "flag flag-ru",
+            "count": 0
+          },
+          {
+            "id": "231",
+            "text": "Ethiopia",
+            "formattedText": "Ethiopia",
+            "icon": "flag flag-et",
+            "count": 0
+          },
+          {
+            "id": "860",
+            "text": "Uzbekistan",
+            "formattedText": "Uzbekistan",
+            "icon": "flag flag-uz",
+            "count": 0
+          },
+          {
+            "id": "608",
+            "text": "Philippines",
+            "formattedText": "Philippines",
+            "icon": "flag flag-ph",
+            "count": 0
+          },
+          {
+            "id": "724",
+            "text": "Spain",
+            "formattedText": "Spain",
+            "icon": "flag flag-es",
+            "count": 0
+          },
+          {
+            "id": "250",
+            "text": "France",
+            "formattedText": "France",
+            "icon": "flag flag-fr",
+            "count": 0
+          },
+          {
+            "id": "380",
+            "text": "Italy",
+            "formattedText": "Italy",
+            "icon": "flag flag-it",
+            "count": 0
+          },
+          {
+            "id": "818",
+            "text": "Egypt",
+            "formattedText": "Egypt",
+            "icon": "flag flag-eg",
+            "count": 0
+          },
+          {
+            "id": "392",
+            "text": "Japan",
+            "formattedText": "Japan",
+            "icon": "flag flag-jp",
+            "count": 0
+          },
+          {
+            "id": "784",
+            "text": "United Arab Emirates",
+            "formattedText": "United Arab Emirates",
+            "icon": "flag flag-ae",
+            "count": 0
+          },
+          {
+            "id": "764",
+            "text": "Thailand",
+            "formattedText": "Thailand",
+            "icon": "flag flag-th",
+            "count": 0
+          },
+          {
+            "id": "458",
+            "text": "Malaysia",
+            "formattedText": "Malaysia",
+            "icon": "flag flag-my",
+            "count": 0
+          },
+          {
+            "id": "616",
+            "text": "Poland",
+            "formattedText": "Poland",
+            "icon": "flag flag-pl",
+            "count": 0
+          },
+          {
+            "id": "208",
+            "text": "Denmark",
+            "formattedText": "Denmark",
+            "icon": "flag flag-dk",
+            "count": 0
+          },
+          {
+            "id": "524",
+            "text": "Nepal",
+            "formattedText": "Nepal",
+            "icon": "flag flag-np",
+            "count": 0
+          },
+          {
+            "id": "756",
+            "text": "Switzerland",
+            "formattedText": "Switzerland",
+            "icon": "flag flag-ch",
+            "count": 0
+          },
+          {
+            "id": "376",
+            "text": "Israel",
+            "formattedText": "Israel",
+            "icon": "flag flag-il",
+            "count": 0
+          },
+          {
+            "id": "203",
+            "text": "Czech Republic",
+            "formattedText": "Czech Republic",
+            "icon": "flag flag-cz",
+            "count": 0
+          },
+          {
+            "id": "40",
+            "text": "Austria",
+            "formattedText": "Austria",
+            "icon": "flag flag-at",
+            "count": 0
+          },
+          {
+            "id": "50",
+            "text": "Bangladesh",
+            "formattedText": "Bangladesh",
+            "icon": "flag flag-bd",
+            "count": 0
+          },
+          {
+            "id": "344",
+            "text": "Hong Kong",
+            "formattedText": "Hong Kong",
+            "icon": "flag flag-hk",
+            "count": 0
+          },
+          {
+            "id": "512",
+            "text": "Oman",
+            "formattedText": "Oman",
+            "icon": "flag flag-om",
+            "count": 0
+          },
+          {
+            "id": "504",
+            "text": "Morocco",
+            "formattedText": "Morocco",
+            "icon": "flag flag-ma",
+            "count": 0
+          },
+          {
+            "id": "630",
+            "text": "Puerto Rico",
+            "formattedText": "Puerto Rico",
+            "icon": "flag flag-pr",
+            "count": 0
+          },
+          {
+            "id": "804",
+            "text": "Ukraine",
+            "formattedText": "Ukraine",
+            "icon": "flag flag-ua",
+            "count": 0
+          },
+          {
+            "id": "710",
+            "text": "South Africa",
+            "formattedText": "South Africa",
+            "icon": "flag flag-za",
+            "count": 0
+          },
+          {
+            "id": "56",
+            "text": "Belgium",
+            "formattedText": "Belgium",
+            "icon": "flag flag-be",
+            "count": 0
+          },
+          {
+            "id": "372",
+            "text": "Ireland",
+            "formattedText": "Ireland",
+            "icon": "flag flag-ie",
+            "count": 0
+          },
+          {
+            "id": "158",
+            "text": "Taiwan",
+            "formattedText": "Taiwan",
+            "icon": "flag flag-tw",
+            "count": 0
+          },
+          {
+            "id": "348",
+            "text": "Hungary",
+            "formattedText": "Hungary",
+            "icon": "flag flag-hu",
+            "count": 0
+          },
+          {
+            "id": "554",
+            "text": "New Zealand",
+            "formattedText": "New Zealand",
+            "icon": "flag flag-nz",
+            "count": 0
+          },
+          {
+            "id": "300",
+            "text": "Greece",
+            "formattedText": "Greece",
+            "icon": "flag flag-gr",
+            "count": 0
+          },
+          {
+            "id": "404",
+            "text": "Kenya",
+            "formattedText": "Kenya",
+            "icon": "flag flag-ke",
+            "count": 0
+          },
+          {
+            "id": "642",
+            "text": "Romania",
+            "formattedText": "Romania",
+            "icon": "flag flag-ro",
+            "count": 0
+          },
+          {
+            "id": "112",
+            "text": "Belarus",
+            "formattedText": "Belarus",
+            "icon": "flag flag-by",
+            "count": 0
+          },
+          {
+            "id": "484",
+            "text": "Mexico",
+            "formattedText": "Mexico",
+            "icon": "flag flag-mx",
+            "count": 0
+          },
+          {
+            "id": "688",
+            "text": "Serbia",
+            "formattedText": "Serbia",
+            "icon": "flag flag-rs",
+            "count": 0
+          },
+          {
+            "id": "12",
+            "text": "Algeria",
+            "formattedText": "Algeria",
+            "icon": "flag flag-dz",
+            "count": 0
+          },
+          {
+            "id": "100",
+            "text": "Bulgaria",
+            "formattedText": "Bulgaria",
+            "icon": "flag flag-bg",
+            "count": 0
+          },
+          {
+            "id": "268",
+            "text": "Georgia",
+            "formattedText": "Georgia",
+            "icon": "flag flag-ge",
+            "count": 0
+          },
+          {
+            "id": "428",
+            "text": "Latvia",
+            "formattedText": "Latvia",
+            "icon": "flag flag-lv",
+            "count": 0
+          },
+          {
+            "id": "191",
+            "text": "Croatia",
+            "formattedText": "Croatia",
+            "icon": "flag flag-hr",
+            "count": 0
+          },
+          {
+            "id": "788",
+            "text": "Tunisia",
+            "formattedText": "Tunisia",
+            "icon": "flag flag-tn",
+            "count": 0
+          },
+          {
+            "id": "32",
+            "text": "Argentina",
+            "formattedText": "Argentina",
+            "icon": "flag flag-ar",
+            "count": 0
+          },
+          {
+            "id": "620",
+            "text": "Portugal",
+            "formattedText": "Portugal",
+            "icon": "flag flag-pt",
+            "count": 0
+          }
+        ]
+      },
+      "Data": [
+        {
+          "Country": 356,
+          "Share": 0.15633181888945547,
+          "UsersShare": 0.1805956083550349,
+          "ShareList": {
+            "exemplary.ai": 1
+          },
+          "Change": -0.051335690772442266,
+          "AvgVisitDuration": 150.54180270468467,
+          "PagePerVisit": 4.703639018704088,
+          "BounceRate": 0.31656901960447104,
+          "Rank": 65867
+        },
+        {
+          "Country": 840,
+          "Share": 0.07408835216679274,
+          "UsersShare": 0.08392044498804305,
+          "ShareList": {
+            "exemplary.ai": 1
+          },
+          "Change": 0.00012890022076095242,
+          "AvgVisitDuration": 138.89541943588966,
+          "PagePerVisit": 5.536369059550323,
+          "BounceRate": 0.3273612952102251,
+          "Rank": 293993
+        },
+        {
+          "Country": 566,
+          "Share": 0.07394113257107915,
+          "UsersShare": 0.05749152660943094,
+          "ShareList": {
+            "exemplary.ai": 1
+          },
+          "Change": 0.2078151226308924,
+          "AvgVisitDuration": 213.33666446109024,
+          "PagePerVisit": 2.2708084919810885,
+          "BounceRate": 0.5456778374160365,
+          "Rank": 17431
+        },
+        {
+          "Country": 144,
+          "Share": 0.053324040215672046,
+          "UsersShare": 0.05567195346420362,
+          "ShareList": {
+            "exemplary.ai": 1
+          },
+          "Change": -0.7144777797623498,
+          "AvgVisitDuration": 94.06197525085713,
+          "PagePerVisit": 9.856350455465762,
+          "BounceRate": 0.22801129279949886,
+          "Rank": 0
+        },
+        {
+          "Country": 682,
+          "Share": 0.03674379727147406,
+          "UsersShare": 0.038219346091002776,
+          "ShareList": {
+            "exemplary.ai": 1
+          },
+          "Change": 8.42872036125126,
+          "AvgVisitDuration": 6.334485256955288,
+          "PagePerVisit": 1.2559662361456676,
+          "BounceRate": 0.8190593086091714,
+          "Rank": 26816
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficSourcesSearchV2/BrandedKeywords/WebsitePerformance/PieChart?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&to=2026%7C02%7C28&webSource=Total&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Branded": 1477.4675189084055,
+          "NoneBranded": 13615.984022443841
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Paid&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 2,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "define exemplary",
+          "TotalShare": 0,
+          "TotalVisits": 0,
+          "SiteOrigins": {
+            "exemplary.ai": 0
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 9227
+        },
+        {
+          "SearchTerm": "excemplary ai api",
+          "TotalShare": 0,
+          "TotalVisits": 0,
+          "SiteOrigins": {
+            "exemplary.ai": 0
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 22
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesOverview/PieChart?country=999&webSource=Total&keys=exemplary.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&includeSubDomains=true",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Organic Search": 220964.3374571944,
+          "Paid Search": 950.0382897477833,
+          "Social": 10147.128046597967,
+          "Mail": 197.11498084620757,
+          "Direct": 108612.85257186837,
+          "Paid Referrals": 1570.5652753098084,
+          "Referrals": 15008.570333588184
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=exemplary.ai",
+    "body": {
+      "Data": {
+        "Total": {
+          "exemplary.ai": {
+            "Organic Search": 220964.33745719443,
+            "Social": 10147.128046597965,
+            "Email": 197.11498084620754,
+            "Display Ads": 1570.5652753098084,
+            "Direct": 108612.85257186837,
+            "Referrals": 15008.570333588184,
+            "Paid Search": 950.0382897477833
+          }
+        },
+        "Desktop": {
+          "exemplary.ai": {
+            "Organic Search": 61195.896,
+            "Social": 5070.102,
+            "Email": 186.36599999999999,
+            "Display Ads": 1250.539,
+            "Direct": 48528.320999999996,
+            "Referrals": 11519.579999999998,
+            "Paid Search": 525.7169999999998
+          }
+        },
+        "MobileWeb": {
+          "exemplary.ai": {
+            "Organic Search": 159768.44145719442,
+            "Social": 5077.026046597966,
+            "Email": 10.748980846207571,
+            "Display Ads": 320.0262753098084,
+            "Direct": 60084.53157186837,
+            "Referrals": 3488.9903335881854,
+            "Paid Search": 424.32128974778357
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Organic&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "opus clip",
+          "TotalShare": 0.12651515151515152,
+          "TotalVisits": 1670,
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.34,
+          "KwVolume": 1008125
+        },
+        {
+          "SearchTerm": "youtube timestamp generator",
+          "Change": 0.32608695652173914,
+          "TotalShare": 0.04621212121212121,
+          "TotalVisits": 610,
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 1.51,
+          "KwVolume": 3237
+        },
+        {
+          "SearchTerm": "vidyo ai",
+          "Change": 5.666666666666667,
+          "TotalShare": 0.030303030303030304,
+          "TotalVisits": 400,
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.15,
+          "KwVolume": 35665
+        },
+        {
+          "SearchTerm": "opus ai",
+          "Change": 1.1764705882352942,
+          "TotalShare": 0.02803030303030303,
+          "TotalVisits": 370,
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.61,
+          "KwVolume": 61906
+        },
+        {
+          "SearchTerm": "submagic",
+          "Change": 34,
+          "TotalShare": 0.026515151515151516,
+          "TotalVisits": 350,
+          "SiteOrigins": {
+            "exemplary.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "exemplary.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.32,
+          "KwVolume": 217954
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferrals/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 14,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Change": -0.8157533992812419,
+          "Share": 0.3286688059912513,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Category": ""
+        },
+        {
+          "Share": 0.12272254045508488,
+          "Domain": "onehack.us",
+          "Favicon": "https://site-images.similarcdn.com/image?url=onehack.us&t=2&s=0&h=6eb2f9dc4448223ffb01c13c7c8697b6edf17beffbf5ac6be0183e503a67309d",
+          "Category": ""
+        },
+        {
+          "Change": -0.8831855948682982,
+          "Share": 0.11367910988102325,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Category": ""
+        },
+        {
+          "Change": 0.3037783720770759,
+          "Share": 0.1082812426362534,
+          "Domain": "toolify.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolify.ai&t=2&s=0&h=a274658d0d5c006c07c78f798989130b0de2c0ecebc5c7d1ba530bfef8bdcc7c",
+          "Category": ""
+        },
+        {
+          "Change": -1,
+          "Share": 0.05736888782255887,
+          "Domain": "theresanaiforthat.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=theresanaiforthat.com&t=2&s=0&h=fd4102738ea78932cf709a19297e733d0a14c70742750091167fb81a14215a83",
+          "Category": ""
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationReferrals/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "stripe.com",
+          "Share": 0.4407250349613344,
+          "Change": -0.015216957265648536,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=stripe.com&t=2&s=0&h=d68993ccefeee1fe61031cd46586b3158ad13585abae80195cc41b500863c253",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "google.com",
+          "Share": 0.4330189339673135,
+          "Change": -1,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "2short.ai",
+          "Share": 0.03798369150901222,
+          "Change": -1,
+          "Favicon": "https://site-images.similarcdn.com/image?url=2short.ai&t=2&s=0&h=3b6ee15e9a20949b6601d595266e98d179b8bd4b126838f0a5204a4b4ad05c83",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "discord.com",
+          "Share": 0.03459146364655124,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=discord.com&t=2&s=0&h=133c0aed0b1b6c3760db4875f51accd42ff1157854dd0ee0eabab700af80a348",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "munchstudio.com",
+          "Share": 0.029266095856620218,
+          "Change": -1,
+          "Favicon": "https://site-images.similarcdn.com/image?url=munchstudio.com&t=2&s=0&h=0a1021dc7b70c1a4b7e0b71fe8ad78d2bdc60238661b5135cdf45a4c6f0e6567",
+          "HasAdsense": false
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesSocial/PieChart?country=999&includeSubDomains=true&webSource=Desktop&timeGranularity=Monthly&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&keys=exemplary.ai",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Youtube": {
+            "Share": 0.9999999998169863,
+            "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=1&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20"
+          },
+          "Social": {
+            "Share": 1.8301376322182433e-10
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferringCategories/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&timeGranularity=Monthly&to=2026%7C02%7C28&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Share": 0.4812156447750067,
+          "Category": "AI_Chatbots_and_Tools"
+        },
+        {
+          "Share": 0.17485508146713677,
+          "Category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software"
+        },
+        {
+          "Share": 0.1738979550741837,
+          "Category": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology"
+        },
+        {
+          "Share": 0.13997652169814956,
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design"
+        },
+        {
+          "Share": 0.030054796985523144,
+          "Category": "Unknown"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "synthesys.io",
+        "DomainWithoutSub": "synthesys.io",
+        "Rank": 380557,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesys.io&t=2&s=1&h=24e02654696c3a75fd060fd43fe2088b59d92a46fba74eef79c6641b8aad5a38"
+      },
+      {
+        "Domain": "rewriteguru.com",
+        "DomainWithoutSub": "rewriteguru.com",
+        "Rank": 378267,
+        "Favicon": "https://site-images.similarcdn.com/image?url=rewriteguru.com&t=2&s=1&h=d24c246d6852244594cfb6df0be0508b531ac642d3cc92fedf067ea664d98892"
+      },
+      {
+        "Domain": "opus.ai",
+        "DomainWithoutSub": "opus.ai",
+        "Rank": 288346,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.ai&t=2&s=1&h=14b9a2260fcb8eb64f7aa80ab2bd5fa93355a462ef57531a44d75d8edc21971b"
+      },
+      {
+        "Domain": "writeless.ai",
+        "DomainWithoutSub": "writeless.ai",
+        "Rank": 267672,
+        "Favicon": "https://site-images.similarcdn.com/image?url=writeless.ai&t=2&s=1&h=329602731db789f0be144d8839acb4373deb5b3df0946f42b081242d140a3d45"
+      },
+      {
+        "Domain": "tldrthis.com",
+        "DomainWithoutSub": "tldrthis.com",
+        "Rank": 297839,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tldrthis.com&t=2&s=1&h=2ca640bee58ea2c88e5916e793504cc2dda7f371e0f43ba2834eea2a080f3803"
+      },
+      {
+        "Domain": "inkforall.com",
+        "DomainWithoutSub": "inkforall.com",
+        "Rank": 334716,
+        "Favicon": "https://site-images.similarcdn.com/image?url=inkforall.com&t=2&s=1&h=f18c653f06e86202c88bf2ba253214286d5d5c9c9b9e7a374ba7e358f0f08f30"
+      },
+      {
+        "Domain": "aiktp.com",
+        "DomainWithoutSub": "aiktp.com",
+        "Rank": 316059,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aiktp.com&t=2&s=1&h=3cbe9f6ba6903857f9caac5217bab340f46c0dae36fb0a82bb6ae8fa4477e00c"
+      },
+      {
+        "Domain": "wordchiefs.com",
+        "DomainWithoutSub": "wordchiefs.com",
+        "Rank": 190249,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wordchiefs.com&t=2&s=1&h=cf99b4e3e86d7752dd28103b0c8ebb0082d1c2df2d07a7d028d19f1bb375aed6"
+      },
+      {
+        "Domain": "artificialstudio.ai",
+        "DomainWithoutSub": "artificialstudio.ai",
+        "Rank": 279171,
+        "Favicon": "https://site-images.similarcdn.com/image?url=artificialstudio.ai&t=2&s=1&h=e53bc33c70d0f75f4cd9b581e4762dc715ebd1dffd047bf8c0624d28aae608bb"
+      },
+      {
+        "Domain": "zubtitle.com",
+        "DomainWithoutSub": "zubtitle.com",
+        "Rank": 455337,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zubtitle.com&t=2&s=1&h=d36f0cd15e8b6b1dc495febc9175a835dc7c42fe6c00d530435f7dfe29ad2f8b"
+      },
+      {
+        "Domain": "quso.ai",
+        "DomainWithoutSub": "quso.ai",
+        "Rank": 93435,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "echowave.io",
+        "DomainWithoutSub": "echowave.io",
+        "Rank": 127978,
+        "Favicon": "https://site-images.similarcdn.com/image?url=echowave.io&t=2&s=1&h=484550467f2f18765c49b273654a6dd45a0e631c3e221d3ed0bb386c8d1f73c8"
+      },
+      {
+        "Domain": "bytecap.io",
+        "DomainWithoutSub": "bytecap.io",
+        "Rank": 1044866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bytecap.io&t=2&s=1&h=b2e2db95e5bc8d03196e4c6a7672a933a48841e2169b94ca2f9ad13d69e4ec3e"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=exemplary.ai&webSource=Total",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 112752.05195546022
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 119671.31630042258
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 125027.23689905251
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=exemplary.ai%2Cvizard.ai%2Copus.pro%2Cmaestra.ai%2Cdubverse.ai&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "exemplary.ai": false,
+        "vizard.ai": false,
+        "opus.pro": false,
+        "maestra.ai": false,
+        "dubverse.ai": false
+      },
+      "Data": [
+        {
+          "Domain": "exemplary.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=0&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+          "TotalVisits": 357450.6051549354,
+          "Change": 0.04475525768584716,
+          "ShareOfVisits": 0.014018941568637809
+        },
+        {
+          "Domain": "vizard.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=0&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+          "TotalVisits": 5432922.911468741,
+          "Change": -0.4219995035838359,
+          "ShareOfVisits": 0.21307511511913932
+        },
+        {
+          "Domain": "opus.pro",
+          "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=0&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab",
+          "TotalVisits": 15268938.863069775,
+          "Change": -0.09287052079679146,
+          "ShareOfVisits": 0.5988361990426545
+        },
+        {
+          "Domain": "maestra.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=0&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca",
+          "TotalVisits": 3894652.4477704084,
+          "Change": -0.04706819400236274,
+          "ShareOfVisits": 0.15274531447996825
+        },
+        {
+          "Domain": "dubverse.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=0&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7",
+          "TotalVisits": 543723.6681212003,
+          "Change": -0.023033820383124126,
+          "ShareOfVisits": 0.0213244297896002
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=exemplary.ai%2Cvizard.ai%2Copus.pro%2Cmaestra.ai%2Cdubverse.ai&webSource=Total",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 112752.05195546022
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 119671.31630042258
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 125027.23689905251
+              }
+            ]
+          ]
+        },
+        "vizard.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 1512114.4784971792
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2484668.694259733
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1436139.738711828
+              }
+            ]
+          ]
+        },
+        "opus.pro": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 4886399.646142153
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5444066.242039004
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 4938472.974888611
+              }
+            ]
+          ]
+        },
+        "maestra.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 1142422.5980808828
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 1409281.082543266
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1342948.7671462598
+              }
+            ]
+          ]
+        },
+        "dubverse.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 161258.47138874914
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 193460.66749941598
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 189004.52923303514
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false,
+        "vizard.ai": false,
+        "opus.pro": false,
+        "maestra.ai": false,
+        "dubverse.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

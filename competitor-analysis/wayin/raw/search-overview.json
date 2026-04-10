@@ -1,0 +1,537 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=5",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 809856.594356055,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/brand-split?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=wayin.ai&includeSubDomains=true",
+    "body": {
+      "wayin.ai": {
+        "BrandedShareSplitGraph": [
+          {
+            "Key": "2026-01-01",
+            "Value": {
+              "Branded": 0.10512079567297446,
+              "NonBranded": 0.8948792043270257
+            }
+          },
+          {
+            "Key": "2026-02-01",
+            "Value": {
+              "Branded": 0.15236196659352322,
+              "NonBranded": 0.8476380334064769
+            }
+          },
+          {
+            "Key": "2025-12-01",
+            "Value": {
+              "Branded": 0.07949637114722091,
+              "NonBranded": 0.9205036288527791
+            }
+          }
+        ],
+        "BrandedShare": 0.11629951449235439,
+        "NonBrandedShare": 0.8837004855076457
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/traffic?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=wayin.ai&includeSubDomains=true",
+    "body": {
+      "TrafficSourcesVisits": {
+        "wayin.ai": {
+          "All": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 393967.8288206898
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 465853.67395687755
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 484080.3126123259
+              }
+            ],
+            "Total": 1343901.8153898933,
+            "YoyChange": 9.07983194174174,
+            "Average": 447967.2717966311,
+            "TotalVisits": 2652084.2475367934
+          },
+          "Organic": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 83426.09511157511
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 162725.4335419946
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 231926.02565053295
+              }
+            ],
+            "Total": 478077.55430410267,
+            "YoyChange": 6.4722965676314965,
+            "Average": 159359.18476803423,
+            "TotalVisits": 1343901.8153898933
+          },
+          "Paid": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 310541.7337091147
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 303128.24041488295
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 252154.28696179297
+              }
+            ],
+            "Total": 865824.2610857906,
+            "YoyChange": 11.48560257107074,
+            "Average": 288608.08702859684,
+            "TotalVisits": 1343901.8153898933
+          }
+        }
+      },
+      "AdSpend": {
+        "wayin.ai": {
+          "CostPerVisit": {
+            "CostPerVisit": 0.19272242359060696,
+            "YoyChange": -0.11436883233925392
+          },
+          "PayPerClick": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 59472.99
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 71543.63
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 35847.13
+              }
+            ],
+            "Total": 166863.75,
+            "YoyChange": 10.057638783965393,
+            "Average": 55621.25,
+            "TotalVisits": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=wayin.ai&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 139754.64604708884,
+              "Email": 1254.9000159816514,
+              "Direct": 1063397.2768552648,
+              "Display Ads": 12843.637763109933,
+              "Referrals": 90931.97146545531,
+              "Organic Search": 478077.55430410267,
+              "Paid Search": 865824.2610857906
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 45100.33765413494,
+                "Email": 349.33378334230946,
+                "Direct": 321611.15753823525,
+                "Display Ads": 3765.568692072919,
+                "Referrals": 23897.97506231515,
+                "Organic Search": 83426.09511157511,
+                "Paid Search": 310541.7337091147
+              },
+              "2026-01-01": {
+                "Social": 46198.49581244531,
+                "Email": 493.10718716086535,
+                "Direct": 374281.42971397046,
+                "Display Ads": 4410.583536804269,
+                "Referrals": 31650.47923207411,
+                "Organic Search": 162725.4335419946,
+                "Paid Search": 303128.24041488295
+              },
+              "2026-02-01": {
+                "Social": 48455.8125805086,
+                "Email": 412.4590454784767,
+                "Direct": 367504.68960305897,
+                "Display Ads": 4667.485534232745,
+                "Referrals": 35383.51717106606,
+                "Organic Search": 231926.02565053295,
+                "Paid Search": 252154.28696179297
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=wayin.ai&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 139754.64604708884,
+              "Email": 1254.9000159816514,
+              "Direct": 1063397.2768552648,
+              "Display Ads": 12843.637763109933,
+              "Referrals": 90931.97146545531,
+              "Organic Search": 478077.55430410267,
+              "Paid Search": 865824.2610857906
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 45100.33765413494,
+                "Email": 349.33378334230946,
+                "Direct": 321611.15753823525,
+                "Display Ads": 3765.568692072919,
+                "Referrals": 23897.97506231515,
+                "Organic Search": 83426.09511157511,
+                "Paid Search": 310541.7337091147
+              },
+              "2026-01-01": {
+                "Social": 46198.49581244531,
+                "Email": 493.10718716086535,
+                "Direct": 374281.42971397046,
+                "Display Ads": 4410.583536804269,
+                "Referrals": 31650.47923207411,
+                "Organic Search": 162725.4335419946,
+                "Paid Search": 303128.24041488295
+              },
+              "2026-02-01": {
+                "Social": 48455.8125805086,
+                "Email": 412.4590454784767,
+                "Direct": 367504.68960305897,
+                "Display Ads": 4667.485534232745,
+                "Referrals": 35383.51717106606,
+                "Organic Search": 231926.02565053295,
+                "Paid Search": 252154.28696179297
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "vidfly.ai",
+        "DomainWithoutSub": "vidfly.ai",
+        "Rank": 113917,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidfly.ai&t=2&s=1&h=f4e328af0d440be0ce37a0162f417200aee2b198081ca875d302aa5d1af2071a"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "pikzels.com",
+        "DomainWithoutSub": "pikzels.com",
+        "Rank": 110077,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pikzels.com&t=2&s=1&h=19f756ec29f5208bf002c7fd54d3ec2032784579edd763c108430d9469282076"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "sivi.ai",
+        "DomainWithoutSub": "sivi.ai",
+        "Rank": 295300,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sivi.ai&t=2&s=1&h=8aafe428928acc7fa54593b60f7e85bc2e8b537070de63af897f6918a62c5127"
+      },
+      {
+        "Domain": "reccloud.com",
+        "DomainWithoutSub": "reccloud.com",
+        "Rank": 85042,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reccloud.com&t=2&s=1&h=8b7be0c558377be73cca71b9a24ae639ac86c343765f672dd39080aee9658b5c"
+      },
+      {
+        "Domain": "clipto.com",
+        "DomainWithoutSub": "clipto.com",
+        "Rank": 23061,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipto.com&t=2&s=1&h=393dfd5a054efbc9c85d64e14be24461042aa3b2643e2afa54f5740568e47f60"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/top-keywords?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=wayin.ai&includeSubDomains=true&SourceType=all&pageSize=5",
+    "body": {
+      "opus clip": {
+        "Clicks": 79890,
+        "ClicksShare": 0.1462704602878172,
+        "ChangePresentation": "New",
+        "SitesClickShare": {
+          "wayin.ai": 1
+        },
+        "OrganicClicks": 460,
+        "PaidClicks": 79430
+      },
+      "opusclip": {
+        "Clicks": 22910,
+        "ClicksShare": 0.04194587864806474,
+        "ChangePresentation": "New",
+        "SitesClickShare": {
+          "wayin.ai": 1
+        },
+        "OrganicClicks": 0,
+        "PaidClicks": 22910
+      },
+      "youtube video summarizer": {
+        "Clicks": 13580,
+        "ClicksShare": 0.024863598081218647,
+        "YoYChange": 30.58139534883721,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "wayin.ai": 1
+        },
+        "OrganicClicks": 12780,
+        "PaidClicks": 800
+      },
+      "video summarizer": {
+        "Clicks": 9870,
+        "ClicksShare": 0.01807096561573108,
+        "YoYChange": 21.953488372093023,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "wayin.ai": 1
+        },
+        "OrganicClicks": 8190,
+        "PaidClicks": 1680
+      },
+      "kapwing": {
+        "Clicks": 8180,
+        "ClicksShare": 0.014976747592368816,
+        "ChangePresentation": "New",
+        "SitesClickShare": {
+          "wayin.ai": 1
+        },
+        "OrganicClicks": 0,
+        "PaidClicks": 8180
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/rank-distribution?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=wayin.ai&includeSubDomains=true",
+    "body": {
+      "Country": 840,
+      "RankSplit": {
+        "wayin.ai": {
+          "Top3": {
+            "2026-01": 615,
+            "2026-02": 484
+          },
+          "RestTo100": {
+            "2026-01": 1614,
+            "2026-02": 1623
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/landing-pages?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=wayin.ai&includeSubDomains=true&sourceType=Paid",
+    "body": [
+      {
+        "Url": "wayin.ai/wayinvideo",
+        "Clicks": 55560,
+        "ClicksShare": 0.5085118066996156,
+        "MoMChange": 0.18717948717948718,
+        "Spend": 25364.24,
+        "TopKeyword": "opus clip",
+        "TotalKeywords": 4420
+      },
+      {
+        "Url": "wayin.ai/wayinvideo?v_t_t=moments_task",
+        "Clicks": 6220,
+        "ClicksShare": 0.05692842760388065,
+        "MoMChange": -0.6548279689234184,
+        "Spend": 2664.42,
+        "TopKeyword": "opus clip",
+        "TotalKeywords": 871
+      },
+      {
+        "Url": "wayin.ai/wayinvideo?lang=pt&v_t_t=moments_task",
+        "Clicks": 3150,
+        "ClicksShare": 0.028830313014827018,
+        "MoMChange": 18.6875,
+        "Spend": 368.65,
+        "TopKeyword": "opus clip",
+        "TotalKeywords": 211
+      },
+      {
+        "Url": "v.wayin.ai/.well-known/apple-app-site-association",
+        "Clicks": 1130,
+        "ClicksShare": 0.010342302764049058,
+        "MoMChange": 0,
+        "Spend": 11.39,
+        "TopKeyword": "opus clip",
+        "TotalKeywords": 170
+      },
+      {
+        "Url": "wayin.ai/wayinvideo?gad_campaignid=23222832921&gad_source=1&gbraid=0AAAAA_TQ-aD-04WcYjBzdiCqzOlF9ISne&v_t_t=moments_task",
+        "Clicks": 1040,
+        "ClicksShare": 0.009518579535054,
+        "MoMChange": 0,
+        "Spend": 110.71,
+        "TopKeyword": "ukronia shorts hacer shorts",
+        "TotalKeywords": 23
+      }
+    ]
+  }
+]

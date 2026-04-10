@@ -1,0 +1,541 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=5",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 1975524.6178922423,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/brand-split?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=restream.io&includeSubDomains=true",
+    "body": {
+      "restream.io": {
+        "BrandedShareSplitGraph": [
+          {
+            "Key": "2026-01-01",
+            "Value": {
+              "Branded": 0.17096554083920543,
+              "NonBranded": 0.8290344591607944
+            }
+          },
+          {
+            "Key": "2025-12-01",
+            "Value": {
+              "Branded": 0.13099755031720173,
+              "NonBranded": 0.8690024496827982
+            }
+          },
+          {
+            "Key": "2026-02-01",
+            "Value": {
+              "Branded": 0.1638354648750173,
+              "NonBranded": 0.8361645351249827
+            }
+          }
+        ],
+        "BrandedShare": 0.15404605708309585,
+        "NonBrandedShare": 0.845953942916904
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=restream.io&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 527500.1860032849,
+              "Email": 1813.8371248919075,
+              "Direct": 4188046.4124786574,
+              "Display Ads": 37290.41049286935,
+              "Referrals": 199943.60335631366,
+              "Organic Search": 3888292.4525720626,
+              "Paid Search": 1595950.9548086217
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 184060.5387374586,
+                "Email": 589.6929937708999,
+                "Direct": 1476226.559968665,
+                "Display Ads": 14456.892878589577,
+                "Referrals": 73493.76849145157,
+                "Organic Search": 1420114.8078162586,
+                "Paid Search": 572010.5558893384
+              },
+              "2026-01-01": {
+                "Social": 181475.3139921017,
+                "Email": 671.0650007253975,
+                "Direct": 1465096.906515647,
+                "Display Ads": 12794.202015347397,
+                "Referrals": 68566.70144735451,
+                "Organic Search": 1358140.3179150969,
+                "Paid Search": 534163.5770975712
+              },
+              "2026-02-01": {
+                "Social": 161964.33327372457,
+                "Email": 553.0791303956104,
+                "Direct": 1246722.9459943457,
+                "Display Ads": 10039.315598932375,
+                "Referrals": 57883.13341750759,
+                "Organic Search": 1110037.3268407073,
+                "Paid Search": 489776.82182171184
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=restream.io&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 527500.1860032849,
+              "Email": 1813.8371248919075,
+              "Direct": 4188046.4124786574,
+              "Display Ads": 37290.41049286935,
+              "Referrals": 199943.60335631366,
+              "Organic Search": 3888292.4525720626,
+              "Paid Search": 1595950.9548086217
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 184060.5387374586,
+                "Email": 589.6929937708999,
+                "Direct": 1476226.559968665,
+                "Display Ads": 14456.892878589577,
+                "Referrals": 73493.76849145157,
+                "Organic Search": 1420114.8078162586,
+                "Paid Search": 572010.5558893384
+              },
+              "2026-01-01": {
+                "Social": 181475.3139921017,
+                "Email": 671.0650007253975,
+                "Direct": 1465096.906515647,
+                "Display Ads": 12794.202015347397,
+                "Referrals": 68566.70144735451,
+                "Organic Search": 1358140.3179150969,
+                "Paid Search": 534163.5770975712
+              },
+              "2026-02-01": {
+                "Social": 161964.33327372457,
+                "Email": 553.0791303956104,
+                "Direct": 1246722.9459943457,
+                "Display Ads": 10039.315598932375,
+                "Referrals": 57883.13341750759,
+                "Organic Search": 1110037.3268407073,
+                "Paid Search": 489776.82182171184
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/traffic?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=restream.io&includeSubDomains=true",
+    "body": {
+      "TrafficSourcesVisits": {
+        "restream.io": {
+          "All": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 1992125.363705597
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 1892303.895012668
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1599814.148662419
+              }
+            ],
+            "Total": 5484243.407380684,
+            "YoyChange": -0.22613565367832944,
+            "Average": 1828081.1357935613,
+            "TotalVisits": 10438837.856836705
+          },
+          "Organic": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 1420114.8078162586
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 1358140.3179150969
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1110037.3268407073
+              }
+            ],
+            "Total": 3888292.4525720626,
+            "YoyChange": -0.28489416886863017,
+            "Average": 1296097.4841906875,
+            "TotalVisits": 5484243.407380684
+          },
+          "Paid": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 572010.5558893384
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 534163.5770975712
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 489776.82182171184
+              }
+            ],
+            "Total": 1595950.9548086217,
+            "YoyChange": -0.032441168274527386,
+            "Average": 531983.6516028739,
+            "TotalVisits": 5484243.407380684
+          }
+        }
+      },
+      "AdSpend": {
+        "restream.io": {
+          "CostPerVisit": {
+            "CostPerVisit": 0.4787464913617108,
+            "YoyChange": 0.19386963957439424
+          },
+          "PayPerClick": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 255108.89
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 241601.93
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 267345.1
+              }
+            ],
+            "Total": 764055.9199999999,
+            "YoyChange": 0.1551391136991119,
+            "Average": 254685.30666666664,
+            "TotalVisits": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "freeconvert.com",
+        "DomainWithoutSub": "freeconvert.com",
+        "Rank": 1529,
+        "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=1&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18"
+      },
+      {
+        "Domain": "cloudconvert.com",
+        "DomainWithoutSub": "cloudconvert.com",
+        "Rank": 2491,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=1&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83"
+      },
+      {
+        "Domain": "convertio.co",
+        "DomainWithoutSub": "convertio.co",
+        "Favicon": "https://site-images.similarcdn.com/image?url=convertio.co&t=2&s=1&h=e995388c379d89a1afbc5b2ff71b8f86fa9b547a859124c9f7beaafa9678fcaf"
+      },
+      {
+        "Domain": "zamzar.com",
+        "DomainWithoutSub": "zamzar.com",
+        "Rank": 25575,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zamzar.com&t=2&s=1&h=f33f5461a90058eb543109e3df1212141f6a2d73aae9b5b3071fd4bcd661ef8e"
+      },
+      {
+        "Domain": "biteable.com",
+        "DomainWithoutSub": "biteable.com",
+        "Rank": 65412,
+        "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=1&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22"
+      },
+      {
+        "Domain": "uniscribe.co",
+        "DomainWithoutSub": "uniscribe.co",
+        "Rank": 34543,
+        "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=1&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "notta.ai",
+        "DomainWithoutSub": "notta.ai",
+        "Rank": 19207,
+        "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=1&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21"
+      },
+      {
+        "Domain": "descript.com",
+        "DomainWithoutSub": "descript.com",
+        "Rank": 13908,
+        "Favicon": "https://site-images.similarcdn.com/image?url=descript.com&t=2&s=1&h=19b1b9d6d824da80586a1078567284aa3d80d84adbbbb32672d9d63283943881"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "streamlabs.com",
+        "DomainWithoutSub": "streamlabs.com",
+        "Rank": 9969,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=1&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-audio-converter.com",
+        "DomainWithoutSub": "online-audio-converter.com",
+        "Rank": 18174,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-audio-converter.com&t=2&s=1&h=7072bef883704cb884e36073b5327cb009396fe3eac70803d46c75f23bdefd8f"
+      },
+      {
+        "Domain": "podbean.com",
+        "DomainWithoutSub": "podbean.com",
+        "Rank": 19514,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podbean.com&t=2&s=1&h=6bd03331138a96684f3443d0492539934b6c0e774cfbf1ddcb042a82260bedcc"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/top-keywords?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=restream.io&includeSubDomains=true&SourceType=all&pageSize=5",
+    "body": {
+      "twitch": {
+        "Clicks": 458940,
+        "ClicksShare": 0.1529132278904878,
+        "YoYChange": 98.5531453362256,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "restream.io": 1
+        },
+        "OrganicClicks": 610,
+        "PaidClicks": 458330
+      },
+      "speed test": {
+        "Clicks": 316440,
+        "ClicksShare": 0.1054339605039133,
+        "ChangePresentation": "New",
+        "SitesClickShare": {
+          "restream.io": 1
+        },
+        "OrganicClicks": 100,
+        "PaidClicks": 316340
+      },
+      "extract audio from video": {
+        "Clicks": 130870,
+        "ClicksShare": 0.04360429279214743,
+        "YoYChange": 0.49360876512211826,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "restream.io": 1
+        },
+        "OrganicClicks": 130870,
+        "PaidClicks": 0
+      },
+      "speedtest": {
+        "Clicks": 79280,
+        "ClicksShare": 0.026415132059000902,
+        "ChangePresentation": "New",
+        "SitesClickShare": {
+          "restream.io": 1
+        },
+        "OrganicClicks": 0,
+        "PaidClicks": 79280
+      },
+      "mp4 to mp3": {
+        "Clicks": 67470,
+        "ClicksShare": 0.02248018365313813,
+        "YoYChange": 0.3724572823433686,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "restream.io": 1
+        },
+        "OrganicClicks": 60620,
+        "PaidClicks": 6850
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/rank-distribution?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=restream.io&includeSubDomains=true",
+    "body": {
+      "Country": 840,
+      "RankSplit": {
+        "restream.io": {
+          "Top3": {
+            "2026-01": 2309,
+            "2026-02": 1940
+          },
+          "RestTo100": {
+            "2026-01": 9965,
+            "2026-02": 8530
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/landing-pages?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=restream.io&includeSubDomains=true&sourceType=Paid",
+    "body": [
+      {
+        "Url": "support.restream.io/en/articles/780137-test-your-upload-speed-to-restream",
+        "Clicks": 236110,
+        "ClicksShare": 0.44951927653498336,
+        "MoMChange": 1.4291152263374485,
+        "Spend": 857.44,
+        "TopKeyword": "speed test",
+        "TotalKeywords": 44
+      },
+      {
+        "Url": "restream.io/learn/what-is/twitch",
+        "Clicks": 103670,
+        "ClicksShare": 0.1973726796763446,
+        "MoMChange": -0.39402618657937805,
+        "Spend": 3491.89,
+        "TopKeyword": "twitch",
+        "TotalKeywords": 18
+      },
+      {
+        "Url": "restream.io",
+        "Clicks": 57730,
+        "ClicksShare": 0.10990956687291766,
+        "MoMChange": -0.09329354484058426,
+        "Spend": 151660.99,
+        "TopKeyword": "restream",
+        "TotalKeywords": 607
+      },
+      {
+        "Url": "restream.io/learn/what-is/obs",
+        "Clicks": 14760,
+        "ClicksShare": 0.028100904331270823,
+        "MoMChange": 0.25190839694656486,
+        "Spend": 6941.36,
+        "TopKeyword": "obs studio",
+        "TotalKeywords": 91
+      },
+      {
+        "Url": "app.restream.io",
+        "Clicks": 11550,
+        "ClicksShare": 0.02198952879581152,
+        "MoMChange": -0.16546242774566475,
+        "Spend": 22279.68,
+        "TopKeyword": "restream",
+        "TotalKeywords": 31
+      }
+    ]
+  }
+]

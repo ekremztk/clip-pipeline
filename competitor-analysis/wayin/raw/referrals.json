@@ -1,0 +1,2295 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=5",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 809856.594356055,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "vidfly.ai",
+        "DomainWithoutSub": "vidfly.ai",
+        "Rank": 113917,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidfly.ai&t=2&s=1&h=f4e328af0d440be0ce37a0162f417200aee2b198081ca875d302aa5d1af2071a"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "pikzels.com",
+        "DomainWithoutSub": "pikzels.com",
+        "Rank": 110077,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pikzels.com&t=2&s=1&h=19f756ec29f5208bf002c7fd54d3ec2032784579edd763c108430d9469282076"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "sivi.ai",
+        "DomainWithoutSub": "sivi.ai",
+        "Rank": 295300,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sivi.ai&t=2&s=1&h=8aafe428928acc7fa54593b60f7e85bc2e8b537070de63af897f6918a62c5127"
+      },
+      {
+        "Domain": "reccloud.com",
+        "DomainWithoutSub": "reccloud.com",
+        "Rank": 85042,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reccloud.com&t=2&s=1&h=8b7be0c558377be73cca71b9a24ae639ac86c343765f672dd39080aee9658b5c"
+      },
+      {
+        "Domain": "clipto.com",
+        "DomainWithoutSub": "clipto.com",
+        "Rank": 23061,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipto.com&t=2&s=1&h=393dfd5a054efbc9c85d64e14be24461042aa3b2643e2afa54f5740568e47f60"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferrals?key=wayin.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&ignoreFilterConsistency=false",
+    "body": {
+      "dictionary": {
+        "wayin.ai": {
+          "VolumeTotal": 2652084.247306289,
+          "Volumes": [
+            [
+              23897.97672094907,
+              null
+            ],
+            [
+              31650.480451154544,
+              null
+            ],
+            [
+              35383.51674513943,
+              null
+            ]
+          ],
+          "Dates": [
+            "2025-12-01",
+            "2026-01-01",
+            "2026-02-01"
+          ],
+          "SearchTotal": 90931.97391724304
+        }
+      },
+      "Categories": [
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 7,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Science_and_Education",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Lifestyle/Beauty_and_Cosmetics",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Jobs_and_Career/Jobs_and_Employment",
+          "Count": 1,
+          "Value": 0
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferralsTable?key=wayin.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&orderBy=TotalShare+desc&ignoreFilterConsistency=false",
+    "body": {
+      "TotalShare": 1.0000000000000004,
+      "TotalVisits": 45466.115849137714,
+      "TotalVisitsGlobalList": {
+        "wayin.ai": 0.9999999999999999
+      },
+      "TopCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 0,
+          "Value": 0.7144581612547923
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.12686315032134213
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 0,
+          "Value": 0.07891570289085395
+        },
+        {
+          "Name": "Unknown",
+          "Count": 0,
+          "Value": 0.028355353425190983
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 0,
+          "Value": 0.0212010375253183
+        },
+        {
+          "Name": "Lifestyle/Beauty_and_Cosmetics",
+          "Count": 0,
+          "Value": 0.01636935520222397
+        },
+        {
+          "Name": "Jobs_and_Career/Jobs_and_Employment",
+          "Count": 0,
+          "Value": 0.005102899063773889
+        },
+        {
+          "Name": "Science_and_Education/Science_and_Education",
+          "Count": 0,
+          "Value": 0.004316534769557752
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 0,
+          "Value": 0.003878942713770492
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 0,
+          "Value": 0.0005388628331765591
+        }
+      ],
+      "Categories": {
+        "wayin.ai": [
+          {
+            "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+            "Count": 7,
+            "Value": 0.12686315032134213
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+            "Count": 5,
+            "Value": 0.07891570289085395
+          },
+          {
+            "Name": "AI_Chatbots_and_Tools",
+            "Count": 4,
+            "Value": 0.7144581612547923
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+            "Count": 6,
+            "Value": 0.0212010375253183
+          },
+          {
+            "Name": "Science_and_Education/Science_and_Education",
+            "Count": 2,
+            "Value": 0.004316534769557752
+          },
+          {
+            "Name": "Lifestyle/Beauty_and_Cosmetics",
+            "Count": 1,
+            "Value": 0.01636935520222397
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Search_Engines",
+            "Count": 1,
+            "Value": 0.0005388628331765591
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Online_Marketing",
+            "Count": 3,
+            "Value": 0.003878942713770492
+          },
+          {
+            "Name": "Unknown",
+            "Count": 3,
+            "Value": 0.028355353425190983
+          },
+          {
+            "Name": "Jobs_and_Career/Jobs_and_Employment",
+            "Count": 1,
+            "Value": 0.005102899063773889
+          }
+        ]
+      },
+      "AllCategories": [
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 7,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Science_and_Education",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Lifestyle/Beauty_and_Cosmetics",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Jobs_and_Career/Jobs_and_Employment",
+          "Count": 1,
+          "Value": 0
+        }
+      ],
+      "Topics": [
+        {
+          "Name": "haku",
+          "Value": 0.15904760946236135
+        },
+        {
+          "Name": "kuvat",
+          "Value": 0.15904760946236135
+        },
+        {
+          "Name": "search",
+          "Value": 0.15904760946236135
+        },
+        {
+          "Name": "yahoo",
+          "Value": 0.15904760946236135
+        },
+        {
+          "Name": "technology",
+          "Value": 0.01836855153257342
+        },
+        {
+          "Name": "blog templates",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "design",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "design resources",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "design tutorials",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "flash",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "flash templates",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "flash tutorials",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "templates",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "web designers",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "web templates",
+          "Value": 0.018012404682482035
+        },
+        {
+          "Name": "comments",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "facebook",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "mobile",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "mobile app",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "mobile apps",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "news",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "nigeria",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "post",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "social media",
+          "Value": 0.012747217455616633
+        },
+        {
+          "Name": "domain",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "domain parking",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "domains",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "information",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "internet business",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "org",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "owner",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "sale",
+          "Value": 0.005621334076956783
+        },
+        {
+          "Name": "third party",
+          "Value": 0.005621334076956783
+        }
+      ],
+      "TotalCount": 31,
+      "TotalUnGroupedCount": 33,
+      "Records": [
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": 0.4911165231302631,
+          "NewChange": false,
+          "Share": 0.6156802032237715,
+          "FilteredShare": 0.6156802032237714,
+          "TotalVisits": 27992.58744579264,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Rank": 6,
+          "TotalShare": 0.6156802032237715,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.2926815242836903
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.6274230515275685
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.7670085040389949
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 2860.5263252793093
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 10088.673447090756
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 15043.387673422574
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.06724422712093396,
+          "FilteredShare": 0.06724422712093395,
+          "TotalVisits": 3057.3338204661113,
+          "Domain": "aixploria.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aixploria.com&t=2&s=0&h=bfab7f4b2d02e37c654c3e731f5f1fe2150d2c5888e66d7c93b2d58e8ba5dbd7",
+          "Rank": 33043,
+          "TotalShare": 0.06724422712093396,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.21133855998121726
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.06168173807531855
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 2065.519905475565
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 991.8139149905466
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.059153272965134576,
+          "FilteredShare": 0.05915327296513456,
+          "TotalVisits": 2689.469561488474,
+          "Domain": "theresanaiforthat.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=theresanaiforthat.com&t=2&s=0&h=fd4102738ea78932cf709a19297e733d0a14c70742750091167fb81a14215a83",
+          "Rank": 9351,
+          "TotalShare": 0.059153272965134576,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.2751794464587473
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 2689.469561488474
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.70858215589647,
+          "NewChange": false,
+          "Share": 0.05198422677342261,
+          "FilteredShare": 0.051984226773422605,
+          "TotalVisits": 2363.5208768082784,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Rank": 19,
+          "TotalShare": 0.05198422677342261,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.11382012691443115
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.02719338881382817
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 1830.1751734342618
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 533.3457033740167
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": 1.2963049694771605,
+          "NewChange": false,
+          "Share": 0.03697420337685679,
+          "FilteredShare": 0.036974203376856786,
+          "TotalVisits": 1681.0734141617495,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Rank": 264,
+          "TotalShare": 0.03697420337685679,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.08383558564606777
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.016257651132325992
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.030606628449325848
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 819.3680838676316
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 261.4155359632262
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 600.2897943308917
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.02975886492018563,
+          "FilteredShare": 0.029758864920185625,
+          "TotalVisits": 1353.02,
+          "Domain": "workona.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=workona.com&t=2&s=0&h=109b55be032652ec7cae0c90e31daba870625b03f9231577b724c08872e37ffd",
+          "Rank": 3728,
+          "TotalShare": 0.02975886492018563,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.08414544703324006
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 1353.02
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.021056727799234634,
+          "FilteredShare": 0.02105672779923463,
+          "TotalVisits": 957.3676255237604,
+          "Domain": "opus.pro",
+          "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=0&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab",
+          "Rank": 8500,
+          "TotalShare": 0.021056727799234634,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.04881274924302199
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 957.3676255237604
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "SourceType": "ST",
+          "Change": 0.19341878955054367,
+          "NewChange": false,
+          "Share": 0.01871641748600299,
+          "FilteredShare": 0.018716417486002987,
+          "TotalVisits": 850.9628056994386,
+          "Domain": "feishu.cn",
+          "Favicon": "https://site-images.similarcdn.com/image?url=feishu.cn&t=2&s=0&h=015eb0e457b25ceabc3c0b89917147761faf11825abc0200d58f15b0136803e5",
+          "Rank": 772,
+          "TotalShare": 0.01871641748600299,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.052490017637918135
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.009582053296807485
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009375179231593051
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 513.0118056994386
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 154.075
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 183.876
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "Children": [
+            {
+              "Category": "Lifestyle~Beauty_and_Cosmetics",
+              "Change": 0.19341878955054367,
+              "NewChange": false,
+              "Share": 0.01636935520222397,
+              "FilteredShare": 0.016369355202223965,
+              "TotalVisits": 744.251,
+              "Domain": "adsmarch.feishu.cn",
+              "Favicon": "https://site-images.similarcdn.com/image?url=adsmarch.feishu.cn&t=2&s=0&h=c2faa5e1eba097312143b358ebfca664c4c655fd7bed198fa38fefba21009584",
+              "Rank": -1,
+              "TotalShare": 0.01636935520222397,
+              "SiteOrigins": {
+                "wayin.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "NewChange": false,
+              "Share": 0.0018081994506024606,
+              "FilteredShare": 0.0018081994506024604,
+              "TotalVisits": 82.21180569943863,
+              "Domain": "ai.feishu.cn",
+              "Favicon": "https://site-images.similarcdn.com/image?url=ai.feishu.cn&t=2&s=0&h=6286601b04ba3632c74c43b216ca3287a454e3252d7d57b778b0035cdbb6b4ed",
+              "Rank": -1,
+              "TotalShare": 0.0018081994506024606,
+              "SiteOrigins": {
+                "wayin.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Search_Engines",
+              "NewChange": false,
+              "Share": 0.0005388628331765591,
+              "FilteredShare": 0.000538862833176559,
+              "TotalVisits": 24.5,
+              "Domain": "winddownclub.feishu.cn",
+              "Favicon": "https://site-images.similarcdn.com/image?url=winddownclub.feishu.cn&t=2&s=0&h=5aaf4b170b228f276cb78017695214c846e32cce167d0c131c8d79a502a67520",
+              "Rank": -1,
+              "TotalShare": 0.0005388628331765591,
+              "SiteOrigins": {
+                "wayin.ai": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.016957678688262073,
+          "FilteredShare": 0.01695767868826207,
+          "TotalVisits": 770.9997837729769,
+          "Domain": "fi.search.yahoo.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=fi.search.yahoo.com&t=2&s=0&h=34c8400793afc2db7e429dcba13938377ca16296dc921dc8702de738f9e5f03c",
+          "Rank": -1,
+          "TotalShare": 0.016957678688262073,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.03931051991772252
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 770.9997837729769
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.014982685231894456,
+          "FilteredShare": 0.014982685231894454,
+          "TotalVisits": 681.204502484478,
+          "Domain": "ilounge.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ilounge.com&t=2&s=0&h=0fdfd8c6d2bb37923ed1e018865c65464bdb58069f30d55dc1740d7b9a18d7d5",
+          "Rank": 271831,
+          "TotalShare": 0.014982685231894456,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.004557931785854997
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.03959426331733644
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 636.657502484478
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 44.547
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.009819527880741408,
+          "FilteredShare": 0.009819527880741407,
+          "TotalVisits": 446.45579220962657,
+          "Domain": "claude.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=claude.ai&t=2&s=0&h=a3b3778e02952b653132fb6d019ed0361cff7850429377787fbdc4c86ce1565e",
+          "Rank": 125,
+          "TotalShare": 0.009819527880741408,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.022763183182949995
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 446.45579220962657
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00809747340838851,
+          "FilteredShare": 0.008097473408388508,
+          "TotalVisits": 368.16066407110395,
+          "Domain": "kagi.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=kagi.com&t=2&s=0&h=a8d58083e1a27ab0b415b760a36c2ec05248f73367ecd7b9fa3ce9544089d0a2",
+          "Rank": 12681,
+          "TotalShare": 0.00809747340838851,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.01877119478174922
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 368.16066407110395
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.006173564527292326,
+          "FilteredShare": 0.0061735645272923256,
+          "TotalVisits": 280.688,
+          "Domain": "submitdirs.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=submitdirs.com&t=2&s=0&h=2bb78583e36b16ae5916e4b57301111832f9884a6837337fd1c4c96d96c56e1b",
+          "Rank": -1,
+          "TotalShare": 0.006173564527292326,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.01745622181258672
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 280.688
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -0.10594911088622232,
+          "NewChange": false,
+          "Share": 0.005763039026017206,
+          "FilteredShare": 0.005763039026017205,
+          "TotalVisits": 262.023,
+          "Domain": "videohunt.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=videohunt.ai&t=2&s=0&h=8ebe4b0124a641b1126283ff0b08888703f9efe979a61dc3f1441ed494293e9c",
+          "Rank": -1,
+          "TotalShare": 0.005763039026017206,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.008603480467826366
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.006306153564908544
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 138.34
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 123.683
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 1
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.005224110209636585,
+          "FilteredShare": 0.005224110209636584,
+          "TotalVisits": 237.52,
+          "Domain": "ec2-54-169-225-231.ap-southeast-1.compute.amazonaws.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ec2-54-169-225-231.ap-southeast-1.compute.amazonaws.com&t=2&s=0&h=47b293ef38516d981766f594b6f9ebe428dd64dabcccedb69e54582aa9e34333",
+          "Rank": -1,
+          "TotalShare": 0.005224110209636585,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.006510761068743372
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.01081417817051412
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 63.633
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 173.887
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "Jobs_and_Career~Jobs_and_Employment",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.005102899063773889,
+          "FilteredShare": 0.005102899063773888,
+          "TotalVisits": 232.009,
+          "Domain": "ltf.jooble.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ltf.jooble.com&t=2&s=0&h=64b8e55736fd1f500443b344cc8b0513a774d85d06c9b8f15871fec9a5a99031",
+          "Rank": -1,
+          "TotalShare": 0.005102899063773889,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.011829308655521504
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 232.009
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.004884319155357276,
+          "FilteredShare": 0.0048843191553572755,
+          "TotalVisits": 222.07102056163635,
+          "Domain": "notegpt.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=notegpt.io&t=2&s=0&h=7963a0c38e67206f1a65af912a9683e54c5f5ab93293303f8d1f0d47c7b33334",
+          "Rank": 3867,
+          "TotalShare": 0.004884319155357276,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.022721722300831502
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 222.07102056163635
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Science_and_Education",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0037171873326572935,
+          "FilteredShare": 0.003717187332657293,
+          "TotalVisits": 169.0060698995437,
+          "Domain": "metapress.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=metapress.com&t=2&s=0&h=3d187c6c07c359f6fab11421826a38277d15c80a37f3f03b886b4f327df001ab",
+          "Rank": 469981,
+          "TotalShare": 0.0037171873326572935,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.014504107949648978
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0016947003234658703
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 141.75606989954372
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 27.25
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00369227357078145,
+          "FilteredShare": 0.0036922735707814497,
+          "TotalVisits": 167.87333791585877,
+          "Domain": "appsgeyser.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=appsgeyser.com&t=2&s=0&h=b14afcd7f4a6642ec2f84f4043f460198544c7c2049e4056e98c3143861391c7",
+          "Rank": 58246,
+          "TotalShare": 0.00369227357078145,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.01717635806865265
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 167.87333791585877
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0022340300592779165,
+          "FilteredShare": 0.002234030059277916,
+          "TotalVisits": 101.57266948558572,
+          "Domain": "app.2short.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.2short.ai&t=2&s=0&h=e94bc52e5abd0e4932caca086ee8f2d96f87702eeb1c47d7e764d6b3d4874c5a",
+          "Rank": -1,
+          "TotalShare": 0.0022340300592779165,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.010392648187812761
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 101.57266948558572
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0021799091070120458,
+          "FilteredShare": 0.0021799091070120453,
+          "TotalVisits": 99.112,
+          "Domain": "copilot.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=copilot.com&t=2&s=0&h=81b6d585cf1a03363563922bbe043718bc090e33fc2e1a04b6823e2c5b8bf8b8",
+          "Rank": 53109,
+          "TotalShare": 0.0021799091070120458,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.005053366203319903
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 99.112
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0019204851430399022,
+          "FilteredShare": 0.001920485143039902,
+          "TotalVisits": 87.317,
+          "Domain": "entheosweb.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=entheosweb.com&t=2&s=0&h=f675c8e6cb32b3b3c71707080778b912009f33dbe087734e814598db6e7eaf07",
+          "Rank": 314379,
+          "TotalShare": 0.0019204851430399022,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0044519813622496155
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 87.317
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Online_Marketing",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0019204851430399022,
+          "FilteredShare": 0.001920485143039902,
+          "TotalVisits": 87.317,
+          "Domain": "howinsights.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=howinsights.com&t=2&s=0&h=cdd3bf17c113e0ef09b6b09b3e0f0152bd2f3ed8facbe1c4240fcb0bae550d6e",
+          "Rank": -1,
+          "TotalShare": 0.0019204851430399022,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0044519813622496155
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 87.317
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0017539215415849603,
+          "FilteredShare": 0.00175392154158496,
+          "TotalVisits": 79.744,
+          "Domain": "indiepa.ge",
+          "Favicon": "https://site-images.similarcdn.com/image?url=indiepa.ge&t=2&s=0&h=976b45597ede807199ed71f0c03f0f44271b4463f07339c4e4ef231f2ea40ebd",
+          "Rank": 382094,
+          "TotalShare": 0.0017539215415849603,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.004065861192565404
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 79.744
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Online_Marketing",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0013591101338301316,
+          "FilteredShare": 0.0013591101338301314,
+          "TotalVisits": 61.79345879645782,
+          "Domain": "techloy.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=techloy.com&t=2&s=0&h=bd0bce8771a3f593fac70de9e79b547ec058aaaaac5b5ad03577e63e876a419e",
+          "Rank": 166895,
+          "TotalShare": 0.0013591101338301316,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0038429869581809908
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 61.79345879645782
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0008338737385397095,
+          "FilteredShare": 0.0008338737385397094,
+          "TotalVisits": 37.913,
+          "Domain": "guruhitech.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=guruhitech.com&t=2&s=0&h=4805a57742296995cfe82584ff0fd5fac4d4ac0a74f6f27f1369bb0025c3e662",
+          "Rank": 135363,
+          "TotalShare": 0.0008338737385397095,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010910100934422482
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0016947003234658703
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 10.663
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 27.25
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Online_Marketing",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0005993474369004586,
+          "FilteredShare": 0.0005993474369004585,
+          "TotalVisits": 27.25,
+          "Domain": "bulk.ly",
+          "Favicon": "https://site-images.similarcdn.com/image?url=bulk.ly&t=2&s=0&h=fa29118a3acc7c73c9dc09c5eba7badf5851f18a8aa6bc6865b1fb14e4082c03",
+          "Rank": 700078,
+          "TotalShare": 0.0005993474369004586,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0016947003234658703
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 27.25
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Science_and_Education",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0005993474369004586,
+          "FilteredShare": 0.0005993474369004585,
+          "TotalVisits": 27.25,
+          "Domain": "technology.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=technology.org&t=2&s=0&h=e6d06b009f0992ef2ca2267d21e74dc415b4cd48d5685cd6bf621a5d7836be5c",
+          "Rank": 211485,
+          "TotalShare": 0.0005993474369004586,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0016947003234658703
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 27.25
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0005388628331765591,
+          "FilteredShare": 0.000538862833176559,
+          "TotalVisits": 24.5,
+          "Domain": "aistage.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aistage.net&t=2&s=0&h=5867a2ce6b9842026aa36fb0a082d790b3ff51a5a52104f1cb2bc4e4dba983eb",
+          "Rank": 951993,
+          "TotalShare": 0.0005388628331765591,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0025067755124575713
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 24.5
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0005388628331765591,
+          "FilteredShare": 0.000538862833176559,
+          "TotalVisits": 24.5,
+          "Domain": "promoteproject.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=promoteproject.com&t=2&s=0&h=fc4fcc7554b521a4009bdc40a498e6439694250cefc237d50184d4c0d41aadf7",
+          "Rank": 1145056,
+          "TotalShare": 0.0005388628331765591,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0025067755124575713
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 24.5
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0005388628331765591,
+          "FilteredShare": 0.000538862833176559,
+          "TotalVisits": 24.5,
+          "Domain": "aiwith.me",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aiwith.me&t=2&s=0&h=115186d5c69953fb7abcdf2ab9f5a10588fc85c289884d07f0cbbbcc009388e4",
+          "Rank": -1,
+          "TotalShare": 0.0005388628331765591,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0025067755124575713
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 1,
+                "AbsValue": 24.5
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "wayin.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "HasAdsense": false
+        }
+      ]
+    }
+  }
+]

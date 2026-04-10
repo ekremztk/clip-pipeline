@@ -1,0 +1,535 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 59774.904225386155,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 125027.23536336076,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=exemplary.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "exemplary.ai": {
+          "TotalVisits": 357450.6051549354,
+          "Change": 0.04475525768584716,
+          "ShareOfVisits": 1,
+          "Trend": [
+            112752,
+            119671,
+            125027
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=exemplary.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "GlobalRank": {
+            "Value": 267181,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 259105
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 309225
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 267181
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 65867,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 62882
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 68251
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 65867
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 6118,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 6010
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 7142
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 6118
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Country": 356
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=exemplary.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Desktop": 128276.51615493537,
+          "Mobile Web": 229174.08900000004
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=exemplary.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "exemplary.ai": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 54819.20264362433,
+            "ReturningUsers": 3947.2687398375756
+          },
+          "2026-01-01": {
+            "NewUsers": 64540.60345286643,
+            "ReturningUsers": 0
+          },
+          "2026-02-01": {
+            "NewUsers": 53410.37012251875,
+            "ReturningUsers": 7397.272063345569
+          }
+        },
+        "Total": {
+          "NewUsers": 57590.05873966983,
+          "ReturningUsers": 3781.513601061048
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=exemplary.ai&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=exemplary.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "exemplary.ai": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 54819.20264362433,
+            "ReturningUsers": 3947.2687398375756
+          },
+          "2026-01-01": {
+            "NewUsers": 64540.60345286643,
+            "ReturningUsers": 0
+          },
+          "2026-02-01": {
+            "NewUsers": 53410.37012251875,
+            "ReturningUsers": 7397.272063345569
+          }
+        },
+        "Total": {
+          "NewUsers": 57590.05873966983,
+          "ReturningUsers": 3781.513601061048
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.374585616656785,
+          "UniqueUsers": 61371.573333333334,
+          "DedupUniqueUsers": 53877.085315737,
+          "VisitsPerUser": 1.9414558768301378,
+          "Source": "Total",
+          "Domain": "exemplary.ai",
+          "AvgMonthVisits": 119150.20171831177,
+          "AvgVisitDuration": 33.37768956010282,
+          "PagesPerVisit": 3.2537939493305554,
+          "TotalPagesViews": 387690.2054125581,
+          "Favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=0&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.374585616656785,
+          "UniqueUsers": 61371.573333333334,
+          "DedupUniqueUsers": 53877.085315737,
+          "VisitsPerUser": 1.9414558768301378,
+          "Source": "Total",
+          "Domain": "exemplary.ai",
+          "AvgMonthVisits": 119150.20171831177,
+          "AvgVisitDuration": 33.37768956010282,
+          "PagesPerVisit": 3.2537939493305554,
+          "TotalPagesViews": 387690.2054125581,
+          "Favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=0&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "synthesys.io",
+        "DomainWithoutSub": "synthesys.io",
+        "Rank": 380557,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesys.io&t=2&s=1&h=24e02654696c3a75fd060fd43fe2088b59d92a46fba74eef79c6641b8aad5a38"
+      },
+      {
+        "Domain": "rewriteguru.com",
+        "DomainWithoutSub": "rewriteguru.com",
+        "Rank": 378267,
+        "Favicon": "https://site-images.similarcdn.com/image?url=rewriteguru.com&t=2&s=1&h=d24c246d6852244594cfb6df0be0508b531ac642d3cc92fedf067ea664d98892"
+      },
+      {
+        "Domain": "opus.ai",
+        "DomainWithoutSub": "opus.ai",
+        "Rank": 288346,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.ai&t=2&s=1&h=14b9a2260fcb8eb64f7aa80ab2bd5fa93355a462ef57531a44d75d8edc21971b"
+      },
+      {
+        "Domain": "writeless.ai",
+        "DomainWithoutSub": "writeless.ai",
+        "Rank": 267672,
+        "Favicon": "https://site-images.similarcdn.com/image?url=writeless.ai&t=2&s=1&h=329602731db789f0be144d8839acb4373deb5b3df0946f42b081242d140a3d45"
+      },
+      {
+        "Domain": "tldrthis.com",
+        "DomainWithoutSub": "tldrthis.com",
+        "Rank": 297839,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tldrthis.com&t=2&s=1&h=2ca640bee58ea2c88e5916e793504cc2dda7f371e0f43ba2834eea2a080f3803"
+      },
+      {
+        "Domain": "inkforall.com",
+        "DomainWithoutSub": "inkforall.com",
+        "Rank": 334716,
+        "Favicon": "https://site-images.similarcdn.com/image?url=inkforall.com&t=2&s=1&h=f18c653f06e86202c88bf2ba253214286d5d5c9c9b9e7a374ba7e358f0f08f30"
+      },
+      {
+        "Domain": "aiktp.com",
+        "DomainWithoutSub": "aiktp.com",
+        "Rank": 316059,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aiktp.com&t=2&s=1&h=3cbe9f6ba6903857f9caac5217bab340f46c0dae36fb0a82bb6ae8fa4477e00c"
+      },
+      {
+        "Domain": "wordchiefs.com",
+        "DomainWithoutSub": "wordchiefs.com",
+        "Rank": 190249,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wordchiefs.com&t=2&s=1&h=cf99b4e3e86d7752dd28103b0c8ebb0082d1c2df2d07a7d028d19f1bb375aed6"
+      },
+      {
+        "Domain": "artificialstudio.ai",
+        "DomainWithoutSub": "artificialstudio.ai",
+        "Rank": 279171,
+        "Favicon": "https://site-images.similarcdn.com/image?url=artificialstudio.ai&t=2&s=1&h=e53bc33c70d0f75f4cd9b581e4762dc715ebd1dffd047bf8c0624d28aae608bb"
+      },
+      {
+        "Domain": "zubtitle.com",
+        "DomainWithoutSub": "zubtitle.com",
+        "Rank": 455337,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zubtitle.com&t=2&s=1&h=d36f0cd15e8b6b1dc495febc9175a835dc7c42fe6c00d530435f7dfe29ad2f8b"
+      },
+      {
+        "Domain": "quso.ai",
+        "DomainWithoutSub": "quso.ai",
+        "Rank": 93435,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "echowave.io",
+        "DomainWithoutSub": "echowave.io",
+        "Rank": 127978,
+        "Favicon": "https://site-images.similarcdn.com/image?url=echowave.io&t=2&s=1&h=484550467f2f18765c49b273654a6dd45a0e631c3e221d3ed0bb386c8d1f73c8"
+      },
+      {
+        "Domain": "bytecap.io",
+        "DomainWithoutSub": "bytecap.io",
+        "Rank": 1044866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bytecap.io&t=2&s=1&h=b2e2db95e5bc8d03196e4c6a7672a933a48841e2169b94ca2f9ad13d69e4ec3e"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=true&includeCrossData=false",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Visits/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 40252.69095546021
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 46810.38830042258
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 41213.4368990525
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 72499.361
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 72860.928
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 83813.80000000002
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Duration/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=exemplary.ai&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "exemplary.ai": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 56.74236032219859
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 55.87118639319439
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 77.89376802656267
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 5.98590158089798
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 12.768665573563753
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 29.31390715969329
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "exemplary.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

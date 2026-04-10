@@ -1,0 +1,2042 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=5",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=quso.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "quso.ai": {
+        "mainDomainName": "quso",
+        "icon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "image": "https://site-images.similarcdn.com/image?url=quso.ai&t=0&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=quso.ai&t=1&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "title": "quso.ai: Long To Short Video AI & Social Media Scheduling (formerly vidyo.ai)",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "quso.ai (formerly vidyo.ai) is the best AI-powered video repurposing and social media scheduling tool trusted by 4M+ coaches, podcasters, business owners and video creators.",
+        "globalRanking": 93435,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 93758,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 810,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "ai.quso.app",
+              "title": "AI Captions",
+              "author": "CC AI Captions",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2FcEpHbnY-jiSu4JgQXBf2c-2PDa4W4EUnxyGalTaPjyAXSwwQsafCZsapLnAOAhMbKz0%3Ds180&h=932eb95435e614d2d9ee8ae739d295afb6f782671b8d189e17c3a9d2e7834142",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.188679218292236,
+              "ratecount": 888,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2022",
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 162058.94302456797,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=quso.ai&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "quso.ai": {
+        "mainDomainName": "quso",
+        "icon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "image": "https://site-images.similarcdn.com/image?url=quso.ai&t=0&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=quso.ai&t=1&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "title": "quso.ai: Long To Short Video AI & Social Media Scheduling (formerly vidyo.ai)",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "quso.ai (formerly vidyo.ai) is the best AI-powered video repurposing and social media scheduling tool trusted by 4M+ coaches, podcasters, business owners and video creators.",
+        "globalRanking": 93435,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 93758,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 810,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "ai.quso.app",
+              "title": "AI Captions",
+              "author": "CC AI Captions",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2FcEpHbnY-jiSu4JgQXBf2c-2PDa4W4EUnxyGalTaPjyAXSwwQsafCZsapLnAOAhMbKz0%3Ds180&h=932eb95435e614d2d9ee8ae739d295afb6f782671b8d189e17c3a9d2e7834142",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.188679218292236,
+              "ratecount": 888,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2022",
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 380899.23720569036,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=quso.ai&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=quso.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "GlobalRank": {
+            "Value": 93435,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 95174
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 76818
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 93435
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 93758,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 108948
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 94612
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 93758
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 810,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 845
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 656
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 810
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=quso.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "quso.ai": {
+          "TotalVisits": 1320096.8603462772,
+          "Change": -0.2905746980184,
+          "ShareOfVisits": 1,
+          "Trend": [
+            402285,
+            536912,
+            380899
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "quso.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=quso.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "Desktop": 551082.4773462776,
+          "Mobile Web": 769014.3829999997
+        }
+      },
+      "KeysDataVerification": {
+        "quso.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=quso.ai&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "quso.ai": false
+      },
+      "Data": [
+        {
+          "Domain": "quso.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=0&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+          "TotalVisits": 1320096.8603462772,
+          "Change": -0.2905746980184,
+          "ShareOfVisits": 1
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficSourcesSearchV2/BrandedKeywords/WebsitePerformance/PieChart?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&to=2026%7C02%7C28&webSource=Total&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "Branded": 20676.726868626356,
+          "NoneBranded": 25500.385783924077
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementOverview/Table?country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false&includeSubDomains=true&timeGranularity=Monthly&keys=quso.ai&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "quso.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.36889023397183757,
+          "UniqueUsers": 219787.92999999996,
+          "DedupUniqueUsers": 191563.90789069628,
+          "VisitsPerUser": 2.002076669005858,
+          "Source": "Total",
+          "Domain": "quso.ai",
+          "AvgMonthVisits": 440032.2867820926,
+          "AvgVisitDuration": 93.41052708041335,
+          "PagesPerVisit": 4.450846181556721,
+          "TotalPagesViews": 1958516.0233857483,
+          "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=0&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Paid&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "opus clip",
+          "Change": -0.875,
+          "TotalShare": 0.3333333333333333,
+          "TotalVisits": 30,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.34,
+          "KwVolume": 1008125
+        },
+        {
+          "SearchTerm": "edit video online",
+          "Change": -0.8333333333333334,
+          "TotalShare": 0.1111111111111111,
+          "TotalVisits": 10,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.32,
+          "KwVolume": 66274
+        },
+        {
+          "SearchTerm": "2shorts.ai",
+          "Change": 0,
+          "TotalShare": 0.1111111111111111,
+          "TotalVisits": 10,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 3017
+        },
+        {
+          "SearchTerm": "ai auto editing",
+          "Change": -0.8888888888888888,
+          "TotalShare": 0.1111111111111111,
+          "TotalVisits": 10,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 101
+        },
+        {
+          "SearchTerm": "opusclip",
+          "Change": -0.8333333333333334,
+          "TotalShare": 0.1111111111111111,
+          "TotalVisits": 10,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.64,
+          "KwVolume": 306947
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferrals/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 56,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Change": -0.4790136613631373,
+          "Share": 0.4924555546511634,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Category": ""
+        },
+        {
+          "Share": 0.07019428526241053,
+          "Domain": "vidyo.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=0&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056",
+          "Category": ""
+        },
+        {
+          "Change": -0.9051530149516727,
+          "Share": 0.057591204497831276,
+          "Domain": "swiy.co",
+          "Favicon": "https://site-images.similarcdn.com/image?url=swiy.co&t=2&s=0&h=a815b4cd683edcf6669654b82efab2da878e118ce85efa00eaa105c95ab2c483",
+          "Category": ""
+        },
+        {
+          "Change": -0.6936232492413781,
+          "Share": 0.042519149953230986,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Category": ""
+        },
+        {
+          "Change": -0.48556357861733396,
+          "Share": 0.03738902867524717,
+          "Domain": "app.clickup.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=app.clickup.com&t=2&s=0&h=640f36fd1ec71062aed8cf8ddc65d875a921507d96885e26c7de38c91cd9b07e",
+          "Category": ""
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=quso.ai",
+    "body": {
+      "Data": {
+        "Total": {
+          "quso.ai": {
+            "Organic Search": 570388.4470323514,
+            "Social": 47464.256855104526,
+            "Email": 689.8529684551014,
+            "Display Ads": 5722.983045502671,
+            "Direct": 557424.1788658712,
+            "Referrals": 124429.63169835633,
+            "Paid Search": 13977.503986044025
+          }
+        },
+        "Desktop": {
+          "quso.ai": {
+            "Organic Search": 196282.80199999994,
+            "Social": 16932.409999999996,
+            "Email": 667.6510000000001,
+            "Display Ads": 4467.788,
+            "Direct": 232239.778,
+            "Referrals": 88402.391,
+            "Paid Search": 12089.652
+          }
+        },
+        "MobileWeb": {
+          "quso.ai": {
+            "Organic Search": 374105.6450323515,
+            "Social": 30531.84685510453,
+            "Email": 22.20196845510133,
+            "Display Ads": 1255.1950455026715,
+            "Direct": 325184.40086587117,
+            "Referrals": 36027.24069835632,
+            "Paid Search": 1887.8519860440251
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?mainDomainOnly=false&includeCrossData=true&key=quso.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false",
+    "body": {
+      "quso.ai": {
+        "mainDomainName": "quso",
+        "icon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "image": "https://site-images.similarcdn.com/image?url=quso.ai&t=0&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=quso.ai&t=1&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "title": "quso.ai: Long To Short Video AI & Social Media Scheduling (formerly vidyo.ai)",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "quso.ai (formerly vidyo.ai) is the best AI-powered video repurposing and social media scheduling tool trusted by 4M+ coaches, podcasters, business owners and video creators.",
+        "globalRanking": 93435,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 93758,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 810,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "ai.quso.app",
+              "title": "AI Captions",
+              "author": "CC AI Captions",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2FcEpHbnY-jiSu4JgQXBf2c-2PDa4W4EUnxyGalTaPjyAXSwwQsafCZsapLnAOAhMbKz0%3Ds180&h=932eb95435e614d2d9ee8ae739d295afb6f782671b8d189e17c3a9d2e7834142",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.188679218292236,
+              "ratecount": 888,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2022",
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 380899.23720569036,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=4&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteGeography/Geography/Table?country=999&includeSubDomains=true&webSource=Total&timeGranularity=Monthly&orderBy=TotalShare+desc&keys=quso.ai&pageSize=5&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 108,
+      "TotalTopLevelCount": 0,
+      "Filters": {
+        "country": [
+          {
+            "id": "356",
+            "text": "India",
+            "formattedText": "India",
+            "icon": "flag flag-in",
+            "count": 0
+          },
+          {
+            "id": "840",
+            "text": "United States",
+            "formattedText": "United States",
+            "icon": "flag flag-us",
+            "count": 0
+          },
+          {
+            "id": "586",
+            "text": "Pakistan",
+            "formattedText": "Pakistan",
+            "icon": "flag flag-pk",
+            "count": 0
+          },
+          {
+            "id": "360",
+            "text": "Indonesia",
+            "formattedText": "Indonesia",
+            "icon": "flag flag-id",
+            "count": 0
+          },
+          {
+            "id": "826",
+            "text": "United Kingdom",
+            "formattedText": "United Kingdom",
+            "icon": "flag flag-gb",
+            "count": 0
+          },
+          {
+            "id": "484",
+            "text": "Mexico",
+            "formattedText": "Mexico",
+            "icon": "flag flag-mx",
+            "count": 0
+          },
+          {
+            "id": "710",
+            "text": "South Africa",
+            "formattedText": "South Africa",
+            "icon": "flag flag-za",
+            "count": 0
+          },
+          {
+            "id": "566",
+            "text": "Nigeria",
+            "formattedText": "Nigeria",
+            "icon": "flag flag-ng",
+            "count": 0
+          },
+          {
+            "id": "76",
+            "text": "Brazil",
+            "formattedText": "Brazil",
+            "icon": "flag flag-br",
+            "count": 0
+          },
+          {
+            "id": "124",
+            "text": "Canada",
+            "formattedText": "Canada",
+            "icon": "flag flag-ca",
+            "count": 0
+          },
+          {
+            "id": "608",
+            "text": "Philippines",
+            "formattedText": "Philippines",
+            "icon": "flag flag-ph",
+            "count": 0
+          },
+          {
+            "id": "36",
+            "text": "Australia",
+            "formattedText": "Australia",
+            "icon": "flag flag-au",
+            "count": 0
+          },
+          {
+            "id": "604",
+            "text": "Peru",
+            "formattedText": "Peru",
+            "icon": "flag flag-pe",
+            "count": 0
+          },
+          {
+            "id": "704",
+            "text": "Vietnam",
+            "formattedText": "Vietnam",
+            "icon": "flag flag-vn",
+            "count": 0
+          },
+          {
+            "id": "276",
+            "text": "Germany",
+            "formattedText": "Germany",
+            "icon": "flag flag-de",
+            "count": 0
+          },
+          {
+            "id": "458",
+            "text": "Malaysia",
+            "formattedText": "Malaysia",
+            "icon": "flag flag-my",
+            "count": 0
+          },
+          {
+            "id": "50",
+            "text": "Bangladesh",
+            "formattedText": "Bangladesh",
+            "icon": "flag flag-bd",
+            "count": 0
+          },
+          {
+            "id": "643",
+            "text": "Russia",
+            "formattedText": "Russia",
+            "icon": "flag flag-ru",
+            "count": 0
+          },
+          {
+            "id": "804",
+            "text": "Ukraine",
+            "formattedText": "Ukraine",
+            "icon": "flag flag-ua",
+            "count": 0
+          },
+          {
+            "id": "528",
+            "text": "Netherlands",
+            "formattedText": "Netherlands",
+            "icon": "flag flag-nl",
+            "count": 0
+          },
+          {
+            "id": "410",
+            "text": "Korea, Republic of",
+            "formattedText": "Korea, Republic of",
+            "icon": "flag flag-kr",
+            "count": 0
+          },
+          {
+            "id": "578",
+            "text": "Norway",
+            "formattedText": "Norway",
+            "icon": "flag flag-no",
+            "count": 0
+          },
+          {
+            "id": "288",
+            "text": "Ghana",
+            "formattedText": "Ghana",
+            "icon": "flag flag-gh",
+            "count": 0
+          },
+          {
+            "id": "752",
+            "text": "Sweden",
+            "formattedText": "Sweden",
+            "icon": "flag flag-se",
+            "count": 0
+          },
+          {
+            "id": "400",
+            "text": "Jordan",
+            "formattedText": "Jordan",
+            "icon": "flag flag-jo",
+            "count": 0
+          },
+          {
+            "id": "764",
+            "text": "Thailand",
+            "formattedText": "Thailand",
+            "icon": "flag flag-th",
+            "count": 0
+          },
+          {
+            "id": "372",
+            "text": "Ireland",
+            "formattedText": "Ireland",
+            "icon": "flag flag-ie",
+            "count": 0
+          },
+          {
+            "id": "686",
+            "text": "Senegal",
+            "formattedText": "Senegal",
+            "icon": "flag flag-sn",
+            "count": 0
+          },
+          {
+            "id": "724",
+            "text": "Spain",
+            "formattedText": "Spain",
+            "icon": "flag flag-es",
+            "count": 0
+          },
+          {
+            "id": "818",
+            "text": "Egypt",
+            "formattedText": "Egypt",
+            "icon": "flag flag-eg",
+            "count": 0
+          },
+          {
+            "id": "250",
+            "text": "France",
+            "formattedText": "France",
+            "icon": "flag flag-fr",
+            "count": 0
+          },
+          {
+            "id": "246",
+            "text": "Finland",
+            "formattedText": "Finland",
+            "icon": "flag flag-fi",
+            "count": 0
+          },
+          {
+            "id": "702",
+            "text": "Singapore",
+            "formattedText": "Singapore",
+            "icon": "flag flag-sg",
+            "count": 0
+          },
+          {
+            "id": "380",
+            "text": "Italy",
+            "formattedText": "Italy",
+            "icon": "flag flag-it",
+            "count": 0
+          },
+          {
+            "id": "792",
+            "text": "Turkey",
+            "formattedText": "Turkey",
+            "icon": "flag flag-tr",
+            "count": 0
+          },
+          {
+            "id": "682",
+            "text": "Saudi Arabia",
+            "formattedText": "Saudi Arabia",
+            "icon": "flag flag-sa",
+            "count": 0
+          },
+          {
+            "id": "208",
+            "text": "Denmark",
+            "formattedText": "Denmark",
+            "icon": "flag flag-dk",
+            "count": 0
+          },
+          {
+            "id": "116",
+            "text": "Cambodia",
+            "formattedText": "Cambodia",
+            "icon": "flag flag-kh",
+            "count": 0
+          },
+          {
+            "id": "24",
+            "text": "Angola",
+            "formattedText": "Angola",
+            "icon": "flag flag-ao",
+            "count": 0
+          },
+          {
+            "id": "392",
+            "text": "Japan",
+            "formattedText": "Japan",
+            "icon": "flag flag-jp",
+            "count": 0
+          },
+          {
+            "id": "784",
+            "text": "United Arab Emirates",
+            "formattedText": "United Arab Emirates",
+            "icon": "flag flag-ae",
+            "count": 0
+          },
+          {
+            "id": "756",
+            "text": "Switzerland",
+            "formattedText": "Switzerland",
+            "icon": "flag flag-ch",
+            "count": 0
+          },
+          {
+            "id": "404",
+            "text": "Kenya",
+            "formattedText": "Kenya",
+            "icon": "flag flag-ke",
+            "count": 0
+          },
+          {
+            "id": "231",
+            "text": "Ethiopia",
+            "formattedText": "Ethiopia",
+            "icon": "flag flag-et",
+            "count": 0
+          },
+          {
+            "id": "203",
+            "text": "Czech Republic",
+            "formattedText": "Czech Republic",
+            "icon": "flag flag-cz",
+            "count": 0
+          },
+          {
+            "id": "860",
+            "text": "Uzbekistan",
+            "formattedText": "Uzbekistan",
+            "icon": "flag flag-uz",
+            "count": 0
+          },
+          {
+            "id": "620",
+            "text": "Portugal",
+            "formattedText": "Portugal",
+            "icon": "flag flag-pt",
+            "count": 0
+          },
+          {
+            "id": "376",
+            "text": "Israel",
+            "formattedText": "Israel",
+            "icon": "flag flag-il",
+            "count": 0
+          },
+          {
+            "id": "504",
+            "text": "Morocco",
+            "formattedText": "Morocco",
+            "icon": "flag flag-ma",
+            "count": 0
+          },
+          {
+            "id": "616",
+            "text": "Poland",
+            "formattedText": "Poland",
+            "icon": "flag flag-pl",
+            "count": 0
+          },
+          {
+            "id": "398",
+            "text": "Kazakhstan",
+            "formattedText": "Kazakhstan",
+            "icon": "flag flag-kz",
+            "count": 0
+          },
+          {
+            "id": "642",
+            "text": "Romania",
+            "formattedText": "Romania",
+            "icon": "flag flag-ro",
+            "count": 0
+          },
+          {
+            "id": "630",
+            "text": "Puerto Rico",
+            "formattedText": "Puerto Rico",
+            "icon": "flag flag-pr",
+            "count": 0
+          },
+          {
+            "id": "554",
+            "text": "New Zealand",
+            "formattedText": "New Zealand",
+            "icon": "flag flag-nz",
+            "count": 0
+          },
+          {
+            "id": "344",
+            "text": "Hong Kong",
+            "formattedText": "Hong Kong",
+            "icon": "flag flag-hk",
+            "count": 0
+          },
+          {
+            "id": "31",
+            "text": "Azerbaijan",
+            "formattedText": "Azerbaijan",
+            "icon": "flag flag-az",
+            "count": 0
+          },
+          {
+            "id": "56",
+            "text": "Belgium",
+            "formattedText": "Belgium",
+            "icon": "flag flag-be",
+            "count": 0
+          },
+          {
+            "id": "32",
+            "text": "Argentina",
+            "formattedText": "Argentina",
+            "icon": "flag flag-ar",
+            "count": 0
+          },
+          {
+            "id": "40",
+            "text": "Austria",
+            "formattedText": "Austria",
+            "icon": "flag flag-at",
+            "count": 0
+          },
+          {
+            "id": "144",
+            "text": "Sri Lanka",
+            "formattedText": "Sri Lanka",
+            "icon": "flag flag-lk",
+            "count": 0
+          },
+          {
+            "id": "524",
+            "text": "Nepal",
+            "formattedText": "Nepal",
+            "icon": "flag flag-np",
+            "count": 0
+          },
+          {
+            "id": "170",
+            "text": "Colombia",
+            "formattedText": "Colombia",
+            "icon": "flag flag-co",
+            "count": 0
+          },
+          {
+            "id": "300",
+            "text": "Greece",
+            "formattedText": "Greece",
+            "icon": "flag flag-gr",
+            "count": 0
+          },
+          {
+            "id": "158",
+            "text": "Taiwan",
+            "formattedText": "Taiwan",
+            "icon": "flag flag-tw",
+            "count": 0
+          },
+          {
+            "id": "348",
+            "text": "Hungary",
+            "formattedText": "Hungary",
+            "icon": "flag flag-hu",
+            "count": 0
+          },
+          {
+            "id": "191",
+            "text": "Croatia",
+            "formattedText": "Croatia",
+            "icon": "flag flag-hr",
+            "count": 0
+          },
+          {
+            "id": "188",
+            "text": "Costa Rica",
+            "formattedText": "Costa Rica",
+            "icon": "flag flag-cr",
+            "count": 0
+          },
+          {
+            "id": "858",
+            "text": "Uruguay",
+            "formattedText": "Uruguay",
+            "icon": "flag flag-uy",
+            "count": 0
+          },
+          {
+            "id": "268",
+            "text": "Georgia",
+            "formattedText": "Georgia",
+            "icon": "flag flag-ge",
+            "count": 0
+          },
+          {
+            "id": "634",
+            "text": "Qatar",
+            "formattedText": "Qatar",
+            "icon": "flag flag-qa",
+            "count": 0
+          },
+          {
+            "id": "788",
+            "text": "Tunisia",
+            "formattedText": "Tunisia",
+            "icon": "flag flag-tn",
+            "count": 0
+          },
+          {
+            "id": "703",
+            "text": "Slovakia",
+            "formattedText": "Slovakia",
+            "icon": "flag flag-sk",
+            "count": 0
+          },
+          {
+            "id": "48",
+            "text": "Bahrain",
+            "formattedText": "Bahrain",
+            "icon": "flag flag-bh",
+            "count": 0
+          },
+          {
+            "id": "688",
+            "text": "Serbia",
+            "formattedText": "Serbia",
+            "icon": "flag flag-rs",
+            "count": 0
+          },
+          {
+            "id": "414",
+            "text": "Kuwait",
+            "formattedText": "Kuwait",
+            "icon": "flag flag-kw",
+            "count": 0
+          },
+          {
+            "id": "152",
+            "text": "Chile",
+            "formattedText": "Chile",
+            "icon": "flag flag-cl",
+            "count": 0
+          },
+          {
+            "id": "591",
+            "text": "Panama",
+            "formattedText": "Panama",
+            "icon": "flag flag-pa",
+            "count": 0
+          },
+          {
+            "id": "417",
+            "text": "Kyrgyzstan",
+            "formattedText": "Kyrgyzstan",
+            "icon": "flag flag-kg",
+            "count": 0
+          },
+          {
+            "id": "894",
+            "text": "Zambia",
+            "formattedText": "Zambia",
+            "icon": "flag flag-zm",
+            "count": 0
+          },
+          {
+            "id": "384",
+            "text": "Côte d'Ivoire",
+            "formattedText": "Côte d'Ivoire",
+            "icon": "flag flag-ci",
+            "count": 0
+          },
+          {
+            "id": "12",
+            "text": "Algeria",
+            "formattedText": "Algeria",
+            "icon": "flag flag-dz",
+            "count": 0
+          },
+          {
+            "id": "214",
+            "text": "Dominican Republic",
+            "formattedText": "Dominican Republic",
+            "icon": "flag flag-do",
+            "count": 0
+          },
+          {
+            "id": "100",
+            "text": "Bulgaria",
+            "formattedText": "Bulgaria",
+            "icon": "flag flag-bg",
+            "count": 0
+          },
+          {
+            "id": "440",
+            "text": "Lithuania",
+            "formattedText": "Lithuania",
+            "icon": "flag flag-lt",
+            "count": 0
+          },
+          {
+            "id": "112",
+            "text": "Belarus",
+            "formattedText": "Belarus",
+            "icon": "flag flag-by",
+            "count": 0
+          },
+          {
+            "id": "499",
+            "text": "Montenegro",
+            "formattedText": "Montenegro",
+            "icon": "flag flag-me",
+            "count": 0
+          },
+          {
+            "id": "51",
+            "text": "Armenia",
+            "formattedText": "Armenia",
+            "icon": "flag flag-am",
+            "count": 0
+          },
+          {
+            "id": "368",
+            "text": "Iraq",
+            "formattedText": "Iraq",
+            "icon": "flag flag-iq",
+            "count": 0
+          },
+          {
+            "id": "646",
+            "text": "Rwanda",
+            "formattedText": "Rwanda",
+            "icon": "flag flag-rw",
+            "count": 0
+          },
+          {
+            "id": "800",
+            "text": "Uganda",
+            "formattedText": "Uganda",
+            "icon": "flag flag-ug",
+            "count": 0
+          },
+          {
+            "id": "222",
+            "text": "El Salvador",
+            "formattedText": "El Salvador",
+            "icon": "flag flag-sv",
+            "count": 0
+          },
+          {
+            "id": "104",
+            "text": "Myanmar",
+            "formattedText": "Myanmar",
+            "icon": "flag flag-mm",
+            "count": 0
+          },
+          {
+            "id": "218",
+            "text": "Ecuador",
+            "formattedText": "Ecuador",
+            "icon": "flag flag-ec",
+            "count": 0
+          },
+          {
+            "id": "862",
+            "text": "Venezuela",
+            "formattedText": "Venezuela",
+            "icon": "flag flag-ve",
+            "count": 0
+          },
+          {
+            "id": "352",
+            "text": "Iceland",
+            "formattedText": "Iceland",
+            "icon": "flag flag-is",
+            "count": 0
+          },
+          {
+            "id": "807",
+            "text": "Macedonia, the former Yugoslav Republic of",
+            "formattedText": "Macedonia, the former Yugoslav Republic of",
+            "icon": "flag flag-mk",
+            "count": 0
+          },
+          {
+            "id": "233",
+            "text": "Estonia",
+            "formattedText": "Estonia",
+            "icon": "flag flag-ee",
+            "count": 0
+          },
+          {
+            "id": "68",
+            "text": "Bolivia",
+            "formattedText": "Bolivia",
+            "icon": "flag flag-bo",
+            "count": 0
+          },
+          {
+            "id": "70",
+            "text": "Bosnia and Herzegovina",
+            "formattedText": "Bosnia and Herzegovina",
+            "icon": "flag flag-ba",
+            "count": 0
+          },
+          {
+            "id": "498",
+            "text": "Moldova",
+            "formattedText": "Moldova",
+            "icon": "flag flag-md",
+            "count": 0
+          },
+          {
+            "id": "8",
+            "text": "Albania",
+            "formattedText": "Albania",
+            "icon": "flag flag-al",
+            "count": 0
+          },
+          {
+            "id": "705",
+            "text": "Slovenia",
+            "formattedText": "Slovenia",
+            "icon": "flag flag-si",
+            "count": 0
+          },
+          {
+            "id": "780",
+            "text": "Trinidad and Tobago",
+            "formattedText": "Trinidad and Tobago",
+            "icon": "flag flag-tt",
+            "count": 0
+          },
+          {
+            "id": "428",
+            "text": "Latvia",
+            "formattedText": "Latvia",
+            "icon": "flag flag-lv",
+            "count": 0
+          },
+          {
+            "id": "480",
+            "text": "Mauritius",
+            "formattedText": "Mauritius",
+            "icon": "flag flag-mu",
+            "count": 0
+          },
+          {
+            "id": "512",
+            "text": "Oman",
+            "formattedText": "Oman",
+            "icon": "flag flag-om",
+            "count": 0
+          },
+          {
+            "id": "600",
+            "text": "Paraguay",
+            "formattedText": "Paraguay",
+            "icon": "flag flag-py",
+            "count": 0
+          },
+          {
+            "id": "516",
+            "text": "Namibia",
+            "formattedText": "Namibia",
+            "icon": "flag flag-na",
+            "count": 0
+          }
+        ]
+      },
+      "Data": [
+        {
+          "Country": 356,
+          "Share": 0.13252753798748615,
+          "UsersShare": 0.12373679007106056,
+          "ShareList": {
+            "quso.ai": 1
+          },
+          "Change": -0.4218023802695724,
+          "AvgVisitDuration": 162.7303148930813,
+          "PagePerVisit": 5.525420044789752,
+          "BounceRate": 0.3362435196912702,
+          "Rank": 31532
+        },
+        {
+          "Country": 840,
+          "Share": 0.10443037159690409,
+          "UsersShare": 0.10787864206331711,
+          "ShareList": {
+            "quso.ai": 1
+          },
+          "Change": -0.01109831625981006,
+          "AvgVisitDuration": 254.49517058921396,
+          "PagePerVisit": 6.015067338434196,
+          "BounceRate": 0.35659268381407594,
+          "Rank": 93758
+        },
+        {
+          "Country": 586,
+          "Share": 0.05479759506359776,
+          "UsersShare": 0.05041469666187961,
+          "ShareList": {
+            "quso.ai": 1
+          },
+          "Change": -0.291476649833428,
+          "AvgVisitDuration": 524.2572298254051,
+          "PagePerVisit": 8.598861575050393,
+          "BounceRate": 0.130558134920266,
+          "Rank": 11042
+        },
+        {
+          "Country": 360,
+          "Share": 0.052241706808664266,
+          "UsersShare": 0.05871648595613091,
+          "ShareList": {
+            "quso.ai": 1
+          },
+          "Change": -0.3306717233290991,
+          "AvgVisitDuration": 127.22110110867048,
+          "PagePerVisit": 5.647920266920828,
+          "BounceRate": 0.23148574853930307,
+          "Rank": 23636
+        },
+        {
+          "Country": 826,
+          "Share": 0.02947043908814461,
+          "UsersShare": 0.028931369428364793,
+          "ShareList": {
+            "quso.ai": 1
+          },
+          "Change": -0.5139126935228128,
+          "AvgVisitDuration": 214.37648508283115,
+          "PagePerVisit": 4.373200174787126,
+          "BounceRate": 0.4069271930970339,
+          "Rank": 118428
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationAds/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "next.frame.io",
+          "Share": 0.9694587228318126,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=next.frame.io&t=2&s=0&h=651d8e5754368b6252b133143ddfee3571428aa525734b9978a58cb04071e8e9",
+          "HasAdsense": false,
+          "TotalShare": 0.9694587228318126,
+          "SiteOrigins": {
+            "quso.ai": 1
+          }
+        },
+        {
+          "Domain": "desktop.captions.ai",
+          "Share": 0.030541277168187338,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=desktop.captions.ai&t=2&s=0&h=caad0ce634c0107aa21541a450bd80a83b7fe8f6234ac12711f2ac8d295d9bc1",
+          "HasAdsense": false,
+          "TotalShare": 0.030541277168187338,
+          "SiteOrigins": {
+            "quso.ai": 1
+          }
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationReferrals/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "vidyo.ai",
+          "Share": 0.6464083126392784,
+          "Change": -0.15953792658521118,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=0&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "event.demio.com",
+          "Share": 0.20315287119381553,
+          "Change": -0.6667794503746263,
+          "Favicon": "https://site-images.similarcdn.com/image?url=event.demio.com&t=2&s=0&h=85fd82627dc87ab678d3fa07f9869b6b7a8ad2faf3182a94d81ed2892b59a739",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "wellfound.com",
+          "Share": 0.035773083422705895,
+          "Change": -1,
+          "Favicon": "https://site-images.similarcdn.com/image?url=wellfound.com&t=2&s=0&h=d322d1ab5975ca9a2d12cecd7742dabd14062386c88811b6ef4f6d2b27fe5cb0",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "youtube.com",
+          "Share": 0.02966638494010678,
+          "Change": 0.3572689458493942,
+          "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=0&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "instagram.com",
+          "Share": 0.027358160825296886,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=instagram.com&t=2&s=0&h=acbe9ff09f263f0114ce8473b3d3e401bfdc360d5aff845e04182e8d2335ba49",
+          "HasAdsense": false
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesOverview/PieChart?country=999&webSource=Total&keys=quso.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&includeSubDomains=true",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "Organic Search": 570388.4470323515,
+          "Paid Search": 13977.503986044023,
+          "Social": 47464.256855104526,
+          "Mail": 689.8529684551014,
+          "Direct": 557424.1788658712,
+          "Paid Referrals": 5722.983045502671,
+          "Referrals": 124429.63169835632
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Organic&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "opus clip",
+          "Change": -0.48985507246376814,
+          "TotalShare": 0.07302904564315353,
+          "TotalVisits": 1760,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.34,
+          "KwVolume": 1008125
+        },
+        {
+          "SearchTerm": "ai clip maker",
+          "Change": -0.109375,
+          "TotalShare": 0.023651452282157676,
+          "TotalVisits": 570,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 1.25,
+          "KwVolume": 9991
+        },
+        {
+          "SearchTerm": "2short ai",
+          "Change": 0.1276595744680851,
+          "TotalShare": 0.02199170124481328,
+          "TotalVisits": 530,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.15,
+          "KwVolume": 65954
+        },
+        {
+          "SearchTerm": "capcut ai clip maker",
+          "Change": 0.34210526315789475,
+          "TotalShare": 0.02116182572614108,
+          "TotalVisits": 510,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.11,
+          "KwVolume": 9848
+        },
+        {
+          "SearchTerm": "vizard ai",
+          "Change": 4.714285714285714,
+          "TotalShare": 0.016597510373443983,
+          "TotalVisits": 400,
+          "SiteOrigins": {
+            "quso.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "quso.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.21,
+          "KwVolume": 208354
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesSocial/PieChart?country=999&includeSubDomains=true&webSource=Desktop&timeGranularity=Monthly&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&keys=quso.ai",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "Youtube": {
+            "Share": 0.35345778424667634,
+            "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=1&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20"
+          },
+          "Reddit": {
+            "Share": 0.2070444018360014,
+            "Favicon": "https://site-images.similarcdn.com/image?url=reddit.com&t=2&s=1&h=66f2412047e0362ec60d5583d4b186511a8e859446bb112c60d22968facae906"
+          },
+          "Facebook": {
+            "Share": 0.18803630997362944,
+            "Favicon": "https://site-images.similarcdn.com/image?url=facebook.com&t=2&s=1&h=be773d6b77aa3d59b6a671c5c27ad729b1ae77400e89776e2f749cce6b926c4b"
+          },
+          "Tiktok": {
+            "Share": 0.10138464130173257,
+            "Favicon": "https://site-images.similarcdn.com/image?url=tiktok.com&t=2&s=1&h=398f47f8e1724c54f9f760f76988b2f9cf0c4111523f9d3f26e03d62731b0c17"
+          },
+          "Linkedin": {
+            "Share": 0.09590352027230026,
+            "Favicon": "https://site-images.similarcdn.com/image?url=linkedin.com&t=2&s=1&h=64a0e043fc8ff74ac308e3f0e136ae7d1b6544be4e9e704ad7fd062070be48a1"
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferringCategories/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=quso.ai&timeGranularity=Monthly&to=2026%7C02%7C28&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Share": 0.5929415303328563,
+          "Category": "AI_Chatbots_and_Tools"
+        },
+        {
+          "Share": 0.16560254619823148,
+          "Category": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology"
+        },
+        {
+          "Share": 0.05759120449783128,
+          "Category": "Finance/Financial_Planning_and_Management"
+        },
+        {
+          "Share": 0.05705417312031993,
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design"
+        },
+        {
+          "Share": 0.03651273525565883,
+          "Category": "E-commerce_and_Shopping/Coupons_and_Rebates"
+        },
+        {
+          "Share": 0.02834458808391809,
+          "Category": "Unknown"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Rank": 3787,
+        "Favicon": "https://site-images.similarcdn.com/image?url=heygen.com&t=2&s=1&h=da761b4500aacead5d6342124f3d9ea128dae354f2ee9191d230f0a756fe735c"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "getmunch.com",
+        "DomainWithoutSub": "getmunch.com",
+        "Rank": 1601445,
+        "Favicon": "https://site-images.similarcdn.com/image?url=getmunch.com&t=2&s=1&h=ead38b278572f50cf6ed47b22699af3d5586e165234e8fe68cdc7af15410397f"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "munchstudio.com",
+        "DomainWithoutSub": "munchstudio.com",
+        "Rank": 288433,
+        "Favicon": "https://site-images.similarcdn.com/image?url=munchstudio.com&t=2&s=1&h=0a1021dc7b70c1a4b7e0b71fe8ad78d2bdc60238661b5135cdf45a4c6f0e6567"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "later.com",
+        "DomainWithoutSub": "later.com",
+        "Rank": 22262,
+        "Favicon": "https://site-images.similarcdn.com/image?url=later.com&t=2&s=1&h=a579fa82672132e2ea35028927f0f10177b82bf2ade18a19ce09dd5aa3d7bb78"
+      },
+      {
+        "Domain": "wevideo.com",
+        "DomainWithoutSub": "wevideo.com",
+        "Rank": 38711,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wevideo.com&t=2&s=1&h=f8eb1ee5018a12c89e116e3c36fbb91a8f10d1f954a9408e26a6a8ee8b3d9866"
+      },
+      {
+        "Domain": "jasper.ai",
+        "DomainWithoutSub": "jasper.ai",
+        "Rank": 58811,
+        "Favicon": "https://site-images.similarcdn.com/image?url=jasper.ai&t=2&s=1&h=2ba38385e969df3f06863d64140edcfe790847e79e10ffadaea233f7673e9e36"
+      },
+      {
+        "Domain": "simplified.com",
+        "DomainWithoutSub": "simplified.com",
+        "Rank": 80268,
+        "Favicon": "https://site-images.similarcdn.com/image?url=simplified.com&t=2&s=1&h=8edc9e35c59f2c240b1875890e3d217c616bc08d4a92055a65a48b1022882a61"
+      },
+      {
+        "Domain": "copy.ai",
+        "DomainWithoutSub": "copy.ai",
+        "Rank": 84979,
+        "Favicon": "https://site-images.similarcdn.com/image?url=copy.ai&t=2&s=1&h=132d3538bbd2d7431cab0097b4f7f3eff4d341c4fcff1bb14da6e0ee83247849"
+      },
+      {
+        "Domain": "claap.io",
+        "DomainWithoutSub": "claap.io",
+        "Rank": 195276,
+        "Favicon": "https://site-images.similarcdn.com/image?url=claap.io&t=2&s=1&h=2bd0dae67879ef64d7e542a0388267accdb6e4a224feb64cdc030c550dd5f219"
+      },
+      {
+        "Domain": "seo.ai",
+        "DomainWithoutSub": "seo.ai",
+        "Rank": 208916,
+        "Favicon": "https://site-images.similarcdn.com/image?url=seo.ai&t=2&s=1&h=6a6f3f0e2d6b80de18302e3923a57c77b70d0281077979e7e220fe55322ad2ec"
+      },
+      {
+        "Domain": "juma.ai",
+        "DomainWithoutSub": "juma.ai",
+        "Rank": 223379,
+        "Favicon": "https://site-images.similarcdn.com/image?url=juma.ai&t=2&s=1&h=2911f727a50186a45bc1d8e2e37796ea7fa108584da6bd9bcbbc952a13c6bf54"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/breakdown?country=999&key=quso.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.7129303706579943,
+          "visitsShare": 0.6625424660689578,
+          "spendShare": 0.9600456019245771,
+          "category": "E-commerce_and_Shopping~E-commerce_and_Shopping",
+          "rank": 129242,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "trendshops.net",
+          "favicon": "https://site-images.similarcdn.com/image?url=trendshops.net&t=2&s=0&h=4514c51d3b19dad9e1ee5c49583c89f05a97ab600df39ca4b96b2c953f85c6de"
+        },
+        {
+          "impressionsShare": 0.28706962934200575,
+          "visitsShare": 0.3374575339310421,
+          "spendShare": 0.03995439807542278,
+          "category": "E-commerce_and_Shopping~Coupons_and_Rebates",
+          "rank": 3553,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "couponfollow.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=couponfollow.com&t=2&s=0&h=7954d7bfd323bb0173d789e7d0d9039d13e9d7d421c868abcd2bffbb52047b71"
+        }
+      ],
+      "totalCount": 2,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=quso.ai&webSource=Total",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 402285.2280514529
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 536912.3946105626
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 380899.23768426233
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "quso.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=quso.ai%2Copus.pro%2Cvizard.ai%2Cvidyo.ai%2Clivelink.ai&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "quso.ai": false,
+        "opus.pro": false,
+        "vizard.ai": false,
+        "vidyo.ai": false,
+        "livelink.ai": false
+      },
+      "Data": [
+        {
+          "Domain": "quso.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=0&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+          "TotalVisits": 1320096.8603462772,
+          "Change": -0.2905746980184,
+          "ShareOfVisits": 0.05709089508531186
+        },
+        {
+          "Domain": "opus.pro",
+          "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=0&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab",
+          "TotalVisits": 15268938.863069775,
+          "Change": -0.09287052079679146,
+          "ShareOfVisits": 0.6603435042386931
+        },
+        {
+          "Domain": "vizard.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=0&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+          "TotalVisits": 5432922.911468741,
+          "Change": -0.4219995035838359,
+          "ShareOfVisits": 0.23496035879055682
+        },
+        {
+          "Domain": "vidyo.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=0&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056",
+          "TotalVisits": 275967.24926387874,
+          "Change": -0.4063952228549848,
+          "ShareOfVisits": 0.01193489489140473
+        },
+        {
+          "Domain": "livelink.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=0&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145",
+          "TotalVisits": 824795.4950420901,
+          "Change": -0.08081886143208743,
+          "ShareOfVisits": 0.035670346994033444
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=quso.ai%2Copus.pro%2Cvizard.ai%2Cvidyo.ai%2Clivelink.ai&webSource=Total",
+    "body": {
+      "Data": {
+        "quso.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 402285.2280514529
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 536912.3946105626
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 380899.23768426233
+              }
+            ]
+          ]
+        },
+        "opus.pro": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 4886399.646142153
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5444066.242039004
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 4938472.974888611
+              }
+            ]
+          ]
+        },
+        "vizard.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 1512114.4784971792
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2484668.694259733
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1436139.738711828
+              }
+            ]
+          ]
+        },
+        "vidyo.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 99795.79992624733
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 110549.02185549859
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 65622.42748213265
+              }
+            ]
+          ]
+        },
+        "livelink.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 261627.09074313717
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 293442.02742591954
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 269726.37687303335
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "quso.ai": false,
+        "opus.pro": false,
+        "vizard.ai": false,
+        "vidyo.ai": false,
+        "livelink.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

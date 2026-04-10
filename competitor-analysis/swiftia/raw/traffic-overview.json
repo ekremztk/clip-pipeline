@@ -1,0 +1,454 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=swiftia.io&limit=5",
+    "body": [
+      {
+        "Domain": "project-aeon.com",
+        "DomainWithoutSub": "project-aeon.com",
+        "Rank": 2040494,
+        "Favicon": "https://site-images.similarcdn.com/image?url=project-aeon.com&t=2&s=1&h=4dee952e4a1964008a56f038045edc86375adc97456b750ac6ba780a4ec55316"
+      },
+      {
+        "Domain": "viddly.net",
+        "DomainWithoutSub": "viddly.net",
+        "Rank": 212375,
+        "Favicon": "https://site-images.similarcdn.com/image?url=viddly.net&t=2&s=1&h=701365373ee3090e097ca6fc10b30339a8bbde79394e72179713aea1cc3ea14e"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "virlo.ai",
+        "DomainWithoutSub": "virlo.ai",
+        "Rank": 302966,
+        "Favicon": "https://site-images.similarcdn.com/image?url=virlo.ai&t=2&s=1&h=7d073cfc06b79ff97ad5f5f97696f5b8bee6b57919bcbc8f12ff55ed471c7039"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=swiftia.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "swiftia.io": {
+        "mainDomainName": "swiftia",
+        "icon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "image": "https://site-images.similarcdn.com/image?url=swiftia.io&t=0&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=swiftia.io&t=1&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "title": "Use case : Social media Management (SMM) platforms",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Integrate Swiftia’s API into your platform to offer your users an enhanced video editing experience. By leveraging our AI-powered technology, your users can quickly and easily create engaging short…",
+        "globalRanking": 2096315,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 1225787,
+        "categoryRanking": 0,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2024",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 0,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=swiftia.io",
+    "body": {
+      "Data": {
+        "Total": {
+          "swiftia.io": {
+            "Organic Search": 10502.576867560178,
+            "Social": 1231.82608251272,
+            "Email": 13.91239362491708,
+            "Display Ads": 140.9215025031888,
+            "Direct": 9546.360161103103,
+            "Referrals": 1408.8916403538615,
+            "Paid Search": 35.018
+          }
+        },
+        "Desktop": {
+          "swiftia.io": {
+            "Organic Search": 2268.4120000000003,
+            "Social": 544.2940000000001,
+            "Email": 13.682999999999998,
+            "Display Ads": 138.436,
+            "Direct": 5700.354000000001,
+            "Referrals": 795.852,
+            "Paid Search": 35.018
+          }
+        },
+        "MobileWeb": {
+          "swiftia.io": {
+            "Organic Search": 8234.164867560177,
+            "Social": 687.5320825127199,
+            "Email": 0.22939362491708168,
+            "Display Ads": 2.4855025031888003,
+            "Direct": 3846.0061611031015,
+            "Referrals": 613.0396403538615,
+            "Paid Search": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=swiftia.io&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 1231.82608251272,
+              "Email": 13.912393624917081,
+              "Direct": 9546.360161103103,
+              "Display Ads": 140.92150250318883,
+              "Referrals": 1408.8916403538615,
+              "Organic Search": 10502.576867560178,
+              "Paid Search": 35.018
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 291.1518435353849,
+                "Email": 3.4444751867665064,
+                "Direct": 2852.909719993026,
+                "Display Ads": 43.12676045965424,
+                "Referrals": 240.39361029124223,
+                "Organic Search": 1943.1858488933246,
+                "Paid Search": 3.767000000000001
+              },
+              "2026-01-01": {
+                "Social": 410.06428993746033,
+                "Email": 5.003763582311175,
+                "Direct": 2039.7006456337956,
+                "Display Ads": 49.2344340457597,
+                "Referrals": 362.1097940042449,
+                "Organic Search": 4617.498882663194,
+                "Paid Search": 15.958
+              },
+              "2026-02-01": {
+                "Social": 530.6099490398747,
+                "Email": 5.4641548558394,
+                "Direct": 4653.749795476281,
+                "Display Ads": 48.560307997774885,
+                "Referrals": 806.3882360583743,
+                "Organic Search": 3941.8921360036584,
+                "Paid Search": 15.293
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=swiftia.io%2Cproject-aeon.com%2Cviddly.net&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Social": {
+            "Total": {
+              "swiftia.io": 1231.82608251272,
+              "project-aeon.com": 4609.809465033606,
+              "viddly.net": 10946.359806909819
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 291.1518435353849,
+                "project-aeon.com": 822.5589525390858,
+                "viddly.net": 3381.297234507865
+              },
+              "2026-01-01": {
+                "swiftia.io": 410.06428993746033,
+                "project-aeon.com": 1247.9198770789164,
+                "viddly.net": 3599.5650849043823
+              },
+              "2026-02-01": {
+                "swiftia.io": 530.6099490398747,
+                "project-aeon.com": 2539.330635415604,
+                "viddly.net": 3965.4974874975724
+              }
+            }
+          },
+          "Email": {
+            "Total": {
+              "swiftia.io": 13.912393624917081,
+              "project-aeon.com": 23.405960051168957,
+              "viddly.net": 356.6975291087604
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 3.4444751867665064,
+                "project-aeon.com": 6.301085897112525,
+                "viddly.net": 98.05474892993631
+              },
+              "2026-01-01": {
+                "swiftia.io": 5.003763582311175,
+                "project-aeon.com": 11.679719660612063,
+                "viddly.net": 120.48089449473476
+              },
+              "2026-02-01": {
+                "swiftia.io": 5.4641548558394,
+                "project-aeon.com": 5.425154493444372,
+                "viddly.net": 138.16188568408936
+              }
+            }
+          },
+          "Direct": {
+            "Total": {
+              "swiftia.io": 9546.360161103103,
+              "project-aeon.com": 8488.286062074487,
+              "viddly.net": 255678.43056916088
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 2852.909719993026,
+                "project-aeon.com": 3323.0668436233973,
+                "viddly.net": 87196.05345880761
+              },
+              "2026-01-01": {
+                "swiftia.io": 2039.7006456337956,
+                "project-aeon.com": 3665.426626257571,
+                "viddly.net": 80033.00789707733
+              },
+              "2026-02-01": {
+                "swiftia.io": 4653.749795476281,
+                "project-aeon.com": 1499.792592193518,
+                "viddly.net": 88449.36921327593
+              }
+            }
+          },
+          "Display Ads": {
+            "Total": {
+              "swiftia.io": 140.92150250318883,
+              "project-aeon.com": 246.99363068640753,
+              "viddly.net": 2412.7334108524587
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 43.12676045965424,
+                "project-aeon.com": 73.31670695608784,
+                "viddly.net": 748.7134305384161
+              },
+              "2026-01-01": {
+                "swiftia.io": 49.2344340457597,
+                "project-aeon.com": 119.18723124293507,
+                "viddly.net": 817.5442872234117
+              },
+              "2026-02-01": {
+                "swiftia.io": 48.560307997774885,
+                "project-aeon.com": 54.48969248738462,
+                "viddly.net": 846.475693090631
+              }
+            }
+          },
+          "Referrals": {
+            "Total": {
+              "swiftia.io": 1408.8916403538615,
+              "project-aeon.com": 3473.3358670313546,
+              "viddly.net": 21411.841954392352
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 240.39361029124223,
+                "project-aeon.com": 1318.7250106582826,
+                "viddly.net": 6594.55025879163
+              },
+              "2026-01-01": {
+                "swiftia.io": 362.1097940042449,
+                "project-aeon.com": 1492.5622886185884,
+                "viddly.net": 7143.914708099837
+              },
+              "2026-02-01": {
+                "swiftia.io": 806.3882360583743,
+                "project-aeon.com": 662.0485677544837,
+                "viddly.net": 7673.376987500886
+              }
+            }
+          },
+          "Organic Search": {
+            "Total": {
+              "swiftia.io": 10502.576867560178,
+              "project-aeon.com": 9765.250031081598,
+              "viddly.net": 324079.0290781136
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 1943.1858488933246,
+                "project-aeon.com": 2948.3730621587133,
+                "viddly.net": 90063.8871711111
+              },
+              "2026-01-01": {
+                "swiftia.io": 4617.498882663194,
+                "project-aeon.com": 4788.00652574716,
+                "viddly.net": 107926.52448968356
+              },
+              "2026-02-01": {
+                "swiftia.io": 3941.8921360036584,
+                "project-aeon.com": 2028.8704431757255,
+                "viddly.net": 126088.61741731892
+              }
+            }
+          },
+          "Paid Search": {
+            "Total": {
+              "swiftia.io": 35.018,
+              "project-aeon.com": 16239.69504347975,
+              "viddly.net": 266.9905501088268
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "swiftia.io": 3.767000000000001,
+                "project-aeon.com": 4237.570964640453,
+                "viddly.net": 87.80639545629307
+              },
+              "2026-01-01": {
+                "swiftia.io": 15.958,
+                "project-aeon.com": 8580.267258595923,
+                "viddly.net": 78.3768771537903
+              },
+              "2026-02-01": {
+                "swiftia.io": 15.293,
+                "project-aeon.com": 3421.856820243374,
+                "viddly.net": 100.80727749874342
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=swiftia.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "project-aeon.com",
+        "DomainWithoutSub": "project-aeon.com",
+        "Rank": 2040494,
+        "Favicon": "https://site-images.similarcdn.com/image?url=project-aeon.com&t=2&s=1&h=4dee952e4a1964008a56f038045edc86375adc97456b750ac6ba780a4ec55316"
+      },
+      {
+        "Domain": "viddly.net",
+        "DomainWithoutSub": "viddly.net",
+        "Rank": 212375,
+        "Favicon": "https://site-images.similarcdn.com/image?url=viddly.net&t=2&s=1&h=701365373ee3090e097ca6fc10b30339a8bbde79394e72179713aea1cc3ea14e"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "virlo.ai",
+        "DomainWithoutSub": "virlo.ai",
+        "Rank": 302966,
+        "Favicon": "https://site-images.similarcdn.com/image?url=virlo.ai&t=2&s=1&h=7d073cfc06b79ff97ad5f5f97696f5b8bee6b57919bcbc8f12ff55ed471c7039"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "flarecut.com",
+        "DomainWithoutSub": "flarecut.com",
+        "Rank": 2148191,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flarecut.com&t=2&s=1&h=60279774b37478c48dd264a64afb3b4ff9eea3fa11d288ec8f912690d62d7199"
+      },
+      {
+        "Domain": "vidiyo.ai",
+        "DomainWithoutSub": "vidiyo.ai",
+        "Rank": 1556566,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiyo.ai&t=2&s=1&h=a48120529bc037544d8d28135020fff1b942ac67b1b978795a1240c765279342"
+      },
+      {
+        "Domain": "fliki-ai.com",
+        "DomainWithoutSub": "fliki-ai.com",
+        "Rank": 2037942,
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki-ai.com&t=2&s=1&h=6d4bdcc4fd10089fc8210b3852e8da92fdd56c5bfac362f3ebe0817d95a3d71b"
+      },
+      {
+        "Domain": "jupitrr.com",
+        "DomainWithoutSub": "jupitrr.com",
+        "Rank": 603751,
+        "Favicon": "https://site-images.similarcdn.com/image?url=jupitrr.com&t=2&s=1&h=35cb8523f6d68ff4a02f15251f001298600a742b40f7b114716b49ec1efedb2a"
+      },
+      {
+        "Domain": "subscribr.ai",
+        "DomainWithoutSub": "subscribr.ai",
+        "Rank": 243713,
+        "Favicon": "https://site-images.similarcdn.com/image?url=subscribr.ai&t=2&s=1&h=aff9f1fa42f6cc07a8f517b5fd83a0b534b9f5945271d3c07173ac4fc38b9449"
+      },
+      {
+        "Domain": "sendshort.ai",
+        "DomainWithoutSub": "sendshort.ai",
+        "Rank": 189592,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sendshort.ai&t=2&s=1&h=11fbd864e02ac3cbcbbe6baaa0a4aefe619aeb4523abb68896b4580c5302620d"
+      },
+      {
+        "Domain": "clicks.video",
+        "DomainWithoutSub": "clicks.video",
+        "Rank": 2032484,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clicks.video&t=2&s=1&h=f69aba011ad9e9242a8404cf055788e8f06bd798ac58b41926cd1d751087d606"
+      },
+      {
+        "Domain": "magi-1.org",
+        "DomainWithoutSub": "magi-1.org",
+        "Rank": 1871964,
+        "Favicon": "https://site-images.similarcdn.com/image?url=magi-1.org&t=2&s=1&h=59c56152cf4a022ad9e458d9ecede4b305b20541812f86563331834ba6333a24"
+      },
+      {
+        "Domain": "autopilotshorts.com",
+        "DomainWithoutSub": "autopilotshorts.com",
+        "Rank": 1928119,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autopilotshorts.com&t=2&s=1&h=89850149b19a43c1910c98df26b9b543174ab665651f065d0a353139d601183b"
+      },
+      {
+        "Domain": "omagicai.com",
+        "DomainWithoutSub": "omagicai.com",
+        "Rank": 1890434,
+        "Favicon": "https://site-images.similarcdn.com/image?url=omagicai.com&t=2&s=1&h=2cc1b927c005f836539e742f46b1077b98725706c701e41dc48ab6dcf6750f99"
+      },
+      {
+        "Domain": "veo4.dev",
+        "DomainWithoutSub": "veo4.dev",
+        "Rank": 2087036,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veo4.dev&t=2&s=1&h=34957ee6082c6a78e9dcaa2e216d52d155d5906ba2ca114fc98af8ba9463f620"
+      },
+      {
+        "Domain": "cinefai.com",
+        "DomainWithoutSub": "cinefai.com",
+        "Rank": 2275811,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cinefai.com&t=2&s=1&h=0d4b4544453448928f515e913987efa6d0b37804ad4c4735ff064107e7b99c1c"
+      },
+      {
+        "Domain": "addsubtitle.ai",
+        "DomainWithoutSub": "addsubtitle.ai",
+        "Rank": 1463956,
+        "Favicon": "https://site-images.similarcdn.com/image?url=addsubtitle.ai&t=2&s=1&h=82bc053fc2b283e31860c65b2c669eb555a25ee6cd6aad7be3b279d673d34c9a"
+      },
+      {
+        "Domain": "tasy.ai",
+        "DomainWithoutSub": "tasy.ai",
+        "Rank": 2088034,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tasy.ai&t=2&s=1&h=fb9dc345a5f934911e6ef5498dc58015d986a537148995f546c77b92c0005bef"
+      }
+    ]
+  }
+]

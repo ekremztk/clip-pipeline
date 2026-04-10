@@ -1,0 +1,10 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/images/?domains=aliexpress.com%2Camazon.com%2Cebay.com",
+    "body": {
+      "aliexpress.com": "https://site-images.similarcdn.com/image?url=aliexpress.com&t=2&s=1&h=d276f202957fc1992170305299cf0078603f7f931e2158aa3ab6097731f1ed40",
+      "amazon.com": "https://site-images.similarcdn.com/image?url=amazon.com&t=2&s=1&h=43a07f575342a8fbb74cd3ca3ebf33760f2fbfbff603546fb4f7208244147dcc",
+      "ebay.com": "https://site-images.similarcdn.com/image?url=ebay.com&t=2&s=1&h=7f6f9f419ebf2319e686381f48e1ea1bbb2f25fc404930fdfbb3a60985cb6695"
+    }
+  }
+]

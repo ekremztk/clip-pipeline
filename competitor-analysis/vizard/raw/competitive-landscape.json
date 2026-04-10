@@ -1,0 +1,591 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=vizard.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1244117.4954584057,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteCompetitors/SimilarSites/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&orderBy=Affinity+desc&to=2026%7C02%7C28&timeGranularity=Monthly",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 40,
+      "TotalTopLevelCount": 0,
+      "Filters": {
+        "category": [
+          {
+            "id": "Computers_Electronics_and_Technology",
+            "text": "Computers Electronics and Technology",
+            "formattedText": "Computers Electronics and Technology",
+            "icon": "sprite-category Computers_Electronics_and_Technology",
+            "count": 37,
+            "children": [
+              {
+                "id": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+                "text": "Graphics Multimedia and Web Design",
+                "formattedText": "Computers Electronics and Technology > Graphics Multimedia and Web Design",
+                "count": 29
+              },
+              {
+                "id": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+                "text": "Computers Electronics and Technology",
+                "formattedText": "Computers Electronics and Technology > Computers Electronics and Technology",
+                "count": 3
+              },
+              {
+                "id": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+                "text": "Programming and Developer Software",
+                "formattedText": "Computers Electronics and Technology > Programming and Developer Software",
+                "count": 4
+              },
+              {
+                "id": "Computers_Electronics_and_Technology~Email",
+                "text": "Email",
+                "formattedText": "Computers Electronics and Technology > Email",
+                "count": 1
+              }
+            ]
+          },
+          {
+            "id": "Business_and_Consumer_Services",
+            "text": "Business and Consumer Services",
+            "formattedText": "Business and Consumer Services",
+            "icon": "sprite-category Business_and_Consumer_Services",
+            "count": 2,
+            "children": [
+              {
+                "id": "Business_and_Consumer_Services~Business_and_Consumer_Services",
+                "text": "Business and Consumer Services",
+                "formattedText": "Business and Consumer Services > Business and Consumer Services",
+                "count": 1
+              },
+              {
+                "id": "Business_and_Consumer_Services~Business_Services",
+                "text": "Business Services",
+                "formattedText": "Business and Consumer Services > Business Services",
+                "count": 1
+              }
+            ]
+          },
+          {
+            "id": "Games",
+            "text": "Games",
+            "formattedText": "Games",
+            "icon": "sprite-category Games",
+            "count": 1,
+            "children": [
+              {
+                "id": "Games~Video_Games_Consoles_and_Accessories",
+                "text": "Video Games Consoles and Accessories",
+                "formattedText": "Games > Video Games Consoles and Accessories",
+                "count": 1
+              }
+            ]
+          }
+        ]
+      },
+      "Data": [
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 1,
+          "Domain": "veed.io",
+          "Rank": 2762,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=0&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.9239130434782608,
+          "Domain": "kapwing.com",
+          "Rank": 7430,
+          "HasAdsense": true,
+          "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=0&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "Affinity": 0.9021739130434782,
+          "Domain": "opus.pro",
+          "Rank": 8500,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=0&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.8478260869565217,
+          "Domain": "invideo.io",
+          "Rank": 5603,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=0&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "Affinity": 0.8260869565217391,
+          "Domain": "turboscribe.ai",
+          "Rank": 1688,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=0&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Business_and_Consumer_Services",
+          "Affinity": 0.8043478260869564,
+          "Domain": "happyscribe.com",
+          "Rank": 15302,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=0&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.7826086956521738,
+          "Domain": "klap.app",
+          "Rank": 111144,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=0&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.7499999999999999,
+          "Domain": "wisecut.ai",
+          "Rank": 202058,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=wisecut.ai&t=2&s=0&h=d5f07b32c9852989be3eb9a9d9f0dd56d19aeeeab12d043b1463d5ceeb75443b"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.7391304347826088,
+          "Domain": "aivideocut.com",
+          "Rank": 139078,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=0&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.7282608695652174,
+          "Domain": "vmaker.com",
+          "Rank": 82064,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=0&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+        },
+        {
+          "Category": "Games~Video_Games_Consoles_and_Accessories",
+          "Affinity": 0.7065217391304348,
+          "Domain": "restream.io",
+          "Rank": 18545,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=0&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "Affinity": 0.6956521739130435,
+          "Domain": "otter.ai",
+          "Rank": 6056,
+          "HasAdsense": true,
+          "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=0&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.6847826086956521,
+          "Domain": "quickreel.io",
+          "Rank": 534991,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=0&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.6739130434782609,
+          "Domain": "livelink.ai",
+          "Rank": 126204,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=0&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "Affinity": 0.6630434782608695,
+          "Domain": "maestra.ai",
+          "Rank": 32168,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=0&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.6413043478260869,
+          "Domain": "flexclip.com",
+          "Rank": 24613,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=flexclip.com&t=2&s=0&h=af565db4a808d861ee89679b0357a6d0e24f2d180ddb8e02916a94f128571055"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "Affinity": 0.6304347826086956,
+          "Domain": "clideo.com",
+          "Rank": 4293,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=0&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Business_Services",
+          "Affinity": 0.6195652173913042,
+          "Domain": "riverside.com",
+          "Rank": 12099,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=0&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "Affinity": 0.6086956521739131,
+          "Domain": "tactiq.io",
+          "Rank": 13690,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=tactiq.io&t=2&s=0&h=13d64b501c2c95b1abd24fb2885142e162ff76e247d9322f4fef6cd8fc50a6bf"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.5978260869565217,
+          "Domain": "choppity.com",
+          "Rank": 462683,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=choppity.com&t=2&s=0&h=785bdd2a8da721bf721169ede58e7a9bfe7d281ade94ece92eea9f7ae51b5dab"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.5869565217391305,
+          "Domain": "videotranscriber.ai",
+          "Rank": 97269,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=videotranscriber.ai&t=2&s=0&h=8222c91213082c0a1f7c33940ec64ae297cc8bf1c6cef2b925b69513e7fc20b4"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.5760869565217391,
+          "Domain": "autoclipper.live",
+          "Rank": 1295732,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=autoclipper.live&t=2&s=0&h=9c6077ddc7f2929ecf146cd59369d61f63187b29806b45f3c618675e45176f18"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.5652173913043478,
+          "Domain": "tubetranscript.com",
+          "Rank": 96299,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=tubetranscript.com&t=2&s=0&h=98f5e6586d3ffe4d7ed3a915439dd8e0dcbd00a8d96d647ecb05f91128eaa597"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "Affinity": 0.5543478260869565,
+          "Domain": "awesomescreenshot.com",
+          "Rank": 29451,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=awesomescreenshot.com&t=2&s=0&h=3fd5e3a6f59daf0c2c68587c117ae0270bb8b58fd9a7e5482fbef93fd103cf87"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "Affinity": 0.5434782608695652,
+          "Domain": "buzzsprout.com",
+          "Rank": 24969,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=buzzsprout.com&t=2&s=0&h=d628488efcf15c1bfe6a193bd1c08a7a3c907664d84cc14a3320f4f4d3e17933"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.5095108695652174,
+          "Domain": "flixier.com",
+          "Rank": 36732,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=flixier.com&t=2&s=0&h=50713cd5741aea133dbe7ff4a331385175cf47a5248f77982c8c5232a89d484c"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.47554347826086957,
+          "Domain": "videototext.io",
+          "Rank": 379306,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=videototext.io&t=2&s=0&h=3f93951ca1d416f7bb546214b62ecf731752e330a81adf822739018043f70b67"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.44157608695652173,
+          "Domain": "revid.ai",
+          "Rank": 54641,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=0&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.4076086956521739,
+          "Domain": "any2text.com",
+          "Rank": 119666,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=any2text.com&t=2&s=0&h=9afd1203d5d76808a456a3ec985a8b3a9d8d22b057a97d22388c00e3941439ed"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.37364130434782605,
+          "Domain": "transkriptor.com",
+          "Rank": 53214,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=transkriptor.com&t=2&s=0&h=ddbe1ef103a90132df9416e330a261a815ccaf2159147df6afc60a0f4d32453a"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.33967391304347827,
+          "Domain": "short.ai",
+          "Rank": 158007,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=0&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.30570652173913043,
+          "Domain": "canva.com",
+          "Rank": 33,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=0&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.2717391304347826,
+          "Domain": "quso.ai",
+          "Rank": 93435,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=0&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.23777173913043478,
+          "Domain": "steve.ai",
+          "Rank": 96150,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=steve.ai&t=2&s=0&h=5d161648825e39e6d4b96bb1ca7df87b1a1ff8295e9bba8a0d0a29dc93bbbc1a"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.20380434782608695,
+          "Domain": "capcut.com",
+          "Rank": 752,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=capcut.com&t=2&s=0&h=7aa3f747cf8bdf77ef35235070edd5fd1cf4db542f9a8d6e974139d13d13cac8"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.16983695652173914,
+          "Domain": "kome.ai",
+          "Rank": 86849,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=kome.ai&t=2&s=0&h=6efab0ea78d6dca7861379d26341c4ffe2edf3630b13759604745b1b5c872cf1"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.1358695652173913,
+          "Domain": "spikes.studio",
+          "Rank": 285302,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=spikes.studio&t=2&s=0&h=feb33af05011d2c82f749f042e3541f8ec577d81908de0463ef927c93f94dead"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.10190217391304347,
+          "Domain": "pictory.ai",
+          "Rank": 32103,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=0&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.06793478260869565,
+          "Domain": "clipchamp.com",
+          "Rank": 5384,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=clipchamp.com&t=2&s=0&h=d9a809ec1c022d0d425eb80018eb473837adfa826a5f2b539e5403660a0c1a07"
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "Affinity": 0.033967391304347824,
+          "Domain": "youtubetotranscript.com",
+          "Rank": 8966,
+          "HasAdsense": false,
+          "Favicon": "https://site-images.similarcdn.com/image?url=youtubetotranscript.com&t=2&s=0&h=b9ec97642a966315020e6c6ee75c0fa16d0fea1a1a36c835660853504ff05998"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "wisecut.ai",
+        "DomainWithoutSub": "wisecut.ai",
+        "Rank": 202058,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wisecut.ai&t=2&s=1&h=d5f07b32c9852989be3eb9a9d9f0dd56d19aeeeab12d043b1463d5ceeb75443b"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "quickreel.io",
+        "DomainWithoutSub": "quickreel.io",
+        "Rank": 534991,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "flexclip.com",
+        "DomainWithoutSub": "flexclip.com",
+        "Rank": 24613,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flexclip.com&t=2&s=1&h=af565db4a808d861ee89679b0357a6d0e24f2d180ddb8e02916a94f128571055"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "tactiq.io",
+        "DomainWithoutSub": "tactiq.io",
+        "Rank": 13690,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tactiq.io&t=2&s=1&h=13d64b501c2c95b1abd24fb2885142e162ff76e247d9322f4fef6cd8fc50a6bf"
+      },
+      {
+        "Domain": "choppity.com",
+        "DomainWithoutSub": "choppity.com",
+        "Rank": 462683,
+        "Favicon": "https://site-images.similarcdn.com/image?url=choppity.com&t=2&s=1&h=785bdd2a8da721bf721169ede58e7a9bfe7d281ade94ece92eea9f7ae51b5dab"
+      }
+    ]
+  }
+]

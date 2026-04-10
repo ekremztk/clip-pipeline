@@ -1,0 +1,4053 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=vizard.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1244117.4954584057,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferrals?key=vizard.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&ignoreFilterConsistency=false",
+    "body": {
+      "dictionary": {
+        "vizard.ai": {
+          "VolumeTotal": 5432922.9088908555,
+          "Volumes": [
+            [
+              52245.44209206275,
+              null
+            ],
+            [
+              66052.29825782217,
+              null
+            ],
+            [
+              44493.28530287007,
+              null
+            ]
+          ],
+          "Dates": [
+            "2025-12-01",
+            "2026-01-01",
+            "2026-02-01"
+          ],
+          "SearchTotal": 162791.02565275496
+        }
+      },
+      "Categories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Telecommunications",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Finance",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 8,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Marketplace",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Sports",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Community_and_Society/Philanthropy",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Pets_and_Animals/Pet_Food_and_Supplies",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 7,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+          "Count": 1,
+          "Value": 0
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "wisecut.ai",
+        "DomainWithoutSub": "wisecut.ai",
+        "Rank": 202058,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wisecut.ai&t=2&s=1&h=d5f07b32c9852989be3eb9a9d9f0dd56d19aeeeab12d043b1463d5ceeb75443b"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "quickreel.io",
+        "DomainWithoutSub": "quickreel.io",
+        "Rank": 534991,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "flexclip.com",
+        "DomainWithoutSub": "flexclip.com",
+        "Rank": 24613,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flexclip.com&t=2&s=1&h=af565db4a808d861ee89679b0357a6d0e24f2d180ddb8e02916a94f128571055"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "tactiq.io",
+        "DomainWithoutSub": "tactiq.io",
+        "Rank": 13690,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tactiq.io&t=2&s=1&h=13d64b501c2c95b1abd24fb2885142e162ff76e247d9322f4fef6cd8fc50a6bf"
+      },
+      {
+        "Domain": "choppity.com",
+        "DomainWithoutSub": "choppity.com",
+        "Rank": 462683,
+        "Favicon": "https://site-images.similarcdn.com/image?url=choppity.com&t=2&s=1&h=785bdd2a8da721bf721169ede58e7a9bfe7d281ade94ece92eea9f7ae51b5dab"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/websiteanalysis/GetTrafficSourcesTotalReferralsTable?key=vizard.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&selectedTab=incomingTraffic&orderBy=TotalShare+desc&ignoreFilterConsistency=false",
+    "body": {
+      "TotalShare": 0.9999999999999999,
+      "TotalVisits": 95601.70624361139,
+      "TotalVisitsGlobalList": {
+        "vizard.ai": 1
+      },
+      "TopCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 0,
+          "Value": 0.7379632142369895
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 0,
+          "Value": 0.0746949484974262
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 0,
+          "Value": 0.0491674234974413
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 0,
+          "Value": 0.037765005575144464
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 0,
+          "Value": 0.01694871436809928
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 0,
+          "Value": 0.014969873454598078
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 0,
+          "Value": 0.013938453544037997
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Marketplace",
+          "Count": 0,
+          "Value": 0.011531944485764375
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 0,
+          "Value": 0.010537777623847406
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Telecommunications",
+          "Count": 0,
+          "Value": 0.007320759502267103
+        }
+      ],
+      "Categories": {
+        "vizard.ai": [
+          {
+            "Name": "AI_Chatbots_and_Tools",
+            "Count": 5,
+            "Value": 0.7379632142369895
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+            "Count": 1,
+            "Value": 0.007000277706497287
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+            "Count": 10,
+            "Value": 0.0746949484974262
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+            "Count": 6,
+            "Value": 0.0491674234974413
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Telecommunications",
+            "Count": 1,
+            "Value": 0.007320759502267103
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Search_Engines",
+            "Count": 4,
+            "Value": 0.01694871436809928
+          },
+          {
+            "Name": "Finance/Finance",
+            "Count": 1,
+            "Value": 0.004433091814138631
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+            "Count": 3,
+            "Value": 0.037765005575144464
+          },
+          {
+            "Name": "Science_and_Education/Education",
+            "Count": 4,
+            "Value": 0.010537777623847406
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+            "Count": 1,
+            "Value": 0.0013054300220166854
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+            "Count": 8,
+            "Value": 0.014969873454598078
+          },
+          {
+            "Name": "E-commerce_and_Shopping/Marketplace",
+            "Count": 2,
+            "Value": 0.011531944485764375
+          },
+          {
+            "Name": "Computers_Electronics_and_Technology/Email",
+            "Count": 4,
+            "Value": 0.013938453544037997
+          },
+          {
+            "Name": "Sports/Sports",
+            "Count": 1,
+            "Value": 0.0028879706969985653
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Business_Services",
+            "Count": 1,
+            "Value": 0.0021617371844050272
+          },
+          {
+            "Name": "Community_and_Society/Philanthropy",
+            "Count": 1,
+            "Value": 0.0024938414480443834
+          },
+          {
+            "Name": "Pets_and_Animals/Pet_Food_and_Supplies",
+            "Count": 1,
+            "Value": 0.00021728691689943725
+          },
+          {
+            "Name": "Unknown",
+            "Count": 7,
+            "Value": 0.004380957374680624
+          },
+          {
+            "Name": "Business_and_Consumer_Services/Online_Marketing",
+            "Count": 1,
+            "Value": 0.00011440172387855125
+          },
+          {
+            "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+            "Count": 1,
+            "Value": 0.0001668903268247495
+          }
+        ]
+      },
+      "AllCategories": [
+        {
+          "Name": "AI_Chatbots_and_Tools",
+          "Count": 5,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Advertising_Networks",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Count": 10,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology",
+          "Count": 6,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Telecommunications",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Search_Engines",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Finance/Finance",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names",
+          "Count": 3,
+          "Value": 0
+        },
+        {
+          "Name": "Science_and_Education/Education",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Social_Networks_and_Online_Communities",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+          "Count": 8,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Marketplace",
+          "Count": 2,
+          "Value": 0
+        },
+        {
+          "Name": "Computers_Electronics_and_Technology/Email",
+          "Count": 4,
+          "Value": 0
+        },
+        {
+          "Name": "Sports/Sports",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Business_Services",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Community_and_Society/Philanthropy",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Pets_and_Animals/Pet_Food_and_Supplies",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "Unknown",
+          "Count": 7,
+          "Value": 0
+        },
+        {
+          "Name": "Business_and_Consumer_Services/Online_Marketing",
+          "Count": 1,
+          "Value": 0
+        },
+        {
+          "Name": "E-commerce_and_Shopping/Coupons_and_Rebates",
+          "Count": 1,
+          "Value": 0
+        }
+      ],
+      "Topics": [
+        {
+          "Name": "internet",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "russian",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "search",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "search engine",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "yandex",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "поиск",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "поиск людей",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "поисковики",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "почта",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "яндекс",
+          "Value": 0.048136988240410995
+        },
+        {
+          "Name": "shop",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "shops",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "аксессуары",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "интернет",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "интернет магазин",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "интернет магазины",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "магазин",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "магазины бытовой техники",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "магазины электроники",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "электроника",
+          "Value": 0.03842849802891453
+        },
+        {
+          "Name": "mail",
+          "Value": 0.015212108611240649
+        },
+        {
+          "Name": "temp",
+          "Value": 0.015212108611240649
+        },
+        {
+          "Name": "can",
+          "Value": 0.009857902604447027
+        },
+        {
+          "Name": "mood",
+          "Value": 0.009440463544132369
+        },
+        {
+          "Name": "moodle",
+          "Value": 0.009440463544132369
+        },
+        {
+          "Name": "email",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "food",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "internships",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "local",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "marketplace",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "mobile",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "password",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "shopping",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "sign",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "stores",
+          "Value": 0.0051480779996038615
+        },
+        {
+          "Name": "business",
+          "Value": 0.003872008824199864
+        },
+        {
+          "Name": "e-commerce",
+          "Value": 0.003872008824199864
+        },
+        {
+          "Name": "news and media",
+          "Value": 0.003872008824199864
+        },
+        {
+          "Name": "newsletters",
+          "Value": 0.003872008824199864
+        },
+        {
+          "Name": "work",
+          "Value": 0.0022731970507229174
+        },
+        {
+          "Name": "paper",
+          "Value": 0.002160553029502585
+        },
+        {
+          "Name": "bulk",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "http",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "links",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "multi",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "multiple",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "open",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "opener",
+          "Value": 0.00047244062731097543
+        },
+        {
+          "Name": "url",
+          "Value": 0.00047244062731097543
+        }
+      ],
+      "TotalCount": 58,
+      "TotalUnGroupedCount": 63,
+      "Records": [
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.5295173834544007,
+          "NewChange": false,
+          "Share": 0.6065006040960389,
+          "FilteredShare": 0.6065006040960389,
+          "TotalVisits": 57982.49258936236,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Rank": 6,
+          "TotalShare": 0.6065006040960389,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.6577422583273271
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.6422297060950111
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.4763452876117499
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 22552.46198501889
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 24094.151270944174
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 11335.87933339929
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.04051686682952292,
+          "NewChange": false,
+          "Share": 0.08659716004123182,
+          "FilteredShare": 0.0865971600412318,
+          "TotalVisits": 8278.836255792845,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Rank": 19,
+          "TotalShare": 0.08659716004123182,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007011940011432498
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.10934716945198718
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.16539896658160805
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 240.42321828494602
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 4102.312952549691
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 3936.100084958208
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -0.1926860891753942,
+          "NewChange": false,
+          "Share": 0.047653852282650566,
+          "FilteredShare": 0.04765385228265056,
+          "TotalVisits": 4555.789587302409,
+          "Domain": "toolify.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolify.ai&t=2&s=0&h=a274658d0d5c006c07c78f798989130b0de2c0ecebc5c7d1ba530bfef8bdcc7c",
+          "Rank": 30139,
+          "TotalShare": 0.047653852282650566,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.04012973986113277
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.04689748495488467
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.059687019165527856
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1375.9560393586664
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1759.425149609406
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1420.4083983343367
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -0.8638460111746581,
+          "NewChange": false,
+          "Share": 0.03757750138494228,
+          "FilteredShare": 0.03757750138494228,
+          "TotalVisits": 3592.4732487721517,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Rank": 264,
+          "TotalShare": 0.03757750138494228,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.07752625246548184
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.021918827441600976
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.004704739573393732
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 2658.196032614733
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 822.3156590977234
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 111.9615570596951
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Web_Hosting_and_Domain_Names",
+          "SourceType": "ST",
+          "Change": -0.22179186193145226,
+          "NewChange": false,
+          "Share": 0.03262770186689794,
+          "FilteredShare": 0.03262770186689793,
+          "TotalVisits": 3119.2639692833072,
+          "Domain": "timeweb.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=timeweb.com&t=2&s=0&h=ac8bf43d99354c29924573f189b597f729151d6dfea8694f4da969c51ee65ace",
+          "Rank": 25089,
+          "TotalShare": 0.03262770186689794,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.018258011600035828
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0373731811498875
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.045850464071493575
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 626.0250232043429
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1402.1074882646008
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1091.131457814363
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Finance",
+          "SourceType": "ST",
+          "Change": 3.4242584396097073,
+          "NewChange": false,
+          "Share": 0.024666334017262277,
+          "FilteredShare": 0.024666334017262273,
+          "TotalVisits": 2358.143618825107,
+          "Domain": "stripe.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=stripe.com&t=2&s=0&h=d68993ccefeee1fe61031cd46586b3158ad13585abae80195cc41b500863c253",
+          "Rank": 351,
+          "TotalShare": 0.024666334017262277,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.023018609063776726
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007709576490749916
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.05377233694804004
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 789.2549084180803
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 289.235612180734
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1279.6530982262927
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "Children": [
+            {
+              "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+              "Change": 3.8229652815026034,
+              "NewChange": false,
+              "Share": 0.02149452219519528,
+              "FilteredShare": 0.021494522195195275,
+              "TotalVisits": 2054.912996751844,
+              "Domain": "checkout.stripe.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=checkout.stripe.com&t=2&s=0&h=b8cd94e95509332f54fbddaf07aa6d65829831f32a05bfba2898322ba16c3593",
+              "Rank": -1,
+              "TotalShare": 0.02149452219519528,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+              "Change": 2.21860672036903,
+              "NewChange": false,
+              "Share": 0.003171811822066999,
+              "FilteredShare": 0.0031718118220669987,
+              "TotalVisits": 303.230622073263,
+              "Domain": "billing.stripe.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=billing.stripe.com&t=2&s=0&h=642abb38d59887c626d10d0a6c10def921c0c10c6cb1b268e406894a4d79049a",
+              "Rank": -1,
+              "TotalShare": 0.003171811822066999,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 1.5556954391765765,
+          "NewChange": false,
+          "Share": 0.017717418615991725,
+          "FilteredShare": 0.01771741861599172,
+          "TotalVisits": 1693.8154499211325,
+          "Domain": "zeemo.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=zeemo.ai&t=2&s=0&h=519cab04d33fc401f0d7ec94f1f6df27a11e8f9aacacf69ae3f769e512ed6b00",
+          "Rank": 87656,
+          "TotalShare": 0.017717418615991725,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.03552379501028686
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0035666986937086566
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.014370220176463224
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 1218.028834836402
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 133.8097211146162
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 341.97689397011425
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 1.240917449147787,
+          "NewChange": false,
+          "Share": 0.01405384104579449,
+          "FilteredShare": 0.014053841045794489,
+          "TotalVisits": 1343.571183254453,
+          "Domain": "aixploria.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aixploria.com&t=2&s=0&h=bfab7f4b2d02e37c654c3e731f5f1fe2150d2c5888e66d7c93b2d58e8ba5dbd7",
+          "Rank": 33043,
+          "TotalShare": 0.01405384104579449,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.018798164876086838
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.005749152643055953
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.020310358980739712
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 644.5456307371518
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 215.68755251730124
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 483.338
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "Change": 1.4147333989924742,
+          "NewChange": false,
+          "Share": 0.01165639472703459,
+          "FilteredShare": 0.011656394727034588,
+          "TotalVisits": 1114.3712245535414,
+          "Domain": "yandex.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=yandex.ru&t=2&s=0&h=f0674e5e56f12160a4f31738b3aecd42e2ebffde994db0c5ebdd214ef6dde60e",
+          "Rank": 11,
+          "TotalShare": 0.01165639472703459,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.008698649741684276
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.03311379338590978
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 326.3420871691885
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 788.0291373843529
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "E-commerce_and_Shopping~Marketplace",
+          "SourceType": "ST",
+          "Change": -0.7339372304812503,
+          "NewChange": false,
+          "Share": 0.009305479178609159,
+          "FilteredShare": 0.009305479178609157,
+          "TotalVisits": 889.6196868894349,
+          "Domain": "eldorado.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=eldorado.ru&t=2&s=0&h=27ce9107d628d0f57b6dfaa9b8e6b71bc81bbfe9d83e87bdd2f7059ea04fbd9a",
+          "Rank": 8956,
+          "TotalShare": 0.009305479178609159,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.010167212788626468
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.011390122004198344
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.004777496583337623
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 348.61022992837223
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 427.31645696106267
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 113.693
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "SourceType": "ST",
+          "Change": 1.823495710213845,
+          "NewChange": false,
+          "Share": 0.009089067252337841,
+          "FilteredShare": 0.00908906725233784,
+          "TotalVisits": 868.9303374864303,
+          "Domain": "feishu.cn",
+          "Favicon": "https://site-images.similarcdn.com/image?url=feishu.cn&t=2&s=0&h=015eb0e457b25ceabc3c0b89917147761faf11825abc0200d58f15b0136803e5",
+          "Rank": 772,
+          "TotalShare": 0.009089067252337841,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.017556894481023162
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0018609724362653717
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.008283520942187986
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 601.9853374864302
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 69.817
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 197.128
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "Children": [
+            {
+              "Category": "Science_and_Education~Education",
+              "Change": 1.823495710213845,
+              "NewChange": false,
+              "Share": 0.007367692771143082,
+              "FilteredShare": 0.007367692771143081,
+              "TotalVisits": 704.364,
+              "Domain": "acnr74glhdjv.feishu.cn",
+              "Favicon": "https://site-images.similarcdn.com/image?url=acnr74glhdjv.feishu.cn&t=2&s=0&h=da8d1ed5384648d5d74f1e6773430d6d6a85299406e1512be4164b2ed7d56429",
+              "Rank": -1,
+              "TotalShare": 0.007367692771143082,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+              "NewChange": false,
+              "Share": 0.0013054300220166856,
+              "FilteredShare": 0.0013054300220166854,
+              "TotalVisits": 124.8013374864303,
+              "Domain": "security.feishu.cn",
+              "Favicon": "https://site-images.similarcdn.com/image?url=security.feishu.cn&t=2&s=0&h=6639e57c0186b48f007699b10f0ced32a57ff84bd18d043162d830427a52bdcd",
+              "Rank": -1,
+              "TotalShare": 0.0013054300220166856,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "NewChange": false,
+              "Share": 0.0004159444591780736,
+              "FilteredShare": 0.00041594445917807356,
+              "TotalVisits": 39.765,
+              "Domain": "ai.feishu.cn",
+              "Favicon": "https://site-images.similarcdn.com/image?url=ai.feishu.cn&t=2&s=0&h=6286601b04ba3632c74c43b216ca3287a454e3252d7d57b778b0035cdbb6b4ed",
+              "Rank": -1,
+              "TotalShare": 0.0004159444591780736,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Telecommunications",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.007320759502267105,
+          "FilteredShare": 0.007320759502267103,
+          "TotalVisits": 699.8770994158664,
+          "Domain": "gpbmobile.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gpbmobile.ru&t=2&s=0&h=96e0da6bf18b7c0a1a39f5aa2836b58a3b46f223d987df375d0f0138432aa368",
+          "Rank": 166410,
+          "TotalShare": 0.007320759502267105,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.020411906435189392
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 699.8770994158664
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.007094716471604036,
+          "FilteredShare": 0.0070947164716040345,
+          "TotalVisits": 678.267,
+          "Domain": "force.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=force.com&t=2&s=0&h=d410a930728d6d466c397b9e97796d0a8e782c022bf2d286ef217da21ed0e695",
+          "Rank": 151,
+          "TotalShare": 0.007094716471604036,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007564376826990773
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.011165834617592232
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 259.365
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 418.902
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "Children": [
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "Change": -1,
+              "NewChange": false,
+              "Share": 0.0043817418795074415,
+              "FilteredShare": 0.004381741879507441,
+              "TotalVisits": 418.902,
+              "Domain": "paddle-alpaca.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=paddle-alpaca.lightning.force.com&t=2&s=0&h=548773ddd63bd25e059bbdac01193ab1cb0215b7800e328923637146b95ddcf9",
+              "Rank": -1,
+              "TotalShare": 0.0043817418795074415,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "NewChange": false,
+              "Share": 0.002495687675197157,
+              "FilteredShare": 0.0024956876751971568,
+              "TotalVisits": 238.592,
+              "Domain": "webflow.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=webflow.lightning.force.com&t=2&s=0&h=b0a888d7bb25d31c351e7a6b7690306631d3ea2efce53532c4d67f584ad1350c",
+              "Rank": -1,
+              "TotalShare": 0.002495687675197157,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            },
+            {
+              "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+              "NewChange": false,
+              "Share": 0.00021728691689943728,
+              "FilteredShare": 0.00021728691689943725,
+              "TotalVisits": 20.773,
+              "Domain": "intercom.lightning.force.com",
+              "Favicon": "https://site-images.similarcdn.com/image?url=intercom.lightning.force.com&t=2&s=0&h=fce203ea06f0c73aca5eb6b2accecb30d36474d5aece1cb22bf3bb27f9064017",
+              "Rank": -1,
+              "TotalShare": 0.00021728691689943728,
+              "SiteOrigins": {
+                "vizard.ai": 1
+              },
+              "HasAdsense": false
+            }
+          ],
+          "HasAdsense": false,
+          "EngagementScore": 2
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Advertising_Networks",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.007000277706497289,
+          "FilteredShare": 0.007000277706497287,
+          "TotalVisits": 669.2384929202553,
+          "Domain": "clubpromptturbo.lovable.app",
+          "Favicon": "https://site-images.similarcdn.com/image?url=clubpromptturbo.lovable.app&t=2&s=0&h=7b22049fc9e9133a4fbff58913f97448f0c9caebb23b106780e3dc98acc302fd",
+          "Rank": -1,
+          "TotalShare": 0.007000277706497289,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.019518331878149355
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 669.2384929202553
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.006350339925958586,
+          "FilteredShare": 0.006350339925958584,
+          "TotalVisits": 607.1033321485695,
+          "Domain": "claude.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=claude.ai&t=2&s=0&h=a3b3778e02952b653132fb6d019ed0361cff7850429377787fbdc4c86ce1565e",
+          "Rank": 125,
+          "TotalShare": 0.006350339925958586,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.02551110530175716
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 607.1033321485695
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.004477105334132773,
+          "FilteredShare": 0.004477105334132772,
+          "TotalVisits": 428.0189089754669,
+          "Domain": "smailpro.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=smailpro.com&t=2&s=0&h=da974527a6bb71afb06b523e3c87c133eec4067e02efb25770669ef6f5c8dbf5",
+          "Rank": 53380,
+          "TotalShare": 0.004477105334132773,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.01140884586567342
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 428.0189089754669
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Finance~Finance",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.004433091814138632,
+          "FilteredShare": 0.004433091814138631,
+          "TotalVisits": 423.8111413662397,
+          "Domain": "trustpilot.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=trustpilot.com&t=2&s=0&h=6b28e6965b15cc311b02f6082b1ec068adc340d193fe3e170c28f024352afaec",
+          "Rank": 601,
+          "TotalShare": 0.004433091814138632,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.008167352116442898
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0038322302774516344
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 280.0396291896414
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 143.77151217659832
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Web_Hosting_and_Domain_Names",
+          "SourceType": "ST",
+          "Change": -0.6287650572911566,
+          "NewChange": false,
+          "Share": 0.004347893111246401,
+          "FilteredShare": 0.004347893111246401,
+          "TotalVisits": 415.666,
+          "Domain": "affiliate.watch",
+          "Favicon": "https://site-images.similarcdn.com/image?url=affiliate.watch&t=2&s=0&h=bcf0f943b77da4587a2b0600a396fd4dd2395ff0467df9ee8feba8880915b54e",
+          "Rank": 452204,
+          "TotalShare": 0.004347893111246401,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.001913923100242679
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0068043562265299685
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.003982206632889945
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 65.624
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 255.275
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 94.767
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 3
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.004299933716167024,
+          "FilteredShare": 0.004299933716167023,
+          "TotalVisits": 411.081,
+          "Domain": "axido-my.sharepoint.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=axido-my.sharepoint.com&t=2&s=0&h=fedfd36fe49cdd8391d0669f8facb4bb1511b9925f22ca50ea531f72dfd795c8",
+          "Rank": -1,
+          "TotalShare": 0.004299933716167024,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.011989171979319469
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 411.081
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -0.08313049512933167,
+          "NewChange": false,
+          "Share": 0.003929291795721509,
+          "FilteredShare": 0.003929291795721509,
+          "TotalVisits": 375.647,
+          "Domain": "moge.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=moge.ai&t=2&s=0&h=92d5d3da58cf4ad766f3cc47419bc738e30e5ff26effa544bd2ce5434d53dd2d",
+          "Rank": 97965,
+          "TotalShare": 0.003929291795721509,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.005223554540620317
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.007550254027081152
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 195.969
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 179.678
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 4
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0036836193763839227,
+          "FilteredShare": 0.0036836193763839222,
+          "TotalVisits": 352.1602975343307,
+          "Domain": "temp-mail.org",
+          "Favicon": "https://site-images.similarcdn.com/image?url=temp-mail.org&t=2&s=0&h=886d4218539c89b27036efbfbd572d071841928549faccc366341937003a473e",
+          "Rank": 2688,
+          "TotalShare": 0.0036836193763839227,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.009386834250374575
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 352.1602975343307
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": true,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 1.4796953445463312,
+          "NewChange": false,
+          "Share": 0.003349752729844044,
+          "FilteredShare": 0.0033497527298440434,
+          "TotalVisits": 320.2420764672856,
+          "Domain": "quso.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=0&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+          "Rank": 93435,
+          "TotalShare": 0.003349752729844044,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.002453103816539998
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009589636746393165
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 92.03164207153814
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 228.21043439574743
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.003134245655750612,
+          "FilteredShare": 0.0031342456557506117,
+          "TotalVisits": 299.63923247638513,
+          "Domain": "kapwing.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=0&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a",
+          "Rank": 7430,
+          "TotalShare": 0.003134245655750612,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.01259114817438046
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 299.63923247638513
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": 14.839047320589156,
+          "NewChange": false,
+          "Share": 0.003133061236760259,
+          "FilteredShare": 0.0031330612367602585,
+          "TotalVisits": 299.526,
+          "Domain": "affitor.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=affitor.com&t=2&s=0&h=17452538e3d5e6a24a9c6c8c7aec0392d35811c900dbddd40456a1492d1ae156",
+          "Rank": 2537186,
+          "TotalShare": 0.003133061236760259,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0009000023307081074
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0004252805938469715
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.010619217687706519
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 30.859
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 15.955
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 252.712
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -0.9344115937214518,
+          "NewChange": false,
+          "Share": 0.0031001538742913984,
+          "FilteredShare": 0.003100153874291398,
+          "TotalVisits": 296.38,
+          "Domain": "vizard-corp.getrewardful.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard-corp.getrewardful.com&t=2&s=0&h=d7861e2b1d588bb20d18cf63230ed93acd408b5f060ebfdf5d1584dca9836586",
+          "Rank": -1,
+          "TotalShare": 0.0031001538742913984,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0011597457040282539
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.006419058139155605
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0006637221159949843
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 39.765
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 240.82
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 15.795
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Sports~Sports",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0028879706969985658,
+          "FilteredShare": 0.0028879706969985653,
+          "TotalVisits": 276.0949262146145,
+          "Domain": "accounts.animaker.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=accounts.animaker.com&t=2&s=0&h=ca8673bdcbf92bd5d62f7153195474d313fe583a2a968112ce34580cc32fef3d",
+          "Rank": -1,
+          "TotalShare": 0.0028879706969985658,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.007359311449619995
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 276.0949262146145
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0027786615753012623,
+          "FilteredShare": 0.002778661575301262,
+          "TotalVisits": 265.6447876723617,
+          "Domain": "techleez.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=techleez.com&t=2&s=0&h=fd2519c6b16088b78ff6abdd83fd8af7b900b851cb30f8ee59fd12b21df3e5e2",
+          "Rank": 909749,
+          "TotalShare": 0.0027786615753012623,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.007747526752182048
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 265.6447876723617
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Community_and_Society~Philanthropy",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.002493841448044384,
+          "FilteredShare": 0.0024938414480443834,
+          "TotalVisits": 238.4154975340816,
+          "Domain": "tatrck.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tatrck.com&t=2&s=0&h=ec183ccc430927771886dec2896d6a86702eb14e91601f23b7ee8071441eedc1",
+          "Rank": 5251,
+          "TotalShare": 0.002493841448044384,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.010018463976531661
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 238.4154975340816
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false,
+          "EngagementScore": 5
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.002387095830844522,
+          "FilteredShare": 0.0023870958308445218,
+          "TotalVisits": 228.21043439574743,
+          "Domain": "canva.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=0&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65",
+          "Rank": 33,
+          "TotalShare": 0.002387095830844522,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.009589636746393165
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 228.21043439574743
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Education",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0022860127627221754,
+          "FilteredShare": 0.0022860127627221754,
+          "TotalVisits": 218.5467206109119,
+          "Domain": "moodle.umk.pl",
+          "Favicon": "https://site-images.similarcdn.com/image?url=moodle.umk.pl&t=2&s=0&h=c1816d10927ced84474493ff2cb542cafc20a2f98f9feb693ae39d0ab423e937",
+          "Rank": -1,
+          "TotalShare": 0.0022860127627221754,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00582536378092866
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 218.5467206109119
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "E-commerce_and_Shopping~Marketplace",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0022264653071552196,
+          "FilteredShare": 0.0022264653071552196,
+          "TotalVisits": 212.8538822562453,
+          "Domain": "shopee.co.id",
+          "Favicon": "https://site-images.similarcdn.com/image?url=shopee.co.id&t=2&s=0&h=b29b3e18f92ec1d83e332dcfbd16f17fc3f3c3b8d63b4f23a014f8f0ac6b983b",
+          "Rank": 184,
+          "TotalShare": 0.0022264653071552196,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.005673621150020016
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 212.8538822562453
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Business_Services",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0021617371844050277,
+          "FilteredShare": 0.0021617371844050272,
+          "TotalVisits": 206.665763279381,
+          "Domain": "ahrefs.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=ahrefs.com&t=2&s=0&h=f71d08d989e923807032141cd53efbd11355d60dcb6062cf80af8c3c2f55f611",
+          "Rank": 5916,
+          "TotalShare": 0.0021617371844050277,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00550867681198952
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 206.665763279381
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0019374235803702245,
+          "FilteredShare": 0.0019374235803702243,
+          "TotalVisits": 185.221,
+          "Domain": "clubneurolife.getcourse.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=clubneurolife.getcourse.ru&t=2&s=0&h=f2d512fba1c15ce05747ce92ea3f8c809b24f01de316c8666b4b88f1abce4392",
+          "Rank": -1,
+          "TotalShare": 0.0019374235803702245,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.004937066554241924
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 185.221
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0018794434436363112,
+          "FilteredShare": 0.0018794434436363108,
+          "TotalVisits": 179.678,
+          "Domain": "dgrai.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=dgrai.com&t=2&s=0&h=f2f7d1a950e8519e0376f9978d30a34b95aa97575716e0b4af7aea6d4889dab8",
+          "Rank": 1154450,
+          "TotalShare": 0.0018794434436363112,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.007550254027081152
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 179.678
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00183731030440409,
+          "FilteredShare": 0.0018373103044040896,
+          "TotalVisits": 175.65,
+          "Domain": "toolkitly.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolkitly.com&t=2&s=0&h=b446599cd52a02f31285c261849a96f17cd418eac5a964b431af979cde4818f0",
+          "Rank": 3277687,
+          "TotalShare": 0.00183731030440409,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.004681951507942372
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 175.65
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0014928327446772042,
+          "FilteredShare": 0.001492832744677204,
+          "TotalVisits": 142.71735752747418,
+          "Domain": "beacons.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=beacons.ai&t=2&s=0&h=0e8ea333ae0481778218a49544b8f1b3deed00366ac276c12870bc21dd0845af",
+          "Rank": 2397,
+          "TotalShare": 0.0014928327446772042,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.005997129884605753
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 142.71735752747418
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Email",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0014777951173542796,
+          "FilteredShare": 0.0014777951173542794,
+          "TotalVisits": 141.27973469754704,
+          "Domain": "zenno.club",
+          "Favicon": "https://site-images.similarcdn.com/image?url=zenno.club&t=2&s=0&h=466dd3344edd8adfddab06696c123c75390d34944e2608908f79289dbad24942",
+          "Rank": 258911,
+          "TotalShare": 0.0014777951173542796,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0022601329221750145
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.002680311185105418
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 77.49473469754705
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 63.785
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0013487206982628144,
+          "FilteredShare": 0.0013487206982628142,
+          "TotalVisits": 128.94,
+          "Domain": "promo-discount-code.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=promo-discount-code.com&t=2&s=0&h=75239e288eeba15843259f7e5dd500c26a472e64662600fe369337d0094c3a64",
+          "Rank": 4993224,
+          "TotalShare": 0.0013487206982628144,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0034368962563853652
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 128.94
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0012466095500043872,
+          "FilteredShare": 0.001246609550004387,
+          "TotalVisits": 119.178,
+          "Domain": "taap.it",
+          "Favicon": "https://site-images.similarcdn.com/image?url=taap.it&t=2&s=0&h=94fb46cffcfd0634c5418deae4ab0ee16276f0327aac810b3dd78e06f4a2c0f2",
+          "Rank": 76082,
+          "TotalShare": 0.0012466095500043872,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0034758248086176097
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 119.178
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "AI_Chatbots_and_Tools",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00093760878881793,
+          "FilteredShare": 0.0009376087888179299,
+          "TotalVisits": 89.637,
+          "Domain": "grok.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=grok.com&t=2&s=0&h=5f2be8fd5c0911d0646a313793511a5a9acc4816f25a1b301774b501e7aa7c94",
+          "Rank": 53,
+          "TotalShare": 0.00093760878881793,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0023892746217900962
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 89.637
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0008610666874580241,
+          "FilteredShare": 0.000861066687458024,
+          "TotalVisits": 82.31944451052155,
+          "Domain": "lmarena.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=lmarena.ai&t=2&s=0&h=607482270ac58303ba489bf329117612f55db2cb0ef5300ded2581e4f8b7d073",
+          "Rank": 14851,
+          "TotalShare": 0.0008610666874580241,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.00219422514864227
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 82.31944451052155
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Programming_and_Developer_Software",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0007894105970001267,
+          "FilteredShare": 0.0007894105970001266,
+          "TotalVisits": 75.469,
+          "Domain": "aimode.co",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aimode.co&t=2&s=0&h=e71fc4fd876a1f7875081fe66c3c93666f9db2307922cb4749273f15aac3df32",
+          "Rank": 1486766,
+          "TotalShare": 0.0007894105970001267,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.002201052396260739
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 75.469
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Web_Hosting_and_Domain_Names",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0007894105970001267,
+          "FilteredShare": 0.0007894105970001266,
+          "TotalVisits": 75.469,
+          "Domain": "hostingcouponspot.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=hostingcouponspot.com&t=2&s=0&h=208507ed43c815045e7dc1fc8529e4c1ba2c377a8e331fec0fa21e909f5be818",
+          "Rank": 235875,
+          "TotalShare": 0.0007894105970001267,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.002201052396260739
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 75.469
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": true
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.000637244408103216,
+          "FilteredShare": 0.0006372444081032159,
+          "TotalVisits": 60.92165270886766,
+          "Domain": "mapify.so",
+          "Favicon": "https://site-images.similarcdn.com/image?url=mapify.so&t=2&s=0&h=0ec0249c993818766f7dc224a45110c0f606c0378221a25d0baffc0f4e7173a0",
+          "Rank": 45258,
+          "TotalShare": 0.000637244408103216,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.002559990392265984
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 60.92165270886766
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.0005925208055979167,
+          "FilteredShare": 0.0005925208055979166,
+          "TotalVisits": 56.646,
+          "Domain": "vizard.sleekplan.app",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard.sleekplan.app&t=2&s=0&h=41b1bc9e713d2ed721c6549bc25b151eaf382cc9a812e8163900d78d0cb9ae18",
+          "Rank": -1,
+          "TotalShare": 0.0005925208055979167,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0023803230758247472
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 56.646
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Search_Engines",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0005762344853932075,
+          "FilteredShare": 0.0005762344853932074,
+          "TotalVisits": 55.089,
+          "Domain": "rbtds.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=rbtds.net&t=2&s=0&h=cc8d26c77ba0e94cc3e60afc12df2c4a7c5d9e0be13adc7aa12ce671609bc481",
+          "Rank": 15644,
+          "TotalShare": 0.0005762344853932075,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0016066699632644908
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 55.089
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0005504557531356466,
+          "FilteredShare": 0.0005504557531356464,
+          "TotalVisits": 52.624509211379944,
+          "Domain": "upwork.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=upwork.com&t=2&s=0&h=950f51887566463d99a31f2a8785e9512e06d783a871f726af16f3b139e88881",
+          "Rank": 823,
+          "TotalShare": 0.0005504557531356466,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0014027065201078711
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 52.624509211379944
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Education",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0005231789495178751,
+          "FilteredShare": 0.0005231789495178751,
+          "TotalVisits": 50.01680024464909,
+          "Domain": "padlet.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=padlet.com&t=2&s=0&h=a55ffd1b5afb46816052aaf72df7ef47a126dacfd0e3e6a944b19d7003ff4e14",
+          "Rank": 1880,
+          "TotalShare": 0.0005231789495178751,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0013331980263472088
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 50.01680024464909
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.0003813530263476476,
+          "FilteredShare": 0.00038135302634764755,
+          "TotalVisits": 36.458,
+          "Domain": "lacreme.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=lacreme.ai&t=2&s=0&h=9a6cb3d8fc70202fe88c9a059ac89f57569635f371872e8d2585d67dcefc7c84",
+          "Rank": 738446,
+          "TotalShare": 0.0003813530263476476,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0009717881473188897
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 36.458
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Science_and_Education~Education",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.0003608931404642751,
+          "FilteredShare": 0.000360893140464275,
+          "TotalVisits": 34.502,
+          "Domain": "neural-networked.ru",
+          "Favicon": "https://site-images.similarcdn.com/image?url=neural-networked.ru&t=2&s=0&h=fbb2d29d9088e6c7ae304ca3bd9d10f807bcd37b84f5183a843f944acdafbbbf",
+          "Rank": 573369,
+          "TotalShare": 0.0003608931404642751,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0010062503779802042
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 34.502
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00035812122340952366,
+          "FilteredShare": 0.0003581212234095236,
+          "TotalVisits": 34.237,
+          "Domain": "getcapte.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=getcapte.com&t=2&s=0&h=44fe611c0099dd511802e34aebe9072afcbd6a3b7045156676050379eac32ea4",
+          "Rank": 510823,
+          "TotalShare": 0.00035812122340952366,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0014386738895422779
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 34.237
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Pets_and_Animals~Pet_Food_and_Supplies",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00021728691689943728,
+          "FilteredShare": 0.00021728691689943725,
+          "TotalVisits": 20.773,
+          "Domain": "web.outreach.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=web.outreach.io&t=2&s=0&h=9727610e0a0cb3e1f3d89fdf89135cf456a50454df8d90fcca0f580371941f90",
+          "Rank": -1,
+          "TotalShare": 0.00021728691689943728,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.0006058442728474517
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 20.773
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00020838540213116014,
+          "FilteredShare": 0.0002083854021311601,
+          "TotalVisits": 19.922,
+          "Domain": "yt020429.up.seesaa.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=yt020429.up.seesaa.net&t=2&s=0&h=22576f8cf4caf41e2c2ede383d029f9cdc3b1a9f05edd24e168affc758347f1e",
+          "Rank": -1,
+          "TotalShare": 0.00020838540213116014,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.000581024868996627
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 19.922
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "E-commerce_and_Shopping~Coupons_and_Rebates",
+          "SourceType": "ST",
+          "Change": -1,
+          "NewChange": false,
+          "Share": 0.00016689032682474952,
+          "FilteredShare": 0.0001668903268247495,
+          "TotalVisits": 15.955,
+          "Domain": "bestbuybestdeals.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=bestbuybestdeals.com&t=2&s=0&h=4aa8281c1e8e0c706f3caf2341cbb2f234d7b5ca67326ed25109ddb79f4387ce",
+          "Rank": -1,
+          "TotalShare": 0.00016689032682474952,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0.0004252805938469715
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 15.955
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "Change": 0,
+          "NewChange": true,
+          "Share": 0.00016521671652754114,
+          "FilteredShare": 0.00016521671652754112,
+          "TotalVisits": 15.795,
+          "Domain": "bestlist.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=bestlist.ai&t=2&s=0&h=cc2039d6886f010a23595a73641d59dcdc0d57989a59a454c610bf3803109e92",
+          "Rank": -1,
+          "TotalShare": 0.00016521671652754114,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0.0006637221159949843
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 15.795
+              }
+            ],
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00011440172387855126,
+          "FilteredShare": 0.00011440172387855125,
+          "TotalVisits": 10.937,
+          "Domain": "admin.aitodays.net",
+          "Favicon": "https://site-images.similarcdn.com/image?url=admin.aitodays.net&t=2&s=0&h=57ca5b8139767b6ff6c5f87d9908f20471b394976f78d6149d92749e9afbcbc9",
+          "Rank": -1,
+          "TotalShare": 0.00011440172387855126,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.00031897746171148027
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 10.937
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Unknown",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00011440172387855126,
+          "FilteredShare": 0.00011440172387855125,
+          "TotalVisits": 10.937,
+          "Domain": "tailieummo.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=tailieummo.com&t=2&s=0&h=ec10c52dcce025cea0c5c79d1fc8f2ea3641374261aa83645b31eb5c4c7e8f2b",
+          "Rank": 7483792,
+          "TotalShare": 0.00011440172387855126,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.00031897746171148027
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 10.937
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": false
+        },
+        {
+          "Category": "Business_and_Consumer_Services~Online_Marketing",
+          "SourceType": "ST",
+          "NewChange": false,
+          "Share": 0.00011440172387855126,
+          "FilteredShare": 0.00011440172387855125,
+          "TotalVisits": 10.937,
+          "Domain": "openmultipleurl.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=openmultipleurl.com&t=2&s=0&h=fc2b53224c340fa00978ed559fa8663043f74b0148dbd9d9a760e6917c734c9a",
+          "Rank": 957155,
+          "TotalShare": 0.00011440172387855126,
+          "TotalSharePerMonth": [
+            {
+              "Key": "2025-12-01",
+              "Value": 0.00031897746171148027
+            },
+            {
+              "Key": "2026-01-01",
+              "Value": 0
+            },
+            {
+              "Key": "2026-02-01",
+              "Value": 0
+            }
+          ],
+          "TotalVisitsAndSharePerMonth": {
+            "2025-12-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 1,
+                "AbsValue": 10.937
+              }
+            ],
+            "2026-01-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ],
+            "2026-02-01": [
+              {
+                "Site": "vizard.ai",
+                "Value": 0,
+                "AbsValue": 0
+              }
+            ]
+          },
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "HasAdsense": true
+        }
+      ]
+    }
+  }
+]

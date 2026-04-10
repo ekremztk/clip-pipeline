@@ -1,0 +1,534 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=swiftia.io&limit=5",
+    "body": [
+      {
+        "Domain": "project-aeon.com",
+        "DomainWithoutSub": "project-aeon.com",
+        "Rank": 2040494,
+        "Favicon": "https://site-images.similarcdn.com/image?url=project-aeon.com&t=2&s=1&h=4dee952e4a1964008a56f038045edc86375adc97456b750ac6ba780a4ec55316"
+      },
+      {
+        "Domain": "viddly.net",
+        "DomainWithoutSub": "viddly.net",
+        "Rank": 212375,
+        "Favicon": "https://site-images.similarcdn.com/image?url=viddly.net&t=2&s=1&h=701365373ee3090e097ca6fc10b30339a8bbde79394e72179713aea1cc3ea14e"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "virlo.ai",
+        "DomainWithoutSub": "virlo.ai",
+        "Rank": 302966,
+        "Favicon": "https://site-images.similarcdn.com/image?url=virlo.ai&t=2&s=1&h=7d073cfc06b79ff97ad5f5f97696f5b8bee6b57919bcbc8f12ff55ed471c7039"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=swiftia.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "swiftia.io": {
+        "mainDomainName": "swiftia",
+        "icon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "image": "https://site-images.similarcdn.com/image?url=swiftia.io&t=0&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=swiftia.io&t=1&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "title": "Use case : Social media Management (SMM) platforms",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Integrate Swiftia’s API into your platform to offer your users an enhanced video editing experience. By leveraging our AI-powered technology, your users can quickly and easily create engaging short…",
+        "globalRanking": 2096315,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 1225787,
+        "categoryRanking": 0,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2024",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 0,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=swiftia.io&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "swiftia.io": {
+        "mainDomainName": "swiftia",
+        "icon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "image": "https://site-images.similarcdn.com/image?url=swiftia.io&t=0&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=swiftia.io&t=1&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "title": "Use case : Social media Management (SMM) platforms",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Integrate Swiftia’s API into your platform to offer your users an enhanced video editing experience. By leveraging our AI-powered technology, your users can quickly and easily create engaging short…",
+        "globalRanking": 2096315,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 1225787,
+        "categoryRanking": 0,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2024",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 10001.9512138979,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=swiftia.io&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "swiftia.io": {
+          "Desktop": 9496.044497936075,
+          "Mobile Web": 13383.462000000003
+        }
+      },
+      "KeysDataVerification": {
+        "swiftia.io": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=swiftia.io&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "swiftia.io": {
+          "GlobalRank": {
+            "Value": 2096315,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 3280558
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2749218
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 2096315
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 1225787,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 1113361
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 1719765
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1225787
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 0,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 0
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 0
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 0
+              }
+            ]
+          },
+          "Category": "",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=swiftia.io&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "swiftia.io": {
+          "TotalVisits": 22879.506497936076,
+          "Change": 0.33367040760736205,
+          "ShareOfVisits": 1,
+          "Trend": [
+            5377,
+            7499,
+            10001
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "swiftia.io": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=swiftia.io&mainDomainOnly=true&includeCrossData=false",
+    "body": {
+      "swiftia.io": {
+        "mainDomainName": "swiftia",
+        "icon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "image": "https://site-images.similarcdn.com/image?url=swiftia.io&t=0&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=swiftia.io&t=1&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "title": "Use case : Social media Management (SMM) platforms",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Integrate Swiftia’s API into your platform to offer your users an enhanced video editing experience. By leveraging our AI-powered technology, your users can quickly and easily create engaging short…",
+        "globalRanking": 2096315,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 1225787,
+        "categoryRanking": 0,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=swiftia.io&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "swiftia.io": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 0,
+            "ReturningUsers": 0
+          },
+          "2026-01-01": {
+            "NewUsers": 0,
+            "ReturningUsers": 0
+          },
+          "2026-02-01": {
+            "NewUsers": 0,
+            "ReturningUsers": 0
+          }
+        },
+        "Total": {
+          "NewUsers": 0,
+          "ReturningUsers": 0
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=swiftia.io&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "swiftia.io": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 0,
+            "ReturningUsers": 0
+          },
+          "2026-01-01": {
+            "NewUsers": 0,
+            "ReturningUsers": 0
+          },
+          "2026-02-01": {
+            "NewUsers": 0,
+            "ReturningUsers": 0
+          }
+        },
+        "Total": {
+          "NewUsers": 0,
+          "ReturningUsers": 0
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=swiftia.io&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "swiftia.io": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.3857621666635883,
+          "UniqueUsers": 3571.69,
+          "DedupUniqueUsers": 3099.317404245094,
+          "VisitsPerUser": 2.1352643051268982,
+          "Source": "Total",
+          "Domain": "swiftia.io",
+          "AvgMonthVisits": 7626.502165978692,
+          "AvgVisitDuration": 39.38501922454352,
+          "PagesPerVisit": 1.945509139392065,
+          "TotalPagesViews": 14837.429665504926,
+          "Favicon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=0&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=swiftia.io&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "swiftia.io": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.3857621666635883,
+          "UniqueUsers": 3571.69,
+          "DedupUniqueUsers": 3099.317404245094,
+          "VisitsPerUser": 2.1352643051268982,
+          "Source": "Total",
+          "Domain": "swiftia.io",
+          "AvgMonthVisits": 7626.502165978692,
+          "AvgVisitDuration": 39.38501922454352,
+          "PagesPerVisit": 1.945509139392065,
+          "TotalPagesViews": 14837.429665504926,
+          "Favicon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=0&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=swiftia.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "project-aeon.com",
+        "DomainWithoutSub": "project-aeon.com",
+        "Rank": 2040494,
+        "Favicon": "https://site-images.similarcdn.com/image?url=project-aeon.com&t=2&s=1&h=4dee952e4a1964008a56f038045edc86375adc97456b750ac6ba780a4ec55316"
+      },
+      {
+        "Domain": "viddly.net",
+        "DomainWithoutSub": "viddly.net",
+        "Rank": 212375,
+        "Favicon": "https://site-images.similarcdn.com/image?url=viddly.net&t=2&s=1&h=701365373ee3090e097ca6fc10b30339a8bbde79394e72179713aea1cc3ea14e"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "virlo.ai",
+        "DomainWithoutSub": "virlo.ai",
+        "Rank": 302966,
+        "Favicon": "https://site-images.similarcdn.com/image?url=virlo.ai&t=2&s=1&h=7d073cfc06b79ff97ad5f5f97696f5b8bee6b57919bcbc8f12ff55ed471c7039"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "flarecut.com",
+        "DomainWithoutSub": "flarecut.com",
+        "Rank": 2148191,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flarecut.com&t=2&s=1&h=60279774b37478c48dd264a64afb3b4ff9eea3fa11d288ec8f912690d62d7199"
+      },
+      {
+        "Domain": "vidiyo.ai",
+        "DomainWithoutSub": "vidiyo.ai",
+        "Rank": 1556566,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiyo.ai&t=2&s=1&h=a48120529bc037544d8d28135020fff1b942ac67b1b978795a1240c765279342"
+      },
+      {
+        "Domain": "fliki-ai.com",
+        "DomainWithoutSub": "fliki-ai.com",
+        "Rank": 2037942,
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki-ai.com&t=2&s=1&h=6d4bdcc4fd10089fc8210b3852e8da92fdd56c5bfac362f3ebe0817d95a3d71b"
+      },
+      {
+        "Domain": "jupitrr.com",
+        "DomainWithoutSub": "jupitrr.com",
+        "Rank": 603751,
+        "Favicon": "https://site-images.similarcdn.com/image?url=jupitrr.com&t=2&s=1&h=35cb8523f6d68ff4a02f15251f001298600a742b40f7b114716b49ec1efedb2a"
+      },
+      {
+        "Domain": "subscribr.ai",
+        "DomainWithoutSub": "subscribr.ai",
+        "Rank": 243713,
+        "Favicon": "https://site-images.similarcdn.com/image?url=subscribr.ai&t=2&s=1&h=aff9f1fa42f6cc07a8f517b5fd83a0b534b9f5945271d3c07173ac4fc38b9449"
+      },
+      {
+        "Domain": "sendshort.ai",
+        "DomainWithoutSub": "sendshort.ai",
+        "Rank": 189592,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sendshort.ai&t=2&s=1&h=11fbd864e02ac3cbcbbe6baaa0a4aefe619aeb4523abb68896b4580c5302620d"
+      },
+      {
+        "Domain": "clicks.video",
+        "DomainWithoutSub": "clicks.video",
+        "Rank": 2032484,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clicks.video&t=2&s=1&h=f69aba011ad9e9242a8404cf055788e8f06bd798ac58b41926cd1d751087d606"
+      },
+      {
+        "Domain": "magi-1.org",
+        "DomainWithoutSub": "magi-1.org",
+        "Rank": 1871964,
+        "Favicon": "https://site-images.similarcdn.com/image?url=magi-1.org&t=2&s=1&h=59c56152cf4a022ad9e458d9ecede4b305b20541812f86563331834ba6333a24"
+      },
+      {
+        "Domain": "autopilotshorts.com",
+        "DomainWithoutSub": "autopilotshorts.com",
+        "Rank": 1928119,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autopilotshorts.com&t=2&s=1&h=89850149b19a43c1910c98df26b9b543174ab665651f065d0a353139d601183b"
+      },
+      {
+        "Domain": "omagicai.com",
+        "DomainWithoutSub": "omagicai.com",
+        "Rank": 1890434,
+        "Favicon": "https://site-images.similarcdn.com/image?url=omagicai.com&t=2&s=1&h=2cc1b927c005f836539e742f46b1077b98725706c701e41dc48ab6dcf6750f99"
+      },
+      {
+        "Domain": "veo4.dev",
+        "DomainWithoutSub": "veo4.dev",
+        "Rank": 2087036,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veo4.dev&t=2&s=1&h=34957ee6082c6a78e9dcaa2e216d52d155d5906ba2ca114fc98af8ba9463f620"
+      },
+      {
+        "Domain": "cinefai.com",
+        "DomainWithoutSub": "cinefai.com",
+        "Rank": 2275811,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cinefai.com&t=2&s=1&h=0d4b4544453448928f515e913987efa6d0b37804ad4c4735ff064107e7b99c1c"
+      },
+      {
+        "Domain": "addsubtitle.ai",
+        "DomainWithoutSub": "addsubtitle.ai",
+        "Rank": 1463956,
+        "Favicon": "https://site-images.similarcdn.com/image?url=addsubtitle.ai&t=2&s=1&h=82bc053fc2b283e31860c65b2c669eb555a25ee6cd6aad7be3b279d673d34c9a"
+      },
+      {
+        "Domain": "tasy.ai",
+        "DomainWithoutSub": "tasy.ai",
+        "Rank": 2088034,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tasy.ai&t=2&s=1&h=fb9dc345a5f934911e6ef5498dc58015d986a537148995f546c77b92c0005bef"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=swiftia.io&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Visits/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=swiftia.io&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "swiftia.io": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 3043.3020711472473
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2942.905792322729
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 3509.8366344660985
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 2334.6850000000004
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 4556.662
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 6492.115
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "swiftia.io": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Duration/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=swiftia.io&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "swiftia.io": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 80.1280353334655
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 45.369883519858305
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 149.21967855465607
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 0
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 0
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 0
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "swiftia.io": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

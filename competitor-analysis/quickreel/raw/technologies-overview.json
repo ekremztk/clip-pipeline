@@ -1,0 +1,45 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quickreel.io&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "wayin.ai",
+        "DomainWithoutSub": "wayin.ai",
+        "Rank": 40370,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/images/?domains=aliexpress.com%2Camazon.com%2Cebay.com",
+    "body": {
+      "aliexpress.com": "https://site-images.similarcdn.com/image?url=aliexpress.com&t=2&s=1&h=d276f202957fc1992170305299cf0078603f7f931e2158aa3ab6097731f1ed40",
+      "amazon.com": "https://site-images.similarcdn.com/image?url=amazon.com&t=2&s=1&h=43a07f575342a8fbb74cd3ca3ebf33760f2fbfbff603546fb4f7208244147dcc",
+      "ebay.com": "https://site-images.similarcdn.com/image?url=ebay.com&t=2&s=1&h=7f6f9f419ebf2319e686381f48e1ea1bbb2f25fc404930fdfbb3a60985cb6695"
+    }
+  }
+]

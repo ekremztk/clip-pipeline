@@ -1,0 +1,321 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=5",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 809856.594356055,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/graphV2/unified?country=999&key=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "wayin.ai": {
+          "desktop": {
+            "monthly": {
+              "2025-12-01": {
+                "spend": {},
+                "impressions": {},
+                "pageViews": {
+                  "value": 1255700.0351564155,
+                  "change": 0.06328442578358624
+                }
+              },
+              "2026-01-01": {
+                "spend": {
+                  "value": 22.070326115517275,
+                  "change": 0
+                },
+                "impressions": {
+                  "value": 419363.2447861262,
+                  "change": 0
+                },
+                "pageViews": {
+                  "value": 1363491.3053544366,
+                  "change": 0.08584157615683599
+                }
+              },
+              "2026-02-01": {
+                "spend": {
+                  "value": 108.19181270045688,
+                  "change": 3.9021392857620274
+                },
+                "impressions": {
+                  "value": 4618531.135374444,
+                  "change": 10.013199637297442
+                },
+                "pageViews": {
+                  "value": 1742420.7371552105,
+                  "change": 0.2779111464170811
+                }
+              }
+            },
+            "total": {
+              "impressions": 5037894.38016057,
+              "spend": 130.26213881597414,
+              "pageViews": 4361612.077666063
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/summary?country=999&key=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "wayin.ai": {
+          "advertisers": {
+            "count": 4,
+            "change": 2
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/breakdown?country=999&key=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.9602761790990809,
+          "visitsShare": 0.9294878408401611,
+          "spendShare": 0.8408025784092997,
+          "category": "Computers_Electronics_and_Technology~Search_Engines",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "myaccount.google.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461"
+        },
+        {
+          "impressionsShare": 0.03217422644433081,
+          "visitsShare": 0.0627682359635509,
+          "spendShare": 0.1426322837314658,
+          "category": "Computers_Electronics_and_Technology~Graphics_Multimedia_and_Web_Design",
+          "rank": 2686,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "veed.io",
+          "favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=0&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+        },
+        {
+          "impressionsShare": 0.007549594456588228,
+          "visitsShare": 0.005655610151725329,
+          "spendShare": 0.01656513785923448,
+          "category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "login.live.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=live.com&t=2&s=0&h=4f68d3ffc8947028c823ba7e44ba3467cd07f113e6cbf03281186fb2ff9369d2"
+        },
+        {
+          "impressionsShare": 0,
+          "visitsShare": 0.0020883130445625733,
+          "spendShare": 0,
+          "category": "Community_and_Society~Philanthropy",
+          "rank": 5251,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "tatrck.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=tatrck.com&t=2&s=0&h=ec183ccc430927771886dec2896d6a86702eb14e91601f23b7ee8071441eedc1"
+        }
+      ],
+      "totalCount": 4,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/summary?country=999&key=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "wayin.ai": {
+          "campaigns": {},
+          "creatives": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=20&country=999&webSource=Desktop",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "vidfly.ai",
+        "DomainWithoutSub": "vidfly.ai",
+        "Rank": 113917,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidfly.ai&t=2&s=1&h=f4e328af0d440be0ce37a0162f417200aee2b198081ca875d302aa5d1af2071a"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "pikzels.com",
+        "DomainWithoutSub": "pikzels.com",
+        "Rank": 110077,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pikzels.com&t=2&s=1&h=19f756ec29f5208bf002c7fd54d3ec2032784579edd763c108430d9469282076"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "sivi.ai",
+        "DomainWithoutSub": "sivi.ai",
+        "Rank": 295300,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sivi.ai&t=2&s=1&h=8aafe428928acc7fa54593b60f7e85bc2e8b537070de63af897f6918a62c5127"
+      },
+      {
+        "Domain": "reccloud.com",
+        "DomainWithoutSub": "reccloud.com",
+        "Rank": 85042,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reccloud.com&t=2&s=1&h=8b7be0c558377be73cca71b9a24ae639ac86c343765f672dd39080aee9658b5c"
+      },
+      {
+        "Domain": "clipto.com",
+        "DomainWithoutSub": "clipto.com",
+        "Rank": 23061,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipto.com&t=2&s=1&h=393dfd5a054efbc9c85d64e14be24461042aa3b2643e2afa54f5740568e47f60"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      }
+    ]
+  }
+]

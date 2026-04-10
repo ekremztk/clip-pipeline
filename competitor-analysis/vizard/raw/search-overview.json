@@ -1,0 +1,543 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=vizard.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1244117.4954584057,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/brand-split?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=vizard.ai&includeSubDomains=true",
+    "body": {
+      "vizard.ai": {
+        "BrandedShareSplitGraph": [
+          {
+            "Key": "2026-02-01",
+            "Value": {
+              "Branded": 0.5356248000990814,
+              "NonBranded": 0.4643751999009186
+            }
+          },
+          {
+            "Key": "2025-12-01",
+            "Value": {
+              "Branded": 0.5207285532440685,
+              "NonBranded": 0.47927144675593164
+            }
+          },
+          {
+            "Key": "2026-01-01",
+            "Value": {
+              "Branded": 0.5577616884832154,
+              "NonBranded": 0.44223831151678455
+            }
+          }
+        ],
+        "BrandedShare": 0.5395314993371229,
+        "NonBrandedShare": 0.4604685006628771
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/top-keywords?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=vizard.ai&includeSubDomains=true&SourceType=all&pageSize=5",
+    "body": {
+      "opus clip": {
+        "Clicks": 73240,
+        "ClicksShare": 0.11778706979736249,
+        "YoYChange": 20.73293768545994,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "vizard.ai": 1
+        },
+        "OrganicClicks": 73240,
+        "PaidClicks": 0
+      },
+      "video to text": {
+        "Clicks": 22210,
+        "ClicksShare": 0.03571888066902541,
+        "YoYChange": -0.5960349217897417,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "vizard.ai": 1
+        },
+        "OrganicClicks": 22200,
+        "PaidClicks": 10
+      },
+      "video to text converter": {
+        "Clicks": 13710,
+        "ClicksShare": 0.022048890318430363,
+        "YoYChange": -0.5911124366239189,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "vizard.ai": 1
+        },
+        "OrganicClicks": 13710,
+        "PaidClicks": 0
+      },
+      "opusclip": {
+        "Clicks": 7470,
+        "ClicksShare": 0.012013509166934706,
+        "YoYChange": 10.671875,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "vizard.ai": 1
+        },
+        "OrganicClicks": 7470,
+        "PaidClicks": 0
+      },
+      "video to text converter online free": {
+        "Clicks": 7130,
+        "ClicksShare": 0.011466709552910903,
+        "YoYChange": 0.2916666666666667,
+        "ChangePresentation": "-",
+        "SitesClickShare": {
+          "vizard.ai": 1
+        },
+        "OrganicClicks": 7130,
+        "PaidClicks": 0
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=vizard.ai&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 150179.05569652552,
+              "Email": 1397.9544470741353,
+              "Direct": 2021925.5188155337,
+              "Display Ads": 15522.18513942324,
+              "Referrals": 162791.0299241227,
+              "Organic Search": 3069294.536379126,
+              "Paid Search": 11812.63702031071
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 38549.51233765229,
+                "Email": 411.300145592958,
+                "Direct": 565539.1245792733,
+                "Display Ads": 4687.570552404961,
+                "Referrals": 52245.44191332276,
+                "Organic Search": 846791.9844767111,
+                "Paid Search": 3889.542145370723
+              },
+              "2026-01-01": {
+                "Social": 70971.47882401152,
+                "Email": 534.1880496299264,
+                "Direct": 924428.8527264197,
+                "Display Ads": 5665.813507076335,
+                "Referrals": 66052.29964906897,
+                "Organic Search": 1412811.7964966798,
+                "Paid Search": 4204.263974603985
+              },
+              "2026-02-01": {
+                "Social": 40658.06453486172,
+                "Email": 452.46625185125095,
+                "Direct": 531957.5415098406,
+                "Display Ads": 5168.801079941945,
+                "Referrals": 44493.288361730985,
+                "Organic Search": 809690.7554057352,
+                "Paid Search": 3718.8309003360037
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?country=999&includeSubDomains=true&keys=vizard.ai&timeGranularity=Monthly&webSource=Total&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 150179.05569652552,
+              "Email": 1397.9544470741353,
+              "Direct": 2021925.5188155337,
+              "Display Ads": 15522.18513942324,
+              "Referrals": 162791.0299241227,
+              "Organic Search": 3069294.536379126,
+              "Paid Search": 11812.63702031071
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 38549.51233765229,
+                "Email": 411.300145592958,
+                "Direct": 565539.1245792733,
+                "Display Ads": 4687.570552404961,
+                "Referrals": 52245.44191332276,
+                "Organic Search": 846791.9844767111,
+                "Paid Search": 3889.542145370723
+              },
+              "2026-01-01": {
+                "Social": 70971.47882401152,
+                "Email": 534.1880496299264,
+                "Direct": 924428.8527264197,
+                "Display Ads": 5665.813507076335,
+                "Referrals": 66052.29964906897,
+                "Organic Search": 1412811.7964966798,
+                "Paid Search": 4204.263974603985
+              },
+              "2026-02-01": {
+                "Social": 40658.06453486172,
+                "Email": 452.46625185125095,
+                "Direct": 531957.5415098406,
+                "Display Ads": 5168.801079941945,
+                "Referrals": 44493.288361730985,
+                "Organic Search": 809690.7554057352,
+                "Paid Search": 3718.8309003360037
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "wisecut.ai",
+        "DomainWithoutSub": "wisecut.ai",
+        "Rank": 202058,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wisecut.ai&t=2&s=1&h=d5f07b32c9852989be3eb9a9d9f0dd56d19aeeeab12d043b1463d5ceeb75443b"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "quickreel.io",
+        "DomainWithoutSub": "quickreel.io",
+        "Rank": 534991,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "flexclip.com",
+        "DomainWithoutSub": "flexclip.com",
+        "Rank": 24613,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flexclip.com&t=2&s=1&h=af565db4a808d861ee89679b0357a6d0e24f2d180ddb8e02916a94f128571055"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "tactiq.io",
+        "DomainWithoutSub": "tactiq.io",
+        "Rank": 13690,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tactiq.io&t=2&s=1&h=13d64b501c2c95b1abd24fb2885142e162ff76e247d9322f4fef6cd8fc50a6bf"
+      },
+      {
+        "Domain": "choppity.com",
+        "DomainWithoutSub": "choppity.com",
+        "Rank": 462683,
+        "Favicon": "https://site-images.similarcdn.com/image?url=choppity.com&t=2&s=1&h=785bdd2a8da721bf721169ede58e7a9bfe7d281ade94ece92eea9f7ae51b5dab"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/overview/traffic?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=vizard.ai&includeSubDomains=true",
+    "body": {
+      "TrafficSourcesVisits": {
+        "vizard.ai": {
+          "All": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 850681.5266220819
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 1417016.0604712837
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 813409.5863060713
+              }
+            ],
+            "Total": 3081107.1733994368,
+            "YoyChange": 0.428730552684511,
+            "Average": 1027035.7244664789,
+            "TotalVisits": 5432922.917422116
+          },
+          "Organic": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 846791.9844767111
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 1412811.7964966798
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 809690.7554057352
+              }
+            ],
+            "Total": 3069294.536379126,
+            "YoyChange": 0.42710928970306516,
+            "Average": 1023098.178793042,
+            "TotalVisits": 3081107.173399437
+          },
+          "Paid": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 3889.542145370723
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 4204.263974603985
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 3718.8309003360037
+              }
+            ],
+            "Total": 11812.63702031071,
+            "YoyChange": 1.0270876920535519,
+            "Average": 3937.5456734369036,
+            "TotalVisits": 3081107.173399437
+          }
+        }
+      },
+      "AdSpend": {
+        "vizard.ai": {
+          "CostPerVisit": {
+            "CostPerVisit": 0.555908895592838,
+            "YoyChange": 1.2403024285176787
+          },
+          "PayPerClick": {
+            "Graph": [
+              {
+                "Key": "2025-12-01",
+                "Value": 2613.12
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2416.65
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1536.98
+              }
+            ],
+            "Total": 6566.75,
+            "YoyChange": 3.541289479325869,
+            "Average": 2188.9166666666665,
+            "TotalVisits": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/rank-distribution?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=vizard.ai&includeSubDomains=true",
+    "body": {
+      "Country": 356,
+      "RankSplit": {
+        "vizard.ai": {
+          "Top3": {
+            "2026-01": 294,
+            "2026-02": 232
+          },
+          "RestTo100": {
+            "2026-01": 4036,
+            "2026-02": 4106
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/searchoverview/keywords/landing-pages?country=999&to=2026%7C02%7C28&from=2025%7C12%7C01&webSource=Total&keys=vizard.ai&includeSubDomains=true&sourceType=Paid",
+    "body": [
+      {
+        "Url": "vizard.ai",
+        "Clicks": 1960,
+        "ClicksShare": 0.8672566371681416,
+        "MoMChange": -0.3931888544891641,
+        "Spend": 1343.05,
+        "TopKeyword": "vizard ai",
+        "TotalKeywords": 14
+      },
+      {
+        "Url": "vizard.ai/pricing",
+        "Clicks": 80,
+        "ClicksShare": 0.035398230088495575,
+        "MoMChange": -0.3333333333333333,
+        "Spend": 55.75,
+        "TopKeyword": "vizard",
+        "TotalKeywords": 3
+      },
+      {
+        "Url": "vizard.ai/tools/youtube-video-editor/youtube-shorts-maker",
+        "Clicks": 70,
+        "ClicksShare": 0.030973451327433628,
+        "MoMChange": 0.16666666666666666,
+        "Spend": 37.32,
+        "TopKeyword": "vizard",
+        "TotalKeywords": 5
+      },
+      {
+        "Url": "vizard.ai/tools/video-to-text",
+        "Clicks": 50,
+        "ClicksShare": 0.022123893805309734,
+        "MoMChange": 4,
+        "Spend": 19.01,
+        "TopKeyword": "vizard",
+        "TotalKeywords": 5
+      },
+      {
+        "Url": "vizard.ai/tools/ai-video-generator",
+        "Clicks": 40,
+        "ClicksShare": 0.017699115044247787,
+        "MoMChange": 1,
+        "Spend": 33.74,
+        "TopKeyword": "vizard ai",
+        "TotalKeywords": 3
+      }
+    ]
+  }
+]

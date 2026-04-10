@@ -1,0 +1,531 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=5",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 809856.594356055,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 940504.2809000977,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=wayin.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "GlobalRank": {
+            "Value": 40370,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 43022
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 46475
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 40370
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 48533,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 59614
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 64202
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 48533
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 325,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 356
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 385
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 325
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=wayin.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "wayin.ai": {
+          "TotalVisits": 2652084.2437694953,
+          "Change": 0.01908846746841715,
+          "ShareOfVisits": 1,
+          "Trend": [
+            788692,
+            922887,
+            940504
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.37098021141409726,
+          "UniqueUsers": 468387.10333333333,
+          "DedupUniqueUsers": 412343.9615307458,
+          "VisitsPerUser": 1.8873877503569285,
+          "Source": "Total",
+          "Domain": "wayin.ai",
+          "AvgMonthVisits": 884028.0812564982,
+          "AvgVisitDuration": 168.05043387373803,
+          "PagesPerVisit": 5.939697232345983,
+          "TotalPagesViews": 5250859.147555354,
+          "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=0&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficAndEngagement/EngagementOverview/Table?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&webSource=Total&to=2026%7C02%7C28&timeGranularity=Monthly&unBounced=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.37098021141409726,
+          "UniqueUsers": 468387.10333333333,
+          "DedupUniqueUsers": 412343.9615307458,
+          "VisitsPerUser": 1.8873877503569285,
+          "Source": "Total",
+          "Domain": "wayin.ai",
+          "AvgMonthVisits": 884028.0812564982,
+          "AvgVisitDuration": 168.05043387373803,
+          "PagesPerVisit": 5.939697232345983,
+          "TotalPagesViews": 5250859.147555354,
+          "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=0&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=wayin.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Desktop": 1020858.2137694949,
+          "Mobile Web": 1631226.0300000005
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=wayin.ai&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=false",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "wayin.ai": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 351079.56765899714,
+            "ReturningUsers": 45205.64730490381
+          },
+          "2026-01-01": {
+            "NewUsers": 451050.26217075,
+            "ReturningUsers": 40569.92280900528
+          },
+          "2026-02-01": {
+            "NewUsers": 457683.3920005942,
+            "ReturningUsers": 59572.50485789567
+          }
+        },
+        "Total": {
+          "NewUsers": 419937.7406101138,
+          "ReturningUsers": 48449.35832393492
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebNewVsReturning/NewVsReturning/Data?includeSubDomains=true&keys=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "wayin.ai": {
+        "Graph": {
+          "2025-12-01": {
+            "NewUsers": 351079.56765899714,
+            "ReturningUsers": 45205.64730490381
+          },
+          "2026-01-01": {
+            "NewUsers": 451050.26217075,
+            "ReturningUsers": 40569.92280900528
+          },
+          "2026-02-01": {
+            "NewUsers": 457683.3920005942,
+            "ReturningUsers": 59572.50485789567
+          }
+        },
+        "Total": {
+          "NewUsers": 419937.7406101138,
+          "ReturningUsers": 48449.35832393492
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "vidfly.ai",
+        "DomainWithoutSub": "vidfly.ai",
+        "Rank": 113917,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidfly.ai&t=2&s=1&h=f4e328af0d440be0ce37a0162f417200aee2b198081ca875d302aa5d1af2071a"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "pikzels.com",
+        "DomainWithoutSub": "pikzels.com",
+        "Rank": 110077,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pikzels.com&t=2&s=1&h=19f756ec29f5208bf002c7fd54d3ec2032784579edd763c108430d9469282076"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "sivi.ai",
+        "DomainWithoutSub": "sivi.ai",
+        "Rank": 295300,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sivi.ai&t=2&s=1&h=8aafe428928acc7fa54593b60f7e85bc2e8b537070de63af897f6918a62c5127"
+      },
+      {
+        "Domain": "reccloud.com",
+        "DomainWithoutSub": "reccloud.com",
+        "Rank": 85042,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reccloud.com&t=2&s=1&h=8b7be0c558377be73cca71b9a24ae639ac86c343765f672dd39080aee9658b5c"
+      },
+      {
+        "Domain": "clipto.com",
+        "DomainWithoutSub": "clipto.com",
+        "Rank": 23061,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipto.com&t=2&s=1&h=393dfd5a054efbc9c85d64e14be24461042aa3b2643e2afa54f5740568e47f60"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Visits/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 274008.2982031727
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 356072.18521289533
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 390777.73035342694
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 514683.8959999999
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 566815.5829999999
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 549726.5510000002
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/AssetsCompare/Duration/Graph?ShouldGetVerifiedData=false&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&timeGranularity=Monthly&to=2026%7C02%7C28&unBounced=false&webSource=Combined",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Desktop": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 204.7164575185333
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 174.70283526736736
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 224.8506904341998
+              }
+            ]
+          ],
+          "MobileWeb": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 166.89560199910312
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 139.62063776305433
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 135.48336880103494
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

@@ -1,0 +1,324 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=5",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=quso.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "quso.ai": {
+        "mainDomainName": "quso",
+        "icon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "image": "https://site-images.similarcdn.com/image?url=quso.ai&t=0&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=quso.ai&t=1&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c",
+        "title": "quso.ai: Long To Short Video AI & Social Media Scheduling (formerly vidyo.ai)",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "quso.ai (formerly vidyo.ai) is the best AI-powered video repurposing and social media scheduling tool trusted by 4M+ coaches, podcasters, business owners and video creators.",
+        "globalRanking": 93435,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 93758,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 810,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {
+          "apps_0": [
+            {
+              "store": 0,
+              "id": "ai.quso.app",
+              "title": "AI Captions",
+              "author": "CC AI Captions",
+              "icon": "https://site-images.similarcdn.com/url?url=https%3A%2F%2Fplay-lh.googleusercontent.com%2FcEpHbnY-jiSu4JgQXBf2c-2PDa4W4EUnxyGalTaPjyAXSwwQsafCZsapLnAOAhMbKz0%3Ds180&h=932eb95435e614d2d9ee8ae739d295afb6f782671b8d189e17c3a9d2e7834142",
+              "category": "VIDEO_PLAYERS",
+              "price": "Free",
+              "rating": 4.188679218292236,
+              "ratecount": 888,
+              "valid": true
+            }
+          ]
+        },
+        "yearFounded": "2022",
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 162058.94302456797,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/graphV2/unified?country=999&key=quso.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "quso.ai": {
+          "desktop": {
+            "monthly": {
+              "2025-12-01": {
+                "spend": {
+                  "value": 0.9220538651138775,
+                  "change": 22.86055465124955
+                },
+                "impressions": {
+                  "value": 15068.36493322553,
+                  "change": 3.9545335471482685
+                },
+                "pageViews": {
+                  "value": 816292.4749940697,
+                  "change": -0.4465107863859388
+                }
+              },
+              "2026-01-01": {
+                "spend": {
+                  "value": 5.463707756175156,
+                  "change": 4.925584136562743
+                },
+                "impressions": {
+                  "value": 20381.663251370825,
+                  "change": 0.3526127978510494
+                },
+                "pageViews": {
+                  "value": 989154.1418891991,
+                  "change": 0.2117643763607956
+                }
+              },
+              "2026-02-01": {
+                "spend": {
+                  "value": 0.9760089794548698,
+                  "change": -0.8213650833810116
+                },
+                "impressions": {
+                  "value": 53220.8125436738,
+                  "change": 1.6112104732225072
+                },
+                "pageViews": {
+                  "value": 776672.2042739752,
+                  "change": -0.21481175543520623
+                }
+              }
+            },
+            "total": {
+              "impressions": 88670.84072827015,
+              "spend": 7.3617706007439025,
+              "pageViews": 2582118.821157244
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/summary?country=999&key=quso.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "quso.ai": {
+          "advertisers": {
+            "count": 2,
+            "change": -1
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/advertisers/breakdown?country=999&key=quso.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.8241561178730273,
+          "visitsShare": 0.9694587266630169,
+          "spendShare": 0.8756891605563127,
+          "category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "next.frame.io",
+          "favicon": "https://site-images.similarcdn.com/image?url=frame.io&t=2&s=0&h=ce7ebbab8b25233c8810f3addb35eea00df0ab72b5e1464cd68f77755bbd57e6"
+        },
+        {
+          "impressionsShare": 0.1758438821269727,
+          "visitsShare": 0.030541273336983133,
+          "spendShare": 0.1243108394436874,
+          "category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "desktop.captions.ai",
+          "favicon": "https://site-images.similarcdn.com/image?url=captions.ai&t=2&s=0&h=598105fcee1a8630971d571817768d8cafb9bd77bd0c5a73d90d2a07aa45925d"
+        }
+      ],
+      "totalCount": 2,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/adIntelligence/publisher/summary?country=999&key=quso.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "quso.ai": {
+          "campaigns": {},
+          "creatives": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=quso.ai&limit=20&country=999&webSource=Desktop",
+    "body": [
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "vidyo.ai",
+        "DomainWithoutSub": "vidyo.ai",
+        "Rank": 470819,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidyo.ai&t=2&s=1&h=356fd77b6df5977edfcbd1ca9b836f21bdf9ebdeb36040ea37f0e0ecc8a7c056"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "pictory.ai",
+        "DomainWithoutSub": "pictory.ai",
+        "Rank": 32103,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pictory.ai&t=2&s=1&h=955f261f5621845d6dfc0198bc7d03a92b93ac64be1a971a3613efa856a95ac9"
+      },
+      {
+        "Domain": "heygen.com",
+        "DomainWithoutSub": "heygen.com",
+        "Rank": 3787,
+        "Favicon": "https://site-images.similarcdn.com/image?url=heygen.com&t=2&s=1&h=da761b4500aacead5d6342124f3d9ea128dae354f2ee9191d230f0a756fe735c"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "getmunch.com",
+        "DomainWithoutSub": "getmunch.com",
+        "Rank": 1601445,
+        "Favicon": "https://site-images.similarcdn.com/image?url=getmunch.com&t=2&s=1&h=ead38b278572f50cf6ed47b22699af3d5586e165234e8fe68cdc7af15410397f"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "munchstudio.com",
+        "DomainWithoutSub": "munchstudio.com",
+        "Rank": 288433,
+        "Favicon": "https://site-images.similarcdn.com/image?url=munchstudio.com&t=2&s=1&h=0a1021dc7b70c1a4b7e0b71fe8ad78d2bdc60238661b5135cdf45a4c6f0e6567"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "later.com",
+        "DomainWithoutSub": "later.com",
+        "Rank": 22262,
+        "Favicon": "https://site-images.similarcdn.com/image?url=later.com&t=2&s=1&h=a579fa82672132e2ea35028927f0f10177b82bf2ade18a19ce09dd5aa3d7bb78"
+      },
+      {
+        "Domain": "wevideo.com",
+        "DomainWithoutSub": "wevideo.com",
+        "Rank": 38711,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wevideo.com&t=2&s=1&h=f8eb1ee5018a12c89e116e3c36fbb91a8f10d1f954a9408e26a6a8ee8b3d9866"
+      },
+      {
+        "Domain": "jasper.ai",
+        "DomainWithoutSub": "jasper.ai",
+        "Rank": 58811,
+        "Favicon": "https://site-images.similarcdn.com/image?url=jasper.ai&t=2&s=1&h=2ba38385e969df3f06863d64140edcfe790847e79e10ffadaea233f7673e9e36"
+      },
+      {
+        "Domain": "simplified.com",
+        "DomainWithoutSub": "simplified.com",
+        "Rank": 80268,
+        "Favicon": "https://site-images.similarcdn.com/image?url=simplified.com&t=2&s=1&h=8edc9e35c59f2c240b1875890e3d217c616bc08d4a92055a65a48b1022882a61"
+      },
+      {
+        "Domain": "copy.ai",
+        "DomainWithoutSub": "copy.ai",
+        "Rank": 84979,
+        "Favicon": "https://site-images.similarcdn.com/image?url=copy.ai&t=2&s=1&h=132d3538bbd2d7431cab0097b4f7f3eff4d341c4fcff1bb14da6e0ee83247849"
+      },
+      {
+        "Domain": "claap.io",
+        "DomainWithoutSub": "claap.io",
+        "Rank": 195276,
+        "Favicon": "https://site-images.similarcdn.com/image?url=claap.io&t=2&s=1&h=2bd0dae67879ef64d7e542a0388267accdb6e4a224feb64cdc030c550dd5f219"
+      },
+      {
+        "Domain": "seo.ai",
+        "DomainWithoutSub": "seo.ai",
+        "Rank": 208916,
+        "Favicon": "https://site-images.similarcdn.com/image?url=seo.ai&t=2&s=1&h=6a6f3f0e2d6b80de18302e3923a57c77b70d0281077979e7e220fe55322ad2ec"
+      },
+      {
+        "Domain": "juma.ai",
+        "DomainWithoutSub": "juma.ai",
+        "Rank": 223379,
+        "Favicon": "https://site-images.similarcdn.com/image?url=juma.ai&t=2&s=1&h=2911f727a50186a45bc1d8e2e37796ea7fa108584da6bd9bcbbc952a13c6bf54"
+      }
+    ]
+  }
+]

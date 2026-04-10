@@ -1,0 +1,1815 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=5",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=restream.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "restream.io": {
+        "mainDomainName": "restream",
+        "icon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "image": "https://site-images.similarcdn.com/image?url=restream.io&t=0&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=restream.io&t=1&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab",
+        "title": "How to improve your e-commerce checkout process",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Around 70% of shoppers abandon their cart before checking out. Don’t let your precious sales slip away because of a funky e-commerce checkout experience.",
+        "globalRanking": 18545,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 12067,
+        "category": "Games/Video_Games_Consoles_and_Accessories",
+        "categoryRanking": 631,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2014",
+        "employeeRange": "50 - 200",
+        "monthlyVisits": 1975524.6178922423,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/WorldMap/Data?key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "countrySpendShares": [
+        {
+          "country": 840,
+          "share": 0.21210932366882945,
+          "popChange": -0.2241757629373698
+        },
+        {
+          "country": 826,
+          "share": 0.06689418625245913,
+          "popChange": 0.10821896198138511
+        },
+        {
+          "country": 276,
+          "share": 0.05217460858569025,
+          "popChange": 0.0701144486543494
+        },
+        {
+          "country": 124,
+          "share": 0.0421666669840768,
+          "popChange": 0.9804114490161002
+        },
+        {
+          "country": 566,
+          "share": 0.040551684209924894,
+          "popChange": 0.5468942971304029
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/summary?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "restream.io": {
+          "publishers": {
+            "count": 78,
+            "change": 0.652173913
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=restream.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "streamyard.com",
+        "DomainWithoutSub": "streamyard.com",
+        "Rank": 9410,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamyard.com&t=2&s=1&h=079e036e90eb7ad124375acec31b698d9a13b297165457e44ce7e06b633f8f70"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "obsproject.com",
+        "DomainWithoutSub": "obsproject.com",
+        "Rank": 11382,
+        "Favicon": "https://site-images.similarcdn.com/image?url=obsproject.com&t=2&s=1&h=04845436976811e4d7fff6c4b2f68eefdd0e767ab560bdad5371f35b3c2734dc"
+      },
+      {
+        "Domain": "castr.com",
+        "DomainWithoutSub": "castr.com",
+        "Rank": 134205,
+        "Favicon": "https://site-images.similarcdn.com/image?url=castr.com&t=2&s=1&h=05aa3fc8a7009ff42e4c00203bdf8a578e68d0067a549255b68020776e846636"
+      },
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "freeconvert.com",
+        "DomainWithoutSub": "freeconvert.com",
+        "Rank": 1529,
+        "Favicon": "https://site-images.similarcdn.com/image?url=freeconvert.com&t=2&s=1&h=ffc299501abc8c79e3656125d35db896e1c99c059caa7c2d1b034a5426b41a18"
+      },
+      {
+        "Domain": "cloudconvert.com",
+        "DomainWithoutSub": "cloudconvert.com",
+        "Rank": 2491,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cloudconvert.com&t=2&s=1&h=5fc1680af0a8ab2c78abf38c16454ca85d875332cb7b96e4e18e5a18c3080c83"
+      },
+      {
+        "Domain": "convertio.co",
+        "DomainWithoutSub": "convertio.co",
+        "Favicon": "https://site-images.similarcdn.com/image?url=convertio.co&t=2&s=1&h=e995388c379d89a1afbc5b2ff71b8f86fa9b547a859124c9f7beaafa9678fcaf"
+      },
+      {
+        "Domain": "zamzar.com",
+        "DomainWithoutSub": "zamzar.com",
+        "Rank": 25575,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zamzar.com&t=2&s=1&h=f33f5461a90058eb543109e3df1212141f6a2d73aae9b5b3071fd4bcd661ef8e"
+      },
+      {
+        "Domain": "biteable.com",
+        "DomainWithoutSub": "biteable.com",
+        "Rank": 65412,
+        "Favicon": "https://site-images.similarcdn.com/image?url=biteable.com&t=2&s=1&h=8e31b557207f23ba49c9914fc7f9990638efe9b34719afd1860b2167147c6c22"
+      },
+      {
+        "Domain": "uniscribe.co",
+        "DomainWithoutSub": "uniscribe.co",
+        "Rank": 34543,
+        "Favicon": "https://site-images.similarcdn.com/image?url=uniscribe.co&t=2&s=1&h=246b8a63daa9352fca6f05f7b85d002c2b7218346144f70293f5ec27aef15f4d"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "notta.ai",
+        "DomainWithoutSub": "notta.ai",
+        "Rank": 19207,
+        "Favicon": "https://site-images.similarcdn.com/image?url=notta.ai&t=2&s=1&h=0f6a3ed53f47e92eb122be61856024601a2ff62d88d3001a361e70d6165dae21"
+      },
+      {
+        "Domain": "descript.com",
+        "DomainWithoutSub": "descript.com",
+        "Rank": 13908,
+        "Favicon": "https://site-images.similarcdn.com/image?url=descript.com&t=2&s=1&h=19b1b9d6d824da80586a1078567284aa3d80d84adbbbb32672d9d63283943881"
+      },
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "streamlabs.com",
+        "DomainWithoutSub": "streamlabs.com",
+        "Rank": 9969,
+        "Favicon": "https://site-images.similarcdn.com/image?url=streamlabs.com&t=2&s=1&h=dad7a57a0fdf2c2c13c777e7a35015f95334a9c7eda9ca583b0ed2f74a75c954"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "online-audio-converter.com",
+        "DomainWithoutSub": "online-audio-converter.com",
+        "Rank": 18174,
+        "Favicon": "https://site-images.similarcdn.com/image?url=online-audio-converter.com&t=2&s=1&h=7072bef883704cb884e36073b5327cb009396fe3eac70803d46c75f23bdefd8f"
+      },
+      {
+        "Domain": "podbean.com",
+        "DomainWithoutSub": "podbean.com",
+        "Rank": 19514,
+        "Favicon": "https://site-images.similarcdn.com/image?url=podbean.com&t=2&s=1&h=6bd03331138a96684f3443d0492539934b6c0e774cfbf1ddcb042a82260bedcc"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/breakdown?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.10703687562735631,
+          "visitsShare": 0.1508577383582424,
+          "spendShare": 0.1912161006963016,
+          "category": "Computers_Electronics_and_Technology~Search_Engines",
+          "rank": 189,
+          "visitsChange": -0.6201898900958774,
+          "isVisitsNew": false,
+          "entity": "ecosia.org",
+          "favicon": "https://site-images.similarcdn.com/image?url=ecosia.org&t=2&s=0&h=5278c0cf0866a10d3c7cfaae91dc127367e2268750ac13451bda62d7b78abde2"
+        },
+        {
+          "impressionsShare": 0.0490124951146877,
+          "visitsShare": 0.09667721560088129,
+          "spendShare": 0.1354927172103578,
+          "category": "News_and_Media",
+          "rank": 24958,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "bangkokpost.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=bangkokpost.com&t=2&s=0&h=2c3c716719ddbd385516ce4475fa257cfa3ded62dc40f0efe72d3b3f4a6f7f88"
+        },
+        {
+          "impressionsShare": 0.03466270896531644,
+          "visitsShare": 0.0963050642253151,
+          "spendShare": 0.09650931619172164,
+          "category": "",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "nortonsafe.search.ask.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=ask.com&t=2&s=0&h=fabebef019c71b937e87357f0a391ebd60ecdf79bd1f62405f3b7eff258ee3c3"
+        },
+        {
+          "impressionsShare": 0.026371421725640824,
+          "visitsShare": 0.0637064915259241,
+          "spendShare": 0.0578787943961999,
+          "category": "Arts_and_Entertainment~TV_Movies_and_Streaming",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "gem.cbc.ca",
+          "favicon": "https://site-images.similarcdn.com/image?url=cbc.ca&t=2&s=0&h=45a954fa53df3c30ca9ffa8db639e0919c55e95ce01e2cc4c7763b3d4d9b0c8c"
+        },
+        {
+          "impressionsShare": 0.035130136112010386,
+          "visitsShare": 0.0637064915259241,
+          "spendShare": 0.07594923432553712,
+          "category": "Sports~Basketball",
+          "rank": 32336,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "nbcsportsbayarea.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=nbcsportsbayarea.com&t=2&s=0&h=dfc0f24f1115193346a49fa4f8b14c5c851136713ad176be05bc487040242a95"
+        }
+      ],
+      "totalCount": 78,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/GraphV2/unified?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "restream.io": {
+          "total": {
+            "monthly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 27648.18,
+                  "change": 0,
+                  "desktopShare": 0.40201517691218736
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 22896.708000000002,
+                  "change": -0.17185478393152814,
+                  "desktopShare": 0.4274836722379479
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 18971.438000000006,
+                  "change": -0.09763101623303891,
+                  "desktopShare": 0.42917526062072875
+                }
+              }
+            },
+            "weekly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 5820.291000000001,
+                  "change": 0,
+                  "desktopShare": 0.41861236697615284
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 6098.701000000001,
+                  "change": 0.04783437804054811,
+                  "desktopShare": 0.40329052957342876
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 6452.496999999999,
+                  "change": 0.05801169790091339,
+                  "desktopShare": 0.403298989367992
+                }
+              },
+              "2025-12-22": {
+                "visits": {
+                  "value": 6498.1359999999995,
+                  "change": 0.007073075741065843,
+                  "desktopShare": 0.39093646393365733
+                }
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 6297.009,
+                  "change": -0.0309514913199723,
+                  "desktopShare": 0.39755990185181556
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 5630.293,
+                  "change": -0.1058782034454771,
+                  "desktopShare": 0.40255969609396886
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 4951.019,
+                  "change": -0.12064629673802046,
+                  "desktopShare": 0.42387191727601936
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 4584.771,
+                  "change": -0.07397426671155988,
+                  "desktopShare": 0.4474506196710807
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 4799.129999999999,
+                  "change": 0.04675457072992293,
+                  "desktopShare": 0.46934515839329216
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 4378.194,
+                  "change": -0.0877108976001898,
+                  "desktopShare": 0.47102005096165217
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 4893.945,
+                  "change": 0.11779994216793482,
+                  "desktopShare": 0.41151439298970466
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 4682.532,
+                  "change": -0.043198891691671966,
+                  "desktopShare": 0.42685499810786126
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 4429.808,
+                  "change": -0.05397165465179953,
+                  "desktopShare": 0.3970849793038434
+                }
+              }
+            },
+            "daily": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 1012.693,
+                  "change": 0,
+                  "desktopShare": 0.357
+                }
+              },
+              "2025-12-02": {
+                "visits": {
+                  "value": 827.765,
+                  "change": -0.18261012962467402,
+                  "desktopShare": 0.42
+                }
+              },
+              "2025-12-03": {
+                "visits": {
+                  "value": 831.529,
+                  "change": 0.004547184285395022,
+                  "desktopShare": 0.381
+                }
+              },
+              "2025-12-04": {
+                "visits": {
+                  "value": 946.961,
+                  "change": 0.13881897083565337,
+                  "desktopShare": 0.533
+                }
+              },
+              "2025-12-05": {
+                "visits": {
+                  "value": 801.522,
+                  "change": -0.15358499452458968,
+                  "desktopShare": 0.416
+                }
+              },
+              "2025-12-06": {
+                "visits": {
+                  "value": 664.743,
+                  "change": -0.17064909010607318,
+                  "desktopShare": 0.42299999999999993
+                }
+              },
+              "2025-12-07": {
+                "visits": {
+                  "value": 735.078,
+                  "change": 0.10580780843122818,
+                  "desktopShare": 0.396
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 877.365,
+                  "change": 0.19356721327532594,
+                  "desktopShare": 0.337
+                }
+              },
+              "2025-12-09": {
+                "visits": {
+                  "value": 749.817,
+                  "change": -0.14537621172488074,
+                  "desktopShare": 0.391
+                }
+              },
+              "2025-12-10": {
+                "visits": {
+                  "value": 841.886,
+                  "change": 0.12278862709167698,
+                  "desktopShare": 0.35899999999999993
+                }
+              },
+              "2025-12-11": {
+                "visits": {
+                  "value": 796.885,
+                  "change": -0.05345260522208468,
+                  "desktopShare": 0.422
+                }
+              },
+              "2025-12-12": {
+                "visits": {
+                  "value": 992.838,
+                  "change": 0.2458987181337332,
+                  "desktopShare": 0.324
+                }
+              },
+              "2025-12-13": {
+                "visits": {
+                  "value": 904.287,
+                  "change": -0.08918977718419313,
+                  "desktopShare": 0.563
+                }
+              },
+              "2025-12-14": {
+                "visits": {
+                  "value": 935.623,
+                  "change": 0.03465271534369068,
+                  "desktopShare": 0.429
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 1127.9,
+                  "change": 0.2055069189192656,
+                  "desktopShare": 0.339
+                }
+              },
+              "2025-12-16": {
+                "visits": {
+                  "value": 943.768,
+                  "change": -0.16325206135295686,
+                  "desktopShare": 0.452
+                }
+              },
+              "2025-12-17": {
+                "visits": {
+                  "value": 909.581,
+                  "change": -0.03622394486780651,
+                  "desktopShare": 0.401
+                }
+              },
+              "2025-12-18": {
+                "visits": {
+                  "value": 869.108,
+                  "change": -0.044496312038180295,
+                  "desktopShare": 0.431
+                }
+              },
+              "2025-12-19": {
+                "visits": {
+                  "value": 922.946,
+                  "change": 0.06194627134947565,
+                  "desktopShare": 0.362
+                }
+              },
+              "2025-12-20": {
+                "visits": {
+                  "value": 808.2,
+                  "change": -0.12432580020932966,
+                  "desktopShare": 0.4779999999999999
+                }
+              },
+              "2025-12-21": {
+                "visits": {
+                  "value": 870.994,
+                  "change": 0.07769611482306357,
+                  "desktopShare": 0.383
+                }
+              },
+              "2025-12-22": {
+                "visits": {
+                  "value": 822.05,
+                  "change": -0.05619326883996913,
+                  "desktopShare": 0.394
+                }
+              },
+              "2025-12-23": {
+                "visits": {
+                  "value": 1073.464,
+                  "change": 0.3058378444133569,
+                  "desktopShare": 0.429
+                }
+              },
+              "2025-12-24": {
+                "visits": {
+                  "value": 868.755,
+                  "change": -0.1906994552216003,
+                  "desktopShare": 0.391
+                }
+              },
+              "2025-12-25": {
+                "visits": {
+                  "value": 924.526,
+                  "change": 0.06419646505631617,
+                  "desktopShare": 0.369
+                }
+              },
+              "2025-12-26": {
+                "visits": {
+                  "value": 989.794,
+                  "change": 0.07059617577007032,
+                  "desktopShare": 0.33499999999999996
+                }
+              },
+              "2025-12-27": {
+                "visits": {
+                  "value": 913.959,
+                  "change": -0.07661695261842368,
+                  "desktopShare": 0.43899999999999995
+                }
+              },
+              "2025-12-28": {
+                "visits": {
+                  "value": 905.588,
+                  "change": -0.009159054180767389,
+                  "desktopShare": 0.378
+                }
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 876.831,
+                  "change": -0.031755058591765736,
+                  "desktopShare": 0.356
+                }
+              },
+              "2025-12-30": {
+                "visits": {
+                  "value": 985.387,
+                  "change": 0.12380492934214224,
+                  "desktopShare": 0.411
+                }
+              },
+              "2025-12-31": {
+                "visits": {
+                  "value": 916.337,
+                  "change": -0.07007399123390096,
+                  "desktopShare": 0.392
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 813.449,
+                  "change": -0.11228183517635983,
+                  "desktopShare": 0.388
+                }
+              },
+              "2026-01-02": {
+                "visits": {
+                  "value": 971.607,
+                  "change": 0.1944289070365813,
+                  "desktopShare": 0.463
+                }
+              },
+              "2026-01-03": {
+                "visits": {
+                  "value": 974.93,
+                  "change": 0.0034201071009162956,
+                  "desktopShare": 0.383
+                }
+              },
+              "2026-01-04": {
+                "visits": {
+                  "value": 758.468,
+                  "change": -0.22202824818192074,
+                  "desktopShare": 0.37999999999999995
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 983.594,
+                  "change": 0.2968167411149846,
+                  "desktopShare": 0.321
+                }
+              },
+              "2026-01-06": {
+                "visits": {
+                  "value": 838.863,
+                  "change": -0.14714506188529006,
+                  "desktopShare": 0.407
+                }
+              },
+              "2026-01-07": {
+                "visits": {
+                  "value": 684.674,
+                  "change": -0.18380712941207333,
+                  "desktopShare": 0.4139999999999999
+                }
+              },
+              "2026-01-08": {
+                "visits": {
+                  "value": 843.713,
+                  "change": 0.23228426959399653,
+                  "desktopShare": 0.435
+                }
+              },
+              "2026-01-09": {
+                "visits": {
+                  "value": 814.657,
+                  "change": -0.03443825092181812,
+                  "desktopShare": 0.407
+                }
+              },
+              "2026-01-10": {
+                "visits": {
+                  "value": 702.999,
+                  "change": -0.1370613644760924,
+                  "desktopShare": 0.421
+                }
+              },
+              "2026-01-11": {
+                "visits": {
+                  "value": 761.793,
+                  "change": 0.08363312038850693,
+                  "desktopShare": 0.435
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 825.873,
+                  "change": 0.08411733896215906,
+                  "desktopShare": 0.391
+                }
+              },
+              "2026-01-13": {
+                "visits": {
+                  "value": 752.342,
+                  "change": -0.08903427040235007,
+                  "desktopShare": 0.37999999999999995
+                }
+              },
+              "2026-01-14": {
+                "visits": {
+                  "value": 721.906,
+                  "change": -0.04045500583511227,
+                  "desktopShare": 0.407
+                }
+              },
+              "2026-01-15": {
+                "visits": {
+                  "value": 658.423,
+                  "change": -0.08793804179491506,
+                  "desktopShare": 0.44300000000000006
+                }
+              },
+              "2026-01-16": {
+                "visits": {
+                  "value": 667.011,
+                  "change": 0.013043286762461161,
+                  "desktopShare": 0.43200000000000005
+                }
+              },
+              "2026-01-17": {
+                "visits": {
+                  "value": 730.013,
+                  "change": 0.0944542143982634,
+                  "desktopShare": 0.437
+                }
+              },
+              "2026-01-18": {
+                "visits": {
+                  "value": 595.451,
+                  "change": -0.1843282242918962,
+                  "desktopShare": 0.49899999999999994
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 715.011,
+                  "change": 0.20078898179699076,
+                  "desktopShare": 0.376
+                }
+              },
+              "2026-01-20": {
+                "visits": {
+                  "value": 660.737,
+                  "change": -0.07590652451500747,
+                  "desktopShare": 0.425
+                }
+              },
+              "2026-01-21": {
+                "visits": {
+                  "value": 618.557,
+                  "change": -0.06383780535977242,
+                  "desktopShare": 0.4729999999999999
+                }
+              },
+              "2026-01-22": {
+                "visits": {
+                  "value": 668.904,
+                  "change": 0.08139427732609926,
+                  "desktopShare": 0.425
+                }
+              },
+              "2026-01-23": {
+                "visits": {
+                  "value": 616.008,
+                  "change": -0.07907861217753213,
+                  "desktopShare": 0.497
+                }
+              },
+              "2026-01-24": {
+                "visits": {
+                  "value": 689.711,
+                  "change": 0.11964617342631909,
+                  "desktopShare": 0.465
+                }
+              },
+              "2026-01-25": {
+                "visits": {
+                  "value": 615.843,
+                  "change": -0.10709993026064547,
+                  "desktopShare": 0.48399999999999993
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 771.083,
+                  "change": 0.25207723397034637,
+                  "desktopShare": 0.418
+                }
+              },
+              "2026-01-27": {
+                "visits": {
+                  "value": 872.025,
+                  "change": 0.13090938329596166,
+                  "desktopShare": 0.38100000000000006
+                }
+              },
+              "2026-01-28": {
+                "visits": {
+                  "value": 696.391,
+                  "change": -0.20140936326366793,
+                  "desktopShare": 0.452
+                }
+              },
+              "2026-01-29": {
+                "visits": {
+                  "value": 617.185,
+                  "change": -0.11373782831771236,
+                  "desktopShare": 0.517
+                }
+              },
+              "2026-01-30": {
+                "visits": {
+                  "value": 665.111,
+                  "change": 0.07765256770660345,
+                  "desktopShare": 0.529
+                }
+              },
+              "2026-01-31": {
+                "visits": {
+                  "value": 590.376,
+                  "change": -0.1123647030345311,
+                  "desktopShare": 0.515
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 586.959,
+                  "change": -0.005787836903939235,
+                  "desktopShare": 0.525
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 675.388,
+                  "change": 0.1506561787109493,
+                  "desktopShare": 0.439
+                }
+              },
+              "2026-02-03": {
+                "visits": {
+                  "value": 550.286,
+                  "change": -0.18522982344963204,
+                  "desktopShare": 0.519
+                }
+              },
+              "2026-02-04": {
+                "visits": {
+                  "value": 594.45,
+                  "change": 0.08025644846498022,
+                  "desktopShare": 0.515
+                }
+              },
+              "2026-02-05": {
+                "visits": {
+                  "value": 590.961,
+                  "change": -0.005869290941206211,
+                  "desktopShare": 0.518
+                }
+              },
+              "2026-02-06": {
+                "visits": {
+                  "value": 745.952,
+                  "change": 0.26226942217845167,
+                  "desktopShare": 0.424
+                }
+              },
+              "2026-02-07": {
+                "visits": {
+                  "value": 647.369,
+                  "change": -0.13215729698425632,
+                  "desktopShare": 0.439
+                }
+              },
+              "2026-02-08": {
+                "visits": {
+                  "value": 573.788,
+                  "change": -0.11366160566848275,
+                  "desktopShare": 0.466
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 683.922,
+                  "change": 0.19194197159926665,
+                  "desktopShare": 0.377
+                }
+              },
+              "2026-02-10": {
+                "visits": {
+                  "value": 616.515,
+                  "change": -0.09855948485353598,
+                  "desktopShare": 0.49000000000000005
+                }
+              },
+              "2026-02-11": {
+                "visits": {
+                  "value": 700.434,
+                  "change": 0.13611834261940095,
+                  "desktopShare": 0.395
+                }
+              },
+              "2026-02-12": {
+                "visits": {
+                  "value": 670.143,
+                  "change": -0.04324604459520803,
+                  "desktopShare": 0.454
+                }
+              },
+              "2026-02-13": {
+                "visits": {
+                  "value": 728.145,
+                  "change": 0.08655167628401692,
+                  "desktopShare": 0.385
+                }
+              },
+              "2026-02-14": {
+                "visits": {
+                  "value": 743.685,
+                  "change": 0.021341903055023332,
+                  "desktopShare": 0.388
+                }
+              },
+              "2026-02-15": {
+                "visits": {
+                  "value": 751.101,
+                  "change": 0.00997196393634409,
+                  "desktopShare": 0.405
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 715.446,
+                  "change": -0.04747031357966502,
+                  "desktopShare": 0.38899999999999996
+                }
+              },
+              "2026-02-17": {
+                "visits": {
+                  "value": 635.806,
+                  "change": -0.11131517962222164,
+                  "desktopShare": 0.416
+                }
+              },
+              "2026-02-18": {
+                "visits": {
+                  "value": 734.859,
+                  "change": 0.1557912319166538,
+                  "desktopShare": 0.409
+                }
+              },
+              "2026-02-19": {
+                "visits": {
+                  "value": 603.063,
+                  "change": -0.17934869138161205,
+                  "desktopShare": 0.459
+                }
+              },
+              "2026-02-20": {
+                "visits": {
+                  "value": 647.326,
+                  "change": 0.07339697510873662,
+                  "desktopShare": 0.457
+                }
+              },
+              "2026-02-21": {
+                "visits": {
+                  "value": 677.059,
+                  "change": 0.045932034245496,
+                  "desktopShare": 0.425
+                }
+              },
+              "2026-02-22": {
+                "visits": {
+                  "value": 668.973,
+                  "change": -0.011942829206908132,
+                  "desktopShare": 0.441
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 763.054,
+                  "change": 0.14063497330983465,
+                  "desktopShare": 0.38499999999999995
+                }
+              },
+              "2026-02-24": {
+                "visits": {
+                  "value": 690.59,
+                  "change": -0.09496575602775156,
+                  "desktopShare": 0.426
+                }
+              },
+              "2026-02-25": {
+                "visits": {
+                  "value": 721.793,
+                  "change": 0.045183104302118436,
+                  "desktopShare": 0.427
+                }
+              },
+              "2026-02-26": {
+                "visits": {
+                  "value": 646.021,
+                  "change": -0.10497746583854381,
+                  "desktopShare": 0.405
+                }
+              },
+              "2026-02-27": {
+                "visits": {
+                  "value": 789.451,
+                  "change": 0.22202064638765623,
+                  "desktopShare": 0.385
+                }
+              },
+              "2026-02-28": {
+                "visits": {
+                  "value": 818.899,
+                  "change": 0.03730187180711656,
+                  "desktopShare": 0.363
+                }
+              }
+            },
+            "total": {
+              "visits": 69516.326
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Campaigns/Data?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=100&includeTerms=&isWindow=false&asc=false&sort=lastSeen",
+    "body": {
+      "data": [
+        {
+          "campaign": "Create and Multistream Live Video | Restream",
+          "landingPageLink": "https://restream.io?utm_campaignid=22238146054&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 262,
+          "firstSeen": "2025-03-09",
+          "lastSeen": "2026-04-02",
+          "activeDays": 390,
+          "campaignId": "restream.io"
+        },
+        {
+          "campaign": "Create and Multistream Live Video | Restream",
+          "landingPageLink": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 18,
+          "firstSeen": "2025-03-09",
+          "lastSeen": "2026-04-02",
+          "activeDays": 390,
+          "campaignId": "restream.io?hsa_acc=6098119570&hsa_ad=&hsa_cam=21289905092&hsa_grp=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_src=x&hsa_tgt=&hsa_ver=3"
+        },
+        {
+          "campaign": "Grow Your Audience with Life Streaming Software | Restream",
+          "landingPageLink": "https://restream.io/lp/livestreaming?utm_campaignid=21341658407&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21341658407&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 11,
+          "firstSeen": "2025-05-05",
+          "lastSeen": "2026-03-31",
+          "activeDays": 331,
+          "campaignId": "restream.io/lp/livestreaming"
+        },
+        {
+          "campaign": "X | Restream",
+          "landingPageLink": "https://restream.io/x?utm_campaignid=21593598197&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21593598197&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 8,
+          "firstSeen": "2025-08-28",
+          "lastSeen": "2026-03-31",
+          "activeDays": 216,
+          "campaignId": "restream.io/x"
+        },
+        {
+          "campaign": "Simply, the best way to live stream | Restream",
+          "landingPageLink": "https://join.restream.io/livestreaming?utm_campaignid=21784507188&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21784507188&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gad_source=0",
+          "publishersCount": 0,
+          "creativesCount": 2,
+          "firstSeen": "2025-08-01",
+          "lastSeen": "2026-03-30",
+          "activeDays": 242,
+          "campaignId": "join.restream.io/livestreaming"
+        },
+        {
+          "campaign": "join.restream.io/livestreaming?hsa_acc=6098119570&hsa_ad=&hsa_cam=21784507188&hsa_grp=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_src=x&hsa_tgt=&hsa_ver=3",
+          "landingPageLink": "https://join.restream.io/livestreaming?utm_campaignid=21784507188&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21784507188&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 2,
+          "firstSeen": "2025-08-01",
+          "lastSeen": "2026-03-30",
+          "activeDays": 242,
+          "campaignId": "join.restream.io/livestreaming?hsa_acc=6098119570&hsa_ad=&hsa_cam=21784507188&hsa_grp=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_src=x&hsa_tgt=&hsa_ver=3"
+        },
+        {
+          "campaign": "Multistream live video | Restream",
+          "landingPageLink": "https://join.restream.io/multi-streaming?utm_campaignid=21377560311&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21377560311&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gad_source=0&gad_campaignid=21377561271",
+          "publishersCount": 0,
+          "creativesCount": 1,
+          "firstSeen": "2026-03-15",
+          "lastSeen": "2026-03-29",
+          "activeDays": 15,
+          "campaignId": "join.restream.io/multi-streaming"
+        },
+        {
+          "campaign": "Upload & Stream Pre-Recorded Videos | Restream",
+          "landingPageLink": "https://restream.io/upload-and-stream?utm_campaignid=21321262030&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21321262030&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gad_source=5&gad_campaignid=21321263278",
+          "publishersCount": 0,
+          "creativesCount": 5,
+          "firstSeen": "2025-03-24",
+          "lastSeen": "2026-03-26",
+          "activeDays": 368,
+          "campaignId": "restream.io/upload-and-stream"
+        },
+        {
+          "campaign": "Get More Views with Multistreaming | Restream",
+          "landingPageLink": "https://restream.io/live/multistreaming?studio_version=scenes&customer_segmentation=livestream_campaign&utm_campaignid=21345599893&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21345599893&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 1,
+          "firstSeen": "2026-01-29",
+          "lastSeen": "2026-03-24",
+          "activeDays": 55,
+          "campaignId": "restream.io/live/multistreaming"
+        },
+        {
+          "campaign": "How to live stream to YouTube | Restream",
+          "landingPageLink": "https://join.restream.io/how-to/youtube?utm_campaignid=21660665889&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21307208613&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 6,
+          "firstSeen": "2025-03-10",
+          "lastSeen": "2026-02-18",
+          "activeDays": 346,
+          "campaignId": "join.restream.io/how-to/youtube"
+        },
+        {
+          "campaign": "LinkedIn Preferred Live Streaming Provider | Restream",
+          "landingPageLink": "https://restream.io/linkedin?utm_campaignid=21397428950&utm_adgroup=&utm_adgroupid=&utm_device=m&utm_adposition=&hsa_acc=6098119570&hsa_cam=21397428950&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 1,
+          "firstSeen": "2026-01-08",
+          "lastSeen": "2026-01-20",
+          "activeDays": 13,
+          "campaignId": "restream.io/linkedin"
+        },
+        {
+          "campaign": "Riverside vs. Restream - Comparing Features",
+          "landingPageLink": "https://join.restream.io/comparison/riverside?utm_campaignid=21544237813&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21266726835&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 1,
+          "firstSeen": "2025-09-30",
+          "lastSeen": "2025-12-16",
+          "activeDays": 78,
+          "campaignId": "join.restream.io/comparison/riverside"
+        },
+        {
+          "campaign": "na",
+          "landingPageLink": "http://NA",
+          "publishersCount": 0,
+          "creativesCount": 2,
+          "firstSeen": "2025-09-24",
+          "lastSeen": "2025-10-21",
+          "activeDays": 28,
+          "campaignId": "na"
+        }
+      ],
+      "totalCount": 13,
+      "isFromNewScraper": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/ads/gallery/unified?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": [
+        {
+          "creativeId": "92213a7f05a3e0c5a057959c92161894a7b6f0d30ad213a09391572c*280336",
+          "firstSeen": "2025-12-11",
+          "lastSeen": "2026-04-02",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/92213a7f05a3e0c5a057959c92161894a7b6f0d30ad213a09391572c/336x280?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=64ec63d2dcd449ce01a8ea5529c77e4a75c99ac6a629b7428dfb9730e7ac622e",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "336x280",
+          "activeDays": 113,
+          "campaignTitle": "Create and Multistream Live Video | Restream",
+          "landingPage": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "202ab690fbfcfcad9c7b81ac8383e68ea92b7600dec6c313691b0b26*2801200",
+          "firstSeen": "2025-09-25",
+          "lastSeen": "2026-04-02",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/202ab690fbfcfcad9c7b81ac8383e68ea92b7600dec6c313691b0b26/1200x280?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=5972b28bbba73134f28e586f13751fe4f9acf34fcea0a094e470e3cb2a9dbfbf",
+          "adType": "display",
+          "creativeType": "text",
+          "dimensions": "1200x280",
+          "activeDays": 190,
+          "campaignTitle": "Create and Multistream Live Video | Restream",
+          "landingPage": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "5ad2ba5fe9169c6e41bb8913c4752dffa6e2898001e905d038827a29*90970",
+          "firstSeen": "2026-01-13",
+          "lastSeen": "2026-03-31",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/5ad2ba5fe9169c6e41bb8913c4752dffa6e2898001e905d038827a29/970x90?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=9b320139a9f6e52fb346deaed6eb43f7e8fa686592187886d705d07e5d4ca087",
+          "adType": "display",
+          "creativeType": "text",
+          "dimensions": "970x90",
+          "activeDays": 78,
+          "campaignTitle": "X | Restream",
+          "landingPage": "https://restream.io/x?utm_campaignid=21593598197&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21593598197&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "googleads-5Zwme9YK25w*7201280",
+          "firstSeen": "2025-10-01",
+          "lastSeen": "2026-03-30",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/videos_thumbnails/googleads-5Zwme9YK25w/1280x720.jpg?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=9776eeb5798185eb587dc792e50158c95732acedf1a0ebb73dc9f1bc670a75cf",
+          "adType": "video",
+          "creativeType": "video",
+          "dimensions": "1280x720",
+          "activeDays": 181,
+          "campaignTitle": "Simply, the best way to live stream | Restream",
+          "videoUrl": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture_client_side_vast/videos/googleads-5Zwme9YK25w?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.mp4%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=07d241da1002101fff67a480f973450d41955edd18c724b60ea3c11941041192",
+          "landingPage": "https://join.restream.io/livestreaming?utm_campaignid=21784507188&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21784507188&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "2c6b1064736c64efd230747767f72de109ff973f0cf52b0320d20d59*90728",
+          "firstSeen": "2025-12-13",
+          "lastSeen": "2026-03-28",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/2c6b1064736c64efd230747767f72de109ff973f0cf52b0320d20d59/728x90?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=0670bd45ad19d515c0a429f83c8b8f791d5a86d808deb0b62dfea58734430c25",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "728x90",
+          "activeDays": 106,
+          "campaignTitle": "Create and Multistream Live Video | Restream",
+          "landingPage": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "1a99fa3373d7dfd7214d9224b146cf5ac4aa62a9070cae2bae02a603*901200",
+          "firstSeen": "2025-12-08",
+          "lastSeen": "2026-03-28",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/1a99fa3373d7dfd7214d9224b146cf5ac4aa62a9070cae2bae02a603/1200x90?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=7834201e3c02be5362cdc0902f5d477133e1107ae28bd321d10184c14dfea7b4",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "1200x90",
+          "activeDays": 111,
+          "campaignTitle": "Create and Multistream Live Video | Restream",
+          "landingPage": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "1a99fa3373d7dfd7214d9224b146cf5ac4aa62a9070cae2bae02a603*1241005",
+          "firstSeen": "2025-08-29",
+          "lastSeen": "2026-03-26",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/1a99fa3373d7dfd7214d9224b146cf5ac4aa62a9070cae2bae02a603/1005x124?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=d33322aebccebd29866fdb7ec55e766148dc780841b681ceda753d1b10ed87d2",
+          "adType": "display",
+          "creativeType": "banner",
+          "dimensions": "1005x124",
+          "activeDays": 210,
+          "campaignTitle": "Create and Multistream Live Video | Restream",
+          "landingPage": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "googleads-WS65QZBdKe0*7201280",
+          "firstSeen": "2025-09-23",
+          "lastSeen": "2026-03-26",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/videos_thumbnails/googleads-WS65QZBdKe0/1280x720.jpg?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=5f27e80c7f12bd7e059efe34222b4e0922213a76b6b4963c0bfb93fc09ab1ae9",
+          "adType": "video",
+          "creativeType": "video",
+          "dimensions": "1280x720",
+          "activeDays": 185,
+          "campaignTitle": "Upload & Stream Pre-Recorded Videos | Restream",
+          "videoUrl": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture_client_side_vast/videos/googleads-WS65QZBdKe0?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.mp4%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=09bff5bcb37914e95d4520f8c28df77bd9fd630ae6c0b88e408882040119cf03",
+          "landingPage": "https://restream.io/upload-and-stream?utm_campaignid=22798633434&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21307208613&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "googleads-NroxYp8zQzY*7201280",
+          "firstSeen": "2025-08-04",
+          "lastSeen": "2026-03-25",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/videos_thumbnails/googleads-NroxYp8zQzY/1280x720.jpg?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=9d9f2176fb4438f9b241af5da1ab34f48a695f9aee5851874aad1cc54f54169e",
+          "adType": "video",
+          "creativeType": "video",
+          "dimensions": "1280x720",
+          "activeDays": 234,
+          "videoUrl": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture_client_side_vast/videos/googleads-NroxYp8zQzY?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.mp4%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=329c3e0d97ddb90f61f7968a6a61e5f4209f695daac1aeb4fd17b04607f3cc62",
+          "landingPage": "https://join.restream.io/livestreaming?utm_campaignid=21784507188&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21784507188&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        },
+        {
+          "creativeId": "68ebbed8e8fbc1f9efce5d95ccc62b85acd32caa322dfc1800c62a82*600300",
+          "firstSeen": "2025-12-15",
+          "lastSeen": "2026-03-19",
+          "creativeImageUri": "https://sw-df-ads-capture-creatives-production.s3.us-east-1.amazonaws.com/creatives/execution_key%3Dads_capture/images/68ebbed8e8fbc1f9efce5d95ccc62b85acd32caa322dfc1800c62a82/300x600?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22creative_screenshot.png%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4GKBI5ER5IXVZOXV%2F20260404%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260404T205620Z&X-Amz-SignedHeaders=host&X-Amz-Signature=f5c2ea33458d8f405ad0fa1fa6bca73399238605a296c79f3d3d137d2791fb16",
+          "adType": "display",
+          "creativeType": "text",
+          "dimensions": "300x600",
+          "activeDays": 95,
+          "campaignTitle": "Create and Multistream Live Video | Restream",
+          "landingPage": "https://restream.io?utm_campaignid=21289905092&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3"
+        }
+      ],
+      "totalCount": 301,
+      "totalValidCount": 292,
+      "isFromNewScraper": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/summary?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "restream.io": {
+          "campaigns": {
+            "count": 13,
+            "change": 0.125
+          },
+          "creatives": {
+            "count": 300,
+            "change": -0.204081633
+          },
+          "favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Campaigns/Data?country=999&key=restream.io&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&asc=false&sort=lastSeen",
+    "body": {
+      "data": [
+        {
+          "campaign": "Create and Multistream Live Video | Restream",
+          "landingPageLink": "https://restream.io?utm_campaignid=21289905092&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 262,
+          "firstSeen": "2025-03-09",
+          "lastSeen": "2026-04-02",
+          "activeDays": 390,
+          "campaignId": "restream.io"
+        },
+        {
+          "campaign": "Create and Multistream Live Video | Restream",
+          "landingPageLink": "https://restream.io?utm_campaignid=22238146054&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21289905092&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 18,
+          "firstSeen": "2025-03-09",
+          "lastSeen": "2026-04-02",
+          "activeDays": 390,
+          "campaignId": "restream.io?hsa_acc=6098119570&hsa_ad=&hsa_cam=21289905092&hsa_grp=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_src=x&hsa_tgt=&hsa_ver=3"
+        },
+        {
+          "campaign": "Grow Your Audience with Life Streaming Software | Restream",
+          "landingPageLink": "https://restream.io/lp/livestreaming?utm_campaignid=21341658407&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21341658407&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 11,
+          "firstSeen": "2025-05-05",
+          "lastSeen": "2026-03-31",
+          "activeDays": 331,
+          "campaignId": "restream.io/lp/livestreaming"
+        },
+        {
+          "campaign": "X | Restream",
+          "landingPageLink": "https://restream.io/x?utm_campaignid=21593598197&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21593598197&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3",
+          "publishersCount": 0,
+          "creativesCount": 8,
+          "firstSeen": "2025-08-28",
+          "lastSeen": "2026-03-31",
+          "activeDays": 216,
+          "campaignId": "restream.io/x"
+        },
+        {
+          "campaign": "Simply, the best way to live stream | Restream",
+          "landingPageLink": "https://join.restream.io/livestreaming?utm_campaignid=21784507188&utm_adgroup=&utm_adgroupid=&utm_device=c&utm_adposition=&hsa_acc=6098119570&hsa_cam=21784507188&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gad_source=0",
+          "publishersCount": 0,
+          "creativesCount": 2,
+          "firstSeen": "2025-08-01",
+          "lastSeen": "2026-03-30",
+          "activeDays": 242,
+          "campaignId": "join.restream.io/livestreaming"
+        }
+      ],
+      "totalCount": 13,
+      "isFromNewScraper": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/ads/gallery/unified/filteredPublishers?key=restream.io&country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": [
+      {
+        "domain": "Unknown publisher"
+      },
+      {
+        "domain": "0nradio.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=0nradio.com&t=2&s=0&h=6ca45c71e652714d325a4f6f2983ec0642d4f7910c5ac3c40042c9e189f7e32b"
+      },
+      {
+        "domain": "108.gigafile.nu",
+        "favicon": "https://site-images.similarcdn.com/image?url=108.gigafile.nu&t=2&s=0&h=cccfeaa3717bc4d1c63ff6161b95ee44cb78c53e2f682411a266f60acd276948"
+      },
+      {
+        "domain": "10tv.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=10tv.com&t=2&s=0&h=a9ca6049dae05a32fc2233fc9e2b8f1e886772adcf348d059797c5a9821116bc"
+      },
+      {
+        "domain": "12jan.fixd.online",
+        "favicon": "https://site-images.similarcdn.com/image?url=12jan.fixd.online&t=2&s=0&h=0a046f3ab18079f8ffd085a8c92c789b55f9f9b9347946385886d6636853a1f5"
+      },
+      {
+        "domain": "12thman.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=12thman.com&t=2&s=0&h=8d6e7db9150a527680c78d6c74f23f2ecdd50e0331f530e2dfea693919addb05"
+      },
+      {
+        "domain": "20minutes.fr",
+        "favicon": "https://site-images.similarcdn.com/image?url=20minutes.fr&t=2&s=0&h=64a71550eedbc7367538c52d29e813a38571c3c690dc1fef10e6152e421474c1"
+      },
+      {
+        "domain": "24live.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=24live.com&t=2&s=0&h=a7d919a5dcc3b81fc81fd179a1703181b1056b4b627f078f08daa65f3423d2c8"
+      },
+      {
+        "domain": "365scores.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=365scores.com&t=2&s=0&h=4edcd0f79bb363367b09e6f5b9465430475a1dfa50d6d0c51af301fd33540509"
+      },
+      {
+        "domain": "3musicgh.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=3musicgh.com&t=2&s=0&h=5fab1118ebaa45f80ebf8b7b4d53bba691ee761df7c82967f96d5de7f3d0d5ea"
+      },
+      {
+        "domain": "4devs.com.br",
+        "favicon": "https://site-images.similarcdn.com/image?url=4devs.com.br&t=2&s=0&h=24e7b2b35c95b0083aed9e4c60c14e2290911c092c7fbf79fe283732ceb24820"
+      },
+      {
+        "domain": "5msh.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=5msh.com&t=2&s=0&h=677078171dd28cf9673e7f99238185e2dfd1dccf75f07ed67a1db93e19a97fcd"
+      },
+      {
+        "domain": "90zhibo.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=90zhibo.com&t=2&s=0&h=b2c2f33341c5492f719407be3b539c9a685e1c3abf3dc5911a334da60e541f1b"
+      },
+      {
+        "domain": "9news.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=9news.com&t=2&s=0&h=cdc9ca31525eebf2e22a658a27b6d699021cfb6055e32cf602efc50bb97563d3"
+      },
+      {
+        "domain": "a-sports.tv",
+        "favicon": "https://site-images.similarcdn.com/image?url=a-sports.tv&t=2&s=0&h=58b11805dfcb189197f554faef054b83a28909bb4077a4ac34d0deb5648fdefb"
+      },
+      {
+        "domain": "a1.ro",
+        "favicon": "https://site-images.similarcdn.com/image?url=a1.ro&t=2&s=0&h=3346fb49d02c47c12899e41052ef7736ed1681ed4eec97268f3f59720c4ae210"
+      },
+      {
+        "domain": "aboutmsr.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=aboutmsr.com&t=2&s=0&h=a5d62f1236f292209d388946390a32c6a818cf6dce8da00f70e78f4f2125c851"
+      },
+      {
+        "domain": "adorocinema.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=adorocinema.com&t=2&s=0&h=c7fb5d2f5d5c55f9d91eb3983c15cb4a6a8092bc859a9dd93d39ba3c289d7839"
+      },
+      {
+        "domain": "ahly.alsaudinews.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=ahly.alsaudinews.com&t=2&s=0&h=7af4e876acde52a240a4485c452c8cdc72337d45541226fa1e44a2281291c829"
+      },
+      {
+        "domain": "ahsa-news.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=ahsa-news.com&t=2&s=0&h=b5b064dff147f6acfef11dae9ee3f7c1ecaaf5de0d95c96d0a19e908751db481"
+      },
+      {
+        "domain": "ahwaljawiya.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=ahwaljawiya.com&t=2&s=0&h=a34e7cddf9cd57e3b48e78d36d0ce502fa74e45a5db99fa48f463cb12f810fd9"
+      },
+      {
+        "domain": "aifreevideo.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=aifreevideo.com&t=2&s=0&h=680665ebb4b933c53949f488e8a06ee8d1d19ba78374d0614ae9bd85836e8356"
+      },
+      {
+        "domain": "airportdistancecalculator.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=airportdistancecalculator.com&t=2&s=0&h=7eb6477c183eadef2f494e8cdca792d26de4aec1a14dc244b92f961871209f2b"
+      },
+      {
+        "domain": "al.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=al.com&t=2&s=0&h=4ac47449a8829e062f9fc5972026a8cec53ed18ed98ff450553e97cfa8ea79a8"
+      },
+      {
+        "domain": "al3asmaalyoum.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=al3asmaalyoum.com&t=2&s=0&h=c8ea71e0b669d877aa971ca1bf9a830e35bb05ec2cc775d1eb49ac44eec8b227"
+      },
+      {
+        "domain": "aldiwan.net",
+        "favicon": "https://site-images.similarcdn.com/image?url=aldiwan.net&t=2&s=0&h=f877794963de6528d914db2478bf17ec4bd332036f058a8020086e032053ff0e"
+      },
+      {
+        "domain": "aljazeera.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=aljazeera.com&t=2&s=0&h=21b4054d34f329ad0a39fceb870833f5da41b221cf91e267febd455b52796a76"
+      },
+      {
+        "domain": "allapktv.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=allapktv.com&t=2&s=0&h=7ad31b1315a420e617aae53c50acbfba635ffce4d4fe5da98fb685d1b9b4a539"
+      },
+      {
+        "domain": "allevents.in",
+        "favicon": "https://site-images.similarcdn.com/image?url=allevents.in&t=2&s=0&h=13105935250e032532d810f378ea86ae287e7ceb4dd93ef6bfa1f37e2d4bbe27"
+      },
+      {
+        "domain": "allmyfaves.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=allmyfaves.com&t=2&s=0&h=a3cb7dfdb86287a109084f2cd8ceb2e65c00e058a0f164ec446a960ec8d117f7"
+      },
+      {
+        "domain": "alphacyprus.com.cy",
+        "favicon": "https://site-images.similarcdn.com/image?url=alphacyprus.com.cy&t=2&s=0&h=7967fe351446d001b342c16861e85bf413d451c2dd1de4240df74902389cb29d"
+      },
+      {
+        "domain": "alphonsevanworden.tumblr.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=alphonsevanworden.tumblr.com&t=2&s=0&h=2bb0aa899ec738571de67fc3e911e9f3a69476de31b4e3bccb1c530c50111938"
+      },
+      {
+        "domain": "alshamsnews.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=alshamsnews.com&t=2&s=0&h=59f75aa180e6c6ce3c8dcf7365976094585100946c1eef7e1a1874d158dcd5ac"
+      },
+      {
+        "domain": "alwafd.news",
+        "favicon": "https://site-images.similarcdn.com/image?url=alwafd.news&t=2&s=0&h=f2d10b160a24913f5b9dfa1e73a1f27d4b1870f0096d41a1781f4c3e41a2e809"
+      },
+      {
+        "domain": "amazing.daily24.blog",
+        "favicon": "https://site-images.similarcdn.com/image?url=amazing.daily24.blog&t=2&s=0&h=49530b675a79b0e7b914b7afc9950e7f204d42648bd554e2bb7bd50d44bde38d"
+      },
+      {
+        "domain": "ambito.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=ambito.com&t=2&s=0&h=3f3df0c207d82895616d880b9cd7dcc002336990173b4eb887962b692d37246a"
+      },
+      {
+        "domain": "americaeconomia.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=americaeconomia.com&t=2&s=0&h=e753c2768f97709e3521212050a75ab4d873b228cac652af69203b80cd0910b4"
+      },
+      {
+        "domain": "amw.al",
+        "favicon": "https://site-images.similarcdn.com/image?url=amw.al&t=2&s=0&h=3c03c72822913ca52b6cd993bf278f8b8a96e7f568d2e77a4d610c4e8e141e17"
+      },
+      {
+        "domain": "amwaly.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=amwaly.com&t=2&s=0&h=b4cc92a2c27b3fd4f12835fc391ca09d7cd52a2f4f0699f8d7ea8523fcc40ed3"
+      },
+      {
+        "domain": "analyticsinsight.net",
+        "favicon": "https://site-images.similarcdn.com/image?url=analyticsinsight.net&t=2&s=0&h=c83a0a6c722f447e4e7e43e1c530642407b460130db58722ab04371b33bdd3d1"
+      },
+      {
+        "domain": "antofagasta.tv",
+        "favicon": "https://site-images.similarcdn.com/image?url=antofagasta.tv&t=2&s=0&h=aca3895514a3626fc47978b7e34661019e6111ce60bf415bcc24c9cc944489b2"
+      },
+      {
+        "domain": "antoloji.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=antoloji.com&t=2&s=0&h=d9be2a175c923ca2b1871fdc22edd16f697356253af799d96d89916d5a840861"
+      },
+      {
+        "domain": "apk4u.net",
+        "favicon": "https://site-images.similarcdn.com/image?url=apk4u.net&t=2&s=0&h=b861e7729bc880033c22433881bffb0f9ceb299371572700f0480c2a5aa6c380"
+      },
+      {
+        "domain": "apnews.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=apnews.com&t=2&s=0&h=1eef0349b50c7abadc174c662fe96ae62109df4affc805a53630a1247fe941ad"
+      },
+      {
+        "domain": "app.moviebite.cc",
+        "favicon": "https://site-images.similarcdn.com/image?url=app.moviebite.cc&t=2&s=0&h=13cc8568cf8186cbd8180516b6e5aa338b6d1d297ecffca1f7f3e0cd5c5412a6"
+      },
+      {
+        "domain": "appcrazy.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=appcrazy.com&t=2&s=0&h=9998a19a6e524e367085693170d05a67d5757cac9fd969ffb481e19c8b9f6e90"
+      },
+      {
+        "domain": "arabfinance.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=arabfinance.com&t=2&s=0&h=1538c89eccbd9d0ff67dd98e4d981b3f4da02556907cbf726cba3f509a282a07"
+      },
+      {
+        "domain": "areavibes.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=areavibes.com&t=2&s=0&h=5dfaf54417652b4af3a5801f4acb83d6eb4f351f03629620db0c018b5e41d79c"
+      },
+      {
+        "domain": "asiatimes.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=asiatimes.com&t=2&s=0&h=0a78160807537eed9c0f2eba872092b2dfc99b83878defc5b7dbd2adde0e7113"
+      },
+      {
+        "domain": "ask.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=ask.com&t=2&s=0&h=fabebef019c71b937e87357f0a391ebd60ecdf79bd1f62405f3b7eff258ee3c3"
+      },
+      {
+        "domain": "athletics.skagit.edu",
+        "favicon": "https://site-images.similarcdn.com/image?url=athletics.skagit.edu&t=2&s=0&h=0ffb1a96a625b19d4bdf75b17a491fc6ebdfdd458b9d1da56240afc71d59cdfc"
+      },
+      {
+        "domain": "athletics.snc.edu",
+        "favicon": "https://site-images.similarcdn.com/image?url=athletics.snc.edu&t=2&s=0&h=2e63766576aac1a646843c4415f4b5bb1b1b351f3645243367fdaf26da0e05bb"
+      },
+      {
+        "domain": "athleticsweekly.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=athleticsweekly.com&t=2&s=0&h=78d33786ea19c8f7f02982fc687e120025f0f4ec30f9b61395da1392b59940ee"
+      },
+      {
+        "domain": "atresplayer.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=atresplayer.com&t=2&s=0&h=6ad39dd5812d91c2e969301904202f4172c07a86293c0517559c386bab08d4a9"
+      },
+      {
+        "domain": "atv.pe",
+        "favicon": "https://site-images.similarcdn.com/image?url=atv.pe&t=2&s=0&h=008d2bd08106193a6c56200b2f60eaa53b08103d9a00ceda03930de9a8c34e65"
+      },
+      {
+        "domain": "ausopen.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=ausopen.com&t=2&s=0&h=d46b2e577d4f24bf182a58d95479759ea10ee3547c59ae8188d4969e57cfa171"
+      },
+      {
+        "domain": "avopolis.gr",
+        "favicon": "https://site-images.similarcdn.com/image?url=avopolis.gr&t=2&s=0&h=c5a6714caeb3134d7f562951e66c5dc13a4512eb020040515252219787cb0ce9"
+      },
+      {
+        "domain": "awtar.net",
+        "favicon": "https://site-images.similarcdn.com/image?url=awtar.net&t=2&s=0&h=7715176e8ee05422b71e1e13619d59c4355595a65c64ad13ce6547f50e2cc9e4"
+      },
+      {
+        "domain": "axis-intelligence.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=axis-intelligence.com&t=2&s=0&h=37d208014c6c39adcd576e1fd1cd81f67aa47177dd9e71c2c4f2c0e4b2080745"
+      },
+      {
+        "domain": "aztecaaguascalientes.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=aztecaaguascalientes.com&t=2&s=0&h=6cc75cc0bcb03ba2efcf0bd13ff47396c019a1e9432f451be35d37c967094a73"
+      },
+      {
+        "domain": "aztecajalisco.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=aztecajalisco.com&t=2&s=0&h=d9e0776ce2a6f6205c56d8f5fe1de89379ac22a91e72c232fba3d9c12ab2e9e4"
+      },
+      {
+        "domain": "b360nepal.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=b360nepal.com&t=2&s=0&h=936b27e2eee68b70232bc455ec293fc57ed5954e1c0fe02ff468d06d456f7f4c"
+      },
+      {
+        "domain": "backingtracksfullcollection.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=backingtracksfullcollection.com&t=2&s=0&h=be56d5b01e98ebd33a1d8bfeec542a506295302c083d02965a3089579e6216cf"
+      },
+      {
+        "domain": "band.com.br",
+        "favicon": "https://site-images.similarcdn.com/image?url=band.com.br&t=2&s=0&h=6cd96f9c7977b3b7938bc96cce4e07293b3c95041c33bb33f3eaca4f11da6ed5"
+      },
+      {
+        "domain": "bandsintown.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=bandsintown.com&t=2&s=0&h=6037fa0a5d088fa3b32511855a1810fcf70f94b04d1c7af42b86e0b79848c50b"
+      },
+      {
+        "domain": "bangkokpost.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=bangkokpost.com&t=2&s=0&h=2c3c716719ddbd385516ce4475fa257cfa3ded62dc40f0efe72d3b3f4a6f7f88"
+      },
+      {
+        "domain": "bangordailynews.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=bangordailynews.com&t=2&s=0&h=eac17594b721696494536f23d1704b105faf695d0e690f393776fe020d1d7d00"
+      },
+      {
+        "domain": "barchart.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=barchart.com&t=2&s=0&h=72d2708965fb8dcb8f41fd2d16ba0b0245c503e6907ae82a17624ddf2b1fba29"
+      },
+      {
+        "domain": "basketball.eurobasket.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=basketball.eurobasket.com&t=2&s=0&h=9b36c48979fd51c25acfcad86653a20ea16c4986b35b63834f63ada19f881263"
+      },
+      {
+        "domain": "bbc.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=bbc.com&t=2&s=0&h=291e039829bc725eb527993be3c2f65b3b36650ab5d0ccac6af3ce04a40ab895"
+      },
+      {
+        "domain": "bestoldgames.net",
+        "favicon": "https://site-images.similarcdn.com/image?url=bestoldgames.net&t=2&s=0&h=13bf9d67b6a26155dac164ee71e6256b8bec9a7025f9e31265fb90176bccfedf"
+      },
+      {
+        "domain": "betar.org.ua",
+        "favicon": "https://site-images.similarcdn.com/image?url=betar.org.ua&t=2&s=0&h=44d5312df2155013caa10dec63694e11cff9af5b8655b461ab53000d4d6acb7d"
+      },
+      {
+        "domain": "biblehub.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=biblehub.com&t=2&s=0&h=abc97addeb51a7a2fb1e1da72e80cf188c78463f8611e0145f6a412dd1ba5d0c"
+      },
+      {
+        "domain": "biblestudytools.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=biblestudytools.com&t=2&s=0&h=ae85137bf73fcf1db78b791665eebe09bec9964ccf10238c38194130530a6f6d"
+      },
+      {
+        "domain": "blackandwhite.imageonline.co",
+        "favicon": "https://site-images.similarcdn.com/image?url=blackandwhite.imageonline.co&t=2&s=0&h=f94e2c3503363285ff54cee66c2b9160dbb9ffec0da16b72f033c1d3730d457e"
+      },
+      {
+        "domain": "blog.cricfoot.net",
+        "favicon": "https://site-images.similarcdn.com/image?url=blog.cricfoot.net&t=2&s=0&h=21734141f973744f380f82feefd69da2f9d65938de231881bb48c5abd09050e3"
+      },
+      {
+        "domain": "botrix.live",
+        "favicon": "https://site-images.similarcdn.com/image?url=botrix.live&t=2&s=0&h=09037801814a3ae45a9d3cf90c3b42c1c48164dc294ae1ac1ab117a0dfb0149a"
+      },
+      {
+        "domain": "brandimpact.com.ng",
+        "favicon": "https://site-images.similarcdn.com/image?url=brandimpact.com.ng&t=2&s=0&h=b43b6efa54adbaa22b72fe08e1c255a761720061b5db3334295669268073be0b"
+      },
+      {
+        "domain": "broadwaydancecenter.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=broadwaydancecenter.com&t=2&s=0&h=ddebc7afbd3de498ca20af63764f88c25503558dcc52c688754eba07c757f39a"
+      },
+      {
+        "domain": "buccaneersports.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=buccaneersports.com&t=2&s=0&h=7d566e070f58a36a4c1f24b5d8fd8a7812875437e0eff91f003192c9f660d9cf"
+      },
+      {
+        "domain": "bukimevieningi.lt",
+        "favicon": "https://site-images.similarcdn.com/image?url=bukimevieningi.lt&t=2&s=0&h=964f5cca5c98d03c94527597e10ce157c0f140a1b41f4aab3e929351f5f18004"
+      },
+      {
+        "domain": "buzzreport247.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=buzzreport247.com&t=2&s=0&h=daa58bea15872812aac07f67790e82bf1cb41ef47021eca9edc7ea2c864351b1"
+      },
+      {
+        "domain": "cadforum.cz",
+        "favicon": "https://site-images.similarcdn.com/image?url=cadforum.cz&t=2&s=0&h=7eac49cdc4b13576cab5be97fc167b9a2f52a9229e5b296bb8535aff9c2127a6"
+      },
+      {
+        "domain": "cafemom.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=cafemom.com&t=2&s=0&h=91e1042da5e47eabf85eaf70a0b168da5f18e6b05c93e979789b98ecbd960769"
+      },
+      {
+        "domain": "cairo360.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=cairo360.com&t=2&s=0&h=4fdd2195546f0562e40f390d20e14d3c96e55ff4224dde4c184b232426cd0d4c"
+      },
+      {
+        "domain": "canalesdemexicoenvivo.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=canalesdemexicoenvivo.com&t=2&s=0&h=d99deeb0969192e9afa79677fd1fdf07cea67d49090bd8f989354aa88cc93b7c"
+      },
+      {
+        "domain": "canalesdominicanos.live",
+        "favicon": "https://site-images.similarcdn.com/image?url=canalesdominicanos.live&t=2&s=0&h=f3779e69024f3056efe6cc42bdff6ecc9aa6047eef57421cad834cd4a77a99ef"
+      },
+      {
+        "domain": "capitalfm.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=capitalfm.com&t=2&s=0&h=23abae97b438100c953f53816611548497c2cb2bf6934990aeca019b857c4cbb"
+      },
+      {
+        "domain": "capitalxtra.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=capitalxtra.com&t=2&s=0&h=40e00ad1170763eeebc24d489b02cc8fb24ecb6d487d0d64cf618b513f708bb2"
+      },
+      {
+        "domain": "cardsboard.co.uk",
+        "favicon": "https://site-images.similarcdn.com/image?url=cardsboard.co.uk&t=2&s=0&h=31fc407538e8cc2080b6025fed381c756de5619e7532b73eba2e94012a9d1fc9"
+      },
+      {
+        "domain": "cargurus.ca",
+        "favicon": "https://site-images.similarcdn.com/image?url=cargurus.ca&t=2&s=0&h=cbc6d0c9db723d38ad16c1b91fc4c1f0b6e67b69971ff85bc01f77f709f31dca"
+      },
+      {
+        "domain": "cartoonstock.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=cartoonstock.com&t=2&s=0&h=e485e10f477c52126194e4fe4db62463ac94051cadfef40ebd63eb5a42fd279e"
+      },
+      {
+        "domain": "catsss.gwoo.online",
+        "favicon": "https://site-images.similarcdn.com/image?url=catsss.gwoo.online&t=2&s=0&h=7d46961153df084d26eeffe3ba532d4cfea7fe414b7fc6474ecf16ee0f9a5af7"
+      },
+      {
+        "domain": "cdn.com.do",
+        "favicon": "https://site-images.similarcdn.com/image?url=cdn.com.do&t=2&s=0&h=5e9ffa31c643ff7df2f5cc69636ce62ea568a37a7fcc11f893832db727f33aa6"
+      },
+      {
+        "domain": "celebeat.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=celebeat.com&t=2&s=0&h=b452f37dd30ec59f21e67c553b90c77cf57ad327d06c998549c2efdcfa4d6b31"
+      },
+      {
+        "domain": "centralnews.co.za",
+        "favicon": "https://site-images.similarcdn.com/image?url=centralnews.co.za&t=2&s=0&h=9fa65828948c92d3c8914b782efa638c0507445672493ceaeb6df853fab076c6"
+      },
+      {
+        "domain": "chandigarhmetro.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=chandigarhmetro.com&t=2&s=0&h=5d26b226d48cc9ca85849e564d54ec22312cd25ec040ff894cac16c44523e796"
+      },
+      {
+        "domain": "channelhub.livedirects.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=channelhub.livedirects.com&t=2&s=0&h=80534946f01e5bacee71d424dcee4641c3084419310f29f4c8b26f0f85848033"
+      },
+      {
+        "domain": "charfen.co.uk",
+        "favicon": "https://site-images.similarcdn.com/image?url=charfen.co.uk&t=2&s=0&h=cbcbe0a89a93e84dd1b9e7643e1432deb7a7a6f5ae75a1554e05b7caa663d64f"
+      },
+      {
+        "domain": "chicagotribune.com",
+        "favicon": "https://site-images.similarcdn.com/image?url=chicagotribune.com&t=2&s=0&h=cb3c653008a44871c2c855fdbee8eea52c2f60bb91e7111c956b71313e9edd3c"
+      }
+    ]
+  }
+]

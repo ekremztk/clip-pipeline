@@ -1,0 +1,530 @@
+[
+  {
+    "ts": "2026-04-04T20:25:46.367Z",
+    "domain": "vizard.ai",
+    "section": "traffic-engagement",
+    "compName": "vizard",
+    "responses": 15,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:26:51.502Z",
+    "domain": "opus.pro",
+    "section": "traffic-engagement",
+    "compName": "opusclip",
+    "responses": 15,
+    "kb": 13
+  },
+  {
+    "ts": "2026-04-04T20:27:43.243Z",
+    "domain": "vizard.ai",
+    "section": "traffic-overview",
+    "compName": "vizard",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:28:39.320Z",
+    "domain": "vizard.ai",
+    "section": "search-overview",
+    "compName": "vizard",
+    "responses": 10,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:29:17.417Z",
+    "domain": "vizard.ai",
+    "section": "referrals",
+    "compName": "vizard",
+    "responses": 5,
+    "kb": 67
+  },
+  {
+    "ts": "2026-04-04T20:29:55.714Z",
+    "domain": "vizard.ai",
+    "section": "display-overview",
+    "compName": "vizard",
+    "responses": 7,
+    "kb": 19
+  },
+  {
+    "ts": "2026-04-04T20:30:49.286Z",
+    "domain": "vizard.ai",
+    "section": "publisher-overview",
+    "compName": "vizard",
+    "responses": 7,
+    "kb": 9
+  },
+  {
+    "ts": "2026-04-04T20:31:59.130Z",
+    "domain": "quickreel.io",
+    "section": "website-performance",
+    "compName": "quickreel",
+    "responses": 25,
+    "kb": 24
+  },
+  {
+    "ts": "2026-04-04T20:35:12.405Z",
+    "domain": "quickreel.io",
+    "section": "traffic-engagement",
+    "compName": "quickreel",
+    "responses": 15,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:36:29.139Z",
+    "domain": "quickreel.io",
+    "section": "traffic-overview",
+    "compName": "quickreel",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:37:04.244Z",
+    "domain": "quickreel.io",
+    "section": "search-overview",
+    "compName": "quickreel",
+    "responses": 9,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:37:38.329Z",
+    "domain": "quickreel.io",
+    "section": "referrals",
+    "compName": "quickreel",
+    "responses": 5,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:38:25.157Z",
+    "domain": "quickreel.io",
+    "section": "display-overview",
+    "compName": "quickreel",
+    "responses": 7,
+    "kb": 16
+  },
+  {
+    "ts": "2026-04-04T20:39:04.223Z",
+    "domain": "quickreel.io",
+    "section": "publisher-overview",
+    "compName": "quickreel",
+    "responses": 6,
+    "kb": 7
+  },
+  {
+    "ts": "2026-04-04T20:40:03.307Z",
+    "domain": "quickreel.io",
+    "section": "social",
+    "compName": "quickreel",
+    "responses": 5,
+    "kb": 8
+  },
+  {
+    "ts": "2026-04-04T20:41:18.187Z",
+    "domain": "quickreel.io",
+    "section": "technologies-overview",
+    "compName": "quickreel",
+    "responses": 2,
+    "kb": 1
+  },
+  {
+    "ts": "2026-04-04T20:42:42.780Z",
+    "domain": "quickreel.io",
+    "section": "website-content",
+    "compName": "quickreel",
+    "responses": 1,
+    "kb": 0
+  },
+  {
+    "ts": "2026-04-04T20:43:58.729Z",
+    "domain": "quso.ai",
+    "section": "website-performance",
+    "compName": "quso",
+    "responses": 27,
+    "kb": 35
+  },
+  {
+    "ts": "2026-04-04T20:44:42.787Z",
+    "domain": "quso.ai",
+    "section": "traffic-engagement",
+    "compName": "quso",
+    "responses": 15,
+    "kb": 13
+  },
+  {
+    "ts": "2026-04-04T20:45:16.693Z",
+    "domain": "quso.ai",
+    "section": "traffic-overview",
+    "compName": "quso",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:45:51.712Z",
+    "domain": "quso.ai",
+    "section": "search-overview",
+    "compName": "quso",
+    "responses": 10,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:46:26.549Z",
+    "domain": "quso.ai",
+    "section": "referrals",
+    "compName": "quso",
+    "responses": 5,
+    "kb": 60
+  },
+  {
+    "ts": "2026-04-04T20:47:13.450Z",
+    "domain": "quso.ai",
+    "section": "display-overview",
+    "compName": "quso",
+    "responses": 7,
+    "kb": 18
+  },
+  {
+    "ts": "2026-04-04T20:47:50.346Z",
+    "domain": "quso.ai",
+    "section": "publisher-overview",
+    "compName": "quso",
+    "responses": 7,
+    "kb": 9
+  },
+  {
+    "ts": "2026-04-04T20:48:49.395Z",
+    "domain": "flowjin.com",
+    "section": "website-performance",
+    "compName": "flowjin",
+    "responses": 24,
+    "kb": 26
+  },
+  {
+    "ts": "2026-04-04T20:49:27.149Z",
+    "domain": "flowjin.com",
+    "section": "traffic-engagement",
+    "compName": "flowjin",
+    "responses": 15,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:50:01.526Z",
+    "domain": "flowjin.com",
+    "section": "traffic-overview",
+    "compName": "flowjin",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:50:38.569Z",
+    "domain": "flowjin.com",
+    "section": "search-overview",
+    "compName": "flowjin",
+    "responses": 9,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:51:15.280Z",
+    "domain": "flowjin.com",
+    "section": "referrals",
+    "compName": "flowjin",
+    "responses": 5,
+    "kb": 19
+  },
+  {
+    "ts": "2026-04-04T20:51:52.342Z",
+    "domain": "flowjin.com",
+    "section": "display-overview",
+    "compName": "flowjin",
+    "responses": 6,
+    "kb": 16
+  },
+  {
+    "ts": "2026-04-04T20:52:31.155Z",
+    "domain": "flowjin.com",
+    "section": "publisher-overview",
+    "compName": "flowjin",
+    "responses": 6,
+    "kb": 7
+  },
+  {
+    "ts": "2026-04-04T20:53:23.378Z",
+    "domain": "restream.io",
+    "section": "website-performance",
+    "compName": "restream",
+    "responses": 27,
+    "kb": 38
+  },
+  {
+    "ts": "2026-04-04T20:54:00.099Z",
+    "domain": "restream.io",
+    "section": "traffic-engagement",
+    "compName": "restream",
+    "responses": 15,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:54:36.140Z",
+    "domain": "restream.io",
+    "section": "traffic-overview",
+    "compName": "restream",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:55:12.226Z",
+    "domain": "restream.io",
+    "section": "search-overview",
+    "compName": "restream",
+    "responses": 10,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T20:55:51.125Z",
+    "domain": "restream.io",
+    "section": "referrals",
+    "compName": "restream",
+    "responses": 5,
+    "kb": 104
+  },
+  {
+    "ts": "2026-04-04T20:56:41.138Z",
+    "domain": "restream.io",
+    "section": "display-overview",
+    "compName": "restream",
+    "responses": 12,
+    "kb": 56
+  },
+  {
+    "ts": "2026-04-04T20:57:18.353Z",
+    "domain": "restream.io",
+    "section": "publisher-overview",
+    "compName": "restream",
+    "responses": 7,
+    "kb": 10
+  },
+  {
+    "ts": "2026-04-04T20:58:04.108Z",
+    "domain": "swiftia.io",
+    "section": "website-performance",
+    "compName": "swiftia",
+    "responses": 23,
+    "kb": 19
+  },
+  {
+    "ts": "2026-04-04T20:58:40.644Z",
+    "domain": "swiftia.io",
+    "section": "traffic-engagement",
+    "compName": "swiftia",
+    "responses": 15,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:59:18.198Z",
+    "domain": "swiftia.io",
+    "section": "traffic-overview",
+    "compName": "swiftia",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T20:59:54.190Z",
+    "domain": "swiftia.io",
+    "section": "search-overview",
+    "compName": "swiftia",
+    "responses": 9,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T21:00:30.396Z",
+    "domain": "swiftia.io",
+    "section": "referrals",
+    "compName": "swiftia",
+    "responses": 5,
+    "kb": 8
+  },
+  {
+    "ts": "2026-04-04T21:01:07.585Z",
+    "domain": "swiftia.io",
+    "section": "display-overview",
+    "compName": "swiftia",
+    "responses": 6,
+    "kb": 14
+  },
+  {
+    "ts": "2026-04-04T21:01:45.806Z",
+    "domain": "swiftia.io",
+    "section": "publisher-overview",
+    "compName": "swiftia",
+    "responses": 6,
+    "kb": 7
+  },
+  {
+    "ts": "2026-04-04T21:02:56.334Z",
+    "domain": "exemplary.ai",
+    "section": "website-performance",
+    "compName": "exemplary",
+    "responses": 25,
+    "kb": 27
+  },
+  {
+    "ts": "2026-04-04T21:03:32.668Z",
+    "domain": "exemplary.ai",
+    "section": "traffic-engagement",
+    "compName": "exemplary",
+    "responses": 15,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T21:04:09.697Z",
+    "domain": "exemplary.ai",
+    "section": "traffic-overview",
+    "compName": "exemplary",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T21:04:45.487Z",
+    "domain": "exemplary.ai",
+    "section": "search-overview",
+    "compName": "exemplary",
+    "responses": 10,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T21:05:23.107Z",
+    "domain": "exemplary.ai",
+    "section": "referrals",
+    "compName": "exemplary",
+    "responses": 5,
+    "kb": 20
+  },
+  {
+    "ts": "2026-04-04T21:06:01.184Z",
+    "domain": "exemplary.ai",
+    "section": "display-overview",
+    "compName": "exemplary",
+    "responses": 6,
+    "kb": 16
+  },
+  {
+    "ts": "2026-04-04T21:06:41.406Z",
+    "domain": "exemplary.ai",
+    "section": "publisher-overview",
+    "compName": "exemplary",
+    "responses": 6,
+    "kb": 7
+  },
+  {
+    "ts": "2026-04-04T21:07:56.418Z",
+    "domain": "invideo.io",
+    "section": "website-performance",
+    "compName": "invideo",
+    "responses": 27,
+    "kb": 42
+  },
+  {
+    "ts": "2026-04-04T21:08:34.256Z",
+    "domain": "invideo.io",
+    "section": "traffic-engagement",
+    "compName": "invideo",
+    "responses": 15,
+    "kb": 15
+  },
+  {
+    "ts": "2026-04-04T21:09:53.146Z",
+    "domain": "invideo.io",
+    "section": "traffic-overview",
+    "compName": "invideo",
+    "responses": 6,
+    "kb": 13
+  },
+  {
+    "ts": "2026-04-04T21:10:42.214Z",
+    "domain": "invideo.io",
+    "section": "search-overview",
+    "compName": "invideo",
+    "responses": 10,
+    "kb": 13
+  },
+  {
+    "ts": "2026-04-04T21:11:21.196Z",
+    "domain": "invideo.io",
+    "section": "referrals",
+    "compName": "invideo",
+    "responses": 5,
+    "kb": 121
+  },
+  {
+    "ts": "2026-04-04T21:11:59.837Z",
+    "domain": "invideo.io",
+    "section": "display-overview",
+    "compName": "invideo",
+    "responses": 12,
+    "kb": 33
+  },
+  {
+    "ts": "2026-04-04T21:12:35.483Z",
+    "domain": "invideo.io",
+    "section": "publisher-overview",
+    "compName": "invideo",
+    "responses": 7,
+    "kb": 13
+  },
+  {
+    "ts": "2026-04-04T21:23:08.431Z",
+    "domain": "wayin.ai",
+    "section": "website-performance",
+    "compName": "wayin",
+    "responses": 27,
+    "kb": 36
+  },
+  {
+    "ts": "2026-04-04T21:24:02.693Z",
+    "domain": "wayin.ai",
+    "section": "traffic-engagement",
+    "compName": "wayin",
+    "responses": 15,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T21:24:49.628Z",
+    "domain": "wayin.ai",
+    "section": "traffic-overview",
+    "compName": "wayin",
+    "responses": 6,
+    "kb": 11
+  },
+  {
+    "ts": "2026-04-04T21:25:26.988Z",
+    "domain": "wayin.ai",
+    "section": "search-overview",
+    "compName": "wayin",
+    "responses": 10,
+    "kb": 12
+  },
+  {
+    "ts": "2026-04-04T21:26:08.655Z",
+    "domain": "wayin.ai",
+    "section": "referrals",
+    "compName": "wayin",
+    "responses": 5,
+    "kb": 39
+  },
+  {
+    "ts": "2026-04-04T21:26:45.583Z",
+    "domain": "wayin.ai",
+    "section": "display-overview",
+    "compName": "wayin",
+    "responses": 12,
+    "kb": 22
+  },
+  {
+    "ts": "2026-04-04T21:27:32.716Z",
+    "domain": "wayin.ai",
+    "section": "publisher-overview",
+    "compName": "wayin",
+    "responses": 7,
+    "kb": 9
+  }
+]

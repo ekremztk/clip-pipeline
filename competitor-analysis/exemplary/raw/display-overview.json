@@ -1,0 +1,976 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=5",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=exemplary.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "exemplary.ai": {
+        "mainDomainName": "exemplary",
+        "icon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "image": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=0&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=1&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b",
+        "title": "9 Best AI Video Generators of All Time | Exemplary AI",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Turn podcasts, webinars, and videos into shareable clips, transcripts, summaries, and social posts. Exemplary AI does it all.",
+        "globalRanking": 267181,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 293993,
+        "category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software",
+        "categoryRanking": 6118,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 59774.904225386155,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/GraphV2/unified?country=999&key=exemplary.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "exemplary.ai": {
+          "total": {
+            "monthly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 394.92999999999995,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 453.64,
+                  "change": 0.1486592560706962,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 401.9600000000001,
+                  "change": -0.039269581012930266,
+                  "desktopShare": 1
+                }
+              }
+            },
+            "weekly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 77.78999999999999,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 82.96000000000001,
+                  "change": 0.06646098470240412,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 110.44,
+                  "change": 0.3312439729990355,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-22": {
+                "visits": {
+                  "value": 83.56,
+                  "change": -0.24339007605939872,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 93.33,
+                  "change": 0.11692197223551934,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 96.71000000000001,
+                  "change": 0.036215579127826095,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 100.4,
+                  "change": 0.038155309688760186,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 130.84,
+                  "change": 0.3031872509960159,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 86.44,
+                  "change": -0.3393457658208499,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 105.42000000000002,
+                  "change": 0.2195742711707545,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 96.03999999999999,
+                  "change": -0.08897742363877843,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 96.66,
+                  "change": 0.006455643481882597,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 89.94,
+                  "change": -0.06952203600248293,
+                  "desktopShare": 1
+                }
+              }
+            },
+            "daily": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 12.07,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-02": {
+                "visits": {
+                  "value": 15.87,
+                  "change": 0.31483015741507864,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-03": {
+                "visits": {
+                  "value": 9.72,
+                  "change": -0.38752362948960295,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-04": {
+                "visits": {
+                  "value": 12.04,
+                  "change": 0.2386831275720163,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-05": {
+                "visits": {
+                  "value": 9.96,
+                  "change": -0.17275747508305636,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-06": {
+                "visits": {
+                  "value": 9.08,
+                  "change": -0.08835341365461855,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-07": {
+                "visits": {
+                  "value": 9.05,
+                  "change": -0.0033039647577091805,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 27.03,
+                  "change": 1.9867403314917127,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-09": {
+                "visits": {
+                  "value": 7.34,
+                  "change": -0.7284498705142435,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-10": {
+                "visits": {
+                  "value": 10.77,
+                  "change": 0.46730245231607626,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-11": {
+                "visits": {
+                  "value": 10.72,
+                  "change": -0.004642525533890338,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-12": {
+                "visits": {
+                  "value": 11.07,
+                  "change": 0.032649253731343246,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-13": {
+                "visits": {
+                  "value": 7.53,
+                  "change": -0.31978319783197834,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-14": {
+                "visits": {
+                  "value": 8.5,
+                  "change": 0.1288180610889774,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 15.05,
+                  "change": 0.7705882352941177,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-16": {
+                "visits": {
+                  "value": 12.76,
+                  "change": -0.15215946843853825,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-17": {
+                "visits": {
+                  "value": 18.45,
+                  "change": 0.4459247648902821,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-18": {
+                "visits": {
+                  "value": 21.08,
+                  "change": 0.1425474254742547,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-19": {
+                "visits": {
+                  "value": 11.99,
+                  "change": -0.43121442125237186,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-20": {
+                "visits": {
+                  "value": 14.56,
+                  "change": 0.21434528773978317,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-21": {
+                "visits": {
+                  "value": 16.55,
+                  "change": 0.1366758241758242,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-22": {
+                "visits": {
+                  "value": 10.21,
+                  "change": -0.3830815709969788,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-23": {
+                "visits": {
+                  "value": 8.37,
+                  "change": -0.18021547502448595,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-24": {
+                "visits": {
+                  "value": 6.78,
+                  "change": -0.1899641577060931,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-25": {
+                "visits": {
+                  "value": 12.52,
+                  "change": 0.846607669616519,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-26": {
+                "visits": {
+                  "value": 17.78,
+                  "change": 0.4201277955271567,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-27": {
+                "visits": {
+                  "value": 13.31,
+                  "change": -0.2514060742407199,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-28": {
+                "visits": {
+                  "value": 14.59,
+                  "change": 0.0961682945154019,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 14.92,
+                  "change": 0.022618231665524336,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-30": {
+                "visits": {
+                  "value": 11.47,
+                  "change": -0.23123324396782838,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-31": {
+                "visits": {
+                  "value": 13.79,
+                  "change": 0.20226678291194405,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 15.53,
+                  "change": 0.126178390137781,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-02": {
+                "visits": {
+                  "value": 14.11,
+                  "change": -0.09143593045717965,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-03": {
+                "visits": {
+                  "value": 13.2,
+                  "change": -0.06449326718639264,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-04": {
+                "visits": {
+                  "value": 10.31,
+                  "change": -0.21893939393939385,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 8.95,
+                  "change": -0.13191076624636286,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-06": {
+                "visits": {
+                  "value": 10.75,
+                  "change": 0.20111731843575428,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-07": {
+                "visits": {
+                  "value": 15.5,
+                  "change": 0.4418604651162791,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-08": {
+                "visits": {
+                  "value": 10.42,
+                  "change": -0.327741935483871,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-09": {
+                "visits": {
+                  "value": 12.98,
+                  "change": 0.24568138195777356,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-10": {
+                "visits": {
+                  "value": 21.13,
+                  "change": 0.6278890600924498,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-11": {
+                "visits": {
+                  "value": 16.98,
+                  "change": -0.19640321817321338,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 12.95,
+                  "change": -0.2373380447585395,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-13": {
+                "visits": {
+                  "value": 10.91,
+                  "change": -0.15752895752895746,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-14": {
+                "visits": {
+                  "value": 18.6,
+                  "change": 0.704857928505958,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-15": {
+                "visits": {
+                  "value": 13.47,
+                  "change": -0.27580645161290324,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-16": {
+                "visits": {
+                  "value": 16.11,
+                  "change": 0.19599109131403109,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-17": {
+                "visits": {
+                  "value": 15.65,
+                  "change": -0.028553693358162574,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-18": {
+                "visits": {
+                  "value": 12.71,
+                  "change": -0.18785942492012775,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 14.09,
+                  "change": 0.10857592446892202,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-20": {
+                "visits": {
+                  "value": 23.83,
+                  "change": 0.6912704045422284,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-21": {
+                "visits": {
+                  "value": 23.85,
+                  "change": 0.0008392782207303033,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-22": {
+                "visits": {
+                  "value": 19.18,
+                  "change": -0.19580712788259963,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-23": {
+                "visits": {
+                  "value": 16.38,
+                  "change": -0.14598540145985406,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-24": {
+                "visits": {
+                  "value": 9.65,
+                  "change": -0.4108669108669108,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-25": {
+                "visits": {
+                  "value": 23.86,
+                  "change": 1.472538860103627,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 13.07,
+                  "change": -0.45222129086336965,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-27": {
+                "visits": {
+                  "value": 13.8,
+                  "change": 0.05585309869931143,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-28": {
+                "visits": {
+                  "value": 10.42,
+                  "change": -0.2449275362318841,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-29": {
+                "visits": {
+                  "value": 14.19,
+                  "change": 0.36180422264875234,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-30": {
+                "visits": {
+                  "value": 11.22,
+                  "change": -0.20930232558139528,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-31": {
+                "visits": {
+                  "value": 9.84,
+                  "change": -0.12299465240641717,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 13.9,
+                  "change": 0.4126016260162602,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 11.8,
+                  "change": -0.15107913669064746,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-03": {
+                "visits": {
+                  "value": 15.15,
+                  "change": 0.28389830508474573,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-04": {
+                "visits": {
+                  "value": 14.09,
+                  "change": -0.06996699669966999,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-05": {
+                "visits": {
+                  "value": 22.17,
+                  "change": 0.5734563520227113,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-06": {
+                "visits": {
+                  "value": 12.72,
+                  "change": -0.42625169147496617,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-07": {
+                "visits": {
+                  "value": 12.98,
+                  "change": 0.020440251572327026,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-08": {
+                "visits": {
+                  "value": 16.51,
+                  "change": 0.2719568567026195,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 14.84,
+                  "change": -0.10115081768625085,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-10": {
+                "visits": {
+                  "value": 13.35,
+                  "change": -0.10040431266846363,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-11": {
+                "visits": {
+                  "value": 12.31,
+                  "change": -0.07790262172284639,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-12": {
+                "visits": {
+                  "value": 11.95,
+                  "change": -0.029244516653127637,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-13": {
+                "visits": {
+                  "value": 12.25,
+                  "change": 0.025104602510460313,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-14": {
+                "visits": {
+                  "value": 12.91,
+                  "change": 0.05387755102040818,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-15": {
+                "visits": {
+                  "value": 18.43,
+                  "change": 0.42757552285050343,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 12.15,
+                  "change": -0.3407487791644058,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-17": {
+                "visits": {
+                  "value": 12.29,
+                  "change": 0.011522633744855867,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-18": {
+                "visits": {
+                  "value": 16.38,
+                  "change": 0.33279088689991865,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-19": {
+                "visits": {
+                  "value": 11.87,
+                  "change": -0.27533577533577536,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-20": {
+                "visits": {
+                  "value": 17.77,
+                  "change": 0.49705139005897225,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-21": {
+                "visits": {
+                  "value": 14.41,
+                  "change": -0.18908272369161505,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-22": {
+                "visits": {
+                  "value": 11.79,
+                  "change": -0.18181818181818188,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 17.51,
+                  "change": 0.4851569126378289,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-24": {
+                "visits": {
+                  "value": 15.86,
+                  "change": -0.09423186750428338,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-25": {
+                "visits": {
+                  "value": 17.95,
+                  "change": 0.1317780580075662,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-26": {
+                "visits": {
+                  "value": 11.92,
+                  "change": -0.33593314763231197,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-27": {
+                "visits": {
+                  "value": 14.6,
+                  "change": 0.22483221476510065,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-28": {
+                "visits": {
+                  "value": 12.1,
+                  "change": -0.17123287671232876,
+                  "desktopShare": 1
+                }
+              }
+            },
+            "total": {
+              "visits": 1250.5300000000002
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/summary?country=999&key=exemplary.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "exemplary.ai": {
+          "publishers": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=exemplary.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "vizard.ai",
+        "DomainWithoutSub": "vizard.ai",
+        "Rank": 29298,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "synthesys.io",
+        "DomainWithoutSub": "synthesys.io",
+        "Rank": 380557,
+        "Favicon": "https://site-images.similarcdn.com/image?url=synthesys.io&t=2&s=1&h=24e02654696c3a75fd060fd43fe2088b59d92a46fba74eef79c6641b8aad5a38"
+      },
+      {
+        "Domain": "rewriteguru.com",
+        "DomainWithoutSub": "rewriteguru.com",
+        "Rank": 378267,
+        "Favicon": "https://site-images.similarcdn.com/image?url=rewriteguru.com&t=2&s=1&h=d24c246d6852244594cfb6df0be0508b531ac642d3cc92fedf067ea664d98892"
+      },
+      {
+        "Domain": "opus.ai",
+        "DomainWithoutSub": "opus.ai",
+        "Rank": 288346,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.ai&t=2&s=1&h=14b9a2260fcb8eb64f7aa80ab2bd5fa93355a462ef57531a44d75d8edc21971b"
+      },
+      {
+        "Domain": "writeless.ai",
+        "DomainWithoutSub": "writeless.ai",
+        "Rank": 267672,
+        "Favicon": "https://site-images.similarcdn.com/image?url=writeless.ai&t=2&s=1&h=329602731db789f0be144d8839acb4373deb5b3df0946f42b081242d140a3d45"
+      },
+      {
+        "Domain": "tldrthis.com",
+        "DomainWithoutSub": "tldrthis.com",
+        "Rank": 297839,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tldrthis.com&t=2&s=1&h=2ca640bee58ea2c88e5916e793504cc2dda7f371e0f43ba2834eea2a080f3803"
+      },
+      {
+        "Domain": "inkforall.com",
+        "DomainWithoutSub": "inkforall.com",
+        "Rank": 334716,
+        "Favicon": "https://site-images.similarcdn.com/image?url=inkforall.com&t=2&s=1&h=f18c653f06e86202c88bf2ba253214286d5d5c9c9b9e7a374ba7e358f0f08f30"
+      },
+      {
+        "Domain": "aiktp.com",
+        "DomainWithoutSub": "aiktp.com",
+        "Rank": 316059,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aiktp.com&t=2&s=1&h=3cbe9f6ba6903857f9caac5217bab340f46c0dae36fb0a82bb6ae8fa4477e00c"
+      },
+      {
+        "Domain": "wordchiefs.com",
+        "DomainWithoutSub": "wordchiefs.com",
+        "Rank": 190249,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wordchiefs.com&t=2&s=1&h=cf99b4e3e86d7752dd28103b0c8ebb0082d1c2df2d07a7d028d19f1bb375aed6"
+      },
+      {
+        "Domain": "artificialstudio.ai",
+        "DomainWithoutSub": "artificialstudio.ai",
+        "Rank": 279171,
+        "Favicon": "https://site-images.similarcdn.com/image?url=artificialstudio.ai&t=2&s=1&h=e53bc33c70d0f75f4cd9b581e4762dc715ebd1dffd047bf8c0624d28aae608bb"
+      },
+      {
+        "Domain": "zubtitle.com",
+        "DomainWithoutSub": "zubtitle.com",
+        "Rank": 455337,
+        "Favicon": "https://site-images.similarcdn.com/image?url=zubtitle.com&t=2&s=1&h=d36f0cd15e8b6b1dc495febc9175a835dc7c42fe6c00d530435f7dfe29ad2f8b"
+      },
+      {
+        "Domain": "quso.ai",
+        "DomainWithoutSub": "quso.ai",
+        "Rank": 93435,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quso.ai&t=2&s=1&h=77fd9679a165f4673e62a6f77f606d1cd1a3e18277a9c5d1c050291ded87632c"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "echowave.io",
+        "DomainWithoutSub": "echowave.io",
+        "Rank": 127978,
+        "Favicon": "https://site-images.similarcdn.com/image?url=echowave.io&t=2&s=1&h=484550467f2f18765c49b273654a6dd45a0e631c3e221d3ed0bb386c8d1f73c8"
+      },
+      {
+        "Domain": "bytecap.io",
+        "DomainWithoutSub": "bytecap.io",
+        "Rank": 1044866,
+        "Favicon": "https://site-images.similarcdn.com/image?url=bytecap.io&t=2&s=1&h=b2e2db95e5bc8d03196e4c6a7672a933a48841e2169b94ca2f9ad13d69e4ec3e"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/summary?country=999&key=exemplary.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "exemplary.ai": {
+          "campaigns": {},
+          "creatives": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=exemplary.ai&t=2&s=1&h=983061764eb4dc8ab0a2ec115f7be77f2ea47007c70a77e772b491355fffb87b"
+        }
+      }
+    }
+  }
+]

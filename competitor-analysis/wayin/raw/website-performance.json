@@ -1,0 +1,2073 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=5",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 809856.594356055,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=wayin.ai&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 940504.2809000977,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?mainDomainOnly=false&includeCrossData=true&key=wayin.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false",
+    "body": {
+      "wayin.ai": {
+        "mainDomainName": "wayin",
+        "icon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "image": "https://site-images.similarcdn.com/image?url=wayin.ai&t=0&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=wayin.ai&t=1&s=1&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+        "title": "WayinVideo Blog - Share Insights, Tutorials, and Reviews",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Explore tools and techniques to make video content creation more intuitive and impactful—from practical tutorials and creative inspiration to real-world use cases",
+        "globalRanking": 40370,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 48533,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 325,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "monthlyVisits": 940504.2809000977,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=wayin.ai&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=wayin.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "GlobalRank": {
+            "Value": 40370,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 43022
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 46475
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 40370
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 48533,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 59614
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 64202
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 48533
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 325,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 356
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 385
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 325
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=wayin.ai&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Data": [
+        {
+          "Domain": "wayin.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=0&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+          "TotalVisits": 2652084.2437694953,
+          "Change": 0.01908846746841715,
+          "ShareOfVisits": 1
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=4&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteGeography/Geography/Table?country=999&includeSubDomains=true&webSource=Total&timeGranularity=Monthly&orderBy=TotalShare+desc&keys=wayin.ai&pageSize=5&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 114,
+      "TotalTopLevelCount": 0,
+      "Filters": {
+        "country": [
+          {
+            "id": "840",
+            "text": "United States",
+            "formattedText": "United States",
+            "icon": "flag flag-us",
+            "count": 0
+          },
+          {
+            "id": "356",
+            "text": "India",
+            "formattedText": "India",
+            "icon": "flag flag-in",
+            "count": 0
+          },
+          {
+            "id": "360",
+            "text": "Indonesia",
+            "formattedText": "Indonesia",
+            "icon": "flag flag-id",
+            "count": 0
+          },
+          {
+            "id": "76",
+            "text": "Brazil",
+            "formattedText": "Brazil",
+            "icon": "flag flag-br",
+            "count": 0
+          },
+          {
+            "id": "826",
+            "text": "United Kingdom",
+            "formattedText": "United Kingdom",
+            "icon": "flag flag-gb",
+            "count": 0
+          },
+          {
+            "id": "50",
+            "text": "Bangladesh",
+            "formattedText": "Bangladesh",
+            "icon": "flag flag-bd",
+            "count": 0
+          },
+          {
+            "id": "586",
+            "text": "Pakistan",
+            "formattedText": "Pakistan",
+            "icon": "flag flag-pk",
+            "count": 0
+          },
+          {
+            "id": "578",
+            "text": "Norway",
+            "formattedText": "Norway",
+            "icon": "flag flag-no",
+            "count": 0
+          },
+          {
+            "id": "276",
+            "text": "Germany",
+            "formattedText": "Germany",
+            "icon": "flag flag-de",
+            "count": 0
+          },
+          {
+            "id": "528",
+            "text": "Netherlands",
+            "formattedText": "Netherlands",
+            "icon": "flag flag-nl",
+            "count": 0
+          },
+          {
+            "id": "124",
+            "text": "Canada",
+            "formattedText": "Canada",
+            "icon": "flag flag-ca",
+            "count": 0
+          },
+          {
+            "id": "484",
+            "text": "Mexico",
+            "formattedText": "Mexico",
+            "icon": "flag flag-mx",
+            "count": 0
+          },
+          {
+            "id": "144",
+            "text": "Sri Lanka",
+            "formattedText": "Sri Lanka",
+            "icon": "flag flag-lk",
+            "count": 0
+          },
+          {
+            "id": "36",
+            "text": "Australia",
+            "formattedText": "Australia",
+            "icon": "flag flag-au",
+            "count": 0
+          },
+          {
+            "id": "231",
+            "text": "Ethiopia",
+            "formattedText": "Ethiopia",
+            "icon": "flag flag-et",
+            "count": 0
+          },
+          {
+            "id": "250",
+            "text": "France",
+            "formattedText": "France",
+            "icon": "flag flag-fr",
+            "count": 0
+          },
+          {
+            "id": "504",
+            "text": "Morocco",
+            "formattedText": "Morocco",
+            "icon": "flag flag-ma",
+            "count": 0
+          },
+          {
+            "id": "818",
+            "text": "Egypt",
+            "formattedText": "Egypt",
+            "icon": "flag flag-eg",
+            "count": 0
+          },
+          {
+            "id": "608",
+            "text": "Philippines",
+            "formattedText": "Philippines",
+            "icon": "flag flag-ph",
+            "count": 0
+          },
+          {
+            "id": "566",
+            "text": "Nigeria",
+            "formattedText": "Nigeria",
+            "icon": "flag flag-ng",
+            "count": 0
+          },
+          {
+            "id": "724",
+            "text": "Spain",
+            "formattedText": "Spain",
+            "icon": "flag flag-es",
+            "count": 0
+          },
+          {
+            "id": "704",
+            "text": "Vietnam",
+            "formattedText": "Vietnam",
+            "icon": "flag flag-vn",
+            "count": 0
+          },
+          {
+            "id": "246",
+            "text": "Finland",
+            "formattedText": "Finland",
+            "icon": "flag flag-fi",
+            "count": 0
+          },
+          {
+            "id": "158",
+            "text": "Taiwan",
+            "formattedText": "Taiwan",
+            "icon": "flag flag-tw",
+            "count": 0
+          },
+          {
+            "id": "702",
+            "text": "Singapore",
+            "formattedText": "Singapore",
+            "icon": "flag flag-sg",
+            "count": 0
+          },
+          {
+            "id": "710",
+            "text": "South Africa",
+            "formattedText": "South Africa",
+            "icon": "flag flag-za",
+            "count": 0
+          },
+          {
+            "id": "784",
+            "text": "United Arab Emirates",
+            "formattedText": "United Arab Emirates",
+            "icon": "flag flag-ae",
+            "count": 0
+          },
+          {
+            "id": "458",
+            "text": "Malaysia",
+            "formattedText": "Malaysia",
+            "icon": "flag flag-my",
+            "count": 0
+          },
+          {
+            "id": "288",
+            "text": "Ghana",
+            "formattedText": "Ghana",
+            "icon": "flag flag-gh",
+            "count": 0
+          },
+          {
+            "id": "12",
+            "text": "Algeria",
+            "formattedText": "Algeria",
+            "icon": "flag flag-dz",
+            "count": 0
+          },
+          {
+            "id": "410",
+            "text": "Korea, Republic of",
+            "formattedText": "Korea, Republic of",
+            "icon": "flag flag-kr",
+            "count": 0
+          },
+          {
+            "id": "792",
+            "text": "Turkey",
+            "formattedText": "Turkey",
+            "icon": "flag flag-tr",
+            "count": 0
+          },
+          {
+            "id": "170",
+            "text": "Colombia",
+            "formattedText": "Colombia",
+            "icon": "flag flag-co",
+            "count": 0
+          },
+          {
+            "id": "372",
+            "text": "Ireland",
+            "formattedText": "Ireland",
+            "icon": "flag flag-ie",
+            "count": 0
+          },
+          {
+            "id": "682",
+            "text": "Saudi Arabia",
+            "formattedText": "Saudi Arabia",
+            "icon": "flag flag-sa",
+            "count": 0
+          },
+          {
+            "id": "404",
+            "text": "Kenya",
+            "formattedText": "Kenya",
+            "icon": "flag flag-ke",
+            "count": 0
+          },
+          {
+            "id": "380",
+            "text": "Italy",
+            "formattedText": "Italy",
+            "icon": "flag flag-it",
+            "count": 0
+          },
+          {
+            "id": "300",
+            "text": "Greece",
+            "formattedText": "Greece",
+            "icon": "flag flag-gr",
+            "count": 0
+          },
+          {
+            "id": "752",
+            "text": "Sweden",
+            "formattedText": "Sweden",
+            "icon": "flag flag-se",
+            "count": 0
+          },
+          {
+            "id": "32",
+            "text": "Argentina",
+            "formattedText": "Argentina",
+            "icon": "flag flag-ar",
+            "count": 0
+          },
+          {
+            "id": "616",
+            "text": "Poland",
+            "formattedText": "Poland",
+            "icon": "flag flag-pl",
+            "count": 0
+          },
+          {
+            "id": "764",
+            "text": "Thailand",
+            "formattedText": "Thailand",
+            "icon": "flag flag-th",
+            "count": 0
+          },
+          {
+            "id": "756",
+            "text": "Switzerland",
+            "formattedText": "Switzerland",
+            "icon": "flag flag-ch",
+            "count": 0
+          },
+          {
+            "id": "643",
+            "text": "Russia",
+            "formattedText": "Russia",
+            "icon": "flag flag-ru",
+            "count": 0
+          },
+          {
+            "id": "376",
+            "text": "Israel",
+            "formattedText": "Israel",
+            "icon": "flag flag-il",
+            "count": 0
+          },
+          {
+            "id": "344",
+            "text": "Hong Kong",
+            "formattedText": "Hong Kong",
+            "icon": "flag flag-hk",
+            "count": 0
+          },
+          {
+            "id": "642",
+            "text": "Romania",
+            "formattedText": "Romania",
+            "icon": "flag flag-ro",
+            "count": 0
+          },
+          {
+            "id": "686",
+            "text": "Senegal",
+            "formattedText": "Senegal",
+            "icon": "flag flag-sn",
+            "count": 0
+          },
+          {
+            "id": "392",
+            "text": "Japan",
+            "formattedText": "Japan",
+            "icon": "flag flag-jp",
+            "count": 0
+          },
+          {
+            "id": "116",
+            "text": "Cambodia",
+            "formattedText": "Cambodia",
+            "icon": "flag flag-kh",
+            "count": 0
+          },
+          {
+            "id": "703",
+            "text": "Slovakia",
+            "formattedText": "Slovakia",
+            "icon": "flag flag-sk",
+            "count": 0
+          },
+          {
+            "id": "56",
+            "text": "Belgium",
+            "formattedText": "Belgium",
+            "icon": "flag flag-be",
+            "count": 0
+          },
+          {
+            "id": "620",
+            "text": "Portugal",
+            "formattedText": "Portugal",
+            "icon": "flag flag-pt",
+            "count": 0
+          },
+          {
+            "id": "554",
+            "text": "New Zealand",
+            "formattedText": "New Zealand",
+            "icon": "flag flag-nz",
+            "count": 0
+          },
+          {
+            "id": "152",
+            "text": "Chile",
+            "formattedText": "Chile",
+            "icon": "flag flag-cl",
+            "count": 0
+          },
+          {
+            "id": "496",
+            "text": "Mongolia",
+            "formattedText": "Mongolia",
+            "icon": "flag flag-mn",
+            "count": 0
+          },
+          {
+            "id": "203",
+            "text": "Czech Republic",
+            "formattedText": "Czech Republic",
+            "icon": "flag flag-cz",
+            "count": 0
+          },
+          {
+            "id": "398",
+            "text": "Kazakhstan",
+            "formattedText": "Kazakhstan",
+            "icon": "flag flag-kz",
+            "count": 0
+          },
+          {
+            "id": "804",
+            "text": "Ukraine",
+            "formattedText": "Ukraine",
+            "icon": "flag flag-ua",
+            "count": 0
+          },
+          {
+            "id": "860",
+            "text": "Uzbekistan",
+            "formattedText": "Uzbekistan",
+            "icon": "flag flag-uz",
+            "count": 0
+          },
+          {
+            "id": "218",
+            "text": "Ecuador",
+            "formattedText": "Ecuador",
+            "icon": "flag flag-ec",
+            "count": 0
+          },
+          {
+            "id": "604",
+            "text": "Peru",
+            "formattedText": "Peru",
+            "icon": "flag flag-pe",
+            "count": 0
+          },
+          {
+            "id": "208",
+            "text": "Denmark",
+            "formattedText": "Denmark",
+            "icon": "flag flag-dk",
+            "count": 0
+          },
+          {
+            "id": "24",
+            "text": "Angola",
+            "formattedText": "Angola",
+            "icon": "flag flag-ao",
+            "count": 0
+          },
+          {
+            "id": "31",
+            "text": "Azerbaijan",
+            "formattedText": "Azerbaijan",
+            "icon": "flag flag-az",
+            "count": 0
+          },
+          {
+            "id": "524",
+            "text": "Nepal",
+            "formattedText": "Nepal",
+            "icon": "flag flag-np",
+            "count": 0
+          },
+          {
+            "id": "40",
+            "text": "Austria",
+            "formattedText": "Austria",
+            "icon": "flag flag-at",
+            "count": 0
+          },
+          {
+            "id": "320",
+            "text": "Guatemala",
+            "formattedText": "Guatemala",
+            "icon": "flag flag-gt",
+            "count": 0
+          },
+          {
+            "id": "400",
+            "text": "Jordan",
+            "formattedText": "Jordan",
+            "icon": "flag flag-jo",
+            "count": 0
+          },
+          {
+            "id": "368",
+            "text": "Iraq",
+            "formattedText": "Iraq",
+            "icon": "flag flag-iq",
+            "count": 0
+          },
+          {
+            "id": "191",
+            "text": "Croatia",
+            "formattedText": "Croatia",
+            "icon": "flag flag-hr",
+            "count": 0
+          },
+          {
+            "id": "268",
+            "text": "Georgia",
+            "formattedText": "Georgia",
+            "icon": "flag flag-ge",
+            "count": 0
+          },
+          {
+            "id": "348",
+            "text": "Hungary",
+            "formattedText": "Hungary",
+            "icon": "flag flag-hu",
+            "count": 0
+          },
+          {
+            "id": "214",
+            "text": "Dominican Republic",
+            "formattedText": "Dominican Republic",
+            "icon": "flag flag-do",
+            "count": 0
+          },
+          {
+            "id": "417",
+            "text": "Kyrgyzstan",
+            "formattedText": "Kyrgyzstan",
+            "icon": "flag flag-kg",
+            "count": 0
+          },
+          {
+            "id": "894",
+            "text": "Zambia",
+            "formattedText": "Zambia",
+            "icon": "flag flag-zm",
+            "count": 0
+          },
+          {
+            "id": "858",
+            "text": "Uruguay",
+            "formattedText": "Uruguay",
+            "icon": "flag flag-uy",
+            "count": 0
+          },
+          {
+            "id": "800",
+            "text": "Uganda",
+            "formattedText": "Uganda",
+            "icon": "flag flag-ug",
+            "count": 0
+          },
+          {
+            "id": "384",
+            "text": "Côte d'Ivoire",
+            "formattedText": "Côte d'Ivoire",
+            "icon": "flag flag-ci",
+            "count": 0
+          },
+          {
+            "id": "634",
+            "text": "Qatar",
+            "formattedText": "Qatar",
+            "icon": "flag flag-qa",
+            "count": 0
+          },
+          {
+            "id": "414",
+            "text": "Kuwait",
+            "formattedText": "Kuwait",
+            "icon": "flag flag-kw",
+            "count": 0
+          },
+          {
+            "id": "688",
+            "text": "Serbia",
+            "formattedText": "Serbia",
+            "icon": "flag flag-rs",
+            "count": 0
+          },
+          {
+            "id": "512",
+            "text": "Oman",
+            "formattedText": "Oman",
+            "icon": "flag flag-om",
+            "count": 0
+          },
+          {
+            "id": "788",
+            "text": "Tunisia",
+            "formattedText": "Tunisia",
+            "icon": "flag flag-tn",
+            "count": 0
+          },
+          {
+            "id": "591",
+            "text": "Panama",
+            "formattedText": "Panama",
+            "icon": "flag flag-pa",
+            "count": 0
+          },
+          {
+            "id": "112",
+            "text": "Belarus",
+            "formattedText": "Belarus",
+            "icon": "flag flag-by",
+            "count": 0
+          },
+          {
+            "id": "68",
+            "text": "Bolivia",
+            "formattedText": "Bolivia",
+            "icon": "flag flag-bo",
+            "count": 0
+          },
+          {
+            "id": "104",
+            "text": "Myanmar",
+            "formattedText": "Myanmar",
+            "icon": "flag flag-mm",
+            "count": 0
+          },
+          {
+            "id": "499",
+            "text": "Montenegro",
+            "formattedText": "Montenegro",
+            "icon": "flag flag-me",
+            "count": 0
+          },
+          {
+            "id": "340",
+            "text": "Honduras",
+            "formattedText": "Honduras",
+            "icon": "flag flag-hn",
+            "count": 0
+          },
+          {
+            "id": "275",
+            "text": "Palestine",
+            "formattedText": "Palestine",
+            "icon": "flag flag-ps",
+            "count": 0
+          },
+          {
+            "id": "630",
+            "text": "Puerto Rico",
+            "formattedText": "Puerto Rico",
+            "icon": "flag flag-pr",
+            "count": 0
+          },
+          {
+            "id": "100",
+            "text": "Bulgaria",
+            "formattedText": "Bulgaria",
+            "icon": "flag flag-bg",
+            "count": 0
+          },
+          {
+            "id": "716",
+            "text": "Zimbabwe",
+            "formattedText": "Zimbabwe",
+            "icon": "flag flag-zw",
+            "count": 0
+          },
+          {
+            "id": "807",
+            "text": "Macedonia, the former Yugoslav Republic of",
+            "formattedText": "Macedonia, the former Yugoslav Republic of",
+            "icon": "flag flag-mk",
+            "count": 0
+          },
+          {
+            "id": "862",
+            "text": "Venezuela",
+            "formattedText": "Venezuela",
+            "icon": "flag flag-ve",
+            "count": 0
+          },
+          {
+            "id": "70",
+            "text": "Bosnia and Herzegovina",
+            "formattedText": "Bosnia and Herzegovina",
+            "icon": "flag flag-ba",
+            "count": 0
+          },
+          {
+            "id": "600",
+            "text": "Paraguay",
+            "formattedText": "Paraguay",
+            "icon": "flag flag-py",
+            "count": 0
+          },
+          {
+            "id": "558",
+            "text": "Nicaragua",
+            "formattedText": "Nicaragua",
+            "icon": "flag flag-ni",
+            "count": 0
+          },
+          {
+            "id": "646",
+            "text": "Rwanda",
+            "formattedText": "Rwanda",
+            "icon": "flag flag-rw",
+            "count": 0
+          },
+          {
+            "id": "188",
+            "text": "Costa Rica",
+            "formattedText": "Costa Rica",
+            "icon": "flag flag-cr",
+            "count": 0
+          },
+          {
+            "id": "470",
+            "text": "Malta",
+            "formattedText": "Malta",
+            "icon": "flag flag-mt",
+            "count": 0
+          },
+          {
+            "id": "48",
+            "text": "Bahrain",
+            "formattedText": "Bahrain",
+            "icon": "flag flag-bh",
+            "count": 0
+          },
+          {
+            "id": "480",
+            "text": "Mauritius",
+            "formattedText": "Mauritius",
+            "icon": "flag flag-mu",
+            "count": 0
+          },
+          {
+            "id": "638",
+            "text": "Réunion",
+            "formattedText": "Réunion",
+            "icon": "flag flag-re",
+            "count": 0
+          },
+          {
+            "id": "440",
+            "text": "Lithuania",
+            "formattedText": "Lithuania",
+            "icon": "flag flag-lt",
+            "count": 0
+          },
+          {
+            "id": "705",
+            "text": "Slovenia",
+            "formattedText": "Slovenia",
+            "icon": "flag flag-si",
+            "count": 0
+          },
+          {
+            "id": "96",
+            "text": "Brunei Darussalam",
+            "formattedText": "Brunei Darussalam",
+            "icon": "flag flag-bn",
+            "count": 0
+          },
+          {
+            "id": "8",
+            "text": "Albania",
+            "formattedText": "Albania",
+            "icon": "flag flag-al",
+            "count": 0
+          },
+          {
+            "id": "51",
+            "text": "Armenia",
+            "formattedText": "Armenia",
+            "icon": "flag flag-am",
+            "count": 0
+          },
+          {
+            "id": "428",
+            "text": "Latvia",
+            "formattedText": "Latvia",
+            "icon": "flag flag-lv",
+            "count": 0
+          },
+          {
+            "id": "388",
+            "text": "Jamaica",
+            "formattedText": "Jamaica",
+            "icon": "flag flag-jm",
+            "count": 0
+          },
+          {
+            "id": "780",
+            "text": "Trinidad and Tobago",
+            "formattedText": "Trinidad and Tobago",
+            "icon": "flag flag-tt",
+            "count": 0
+          },
+          {
+            "id": "498",
+            "text": "Moldova",
+            "formattedText": "Moldova",
+            "icon": "flag flag-md",
+            "count": 0
+          }
+        ]
+      },
+      "Data": [
+        {
+          "Country": 840,
+          "Share": 0.1146372205072262,
+          "UsersShare": 0.13441041581744634,
+          "ShareList": {
+            "wayin.ai": 1
+          },
+          "Change": 0.15525319504897084,
+          "AvgVisitDuration": 234.65656748058794,
+          "PagePerVisit": 4.641262333770652,
+          "BounceRate": 0.3547022825547485,
+          "Rank": 48533
+        },
+        {
+          "Country": 356,
+          "Share": 0.1107924374657981,
+          "UsersShare": 0.12485076624724108,
+          "ShareList": {
+            "wayin.ai": 1
+          },
+          "Change": 0.01910532922215724,
+          "AvgVisitDuration": 417.8617006457899,
+          "PagePerVisit": 8.094892319081408,
+          "BounceRate": 0.2915878902755396,
+          "Rank": 19052
+        },
+        {
+          "Country": 360,
+          "Share": 0.09579150014624171,
+          "UsersShare": 0.09461799596621413,
+          "ShareList": {
+            "wayin.ai": 1
+          },
+          "Change": 0.25951739263500784,
+          "AvgVisitDuration": 517.9535529915239,
+          "PagePerVisit": 5.435963210256301,
+          "BounceRate": 0.27407926405020056,
+          "Rank": 9158
+        },
+        {
+          "Country": 76,
+          "Share": 0.08091878612396845,
+          "UsersShare": 0.09410370626906094,
+          "ShareList": {
+            "wayin.ai": 1
+          },
+          "Change": -0.10501094547580869,
+          "AvgVisitDuration": 332.1982129353175,
+          "PagePerVisit": 6.5645095271434135,
+          "BounceRate": 0.3560363088228173,
+          "Rank": 28449
+        },
+        {
+          "Country": 826,
+          "Share": 0.03931875353788504,
+          "UsersShare": 0.035506243005518516,
+          "ShareList": {
+            "wayin.ai": 1
+          },
+          "Change": -0.06451873473833925,
+          "AvgVisitDuration": 284.51248715353125,
+          "PagePerVisit": 5.563998739129348,
+          "BounceRate": 0.3785793377381999,
+          "Rank": 25329
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementOverview/Table?country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false&includeSubDomains=true&timeGranularity=Monthly&keys=wayin.ai&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.37098021141409726,
+          "UniqueUsers": 468387.10333333333,
+          "DedupUniqueUsers": 412343.9615307458,
+          "VisitsPerUser": 1.8873877503569285,
+          "Source": "Total",
+          "Domain": "wayin.ai",
+          "AvgMonthVisits": 884028.0812564982,
+          "AvgVisitDuration": 168.05043387373803,
+          "PagesPerVisit": 5.939697232345983,
+          "TotalPagesViews": 5250859.147555354,
+          "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=0&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=wayin.ai",
+    "body": {
+      "Data": {
+        "Total": {
+          "wayin.ai": {
+            "Organic Search": 478077.5543041026,
+            "Social": 139754.64604708884,
+            "Email": 1254.9000159816514,
+            "Display Ads": 12843.637763109933,
+            "Direct": 1063397.2768552648,
+            "Referrals": 90931.97146545531,
+            "Paid Search": 865824.2610857906
+          }
+        },
+        "Desktop": {
+          "wayin.ai": {
+            "Organic Search": 403342.32099999994,
+            "Social": 29590.131,
+            "Email": 1205.6310000000003,
+            "Display Ads": 10906.367,
+            "Direct": 358650.96800000005,
+            "Referrals": 62852.469000000005,
+            "Paid Search": 154310.327
+          }
+        },
+        "MobileWeb": {
+          "wayin.ai": {
+            "Organic Search": 74735.23330410267,
+            "Social": 110164.51504708885,
+            "Email": 49.26901598165125,
+            "Display Ads": 1937.2707631099327,
+            "Direct": 704746.3088552647,
+            "Referrals": 28079.502465455313,
+            "Paid Search": 711513.9340857906
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=wayin.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Desktop": 1020858.2137694949,
+          "Mobile Web": 1631226.0300000005
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=wayin.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "wayin.ai": {
+          "TotalVisits": 2652084.2437694953,
+          "Change": 0.01908846746841715,
+          "ShareOfVisits": 1,
+          "Trend": [
+            788692,
+            922887,
+            940504
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesOverview/PieChart?country=999&webSource=Total&keys=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&includeSubDomains=true",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Organic Search": 478077.55430410267,
+          "Paid Search": 865824.2610857906,
+          "Social": 139754.64604708884,
+          "Mail": 1254.9000159816514,
+          "Direct": 1063397.2768552648,
+          "Paid Referrals": 12843.637763109933,
+          "Referrals": 90931.97146545531
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficSourcesSearchV2/BrandedKeywords/WebsitePerformance/PieChart?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&to=2026%7C02%7C28&webSource=Total&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Branded": 37265.96428054793,
+          "NoneBranded": 207322.4006095392
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Paid&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "opus clip",
+          "Change": -0.32444168734491313,
+          "TotalShare": 0.21532377656945131,
+          "TotalVisits": 21780,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.34,
+          "KwVolume": 1008125
+        },
+        {
+          "SearchTerm": "opusclip",
+          "Change": -0.44623655913978494,
+          "TotalShare": 0.050914483440435,
+          "TotalVisits": 5150,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.64,
+          "KwVolume": 306947
+        },
+        {
+          "SearchTerm": "opus clips",
+          "Change": 0.13765182186234817,
+          "TotalShare": 0.0277805239742956,
+          "TotalVisits": 2810,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.37,
+          "KwVolume": 73323
+        },
+        {
+          "SearchTerm": "opus pro",
+          "Change": 2.3417721518987342,
+          "TotalShare": 0.026099851705388036,
+          "TotalVisits": 2640,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.64,
+          "KwVolume": 50080
+        },
+        {
+          "SearchTerm": "kapwing",
+          "Change": -0.0898876404494382,
+          "TotalShare": 0.024023727137913987,
+          "TotalVisits": 2430,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.53,
+          "KwVolume": 539494
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Organic&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "youtube video summarizer",
+          "Change": 0.1619047619047619,
+          "TotalShare": 0.04850412483848524,
+          "TotalVisits": 4880,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.53,
+          "KwVolume": 106736
+        },
+        {
+          "SearchTerm": "ai thumbnail maker",
+          "Change": 0.8160919540229885,
+          "TotalShare": 0.04711261306033197,
+          "TotalVisits": 4740,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.51,
+          "KwVolume": 45285
+        },
+        {
+          "SearchTerm": "long video to short video",
+          "Change": 1.2204301075268817,
+          "TotalShare": 0.04104959745552132,
+          "TotalVisits": 4130,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.14,
+          "KwVolume": 13401
+        },
+        {
+          "SearchTerm": "thumbnail maker",
+          "Change": 1.486842105263158,
+          "TotalShare": 0.03757081801013816,
+          "TotalVisits": 3780,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.44,
+          "KwVolume": 71231
+        },
+        {
+          "SearchTerm": "youtube summarizer",
+          "Change": 0.7263157894736842,
+          "TotalShare": 0.03260113308816221,
+          "TotalVisits": 3280,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "wayin.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.42,
+          "KwVolume": 76366
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationReferrals/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "google.com",
+          "Share": 0.5794765290462663,
+          "Change": -0.6044573554337045,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "youtube.com",
+          "Share": 0.14778363104031098,
+          "Change": 0.0003670113992395029,
+          "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=0&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "discord.com",
+          "Share": 0.12002374913924596,
+          "Change": 1.2674818524514206,
+          "Favicon": "https://site-images.similarcdn.com/image?url=discord.com&t=2&s=0&h=133c0aed0b1b6c3760db4875f51accd42ff1157854dd0ee0eabab700af80a348",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "stripe.com",
+          "Share": 0.09986220117788723,
+          "Change": 1.0051303991493856,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=stripe.com&t=2&s=0&h=d68993ccefeee1fe61031cd46586b3158ad13585abae80195cc41b500863c253",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "omnicalculator.com",
+          "Share": 0.023921053490159504,
+          "Change": 1.9826321936316904,
+          "Favicon": "https://site-images.similarcdn.com/image?url=omnicalculator.com&t=2&s=0&h=c531fec85105768cbd4a4104c2a4f9265809329cc67f9ac651e4a42bafb61400",
+          "HasAdsense": false
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferrals/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 29,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Change": 0.6019520194023656,
+          "Share": 0.6225824901133021,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Category": ""
+        },
+        {
+          "Change": -0.8478739848303619,
+          "Share": 0.059726492391143686,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Category": ""
+        },
+        {
+          "Change": -1,
+          "Share": 0.0475568812990111,
+          "Domain": "aixploria.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=aixploria.com&t=2&s=0&h=bfab7f4b2d02e37c654c3e731f5f1fe2150d2c5888e66d7c93b2d58e8ba5dbd7",
+          "Category": ""
+        },
+        {
+          "Change": -1,
+          "Share": 0.047159464986043904,
+          "Domain": "workona.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=workona.com&t=2&s=0&h=109b55be032652ec7cae0c90e31daba870625b03f9231577b724c08872e37ffd",
+          "Category": ""
+        },
+        {
+          "Change": 0.3951294568427187,
+          "Share": 0.043974139428295624,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Category": ""
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesSocial/PieChart?country=999&includeSubDomains=true&webSource=Desktop&timeGranularity=Monthly&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&keys=wayin.ai",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Youtube": {
+            "Share": 0.7369082999504882,
+            "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=1&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20"
+          },
+          "X-twitter": {
+            "Share": 0.19688965168673284,
+            "Favicon": "https://site-images.similarcdn.com/image?url=x.com&t=2&s=1&h=181f9f2250b958cc0ca20fb16f33049b6e13425f038a279637ce1da9dc20d56f"
+          },
+          "Tiktok": {
+            "Share": 0.01979191112065783,
+            "Favicon": "https://site-images.similarcdn.com/image?url=tiktok.com&t=2&s=1&h=398f47f8e1724c54f9f760f76988b2f9cf0c4111523f9d3f26e03d62731b0c17"
+          },
+          "Reddit": {
+            "Share": 0.018357548828023703,
+            "Favicon": "https://site-images.similarcdn.com/image?url=reddit.com&t=2&s=1&h=66f2412047e0362ec60d5583d4b186511a8e859446bb112c60d22968facae906"
+          },
+          "Facebook": {
+            "Share": 0.017476330884526294,
+            "Favicon": "https://site-images.similarcdn.com/image?url=facebook.com&t=2&s=1&h=be773d6b77aa3d59b6a671c5c27ad729b1ae77400e89776e2f749cce6b926c4b"
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationAds/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "myaccount.google.com",
+          "Share": 0.9294878408506174,
+          "Favicon": "https://site-images.similarcdn.com/image?url=myaccount.google.com&t=2&s=0&h=9bf4e4c9208bec797961df0bf31af0cd69065ee7ecb48825467859d5b86121c7",
+          "HasAdsense": false,
+          "TotalShare": 0.9294878408506174,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          }
+        },
+        {
+          "Domain": "veed.io",
+          "Share": 0.06276823596434368,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=0&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a",
+          "HasAdsense": false,
+          "TotalShare": 0.06276823596434368,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          }
+        },
+        {
+          "Domain": "login.live.com",
+          "Share": 0.005655610140672939,
+          "Favicon": "https://site-images.similarcdn.com/image?url=login.live.com&t=2&s=0&h=a8c5c0b14a6e9cdea99eaf664550e70e76667d436aca7011d461563442c9a53c",
+          "HasAdsense": false,
+          "TotalShare": 0.005655610140672939,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          }
+        },
+        {
+          "Domain": "tatrck.com",
+          "Share": 0.002088313044365884,
+          "Favicon": "https://site-images.similarcdn.com/image?url=tatrck.com&t=2&s=0&h=ec183ccc430927771886dec2896d6a86702eb14e91601f23b7ee8071441eedc1",
+          "HasAdsense": false,
+          "TotalShare": 0.002088313044365884,
+          "SiteOrigins": {
+            "wayin.ai": 1
+          }
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferringCategories/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=wayin.ai&timeGranularity=Monthly&to=2026%7C02%7C28&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Share": 0.7353078740816982,
+          "Category": "AI_Chatbots_and_Tools"
+        },
+        {
+          "Share": 0.12383540411909706,
+          "Category": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology"
+        },
+        {
+          "Share": 0.06251258917773549,
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design"
+        },
+        {
+          "Share": 0.025940842689190228,
+          "Category": "Lifestyle/Beauty_and_Cosmetics"
+        },
+        {
+          "Share": 0.0209438954613154,
+          "Category": "Unknown"
+        },
+        {
+          "Share": 0.011588055998126479,
+          "Category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=wayin.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "d-id.com",
+        "DomainWithoutSub": "d-id.com",
+        "Rank": 41933,
+        "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=1&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132"
+      },
+      {
+        "Domain": "fliki.ai",
+        "DomainWithoutSub": "fliki.ai",
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=1&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "vidiq.com",
+        "DomainWithoutSub": "vidiq.com",
+        "Rank": 9843,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=1&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9"
+      },
+      {
+        "Domain": "creatify.ai",
+        "DomainWithoutSub": "creatify.ai",
+        "Rank": 42877,
+        "Favicon": "https://site-images.similarcdn.com/image?url=creatify.ai&t=2&s=1&h=b4380b9e72d1df9fc298b68f38c3d30c75bcc267ea4c01afcc8f4ca2178b1c1b"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "vidfly.ai",
+        "DomainWithoutSub": "vidfly.ai",
+        "Rank": 113917,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidfly.ai&t=2&s=1&h=f4e328af0d440be0ce37a0162f417200aee2b198081ca875d302aa5d1af2071a"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "revid.ai",
+        "DomainWithoutSub": "revid.ai",
+        "Rank": 54641,
+        "Favicon": "https://site-images.similarcdn.com/image?url=revid.ai&t=2&s=1&h=6aecbca6d208ac2bda8d6afa8c83c642d34a638b22b386e9839a5cc4a244d584"
+      },
+      {
+        "Domain": "submagic.co",
+        "DomainWithoutSub": "submagic.co",
+        "Rank": 48735,
+        "Favicon": "https://site-images.similarcdn.com/image?url=submagic.co&t=2&s=1&h=bf2c053155a08dcbea2290b48c509d2dca7878b18edc3b8d545a83fa025e6968"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "dubverse.ai",
+        "DomainWithoutSub": "dubverse.ai",
+        "Rank": 187702,
+        "Favicon": "https://site-images.similarcdn.com/image?url=dubverse.ai&t=2&s=1&h=bae666afe71e912d7c0f9728ccc93afb589027dd3ff38f683fdc9edb001c91a7"
+      },
+      {
+        "Domain": "canva.com",
+        "DomainWithoutSub": "canva.com",
+        "Rank": 33,
+        "Favicon": "https://site-images.similarcdn.com/image?url=canva.com&t=2&s=1&h=76c69b938e0fc8e4bebe1e545dba8f4ad7bd78aec8c65f149f36030ee1036a65"
+      },
+      {
+        "Domain": "pikzels.com",
+        "DomainWithoutSub": "pikzels.com",
+        "Rank": 110077,
+        "Favicon": "https://site-images.similarcdn.com/image?url=pikzels.com&t=2&s=1&h=19f756ec29f5208bf002c7fd54d3ec2032784579edd763c108430d9469282076"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "sivi.ai",
+        "DomainWithoutSub": "sivi.ai",
+        "Rank": 295300,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sivi.ai&t=2&s=1&h=8aafe428928acc7fa54593b60f7e85bc2e8b537070de63af897f6918a62c5127"
+      },
+      {
+        "Domain": "reccloud.com",
+        "DomainWithoutSub": "reccloud.com",
+        "Rank": 85042,
+        "Favicon": "https://site-images.similarcdn.com/image?url=reccloud.com&t=2&s=1&h=8b7be0c558377be73cca71b9a24ae639ac86c343765f672dd39080aee9658b5c"
+      },
+      {
+        "Domain": "clipto.com",
+        "DomainWithoutSub": "clipto.com",
+        "Rank": 23061,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clipto.com&t=2&s=1&h=393dfd5a054efbc9c85d64e14be24461042aa3b2643e2afa54f5740568e47f60"
+      },
+      {
+        "Domain": "vidful.ai",
+        "DomainWithoutSub": "vidful.ai",
+        "Rank": 62087,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidful.ai&t=2&s=1&h=bb025c694c2fdfe33b016552c048e6631d4abcf719f0a21acf8162837672c02f"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/breakdown?country=999&key=wayin.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.46784197329581106,
+          "visitsShare": 0.48251463916287857,
+          "spendShare": 0.859588990714381,
+          "category": "Computers_Electronics_and_Technology~Social_Networks_and_Online_Communities",
+          "rank": 8859,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "save-free.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=save-free.com&t=2&s=0&h=8c8339428664fcc0ae0431d13f7e2a79a44f9ed62df87ff8e7d898fae59bf041"
+        },
+        {
+          "impressionsShare": 0.45188580386228827,
+          "visitsShare": 0.45731551902970113,
+          "spendShare": 0.09751996736554328,
+          "category": "Computers_Electronics_and_Technology~Search_Engines",
+          "rank": 5067,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "coccoc.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=coccoc.com&t=2&s=0&h=81ef825f5694b237cf91c461a20fec10c205ca2499b1504d8c7f0327734532fd"
+        },
+        {
+          "impressionsShare": 0.061870012509168466,
+          "visitsShare": 0.04157413809360918,
+          "spendShare": 0.010239427577031971,
+          "category": "Home_and_Garden~Home_and_Garden",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "allsearchsite.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=allsearchsite.com&t=2&s=0&h=1f9035acab2b3ac65f20e3cb7533780dd06d5a3f5c16ea6a998426a07a93a7a6"
+        },
+        {
+          "impressionsShare": 0.01840221033273223,
+          "visitsShare": 0.018595703713811074,
+          "spendShare": 0.03265161434304375,
+          "category": "Computers_Electronics_and_Technology~Email",
+          "rank": 422900,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "tempumail.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=tempumail.com&t=2&s=0&h=e994444ea82cc747c05ef15429bb6df4def78419a829a0dfb475f8e962afe2bd"
+        }
+      ],
+      "totalCount": 4,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=wayin.ai&webSource=Total",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 788692.1942031726
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 922887.7682128951
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 940504.2813534271
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=wayin.ai%2Cd-id.com%2Cfliki.ai%2Copus.pro%2Cvidiq.com&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "wayin.ai": false,
+        "d-id.com": false,
+        "fliki.ai": false,
+        "opus.pro": false,
+        "vidiq.com": false
+      },
+      "Data": [
+        {
+          "Domain": "wayin.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=wayin.ai&t=2&s=0&h=c27920de6429497dfbdf6f2822d6a60c680bb4e1bcd9a752ae13b5c945b94f40",
+          "TotalVisits": 2652084.2437694953,
+          "Change": 0.01908846746841715,
+          "ShareOfVisits": 0.06890659717700816
+        },
+        {
+          "Domain": "d-id.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=d-id.com&t=2&s=0&h=17dce221d97ffe04311e6d366c5230cf64277e18c5ec7ee75e83207671763132",
+          "TotalVisits": 2630270.0915691433,
+          "Change": -0.07659117244262353,
+          "ShareOfVisits": 0.06833982068717422
+        },
+        {
+          "Domain": "fliki.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=fliki.ai&t=2&s=0&h=30e3bb40a672181dc514b69dc3791331b1d4fbb7c2e36634abaf62f0ce32dc54",
+          "TotalVisits": 2441852.632455866,
+          "Change": -0.24864023217202447,
+          "ShareOfVisits": 0.06344434800875712
+        },
+        {
+          "Domain": "opus.pro",
+          "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=0&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab",
+          "TotalVisits": 15268938.863069775,
+          "Change": -0.09287052079679146,
+          "ShareOfVisits": 0.39671840064269065
+        },
+        {
+          "Domain": "vidiq.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vidiq.com&t=2&s=0&h=31809378b6bd004ec93915e0ecd55680dc394288f8b39f68827f58a880999cb9",
+          "TotalVisits": 15494957.666059054,
+          "Change": -0.1943137849144683,
+          "ShareOfVisits": 0.4025908334843698
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=wayin.ai%2Cd-id.com%2Cfliki.ai%2Copus.pro%2Cvidiq.com&webSource=Total",
+    "body": {
+      "Data": {
+        "wayin.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 788692.1942031726
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 922887.7682128951
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 940504.2813534271
+              }
+            ]
+          ]
+        },
+        "d-id.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 798416.8998056639
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 952399.2848103091
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 879453.9069531714
+              }
+            ]
+          ]
+        },
+        "fliki.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 925550.3827733771
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 865785.7040778073
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 650516.5456046816
+              }
+            ]
+          ]
+        },
+        "opus.pro": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 4886399.646142153
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5444066.242039004
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 4938472.974888611
+              }
+            ]
+          ]
+        },
+        "vidiq.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 5130047.098848763
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5740150.465023806
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 4624760.102186485
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "wayin.ai": false,
+        "d-id.com": false,
+        "fliki.ai": false,
+        "opus.pro": false,
+        "vidiq.com": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

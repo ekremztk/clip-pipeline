@@ -1,0 +1,868 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=swiftia.io&limit=5",
+    "body": [
+      {
+        "Domain": "project-aeon.com",
+        "DomainWithoutSub": "project-aeon.com",
+        "Rank": 2040494,
+        "Favicon": "https://site-images.similarcdn.com/image?url=project-aeon.com&t=2&s=1&h=4dee952e4a1964008a56f038045edc86375adc97456b750ac6ba780a4ec55316"
+      },
+      {
+        "Domain": "viddly.net",
+        "DomainWithoutSub": "viddly.net",
+        "Rank": 212375,
+        "Favicon": "https://site-images.similarcdn.com/image?url=viddly.net&t=2&s=1&h=701365373ee3090e097ca6fc10b30339a8bbde79394e72179713aea1cc3ea14e"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "virlo.ai",
+        "DomainWithoutSub": "virlo.ai",
+        "Rank": 302966,
+        "Favicon": "https://site-images.similarcdn.com/image?url=virlo.ai&t=2&s=1&h=7d073cfc06b79ff97ad5f5f97696f5b8bee6b57919bcbc8f12ff55ed471c7039"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=swiftia.io&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "swiftia.io": {
+        "mainDomainName": "swiftia",
+        "icon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "image": "https://site-images.similarcdn.com/image?url=swiftia.io&t=0&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=swiftia.io&t=1&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3",
+        "title": "Use case : Social media Management (SMM) platforms",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "Integrate Swiftia’s API into your platform to offer your users an enhanced video editing experience. By leveraging our AI-powered technology, your users can quickly and easily create engaging short…",
+        "globalRanking": 2096315,
+        "highestTrafficCountry": 840,
+        "highestTrafficCountryRanking": 1225787,
+        "categoryRanking": 0,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "yearFounded": "2024",
+        "employeeRange": "0 - 10",
+        "monthlyVisits": 0,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/summary?country=999&key=swiftia.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "swiftia.io": {
+          "publishers": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=swiftia.io&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "project-aeon.com",
+        "DomainWithoutSub": "project-aeon.com",
+        "Rank": 2040494,
+        "Favicon": "https://site-images.similarcdn.com/image?url=project-aeon.com&t=2&s=1&h=4dee952e4a1964008a56f038045edc86375adc97456b750ac6ba780a4ec55316"
+      },
+      {
+        "Domain": "viddly.net",
+        "DomainWithoutSub": "viddly.net",
+        "Rank": 212375,
+        "Favicon": "https://site-images.similarcdn.com/image?url=viddly.net&t=2&s=1&h=701365373ee3090e097ca6fc10b30339a8bbde79394e72179713aea1cc3ea14e"
+      },
+      {
+        "Domain": "short.ai",
+        "DomainWithoutSub": "short.ai",
+        "Rank": 158007,
+        "Favicon": "https://site-images.similarcdn.com/image?url=short.ai&t=2&s=1&h=b6405c020f08f5160f6d658ea133e5798f687d04580df8a2c1ca4b28e3a957c2"
+      },
+      {
+        "Domain": "virlo.ai",
+        "DomainWithoutSub": "virlo.ai",
+        "Rank": 302966,
+        "Favicon": "https://site-images.similarcdn.com/image?url=virlo.ai&t=2&s=1&h=7d073cfc06b79ff97ad5f5f97696f5b8bee6b57919bcbc8f12ff55ed471c7039"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "autoshorts.ai",
+        "DomainWithoutSub": "autoshorts.ai",
+        "Rank": 172499,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autoshorts.ai&t=2&s=1&h=f9cf1abc22c5edeac82798ae527ca5688f6c60d489000697623dc0bfc0d7b6cb"
+      },
+      {
+        "Domain": "flarecut.com",
+        "DomainWithoutSub": "flarecut.com",
+        "Rank": 2148191,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flarecut.com&t=2&s=1&h=60279774b37478c48dd264a64afb3b4ff9eea3fa11d288ec8f912690d62d7199"
+      },
+      {
+        "Domain": "vidiyo.ai",
+        "DomainWithoutSub": "vidiyo.ai",
+        "Rank": 1556566,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vidiyo.ai&t=2&s=1&h=a48120529bc037544d8d28135020fff1b942ac67b1b978795a1240c765279342"
+      },
+      {
+        "Domain": "fliki-ai.com",
+        "DomainWithoutSub": "fliki-ai.com",
+        "Rank": 2037942,
+        "Favicon": "https://site-images.similarcdn.com/image?url=fliki-ai.com&t=2&s=1&h=6d4bdcc4fd10089fc8210b3852e8da92fdd56c5bfac362f3ebe0817d95a3d71b"
+      },
+      {
+        "Domain": "jupitrr.com",
+        "DomainWithoutSub": "jupitrr.com",
+        "Rank": 603751,
+        "Favicon": "https://site-images.similarcdn.com/image?url=jupitrr.com&t=2&s=1&h=35cb8523f6d68ff4a02f15251f001298600a742b40f7b114716b49ec1efedb2a"
+      },
+      {
+        "Domain": "subscribr.ai",
+        "DomainWithoutSub": "subscribr.ai",
+        "Rank": 243713,
+        "Favicon": "https://site-images.similarcdn.com/image?url=subscribr.ai&t=2&s=1&h=aff9f1fa42f6cc07a8f517b5fd83a0b534b9f5945271d3c07173ac4fc38b9449"
+      },
+      {
+        "Domain": "sendshort.ai",
+        "DomainWithoutSub": "sendshort.ai",
+        "Rank": 189592,
+        "Favicon": "https://site-images.similarcdn.com/image?url=sendshort.ai&t=2&s=1&h=11fbd864e02ac3cbcbbe6baaa0a4aefe619aeb4523abb68896b4580c5302620d"
+      },
+      {
+        "Domain": "clicks.video",
+        "DomainWithoutSub": "clicks.video",
+        "Rank": 2032484,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clicks.video&t=2&s=1&h=f69aba011ad9e9242a8404cf055788e8f06bd798ac58b41926cd1d751087d606"
+      },
+      {
+        "Domain": "magi-1.org",
+        "DomainWithoutSub": "magi-1.org",
+        "Rank": 1871964,
+        "Favicon": "https://site-images.similarcdn.com/image?url=magi-1.org&t=2&s=1&h=59c56152cf4a022ad9e458d9ecede4b305b20541812f86563331834ba6333a24"
+      },
+      {
+        "Domain": "autopilotshorts.com",
+        "DomainWithoutSub": "autopilotshorts.com",
+        "Rank": 1928119,
+        "Favicon": "https://site-images.similarcdn.com/image?url=autopilotshorts.com&t=2&s=1&h=89850149b19a43c1910c98df26b9b543174ab665651f065d0a353139d601183b"
+      },
+      {
+        "Domain": "omagicai.com",
+        "DomainWithoutSub": "omagicai.com",
+        "Rank": 1890434,
+        "Favicon": "https://site-images.similarcdn.com/image?url=omagicai.com&t=2&s=1&h=2cc1b927c005f836539e742f46b1077b98725706c701e41dc48ab6dcf6750f99"
+      },
+      {
+        "Domain": "veo4.dev",
+        "DomainWithoutSub": "veo4.dev",
+        "Rank": 2087036,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veo4.dev&t=2&s=1&h=34957ee6082c6a78e9dcaa2e216d52d155d5906ba2ca114fc98af8ba9463f620"
+      },
+      {
+        "Domain": "cinefai.com",
+        "DomainWithoutSub": "cinefai.com",
+        "Rank": 2275811,
+        "Favicon": "https://site-images.similarcdn.com/image?url=cinefai.com&t=2&s=1&h=0d4b4544453448928f515e913987efa6d0b37804ad4c4735ff064107e7b99c1c"
+      },
+      {
+        "Domain": "addsubtitle.ai",
+        "DomainWithoutSub": "addsubtitle.ai",
+        "Rank": 1463956,
+        "Favicon": "https://site-images.similarcdn.com/image?url=addsubtitle.ai&t=2&s=1&h=82bc053fc2b283e31860c65b2c669eb555a25ee6cd6aad7be3b279d673d34c9a"
+      },
+      {
+        "Domain": "tasy.ai",
+        "DomainWithoutSub": "tasy.ai",
+        "Rank": 2088034,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tasy.ai&t=2&s=1&h=fb9dc345a5f934911e6ef5498dc58015d986a537148995f546c77b92c0005bef"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/summary?country=999&key=swiftia.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "isFromNewScraper": true,
+      "data": {
+        "swiftia.io": {
+          "campaigns": {},
+          "creatives": {},
+          "favicon": "https://site-images.similarcdn.com/image?url=swiftia.io&t=2&s=1&h=103d67663f3e423e9decf9c68d3ac3fd17effd447652d556077708d1d666fad3"
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/GraphV2/unified?country=999&key=swiftia.io&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "data": {
+        "swiftia.io": {
+          "total": {
+            "monthly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 28.98,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-01": {
+                "visits": {
+                  "value": 45.57,
+                  "change": 0.572463768115942,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 47.29,
+                  "change": 0.19028441983387875,
+                  "desktopShare": 1
+                }
+              }
+            },
+            "weekly": {
+              "2025-12-01": {
+                "visits": {
+                  "value": 13.06,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 13.15,
+                  "change": 0.0068912710566615505,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-15": {
+                "visits": {
+                  "value": 2.77,
+                  "change": -0.7893536121673004,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-22": {
+                "visits": {}
+              },
+              "2025-12-29": {
+                "visits": {
+                  "value": 1.02,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 12.09,
+                  "change": 10.852941176470589,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 8.790000000000001,
+                  "change": -0.2729528535980148,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 12.170000000000002,
+                  "change": 0.3845278725824801,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 13.129999999999999,
+                  "change": 0.07888249794576804,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 13.34,
+                  "change": 0.01599390708301606,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 11.489999999999998,
+                  "change": -0.13868065967016502,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 10.72,
+                  "change": -0.06701479547432532,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 10.110000000000001,
+                  "change": -0.05690298507462681,
+                  "desktopShare": 1
+                }
+              }
+            },
+            "daily": {
+              "2025-12-01": {
+                "visits": {}
+              },
+              "2025-12-02": {
+                "visits": {
+                  "value": 5.88,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-03": {
+                "visits": {
+                  "value": 4.26,
+                  "change": -0.2755102040816327,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-04": {
+                "visits": {}
+              },
+              "2025-12-05": {
+                "visits": {}
+              },
+              "2025-12-06": {
+                "visits": {
+                  "value": 2.92,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-07": {
+                "visits": {}
+              },
+              "2025-12-08": {
+                "visits": {
+                  "value": 2.83,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-09": {
+                "visits": {}
+              },
+              "2025-12-10": {
+                "visits": {}
+              },
+              "2025-12-11": {
+                "visits": {
+                  "value": 2.71,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-12": {
+                "visits": {
+                  "value": 2.71,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-13": {
+                "visits": {}
+              },
+              "2025-12-14": {
+                "visits": {
+                  "value": 4.9,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-15": {
+                "visits": {}
+              },
+              "2025-12-16": {
+                "visits": {
+                  "value": 2.77,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2025-12-17": {
+                "visits": {}
+              },
+              "2025-12-18": {
+                "visits": {}
+              },
+              "2025-12-19": {
+                "visits": {}
+              },
+              "2025-12-20": {
+                "visits": {}
+              },
+              "2025-12-21": {
+                "visits": {}
+              },
+              "2025-12-22": {
+                "visits": {}
+              },
+              "2025-12-23": {
+                "visits": {}
+              },
+              "2025-12-24": {
+                "visits": {}
+              },
+              "2025-12-25": {
+                "visits": {}
+              },
+              "2025-12-26": {
+                "visits": {}
+              },
+              "2025-12-27": {
+                "visits": {}
+              },
+              "2025-12-28": {
+                "visits": {}
+              },
+              "2025-12-29": {
+                "visits": {}
+              },
+              "2025-12-30": {
+                "visits": {}
+              },
+              "2025-12-31": {
+                "visits": {}
+              },
+              "2026-01-01": {
+                "visits": {}
+              },
+              "2026-01-02": {
+                "visits": {
+                  "value": 1.02,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-03": {
+                "visits": {}
+              },
+              "2026-01-04": {
+                "visits": {}
+              },
+              "2026-01-05": {
+                "visits": {
+                  "value": 1.03,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-06": {
+                "visits": {
+                  "value": 1.09,
+                  "change": 0.05825242718446607,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-07": {
+                "visits": {
+                  "value": 3.27,
+                  "change": 1.9999999999999996,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-08": {
+                "visits": {
+                  "value": 1.11,
+                  "change": -0.6605504587155964,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-09": {
+                "visits": {
+                  "value": 3.29,
+                  "change": 1.9639639639639634,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-10": {
+                "visits": {
+                  "value": 1.12,
+                  "change": -0.6595744680851063,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-11": {
+                "visits": {
+                  "value": 1.18,
+                  "change": 0.053571428571428416,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-12": {
+                "visits": {
+                  "value": 1.19,
+                  "change": 0.00847457627118645,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-13": {
+                "visits": {
+                  "value": 1.26,
+                  "change": 0.05882352941176476,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-14": {
+                "visits": {
+                  "value": 1.27,
+                  "change": 0.007936507936507943,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-15": {
+                "visits": {
+                  "value": 1.27,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-16": {
+                "visits": {
+                  "value": 1.28,
+                  "change": 0.007874015748031503,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-17": {
+                "visits": {
+                  "value": 1.27,
+                  "change": -0.007812500000000007,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-18": {
+                "visits": {
+                  "value": 1.25,
+                  "change": -0.015748031496063006,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-19": {
+                "visits": {
+                  "value": 1.26,
+                  "change": 0.008000000000000007,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-20": {
+                "visits": {
+                  "value": 1.55,
+                  "change": 0.23015873015873017,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-21": {
+                "visits": {
+                  "value": 1.58,
+                  "change": 0.019354838709677438,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-22": {
+                "visits": {
+                  "value": 1.59,
+                  "change": 0.006329113924050638,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-23": {
+                "visits": {
+                  "value": 2.87,
+                  "change": 0.8050314465408804,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-24": {
+                "visits": {
+                  "value": 1.57,
+                  "change": -0.4529616724738676,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-25": {
+                "visits": {
+                  "value": 1.75,
+                  "change": 0.11464968152866238,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-26": {
+                "visits": {
+                  "value": 1.86,
+                  "change": 0.06285714285714292,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-27": {
+                "visits": {
+                  "value": 1.9,
+                  "change": 0.02150537634408592,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-28": {
+                "visits": {
+                  "value": 1.9,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-29": {
+                "visits": {
+                  "value": 1.93,
+                  "change": 0.01578947368421054,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-30": {
+                "visits": {
+                  "value": 1.92,
+                  "change": -0.005181347150259072,
+                  "desktopShare": 1
+                }
+              },
+              "2026-01-31": {
+                "visits": {
+                  "value": 1.99,
+                  "change": 0.03645833333333337,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-01": {
+                "visits": {
+                  "value": 1.63,
+                  "change": -0.1809045226130654,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-02": {
+                "visits": {
+                  "value": 3.26,
+                  "change": 1,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-03": {
+                "visits": {
+                  "value": 1.66,
+                  "change": -0.49079754601226994,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-04": {
+                "visits": {
+                  "value": 1.7,
+                  "change": 0.024096385542168697,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-05": {
+                "visits": {
+                  "value": 1.69,
+                  "change": -0.005882352941176476,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-06": {
+                "visits": {
+                  "value": 1.7,
+                  "change": 0.0059171597633136145,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-07": {
+                "visits": {
+                  "value": 1.73,
+                  "change": 0.01764705882352943,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-08": {
+                "visits": {
+                  "value": 1.6,
+                  "change": -0.07514450867052017,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-09": {
+                "visits": {
+                  "value": 1.4,
+                  "change": -0.1250000000000001,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-10": {
+                "visits": {
+                  "value": 1.4,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-11": {
+                "visits": {
+                  "value": 1.43,
+                  "change": 0.02142857142857145,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-12": {
+                "visits": {
+                  "value": 2.89,
+                  "change": 1.020979020979021,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-13": {
+                "visits": {
+                  "value": 1.46,
+                  "change": -0.4948096885813149,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-14": {
+                "visits": {
+                  "value": 1.46,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-15": {
+                "visits": {
+                  "value": 1.45,
+                  "change": -0.006849315068493157,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-16": {
+                "visits": {
+                  "value": 1.48,
+                  "change": 0.020689655172413814,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-17": {
+                "visits": {
+                  "value": 1.5,
+                  "change": 0.013513513513513526,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-18": {
+                "visits": {
+                  "value": 1.25,
+                  "change": -0.16666666666666666,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-19": {
+                "visits": {
+                  "value": 1.25,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-20": {
+                "visits": {
+                  "value": 2.74,
+                  "change": 1.1920000000000002,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-21": {
+                "visits": {
+                  "value": 1.25,
+                  "change": -0.5437956204379563,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-22": {
+                "visits": {
+                  "value": 1.25,
+                  "change": 0,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-23": {
+                "visits": {
+                  "value": 1.43,
+                  "change": 0.14399999999999996,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-24": {
+                "visits": {
+                  "value": 2.54,
+                  "change": 0.7762237762237764,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-25": {
+                "visits": {
+                  "value": 1.44,
+                  "change": -0.4330708661417323,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-26": {
+                "visits": {
+                  "value": 1.57,
+                  "change": 0.09027777777777786,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-27": {
+                "visits": {
+                  "value": 1.56,
+                  "change": -0.006369426751592362,
+                  "desktopShare": 1
+                }
+              },
+              "2026-02-28": {
+                "visits": {
+                  "value": 1.57,
+                  "change": 0.006410256410256416,
+                  "desktopShare": 1
+                }
+              }
+            },
+            "total": {
+              "visits": 121.84000000000003
+            }
+          }
+        }
+      },
+      "hasAdIntelMetrics": true
+    }
+  }
+]

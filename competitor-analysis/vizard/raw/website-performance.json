@@ -1,0 +1,2131 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=vizard.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1244117.4954584057,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=vizard.ai&mainDomainOnly=false&includeCrossData=true",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1436139.7397561253,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/ConversionRates/Countries?Keys=vizard.ai&from=2026%7C03%7C04&to=2026%7C03%7C04&IncludeSubdomains=true",
+    "body": {
+      "Interval": [
+        "Interval is invalid - 2026-03-01--2026-03-31. Allowed interval is 2023-01--2026-02."
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?mainDomainOnly=false&includeCrossData=true&key=vizard.ai&isWWW=false&country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1436139.7397561253,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=vizard.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "Data": {
+        "vizard.ai": {
+          "TotalVisits": 5432922.911468741,
+          "Change": -0.4219995035838359,
+          "ShareOfVisits": 1,
+          "Trend": [
+            1512114,
+            2484668,
+            1436139
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "vizard.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/WebRanks/SingleMetric?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=vizard.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "GlobalRank": {
+            "Value": 29298,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 31395
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 20168
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 29298
+              }
+            ]
+          },
+          "CountryRank": {
+            "Value": 50332,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 56741
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 47527
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 50332
+              }
+            ]
+          },
+          "CategoryRank": {
+            "Value": 230,
+            "Trend": [
+              {
+                "Key": "2025-12-01",
+                "Value": 246
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 154
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 230
+              }
+            ]
+          },
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+          "Country": 840
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=4&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementDesktopVsMobileVisits/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&keys=vizard.ai&webSource=Total&isWindow=false&includeSubDomains=true&timeGranularity=Monthly&ShouldGetVerifiedData=false",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "Desktop": 2465267.30846874,
+          "Mobile Web": 2967655.603
+        }
+      },
+      "KeysDataVerification": {
+        "vizard.ai": false
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteGeography/Geography/Table?country=999&includeSubDomains=true&webSource=Total&timeGranularity=Monthly&orderBy=TotalShare+desc&keys=vizard.ai&pageSize=5&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 119,
+      "TotalTopLevelCount": 0,
+      "Filters": {
+        "country": [
+          {
+            "id": "400",
+            "text": "Jordan",
+            "formattedText": "Jordan",
+            "icon": "flag flag-jo",
+            "count": 0
+          },
+          {
+            "id": "356",
+            "text": "India",
+            "formattedText": "India",
+            "icon": "flag flag-in",
+            "count": 0
+          },
+          {
+            "id": "360",
+            "text": "Indonesia",
+            "formattedText": "Indonesia",
+            "icon": "flag flag-id",
+            "count": 0
+          },
+          {
+            "id": "840",
+            "text": "United States",
+            "formattedText": "United States",
+            "icon": "flag flag-us",
+            "count": 0
+          },
+          {
+            "id": "76",
+            "text": "Brazil",
+            "formattedText": "Brazil",
+            "icon": "flag flag-br",
+            "count": 0
+          },
+          {
+            "id": "826",
+            "text": "United Kingdom",
+            "formattedText": "United Kingdom",
+            "icon": "flag flag-gb",
+            "count": 0
+          },
+          {
+            "id": "686",
+            "text": "Senegal",
+            "formattedText": "Senegal",
+            "icon": "flag flag-sn",
+            "count": 0
+          },
+          {
+            "id": "643",
+            "text": "Russia",
+            "formattedText": "Russia",
+            "icon": "flag flag-ru",
+            "count": 0
+          },
+          {
+            "id": "250",
+            "text": "France",
+            "formattedText": "France",
+            "icon": "flag flag-fr",
+            "count": 0
+          },
+          {
+            "id": "276",
+            "text": "Germany",
+            "formattedText": "Germany",
+            "icon": "flag flag-de",
+            "count": 0
+          },
+          {
+            "id": "724",
+            "text": "Spain",
+            "formattedText": "Spain",
+            "icon": "flag flag-es",
+            "count": 0
+          },
+          {
+            "id": "792",
+            "text": "Turkey",
+            "formattedText": "Turkey",
+            "icon": "flag flag-tr",
+            "count": 0
+          },
+          {
+            "id": "586",
+            "text": "Pakistan",
+            "formattedText": "Pakistan",
+            "icon": "flag flag-pk",
+            "count": 0
+          },
+          {
+            "id": "504",
+            "text": "Morocco",
+            "formattedText": "Morocco",
+            "icon": "flag flag-ma",
+            "count": 0
+          },
+          {
+            "id": "380",
+            "text": "Italy",
+            "formattedText": "Italy",
+            "icon": "flag flag-it",
+            "count": 0
+          },
+          {
+            "id": "604",
+            "text": "Peru",
+            "formattedText": "Peru",
+            "icon": "flag flag-pe",
+            "count": 0
+          },
+          {
+            "id": "710",
+            "text": "South Africa",
+            "formattedText": "South Africa",
+            "icon": "flag flag-za",
+            "count": 0
+          },
+          {
+            "id": "524",
+            "text": "Nepal",
+            "formattedText": "Nepal",
+            "icon": "flag flag-np",
+            "count": 0
+          },
+          {
+            "id": "804",
+            "text": "Ukraine",
+            "formattedText": "Ukraine",
+            "icon": "flag flag-ua",
+            "count": 0
+          },
+          {
+            "id": "704",
+            "text": "Vietnam",
+            "formattedText": "Vietnam",
+            "icon": "flag flag-vn",
+            "count": 0
+          },
+          {
+            "id": "116",
+            "text": "Cambodia",
+            "formattedText": "Cambodia",
+            "icon": "flag flag-kh",
+            "count": 0
+          },
+          {
+            "id": "784",
+            "text": "United Arab Emirates",
+            "formattedText": "United Arab Emirates",
+            "icon": "flag flag-ae",
+            "count": 0
+          },
+          {
+            "id": "484",
+            "text": "Mexico",
+            "formattedText": "Mexico",
+            "icon": "flag flag-mx",
+            "count": 0
+          },
+          {
+            "id": "124",
+            "text": "Canada",
+            "formattedText": "Canada",
+            "icon": "flag flag-ca",
+            "count": 0
+          },
+          {
+            "id": "608",
+            "text": "Philippines",
+            "formattedText": "Philippines",
+            "icon": "flag flag-ph",
+            "count": 0
+          },
+          {
+            "id": "818",
+            "text": "Egypt",
+            "formattedText": "Egypt",
+            "icon": "flag flag-eg",
+            "count": 0
+          },
+          {
+            "id": "50",
+            "text": "Bangladesh",
+            "formattedText": "Bangladesh",
+            "icon": "flag flag-bd",
+            "count": 0
+          },
+          {
+            "id": "566",
+            "text": "Nigeria",
+            "formattedText": "Nigeria",
+            "icon": "flag flag-ng",
+            "count": 0
+          },
+          {
+            "id": "36",
+            "text": "Australia",
+            "formattedText": "Australia",
+            "icon": "flag flag-au",
+            "count": 0
+          },
+          {
+            "id": "788",
+            "text": "Tunisia",
+            "formattedText": "Tunisia",
+            "icon": "flag flag-tn",
+            "count": 0
+          },
+          {
+            "id": "170",
+            "text": "Colombia",
+            "formattedText": "Colombia",
+            "icon": "flag flag-co",
+            "count": 0
+          },
+          {
+            "id": "410",
+            "text": "Korea, Republic of",
+            "formattedText": "Korea, Republic of",
+            "icon": "flag flag-kr",
+            "count": 0
+          },
+          {
+            "id": "682",
+            "text": "Saudi Arabia",
+            "formattedText": "Saudi Arabia",
+            "icon": "flag flag-sa",
+            "count": 0
+          },
+          {
+            "id": "218",
+            "text": "Ecuador",
+            "formattedText": "Ecuador",
+            "icon": "flag flag-ec",
+            "count": 0
+          },
+          {
+            "id": "752",
+            "text": "Sweden",
+            "formattedText": "Sweden",
+            "icon": "flag flag-se",
+            "count": 0
+          },
+          {
+            "id": "376",
+            "text": "Israel",
+            "formattedText": "Israel",
+            "icon": "flag flag-il",
+            "count": 0
+          },
+          {
+            "id": "214",
+            "text": "Dominican Republic",
+            "formattedText": "Dominican Republic",
+            "icon": "flag flag-do",
+            "count": 0
+          },
+          {
+            "id": "528",
+            "text": "Netherlands",
+            "formattedText": "Netherlands",
+            "icon": "flag flag-nl",
+            "count": 0
+          },
+          {
+            "id": "156",
+            "text": "China",
+            "formattedText": "China",
+            "icon": "flag flag-cn",
+            "count": 0
+          },
+          {
+            "id": "203",
+            "text": "Czech Republic",
+            "formattedText": "Czech Republic",
+            "icon": "flag flag-cz",
+            "count": 0
+          },
+          {
+            "id": "860",
+            "text": "Uzbekistan",
+            "formattedText": "Uzbekistan",
+            "icon": "flag flag-uz",
+            "count": 0
+          },
+          {
+            "id": "32",
+            "text": "Argentina",
+            "formattedText": "Argentina",
+            "icon": "flag flag-ar",
+            "count": 0
+          },
+          {
+            "id": "12",
+            "text": "Algeria",
+            "formattedText": "Algeria",
+            "icon": "flag flag-dz",
+            "count": 0
+          },
+          {
+            "id": "554",
+            "text": "New Zealand",
+            "formattedText": "New Zealand",
+            "icon": "flag flag-nz",
+            "count": 0
+          },
+          {
+            "id": "458",
+            "text": "Malaysia",
+            "formattedText": "Malaysia",
+            "icon": "flag flag-my",
+            "count": 0
+          },
+          {
+            "id": "702",
+            "text": "Singapore",
+            "formattedText": "Singapore",
+            "icon": "flag flag-sg",
+            "count": 0
+          },
+          {
+            "id": "616",
+            "text": "Poland",
+            "formattedText": "Poland",
+            "icon": "flag flag-pl",
+            "count": 0
+          },
+          {
+            "id": "246",
+            "text": "Finland",
+            "formattedText": "Finland",
+            "icon": "flag flag-fi",
+            "count": 0
+          },
+          {
+            "id": "756",
+            "text": "Switzerland",
+            "formattedText": "Switzerland",
+            "icon": "flag flag-ch",
+            "count": 0
+          },
+          {
+            "id": "56",
+            "text": "Belgium",
+            "formattedText": "Belgium",
+            "icon": "flag flag-be",
+            "count": 0
+          },
+          {
+            "id": "231",
+            "text": "Ethiopia",
+            "formattedText": "Ethiopia",
+            "icon": "flag flag-et",
+            "count": 0
+          },
+          {
+            "id": "152",
+            "text": "Chile",
+            "formattedText": "Chile",
+            "icon": "flag flag-cl",
+            "count": 0
+          },
+          {
+            "id": "578",
+            "text": "Norway",
+            "formattedText": "Norway",
+            "icon": "flag flag-no",
+            "count": 0
+          },
+          {
+            "id": "191",
+            "text": "Croatia",
+            "formattedText": "Croatia",
+            "icon": "flag flag-hr",
+            "count": 0
+          },
+          {
+            "id": "344",
+            "text": "Hong Kong",
+            "formattedText": "Hong Kong",
+            "icon": "flag flag-hk",
+            "count": 0
+          },
+          {
+            "id": "31",
+            "text": "Azerbaijan",
+            "formattedText": "Azerbaijan",
+            "icon": "flag flag-az",
+            "count": 0
+          },
+          {
+            "id": "764",
+            "text": "Thailand",
+            "formattedText": "Thailand",
+            "icon": "flag flag-th",
+            "count": 0
+          },
+          {
+            "id": "24",
+            "text": "Angola",
+            "formattedText": "Angola",
+            "icon": "flag flag-ao",
+            "count": 0
+          },
+          {
+            "id": "398",
+            "text": "Kazakhstan",
+            "formattedText": "Kazakhstan",
+            "icon": "flag flag-kz",
+            "count": 0
+          },
+          {
+            "id": "620",
+            "text": "Portugal",
+            "formattedText": "Portugal",
+            "icon": "flag flag-pt",
+            "count": 0
+          },
+          {
+            "id": "404",
+            "text": "Kenya",
+            "formattedText": "Kenya",
+            "icon": "flag flag-ke",
+            "count": 0
+          },
+          {
+            "id": "112",
+            "text": "Belarus",
+            "formattedText": "Belarus",
+            "icon": "flag flag-by",
+            "count": 0
+          },
+          {
+            "id": "144",
+            "text": "Sri Lanka",
+            "formattedText": "Sri Lanka",
+            "icon": "flag flag-lk",
+            "count": 0
+          },
+          {
+            "id": "158",
+            "text": "Taiwan",
+            "formattedText": "Taiwan",
+            "icon": "flag flag-tw",
+            "count": 0
+          },
+          {
+            "id": "372",
+            "text": "Ireland",
+            "formattedText": "Ireland",
+            "icon": "flag flag-ie",
+            "count": 0
+          },
+          {
+            "id": "414",
+            "text": "Kuwait",
+            "formattedText": "Kuwait",
+            "icon": "flag flag-kw",
+            "count": 0
+          },
+          {
+            "id": "392",
+            "text": "Japan",
+            "formattedText": "Japan",
+            "icon": "flag flag-jp",
+            "count": 0
+          },
+          {
+            "id": "368",
+            "text": "Iraq",
+            "formattedText": "Iraq",
+            "icon": "flag flag-iq",
+            "count": 0
+          },
+          {
+            "id": "348",
+            "text": "Hungary",
+            "formattedText": "Hungary",
+            "icon": "flag flag-hu",
+            "count": 0
+          },
+          {
+            "id": "800",
+            "text": "Uganda",
+            "formattedText": "Uganda",
+            "icon": "flag flag-ug",
+            "count": 0
+          },
+          {
+            "id": "208",
+            "text": "Denmark",
+            "formattedText": "Denmark",
+            "icon": "flag flag-dk",
+            "count": 0
+          },
+          {
+            "id": "688",
+            "text": "Serbia",
+            "formattedText": "Serbia",
+            "icon": "flag flag-rs",
+            "count": 0
+          },
+          {
+            "id": "40",
+            "text": "Austria",
+            "formattedText": "Austria",
+            "icon": "flag flag-at",
+            "count": 0
+          },
+          {
+            "id": "100",
+            "text": "Bulgaria",
+            "formattedText": "Bulgaria",
+            "icon": "flag flag-bg",
+            "count": 0
+          },
+          {
+            "id": "288",
+            "text": "Ghana",
+            "formattedText": "Ghana",
+            "icon": "flag flag-gh",
+            "count": 0
+          },
+          {
+            "id": "858",
+            "text": "Uruguay",
+            "formattedText": "Uruguay",
+            "icon": "flag flag-uy",
+            "count": 0
+          },
+          {
+            "id": "268",
+            "text": "Georgia",
+            "formattedText": "Georgia",
+            "icon": "flag flag-ge",
+            "count": 0
+          },
+          {
+            "id": "300",
+            "text": "Greece",
+            "formattedText": "Greece",
+            "icon": "flag flag-gr",
+            "count": 0
+          },
+          {
+            "id": "417",
+            "text": "Kyrgyzstan",
+            "formattedText": "Kyrgyzstan",
+            "icon": "flag flag-kg",
+            "count": 0
+          },
+          {
+            "id": "496",
+            "text": "Mongolia",
+            "formattedText": "Mongolia",
+            "icon": "flag flag-mn",
+            "count": 0
+          },
+          {
+            "id": "642",
+            "text": "Romania",
+            "formattedText": "Romania",
+            "icon": "flag flag-ro",
+            "count": 0
+          },
+          {
+            "id": "862",
+            "text": "Venezuela",
+            "formattedText": "Venezuela",
+            "icon": "flag flag-ve",
+            "count": 0
+          },
+          {
+            "id": "600",
+            "text": "Paraguay",
+            "formattedText": "Paraguay",
+            "icon": "flag flag-py",
+            "count": 0
+          },
+          {
+            "id": "275",
+            "text": "Palestine",
+            "formattedText": "Palestine",
+            "icon": "flag flag-ps",
+            "count": 0
+          },
+          {
+            "id": "638",
+            "text": "Réunion",
+            "formattedText": "Réunion",
+            "icon": "flag flag-re",
+            "count": 0
+          },
+          {
+            "id": "320",
+            "text": "Guatemala",
+            "formattedText": "Guatemala",
+            "icon": "flag flag-gt",
+            "count": 0
+          },
+          {
+            "id": "630",
+            "text": "Puerto Rico",
+            "formattedText": "Puerto Rico",
+            "icon": "flag flag-pr",
+            "count": 0
+          },
+          {
+            "id": "558",
+            "text": "Nicaragua",
+            "formattedText": "Nicaragua",
+            "icon": "flag flag-ni",
+            "count": 0
+          },
+          {
+            "id": "188",
+            "text": "Costa Rica",
+            "formattedText": "Costa Rica",
+            "icon": "flag flag-cr",
+            "count": 0
+          },
+          {
+            "id": "51",
+            "text": "Armenia",
+            "formattedText": "Armenia",
+            "icon": "flag flag-am",
+            "count": 0
+          },
+          {
+            "id": "340",
+            "text": "Honduras",
+            "formattedText": "Honduras",
+            "icon": "flag flag-hn",
+            "count": 0
+          },
+          {
+            "id": "634",
+            "text": "Qatar",
+            "formattedText": "Qatar",
+            "icon": "flag flag-qa",
+            "count": 0
+          },
+          {
+            "id": "703",
+            "text": "Slovakia",
+            "formattedText": "Slovakia",
+            "icon": "flag flag-sk",
+            "count": 0
+          },
+          {
+            "id": "716",
+            "text": "Zimbabwe",
+            "formattedText": "Zimbabwe",
+            "icon": "flag flag-zw",
+            "count": 0
+          },
+          {
+            "id": "222",
+            "text": "El Salvador",
+            "formattedText": "El Salvador",
+            "icon": "flag flag-sv",
+            "count": 0
+          },
+          {
+            "id": "591",
+            "text": "Panama",
+            "formattedText": "Panama",
+            "icon": "flag flag-pa",
+            "count": 0
+          },
+          {
+            "id": "512",
+            "text": "Oman",
+            "formattedText": "Oman",
+            "icon": "flag flag-om",
+            "count": 0
+          },
+          {
+            "id": "498",
+            "text": "Moldova",
+            "formattedText": "Moldova",
+            "icon": "flag flag-md",
+            "count": 0
+          },
+          {
+            "id": "48",
+            "text": "Bahrain",
+            "formattedText": "Bahrain",
+            "icon": "flag flag-bh",
+            "count": 0
+          },
+          {
+            "id": "894",
+            "text": "Zambia",
+            "formattedText": "Zambia",
+            "icon": "flag flag-zm",
+            "count": 0
+          },
+          {
+            "id": "68",
+            "text": "Bolivia",
+            "formattedText": "Bolivia",
+            "icon": "flag flag-bo",
+            "count": 0
+          },
+          {
+            "id": "440",
+            "text": "Lithuania",
+            "formattedText": "Lithuania",
+            "icon": "flag flag-lt",
+            "count": 0
+          },
+          {
+            "id": "428",
+            "text": "Latvia",
+            "formattedText": "Latvia",
+            "icon": "flag flag-lv",
+            "count": 0
+          },
+          {
+            "id": "70",
+            "text": "Bosnia and Herzegovina",
+            "formattedText": "Bosnia and Herzegovina",
+            "icon": "flag flag-ba",
+            "count": 0
+          },
+          {
+            "id": "104",
+            "text": "Myanmar",
+            "formattedText": "Myanmar",
+            "icon": "flag flag-mm",
+            "count": 0
+          },
+          {
+            "id": "499",
+            "text": "Montenegro",
+            "formattedText": "Montenegro",
+            "icon": "flag flag-me",
+            "count": 0
+          },
+          {
+            "id": "646",
+            "text": "Rwanda",
+            "formattedText": "Rwanda",
+            "icon": "flag flag-rw",
+            "count": 0
+          },
+          {
+            "id": "384",
+            "text": "Côte d'Ivoire",
+            "formattedText": "Côte d'Ivoire",
+            "icon": "flag flag-ci",
+            "count": 0
+          },
+          {
+            "id": "705",
+            "text": "Slovenia",
+            "formattedText": "Slovenia",
+            "icon": "flag flag-si",
+            "count": 0
+          },
+          {
+            "id": "807",
+            "text": "Macedonia, the former Yugoslav Republic of",
+            "formattedText": "Macedonia, the former Yugoslav Republic of",
+            "icon": "flag flag-mk",
+            "count": 0
+          },
+          {
+            "id": "470",
+            "text": "Malta",
+            "formattedText": "Malta",
+            "icon": "flag flag-mt",
+            "count": 0
+          },
+          {
+            "id": "480",
+            "text": "Mauritius",
+            "formattedText": "Mauritius",
+            "icon": "flag flag-mu",
+            "count": 0
+          },
+          {
+            "id": "442",
+            "text": "Luxembourg",
+            "formattedText": "Luxembourg",
+            "icon": "flag flag-lu",
+            "count": 0
+          },
+          {
+            "id": "196",
+            "text": "Cyprus",
+            "formattedText": "Cyprus",
+            "icon": "flag flag-cy",
+            "count": 0
+          },
+          {
+            "id": "233",
+            "text": "Estonia",
+            "formattedText": "Estonia",
+            "icon": "flag flag-ee",
+            "count": 0
+          },
+          {
+            "id": "8",
+            "text": "Albania",
+            "formattedText": "Albania",
+            "icon": "flag flag-al",
+            "count": 0
+          },
+          {
+            "id": "887",
+            "text": "Yemen",
+            "formattedText": "Yemen",
+            "icon": "flag flag-ye",
+            "count": 0
+          },
+          {
+            "id": "388",
+            "text": "Jamaica",
+            "formattedText": "Jamaica",
+            "icon": "flag flag-jm",
+            "count": 0
+          },
+          {
+            "id": "780",
+            "text": "Trinidad and Tobago",
+            "formattedText": "Trinidad and Tobago",
+            "icon": "flag flag-tt",
+            "count": 0
+          }
+        ]
+      },
+      "Data": [
+        {
+          "Country": 400,
+          "Share": 0.17070231191203192,
+          "UsersShare": 0.032164458164289846,
+          "ShareList": {
+            "vizard.ai": 1
+          },
+          "Change": -0.765220297121042,
+          "AvgVisitDuration": 658.9475514476387,
+          "PagePerVisit": 7.200259442961409,
+          "BounceRate": 0.18228119935866738,
+          "Rank": 469
+        },
+        {
+          "Country": 356,
+          "Share": 0.13107907338616837,
+          "UsersShare": 0.1778453072704549,
+          "ShareList": {
+            "vizard.ai": 1
+          },
+          "Change": -0.39563750561363364,
+          "AvgVisitDuration": 393.337698348988,
+          "PagePerVisit": 5.68269275795606,
+          "BounceRate": 0.28765479049169673,
+          "Rank": 9694
+        },
+        {
+          "Country": 360,
+          "Share": 0.07854803849750398,
+          "UsersShare": 0.0990678450251972,
+          "ShareList": {
+            "vizard.ai": 1
+          },
+          "Change": -0.6229313473738092,
+          "AvgVisitDuration": 358.43415617652124,
+          "PagePerVisit": 6.218040056703289,
+          "BounceRate": 0.27407819141450246,
+          "Rank": 10477
+        },
+        {
+          "Country": 840,
+          "Share": 0.06277934393102423,
+          "UsersShare": 0.07503961757372957,
+          "ShareList": {
+            "vizard.ai": 1
+          },
+          "Change": -0.17416322738634715,
+          "AvgVisitDuration": 472.4605956081111,
+          "PagePerVisit": 5.020558651058147,
+          "BounceRate": 0.3086381519781737,
+          "Rank": 50332
+        },
+        {
+          "Country": 76,
+          "Share": 0.032080578640177035,
+          "UsersShare": 0.040547804238123215,
+          "ShareList": {
+            "vizard.ai": 1
+          },
+          "Change": -0.38602904735041055,
+          "AvgVisitDuration": 499.22460375837846,
+          "PagePerVisit": 5.664442458691098,
+          "BounceRate": 0.2311776258559448,
+          "Rank": 44335
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementOverview/Table?country=999&iso=%5Bobject+Object%5D&to=2026%7C02%7C28&from=2025%7C12%7C01&isWindow=false&webSource=Total&ignoreFilterConsistency=false&includeSubDomains=true&timeGranularity=Monthly&keys=vizard.ai&ShouldGetVerifiedData=false",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "vizard.ai": false
+      },
+      "Data": [
+        {
+          "BounceRate": 0.3427142510452561,
+          "UniqueUsers": 757959.0833333334,
+          "DedupUniqueUsers": 661572.4723458247,
+          "VisitsPerUser": 2.389277130710877,
+          "Source": "Total",
+          "Domain": "vizard.ai",
+          "AvgMonthVisits": 1810974.3038229134,
+          "AvgVisitDuration": 245.5572024448681,
+          "PagesPerVisit": 5.014959366248947,
+          "TotalPagesViews": 9081962.546992883,
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=0&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=vizard.ai&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "vizard.ai": false
+      },
+      "Data": [
+        {
+          "Domain": "vizard.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=0&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+          "TotalVisits": 5432922.911468741,
+          "Change": -0.4219995035838359,
+          "ShareOfVisits": 1
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=vizard.ai",
+    "body": {
+      "Data": {
+        "Total": {
+          "vizard.ai": {
+            "Organic Search": 3069294.5363791264,
+            "Social": 150179.05569652552,
+            "Email": 1397.9544470741353,
+            "Display Ads": 15522.18513942324,
+            "Direct": 2021925.5188155337,
+            "Referrals": 162791.0299241227,
+            "Paid Search": 11812.637020310713
+          }
+        },
+        "Desktop": {
+          "vizard.ai": {
+            "Organic Search": 1312602.482,
+            "Social": 36035.941999999995,
+            "Email": 1329.1789999999996,
+            "Display Ads": 11588.346000000001,
+            "Direct": 981294.1150000001,
+            "Referrals": 110694.10700000002,
+            "Paid Search": 11723.146
+          }
+        },
+        "MobileWeb": {
+          "vizard.ai": {
+            "Organic Search": 1756692.0543791263,
+            "Social": 114143.11369652553,
+            "Email": 68.77544707413566,
+            "Display Ads": 3933.8391394232385,
+            "Direct": 1040631.4038155335,
+            "Referrals": 52096.92292412269,
+            "Paid Search": 89.4910203107111
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Organic&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "opus clip",
+          "Change": -0.06364251861882193,
+          "TotalShare": 0.14555596484765562,
+          "TotalVisits": 27660,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.34,
+          "KwVolume": 1008125
+        },
+        {
+          "SearchTerm": "opusclip",
+          "Change": 1.16,
+          "TotalShare": 0.025574909224859232,
+          "TotalVisits": 4860,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.64,
+          "KwVolume": 306947
+        },
+        {
+          "SearchTerm": "video to text",
+          "Change": -0.5417633410672854,
+          "TotalShare": 0.020786191653949376,
+          "TotalVisits": 3950,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.33,
+          "KwVolume": 192331
+        },
+        {
+          "SearchTerm": "video to text converter free",
+          "Change": 0.2,
+          "TotalShare": 0.012945324422459612,
+          "TotalVisits": 2460,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.22,
+          "KwVolume": 11128
+        },
+        {
+          "SearchTerm": "video to text converter online free",
+          "Change": -0.04081632653061224,
+          "TotalShare": 0.012366468452349628,
+          "TotalVisits": 2350,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.21,
+          "KwVolume": 10299
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/TrafficSourcesSearchV2/BrandedKeywords/WebsitePerformance/PieChart?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&to=2026%7C02%7C28&webSource=Total&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "Branded": 224063.43999394032,
+          "NoneBranded": 194258.19102929166
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/SearchKeywordsV2/WebsitePerformance/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&to=2026%7C02%7C28&webSource=Total&SourceType=Paid&pageSize=5&timeGranularity=Monthly&duration=1m",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 5,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "SearchTerm": "upload video get transcript free",
+          "TotalShare": 0.5,
+          "TotalVisits": 10,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 92
+        },
+        {
+          "SearchTerm": "creative clip maker ai",
+          "Change": 0,
+          "TotalShare": 0.5,
+          "TotalVisits": 10,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 12
+        },
+        {
+          "SearchTerm": "free video podcast ai",
+          "TotalShare": 0,
+          "TotalVisits": 0,
+          "SiteOrigins": {
+            "vizard.ai": 0
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 75
+        },
+        {
+          "SearchTerm": "video to text",
+          "TotalShare": 0,
+          "TotalVisits": 0,
+          "SiteOrigins": {
+            "vizard.ai": 0
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0.33,
+          "KwVolume": 192331
+        },
+        {
+          "SearchTerm": "visard ia",
+          "TotalShare": 0,
+          "TotalVisits": 0,
+          "SiteOrigins": {
+            "vizard.ai": 0
+          },
+          "PositionPaid": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "PositionOrganic": [
+            {
+              "Key": "vizard.ai",
+              "Value": -1
+            }
+          ],
+          "Organic": 0,
+          "Paid": 0,
+          "CPC": 0,
+          "KwVolume": 35
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationAds/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "accounts.google.fr",
+          "Share": 0.44575508943228026,
+          "Favicon": "https://site-images.similarcdn.com/image?url=accounts.google.fr&t=2&s=0&h=73a1bc5fcdbf0aebb6c68dff0937539c073beded02548f8a321aaaa5ecf1c12f",
+          "HasAdsense": false,
+          "TotalShare": 0.44575508943228026,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          }
+        },
+        {
+          "Domain": "chatgpt.com",
+          "Share": 0.33664912600067404,
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "HasAdsense": false,
+          "TotalShare": 0.33664912600067404,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          }
+        },
+        {
+          "Domain": "zuiver-amsterdam.dewi-online.nl",
+          "Share": 0.07354141856103803,
+          "Change": 0,
+          "Favicon": "https://site-images.similarcdn.com/image?url=zuiver-amsterdam.dewi-online.nl&t=2&s=0&h=3218bcf15b3ddd1211d7368a23cfa5e3b7f400b286c15d2a25770499b3dfeca2",
+          "HasAdsense": false,
+          "TotalShare": 0.07354141856103803,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          }
+        },
+        {
+          "Domain": "apply.immigration.govt.nz",
+          "Share": 0.04876758946703836,
+          "Favicon": "https://site-images.similarcdn.com/image?url=apply.immigration.govt.nz&t=2&s=0&h=9bd1782b78d10db42c0486c6a368d2871ed49d430b5e39587ea4b8da364182a8",
+          "HasAdsense": false,
+          "TotalShare": 0.04876758946703836,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          }
+        },
+        {
+          "Domain": "bbva.es",
+          "Share": 0.03151971689284053,
+          "Favicon": "https://site-images.similarcdn.com/image?url=bbva.es&t=2&s=0&h=e8f978e5304066e3a954b51bd7a8f7bf1029056920bf0c9668e5fadbb127cc80",
+          "HasAdsense": false,
+          "TotalShare": 0.03151971689284053,
+          "SiteOrigins": {
+            "vizard.ai": 1
+          }
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficDestinationReferrals/Table?appMode=single&country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Domain": "google.com",
+          "Share": 0.37435171872536804,
+          "Change": -0.5642822588338857,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=google.com&t=2&s=0&h=eb35e0fbafa3eb290132ffdfe47187d950d68daaa659ec1bd4b4e834b8f16461",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "youtube.com",
+          "Share": 0.2442405121847679,
+          "Change": 0.5204866359084187,
+          "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=0&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "stripe.com",
+          "Share": 0.19583407099864314,
+          "Change": -0.18381237468687595,
+          "Category": "-",
+          "Favicon": "https://site-images.similarcdn.com/image?url=stripe.com&t=2&s=0&h=d68993ccefeee1fe61031cd46586b3158ad13585abae80195cc41b500863c253",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "tiktok.com",
+          "Share": 0.0787557912183366,
+          "Change": 0.6641694687960357,
+          "Favicon": "https://site-images.similarcdn.com/image?url=tiktok.com&t=2&s=0&h=398f47f8e1724c54f9f760f76988b2f9cf0c4111523f9d3f26e03d62731b0c17",
+          "HasAdsense": false
+        },
+        {
+          "Domain": "discord.com",
+          "Share": 0.03272409552440729,
+          "Change": -0.6474659554132323,
+          "Favicon": "https://site-images.similarcdn.com/image?url=discord.com&t=2&s=0&h=133c0aed0b1b6c3760db4875f51accd42ff1157854dd0ee0eabab700af80a348",
+          "HasAdsense": false
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferrals/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&timeGranularity=Monthly&to=2026%7C02%7C28&pageSize=5&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 53,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Change": -0.5561549703480119,
+          "Share": 0.5835224359030666,
+          "Domain": "chatgpt.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=chatgpt.com&t=2&s=0&h=a31616ae3cdef12fcfc664127563e6092e7531e7b4c3cde7e0c8c5fd3310dfc0",
+          "Category": ""
+        },
+        {
+          "Change": -0.03943420425292682,
+          "Share": 0.10370855542464334,
+          "Domain": "gemini.google.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=gemini.google.com&t=2&s=0&h=ec0ae7eb3432025135e3658db1edf54cfa2710c74ca7f113d026db33002def01",
+          "Category": ""
+        },
+        {
+          "Change": -0.8956301288835904,
+          "Share": 0.048240178801668976,
+          "Domain": "perplexity.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=perplexity.ai&t=2&s=0&h=f48fa93e79e65eef47bff5b62e7037bccffb0629aecaed2d0c9f2fb25f177362",
+          "Category": ""
+        },
+        {
+          "Change": -0.313439177444168,
+          "Share": 0.04507703516141269,
+          "Domain": "toolify.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=toolify.ai&t=2&s=0&h=a274658d0d5c006c07c78f798989130b0de2c0ecebc5c7d1ba530bfef8bdcc7c",
+          "Category": ""
+        },
+        {
+          "Change": -0.2568298437637324,
+          "Share": 0.039806248880278255,
+          "Domain": "timeweb.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=timeweb.com&t=2&s=0&h=ac8bf43d99354c29924573f189b597f729151d6dfea8694f4da969c51ee65ace",
+          "Category": ""
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesSocial/PieChart?country=999&includeSubDomains=true&webSource=Desktop&timeGranularity=Monthly&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&keys=vizard.ai",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "Youtube": {
+            "Share": 0.6711034834243114,
+            "Favicon": "https://site-images.similarcdn.com/image?url=youtube.com&t=2&s=1&h=e117fb09ba0a34dee9830863bf927d29fc864e342583a36a667bf12346e88e20"
+          },
+          "Instagram": {
+            "Share": 0.0748022401386793,
+            "Favicon": "https://site-images.similarcdn.com/image?url=instagram.com&t=2&s=1&h=acbe9ff09f263f0114ce8473b3d3e401bfdc360d5aff845e04182e8d2335ba49"
+          },
+          "Facebook": {
+            "Share": 0.055005747181413524,
+            "Favicon": "https://site-images.similarcdn.com/image?url=facebook.com&t=2&s=1&h=be773d6b77aa3d59b6a671c5c27ad729b1ae77400e89776e2f749cce6b926c4b"
+          },
+          "X-twitter": {
+            "Share": 0.04376120310408792,
+            "Favicon": "https://site-images.similarcdn.com/image?url=x.com&t=2&s=1&h=181f9f2250b958cc0ca20fb16f33049b6e13425f038a279637ce1da9dc20d56f"
+          },
+          "WhatsApp Webapp": {
+            "Share": 0.03809517254556055,
+            "Favicon": "https://site-images.similarcdn.com/image?url=web.whatsapp.com&t=2&s=1&h=451e82ca011741d37d72edee1d8fdc272155924d894fe937e292066acb713bc8"
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TopReferringCategories/Table?country=999&from=2025%7C12%7C01&includeSubDomains=true&isWindow=false&keys=vizard.ai&timeGranularity=Monthly&to=2026%7C02%7C28&webSource=Desktop&orderBy=TotalShare+desc",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "Data": [
+        {
+          "Share": 0.7454893454882918,
+          "Category": "AI_Chatbots_and_Tools"
+        },
+        {
+          "Share": 0.06032785730261379,
+          "Category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design"
+        },
+        {
+          "Share": 0.05078974651240867,
+          "Category": "Computers_Electronics_and_Technology/Computers_Electronics_and_Technology"
+        },
+        {
+          "Share": 0.047374589391696434,
+          "Category": "Computers_Electronics_and_Technology/Web_Hosting_and_Domain_Names"
+        },
+        {
+          "Share": 0.021344558643093103,
+          "Category": "Computers_Electronics_and_Technology/Programming_and_Developer_Software"
+        },
+        {
+          "Share": 0.01506906238811451,
+          "Category": "Computers_Electronics_and_Technology/Search_Engines"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverviewDesktop/TrafficSourcesOverview/PieChart?country=999&webSource=Total&keys=vizard.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&isWindow=false&includeSubDomains=true",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "Organic Search": 3069294.536379126,
+          "Paid Search": 11812.63702031071,
+          "Social": 150179.05569652552,
+          "Mail": 1397.9544470741353,
+          "Direct": 2021925.5188155337,
+          "Paid Referrals": 15522.18513942324,
+          "Referrals": 162791.0299241227
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "wisecut.ai",
+        "DomainWithoutSub": "wisecut.ai",
+        "Rank": 202058,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wisecut.ai&t=2&s=1&h=d5f07b32c9852989be3eb9a9d9f0dd56d19aeeeab12d043b1463d5ceeb75443b"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "quickreel.io",
+        "DomainWithoutSub": "quickreel.io",
+        "Rank": 534991,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "flexclip.com",
+        "DomainWithoutSub": "flexclip.com",
+        "Rank": 24613,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flexclip.com&t=2&s=1&h=af565db4a808d861ee89679b0357a6d0e24f2d180ddb8e02916a94f128571055"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "tactiq.io",
+        "DomainWithoutSub": "tactiq.io",
+        "Rank": 13690,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tactiq.io&t=2&s=1&h=13d64b501c2c95b1abd24fb2885142e162ff76e247d9322f4fef6cd8fc50a6bf"
+      },
+      {
+        "Domain": "choppity.com",
+        "DomainWithoutSub": "choppity.com",
+        "Rank": 462683,
+        "Favicon": "https://site-images.similarcdn.com/image?url=choppity.com&t=2&s=1&h=785bdd2a8da721bf721169ede58e7a9bfe7d281ade94ece92eea9f7ae51b5dab"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/AdIntelligence/Advertiser/Publishers/breakdown?country=999&key=vizard.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&page=1&pageSize=5&isWindow=false&sort=visits&asc=false",
+    "body": {
+      "records": [
+        {
+          "impressionsShare": 0.09767333851654912,
+          "visitsShare": 0.2131878205788833,
+          "spendShare": 0.47200044451935974,
+          "category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "mail.zoho.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=zoho.com&t=2&s=0&h=ba2af4cb34d157597c74b5c925a2845f5bb7e72d4500f5979838bcf21c152daf"
+        },
+        {
+          "impressionsShare": 0.11751869121150191,
+          "visitsShare": 0.19933534348991508,
+          "spendShare": 0.0917026130894507,
+          "category": "Computers_Electronics_and_Technology~Email",
+          "rank": 2688,
+          "visitsChange": -0.3933166469976199,
+          "isVisitsNew": false,
+          "entity": "temp-mail.org",
+          "favicon": "https://site-images.similarcdn.com/image?url=temp-mail.org&t=2&s=0&h=886d4218539c89b27036efbfbd572d071841928549faccc366341937003a473e"
+        },
+        {
+          "impressionsShare": 0,
+          "visitsShare": 0.10269398225620031,
+          "spendShare": 0,
+          "category": "Computers_Electronics_and_Technology~Email",
+          "rank": 46653,
+          "visitsChange": 0,
+          "isVisitsNew": false,
+          "entity": "tempmailo.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=tempmailo.com&t=2&s=0&h=17a2115f2d487723737e60ff284e6d25a9270675be75916f9df76a5f0563ab54"
+        },
+        {
+          "impressionsShare": 0,
+          "visitsShare": 0.10068258313398079,
+          "spendShare": 0,
+          "category": "Computers_Electronics_and_Technology~Computers_Electronics_and_Technology",
+          "rank": 0,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "web.postman.co",
+          "favicon": "https://site-images.similarcdn.com/image?url=postman.co&t=2&s=0&h=ffc2030341d0108bf2fc681e72d422b6f4e6ba4062eb0e11e7d99c25c920546b"
+        },
+        {
+          "impressionsShare": 0.22218476026623263,
+          "visitsShare": 0.08228976539115564,
+          "spendShare": 0.014880353388704805,
+          "category": "Community_and_Society~Holidays_and_Seasonal_Events",
+          "rank": 940822,
+          "visitsChange": 0,
+          "isVisitsNew": true,
+          "entity": "searchshp.com",
+          "favicon": "https://site-images.similarcdn.com/image?url=searchshp.com&t=2&s=0&h=7bebeac5d244d07df17a9c651f5cc0d5e0d089ae7a5c503230cc8ec379b0e03f"
+        }
+      ],
+      "totalCount": 15,
+      "hasAdIntelMetrics": true
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=vizard.ai&webSource=Total",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 1512114.4784971792
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2484668.694259733
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1436139.738711828
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "vizard.ai": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Table?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=vizard.ai%2Cveed.io%2Ckapwing.com%2Copus.pro%2Cinvideo.io&webSource=Total",
+    "body": {
+      "FromAlternativeSources": false,
+      "TotalCount": 0,
+      "TotalTopLevelCount": 0,
+      "KeysDataVerification": {
+        "vizard.ai": false,
+        "veed.io": false,
+        "kapwing.com": false,
+        "opus.pro": false,
+        "invideo.io": false
+      },
+      "Data": [
+        {
+          "Domain": "vizard.ai",
+          "Favicon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=0&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+          "TotalVisits": 5432922.911468741,
+          "Change": -0.4219995035838359,
+          "ShareOfVisits": 0.05326610187055824
+        },
+        {
+          "Domain": "veed.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=0&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a",
+          "TotalVisits": 37687848.49209744,
+          "Change": -0.13307941425985728,
+          "ShareOfVisits": 0.3695036373191465
+        },
+        {
+          "Domain": "kapwing.com",
+          "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=0&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a",
+          "TotalVisits": 17815295.30494315,
+          "Change": -0.06733083633434152,
+          "ShareOfVisits": 0.17466681379998444
+        },
+        {
+          "Domain": "opus.pro",
+          "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=0&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab",
+          "TotalVisits": 15268938.863069775,
+          "Change": -0.09287052079679146,
+          "ShareOfVisits": 0.14970152645065374
+        },
+        {
+          "Domain": "invideo.io",
+          "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=0&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e",
+          "TotalVisits": 25790873.996842593,
+          "Change": -0.18336616743196382,
+          "ShareOfVisits": 0.252861920559657
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/WebsiteOverview/EngagementVisits/Graph?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&timeGranularity=Monthly&ShouldGetVerifiedData=false&includeSubDomains=true&isWindow=false&keys=vizard.ai%2Cveed.io%2Ckapwing.com%2Copus.pro%2Cinvideo.io&webSource=Total",
+    "body": {
+      "Data": {
+        "vizard.ai": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 1512114.4784971792
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 2484668.694259733
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 1436139.738711828
+              }
+            ]
+          ]
+        },
+        "veed.io": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 12897815.11314572
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 13278568.766289368
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 11511464.612662343
+              }
+            ]
+          ]
+        },
+        "kapwing.com": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 6360408.040135993
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5926977.819152907
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 5527909.44565425
+              }
+            ]
+          ]
+        },
+        "opus.pro": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 4886399.646142153
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 5444066.242039004
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 4938472.974888611
+              }
+            ]
+          ]
+        },
+        "invideo.io": {
+          "Total": [
+            [
+              {
+                "Key": "2025-12-01",
+                "Value": 8920188.32955059
+              },
+              {
+                "Key": "2026-01-01",
+                "Value": 9286783.811266573
+              },
+              {
+                "Key": "2026-02-01",
+                "Value": 7583901.8560254155
+              }
+            ]
+          ]
+        }
+      },
+      "KeysDataVerification": {
+        "vizard.ai": false,
+        "veed.io": false,
+        "kapwing.com": false,
+        "opus.pro": false,
+        "invideo.io": false
+      },
+      "Ga4FirstOccurrence": {}
+    }
+  }
+]

@@ -1,0 +1,454 @@
+[
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=5",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getheader?keys=vizard.ai&mainDomainOnly=true&includeCrossData=true",
+    "body": {
+      "vizard.ai": {
+        "mainDomainName": "vizard",
+        "icon": "https://site-images.similarcdn.com/image?url=vizard.ai&t=2&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "image": "https://site-images.similarcdn.com/image?url=vizard.ai&t=0&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "imageLarge": "https://site-images.similarcdn.com/image?url=vizard.ai&t=1&s=1&h=6a2a0bf31d7aaeec2ba8873db372f4ee3dd35807d4249243a62f384236319439",
+        "title": "Use AI para redimensionar o vídeo do Instagram gratuitamente",
+        "isSubDomain": false,
+        "tags": [],
+        "description": "an ai-powered video generator and editor that turns one long video into 10+ clips instantly. try it forever free. ",
+        "globalRanking": 29298,
+        "highestTrafficCountry": 356,
+        "highestTrafficCountryRanking": 9694,
+        "category": "Computers_Electronics_and_Technology/Graphics_Multimedia_and_Web_Design",
+        "categoryRanking": 230,
+        "hasGaToken": false,
+        "privacyStatus": "None",
+        "relatedApps": {},
+        "employeeRange": "10 - 50",
+        "monthlyVisits": 1244117.4954584057,
+        "country": "999"
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/PieChart?country=999&from=2025%7C12%7C01&to=2026%7C02%7C28&includeSubDomains=true&isWindow=false&timeGranularity=Monthly&keys=vizard.ai",
+    "body": {
+      "Data": {
+        "Total": {
+          "vizard.ai": {
+            "Organic Search": 3069294.5363791264,
+            "Social": 150179.05569652552,
+            "Email": 1397.9544470741353,
+            "Display Ads": 15522.18513942324,
+            "Direct": 2021925.5188155337,
+            "Referrals": 162791.0299241227,
+            "Paid Search": 11812.637020310713
+          }
+        },
+        "Desktop": {
+          "vizard.ai": {
+            "Organic Search": 1312602.482,
+            "Social": 36035.941999999995,
+            "Email": 1329.1789999999996,
+            "Display Ads": 11588.346000000001,
+            "Direct": 981294.1150000001,
+            "Referrals": 110694.10700000002,
+            "Paid Search": 11723.146
+          }
+        },
+        "MobileWeb": {
+          "vizard.ai": {
+            "Organic Search": 1756692.0543791263,
+            "Social": 114143.11369652553,
+            "Email": 68.77544707413566,
+            "Display Ads": 3933.8391394232385,
+            "Direct": 1040631.4038155335,
+            "Referrals": 52096.92292412269,
+            "Paid Search": 89.4910203107111
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=vizard.ai&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false&timeGranularity=Monthly",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Data": {
+            "Total": {
+              "Social": 150179.05569652552,
+              "Email": 1397.9544470741353,
+              "Direct": 2021925.5188155337,
+              "Display Ads": 15522.18513942324,
+              "Referrals": 162791.0299241227,
+              "Organic Search": 3069294.536379126,
+              "Paid Search": 11812.63702031071
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "Social": 38549.51233765229,
+                "Email": 411.300145592958,
+                "Direct": 565539.1245792733,
+                "Display Ads": 4687.570552404961,
+                "Referrals": 52245.44191332276,
+                "Organic Search": 846791.9844767111,
+                "Paid Search": 3889.542145370723
+              },
+              "2026-01-01": {
+                "Social": 70971.47882401152,
+                "Email": 534.1880496299264,
+                "Direct": 924428.8527264197,
+                "Display Ads": 5665.813507076335,
+                "Referrals": 66052.29964906897,
+                "Organic Search": 1412811.7964966798,
+                "Paid Search": 4204.263974603985
+              },
+              "2026-02-01": {
+                "Social": 40658.06453486172,
+                "Email": 452.46625185125095,
+                "Direct": 531957.5415098406,
+                "Display Ads": 5168.801079941945,
+                "Referrals": 44493.288361730985,
+                "Organic Search": 809690.7554057352,
+                "Paid Search": 3718.8309003360037
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "url": "https://pro.similarweb.com/api/WebsiteOverview/getsimilarsites?key=vizard.ai&limit=20&country=999&webSource=Total",
+    "body": [
+      {
+        "Domain": "veed.io",
+        "DomainWithoutSub": "veed.io",
+        "Rank": 2762,
+        "Favicon": "https://site-images.similarcdn.com/image?url=veed.io&t=2&s=1&h=b5a61f2495e0f7b4d21a1c91cd945040eb51e3575716a3b393a28248157d855a"
+      },
+      {
+        "Domain": "kapwing.com",
+        "DomainWithoutSub": "kapwing.com",
+        "Rank": 7430,
+        "Favicon": "https://site-images.similarcdn.com/image?url=kapwing.com&t=2&s=1&h=93773d60618426378337c29e72f79e37ff103600b5e5a2b6189943764064a54a"
+      },
+      {
+        "Domain": "opus.pro",
+        "DomainWithoutSub": "opus.pro",
+        "Rank": 8500,
+        "Favicon": "https://site-images.similarcdn.com/image?url=opus.pro&t=2&s=1&h=e4a2b39e69dd7911c8fe0cd9149800f7d00a5fb238e9e6430d1df45ecbc31cab"
+      },
+      {
+        "Domain": "invideo.io",
+        "DomainWithoutSub": "invideo.io",
+        "Rank": 5603,
+        "Favicon": "https://site-images.similarcdn.com/image?url=invideo.io&t=2&s=1&h=072e85c0c7cb85a3f1ae62310d392f94c1c65ef35e614d6783127c9241defc3e"
+      },
+      {
+        "Domain": "turboscribe.ai",
+        "DomainWithoutSub": "turboscribe.ai",
+        "Rank": 1688,
+        "Favicon": "https://site-images.similarcdn.com/image?url=turboscribe.ai&t=2&s=1&h=0db0678e23907d67c58a710431d90ca6cb8b42fe0bbc759d05757290be60e8d1"
+      },
+      {
+        "Domain": "happyscribe.com",
+        "DomainWithoutSub": "happyscribe.com",
+        "Rank": 15302,
+        "Favicon": "https://site-images.similarcdn.com/image?url=happyscribe.com&t=2&s=1&h=cfade6f1750e8cc561bc9591631dc9f63ac25ae24773d965953fe4f2229384de"
+      },
+      {
+        "Domain": "klap.app",
+        "DomainWithoutSub": "klap.app",
+        "Rank": 111144,
+        "Favicon": "https://site-images.similarcdn.com/image?url=klap.app&t=2&s=1&h=90af7bc4464af1b0380032db4a81cb51bfb5ac0ca4d8bc9107941af401988c32"
+      },
+      {
+        "Domain": "wisecut.ai",
+        "DomainWithoutSub": "wisecut.ai",
+        "Rank": 202058,
+        "Favicon": "https://site-images.similarcdn.com/image?url=wisecut.ai&t=2&s=1&h=d5f07b32c9852989be3eb9a9d9f0dd56d19aeeeab12d043b1463d5ceeb75443b"
+      },
+      {
+        "Domain": "aivideocut.com",
+        "DomainWithoutSub": "aivideocut.com",
+        "Rank": 139078,
+        "Favicon": "https://site-images.similarcdn.com/image?url=aivideocut.com&t=2&s=1&h=e600dfd7629307be757d9c2850f1b5a01d903dd5a7078acc7e0c27379c416c5f"
+      },
+      {
+        "Domain": "vmaker.com",
+        "DomainWithoutSub": "vmaker.com",
+        "Rank": 82064,
+        "Favicon": "https://site-images.similarcdn.com/image?url=vmaker.com&t=2&s=1&h=1df6f5ac81d2cb93d590163d5c6b657ea8e744d22fa0d0794006acec073b9234"
+      },
+      {
+        "Domain": "restream.io",
+        "DomainWithoutSub": "restream.io",
+        "Rank": 18545,
+        "Favicon": "https://site-images.similarcdn.com/image?url=restream.io&t=2&s=1&h=d8116fd5b55268b8585bc310b197fd847c6562f4c29753dec1193bb256f94cab"
+      },
+      {
+        "Domain": "otter.ai",
+        "DomainWithoutSub": "otter.ai",
+        "Rank": 6056,
+        "Favicon": "https://site-images.similarcdn.com/image?url=otter.ai&t=2&s=1&h=e8526f6a33170b75125aec7573e14620ffdb218eebd5a27c823450929e6d32ed"
+      },
+      {
+        "Domain": "quickreel.io",
+        "DomainWithoutSub": "quickreel.io",
+        "Rank": 534991,
+        "Favicon": "https://site-images.similarcdn.com/image?url=quickreel.io&t=2&s=1&h=ed4e66467049ad215a61ea272f21eeede30e7d671d769c303e2916dc60378e3b"
+      },
+      {
+        "Domain": "livelink.ai",
+        "DomainWithoutSub": "livelink.ai",
+        "Rank": 126204,
+        "Favicon": "https://site-images.similarcdn.com/image?url=livelink.ai&t=2&s=1&h=1244f8ce95adf7e6463fa12e06cff32f6d50aaaaf5d2ccf0104b11805eac0145"
+      },
+      {
+        "Domain": "maestra.ai",
+        "DomainWithoutSub": "maestra.ai",
+        "Rank": 32168,
+        "Favicon": "https://site-images.similarcdn.com/image?url=maestra.ai&t=2&s=1&h=74162060827430283ff5f301c84156d0a410125329d2d24b6c9d72ff40de21ca"
+      },
+      {
+        "Domain": "flexclip.com",
+        "DomainWithoutSub": "flexclip.com",
+        "Rank": 24613,
+        "Favicon": "https://site-images.similarcdn.com/image?url=flexclip.com&t=2&s=1&h=af565db4a808d861ee89679b0357a6d0e24f2d180ddb8e02916a94f128571055"
+      },
+      {
+        "Domain": "clideo.com",
+        "DomainWithoutSub": "clideo.com",
+        "Rank": 4293,
+        "Favicon": "https://site-images.similarcdn.com/image?url=clideo.com&t=2&s=1&h=db4055f006031573f5929de07914708fd027e118bb4aa0c1274f08fa19a86b22"
+      },
+      {
+        "Domain": "riverside.com",
+        "DomainWithoutSub": "riverside.com",
+        "Rank": 12099,
+        "Favicon": "https://site-images.similarcdn.com/image?url=riverside.com&t=2&s=1&h=ba5720c7f8728fa22c9aa5205e78fdc02d1c31139b687c829a0278ca62c5e37b"
+      },
+      {
+        "Domain": "tactiq.io",
+        "DomainWithoutSub": "tactiq.io",
+        "Rank": 13690,
+        "Favicon": "https://site-images.similarcdn.com/image?url=tactiq.io&t=2&s=1&h=13d64b501c2c95b1abd24fb2885142e162ff76e247d9322f4fef6cd8fc50a6bf"
+      },
+      {
+        "Domain": "choppity.com",
+        "DomainWithoutSub": "choppity.com",
+        "Rank": 462683,
+        "Favicon": "https://site-images.similarcdn.com/image?url=choppity.com&t=2&s=1&h=785bdd2a8da721bf721169ede58e7a9bfe7d281ade94ece92eea9f7ae51b5dab"
+      }
+    ]
+  },
+  {
+    "url": "https://pro.similarweb.com/widgetApi/MarketingMixTotal/TrafficSourcesOverview/BarChart?includeSubDomains=true&keys=vizard.ai%2Cveed.io%2Ckapwing.com&from=2025%7C12%7C01&to=2026%7C02%7C28&country=999&webSource=Total&isWindow=false",
+    "body": {
+      "Data": {
+        "TrafficShare": {
+          "Social": {
+            "Total": {
+              "vizard.ai": 150179.05569652552,
+              "veed.io": 568082.1943540527,
+              "kapwing.com": 292352.16701344575
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 38549.51233765229,
+                "veed.io": 205085.09474635177,
+                "kapwing.com": 109803.84137157566
+              },
+              "2026-01-01": {
+                "vizard.ai": 70971.47882401152,
+                "veed.io": 201418.7797330785,
+                "kapwing.com": 99527.94386109331
+              },
+              "2026-02-01": {
+                "vizard.ai": 40658.06453486172,
+                "veed.io": 161578.31987462242,
+                "kapwing.com": 83020.3817807768
+              }
+            }
+          },
+          "Email": {
+            "Total": {
+              "vizard.ai": 1397.9544470741353,
+              "veed.io": 5132.118974190715,
+              "kapwing.com": 2407.096930544996
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 411.300145592958,
+                "veed.io": 1775.128464554964,
+                "kapwing.com": 859.6304010029766
+              },
+              "2026-01-01": {
+                "vizard.ai": 534.1880496299264,
+                "veed.io": 1874.2512900260058,
+                "kapwing.com": 866.4687277717005
+              },
+              "2026-02-01": {
+                "vizard.ai": 452.46625185125095,
+                "veed.io": 1482.7392196097446,
+                "kapwing.com": 680.997801770319
+              }
+            }
+          },
+          "Direct": {
+            "Total": {
+              "vizard.ai": 2021925.5188155337,
+              "veed.io": 14377785.888381254,
+              "kapwing.com": 6089507.188101348
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 565539.1245792733,
+                "veed.io": 4758407.4027539175,
+                "kapwing.com": 2173020.2201353568
+              },
+              "2026-01-01": {
+                "vizard.ai": 924428.8527264197,
+                "veed.io": 5071626.590074861,
+                "kapwing.com": 2029117.4665891372
+              },
+              "2026-02-01": {
+                "vizard.ai": 531957.5415098406,
+                "veed.io": 4547751.895552474,
+                "kapwing.com": 1887369.5013768538
+              }
+            }
+          },
+          "Display Ads": {
+            "Total": {
+              "vizard.ai": 15522.18513942324,
+              "veed.io": 82825.50505813885,
+              "kapwing.com": 27695.59152886624
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 4687.570552404961,
+                "veed.io": 28361.039506951885,
+                "kapwing.com": 8576.029280350085
+              },
+              "2026-01-01": {
+                "vizard.ai": 5665.813507076335,
+                "veed.io": 29610.614858139583,
+                "kapwing.com": 9716.893271949328
+              },
+              "2026-02-01": {
+                "vizard.ai": 5168.801079941945,
+                "veed.io": 24853.85069304738,
+                "kapwing.com": 9402.668976566827
+              }
+            }
+          },
+          "Referrals": {
+            "Total": {
+              "vizard.ai": 162791.0299241227,
+              "veed.io": 1256999.6852413442,
+              "kapwing.com": 710786.820462565
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 52245.44191332276,
+                "veed.io": 453846.8531008838,
+                "kapwing.com": 257859.81596469926
+              },
+              "2026-01-01": {
+                "vizard.ai": 66052.29964906897,
+                "veed.io": 443097.2766096904,
+                "kapwing.com": 240200.3184341209
+              },
+              "2026-02-01": {
+                "vizard.ai": 44493.288361730985,
+                "veed.io": 360055.5555307699,
+                "kapwing.com": 212726.6860637449
+              }
+            }
+          },
+          "Organic Search": {
+            "Total": {
+              "vizard.ai": 3069294.536379126,
+              "veed.io": 19207166.17055396,
+              "kapwing.com": 10689523.512346316
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 846791.9844767111,
+                "veed.io": 6702133.91677106,
+                "kapwing.com": 3809468.4512001323
+              },
+              "2026-01-01": {
+                "vizard.ai": 1412811.7964966798,
+                "veed.io": 6805306.33843999,
+                "kapwing.com": 3546937.9991544653
+              },
+              "2026-02-01": {
+                "vizard.ai": 809690.7554057352,
+                "veed.io": 5699725.91534291,
+                "kapwing.com": 3333117.0619917195
+              }
+            }
+          },
+          "Paid Search": {
+            "Total": {
+              "vizard.ai": 11812.63702031071,
+              "veed.io": 2189856.9293225156,
+              "kapwing.com": 3022.930968686295
+            },
+            "BreakDown": {
+              "2025-12-01": {
+                "vizard.ai": 3889.542145370723,
+                "veed.io": 748205.6778982293,
+                "kapwing.com": 820.0558011037645
+              },
+              "2026-01-01": {
+                "vizard.ai": 4204.263974603985,
+                "veed.io": 725634.9176493534,
+                "kapwing.com": 610.7256342268546
+              },
+              "2026-02-01": {
+                "vizard.ai": 3718.8309003360037,
+                "veed.io": 716016.333774933,
+                "kapwing.com": 1592.1495333556759
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]
