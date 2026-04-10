@@ -8,10 +8,11 @@ Server-side FFmpeg split-screen render (1080x1920 vstack):
 Steps:
   1. Sample first 5 seconds (1 fps)
   2. YOLO face detection -> small-face = webcam overlay
-  3. Canny edge detection -> exact webcam rectangle bounds
+  3. Custom YOLO model (prognot-webcam.pt) -> exact webcam rectangle bounds
   4. Game crop: start at center, shift only if webcam overlaps
-  5. FFmpeg filter_complex vstack render
-  6. R2 upload -> return processed_video_url in metadata
+  5. FFmpeg filter_complex vstack render -> processed_video_url
+  5b. If enable_debug: ALSO render annotated debug video -> debug_video_url
+  6. R2 upload -> return both URLs in metadata
 
 No Gemini, no diarization, no keyframes.
 """
@@ -48,6 +49,8 @@ OUTPUT_W = 1080
 OUTPUT_H = 1920
 WEBCAM_PANEL_H = 640
 GAME_PANEL_H = 1280
+
+WEBCAM_CUSTOM_MODEL_PATH = "/root/prognot-webcam.pt"
 
 
 # ─── Public entry point ──────────────────────────────────────────────────────
@@ -96,19 +99,18 @@ def run_gaming_reframe(
         webcam_face.confidence,
     )
 
-    # Step 3: Canny edge detection -> exact webcam overlay bounds
-    progress("Canny edge detection for exact webcam bounds...", 40)
-    canny_result = find_webcam_bounds_canny(
-        best_frame,
-        webcam_face.face_x, webcam_face.face_y,
-        webcam_face.face_width, webcam_face.face_height,
-        src_w, src_h,
+    # Step 3: Custom YOLO model -> exact webcam overlay bounds
+    progress("Detecting webcam bounds (custom YOLO model)...", 40)
+    custom_result = find_webcam_bounds_yolo_custom(
+        frames=[frame for _, frame in sampled],
+        src_w=src_w,
+        src_h=src_h,
     )
 
-    if canny_result is not None:
-        wc_x, wc_y, wc_w, wc_h = canny_result
-        detected_by = "canny"
-        logger.info("[Gaming] Webcam (Canny): x=%d y=%d w=%d h=%d", wc_x, wc_y, wc_w, wc_h)
+    if custom_result is not None:
+        wc_x, wc_y, wc_w, wc_h = custom_result
+        detected_by = "yolo_custom"
+        logger.info("[Gaming] Webcam (custom YOLO): x=%d y=%d w=%d h=%d", wc_x, wc_y, wc_w, wc_h)
     else:
         wc_x, wc_y, wc_w, wc_h = _webcam_bounds_fallback(
             webcam_face.face_x, webcam_face.face_y,
@@ -149,79 +151,7 @@ def run_gaming_reframe(
         game_crop_x, game_crop_w, game_crop_h, src_w, src_h,
     )
 
-    # ── Debug mode: render annotated 16:9 video instead of vstack ────────────
-    if enable_debug:
-        progress("Rendering debug video (drawbox annotations)...", 65)
-        debug_path = os.path.join(
-            str(settings.UPLOAD_DIR),
-            f"gaming_debug_{uuid.uuid4().hex}.mp4",
-        )
-        debug_url = ""
-        try:
-            _run_ffmpeg_debug(
-                input_path=video_path,
-                output_path=debug_path,
-                wc_x=wc_x, wc_y=wc_y, wc_w=wc_w, wc_h=wc_h,
-                cam_x=cam_x, cam_y=cam_y, cam_w=cam_w, cam_h=cam_h,
-                game_x=game_crop_x, game_y=game_crop_y,
-                game_w=game_crop_w, game_h=game_crop_h,
-                detected_by=detected_by,
-                src_w=src_w, src_h=src_h,
-                overlap_pct=overlap_pct,
-                face_cx=face_cx_px, face_cy=face_cy_px,
-            )
-        except Exception as e:
-            try:
-                os.remove(debug_path)
-            except Exception:
-                pass
-            raise RuntimeError(f"FFmpeg debug render failed: {e}") from e
-
-        progress("Uploading debug video to R2...", 90)
-        try:
-            r2 = get_r2_client()
-            r2_key = f"gaming-debug/{uuid.uuid4().hex}.mp4"
-            with open(debug_path, "rb") as f:
-                r2.put_object(
-                    Bucket=settings.R2_BUCKET_NAME,
-                    Key=r2_key,
-                    Body=f,
-                    ContentType="video/mp4",
-                )
-            debug_url = f"{settings.R2_PUBLIC_URL.rstrip('/')}/{r2_key}"
-            logger.info("[Gaming] Debug video uploaded: %s", debug_url)
-        finally:
-            try:
-                os.remove(debug_path)
-            except Exception:
-                pass
-
-        progress("Done! (debug)", 100)
-        return ReframeResult(
-            keyframes=[],
-            scene_cuts=[],
-            src_w=src_w,
-            src_h=src_h,
-            fps=fps,
-            duration_s=duration_s,
-            content_type="gaming",
-            tracking_mode="x_only",
-            metadata={
-                "debug_video_url": debug_url,
-                "webcam_raw_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
-                "webcam_crop":       {"x": cam_x, "y": cam_y, "w": cam_w, "h": cam_h},
-                "game_bounds":       {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
-                "face_center":       {"x": face_cx_px, "y": face_cy_px},
-                "webcam_detected_by": detected_by,
-                "overlap_pct": round(overlap_pct, 1),
-                "pipeline": "gaming_debug",
-                "source_w": src_w,
-                "source_h": src_h,
-            },
-        )
-
-    # ── Normal mode: FFmpeg vstack render ─────────────────────────────────────
-    # Step 5: FFmpeg render
+    # ── Step 5: FFmpeg vstack render (ALWAYS runs) ────────────────────────────
     progress("Rendering split-screen video (FFmpeg)...", 65)
     output_path = os.path.join(
         str(settings.UPLOAD_DIR),
@@ -242,8 +172,8 @@ def run_gaming_reframe(
             pass
         raise RuntimeError(f"FFmpeg gaming render failed: {e}") from e
 
-    # Step 6: Upload to R2
-    progress("Uploading processed video to R2...", 90)
+    # Step 6: Upload main vstack to R2
+    progress("Uploading processed video to R2...", 80)
     processed_url = ""
     try:
         r2 = get_r2_client()
@@ -263,6 +193,47 @@ def run_gaming_reframe(
         except Exception:
             pass
 
+    # ── Step 5b: Debug render (ADDITIONAL — only when enable_debug=True) ──────
+    # The main vstack above is ALWAYS produced. Debug is a second optional output.
+    debug_url = ""
+    if enable_debug:
+        progress("Rendering debug video (drawbox annotations)...", 88)
+        debug_path = os.path.join(
+            str(settings.UPLOAD_DIR),
+            f"gaming_debug_{uuid.uuid4().hex}.mp4",
+        )
+        try:
+            _run_ffmpeg_debug(
+                input_path=video_path,
+                output_path=debug_path,
+                wc_x=wc_x, wc_y=wc_y, wc_w=wc_w, wc_h=wc_h,
+                cam_x=cam_x, cam_y=cam_y, cam_w=cam_w, cam_h=cam_h,
+                game_x=game_crop_x, game_y=game_crop_y,
+                game_w=game_crop_w, game_h=game_crop_h,
+                detected_by=detected_by,
+                src_w=src_w, src_h=src_h,
+                overlap_pct=overlap_pct,
+                face_cx=face_cx_px, face_cy=face_cy_px,
+            )
+            r2 = get_r2_client()
+            r2_key_debug = f"gaming-debug/{uuid.uuid4().hex}.mp4"
+            with open(debug_path, "rb") as f:
+                r2.put_object(
+                    Bucket=settings.R2_BUCKET_NAME,
+                    Key=r2_key_debug,
+                    Body=f,
+                    ContentType="video/mp4",
+                )
+            debug_url = f"{settings.R2_PUBLIC_URL.rstrip('/')}/{r2_key_debug}"
+            logger.info("[Gaming] Debug video uploaded: %s", debug_url)
+        except Exception as exc:
+            logger.warning("[Gaming] Debug render failed (non-fatal): %s", exc)
+        finally:
+            try:
+                os.remove(debug_path)
+            except Exception:
+                pass
+
     progress("Done!", 100)
 
     return ReframeResult(
@@ -276,6 +247,7 @@ def run_gaming_reframe(
         tracking_mode="x_only",
         metadata={
             "processed_video_url": processed_url,
+            "debug_video_url": debug_url or None,
             "webcam_raw_bounds": {"x": wc_x, "y": wc_y, "w": wc_w, "h": wc_h},
             "webcam_crop":       {"x": cam_x, "y": cam_y, "w": cam_w, "h": cam_h},
             "game_bounds":       {"x": game_crop_x, "y": game_crop_y, "w": game_crop_w, "h": game_crop_h},
@@ -373,86 +345,58 @@ def _find_webcam_face(
     return median_det, best_frame
 
 
-# ─── Step 3: Canny edge detection ────────────────────────────────────────────
+# ─── Step 3: Custom YOLO model for webcam bounds ─────────────────────────────
 
-def find_webcam_bounds_canny(
-    frame: np.ndarray,
-    face_cx_norm: float,
-    face_cy_norm: float,
-    face_w_norm: float,
-    face_h_norm: float,
+def find_webcam_bounds_yolo_custom(
+    frames: list[np.ndarray],
     src_w: int,
     src_h: int,
+    model_path: str = WEBCAM_CUSTOM_MODEL_PATH,
+    conf_threshold: float = 0.20,
 ) -> Optional[tuple[int, int, int, int]]:
     """
-    Scan outward from the YOLO face center using Canny edge detection.
-    Finds the largest rectangular contour that contains the face — this is the webcam overlay border.
-
-    Returns (x, y, w, h) in full-frame source pixels, or None if no clear rectangle found.
-    Caller uses _webcam_bounds_fallback() when None is returned.
+    Run prognot-webcam.pt on all sampled frames; return (x, y, w, h) of the
+    highest-confidence detection, or None if the model is missing / no detection
+    meets conf_threshold (caller falls back to _webcam_bounds_fallback).
     """
-    face_cx_px = int(face_cx_norm * src_w)
-    face_cy_px = int(face_cy_norm * src_h)
-    face_w_px  = int(face_w_norm  * src_w)
-    face_h_px  = int(face_h_norm  * src_h)
-
-    # ROI: expand 2.5x around face to capture webcam overlay border fully
-    EXPAND = 2.5
-    roi_x1 = max(0, face_cx_px - int(face_w_px * EXPAND))
-    roi_y1 = max(0, face_cy_px - int(face_h_px * EXPAND))
-    roi_x2 = min(src_w, face_cx_px + int(face_w_px * EXPAND))
-    roi_y2 = min(src_h, face_cy_px + int(face_h_px * EXPAND))
-
-    roi = frame[roi_y1:roi_y2, roi_x1:roi_x2]
-    if roi.size == 0:
+    if not os.path.exists(model_path):
+        logger.warning("[Gaming] Custom webcam model not found: %s", model_path)
         return None
 
-    gray    = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)   # remove sensor noise before edge detection
-    edges   = cv2.Canny(blurred, threshold1=30, threshold2=100)
-
-    # Dilate to bridge minor gaps in rounded-corner webcam borders
-    kernel = np.ones((3, 3), np.uint8)
-    edges  = cv2.dilate(edges, kernel, iterations=1)
-
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # The webcam overlay must be at least as large as the detected face itself
-    MIN_AREA = float(face_w_px * face_h_px)
-    best_rect: Optional[tuple[int, int, int, int]] = None
-    best_area = MIN_AREA
-
-    for cnt in contours:
-        peri   = cv2.arcLength(cnt, True)
-        approx = cv2.approxPolyDP(cnt, 0.03 * peri, True)
-        if len(approx) != 4:
-            continue
-
-        area = cv2.contourArea(approx)
-        if area <= best_area:
-            continue
-
-        x, y, w, h = cv2.boundingRect(approx)
-
-        # Reject degenerate strips
-        if w < 40 or h < 40 or (w / h) > 5.0 or (h / w) > 5.0:
-            continue
-
-        # The rectangle must contain the face center (ROI-relative coordinates)
-        cx_roi = face_cx_px - roi_x1
-        cy_roi = face_cy_px - roi_y1
-        if not (x <= cx_roi <= x + w and y <= cy_roi <= y + h):
-            continue
-
-        best_rect = (x, y, w, h)
-        best_area = area
-
-    if best_rect is None:
+    try:
+        from ultralytics import YOLO
+        model = YOLO(model_path)
+    except Exception as exc:
+        logger.warning("[Gaming] Failed to load custom webcam model: %s", exc)
         return None
 
-    x, y, w, h = best_rect
-    # Offset from ROI-relative back to full-frame coordinates
-    return (roi_x1 + x, roi_y1 + y, w, h)
+    best_conf = 0.0
+    best_box: Optional[tuple[int, int, int, int]] = None
+
+    for frame in frames:
+        try:
+            results = model(frame, verbose=False)
+            for r in results:
+                if r.boxes is None:
+                    continue
+                for box in r.boxes:
+                    conf = float(box.conf[0])
+                    if conf < conf_threshold:
+                        continue
+                    if conf > best_conf:
+                        best_conf = conf
+                        x1, y1, x2, y2 = box.xyxy[0].tolist()
+                        best_box = (int(x1), int(y1), int(x2 - x1), int(y2 - y1))
+        except Exception as exc:
+            logger.warning("[Gaming] Custom YOLO inference error on frame: %s", exc)
+            continue
+
+    if best_box is None:
+        logger.info("[Gaming] Custom YOLO: no detection above conf=%.2f", conf_threshold)
+        return None
+
+    logger.info("[Gaming] Custom YOLO: best_conf=%.3f box=%s", best_conf, best_box)
+    return best_box
 
 
 def _webcam_bounds_fallback(

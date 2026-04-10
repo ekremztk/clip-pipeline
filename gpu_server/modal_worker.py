@@ -80,7 +80,7 @@ _PIP_PACKAGES = [
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_DATE": "2026-04-10_gaming-v3-face-anchored"})
+    .env({"CACHE_DATE": "2026-04-10_gaming-v4-custom-yolo"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
     # Pre-download yolov8l-face.pt (face-specific model) at image build time.
@@ -100,6 +100,13 @@ image = (
     # Include backend source tree at /backend inside the container.
     # copy=True bakes it into the image layer (required for GPU functions).
     .add_local_dir(str(_BACKEND_DIR), remote_path="/backend", copy=True)
+    # Custom webcam-detection model — baked in at deploy time.
+    # Local path: ~/Documents/prognot-webcam.pt
+    .add_local_file(
+        str(Path.home() / "Documents" / "prognot-webcam.pt"),
+        remote_path="/root/prognot-webcam.pt",
+        copy=True,
+    )
 )
 
 # ─── Modal App ────────────────────────────────────────────────────────────────
