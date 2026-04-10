@@ -40,10 +40,21 @@ export interface TranscriptionModel {
 	description: string;
 }
 
+export interface KaraokeWord {
+	/** Display text (cleaned/transformed) */
+	word: string;
+	/** Absolute timeline time in seconds */
+	startTime: number;
+	/** Absolute timeline time in seconds */
+	endTime: number;
+}
+
 export interface CaptionChunk {
 	text: string;
 	startTime: number;
 	duration: number;
+	/** Word-level timing for karaoke rendering (absolute times) */
+	words?: KaraokeWord[];
 }
 
 export interface TranscriptionWord {

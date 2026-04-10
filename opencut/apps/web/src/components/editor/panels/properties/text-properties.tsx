@@ -3,6 +3,7 @@ import { FontPicker } from "@/components/ui/font-picker";
 import type { TextElement, TimelineTrack } from "@/types/timeline";
 import { NumberField } from "@/components/ui/number-field";
 import { useRef, useState, type ChangeEvent } from "react";
+import { CaptionTemplateSection } from "./sections/caption-template-section";
 import {
 	Section,
 	SectionContent,
@@ -43,10 +44,17 @@ import {
 } from "@hugeicons/core-free-icons";
 import { OcTextHeightIcon, OcTextWidthIcon } from "@opencut/ui/icons";
 import { cn } from "@/utils/ui";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 function isCaptionTrack(track: TimelineTrack): boolean {
 	return (
-		track.elements.length > 1 &&
+		track.elements.length >= 1 &&
 		track.elements.every((el) => el.name.startsWith("Caption "))
 	);
 }
@@ -61,19 +69,32 @@ export function TextProperties({
 	track: TimelineTrack;
 }) {
 	const isCaption = isCaptionTrack(track);
-	const [mode, setMode] = useState<"caption" | "track">("caption");
+	const [mode, setMode] = useState<"templates" | "caption" | "track">(
+		isCaption ? "templates" : "caption",
+	);
 
 	return (
 		<div className="flex h-full flex-col">
 			{isCaption && (
 				<div className="flex border-b">
 					<button
+						onClick={() => setMode("templates")}
+						className={cn(
+							"flex-1 py-2 text-xs font-medium transition-colors",
+							mode === "templates"
+								? "text-foreground border-b-2 border-primary"
+								: "text-muted-foreground hover:text-foreground",
+						)}
+					>
+						Templates
+					</button>
+					<button
 						onClick={() => setMode("caption")}
 						className={cn(
 							"flex-1 py-2 text-xs font-medium transition-colors",
 							mode === "caption"
 								? "text-foreground border-b-2 border-primary"
-								: "text-muted-foreground hover:text-foreground"
+								: "text-muted-foreground hover:text-foreground",
 						)}
 					>
 						Caption
@@ -84,12 +105,16 @@ export function TextProperties({
 							"flex-1 py-2 text-xs font-medium transition-colors",
 							mode === "track"
 								? "text-foreground border-b-2 border-primary"
-								: "text-muted-foreground hover:text-foreground"
+								: "text-muted-foreground hover:text-foreground",
 						)}
 					>
 						Track
 					</button>
 				</div>
+			)}
+
+			{isCaption && mode === "templates" && (
+				<CaptionTemplateSection track={track} />
 			)}
 
 			{(!isCaption || mode === "caption") && (
@@ -103,9 +128,7 @@ export function TextProperties({
 				</>
 			)}
 
-			{isCaption && mode === "track" && (
-				<TrackStyleSection track={track} />
-			)}
+			{isCaption && mode === "track" && <TrackStyleSection track={track} />}
 		</div>
 	);
 }
@@ -263,6 +286,29 @@ function TypographySection({
 							onChangeEnd={textColor.onChangeEnd}
 						/>
 					</SectionField>
+					<SectionField label="Case">
+						<div className="flex gap-1">
+							{(["uppercase", "capitalize", "none"] as const).map((val) => (
+								<button
+									key={val}
+									type="button"
+									onClick={() =>
+										editor.timeline.updateElements({
+											updates: [{ trackId, elementId: element.id, updates: { textTransform: val } }],
+										})
+									}
+									className={cn(
+										"flex flex-1 items-center justify-center rounded border py-1 text-xs font-medium transition-colors",
+										(element.textTransform ?? "none") === val
+											? "border-primary bg-primary/10 text-primary"
+											: "border-border text-muted-foreground hover:border-muted-foreground",
+									)}
+								>
+									{val === "uppercase" ? "TT" : val === "capitalize" ? "Tt" : "tt"}
+								</button>
+							))}
+						</div>
+					</SectionField>
 				</SectionFields>
 			</SectionContent>
 		</Section>
@@ -411,6 +457,7 @@ function BackgroundSection({
 	});
 
 	const bg = element.background;
+	const bgOpacity = bg.opacity ?? 100;
 
 	const resolvedPaddingX = resolveNumberAtTime({
 		baseValue: bg.paddingX ?? DEFAULT_TEXT_BACKGROUND.paddingX,
@@ -587,6 +634,28 @@ function BackgroundSection({
 				)}
 			>
 				<SectionFields>
+					<SectionField label="Opacity">
+						<NumberField
+							icon="%"
+							value={bgOpacity.toString()}
+							min={0}
+							max={100}
+							onBlur={(e) => {
+								const v = parseFloat((e.target as HTMLInputElement).value);
+								if (!Number.isNaN(v)) {
+									editor.timeline.updateElements({
+										updates: [{ trackId, elementId: element.id, updates: { background: { ...bg, opacity: clamp({ value: v, min: 0, max: 100 }) } } }],
+									});
+								}
+							}}
+							onScrub={(v) =>
+								editor.timeline.previewElements({
+									updates: [{ trackId, elementId: element.id, updates: { background: { ...bg, opacity: clamp({ value: v, min: 0, max: 100 }) } } }],
+								})
+							}
+							onScrubEnd={() => editor.timeline.commitPreview()}
+						/>
+					</SectionField>
 					<SectionField
 						label="Color"
 						beforeLabel={
@@ -994,6 +1063,25 @@ function TrackStyleSection({ track }: { track: TimelineTrack }) {
 								))}
 							</div>
 						</SectionField>
+						<SectionField label="Case">
+							<div className="flex gap-1">
+								{(["uppercase", "capitalize", "none"] as const).map((val) => (
+									<button
+										key={val}
+										type="button"
+										onClick={() => batchUpdate({ textTransform: val })}
+										className={cn(
+											"flex flex-1 items-center justify-center rounded border py-1 text-xs font-medium transition-colors",
+											(first.textTransform ?? "none") === val
+												? "border-primary bg-primary/10 text-primary"
+												: "border-border text-muted-foreground hover:border-muted-foreground",
+										)}
+									>
+										{val === "uppercase" ? "TT" : val === "capitalize" ? "Tt" : "tt"}
+									</button>
+								))}
+							</div>
+						</SectionField>
 					</SectionFields>
 				</SectionContent>
 			</Section>
@@ -1208,6 +1296,149 @@ function TrackStyleSection({ track }: { track: TimelineTrack }) {
 									onScrubEnd={shadowOpacity.commitScrub}
 									icon="%"
 								/>
+							</SectionField>
+						</div>
+					</SectionFields>
+				</SectionContent>
+			</Section>
+
+			{/* ── Background ── */}
+			<Section
+				collapsible
+				sectionKey="track:background"
+				defaultOpen={first.background.enabled}
+			>
+				<SectionHeader
+					trailing={
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={(e) => {
+								e.stopPropagation();
+								batchUpdate({ background: { ...first.background, enabled: !first.background.enabled } });
+							}}
+						>
+							<HugeiconsIcon icon={first.background.enabled ? ViewIcon : ViewOffSlashIcon} />
+						</Button>
+					}
+				>
+					<SectionTitle>Background</SectionTitle>
+				</SectionHeader>
+				<SectionContent className={cn(!first.background.enabled && "pointer-events-none opacity-50")}>
+					<SectionFields>
+						<SectionField label="Opacity">
+							<NumberField
+								icon="%"
+								value={(first.background.opacity ?? 100).toString()}
+								min={0}
+								max={100}
+								onBlur={(e) => {
+									const v = parseFloat((e.target as HTMLInputElement).value);
+									if (!Number.isNaN(v)) batchUpdate({ background: { ...first.background, opacity: clamp({ value: v, min: 0, max: 100 }) } });
+								}}
+								onScrub={(v) =>
+									editor.timeline.previewElements({
+										updates: track.elements.map((el) => ({ trackId: track.id, elementId: el.id, updates: { background: { ...first.background, opacity: clamp({ value: v, min: 0, max: 100 }) } } })),
+									})
+								}
+								onScrubEnd={() => editor.timeline.commitPreview()}
+							/>
+						</SectionField>
+						<SectionField label="Color">
+							<ColorPicker
+								value={uppercase({ string: first.background.color.replace("#", "") })}
+								onChange={(c) => batchUpdate({ background: { ...first.background, color: `#${c}` } })}
+								onChangeEnd={(c) => batchUpdate({ background: { ...first.background, color: `#${c}` } })}
+							/>
+						</SectionField>
+						<div className="flex items-start gap-2">
+							<SectionField label="Width" className="w-1/2">
+								<NumberField
+									icon="W"
+									value={Math.round(first.background.paddingX ?? 0).toString()}
+									min={0}
+									onBlur={(e) => {
+										const v = parseFloat((e.target as HTMLInputElement).value);
+										if (!Number.isNaN(v)) batchUpdate({ background: { ...first.background, paddingX: Math.max(0, v) } });
+									}}
+									onScrub={(v) => editor.timeline.previewElements({ updates: track.elements.map((el) => ({ trackId: track.id, elementId: el.id, updates: { background: { ...first.background, paddingX: Math.max(0, v) } } })) })}
+									onScrubEnd={() => editor.timeline.commitPreview()}
+								/>
+							</SectionField>
+							<SectionField label="Height" className="w-1/2">
+								<NumberField
+									icon="H"
+									value={Math.round(first.background.paddingY ?? 0).toString()}
+									min={0}
+									onBlur={(e) => {
+										const v = parseFloat((e.target as HTMLInputElement).value);
+										if (!Number.isNaN(v)) batchUpdate({ background: { ...first.background, paddingY: Math.max(0, v) } });
+									}}
+									onScrub={(v) => editor.timeline.previewElements({ updates: track.elements.map((el) => ({ trackId: track.id, elementId: el.id, updates: { background: { ...first.background, paddingY: Math.max(0, v) } } })) })}
+									onScrubEnd={() => editor.timeline.commitPreview()}
+								/>
+							</SectionField>
+						</div>
+						<SectionField label="Corner radius">
+							<NumberField
+								icon="R"
+								value={Math.round(first.background.cornerRadius ?? 0).toString()}
+								min={0}
+								max={100}
+								onBlur={(e) => {
+									const v = parseFloat((e.target as HTMLInputElement).value);
+									if (!Number.isNaN(v)) batchUpdate({ background: { ...first.background, cornerRadius: clamp({ value: v, min: 0, max: 100 }) } });
+								}}
+								onScrub={(v) => editor.timeline.previewElements({ updates: track.elements.map((el) => ({ trackId: track.id, elementId: el.id, updates: { background: { ...first.background, cornerRadius: clamp({ value: v, min: 0, max: 100 }) } } })) })}
+								onScrubEnd={() => editor.timeline.commitPreview()}
+							/>
+						</SectionField>
+					</SectionFields>
+				</SectionContent>
+			</Section>
+
+			{/* ── Blending ── */}
+			<Section collapsible sectionKey="track:blending">
+				<SectionHeader><SectionTitle>Blending</SectionTitle></SectionHeader>
+				<SectionContent>
+					<SectionFields>
+						<div className="flex items-start gap-2">
+							<SectionField label="Opacity" className="w-1/2">
+								<NumberField
+									value={opacity.displayValue}
+									min={0}
+									max={100}
+									onFocus={opacity.onFocus}
+									onChange={opacity.onChange}
+									onBlur={opacity.onBlur}
+									onScrub={opacity.scrubTo}
+									onScrubEnd={opacity.commitScrub}
+									icon="%"
+								/>
+							</SectionField>
+							<SectionField label="Blend mode" className="w-1/2">
+								<Select
+									value={first.blendMode ?? "normal"}
+									onValueChange={(v) => batchUpdate({ blendMode: v as import("@/types/rendering").BlendMode })}
+								>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Normal" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="normal">Normal</SelectItem>
+										<SelectItem value="multiply">Multiply</SelectItem>
+										<SelectItem value="screen">Screen</SelectItem>
+										<SelectItem value="overlay">Overlay</SelectItem>
+										<SelectItem value="darken">Darken</SelectItem>
+										<SelectItem value="lighten">Lighten</SelectItem>
+										<SelectItem value="color-dodge">Color Dodge</SelectItem>
+										<SelectItem value="color-burn">Color Burn</SelectItem>
+										<SelectItem value="hard-light">Hard Light</SelectItem>
+										<SelectItem value="soft-light">Soft Light</SelectItem>
+										<SelectItem value="difference">Difference</SelectItem>
+										<SelectItem value="exclusion">Exclusion</SelectItem>
+									</SelectContent>
+								</Select>
 							</SectionField>
 						</div>
 					</SectionFields>

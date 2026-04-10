@@ -115,10 +115,12 @@ export default function ProjectsPage() {
 
 						{/* Project cards */}
 						{projects.map((project) => (
-							<button
+							<div
 								key={project.id}
-								type="button"
+								role="button"
+								tabIndex={0}
 								onClick={() => handleOpenProject(project.id)}
+								onKeyDown={(e) => e.key === "Enter" && handleOpenProject(project.id)}
 								className="group relative flex flex-col rounded-xl border border-border bg-card overflow-hidden hover:border-muted-foreground/40 transition-colors cursor-pointer text-left"
 							>
 								{/* Thumbnail */}
@@ -162,7 +164,7 @@ export default function ProjectsPage() {
 										<Trash2 className="size-3.5" />
 									)}
 								</button>
-							</button>
+						</div>
 						))}
 					</div>
 				)}

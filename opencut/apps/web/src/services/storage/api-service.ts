@@ -9,6 +9,10 @@ import { getProjectDurationFromScenes } from "@/lib/scenes";
 import type { MediaAsset } from "@/types/assets";
 import type { SavedSoundsData, SavedSound, SoundEffect } from "@/types/sounds";
 import type { SerializedProject } from "./types";
+import {
+	generateThumbnail,
+	generateImageThumbnail,
+} from "@/lib/media/processing";
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
@@ -203,7 +207,7 @@ class ApiStorageService {
 
 		if (!initRes.ok) throw new Error(`Failed to init media upload: ${initRes.status}`);
 
-		const { upload_url } = await initRes.json();
+		const { upload_url, asset: savedAsset } = await initRes.json();
 
 		// Upload file directly to R2 via presigned URL (R2 CORS allows edit.prognot.com)
 		const uploadRes = await fetch(upload_url, {
@@ -212,7 +216,13 @@ class ApiStorageService {
 			headers: { "Content-Type": contentType },
 		});
 
-		if (!uploadRes.ok) throw new Error(`R2 upload failed: ${uploadRes.status}`);
+		if (!uploadRes.ok) {
+			// Rollback: remove the orphan DB record so it doesn't pollute future reloads
+			await apiFetch(`/api/media?id=${savedAsset?.id ?? mediaAsset.id}`, {
+				method: "DELETE",
+			}).catch(() => {});
+			throw new Error(`R2 upload failed: ${uploadRes.status}`);
+		}
 	}
 
 	async loadMediaAsset({
@@ -246,6 +256,18 @@ class ApiStorageService {
 					const file = new File([blob], row.name, { type: blob.type });
 					const url = URL.createObjectURL(file);
 
+					// Regenerate thumbnail so media panel and timeline show previews after reload
+					let thumbnailUrl: string | undefined;
+					try {
+						if (row.type === "video") {
+							thumbnailUrl = await generateThumbnail({ videoFile: file, timeInSeconds: 0 });
+						} else if (row.type === "image") {
+							thumbnailUrl = await generateImageThumbnail({ imageFile: file });
+						}
+					} catch {
+						// Non-fatal: preview panel shows placeholder
+					}
+
 					return {
 						id: row.id,
 						name: row.name,
@@ -256,7 +278,7 @@ class ApiStorageService {
 						height: row.height,
 						duration: row.duration,
 						fps: row.fps,
-						thumbnailUrl: undefined,
+						thumbnailUrl,
 						ephemeral: false,
 					} as MediaAsset;
 				} catch {

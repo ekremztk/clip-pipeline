@@ -1,6 +1,9 @@
 import type { ElementAnimations } from "./animation";
 import type { Effect, EffectParamValues } from "./effects";
 import type { BlendMode, Transform } from "./rendering";
+import type { KaraokeWord } from "./transcription";
+
+export type { KaraokeWord };
 
 export interface Bookmark {
 	time: number;
@@ -127,6 +130,8 @@ export interface TextBackground {
 	paddingY?: number;
 	offsetX?: number;
 	offsetY?: number;
+	/** Background fill opacity 0–100. Undefined = 100 (fully opaque). */
+	opacity?: number;
 }
 
 export interface TextStroke {
@@ -158,6 +163,7 @@ export interface TextElement extends BaseTimelineElement {
 	textDecoration: "none" | "underline" | "line-through";
 	letterSpacing?: number;
 	lineHeight?: number;
+	textTransform?: "none" | "uppercase" | "capitalize" | "lowercase";
 	hidden?: boolean;
 	transform: Transform;
 	opacity: number;
@@ -165,6 +171,10 @@ export interface TextElement extends BaseTimelineElement {
 	effects?: Effect[];
 	stroke?: TextStroke;
 	shadow?: TextShadow;
+	/** Word-level timing for karaoke rendering (relative to element start) */
+	karaokeWords?: KaraokeWord[];
+	/** Highlight color for the active karaoke word (e.g. "#FFE500"). Enables karaoke mode when set. */
+	karaokeHighlightColor?: string;
 }
 
 export interface StickerElement extends BaseTimelineElement {

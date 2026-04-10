@@ -1,7 +1,7 @@
 import type { CanvasRenderer } from "../canvas-renderer";
 import { createOffscreenCanvas } from "../canvas-utils";
 import { BaseNode } from "./base-node";
-import type { TextElement } from "@/types/timeline";
+import type { TextElement, KaraokeWord } from "@/types/timeline";
 import {
 	DEFAULT_TEXT_BACKGROUND,
 	DEFAULT_TEXT_ELEMENT,
@@ -83,6 +83,86 @@ function drawTextDecoration({
 	}
 }
 
+// ── Karaoke per-word rendering ────────────────────────────────────────────────
+
+function applyTextTransformToWord(word: string, tt: string | undefined): string {
+	if (tt === "uppercase") return word.toUpperCase();
+	if (tt === "lowercase") return word.toLowerCase();
+	if (tt === "capitalize") return word.replace(/^\w/, (c) => c.toUpperCase());
+	return word;
+}
+
+function drawKaraokeLine({
+	ctx,
+	karaokeWords,
+	lineY,
+	localTime,
+	baseColor,
+	highlightColor,
+	textTransform,
+	textAlign,
+	stroke,
+	applyShadow,
+	clearShadow,
+}: {
+	ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+	karaokeWords: KaraokeWord[];
+	lineY: number;
+	localTime: number;
+	baseColor: string;
+	highlightColor: string;
+	textTransform: string | undefined;
+	textAlign: CanvasTextAlign;
+	stroke: TextElement["stroke"];
+	applyShadow: () => void;
+	clearShadow: () => void;
+}) {
+	if (karaokeWords.length === 0) return;
+
+	// Measure words (ctx.font and ctx.letterSpacing must already be set)
+	const savedAlign = ctx.textAlign;
+	ctx.textAlign = "left";
+	const spaceWidth = ctx.measureText(" ").width;
+	const displayWords = karaokeWords.map((kw) => applyTextTransformToWord(kw.word, textTransform));
+	const wordWidths = displayWords.map((w) => ctx.measureText(w).width);
+	const totalWidth =
+		wordWidths.reduce((sum, w) => sum + w, 0) +
+		spaceWidth * Math.max(0, karaokeWords.length - 1);
+
+	let startX: number;
+	if (savedAlign === "center") startX = -totalWidth / 2;
+	else if (savedAlign === "right") startX = -totalWidth;
+	else startX = 0;
+
+	let x = startX;
+	for (let i = 0; i < karaokeWords.length; i++) {
+		const kw = karaokeWords[i];
+		const isActive = localTime >= kw.startTime && localTime < kw.endTime;
+		const wordColor = isActive ? highlightColor : baseColor;
+		const displayWord = displayWords[i];
+
+		ctx.fillStyle = wordColor;
+
+		if (stroke?.enabled && stroke.width > 0) {
+			ctx.strokeStyle = stroke.color;
+			ctx.lineWidth = stroke.outsideOnly ? stroke.width * 2 : stroke.width;
+			ctx.lineJoin = "round";
+			applyShadow();
+			ctx.strokeText(displayWord, x, lineY);
+			clearShadow();
+			ctx.fillText(displayWord, x, lineY);
+		} else {
+			applyShadow();
+			ctx.fillText(displayWord, x, lineY);
+			clearShadow();
+		}
+
+		x += wordWidths[i] + (i < karaokeWords.length - 1 ? spaceWidth : 0);
+	}
+
+	ctx.textAlign = savedAlign;
+}
+
 export type TextNodeParams = TextElement & {
 	canvasCenter: { x: number; y: number };
 	canvasHeight: number;
@@ -131,7 +211,14 @@ export class TextNode extends BaseNode<TextNodeParams> {
 		const fontString = `${fontStyle} ${fontWeight} ${scaledFontSize}px ${fontFamily}, sans-serif`;
 		const letterSpacing = this.params.letterSpacing ?? 0;
 		const lineHeight = this.params.lineHeight ?? DEFAULT_LINE_HEIGHT;
-		const lines = this.params.content.split("\n");
+		const rawContent = this.params.content;
+		const tt = this.params.textTransform;
+		const transformedContent =
+			tt === "uppercase" ? rawContent.toUpperCase() :
+			tt === "lowercase" ? rawContent.toLowerCase() :
+			tt === "capitalize" ? rawContent.replace(/(^|[\s\-])\w/g, (c) => c.toUpperCase()) :
+			rawContent;
+		const lines = transformedContent.split("\n");
 		const lineHeightPx = scaledFontSize * lineHeight;
 		const fontSizeRatio = this.params.fontSize / DEFAULT_TEXT_ELEMENT.fontSize;
 		const baseline = this.params.textBaseline ?? "middle";
@@ -224,10 +311,14 @@ export class TextNode extends BaseNode<TextNodeParams> {
 				if (backgroundRect) {
 					const p = clamp({ value: resolvedBackground.cornerRadius, min: CORNER_RADIUS_MIN, max: CORNER_RADIUS_MAX }) / 100;
 					const radius = Math.min(backgroundRect.width, backgroundRect.height) / 2 * p;
+				const bgAlpha = (bg.opacity !== undefined ? bg.opacity : 100) / 100;
+				const savedAlpha = ctx.globalAlpha;
+				ctx.globalAlpha = savedAlpha * bgAlpha;
 				ctx.fillStyle = resolvedBackground.color;
 				ctx.beginPath();
 				ctx.roundRect(backgroundRect.left, backgroundRect.top, backgroundRect.width, backgroundRect.height, radius);
 				ctx.fill();
+				ctx.globalAlpha = savedAlpha;
 				ctx.fillStyle = textColor;
 				}
 			}
@@ -252,10 +343,42 @@ export class TextNode extends BaseNode<TextNodeParams> {
 				ctx.shadowBlur = 0;
 			};
 
+			// Precompute per-line word ranges for karaoke mode
+			const karaokeWords = this.params.karaokeWords;
+			const karaokeHighlight = this.params.karaokeHighlightColor;
+			const isKaraoke = !!(karaokeWords && karaokeWords.length > 0 && karaokeHighlight);
+			const lineWordRanges: Array<{ start: number; end: number }> = [];
+			if (isKaraoke && karaokeWords) {
+				let wordIdx = 0;
+				for (let i = 0; i < lines.length; i++) {
+					const lineWordCount = lines[i].trim() ? lines[i].trim().split(/\s+/).length : 0;
+					lineWordRanges.push({ start: wordIdx, end: wordIdx + lineWordCount });
+					wordIdx += lineWordCount;
+				}
+			}
+
 			for (let i = 0; i < lineCount; i++) {
 				const lineY = i * lineHeightPx - block.visualCenterOffset;
 
-				if (stroke?.enabled && stroke.width > 0) {
+				if (isKaraoke && karaokeWords && lineWordRanges[i]) {
+					// Karaoke mode: draw each word individually with per-word color
+					const range = lineWordRanges[i];
+					const lineKaraokeWords = karaokeWords.slice(range.start, range.end);
+					ctx.fillStyle = textColor;
+					drawKaraokeLine({
+						ctx,
+						karaokeWords: lineKaraokeWords,
+						lineY,
+						localTime,
+						baseColor: textColor,
+						highlightColor: karaokeHighlight,
+						textTransform: this.params.textTransform,
+						textAlign: this.params.textAlign,
+						stroke,
+						applyShadow,
+						clearShadow,
+					});
+				} else if (stroke?.enabled && stroke.width > 0) {
 					ctx.strokeStyle = stroke.color;
 					ctx.lineWidth = stroke.outsideOnly ? stroke.width * 2 : stroke.width;
 					ctx.lineJoin = "round";

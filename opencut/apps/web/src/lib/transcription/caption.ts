@@ -1,4 +1,4 @@
-import type { TranscriptionSegment, TranscriptionWord, CaptionChunk } from "@/types/transcription";
+import type { TranscriptionSegment, TranscriptionWord, CaptionChunk, KaraokeWord } from "@/types/transcription";
 import {
 	DEFAULT_WORDS_PER_CAPTION,
 	MIN_CAPTION_DURATION_SECONDS,
@@ -60,6 +60,18 @@ export function buildCaptionChunks({
 }
 
 /**
+ * Strips noise from a word for cleaner caption display.
+ * - Removes leading standalone dashes/hyphens (Deepgram filler markers)
+ * - Removes trailing punctuation except apostrophes and internal hyphens
+ */
+function stripTerminalPunctuation(word: string): string {
+	// Strip leading dash/em-dash filler that Deepgram inserts (e.g. "- " or "– ")
+	const noDash = word.replace(/^[-–—]+\s*/, "");
+	// Strip trailing punctuation
+	return noDash.replace(/[.,;:!?]+$/, "");
+}
+
+/**
  * Builds caption chunks from word-level timestamps (Deepgram output).
  * Supports single-line (maxLines=1) and double-line (maxLines=2) modes.
  */
@@ -68,19 +80,19 @@ export function buildCaptionChunksFromWords({
 	maxCharsPerLine = 32,
 	maxLines = 1,
 	minDuration = MIN_CAPTION_DURATION_SECONDS,
+	cleanPunctuation = true,
 }: {
 	words: TranscriptionWord[];
 	maxCharsPerLine?: number;
 	maxLines?: 1 | 2;
 	minDuration?: number;
+	cleanPunctuation?: boolean;
 }): CaptionChunk[] {
 	if (!words || words.length === 0) return [];
 
-	// With 2 lines, distribute the total char budget across both lines
-	// so each subtitle stays within maxCharsPerLine total
-	const effectiveCharsPerLine = maxLines === 2
-		? Math.ceil(maxCharsPerLine / 2)
-		: maxCharsPerLine;
+	// maxCharsPerLine is the limit PER LINE — each line in a 2-line subtitle
+	// gets the full budget, not half.
+	const effectiveCharsPerLine = maxCharsPerLine;
 
 	const chunks: CaptionChunk[] = [];
 	// Each entry is one line of words
@@ -97,13 +109,33 @@ export function buildCaptionChunksFromWords({
 		const startTime = allWords[0].start;
 		const endTime = allWords[allWords.length - 1].end;
 		const duration = Math.max(minDuration, endTime - startTime);
-		chunks.push({ text, startTime, duration });
+
+		// Build per-word timing for karaoke rendering
+		const karaokeWords: KaraokeWord[] = allWords
+			.map((w) => ({
+				word: cleanPunctuation
+					? stripTerminalPunctuation(w.punctuated_word || w.word)
+					: (w.punctuated_word || w.word),
+				startTime: w.start,
+				endTime: w.end,
+			}))
+			.filter((kw) => kw.word.trim() !== "");
+
+		chunks.push({
+			text,
+			startTime,
+			duration,
+			words: karaokeWords.length > 0 ? karaokeWords : undefined,
+		});
 		lines = [[]];
 		currentLineChars = 0;
 	};
 
 	for (const word of words) {
-		const wordText = word.punctuated_word || word.word;
+		const raw = word.punctuated_word || word.word;
+		const wordText = cleanPunctuation ? stripTerminalPunctuation(raw) : raw;
+		// Skip standalone dashes/fillers that become empty after cleaning
+		if (cleanPunctuation && wordText.trim() === "") continue;
 		const spaceNeeded = currentLineChars === 0 ? 0 : 1;
 		const totalNeeded = currentLineChars + spaceNeeded + wordText.length;
 
