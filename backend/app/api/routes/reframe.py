@@ -31,7 +31,7 @@ _STALE_MINUTES = 15
 _VALID_ASPECT_RATIOS = {"9:16", "1:1", "4:5", "16:9"}
 _VALID_TRACKING_MODES = {"x_only", "dynamic_xy"}
 _VALID_CONTENT_TYPES = {"auto", "podcast", "single", "gaming", "generic"}
-_VALID_DETECTION_ENGINES = {"mediapipe", "yolo"}
+_VALID_DETECTION_ENGINES = {"yolo"}
 
 
 # ─── Request / Response Modelleri ─────────────────────────────────────────────
@@ -47,7 +47,7 @@ class ReframeRequest(BaseModel):
     aspect_ratio: str = "9:16"
     tracking_mode: str = "dynamic_xy"
     content_type: Optional[str] = None        # "auto" | "podcast" | "single" | "gaming" | "generic"
-    detection_engine: Optional[str] = "mediapipe"  # "mediapipe" | "yolo"
+    detection_engine: Optional[str] = "yolo"
 
 
 class ReframeStatusResponse(BaseModel):
@@ -91,9 +91,7 @@ def _sanitize_content_type(value: Optional[str]) -> Optional[str]:
 
 
 def _sanitize_detection_engine(value: Optional[str]) -> str:
-    if not value:
-        return "mediapipe"
-    return value if value in _VALID_DETECTION_ENGINES else "mediapipe"
+    return "yolo"
 
 
 def _keyframes_to_dicts(keyframes: list[ReframeKeyframe]) -> list[dict]:

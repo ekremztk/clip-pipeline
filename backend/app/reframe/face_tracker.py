@@ -1,14 +1,10 @@
 """
-Face Tracker — pluggable detection engine.
+Face Tracker — YOLO face detection engine.
 
-Supports two engines (selected at runtime via engine_type param):
-  - "mediapipe" (default): BlazeFace model, face-level detection
-  - "yolo": YOLOv8-nano, person-level detection with head region estimation
+Uses YOLOv8-large-face (yolov8l-face.pt) for face-level detection.
+Produces FaceDetection output consumed by focus_resolver, path_solver, etc.
 
-Both engines produce identical FaceDetection output so the rest of the
-pipeline (focus_resolver, path_solver, etc.) remains unchanged.
-
-Performance (per-frame ms) is logged for each engine to enable comparison.
+Performance (per-frame ms) is logged for monitoring.
 """
 import logging
 import time
@@ -27,8 +23,6 @@ logger = logging.getLogger(__name__)
 
 # Model paths
 _MODELS_DIR = Path(__file__).parent.parent.parent / "models"
-_MP_MODEL_FILENAME = "blaze_face_full_range.tflite"
-_MP_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/latest/blaze_face_full_range.tflite"
 
 
 # ─── Abstract base ────────────────────────────────────────────────────────────
@@ -48,85 +42,6 @@ class BaseDetector(ABC):
     @abstractmethod
     def engine_name(self) -> str:
         pass
-
-
-# ─── MediaPipe engine ─────────────────────────────────────────────────────────
-
-class MediaPipeDetector(BaseDetector):
-    """BlazeFace face detection via MediaPipe Tasks API."""
-
-    def __init__(self, config: FaceTrackerConfig):
-        from mediapipe.tasks.python import vision
-        from mediapipe.tasks.python.core.base_options import BaseOptions
-
-        model_path = _MODELS_DIR / _MP_MODEL_FILENAME
-        if not model_path.exists():
-            logger.info("[FaceTracker] Downloading MediaPipe model...")
-            _MODELS_DIR.mkdir(parents=True, exist_ok=True)
-            import urllib.request
-            urllib.request.urlretrieve(_MP_MODEL_URL, str(model_path))
-            logger.info("[FaceTracker] Model downloaded: %s", model_path)
-
-        options = vision.FaceDetectorOptions(
-            base_options=BaseOptions(model_asset_path=str(model_path)),
-            running_mode=vision.RunningMode.IMAGE,
-            min_detection_confidence=config.min_detection_confidence,
-        )
-        self._detector = vision.FaceDetector.create_from_options(options)
-        logger.info("[FaceTracker] MediaPipe FaceDetector initialized (blaze_face_full_range)")
-
-    @property
-    def engine_name(self) -> str:
-        return "mediapipe"
-
-    def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
-        try:
-            import mediapipe as mp
-
-            res_w, res_h = config.analysis_resolution
-            small = cv2.resize(frame, (res_w, res_h))
-            rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
-
-            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
-            result = self._detector.detect(mp_image)
-
-            if not result.detections:
-                return []
-
-            detections: list[FaceDetection] = []
-            for det in result.detections:
-                bbox = det.bounding_box
-                score = det.categories[0].score if det.categories else 0.0
-                if score < config.min_detection_confidence:
-                    continue
-
-                fx = (bbox.origin_x + bbox.width / 2) / res_w
-                fy = (bbox.origin_y + bbox.height / 2) / res_h
-                fw = bbox.width / res_w
-                fh = bbox.height / res_h
-                fx = max(0.0, min(1.0, fx))
-                fy = max(0.0, min(1.0, fy))
-
-                person_h = min(1.0, fh * config.person_height_multiplier)
-                person_x = fx
-                person_y = min(1.0, fy + person_h * 0.2)
-
-                detections.append(FaceDetection(
-                    face_x=round(fx, 5), face_y=round(fy, 5),
-                    face_width=round(fw, 5), face_height=round(fh, 5),
-                    confidence=round(score, 4),
-                    person_x=round(person_x, 5), person_y=round(person_y, 5),
-                    person_height=round(person_h, 5),
-                ))
-
-            detections.sort(key=lambda d: d.face_width * d.face_height, reverse=True)
-            detections = detections[:config.max_faces]
-            detections.sort(key=lambda d: d.face_x)
-            return detections
-
-        except Exception as e:
-            logger.error("[FaceTracker/MediaPipe] Detection error: %s", e)
-            return []
 
 
 # Face model paths
@@ -257,13 +172,10 @@ _detector_cache: dict[str, BaseDetector] = {}
 
 
 def _get_detector(engine_type: str, config: FaceTrackerConfig) -> BaseDetector:
-    """Lazy-init and cache detector by engine type."""
-    if engine_type not in _detector_cache:
-        if engine_type == "yolo":
-            _detector_cache[engine_type] = YoloDetector(config)
-        else:
-            _detector_cache[engine_type] = MediaPipeDetector(config)
-    return _detector_cache[engine_type]
+    """Lazy-init and cache the YOLO face detector."""
+    if "yolo" not in _detector_cache:
+        _detector_cache["yolo"] = YoloDetector(config)
+    return _detector_cache["yolo"]
 
 
 # ─── Public API ───────────────────────────────────────────────────────────────
@@ -274,12 +186,10 @@ def analyze_video(
     src_w: int,
     src_h: int,
     config: FaceTrackerConfig,
-    engine_type: str = "mediapipe",
+    engine_type: str = "yolo",
 ) -> list[Frame]:
     """
-    Sample frames from each shot and detect persons/faces.
-
-    engine_type: "mediapipe" (default) | "yolo"
+    Sample frames from each shot and detect faces via YOLO.
     Returns list of Frame objects with stable tracking IDs.
     """
     detector = _get_detector(engine_type, config)

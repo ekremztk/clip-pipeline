@@ -113,7 +113,7 @@ export async function runReframe(
 				aspect_ratio: options.aspectRatio,
 				tracking_mode: options.contentType === "gaming" ? "x_only" : options.trackingMode,
 				content_type: options.contentType ?? "auto",
-				detection_engine: options.detectionEngine ?? "mediapipe",
+				detection_engine: "yolo",
 			}),
 		});
 
