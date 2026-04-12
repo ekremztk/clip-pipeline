@@ -8,9 +8,8 @@ Two caption modes:
   - Word mode (karaoke templates like Hormozi): each word flashes individually
     in the highlight color — the classic TikTok/Reels pop-in effect
 
-Font requirements: Montserrat, Poppins, Bebas Neue, Oswald must be installed.
-On Railway/Debian, install via: apt-get install fonts-open-sans fonts-urw-base35
-For Montserrat/Poppins/etc, embed OTF files in /usr/share/fonts/ and run fc-cache.
+Fonts: uses Open Sans from fonts-open-sans (installed in Dockerfile).
+fontfile= is used instead of fontconfig font= to avoid fc-cache dependency.
 """
 import logging
 import os
@@ -29,12 +28,16 @@ FONT_SCALE = 18  # fontSize 4 = 72px, 5 = 90px, 6 = 108px
 # Y center offset: template y=0 → video center (960px)
 Y_CENTER = CANVAS_H // 2
 
-# Font family → system font file or fontconfig name
+# Absolute font file paths (installed via fonts-open-sans on Railway/Debian)
+_OPEN_SANS_DIR = "/usr/share/fonts/truetype/open-sans"
+
+# Font family → absolute TTF path
+# All templates fall back to Open Sans variants — similar weight/style profile.
 FONT_MAP = {
-    "Montserrat":  "Montserrat-Bold",
-    "Poppins":     "Poppins-Bold",
-    "Bebas Neue":  "BebasNeue-Regular",
-    "Oswald":      "Oswald-Bold",
+    "Montserrat":  f"{_OPEN_SANS_DIR}/OpenSans-Bold.ttf",
+    "Poppins":     f"{_OPEN_SANS_DIR}/OpenSans-Regular.ttf",
+    "Bebas Neue":  f"{_OPEN_SANS_DIR}/OpenSansCondensed-Bold.ttf",
+    "Oswald":      f"{_OPEN_SANS_DIR}/OpenSansCondensed-Bold.ttf",
 }
 
 # Pipeline key → template config (mirrors caption-templates.ts)
@@ -222,7 +225,7 @@ def _build_drawtext(
 ) -> str:
     """Build a single FFmpeg drawtext filter string."""
     parts = [
-        f"drawtext=font='{font}'",
+        f"drawtext=fontfile='{font}'",
         f"fontsize={font_px}",
         f"fontcolor={color}",
         f"text='{text}'",
@@ -276,8 +279,22 @@ def _run_ffmpeg_copy(input_path: str, output_path: str) -> None:
 
 
 def _resolve_font(font_family: str) -> str:
-    """Resolve font family name to fontconfig-compatible name."""
-    return FONT_MAP.get(font_family, font_family)
+    """Resolve font family name to absolute TTF file path.
+
+    If the mapped font file doesn't exist on this system (e.g. in dev),
+    fall back to any available Open Sans Bold so FFmpeg doesn't crash.
+    """
+    path = FONT_MAP.get(font_family, f"{_OPEN_SANS_DIR}/OpenSans-Bold.ttf")
+    if not os.path.exists(path):
+        # Try the bold variant as first fallback
+        fallback = f"{_OPEN_SANS_DIR}/OpenSans-Bold.ttf"
+        if os.path.exists(fallback):
+            logger.warning("[CaptionRenderer] Font not found: %s → using %s", path, fallback)
+            return fallback
+        # Last resort: let FFmpeg pick whatever it finds
+        logger.warning("[CaptionRenderer] No Open Sans fonts found at %s — FFmpeg will use default", _OPEN_SANS_DIR)
+        return path
+    return path
 
 
 def _hex_to_ffmpeg(hex_color: str) -> str:

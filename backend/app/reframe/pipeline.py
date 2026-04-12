@@ -186,7 +186,16 @@ def run_reframe(
 
         # 9. Path solver (AutoFlip kinematic)
         progress("Computing smooth camera paths...", 75)
-        shot_paths = solve_paths(focus_points, shots, fps, config.path_solver)
+        logger.info(
+            "[Reframe] solve_paths: %d focus_points, %d shots, fps=%.2f",
+            len(focus_points), len(shots), fps,
+        )
+        try:
+            shot_paths = solve_paths(focus_points, shots, fps, config.path_solver)
+        except Exception as path_err:
+            logger.error("[Reframe] solve_paths FAILED: %s", path_err, exc_info=True)
+            raise
+        logger.info("[Reframe] solve_paths complete: %d shot paths", len(shot_paths))
 
         # 10. Keyframe emission
         progress("Generating keyframes...", 85)

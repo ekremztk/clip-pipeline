@@ -11,6 +11,7 @@ Two render paths:
 These functions accept ONLY coordinates/parameters — no detection logic inside.
 Both the pipeline (S09) and a future manual editor API call the same functions.
 """
+import json
 import logging
 import os
 import subprocess
@@ -64,9 +65,30 @@ def render_podcast_reframe(
     segments = _build_segments(keyframes, scene_cuts, duration_s, fps)
     logger.info("[Render] %d segments from %d scene cuts", len(segments), len(scene_cuts))
 
-    # Build FFmpeg filter_complex
+    # Detect audio stream — clips from S07 may be video-only
+    has_audio = _has_audio_stream(video_path)
+    logger.info("[Render] Audio stream: %s", "yes" if has_audio else "no (video-only)")
+
+    n = len(segments)
     filter_parts = []
     concat_inputs = []
+
+    # For multiple segments, use explicit split/asplit so [0:v] and [0:a] are
+    # each referenced only once. Modern FFmpeg handles implicit split, but being
+    # explicit avoids edge cases on older FFmpeg builds on Railway.
+    if n > 1:
+        filter_parts.append(
+            "[0:v]split=" + str(n) + "".join(f"[sv{i}]" for i in range(n))
+        )
+        if has_audio:
+            filter_parts.append(
+                "[0:a]asplit=" + str(n) + "".join(f"[sa{i}]" for i in range(n))
+            )
+        v_src = lambda i: f"[sv{i}]"
+        a_src = lambda i: f"[sa{i}]"
+    else:
+        v_src = lambda i: "[0:v]"
+        a_src = lambda i: "[0:a]"
 
     for i, seg in enumerate(segments):
         # Build crop expression for this segment
@@ -77,48 +99,57 @@ def render_podcast_reframe(
         crop_x_expr = f"clip({crop_x_expr},0,{src_w - crop_w})"
         crop_y_expr = f"clip({crop_y_expr},0,{src_h - crop_h})"
 
-        # trim → crop → scale → setpts for this segment
         seg_label = f"v{i}"
-        seg_a_label = f"a{i}"
         filter_parts.append(
-            f"[0:v]trim=start={seg['start']:.6f}:end={seg['end']:.6f},"
+            f"{v_src(i)}trim=start={seg['start']:.6f}:end={seg['end']:.6f},"
             f"setpts=PTS-STARTPTS,"
             f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
             f"scale={canvas_w}:{canvas_h}:flags=lanczos"
             f"[{seg_label}]"
         )
-        filter_parts.append(
-            f"[0:a]atrim=start={seg['start']:.6f}:end={seg['end']:.6f},"
-            f"asetpts=PTS-STARTPTS"
-            f"[{seg_a_label}]"
-        )
-        concat_inputs.append(f"[{seg_label}][{seg_a_label}]")
+
+        if has_audio:
+            seg_a_label = f"a{i}"
+            filter_parts.append(
+                f"{a_src(i)}atrim=start={seg['start']:.6f}:end={seg['end']:.6f},"
+                f"asetpts=PTS-STARTPTS"
+                f"[{seg_a_label}]"
+            )
+            concat_inputs.append(f"[{seg_label}][{seg_a_label}]")
+        else:
+            concat_inputs.append(f"[{seg_label}]")
 
     # Concat all segments
-    if len(segments) == 1:
+    if n == 1:
         filter_complex = ";".join(filter_parts)
         map_v = "[v0]"
-        map_a = "[a0]"
+        map_a = "[a0]" if has_audio else None
     else:
-        concat_str = "".join(concat_inputs) + f"concat=n={len(segments)}:v=1:a=1[outv][outa]"
+        if has_audio:
+            concat_str = "".join(concat_inputs) + f"concat=n={n}:v=1:a=1[outv][outa]"
+        else:
+            concat_str = "".join(concat_inputs) + f"concat=n={n}:v=1:a=0[outv]"
         filter_complex = ";".join(filter_parts) + ";" + concat_str
         map_v = "[outv]"
-        map_a = "[outa]"
+        map_a = "[outa]" if has_audio else None
 
     cmd = [
         "ffmpeg", "-y",
         "-i", video_path,
         "-filter_complex", filter_complex,
         "-map", map_v,
-        "-map", map_a,
+    ]
+    if map_a:
+        cmd.extend(["-map", map_a])
+    cmd.extend([
         "-c:v", "libx264",
         "-preset", "fast",
         "-crf", "18",
-        "-c:a", "aac",
-        "-b:a", "320k",
         "-movflags", "+faststart",
-        output_path,
-    ]
+    ])
+    if has_audio:
+        cmd.extend(["-c:a", "aac", "-b:a", "320k"])
+    cmd.append(output_path)
 
     logger.info("[Render] Podcast render: %d segments, crop=%dx%d → %dx%d", len(segments), crop_w, crop_h, canvas_w, canvas_h)
 
@@ -306,3 +337,25 @@ def render_gaming_vstack(
         raise RuntimeError(f"FFmpeg gaming render failed: {result.stderr[-800:]}")
 
     logger.info("[Render] Gaming vstack complete: %s", output_path)
+
+
+# ─── Audio detection ──────────────────────────────────────────────────────────
+
+def _has_audio_stream(video_path: str) -> bool:
+    """Return True if the video file contains at least one audio stream."""
+    cmd = [
+        "ffprobe", "-v", "quiet",
+        "-print_format", "json",
+        "-show_streams",
+        "-select_streams", "a:0",
+        video_path,
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        if result.returncode != 0:
+            return False
+        data = json.loads(result.stdout)
+        return len(data.get("streams", [])) > 0
+    except Exception as e:
+        logger.warning("[Render] Audio stream probe failed (%s) — assuming audio present", e)
+        return True

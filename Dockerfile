@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     libegl1 \
     libglib2.0-0 \
     curl \
+    fonts-open-sans \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 20 (yt-dlp n-param decipher + bgutil PO token server)
