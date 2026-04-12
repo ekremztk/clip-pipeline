@@ -18,7 +18,7 @@ def transcribe(audio_path: str) -> dict:
             "punctuate": "true",
             "utterances": "true",
             "words": "true",
-            "language": "en"
+            "detect_language": "true",
         }
 
         response = httpx.post(
