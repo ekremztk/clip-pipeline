@@ -314,23 +314,11 @@ def _escape_text(text: str) -> str:
 
 
 def _apply_transform(text: str, transform: Optional[str]) -> str:
-    """Apply text transform (uppercase, capitalize, etc.).
-
-    Uses locale-aware uppercase so Turkish dotless-i (ı→I) and
-    dotted-i (i→İ) are handled correctly instead of Python's default
-    ASCII-centric .upper() which maps ı→I and leaves İ as-is.
-    """
+    """Apply text transform (uppercase, capitalize, etc.)."""
     if transform == "uppercase":
-        return text.translate(_TR_UPPER_TABLE).upper()
+        return text.upper()
     if transform == "lowercase":
         return text.lower()
     if transform == "capitalize":
         return text.title()
     return text
-
-
-# Turkish-specific upper/lower char mapping.
-# Python's str.upper() maps ı→I (correct) but maps i→I instead of i→İ.
-# Pre-translate the Turkish-specific pairs before calling .upper()
-# so the standard upper() call handles the rest of Unicode correctly.
-_TR_UPPER_TABLE = str.maketrans("iı", "İI")
