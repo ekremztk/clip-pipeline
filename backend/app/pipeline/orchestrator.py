@@ -85,17 +85,27 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             channel_id=channel_id,
         )
 
+        # Fetch job + channel metadata (reframe + caption settings)
+        job_row = get_client().table("jobs").select("reframe_content_type, caption_template").eq("id", job_id).execute()
+        reframe_content_type = "podcast"
+        caption_template = "clean"
+        if job_row.data:
+            reframe_content_type = job_row.data[0].get("reframe_content_type") or "podcast"
+            caption_template = job_row.data[0].get("caption_template") or "clean"
+
         steps = [
-            (1, "s01_audio_extract", 5),
-            (2, "s02_transcribe", 15),
-            (3, "s03_speaker_id", 22),
-            (4, "s04_labeled_transcript", 30),
-            (5, "s05_unified_discovery", 65),
-            (6, "s06_batch_evaluation", 85),
-            (7, "s07_precision_cut", 92),
-            (8, "s08_export", 100)
+            (1,  "s01_audio_extract",      5),
+            (2,  "s02_transcribe",         15),
+            (3,  "s03_speaker_id",         22),
+            (4,  "s04_labeled_transcript",  30),
+            (5,  "s05_unified_discovery",   65),
+            (6,  "s06_batch_evaluation",    85),
+            (7,  "s07_precision_cut",       92),
+            (8,  "s08_export",              95),
+            (9,  "s09_reframe",             98),
+            (10, "s10_captions",           100),
         ]
-        
+
         # State variables to pass between steps
         transcript_data = None
         speaker_data = None
@@ -105,6 +115,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
         evaluated_clips = []
         cut_results = []
         exported_clips = []
+        reframed_clips = []
+        captioned_clips = []
         pass_count = 0
 
         for step_number, step_name, progress_pct in steps:
@@ -262,6 +274,51 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         channel_id=channel_id,
                     )
 
+                elif step_number == 9:
+                    from app.pipeline.steps import s09_reframe
+                    if not exported_clips:
+                        print("[Orchestrator] No exported clips. Skipping reframe.")
+                    else:
+                        reframed_clips = s09_reframe.run(
+                            exported_clips=exported_clips,
+                            job_id=job_id,
+                            channel_id=channel_id,
+                            reframe_content_type=reframe_content_type,
+                        )
+                    reframed_count = sum(1 for c in reframed_clips if c.get("video_reframed_path"))
+                    print(f"[Orchestrator] S09 reframed {reframed_count}/{len(exported_clips)} clips")
+                    duration_ms_s09 = int((time.time() - step_start_time) * 1000)
+                    director_events.emit_sync(
+                        module="module_1", event="s09_reframe_completed",
+                        payload={"job_id": job_id, "reframed_count": reframed_count,
+                                 "strategy": reframe_content_type,
+                                 "duration_ms": duration_ms_s09},
+                        channel_id=channel_id,
+                    )
+
+                elif step_number == 10:
+                    from app.pipeline.steps import s10_captions
+                    source_clips = reframed_clips if reframed_clips else exported_clips
+                    if not source_clips:
+                        print("[Orchestrator] No clips to caption. Skipping S10.")
+                    else:
+                        captioned_clips = s10_captions.run(
+                            reframed_clips=source_clips,
+                            job_id=job_id,
+                            channel_id=channel_id,
+                            caption_template=caption_template,
+                        )
+                    captioned_count = sum(1 for c in captioned_clips if c.get("video_captioned_path"))
+                    print(f"[Orchestrator] S10 captioned {captioned_count}/{len(source_clips)} clips")
+                    duration_ms_s10 = int((time.time() - step_start_time) * 1000)
+                    director_events.emit_sync(
+                        module="module_1", event="s10_captions_completed",
+                        payload={"job_id": job_id, "captioned_count": captioned_count,
+                                 "template": caption_template,
+                                 "duration_ms": duration_ms_s10},
+                        channel_id=channel_id,
+                    )
+
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
 
@@ -315,7 +372,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             progress_pct=100,
             completed_at=completed_at,
             current_step="finished",
-            current_step_number=8,
+            current_step_number=10,
             clip_count=clip_count
         )
         director_events.emit_sync(

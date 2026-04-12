@@ -152,7 +152,7 @@ function SettingsContent() {
                 <div>
                     <div className="mb-8">
                         <h1 className="text-2xl font-semibold mb-1" style={{ color: '#faf9f5' }}>Account</h1>
-                        <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>Manage your profile and account preferences</p>
+                        <p className="text-sm" style={{ color: '#ababab' }}>Manage your profile and account preferences</p>
                     </div>
 
                     {/* Profile card */}
@@ -163,13 +163,13 @@ function SettingsContent() {
                             </div>
                             <div>
                                 <p className="text-base font-medium" style={{ color: '#faf9f5' }}>{userName}</p>
-                                <p className="text-sm mt-0.5" style={{ color: 'rgba(250,249,245,0.4)' }}>{userEmail}</p>
+                                <p className="text-sm mt-0.5" style={{ color: '#ababab' }}>{userEmail}</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>Display name</label>
+                                <label className="block text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: '#ababab' }}>Display name</label>
                                 <input
                                     type="text"
                                     value={displayName}
@@ -180,7 +180,7 @@ function SettingsContent() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>Email</label>
+                                <label className="block text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: '#ababab' }}>Email</label>
                                 <input
                                     type="email"
                                     value={userEmail}
@@ -217,7 +217,7 @@ function SettingsContent() {
                                 { label: 'Confirm password', value: confirmPassword, set: setConfirmPassword },
                             ].map(f => (
                                 <div key={f.label}>
-                                    <label className="block text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                                    <label className="block text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: '#ababab' }}>
                                         {f.label}
                                     </label>
                                     <div className="relative">
@@ -232,7 +232,7 @@ function SettingsContent() {
                                         <button
                                             onClick={() => setShowPasswords(v => !v)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-100"
-                                            style={{ color: 'rgba(250,249,245,0.35)' }}
+                                            style={{ color: '#ababab' }}
                                         >
                                             {showPasswords ? <EyeOff size={15} /> : <Eye size={15} />}
                                         </button>
@@ -257,7 +257,7 @@ function SettingsContent() {
                     {/* Danger zone */}
                     <div className="rounded-2xl p-7" style={{ background: '#181817' }}>
                         <h3 className="text-base font-medium mb-1" style={{ color: '#faf9f5' }}>Danger Zone</h3>
-                        <p className="text-sm mb-5" style={{ color: 'rgba(250,249,245,0.4)' }}>Permanent actions that cannot be undone</p>
+                        <p className="text-sm mb-5" style={{ color: '#ababab' }}>Permanent actions that cannot be undone</p>
                         <button
                             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-red-500/10"
                             style={{ color: 'rgba(239,68,68,0.7)', border: '1px solid rgba(239,68,68,0.15)' }}
@@ -275,7 +275,7 @@ function SettingsContent() {
                     <div className="flex items-start justify-between mb-8">
                         <div>
                             <h1 className="text-2xl font-semibold mb-1" style={{ color: '#faf9f5' }}>Channels</h1>
-                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>Manage your content channels</p>
+                            <p className="text-sm" style={{ color: '#ababab' }}>Manage your content channels</p>
                         </div>
                         <button
                             onClick={() => setShowCreateModal(true)}
@@ -296,7 +296,7 @@ function SettingsContent() {
                             </div>
                         ) : channels.length === 0 ? (
                             <div className="py-16 text-center">
-                                <p className="text-sm" style={{ color: 'rgba(250,249,245,0.3)' }}>No channels yet. Create your first channel.</p>
+                                <p className="text-sm" style={{ color: '#ababab' }}>No channels yet. Create your first channel.</p>
                             </div>
                         ) : (
                             <div>
@@ -311,12 +311,12 @@ function SettingsContent() {
                                                 {ch.display_name || ch.name || ch.id}
                                             </p>
                                             {ch.niche && (
-                                                <p className="text-xs mt-0.5" style={{ color: 'rgba(250,249,245,0.4)' }}>{ch.niche}</p>
+                                                <p className="text-xs mt-0.5" style={{ color: '#ababab' }}>{ch.niche}</p>
                                             )}
                                         </div>
                                         <span
                                             className="text-xs px-2.5 py-1 rounded-lg"
-                                            style={{ color: 'rgba(250,249,245,0.35)', background: 'rgba(250,249,245,0.05)' }}
+                                            style={{ color: '#ababab', background: 'rgba(250,249,245,0.05)' }}
                                         >
                                             {ch.id}
                                         </span>
@@ -335,10 +335,10 @@ function SettingsContent() {
                         <h1 className="text-2xl font-semibold mb-1" style={{ color: '#faf9f5' }}>
                             {SECTION_LABELS[active]}
                         </h1>
-                        <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>Coming soon</p>
+                        <p className="text-sm" style={{ color: '#ababab' }}>Coming soon</p>
                     </div>
                     <div className="rounded-2xl py-20 flex items-center justify-center" style={{ background: '#181817' }}>
-                        <p className="text-sm" style={{ color: 'rgba(250,249,245,0.2)' }}>This section is not yet available</p>
+                        <p className="text-sm" style={{ color: '#ababab' }}>This section is not yet available</p>
                     </div>
                 </div>
             )}
@@ -358,7 +358,7 @@ function SettingsContent() {
                         <h3 className="text-base font-semibold mb-5" style={{ color: '#faf9f5' }}>Create New Channel</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs mb-1.5" style={{ color: 'rgba(250,249,245,0.4)' }}>Channel Name *</label>
+                                <label className="block text-xs mb-1.5" style={{ color: '#ababab' }}>Channel Name *</label>
                                 <input
                                     type="text"
                                     value={newChannel.name}
@@ -369,7 +369,7 @@ function SettingsContent() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs mb-1.5" style={{ color: 'rgba(250,249,245,0.4)' }}>Niche</label>
+                                <label className="block text-xs mb-1.5" style={{ color: '#ababab' }}>Niche</label>
                                 <input
                                     type="text"
                                     value={newChannel.niche}
@@ -380,7 +380,7 @@ function SettingsContent() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs mb-1.5" style={{ color: 'rgba(250,249,245,0.4)' }}>Description</label>
+                                <label className="block text-xs mb-1.5" style={{ color: '#ababab' }}>Description</label>
                                 <textarea
                                     value={newChannel.description}
                                     onChange={e => setNewChannel({ ...newChannel, description: e.target.value })}
@@ -395,7 +395,7 @@ function SettingsContent() {
                             <button
                                 onClick={() => setShowCreateModal(false)}
                                 className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors hover:text-[#faf9f5]"
-                                style={{ border: '1px solid rgba(250,249,245,0.1)', color: 'rgba(250,249,245,0.5)' }}
+                                style={{ border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }}
                             >
                                 Cancel
                             </button>

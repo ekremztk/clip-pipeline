@@ -45,6 +45,49 @@ const DURATION_PRESETS = [
     { label: '5m-15m', min: 300, max: 900 },
 ];
 
+const CAPTION_TEMPLATES = [
+    {
+        key: 'clean', label: 'Clean',
+        textStyle: { color: '#ffffff', fontSize: 17, fontWeight: 600, lineHeight: 1.35 } as React.CSSProperties,
+        phase2Animation: 'ct-fade',
+    },
+    {
+        key: 'hormozi', label: 'Hormozi',
+        textStyle: { color: '#FFE500', fontSize: 16, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: 2 } as React.CSSProperties,
+        phase2Animation: 'ct-pop',
+    },
+    {
+        key: 'outline', label: 'Outline',
+        textStyle: { color: '#fff', fontSize: 16, fontWeight: 900, WebkitTextStroke: '0.8px rgba(255,255,255,0.4)', textTransform: 'uppercase' as const } as React.CSSProperties,
+        phase2Animation: 'ct-slide-up',
+    },
+    {
+        key: 'pill', label: 'Pill',
+        textStyle: { color: '#fff', fontSize: 14, fontWeight: 700, background: 'rgba(255,255,255,0.18)', borderRadius: 4, padding: '3px 10px' } as React.CSSProperties,
+        phase2Animation: 'ct-slide-right',
+    },
+    {
+        key: 'neon', label: 'Neon',
+        textStyle: { color: '#00e5ff', fontSize: 16, fontWeight: 800, textShadow: '0 0 12px #00e5ff, 0 0 24px #00a8ff' } as React.CSSProperties,
+        phase2Animation: 'ct-neon',
+    },
+    {
+        key: 'cinematic', label: 'Cinematic',
+        textStyle: { color: '#e8d5a0', fontSize: 14, fontWeight: 300, fontStyle: 'italic' as const, letterSpacing: 4 } as React.CSSProperties,
+        phase2Animation: 'ct-cinematic',
+    },
+    {
+        key: 'bold_pop', label: 'Bold Pop',
+        textStyle: { color: '#ff5500', fontSize: 19, fontWeight: 900, fontStyle: 'italic' as const } as React.CSSProperties,
+        phase2Animation: 'ct-bounce',
+    },
+    {
+        key: 'fire', label: 'Fire',
+        textStyle: { color: '#ff3300', fontSize: 19, fontWeight: 900, textShadow: '0 0 10px #ff2200, 0 0 22px #ff4400' } as React.CSSProperties,
+        phase2Animation: 'ct-fire',
+    },
+];
+
 function getStepLabel(step: string | undefined): string {
     if (!step) return "Processing...";
     return STEP_LABELS[step] || step.replace(/_/g, " ").replace(/^s\d+\s?/, "");
@@ -184,6 +227,9 @@ export default function DashboardPage() {
 
     // Upload tab (link vs file)
     const [uploadTab, setUploadTab] = useState<'link' | 'file'>('link');
+    const [captionTemplateIdx, setCaptionTemplateIdx] = useState(0);
+    const [windowStart, setWindowStart] = useState(0);
+    const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
     // YouTube URL state
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -283,6 +329,9 @@ export default function DashboardPage() {
         setYoutubeFetching(false);
         setFormChannelId(activeChannelId);
         setUploadTab('link');
+        setCaptionTemplateIdx(0);
+        setWindowStart(0);
+        setHoveredIdx(null);
     };
 
     const handleYoutubeUrl = async (url: string) => {
@@ -454,6 +503,7 @@ export default function DashboardPage() {
         fd.append('aspect_ratio', aspectRatio);
         if (genre) fd.append('genre', genre);
         fd.append('auto_hook', autoHook ? 'true' : 'false');
+        fd.append('caption_template', CAPTION_TEMPLATES[captionTemplateIdx].key);
 
         try {
             const res = await authFetch('/jobs', { method: 'POST', body: fd });
@@ -511,6 +561,9 @@ export default function DashboardPage() {
         }
     };
 
+    const handleCardHover = (idx: number) => setHoveredIdx(idx);
+    const handleCardLeave = () => setHoveredIdx(null);
+
     // TimeGroup — inline since it closes over state setters
     const TimeGroup = ({ time, isStart }: { time: number; isStart: boolean }) => {
         const h = Math.floor(time / 3600);
@@ -526,20 +579,20 @@ export default function DashboardPage() {
         };
         return (
             <div className="flex flex-col items-center gap-1">
-                <span className="text-[9px] uppercase tracking-widest" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                <span className="text-[9px] uppercase tracking-widest" style={{ color: '#ababab' }}>
                     {isStart ? 'START' : 'END'}
                 </span>
                 <div className="flex items-center gap-0.5">
                     <TimeInput value={h} onChange={v => update('h', v)} max={99} />
-                    <span className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>:</span>
+                    <span className="text-xs" style={{ color: '#ababab' }}>:</span>
                     <TimeInput value={m} onChange={v => update('m', v)} max={59} />
-                    <span className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>:</span>
+                    <span className="text-xs" style={{ color: '#ababab' }}>:</span>
                     <TimeInput value={s} onChange={v => update('s', v)} max={59} />
                 </div>
                 <div className="flex gap-[22px]">
-                    <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.25)' }}>HH</span>
-                    <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.25)' }}>MM</span>
-                    <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.25)' }}>SS</span>
+                    <span className="text-[9px]" style={{ color: '#ababab' }}>HH</span>
+                    <span className="text-[9px]" style={{ color: '#ababab' }}>MM</span>
+                    <span className="text-[9px]" style={{ color: '#ababab' }}>SS</span>
                 </div>
             </div>
         );
@@ -561,10 +614,10 @@ export default function DashboardPage() {
                         className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
                         style={{ background: '#181817', border: '1px solid rgba(250,249,245,0.07)' }}
                     >
-                        <Sparkles className="w-6 h-6" style={{ color: 'rgba(250,249,245,0.25)' }} />
+                        <Sparkles className="w-6 h-6" style={{ color: '#ababab' }} />
                     </div>
                     <h2 className="text-lg font-semibold mb-2" style={{ color: '#faf9f5' }}>Create your first channel</h2>
-                    <p className="text-sm mb-6" style={{ color: 'rgba(250,249,245,0.4)' }}>Set up a channel to start extracting viral clips from your videos.</p>
+                    <p className="text-sm mb-6" style={{ color: '#ababab' }}>Set up a channel to start extracting viral clips from your videos.</p>
                     <Link
                         href="/dashboard/settings"
                         className="inline-flex items-center gap-2 bg-white hover:bg-[#e5e5e5] text-black text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
@@ -586,7 +639,7 @@ export default function DashboardPage() {
                         <h1 className="text-3xl font-semibold tracking-tight" style={{ color: '#faf9f5' }}>
                             Turn Long Videos Into Viral Shorts
                         </h1>
-                        <p className="text-sm max-w-lg mx-auto" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                        <p className="text-sm max-w-lg mx-auto" style={{ color: '#ababab' }}>
                             Drop a video link or upload a file. Our AI finds the best moments and turns them into ready-to-post clips.
                         </p>
                     </div>
@@ -661,7 +714,7 @@ export default function DashboardPage() {
                                     {uploadTab === 'link' ? (
                                         <>
                                             <div className="flex items-center gap-3 flex-1 px-2">
-                                                <Link2 size={16} style={{ color: 'rgba(250,249,245,0.3)' }} />
+                                                <Link2 size={16} style={{ color: '#ababab' }} />
                                                 <input
                                                     type="text"
                                                     value={youtubeUrl}
@@ -698,13 +751,13 @@ export default function DashboardPage() {
                                                     className="w-10 h-10 rounded-full flex items-center justify-center"
                                                     style={{ background: 'rgba(250,249,245,0.05)' }}
                                                 >
-                                                    <Upload size={16} style={{ color: 'rgba(250,249,245,0.6)' }} />
+                                                    <Upload size={16} style={{ color: '#ababab' }} />
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-medium" style={{ color: '#faf9f5' }}>
                                                         {isDragging ? 'Release to upload' : 'Drag & Drop your video'}
                                                     </p>
-                                                    <p className="text-xs" style={{ color: 'rgba(250,249,245,0.3)' }}>MP4, MOV, AVI up to 2GB</p>
+                                                    <p className="text-xs" style={{ color: '#ababab' }}>MP4, MOV, AVI up to 2GB</p>
                                                 </div>
                                             </div>
                                             <label
@@ -735,7 +788,7 @@ export default function DashboardPage() {
                                 </div>
                             )}
 
-                            <p className="mt-3 text-center text-xs" style={{ color: 'rgba(250,249,245,0.25)' }}>
+                            <p className="mt-3 text-center text-xs" style={{ color: '#ababab' }}>
                                 YouTube • Twitch • Vimeo • Direct Upload
                             </p>
                         </div>
@@ -751,13 +804,13 @@ export default function DashboardPage() {
                                 className="w-10 h-10 mb-4 rounded-xl flex items-center justify-center"
                                 style={{ background: 'rgba(250,249,245,0.05)', border: '1px solid rgba(250,249,245,0.08)' }}
                             >
-                                <Upload className="w-5 h-5" style={{ color: 'rgba(250,249,245,0.5)' }} />
+                                <Upload className="w-5 h-5" style={{ color: '#ababab' }} />
                             </div>
                             <p className="text-sm font-medium mb-1 max-w-sm truncate" style={{ color: '#faf9f5' }}>
                                 {file ? file.name : (title || 'YouTube Video')}
                             </p>
                             {file && (
-                                <p className="text-xs mb-5" style={{ color: 'rgba(250,249,245,0.25)' }}>
+                                <p className="text-xs mb-5" style={{ color: '#ababab' }}>
                                     {(file.size / 1024 / 1024).toFixed(1)} MB
                                 </p>
                             )}
@@ -779,7 +832,7 @@ export default function DashboardPage() {
                                     </div>
                                 )}
                             </div>
-                            <p className="text-xs" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                            <p className="text-xs" style={{ color: '#ababab' }}>
                                 {file ? `Uploading... ${uploadProgress}%` : 'Downloading YouTube video...'}
                             </p>
                         </div>
@@ -797,14 +850,14 @@ export default function DashboardPage() {
                                     <span className="text-sm font-medium truncate max-w-xs" style={{ color: '#faf9f5' }}>
                                         {youtubeUrl ? title : file?.name}
                                     </span>
-                                    <span className="text-xs flex-shrink-0" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                    <span className="text-xs flex-shrink-0" style={{ color: '#ababab' }}>
                                         · {formatTimeDisplay(videoDuration)}
                                     </span>
                                 </div>
                                 <button
                                     onClick={() => { setUploadPhase('idle'); resetUpload(); }}
                                     className="flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-white/5"
-                                    style={{ color: 'rgba(250,249,245,0.4)' }}
+                                    style={{ color: '#ababab' }}
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -835,11 +888,11 @@ export default function DashboardPage() {
                                     >
                                         <p
                                             className="text-[9px] uppercase tracking-widest font-medium mb-3"
-                                            style={{ color: 'rgba(250,249,245,0.35)' }}
+                                            style={{ color: '#ababab' }}
                                         >
                                             Processing Range
                                         </p>
-                                        <div className="flex justify-between text-xs mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                                        <div className="flex justify-between text-xs mb-2" style={{ color: '#ababab' }}>
                                             <span>{formatTimeDisplay(startTime)}</span>
                                             <span>{formatTimeDisplay(endTime)}</span>
                                         </div>
@@ -870,7 +923,7 @@ export default function DashboardPage() {
                                             <button
                                                 onClick={() => { setStartTime(0); setEndTime(videoDuration); }}
                                                 className="text-[11px] transition-colors mt-1 hover:!text-[#faf9f5]"
-                                                style={{ color: 'rgba(250,249,245,0.35)' }}
+                                                style={{ color: '#ababab' }}
                                             >
                                                 Reset
                                             </button>
@@ -886,7 +939,7 @@ export default function DashboardPage() {
                                     <div>
                                         <label
                                             className="block text-[10px] uppercase tracking-widest mb-1.5"
-                                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                                            style={{ color: '#ababab' }}
                                         >
                                             Video Title *
                                         </label>
@@ -909,7 +962,7 @@ export default function DashboardPage() {
                                     <div>
                                         <label
                                             className="block text-[10px] uppercase tracking-widest mb-1.5"
-                                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                                            style={{ color: '#ababab' }}
                                         >
                                             Clip Duration
                                         </label>
@@ -934,7 +987,7 @@ export default function DashboardPage() {
                                     <div>
                                         <label
                                             className="block text-[10px] uppercase tracking-widest mb-1.5"
-                                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                                            style={{ color: '#ababab' }}
                                         >
                                             Aspect Ratio
                                         </label>
@@ -960,7 +1013,7 @@ export default function DashboardPage() {
                                         <div>
                                             <label
                                                 className="block text-[10px] uppercase tracking-widest mb-1.5"
-                                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                                style={{ color: '#ababab' }}
                                             >
                                                 Genre
                                             </label>
@@ -986,7 +1039,7 @@ export default function DashboardPage() {
                                         <div>
                                             <label
                                                 className="block text-[10px] uppercase tracking-widest mb-1.5"
-                                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                                style={{ color: '#ababab' }}
                                             >
                                                 Guest Name
                                             </label>
@@ -1009,7 +1062,7 @@ export default function DashboardPage() {
                                     <div className="flex items-center justify-between py-1">
                                         <div>
                                             <p className="text-sm" style={{ color: '#faf9f5' }}>Auto Hook</p>
-                                            <p className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>Optimize for the first 3 seconds</p>
+                                            <p className="text-xs" style={{ color: '#ababab' }}>Optimize for the first 3 seconds</p>
                                         </div>
                                         <button
                                             onClick={() => setAutoHook(v => !v)}
@@ -1037,7 +1090,7 @@ export default function DashboardPage() {
                                         <div>
                                             <label
                                                 className="block text-[10px] uppercase tracking-widest mb-1.5"
-                                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                                style={{ color: '#ababab' }}
                                             >
                                                 Channel
                                             </label>
@@ -1096,19 +1149,222 @@ export default function DashboardPage() {
                         >
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
-                                <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,249,245,0.4)' }}>Processing</span>
+                                <span className="text-xs uppercase tracking-wider" style={{ color: '#ababab' }}>Processing</span>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-full border-2 animate-spin mb-5"
                                 style={{ borderColor: 'rgba(250,249,245,0.12)', borderTopColor: '#faf9f5' }}
                             />
                             <p className="text-base font-medium mb-1" style={{ color: '#faf9f5' }}>{title}</p>
-                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>{statusMsg || 'Starting pipeline...'}</p>
+                            <p className="text-sm" style={{ color: '#ababab' }}>{statusMsg || 'Starting pipeline...'}</p>
                         </div>
                     )}
                 </div>
 
-                {/* ── Active Jobs ── */}
+                {/* ── Caption Template Carousel ── */}
+                {uploadPhase === 'settings' && (
+                    <>
+                        {/*
+                          Word-by-word caption loop: 4 words in a 3.2s infinite cycle.
+                          Each word is absolutely centered; only one is visible at a time.
+                          This simulates real short-form caption rendering (one word flashes
+                          in, holds, then disappears — exactly like CapCut/Opus/Submagic output).
+                          All transforms include translate(-50%,-50%) for centering so there
+                          is no conflict with position math.
+                        */}
+                        <style>{`
+                            /* Word 1 "Clip/CLIP": 0–25% of cycle */
+                            @keyframes ct-w1 {
+                                0%        { opacity: 0; transform: translate(-50%,-50%) scale(0.88); }
+                                3%        { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                22%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                25%, 100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+                            }
+                            /* Word 2 "it/IT": 25–50% */
+                            @keyframes ct-w2 {
+                                0%, 25%   { opacity: 0; transform: translate(-50%,-50%) scale(0.88); }
+                                28%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                47%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                50%, 100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+                            }
+                            /* Word 3 "with/WITH": 50–75% */
+                            @keyframes ct-w3 {
+                                0%, 50%   { opacity: 0; transform: translate(-50%,-50%) scale(0.88); }
+                                53%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                72%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                75%, 100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+                            }
+                            /* Word 4 "Prognot/PROGNOT": 75–100% */
+                            @keyframes ct-w4 {
+                                0%, 75%   { opacity: 0; transform: translate(-50%,-50%) scale(0.88); }
+                                78%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                97%       { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                                100%      { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+                            }
+                        `}</style>
+
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[10px] uppercase tracking-widest" style={{ color: '#ababab' }}>
+                                    Caption Template
+                                </p>
+                                <p className="text-xs font-medium" style={{ color: '#ababab' }}>
+                                    {CAPTION_TEMPLATES[captionTemplateIdx].label}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                {/* Left arrow */}
+                                <button
+                                    onClick={() => setWindowStart(w => Math.max(0, w - 1))}
+                                    disabled={windowStart === 0}
+                                    className="flex-shrink-0 flex items-center justify-center rounded-full transition-colors duration-150"
+                                    style={{
+                                        width: 26, height: 26,
+                                        background: 'rgba(250,249,245,0.05)',
+                                        border: '1px solid rgba(250,249,245,0.08)',
+                                        color: windowStart === 0 ? 'rgba(250,249,245,0.12)' : 'rgba(250,249,245,0.6)',
+                                        cursor: windowStart === 0 ? 'default' : 'pointer',
+                                    }}
+                                >
+                                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
+                                        <path d="M5.5 1L1 6L5.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                {/* Cards container — dynamic fade mask: left edge fades only when not at start */}
+                                <div
+                                    className="flex-1 overflow-hidden"
+                                    style={{
+                                        WebkitMaskImage: windowStart === 0
+                                            ? 'linear-gradient(to right, black 0%, black 84%, transparent 100%)'
+                                            : windowStart >= CAPTION_TEMPLATES.length - 5
+                                                ? 'linear-gradient(to right, transparent 0%, black 16%, black 100%)'
+                                                : 'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
+                                        maskImage: windowStart === 0
+                                            ? 'linear-gradient(to right, black 0%, black 84%, transparent 100%)'
+                                            : windowStart >= CAPTION_TEMPLATES.length - 5
+                                                ? 'linear-gradient(to right, transparent 0%, black 16%, black 100%)'
+                                                : 'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
+                                    }}
+                                >
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
+                                        {CAPTION_TEMPLATES.slice(windowStart, windowStart + 5).map((tpl, posIdx) => {
+                                            const tplIdx = windowStart + posIdx;
+                                            const isActive = tplIdx === captionTemplateIdx;
+                                            const isHovered = tplIdx === hoveredIdx;
+
+                                            // Words to cycle through. Uppercase templates get uppercased via textStyle.
+                                            const cycleWords = ['Clip', 'it', 'with', 'Prognot'];
+                                            const ANIM_DURATION = '3.2s';
+
+                                            return (
+                                                <button
+                                                    key={tpl.key}
+                                                    onClick={() => setCaptionTemplateIdx(tplIdx)}
+                                                    onMouseEnter={() => handleCardHover(tplIdx)}
+                                                    onMouseLeave={handleCardLeave}
+                                                    className="relative w-full rounded-xl overflow-hidden transition-colors duration-150"
+                                                    style={{
+                                                        aspectRatio: '16/10',
+                                                        background: '#454746',
+                                                        border: isActive
+                                                            ? '2px solid #ffffff'
+                                                            : isHovered
+                                                                ? '2px solid rgba(255,255,255,0.28)'
+                                                                : '2px solid transparent',
+                                                        outline: 'none',
+                                                    }}
+                                                >
+                                                    {/* Template label — top left */}
+                                                    <span
+                                                        className="absolute top-2 left-0 right-0 text-center text-[9px] font-semibold uppercase tracking-widest pointer-events-none"
+                                                        style={{ color: isActive ? 'rgba(250,249,245,0.8)' : 'rgba(250,249,245,0.3)' }}
+                                                    >
+                                                        {tpl.label}
+                                                    </span>
+
+                                                    {/*
+                                                      Caption preview area.
+                                                      Default: static "Clip it with Prognot" split on two lines.
+                                                      Hover: word-by-word CSS loop — one word visible at a time,
+                                                             centered with position:absolute, simulating real caption playback.
+                                                    */}
+                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: 20 }}>
+
+                                                        {!isHovered ? (
+                                                            /* STATIC PREVIEW: full text always visible */
+                                                            <div className="flex flex-col items-center gap-0.5 px-3">
+                                                                <span
+                                                                    className="text-center leading-tight"
+                                                                    style={{ ...tpl.textStyle, display: 'block' }}
+                                                                >
+                                                                    Clip it
+                                                                </span>
+                                                                <span
+                                                                    className="text-center leading-tight"
+                                                                    style={{ ...tpl.textStyle, display: 'block' }}
+                                                                >
+                                                                    with Prognot
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            /*
+                                                              ANIMATED PREVIEW: word-by-word loop.
+                                                              Each span is position:absolute, centered via
+                                                              top:50% left:50% + translate(-50%,-50%) baked
+                                                              into the @keyframes so no extra transform needed here.
+                                                              Only one word is opaque at any time.
+                                                            */
+                                                            <div className="relative w-full" style={{ height: 48 }}>
+                                                                {cycleWords.map((word, i) => (
+                                                                    <span
+                                                                        key={word}
+                                                                        style={{
+                                                                            ...tpl.textStyle,
+                                                                            position: 'absolute',
+                                                                            top: '50%',
+                                                                            left: '50%',
+                                                                            whiteSpace: 'nowrap',
+                                                                            opacity: 0,
+                                                                            animation: `ct-w${i + 1} ${ANIM_DURATION} ease-in-out infinite`,
+                                                                        }}
+                                                                    >
+                                                                        {word}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Right arrow */}
+                                <button
+                                    onClick={() => setWindowStart(w => Math.min(CAPTION_TEMPLATES.length - 5, w + 1))}
+                                    disabled={windowStart >= CAPTION_TEMPLATES.length - 5}
+                                    className="flex-shrink-0 flex items-center justify-center rounded-full transition-colors duration-150"
+                                    style={{
+                                        width: 26, height: 26,
+                                        background: 'rgba(250,249,245,0.05)',
+                                        border: '1px solid rgba(250,249,245,0.08)',
+                                        color: windowStart >= CAPTION_TEMPLATES.length - 5 ? 'rgba(250,249,245,0.12)' : 'rgba(250,249,245,0.6)',
+                                        cursor: windowStart >= CAPTION_TEMPLATES.length - 5 ? 'default' : 'pointer',
+                                    }}
+                                >
+                                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
+                                        <path d="M1.5 1L6 6L1.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                                {/* ── Active Jobs ── */}
                 {activeJobs.length > 0 && (
                     <div>
                         <div className="flex items-center gap-2 mb-4">
@@ -1131,12 +1387,12 @@ export default function DashboardPage() {
                                             <div className="text-center">
                                                 <div className="flex items-center justify-center gap-2 mb-3">
                                                     <div className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
-                                                    <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,249,245,0.4)' }}>Processing</span>
+                                                    <span className="text-xs uppercase tracking-wider" style={{ color: '#ababab' }}>Processing</span>
                                                 </div>
                                                 <p className="text-sm" style={{ color: '#faf9f5' }}>
                                                     {getStepLabel(job.current_step || job.step)}
                                                     {progress > 0 && (
-                                                        <span className="ml-2" style={{ color: 'rgba(250,249,245,0.4)' }}>({progress}%)</span>
+                                                        <span className="ml-2" style={{ color: '#ababab' }}>({progress}%)</span>
                                                     )}
                                                 </p>
                                             </div>
@@ -1146,7 +1402,7 @@ export default function DashboardPage() {
                                                 <p className="text-xs font-medium truncate" style={{ color: '#faf9f5' }}>
                                                     {job.video_title || "Untitled"}
                                                 </p>
-                                                <span className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                                <span className="text-xs" style={{ color: '#ababab' }}>
                                                     {formatDate(job.created_at)}
                                                 </span>
                                             </div>
@@ -1163,7 +1419,7 @@ export default function DashboardPage() {
                     <div>
                         <div className="mb-5">
                             <h2 className="text-base font-medium" style={{ color: '#faf9f5' }}>Powered by AI</h2>
-                            <p className="text-xs mt-0.5" style={{ color: 'rgba(250,249,245,0.4)' }}>Unique features that set us apart</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#ababab' }}>Unique features that set us apart</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {features.map((feature) => (
@@ -1186,10 +1442,10 @@ export default function DashboardPage() {
                                         {feature.name}
                                         <ArrowRight
                                             className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-                                            style={{ color: 'rgba(250,249,245,0.5)' }}
+                                            style={{ color: '#ababab' }}
                                         />
                                     </h3>
-                                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                                    <p className="text-xs leading-relaxed" style={{ color: '#ababab' }}>
                                         {feature.description}
                                     </p>
                                 </Link>
@@ -1205,7 +1461,7 @@ export default function DashboardPage() {
                         <Link
                             href="/dashboard/projects"
                             className="text-sm flex items-center gap-1 transition-colors hover:!text-[#faf9f5]"
-                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                            style={{ color: '#ababab' }}
                         >
                             View all <ArrowRight size={14} />
                         </Link>
@@ -1228,7 +1484,7 @@ export default function DashboardPage() {
                             className="rounded-2xl p-12 text-center"
                             style={{ background: '#181817' }}
                         >
-                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                            <p className="text-sm" style={{ color: '#ababab' }}>
                                 No projects yet. Upload your first video to get started.
                             </p>
                         </div>
@@ -1275,7 +1531,7 @@ export default function DashboardPage() {
                                         {/* More button */}
                                         <button
                                             className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                            style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(250,249,245,0.6)' }}
+                                            style={{ background: 'rgba(0,0,0,0.6)', color: '#ababab' }}
                                             onClick={e => e.preventDefault()}
                                         >
                                             <MoreVertical size={14} />
@@ -1289,7 +1545,7 @@ export default function DashboardPage() {
                                         >
                                             {job.video_title || "Untitled"}
                                         </p>
-                                        <p className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                        <p className="text-xs" style={{ color: '#ababab' }}>
                                             {formatDate(job.created_at)}
                                         </p>
                                     </div>

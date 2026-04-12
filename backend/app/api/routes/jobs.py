@@ -192,6 +192,8 @@ async def create_job(
     aspect_ratio: Optional[str] = Form(None),
     genre: Optional[str] = Form(None),
     auto_hook: Optional[str] = Form(None),
+    reframe_content_type: Optional[str] = Form(None),
+    caption_template: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user)
 ):
     channel_id = channel_id.replace("-", "_")
@@ -295,6 +297,10 @@ async def create_job(
             job_data["clip_duration_min"] = clip_duration_min
         if clip_duration_max is not None:
             job_data["clip_duration_max"] = clip_duration_max
+        if reframe_content_type in ("podcast", "gaming"):
+            job_data["reframe_content_type"] = reframe_content_type
+        if caption_template:
+            job_data["caption_template"] = caption_template
         
         response = supabase.table("jobs").insert(job_data).execute()
         if not response.data:

@@ -35,7 +35,7 @@ const MultiTagInput = ({ value, onChange, placeholder, variant }: {
         ? { background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }
         : variant === 'dont'
         ? { background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }
-        : { background: 'rgba(250,249,245,0.06)', color: 'rgba(250,249,245,0.6)', border: '1px solid rgba(250,249,245,0.1)' };
+        : { background: 'rgba(250,249,245,0.06)', color: '#ababab', border: '1px solid rgba(250,249,245,0.1)' };
 
     const commitTag = (val: string) => {
         const trimmed = val.trim();
@@ -162,7 +162,8 @@ export default function ChannelDNAPage() {
             target_platforms: parsed.target_platforms || [],
             audience_identity: parsed.audience_identity || parsed.target_audience || '',
             speaker_preference: parsed.speaker_preference || '',
-            avg_successful_duration: parsed.avg_successful_duration || 30
+            avg_successful_duration: parsed.avg_successful_duration || 30,
+
         });
         setEditingDna(true);
     };
@@ -199,7 +200,7 @@ export default function ChannelDNAPage() {
             dont: { background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' },
             zone: { background: 'rgba(239,68,68,0.08)', color: '#f87171', border: '1px solid rgba(239,68,68,0.15)' },
             sacred: { background: 'rgba(34,197,94,0.08)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.15)' },
-            default: { background: 'rgba(250,249,245,0.06)', color: 'rgba(250,249,245,0.6)', border: '1px solid rgba(250,249,245,0.1)' },
+            default: { background: 'rgba(250,249,245,0.06)', color: '#ababab', border: '1px solid rgba(250,249,245,0.1)' },
         };
         const s = styles[variant || 'default'];
         return (
@@ -230,7 +231,7 @@ export default function ChannelDNAPage() {
                         <Dna style={{ color: '#faf9f5' }} className="w-4 h-4" />
                         <p style={{ color: '#faf9f5' }} className="text-sm font-semibold">Channel DNA</p>
                     </div>
-                    <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[11px]">Manage your channel's AI profile</p>
+                    <p style={{ color: '#ababab' }} className="text-[11px]">Manage your channel's AI profile</p>
                 </div>
 
                 <div className="space-y-1">
@@ -264,12 +265,12 @@ export default function ChannelDNAPage() {
                                     <span style={{ color: '#faf9f5' }} className="text-xs font-medium truncate">{ch.display_name || ch.name || ch.id}</span>
                                     <span style={hasDna
                                         ? { color: '#4ade80', background: 'rgba(34,197,94,0.1)' }
-                                        : { color: 'rgba(250,249,245,0.3)', background: 'rgba(250,249,245,0.06)' }
+                                        : { color: '#ababab', background: 'rgba(250,249,245,0.06)' }
                                     } className="text-[10px] px-1.5 py-0.5 rounded-md flex-shrink-0 ml-2">
                                         {hasDna ? 'Ready' : 'Setup'}
                                     </span>
                                 </div>
-                                {ch.niche && <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[11px] mt-0.5 truncate">{ch.niche}</p>}
+                                {ch.niche && <p style={{ color: '#ababab' }} className="text-[11px] mt-0.5 truncate">{ch.niche}</p>}
                             </button>
                         );
                     })}
@@ -303,7 +304,7 @@ export default function ChannelDNAPage() {
                                 </div>
                                 <div className="flex gap-2 pt-1">
                                     <button onClick={handleSaveHeader} className="px-3 py-1.5 bg-white text-black text-xs font-medium rounded-xl hover:bg-[#e5e5e5] transition-colors">Save</button>
-                                    <button onClick={() => setEditingHeader(false)} style={{ border: '1px solid rgba(250,249,245,0.1)', color: 'rgba(250,249,245,0.5)' }} className="px-3 py-1.5 text-xs font-medium rounded-xl hover:text-[#faf9f5] transition-colors">Cancel</button>
+                                    <button onClick={() => setEditingHeader(false)} style={{ border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }} className="px-3 py-1.5 text-xs font-medium rounded-xl hover:text-[#faf9f5] transition-colors">Cancel</button>
                                 </div>
                             </div>
                         ) : (
@@ -318,19 +319,19 @@ export default function ChannelDNAPage() {
                                             });
                                             setEditingHeader(true);
                                         }}
-                                        style={{ color: 'rgba(250,249,245,0.3)' }}
+                                        style={{ color: '#ababab' }}
                                         className="hover:text-[#faf9f5] transition-colors"
                                     >
                                         <Pencil className="w-3.5 h-3.5" />
                                     </button>
                                     <span style={dna && Object.keys(dna).length > 0
                                         ? { color: '#4ade80', background: 'rgba(34,197,94,0.1)' }
-                                        : { color: 'rgba(250,249,245,0.3)', background: 'rgba(250,249,245,0.06)' }
+                                        : { color: '#ababab', background: 'rgba(250,249,245,0.06)' }
                                     } className="text-[10px] px-2 py-0.5 rounded-lg">
                                         {dna && Object.keys(dna).length > 0 ? 'Ready' : 'Setup Required'}
                                     </span>
                                 </div>
-                                {selectedChannel.niche && <p style={{ color: 'rgba(250,249,245,0.35)' }} className="text-sm">{selectedChannel.niche}</p>}
+                                {selectedChannel.niche && <p style={{ color: '#ababab' }} className="text-sm">{selectedChannel.niche}</p>}
                             </div>
                         )}
                     </div>
@@ -341,14 +342,14 @@ export default function ChannelDNAPage() {
                         <div style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }} className="flex items-center justify-between px-5 py-4">
                             <div className="flex items-center gap-2">
                                 <div style={{ background: 'rgba(250,249,245,0.07)' }} className="w-6 h-6 rounded-lg flex items-center justify-center">
-                                    <span style={{ color: 'rgba(250,249,245,0.6)' }} className="text-xs">⚡</span>
+                                    <span style={{ color: '#ababab' }} className="text-xs">⚡</span>
                                 </div>
                                 <span style={{ color: '#faf9f5' }} className="text-sm font-medium">Channel DNA</span>
                             </div>
                             {!editingDna && (
                                 <button
                                     onClick={handleStartEditDna}
-                                    style={{ background: 'rgba(250,249,245,0.07)', border: '1px solid rgba(250,249,245,0.1)', color: 'rgba(250,249,245,0.5)' }}
+                                    style={{ background: 'rgba(250,249,245,0.07)', border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:text-[#faf9f5] transition-colors"
                                 >
                                     <Pencil className="w-3 h-3" />
@@ -363,13 +364,13 @@ export default function ChannelDNAPage() {
                                     <div className="grid grid-cols-2 gap-5">
                                         {/* Tone */}
                                         <div>
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Tone</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Tone</label>
                                             <MultiTagInput value={dnaForm.tone} onChange={v => setDnaForm((p: any) => ({ ...p, tone: v }))} placeholder="e.g. Energetic" />
                                         </div>
 
                                         {/* Hook Style */}
                                         <div>
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Hook Style</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Hook Style</label>
                                             <select
                                                 value={dnaForm.hook_style}
                                                 onChange={e => setDnaForm((p: any) => ({ ...p, hook_style: e.target.value }))}
@@ -388,10 +389,10 @@ export default function ChannelDNAPage() {
 
                                         {/* Humor Profile */}
                                         <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="col-span-2 rounded-xl p-4 space-y-4">
-                                            <h4 style={{ color: 'rgba(250,249,245,0.5)' }} className="text-xs font-medium">Humor Profile</h4>
+                                            <h4 style={{ color: '#ababab' }} className="text-xs font-medium">Humor Profile</h4>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Style</label>
+                                                    <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Style</label>
                                                     <select value={dnaForm.humor_profile.style} onChange={e => setDnaForm((p: any) => ({ ...p, humor_profile: { ...p.humor_profile, style: e.target.value } }))} style={selectStyle} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none appearance-none">
                                                         <option value="">Select...</option>
                                                         <option value="dry_wit">Dry Wit</option>
@@ -404,7 +405,7 @@ export default function ChannelDNAPage() {
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Frequency</label>
+                                                    <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Frequency</label>
                                                     <select value={dnaForm.humor_profile.frequency} onChange={e => setDnaForm((p: any) => ({ ...p, humor_profile: { ...p.humor_profile, frequency: e.target.value } }))} style={selectStyle} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none appearance-none">
                                                         <option value="">Select...</option>
                                                         <option value="very_frequent">Very Frequent</option>
@@ -414,7 +415,7 @@ export default function ChannelDNAPage() {
                                                     </select>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Triggers</label>
+                                                    <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Triggers</label>
                                                     <MultiTagInput value={dnaForm.humor_profile.triggers} onChange={v => setDnaForm((p: any) => ({ ...p, humor_profile: { ...p.humor_profile, triggers: v } }))} placeholder="e.g. Awkward Silence" />
                                                 </div>
                                             </div>
@@ -422,13 +423,13 @@ export default function ChannelDNAPage() {
 
                                         {/* Do List */}
                                         <div>
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Do List</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Do List</label>
                                             <MultiTagInput value={dnaForm.do_list} onChange={v => setDnaForm((p: any) => ({ ...p, do_list: v }))} placeholder="e.g. Start with shocking statement" variant="do" />
                                         </div>
 
                                         {/* Don't List */}
                                         <div>
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Don't List</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Don't List</label>
                                             <MultiTagInput value={dnaForm.dont_list} onChange={v => setDnaForm((p: any) => ({ ...p, dont_list: v }))} placeholder="e.g. No slow intros" variant="dont" />
                                         </div>
 
@@ -446,7 +447,7 @@ export default function ChannelDNAPage() {
 
                                         {/* Best Content Types */}
                                         <div className="col-span-2">
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Best Content Types</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Best Content Types</label>
                                             <div className="flex flex-wrap gap-2">
                                                 {contentTypesOptions.map(type => {
                                                     const isSelected = dnaForm.best_content_types.includes(type);
@@ -454,7 +455,7 @@ export default function ChannelDNAPage() {
                                                         <button key={type} onClick={() => setDnaForm((p: any) => ({ ...p, best_content_types: isSelected ? p.best_content_types.filter((t: string) => t !== type) : [...p.best_content_types, type] }))}
                                                             style={isSelected
                                                                 ? { background: '#faf9f5', color: '#141413', border: '1px solid #faf9f5' }
-                                                                : { background: 'transparent', color: 'rgba(250,249,245,0.5)', border: '1px solid rgba(250,249,245,0.1)' }
+                                                                : { background: 'transparent', color: '#ababab', border: '1px solid rgba(250,249,245,0.1)' }
                                                             }
                                                             className="text-xs px-3 py-1.5 rounded-xl transition-all hover:text-[#faf9f5]">
                                                             {formatText(type)}
@@ -466,7 +467,7 @@ export default function ChannelDNAPage() {
 
                                         {/* Content Format */}
                                         <div className="col-span-2">
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Content Format</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Content Format</label>
                                             <div className="flex flex-wrap gap-2">
                                                 {['podcast', 'interview', 'talk_show', 'comedy', 'debate', 'documentary', 'reaction', 'commentary'].map(format => {
                                                     const isSelected = (dnaForm.content_format || []).includes(format);
@@ -474,7 +475,7 @@ export default function ChannelDNAPage() {
                                                         <button key={format} onClick={() => setDnaForm((p: any) => ({ ...p, content_format: isSelected ? p.content_format.filter((f: string) => f !== format) : [...(p.content_format || []), format] }))}
                                                             style={isSelected
                                                                 ? { background: '#faf9f5', color: '#141413', border: '1px solid #faf9f5' }
-                                                                : { background: 'transparent', color: 'rgba(250,249,245,0.5)', border: '1px solid rgba(250,249,245,0.1)' }
+                                                                : { background: 'transparent', color: '#ababab', border: '1px solid rgba(250,249,245,0.1)' }
                                                             }
                                                             className="text-xs px-3 py-1.5 rounded-xl transition-all hover:text-[#faf9f5]">
                                                             {formatText(format)}
@@ -486,7 +487,7 @@ export default function ChannelDNAPage() {
 
                                         {/* Target Platforms */}
                                         <div className="col-span-2">
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Target Platforms</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Target Platforms</label>
                                             <div className="flex flex-wrap gap-2">
                                                 {['youtube_shorts', 'tiktok', 'instagram_reels', 'all'].map(platform => {
                                                     const isSelected = (dnaForm.target_platforms || []).includes(platform);
@@ -494,7 +495,7 @@ export default function ChannelDNAPage() {
                                                         <button key={platform} onClick={() => setDnaForm((p: any) => ({ ...p, target_platforms: isSelected ? p.target_platforms.filter((pl: string) => pl !== platform) : [...(p.target_platforms || []), platform] }))}
                                                             style={isSelected
                                                                 ? { background: '#faf9f5', color: '#141413', border: '1px solid #faf9f5' }
-                                                                : { background: 'transparent', color: 'rgba(250,249,245,0.5)', border: '1px solid rgba(250,249,245,0.1)' }
+                                                                : { background: 'transparent', color: '#ababab', border: '1px solid rgba(250,249,245,0.1)' }
                                                             }
                                                             className="text-xs px-3 py-1.5 rounded-xl transition-all hover:text-[#faf9f5]">
                                                             {formatText(platform)}
@@ -506,7 +507,7 @@ export default function ChannelDNAPage() {
 
                                         {/* Audience Identity */}
                                         <div className="col-span-2">
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Audience Identity</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Audience Identity</label>
                                             <textarea
                                                 value={dnaForm.audience_identity}
                                                 onChange={e => setDnaForm((p: any) => ({ ...p, audience_identity: e.target.value }))}
@@ -519,7 +520,7 @@ export default function ChannelDNAPage() {
 
                                         {/* Speaker Pref & Duration */}
                                         <div>
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Speaker Preference</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Speaker Preference</label>
                                             <select value={dnaForm.speaker_preference} onChange={e => setDnaForm((p: any) => ({ ...p, speaker_preference: e.target.value }))} style={selectStyle} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none appearance-none">
                                                 <option value="">Select...</option>
                                                 <option value="guest_dominant">Guest Dominant</option>
@@ -529,7 +530,7 @@ export default function ChannelDNAPage() {
                                         </div>
 
                                         <div>
-                                            <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Avg Successful Duration (seconds)</label>
+                                            <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Avg Successful Duration (seconds)</label>
                                             <input
                                                 type="number"
                                                 value={dnaForm.avg_successful_duration}
@@ -538,10 +539,11 @@ export default function ChannelDNAPage() {
                                                 className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none"
                                             />
                                         </div>
+
                                     </div>
 
                                     <div style={{ borderTop: '1px solid rgba(250,249,245,0.06)' }} className="flex items-center gap-3 pt-4">
-                                        <button onClick={() => setEditingDna(false)} style={{ border: '1px solid rgba(250,249,245,0.1)', color: 'rgba(250,249,245,0.5)' }} className="px-4 py-2 rounded-xl text-sm font-medium hover:text-[#faf9f5] transition-colors">
+                                        <button onClick={() => setEditingDna(false)} style={{ border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }} className="px-4 py-2 rounded-xl text-sm font-medium hover:text-[#faf9f5] transition-colors">
                                             Cancel
                                         </button>
                                         <button
@@ -559,7 +561,7 @@ export default function ChannelDNAPage() {
                                     <div className="grid grid-cols-2 gap-3">
                                         {dna.tone && (
                                             <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="rounded-xl p-4">
-                                                <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Tone</p>
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Tone</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {(Array.isArray(dna.tone) ? dna.tone : [dna.tone]).map((t: string, i: number) => <span key={i}>{renderTag(t)}</span>)}
                                                 </div>
@@ -567,13 +569,13 @@ export default function ChannelDNAPage() {
                                         )}
                                         {dna.hook_style && (
                                             <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="rounded-xl p-4">
-                                                <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Hook Style</p>
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Hook Style</p>
                                                 {renderTag(dna.hook_style)}
                                             </div>
                                         )}
                                         {dna.do_list && dna.do_list.length > 0 && (
                                             <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="rounded-xl p-4">
-                                                <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Do List</p>
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Do List</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {dna.do_list.map((t: string, i: number) => <span key={i}>{renderTag(t, 'do')}</span>)}
                                                 </div>
@@ -581,7 +583,7 @@ export default function ChannelDNAPage() {
                                         )}
                                         {dna.dont_list && dna.dont_list.length > 0 && (
                                             <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="rounded-xl p-4">
-                                                <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Don't List</p>
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Don't List</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {dna.dont_list.map((t: string, i: number) => <span key={i}>{renderTag(t, 'dont')}</span>)}
                                                 </div>
@@ -605,7 +607,7 @@ export default function ChannelDNAPage() {
                                         )}
                                         {dna.best_content_types && dna.best_content_types.length > 0 && (
                                             <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="col-span-2 rounded-xl p-4">
-                                                <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Best Content Types</p>
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">Best Content Types</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {dna.best_content_types.map((t: string, i: number) => <span key={i}>{renderTag(t)}</span>)}
                                                 </div>
@@ -614,7 +616,7 @@ export default function ChannelDNAPage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
-                                        <p style={{ color: 'rgba(250,249,245,0.25)' }} className="text-sm mb-3">No DNA configured yet</p>
+                                        <p style={{ color: '#ababab' }} className="text-sm mb-3">No DNA configured yet</p>
                                         <button onClick={handleStartEditDna} className="px-4 py-2 bg-white text-black rounded-xl text-sm font-medium hover:bg-[#e5e5e5] transition-colors">
                                             Set Up DNA
                                         </button>
@@ -639,7 +641,7 @@ export default function ChannelDNAPage() {
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={uploading}
-                                    style={{ background: 'rgba(250,249,245,0.07)', border: '1px solid rgba(250,249,245,0.1)', color: 'rgba(250,249,245,0.5)' }}
+                                    style={{ background: 'rgba(250,249,245,0.07)', border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:text-[#faf9f5] transition-colors disabled:opacity-50"
                                 >
                                     <Upload className="w-3.5 h-3.5" />
@@ -650,7 +652,7 @@ export default function ChannelDNAPage() {
 
                         {referenceClips.length === 0 ? (
                             <div className="px-5 py-10 text-center">
-                                <p style={{ color: 'rgba(250,249,245,0.2)' }} className="text-sm">No reference clips uploaded yet</p>
+                                <p style={{ color: '#ababab' }} className="text-sm">No reference clips uploaded yet</p>
                                 <p style={{ color: 'rgba(250,249,245,0.15)' }} className="text-xs mt-1">Upload clips to help AI understand your style</p>
                             </div>
                         ) : (
@@ -659,9 +661,9 @@ export default function ChannelDNAPage() {
                                     <div key={clip.id} style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="flex items-center justify-between rounded-xl p-3">
                                         <div>
                                             <p style={{ color: '#faf9f5' }} className="text-sm font-medium">{clip.title}</p>
-                                            {clip.source && <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-xs mt-0.5">{clip.source}</p>}
+                                            {clip.source && <p style={{ color: '#ababab' }} className="text-xs mt-0.5">{clip.source}</p>}
                                         </div>
-                                        <button style={{ color: 'rgba(250,249,245,0.3)' }} className="p-1.5 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                                        <button style={{ color: '#ababab' }} className="p-1.5 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -672,7 +674,7 @@ export default function ChannelDNAPage() {
                 </div>
             ) : (
                 <div className="flex-1 flex items-center justify-center">
-                    <p style={{ color: 'rgba(250,249,245,0.25)' }} className="text-sm">Select a channel to manage its DNA</p>
+                    <p style={{ color: '#ababab' }} className="text-sm">Select a channel to manage its DNA</p>
                 </div>
             )}
         </div>

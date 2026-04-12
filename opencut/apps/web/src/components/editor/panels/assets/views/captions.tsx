@@ -33,8 +33,9 @@ import type {
 	TranscriptionWord,
 	TranscriptionSegment,
 } from "@/types/transcription";
-import { Cloud, Cpu, Download, RotateCcw } from "lucide-react";
+import { Cloud, Cpu, Download, RotateCcw, Zap } from "lucide-react";
 import { cn } from "@/utils/ui";
+import { useReframeMetadataStore } from "@/stores/reframe-metadata-store";
 
 type Engine = "deepgram" | "whisper";
 
@@ -77,6 +78,7 @@ function rebuildChunks({
 
 export function Captions() {
 	const editor = useEditor();
+	const captionWords = useReframeMetadataStore((s) => s.captionWords);
 
 	// ── Transcription settings ────────────────────────────────────────────────
 	const [engine, setEngine] = useState<Engine>("deepgram");
@@ -368,6 +370,35 @@ export function Captions() {
 		}
 	};
 
+	const handleUsePipelineCaptions = () => {
+		if (!captionWords || captionWords.length === 0) return;
+		try {
+			// CaptionWord and TranscriptionWord have identical shapes — direct cast
+			const words = captionWords as unknown as TranscriptionWord[];
+			setRawWords(words);
+			setRawSegments(null);
+
+			const chunks = buildCaptionChunksFromWords({
+				words,
+				maxCharsPerLine: effectiveMaxChars,
+				maxLines,
+				cleanPunctuation: true,
+			});
+
+			setCaptions(chunks);
+			saveCaptionsDraft(chunks);
+
+			if (appliedTrackId) {
+				editor.timeline.removeTrack({ trackId: appliedTrackId });
+			}
+			const newTrackId = applyToTimeline(chunks, null);
+			setAppliedTrackId(newTrackId);
+		} catch (err) {
+			console.error("[Captions] Pipeline captions error:", err);
+			setError(err instanceof Error ? err.message : "Failed to apply pipeline captions");
+		}
+	};
+
 	const handleDownloadSrt = () => {
 		if (!captions || captions.length === 0) return;
 		const srtContent = captionChunksToSrt(captions);
@@ -538,8 +569,33 @@ export function Captions() {
 					</div>
 				)}
 
-				{/* Generate button */}
-				{!captions && (
+				{/* Pipeline captions fast-path */}
+				{!captions && captionWords.length > 0 && (
+					<div className="rounded-md border border-[#1a1a1a] bg-[#0a0a0a] p-3">
+						<p className="mb-2 text-xs font-medium text-white">Pipeline captions available</p>
+						<p className="mb-3 text-[11px] text-[#737373]">
+							{captionWords.length} words from auto-transcription — no re-processing needed.
+						</p>
+						<Button
+							className="w-full bg-white text-black hover:bg-[#e5e5e5]"
+							onClick={handleUsePipelineCaptions}
+						>
+							<Zap className="mr-2 size-4" />
+							Use Pipeline Captions
+						</Button>
+						<button
+							type="button"
+							onClick={handleGenerate}
+							disabled={isProcessing}
+							className="mt-2 w-full text-center text-xs text-[#737373] hover:text-white transition-colors"
+						>
+							{isProcessing ? processingStep : "Re-transcribe instead"}
+						</button>
+					</div>
+				)}
+
+			{/* Generate button */}
+				{!captions && captionWords.length === 0 && (
 					<Button
 						className="w-full"
 						onClick={handleGenerate}

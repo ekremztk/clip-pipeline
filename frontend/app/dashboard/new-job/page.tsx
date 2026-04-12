@@ -29,6 +29,8 @@ const STEP_LABELS: Record<string, string> = {
     "s06_batch_evaluation": "Evaluating Clips...",
     "s07_precision_cut": "Calculating Cut Points...",
     "s08_export": "Exporting & Uploading...",
+    "s09_reframe": "Reframing to vertical...",
+    "s10_captions": "Burning captions...",
     "finished": "Complete!",
     "s05_energy_map": "Analyzing Audio Energy...",
     "s06_video_analysis": "Analyzing Video...",
@@ -102,6 +104,7 @@ export default function NewJobPage() {
     const [submitError, setSubmitError] = useState("");
     const [statusMsg, setStatusMsg] = useState("");
     const [jobs, setJobs] = useState<Job[]>([]);
+    const [reframeContentType, setReframeContentType] = useState<'podcast' | 'gaming'>('podcast');
 
     useEffect(() => {
         if (channelLoading || !activeChannelId) return;
@@ -193,6 +196,7 @@ export default function NewJobPage() {
         formData.append("title", title);
         formData.append("channel_id", activeChannelId);
         if (guestName) formData.append("guest_name", guestName);
+        formData.append("reframe_content_type", reframeContentType);
 
         try {
             const response = await authFetch('/jobs', { method: "POST", body: formData });
@@ -238,6 +242,7 @@ export default function NewJobPage() {
         if (guestName) formData.append("guest_name", guestName);
         formData.append("trim_start_seconds", startTime.toString());
         formData.append("trim_end_seconds", endTime.toString());
+        formData.append("reframe_content_type", reframeContentType);
 
         try {
             const response = await authFetch('/jobs', { method: "POST", body: formData });
@@ -286,18 +291,18 @@ export default function NewJobPage() {
         };
         return (
             <div className="flex flex-col items-center gap-1.5">
-                <div style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-widest font-medium">{isStart ? 'START' : 'END'}</div>
+                <div style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-widest font-medium">{isStart ? 'START' : 'END'}</div>
                 <div className="flex items-center gap-1">
                     <TimeInput value={h} onChange={v => updateTime('h', v)} max={99} />
-                    <span style={{ color: 'rgba(250,249,245,0.3)' }}>:</span>
+                    <span style={{ color: '#ababab' }}>:</span>
                     <TimeInput value={m} onChange={v => updateTime('m', v)} max={59} />
-                    <span style={{ color: 'rgba(250,249,245,0.3)' }}>:</span>
+                    <span style={{ color: '#ababab' }}>:</span>
                     <TimeInput value={s} onChange={v => updateTime('s', v)} max={59} />
                 </div>
                 <div className="flex gap-[28px]">
-                    <span style={{ color: 'rgba(250,249,245,0.25)' }} className="text-[10px]">HH</span>
-                    <span style={{ color: 'rgba(250,249,245,0.25)' }} className="text-[10px]">MM</span>
-                    <span style={{ color: 'rgba(250,249,245,0.25)' }} className="text-[10px]">SS</span>
+                    <span style={{ color: '#ababab' }} className="text-[10px]">HH</span>
+                    <span style={{ color: '#ababab' }} className="text-[10px]">MM</span>
+                    <span style={{ color: '#ababab' }} className="text-[10px]">SS</span>
                 </div>
             </div>
         );
@@ -315,7 +320,7 @@ export default function NewJobPage() {
     return (
         <div style={{ background: '#141413', color: '#faf9f5', minHeight: '100vh' }} className="max-w-3xl mx-auto px-8 py-10 pb-20">
             <h1 style={{ color: '#faf9f5' }} className="text-2xl font-semibold mb-1">New Clip Job</h1>
-            <p style={{ color: 'rgba(250,249,245,0.4)' }} className="text-sm mb-8">Upload a video and start the AI processing pipeline</p>
+            <p style={{ color: '#ababab' }} className="text-sm mb-8">Upload a video and start the AI processing pipeline</p>
 
             <div className="space-y-5">
                 {/* IDLE: Tab switcher */}
@@ -327,7 +332,7 @@ export default function NewJobPage() {
                                 onClick={() => setInputMode('upload')}
                                 style={inputMode === 'upload'
                                     ? { background: 'rgba(250,249,245,0.08)', color: '#faf9f5' }
-                                    : { color: 'rgba(250,249,245,0.4)' }
+                                    : { color: '#ababab' }
                                 }
                                 className="flex-1 py-2 text-sm font-medium rounded-xl transition-colors hover:text-[#faf9f5]"
                             >
@@ -337,7 +342,7 @@ export default function NewJobPage() {
                                 onClick={() => setInputMode('youtube')}
                                 style={inputMode === 'youtube'
                                     ? { background: 'rgba(250,249,245,0.08)', color: '#faf9f5' }
-                                    : { color: 'rgba(250,249,245,0.4)' }
+                                    : { color: '#ababab' }
                                 }
                                 className="flex-1 py-2 text-sm font-medium rounded-xl transition-colors hover:text-[#faf9f5]"
                             >
@@ -373,7 +378,7 @@ export default function NewJobPage() {
                                         <Upload style={{ color: isDragging ? '#faf9f5' : 'rgba(250,249,245,0.4)' }} className="w-5 h-5" />
                                     </div>
                                     <h3 style={{ color: '#faf9f5' }} className="text-base font-medium mb-1">Drop your video here</h3>
-                                    <p style={{ color: 'rgba(250,249,245,0.4)' }} className="text-sm mb-5">MP4, MOV, WEBM up to 2GB</p>
+                                    <p style={{ color: '#ababab' }} className="text-sm mb-5">MP4, MOV, WEBM up to 2GB</p>
                                     <button
                                         onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                         className="px-5 py-2.5 bg-white text-black rounded-xl text-sm font-medium hover:bg-[#e5e5e5] transition-colors"
@@ -388,7 +393,7 @@ export default function NewJobPage() {
                         {inputMode === 'youtube' && (
                             <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-6 space-y-4">
                                 <div>
-                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">YouTube URL *</label>
+                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">YouTube URL *</label>
                                     <input
                                         type="url"
                                         value={youtubeUrl}
@@ -400,7 +405,7 @@ export default function NewJobPage() {
                                     {youtubeUrlError && <p className="mt-1.5 text-xs text-red-400">{youtubeUrlError}</p>}
                                 </div>
                                 <div>
-                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Video Title *</label>
+                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Video Title *</label>
                                     <input
                                         type="text"
                                         value={title}
@@ -411,7 +416,7 @@ export default function NewJobPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
                                     <input
                                         type="text"
                                         value={guestName}
@@ -422,7 +427,7 @@ export default function NewJobPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Channel</label>
+                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Channel</label>
                                     {channelLoading ? (
                                         <div style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)' }} className="h-10 rounded-xl animate-pulse" />
                                     ) : (
@@ -436,6 +441,30 @@ export default function NewJobPage() {
                                         </select>
                                     )}
                                 </div>
+                                <div>
+                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Reframe Type</label>
+                                    <div className="flex gap-2">
+                                        {(['podcast', 'gaming'] as const).map(type => (
+                                            <button
+                                                key={type}
+                                                onClick={() => setReframeContentType(type)}
+                                                style={reframeContentType === type
+                                                    ? { background: 'rgba(250,249,245,0.08)', border: '1px solid rgba(250,249,245,0.3)', color: '#faf9f5' }
+                                                    : { background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }
+                                                }
+                                                className="flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors hover:text-[#faf9f5]"
+                                            >
+                                                {type === 'podcast' ? 'Podcast / Talk' : 'Gaming'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p style={{ color: '#ababab' }} className="text-xs mt-1.5">
+                                        {reframeContentType === 'podcast'
+                                            ? 'AI face tracking → 9:16 vertical clip'
+                                            : 'Webcam + gameplay split-screen (1080×1920)'
+                                        }
+                                    </p>
+                                </div>
                                 <button
                                     onClick={handleYoutubeSubmit}
                                     disabled={!youtubeUrl || !title || !activeChannelId}
@@ -444,7 +473,7 @@ export default function NewJobPage() {
                                             ? "bg-white text-black hover:bg-[#e5e5e5]"
                                             : "cursor-not-allowed"
                                     }`}
-                                    style={(!youtubeUrl || !title || !activeChannelId) ? { background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)', color: 'rgba(250,249,245,0.25)' } : {}}
+                                    style={(!youtubeUrl || !title || !activeChannelId) ? { background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)', color: '#ababab' } : {}}
                                 >
                                     Start Processing
                                 </button>
@@ -456,14 +485,14 @@ export default function NewJobPage() {
                 {/* UPLOADING */}
                 {uploadState === 'uploading' && file && (
                     <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-10 flex flex-col items-center text-center">
-                        <p style={{ color: 'rgba(250,249,245,0.5)' }} className="text-sm font-medium mb-5 truncate max-w-sm">{file.name}</p>
+                        <p style={{ color: '#ababab' }} className="text-sm font-medium mb-5 truncate max-w-sm">{file.name}</p>
                         <div style={{ background: 'rgba(250,249,245,0.08)' }} className="w-64 h-1.5 rounded-full overflow-hidden relative mb-3">
                             <div
                                 className="absolute top-0 left-0 bottom-0 bg-white rounded-full transition-all duration-300"
                                 style={{ width: `${uploadProgress}%` }}
                             />
                         </div>
-                        <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-xs">Uploading... {uploadProgress}%</p>
+                        <p style={{ color: '#ababab' }} className="text-xs">Uploading... {uploadProgress}%</p>
                     </div>
                 )}
 
@@ -472,7 +501,7 @@ export default function NewJobPage() {
                     <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-10 flex flex-col items-center text-center">
                         <div style={{ borderColor: 'rgba(250,249,245,0.12)', borderTopColor: '#faf9f5' }} className="w-10 h-10 border-2 rounded-full animate-spin mb-5" />
                         <p style={{ color: '#faf9f5' }} className="text-sm font-medium mb-1">{statusMsg || "Processing..."}</p>
-                        <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-xs">This may take a few minutes</p>
+                        <p style={{ color: '#ababab' }} className="text-xs">This may take a few minutes</p>
                     </div>
                 )}
 
@@ -493,9 +522,9 @@ export default function NewJobPage() {
 
                         {/* Timeline Trimmer */}
                         <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-5">
-                            <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-[10px] uppercase tracking-widest font-medium mb-4">Processing Range</p>
+                            <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-widest font-medium mb-4">Processing Range</p>
 
-                            <div className="flex justify-between text-xs mb-2" style={{ color: 'rgba(250,249,245,0.4)' }}>
+                            <div className="flex justify-between text-xs mb-2" style={{ color: '#ababab' }}>
                                 <span>{formatTimeDisplay(startTime)}</span>
                                 <span>{formatTimeDisplay(endTime)}</span>
                             </div>
@@ -527,7 +556,7 @@ export default function NewJobPage() {
                                 <TimeGroup time={startTime} isStart={true} />
                                 <button
                                     onClick={() => { setStartTime(0); setEndTime(videoDuration); }}
-                                    style={{ color: 'rgba(250,249,245,0.3)' }}
+                                    style={{ color: '#ababab' }}
                                     className="text-xs hover:text-[#faf9f5] transition-colors mt-2"
                                 >
                                     Reset
@@ -539,7 +568,7 @@ export default function NewJobPage() {
                         {/* Form Fields */}
                         <div style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-5 space-y-4">
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Video Title *</label>
+                                <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Video Title *</label>
                                 <input
                                     type="text"
                                     value={title}
@@ -550,7 +579,7 @@ export default function NewJobPage() {
                                 />
                             </div>
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
                                 <input
                                     type="text"
                                     value={guestName}
@@ -561,7 +590,31 @@ export default function NewJobPage() {
                                 />
                             </div>
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.3)' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Channel</label>
+                                <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Reframe Type</label>
+                                <div className="flex gap-2">
+                                    {(['podcast', 'gaming'] as const).map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setReframeContentType(type)}
+                                            style={reframeContentType === type
+                                                ? { background: 'rgba(250,249,245,0.08)', border: '1px solid rgba(250,249,245,0.3)', color: '#faf9f5' }
+                                                : { background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#ababab' }
+                                            }
+                                            className="flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors hover:text-[#faf9f5]"
+                                        >
+                                            {type === 'podcast' ? 'Podcast / Talk' : 'Gaming'}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p style={{ color: '#ababab' }} className="text-xs mt-1.5">
+                                    {reframeContentType === 'podcast'
+                                        ? 'AI face tracking → 9:16 vertical clip'
+                                        : 'Webcam + gameplay split-screen (1080×1920)'
+                                    }
+                                </p>
+                            </div>
+                            <div>
+                                <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Channel</label>
                                 {channelLoading ? (
                                     <div style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)' }} className="h-10 rounded-xl animate-pulse" />
                                 ) : (
@@ -586,7 +639,7 @@ export default function NewJobPage() {
                                     ? "bg-white text-black hover:bg-[#e5e5e5]"
                                     : "cursor-not-allowed"
                             }`}
-                            style={(!title || uploadState !== 'preview_ready') ? { background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)', color: 'rgba(250,249,245,0.25)' } : {}}
+                            style={(!title || uploadState !== 'preview_ready') ? { background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)', color: '#ababab' } : {}}
                         >
                             {uploadState === 'processing' ? (
                                 <>
@@ -608,14 +661,14 @@ export default function NewJobPage() {
 
             {/* Recent Jobs */}
             <div className="mt-12">
-                <h2 style={{ color: 'rgba(250,249,245,0.5)' }} className="text-sm font-medium mb-4">Recent Jobs</h2>
+                <h2 style={{ color: '#ababab' }} className="text-sm font-medium mb-4">Recent Jobs</h2>
                 <div className="space-y-2">
                     {jobs.length === 0 ? (
-                        <p style={{ color: 'rgba(250,249,245,0.25)', background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="text-sm text-center py-6 rounded-2xl">No recent jobs</p>
+                        <p style={{ color: '#ababab', background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="text-sm text-center py-6 rounded-2xl">No recent jobs</p>
                     ) : (
                         jobs.slice(0, 5).map(job => (
                             <div key={job.id} style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.07)' }} className="flex items-center justify-between p-3 rounded-xl">
-                                <p style={{ color: 'rgba(250,249,245,0.5)' }} className="text-sm truncate flex-1 pr-4">{job.video_title}</p>
+                                <p style={{ color: '#ababab' }} className="text-sm truncate flex-1 pr-4">{job.video_title}</p>
                                 <div className="flex-shrink-0">
                                     {job.status === "done" || job.status === "completed" ? (
                                         <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-lg flex items-center gap-1">
@@ -626,7 +679,7 @@ export default function NewJobPage() {
                                             <AlertCircle className="w-3 h-3" /> Failed
                                         </span>
                                     ) : (
-                                        <span style={{ color: 'rgba(250,249,245,0.4)', background: 'rgba(250,249,245,0.06)' }} className="text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                        <span style={{ color: '#ababab', background: 'rgba(250,249,245,0.06)' }} className="text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
                                             <Clock className="w-3 h-3" /> {job.status}
                                         </span>
                                     )}

@@ -139,19 +139,19 @@ export default function LoginPage() {
                 <div className="w-full max-w-[400px]">
                     <div className="text-center mb-8">
                         <span style={{ color: '#faf9f5' }} className="text-xl font-bold tracking-tight">PROGNOT</span>
-                        <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-sm mt-1">AI-powered viral clip extraction</p>
+                        <p style={{ color: '#ababab' }} className="text-sm mt-1">AI-powered viral clip extraction</p>
                     </div>
 
                     <div style={{ background: '#181817', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-6">
                         <div className="mb-6">
                             <h2 style={{ color: '#faf9f5' }} className="text-base font-semibold mb-1">Check your email</h2>
-                            <p style={{ color: 'rgba(250,249,245,0.4)' }} className="text-sm">We sent a 6-digit code to</p>
-                            <p style={{ color: 'rgba(250,249,245,0.7)' }} className="text-sm font-medium mt-0.5">{signupEmail}</p>
+                            <p style={{ color: '#ababab' }} className="text-sm">We sent a 6-digit code to</p>
+                            <p style={{ color: '#ababab' }} className="text-sm font-medium mt-0.5">{signupEmail}</p>
                         </div>
 
                         <form onSubmit={handleVerifyOtp} className="space-y-4">
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs mb-1.5">Verification code</label>
+                                <label style={{ color: '#ababab' }} className="block text-xs mb-1.5">Verification code</label>
                                 <input
                                     type="text"
                                     inputMode="numeric"
@@ -184,7 +184,7 @@ export default function LoginPage() {
                         <div style={{ borderTop: '1px solid rgba(250,249,245,0.07)' }} className="flex items-center justify-between mt-5 pt-4">
                             <button
                                 onClick={() => { setShowOtpScreen(false); setOtpCode(""); setOtpError(null); setOtpSuccess(null); }}
-                                style={{ color: 'rgba(250,249,245,0.3)' }}
+                                style={{ color: '#ababab' }}
                                 className="text-xs hover:text-[#faf9f5] transition-colors"
                             >
                                 ← Back
@@ -210,7 +210,7 @@ export default function LoginPage() {
             <div className="w-full max-w-[400px]">
                 <div className="text-center mb-8">
                     <span style={{ color: '#faf9f5' }} className="text-xl font-bold tracking-tight">PROGNOT</span>
-                    <p style={{ color: 'rgba(250,249,245,0.3)' }} className="text-sm mt-1">AI-powered viral clip extraction</p>
+                    <p style={{ color: '#ababab' }} className="text-sm mt-1">AI-powered viral clip extraction</p>
                 </div>
 
                 <div style={{ background: '#181817', border: '1px solid rgba(250,249,245,0.07)' }} className="rounded-2xl p-6">
@@ -241,7 +241,7 @@ export default function LoginPage() {
                     {activeTab === "signin" ? (
                         <form onSubmit={handleSignIn} className="space-y-4">
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs mb-1.5">Email</label>
+                                <label style={{ color: '#ababab' }} className="block text-xs mb-1.5">Email</label>
                                 <input
                                     type="email"
                                     value={email}
@@ -255,8 +255,8 @@ export default function LoginPage() {
                             </div>
                             <div>
                                 <div className="flex justify-between items-center mb-1.5">
-                                    <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs">Password</label>
-                                    <a href="#" style={{ color: 'rgba(250,249,245,0.4)' }} className="text-xs hover:text-[#faf9f5] transition-colors">Forgot password?</a>
+                                    <label style={{ color: '#ababab' }} className="block text-xs">Password</label>
+                                    <a href="#" style={{ color: '#ababab' }} className="text-xs hover:text-[#faf9f5] transition-colors">Forgot password?</a>
                                 </div>
                                 <input
                                     type="password"
@@ -285,7 +285,7 @@ export default function LoginPage() {
                     ) : (
                         <form onSubmit={handleSignUp} className="space-y-4">
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs mb-1.5">Full Name</label>
+                                <label style={{ color: '#ababab' }} className="block text-xs mb-1.5">Full Name</label>
                                 <input
                                     type="text"
                                     value={fullName}
@@ -298,7 +298,7 @@ export default function LoginPage() {
                                 />
                             </div>
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs mb-1.5">Email</label>
+                                <label style={{ color: '#ababab' }} className="block text-xs mb-1.5">Email</label>
                                 <input
                                     type="email"
                                     value={email}
@@ -311,7 +311,7 @@ export default function LoginPage() {
                                 />
                             </div>
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs mb-1.5">Password</label>
+                                <label style={{ color: '#ababab' }} className="block text-xs mb-1.5">Password</label>
                                 <input
                                     type="password"
                                     value={password}
@@ -330,7 +330,7 @@ export default function LoginPage() {
                                 </div>
                             </div>
                             <div>
-                                <label style={{ color: 'rgba(250,249,245,0.4)' }} className="block text-xs mb-1.5">Confirm Password</label>
+                                <label style={{ color: '#ababab' }} className="block text-xs mb-1.5">Confirm Password</label>
                                 <input
                                     type="password"
                                     value={confirmPassword}
@@ -353,7 +353,7 @@ export default function LoginPage() {
                                     className="mt-0.5 w-4 h-4 rounded accent-white cursor-pointer"
                                     style={{ borderColor: 'rgba(250,249,245,0.1)', background: '#111110' }}
                                 />
-                                <label htmlFor="terms" style={{ color: 'rgba(250,249,245,0.4)' }} className="text-xs leading-snug cursor-pointer">
+                                <label htmlFor="terms" style={{ color: '#ababab' }} className="text-xs leading-snug cursor-pointer">
                                     I agree to the Terms of Service and Privacy Policy
                                 </label>
                             </div>
@@ -375,7 +375,7 @@ export default function LoginPage() {
                     {/* Divider */}
                     <div className="flex items-center gap-3 my-5">
                         <div style={{ background: 'rgba(250,249,245,0.07)' }} className="flex-1 h-px" />
-                        <span style={{ color: 'rgba(250,249,245,0.3)' }} className="text-xs">or</span>
+                        <span style={{ color: '#ababab' }} className="text-xs">or</span>
                         <div style={{ background: 'rgba(250,249,245,0.07)' }} className="flex-1 h-px" />
                     </div>
 

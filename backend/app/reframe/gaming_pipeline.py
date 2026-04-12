@@ -31,6 +31,7 @@ from app.services.r2_client import get_r2_client
 
 from .config import FaceTrackerConfig
 from .face_tracker import _get_detector
+from .render import render_gaming_vstack
 from .types import FaceDetection, ReframeResult
 
 logger = logging.getLogger(__name__)
@@ -161,7 +162,7 @@ def run_gaming_reframe(
         f"gaming_reframe_{uuid.uuid4().hex}.mp4",
     )
     try:
-        _run_ffmpeg_gaming(
+        render_gaming_vstack(
             input_path=video_path,
             output_path=output_path,
             wc_x=cam_x, wc_y=cam_y, wc_w=cam_w, wc_h=cam_h,
@@ -521,73 +522,6 @@ def _compute_game_crop_x(
         game_crop_x, overlap * 100, shift_left, shift_right,
     )
     return game_crop_x, 0
-
-
-# ─── Step 5: FFmpeg render ────────────────────────────────────────────────────
-
-def _run_ffmpeg_gaming(
-    input_path: str,
-    output_path: str,
-    wc_x: int, wc_y: int, wc_w: int, wc_h: int,
-    game_x: int, game_y: int, game_w: int, game_h: int,
-) -> None:
-    """
-    Render 1080x1920 split-screen video via FFmpeg filter_complex vstack.
-
-    Top panel    (1080x640) : webcam region, letterboxed to preserve aspect ratio
-    Bottom panel (1080x1280): gameplay region, scaled to fill
-    """
-    # Webcam panel: crop is pre-computed at exact 1080:640 ratio (face-anchored),
-    # so a simple scale to target dimensions produces zero letterboxing/squashing.
-    webcam_filter = (
-        f"[0:v]crop={wc_w}:{wc_h}:{wc_x}:{wc_y},"
-        f"scale={OUTPUT_W}:{WEBCAM_PANEL_H}"
-        "[top]"
-    )
-
-    # Game panel: direct scale (crop aspect ratio already matches 1080:1280)
-    game_filter = (
-        f"[0:v]crop={game_w}:{game_h}:{game_x}:{game_y},"
-        f"scale={OUTPUT_W}:{GAME_PANEL_H}"
-        "[bottom]"
-    )
-
-    filter_complex = f"{webcam_filter};{game_filter};[top][bottom]vstack=inputs=2[out]"
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", input_path,
-        "-filter_complex", filter_complex,
-        "-map", "[out]",
-        "-map", "0:a?",           # copy audio stream if present
-        "-c:v", "libx264",
-        "-preset", "fast",        # fast: ~50-100x realtime CPU, crf=18 keeps quality high
-        "-crf", "18",
-        "-c:a", "aac",
-        "-b:a", "320k",
-        "-movflags", "+faststart",
-        output_path,
-    ]
-
-    logger.info(
-        "[Gaming] FFmpeg: wc=crop(%d:%d:%d:%d)->scale(%dx%d) ratio=%.4f | game=crop(%d:%d:%d:%d)->scale(%dx%d)",
-        wc_w, wc_h, wc_x, wc_y, OUTPUT_W, WEBCAM_PANEL_H, wc_w / wc_h if wc_h else 0,
-        game_w, game_h, game_x, game_y, OUTPUT_W, GAME_PANEL_H,
-    )
-
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        timeout=600,
-    )
-
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"FFmpeg exited {result.returncode}:\n{result.stderr[-800:]}"
-        )
-
-    logger.info("[Gaming] FFmpeg render complete: %s", output_path)
 
 
 # ─── Step 5b: Debug render (annotated 16:9) ──────────────────────────────────

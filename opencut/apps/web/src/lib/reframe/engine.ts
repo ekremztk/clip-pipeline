@@ -61,7 +61,7 @@ export async function runReframe(
 		throw new Error("No video elements on timeline");
 	}
 
-	const { jobId, clipId } = useReframeMetadataStore.getState();
+	const { jobId, clipId, precomputedReframe } = useReframeMetadataStore.getState();
 	const { setSceneCutMarkers } = useReframeMetadataStore.getState();
 
 	const results: ReframeResult[] = [];
@@ -76,6 +76,33 @@ export async function runReframe(
 			console.warn(`[Reframe] No file/URL for element ${element.id}, skipping`);
 			continue;
 		}
+
+		// ── Fast path: use pre-computed pipeline data (skip backend) ──────────
+		if (precomputedReframe && precomputedReframe.keyframes.length > 0) {
+			onProgress({ step: `Applying pre-computed reframe${label}...`, percent: 80 });
+
+			const keyframes = precomputedReframe.keyframes as ReframeKeyframe[];
+			const { scene_cuts, src_w, src_h, fps } = precomputedReframe;
+
+			const segmentCount = applyReframeWithSplits(
+				editor, trackId, element, keyframes, scene_cuts, src_w, src_h, fps, options,
+			);
+
+			if (scene_cuts.length > 0) {
+				const trimStart = element.trimStart ?? 0;
+				for (const cut of scene_cuts) {
+					const timelineCut = element.startTime + (cut - trimStart);
+					if (timelineCut > element.startTime && timelineCut < element.startTime + element.duration) {
+						allSceneCuts.push(timelineCut);
+					}
+				}
+			}
+
+			console.log(`[Reframe] Used pre-computed data: ${keyframes.length} keyframes, ${scene_cuts.length} scene cuts`);
+			results.push({ elementId: element.id, keyframeCount: segmentCount });
+			continue;
+		}
+		// ── End fast path ─────────────────────────────────────────────────────
 
 		onProgress({ step: `Starting reframe${label}...`, percent: 2 });
 

@@ -30,6 +30,10 @@ interface Clip {
     suggested_description: string | null;
     start_time?: number;
     end_time?: number;
+    video_landscape_path?: string | null;
+    video_reframed_path?: string | null;
+    reframe_metadata?: any | null;
+    caption_metadata?: any | null;
 }
 
 interface TranscriptWord {
@@ -107,7 +111,7 @@ const getScoreHex = (score: number) => {
 const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: string | null }) => {
     if (!clip.file_url) {
         return (
-            <button disabled style={{ border: "1px solid rgba(250,249,245,0.08)", color: "rgba(250,249,245,0.2)" }} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-medium cursor-not-allowed text-xs">
+            <button disabled style={{ border: "1px solid rgba(250,249,245,0.08)", color: "#ababab" }} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-medium cursor-not-allowed text-xs">
                 <Scissors className="w-3.5 h-3.5" /> Open in Editor
             </button>
         );
@@ -117,6 +121,8 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
     if (clip.suggested_description) params.set("clipDesc", clip.suggested_description);
     if (guestName) params.set("clipGuestName", guestName);
     if (clip.job_id) params.set("clipJobId", clip.job_id);
+    // Pass clip ID so the editor can fetch reframe keyframes + caption words
+    params.set("clipId", clip.id);
     const href = `https://edit.prognot.com/editor/${crypto.randomUUID()}?${params.toString()}`;
 
     const handleClick = async (e: React.MouseEvent) => {
@@ -136,7 +142,7 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
     };
 
     return (
-        <button onClick={handleClick} style={{ background: "rgba(250,249,245,0.07)", border: "1px solid rgba(250,249,245,0.1)", color: "rgba(250,249,245,0.7)" }} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-medium hover:text-[#faf9f5] transition-colors text-xs">
+        <button onClick={handleClick} style={{ background: "rgba(250,249,245,0.07)", border: "1px solid rgba(250,249,245,0.1)", color: "#ababab" }} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-medium hover:text-[#faf9f5] transition-colors text-xs">
             <Scissors className="w-3.5 h-3.5" /> Open in Editor
         </button>
     );
@@ -290,7 +296,7 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                             <span className="text-lg font-bold leading-none" style={{ color: scoreHex }}>
                                 {score}
                             </span>
-                            <span className="text-[10px] leading-none" style={{ color: 'rgba(250,249,245,0.35)' }}>/100</span>
+                            <span className="text-[10px] leading-none" style={{ color: '#ababab' }}>/100</span>
                         </div>
 
                         {/* Verdict Badge — top-right */}
@@ -319,8 +325,8 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
 
                     {/* Hook Text */}
                     <div className="px-4 pb-3 flex-shrink-0">
-                        <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: 'rgba(250,249,245,0.35)' }}>Hook</p>
-                        <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'rgba(250,249,245,0.5)' }}>
+                        <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: '#ababab' }}>Hook</p>
+                        <p className="text-xs leading-relaxed line-clamp-2" style={{ color: '#ababab' }}>
                             &ldquo;{clip.hook_text || "No hook text"}&rdquo;
                         </p>
                     </div>
@@ -328,7 +334,7 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                     {/* Score bar */}
                     <div className="px-4 pb-3 flex-shrink-0">
                         <div className="flex items-center justify-between mb-1">
-                            <span className="text-[9px] uppercase tracking-widest" style={{ color: 'rgba(250,249,245,0.35)' }}>Score</span>
+                            <span className="text-[9px] uppercase tracking-widest" style={{ color: '#ababab' }}>Score</span>
                             <span className={`text-[10px] font-semibold ${getScoreColor(score)}`}>{score}/100</span>
                         </div>
                         <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(250,249,245,0.08)' }}>
@@ -401,7 +407,7 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                             </span>
                             <span
                                 className="flex-shrink-0 text-[10px] px-2 py-0.5 rounded-full"
-                                style={{ color: 'rgba(250,249,245,0.4)', background: 'rgba(250,249,245,0.06)', border: '1px solid rgba(250,249,245,0.08)' }}
+                                style={{ color: '#ababab', background: 'rgba(250,249,245,0.06)', border: '1px solid rgba(250,249,245,0.08)' }}
                             >
                                 {formatDuration(clip.duration_s)}
                             </span>
@@ -409,7 +415,7 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                         <button
                             onClick={onClose}
                             className="flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-white/5"
-                            style={{ color: 'rgba(250,249,245,0.4)' }}
+                            style={{ color: '#ababab' }}
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -420,7 +426,7 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
 
                         {/* Transcript */}
                         <div className="p-5" style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }}>
-                            <p className="text-[9px] uppercase tracking-widest mb-3" style={{ color: 'rgba(250,249,245,0.35)' }}>Transcript</p>
+                            <p className="text-[9px] uppercase tracking-widest mb-3" style={{ color: '#ababab' }}>Transcript</p>
                             <div
                                 ref={transcriptContainerRef}
                                 onScroll={handleTranscriptScroll}
@@ -434,18 +440,18 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                             >
                                 {transcriptLoading ? (
                                     <div className="flex items-center justify-center h-full">
-                                        <p className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>Loading transcript...</p>
+                                        <p className="text-xs" style={{ color: '#ababab' }}>Loading transcript...</p>
                                     </div>
                                 ) : transcriptWords.length === 0 ? (
                                     <div className="flex items-center justify-center h-full">
-                                        <p className="text-xs" style={{ color: 'rgba(250,249,245,0.35)' }}>No transcript available</p>
+                                        <p className="text-xs" style={{ color: '#ababab' }}>No transcript available</p>
                                     </div>
                                 ) : (
                                     <div className="leading-7">
                                         {transcriptSegments.map((seg, si) => {
                                             if (seg.type === "timestamp") {
                                                 return (
-                                                    <span key={`ts-${si}`} className="inline-block text-[10px] font-mono mr-2 mb-0.5 align-middle" style={{ color: 'rgba(250,249,245,0.2)' }}>
+                                                    <span key={`ts-${si}`} className="inline-block text-[10px] font-mono mr-2 mb-0.5 align-middle" style={{ color: '#ababab' }}>
                                                         {formatTranscriptTime(seg.time)}
                                                     </span>
                                                 );
@@ -475,10 +481,10 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                         {/* Quality Notes (fixable clips) */}
                         {clip.quality_notes && (
                             <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }}>
-                                <p className="text-[9px] uppercase tracking-widest mb-2" style={{ color: 'rgba(250,249,245,0.35)' }}>AI Notes</p>
+                                <p className="text-[9px] uppercase tracking-widest mb-2" style={{ color: '#ababab' }}>AI Notes</p>
                                 <p
                                     className="text-xs leading-relaxed px-3 py-2.5 rounded-xl"
-                                    style={{ color: 'rgba(250,249,245,0.5)', background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}
+                                    style={{ color: '#ababab', background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}
                                 >
                                     {clip.quality_notes}
                                 </p>
@@ -489,13 +495,13 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                         <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }}>
                             <div className="flex gap-3">
                                 <div className="flex-1 rounded-xl p-3" style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}>
-                                    <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: 'rgba(250,249,245,0.35)' }}>Posting Order</p>
+                                    <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: '#ababab' }}>Posting Order</p>
                                     <p className="text-xl font-bold" style={{ color: '#faf9f5' }}>#{clip.posting_order || "—"}</p>
                                 </div>
                                 <div className="flex-1 rounded-xl p-3" style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}>
-                                    <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: 'rgba(250,249,245,0.35)' }}>Strategy</p>
+                                    <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: '#ababab' }}>Strategy</p>
                                     <p className="text-sm capitalize font-medium" style={{ color: '#faf9f5' }}>{clip.clip_strategy_role || "—"}</p>
-                                    <p className="text-[10px] mt-0.5 capitalize" style={{ color: 'rgba(250,249,245,0.35)' }}>role</p>
+                                    <p className="text-[10px] mt-0.5 capitalize" style={{ color: '#ababab' }}>role</p>
                                 </div>
                             </div>
                         </div>
@@ -503,18 +509,18 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                         {/* YouTube Metadata */}
                         {(clip.suggested_title || clip.suggested_description) && (
                             <div className="px-5 py-4">
-                                <p className="text-[9px] uppercase tracking-widest mb-3" style={{ color: 'rgba(250,249,245,0.35)' }}>YouTube Metadata</p>
+                                <p className="text-[9px] uppercase tracking-widest mb-3" style={{ color: '#ababab' }}>YouTube Metadata</p>
                                 <div className="space-y-2">
                                     {clip.suggested_title && (
                                         <div className="rounded-xl p-3" style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}>
-                                            <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: 'rgba(250,249,245,0.35)' }}>Title</p>
+                                            <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: '#ababab' }}>Title</p>
                                             <p className="text-xs font-medium leading-relaxed" style={{ color: '#faf9f5' }}>{clip.suggested_title}</p>
                                         </div>
                                     )}
                                     {clip.suggested_description && (
                                         <div className="rounded-xl p-3" style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.06)' }}>
-                                            <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: 'rgba(250,249,245,0.35)' }}>Description</p>
-                                            <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: 'rgba(250,249,245,0.5)' }}>{clip.suggested_description}</p>
+                                            <p className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: '#ababab' }}>Description</p>
+                                            <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: '#ababab' }}>{clip.suggested_description}</p>
                                         </div>
                                     )}
                                 </div>
@@ -714,10 +720,10 @@ function ProjectsContent() {
                         className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
                         style={{ background: '#181817', border: '1px solid rgba(250,249,245,0.07)' }}
                     >
-                        <FolderOpen className="w-6 h-6" style={{ color: 'rgba(250,249,245,0.25)' }} />
+                        <FolderOpen className="w-6 h-6" style={{ color: '#ababab' }} />
                     </div>
                     <h2 className="text-lg font-semibold mb-2" style={{ color: '#faf9f5' }}>No channel yet</h2>
-                    <p className="text-sm mb-6" style={{ color: 'rgba(250,249,245,0.4)' }}>Create a channel first to start managing your projects.</p>
+                    <p className="text-sm mb-6" style={{ color: '#ababab' }}>Create a channel first to start managing your projects.</p>
                     <Link href="/dashboard/settings" className="inline-flex items-center gap-2 bg-white hover:bg-[#e5e5e5] text-black text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
                         Add Channel
                     </Link>
@@ -736,21 +742,21 @@ function ProjectsContent() {
                             <button
                                 onClick={goBack}
                                 className="inline-flex items-center gap-1.5 text-xs mb-2 transition-colors hover:!text-[#faf9f5]"
-                                style={{ color: 'rgba(250,249,245,0.4)' }}
+                                style={{ color: '#ababab' }}
                             >
                                 <ArrowLeft className="w-3.5 h-3.5" /> Projects
                             </button>
                             <div className="flex items-center gap-2">
                                 <h1 className="text-2xl font-semibold" style={{ color: '#faf9f5' }}>{selectedJob.video_title || "Project Clips"}</h1>
-                                <ChevronRight className="w-4 h-4" style={{ color: 'rgba(250,249,245,0.35)' }} />
-                                <span className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>{projectClips.length} clips</span>
+                                <ChevronRight className="w-4 h-4" style={{ color: '#ababab' }} />
+                                <span className="text-sm" style={{ color: '#ababab' }}>{projectClips.length} clips</span>
                             </div>
-                            <p className="text-xs mt-0.5" style={{ color: 'rgba(250,249,245,0.35)' }}>{formatDate(selectedJob.created_at)}</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#ababab' }}>{formatDate(selectedJob.created_at)}</p>
                         </div>
                     ) : (
                         <div>
                             <h1 className="text-2xl font-semibold" style={{ color: '#faf9f5' }}>Projects</h1>
-                            <p className="text-sm mt-0.5" style={{ color: 'rgba(250,249,245,0.4)' }}>All your video projects in one place</p>
+                            <p className="text-sm mt-0.5" style={{ color: '#ababab' }}>All your video projects in one place</p>
                         </div>
                     )}
                 </div>
@@ -796,7 +802,7 @@ function ProjectsContent() {
                     {activeJobs.length > 0 && (
                         <div className="mb-8">
                             <div className="flex items-center gap-2 mb-4">
-                                <h2 className="text-sm font-medium" style={{ color: 'rgba(250,249,245,0.5)' }}>Active Jobs</h2>
+                                <h2 className="text-sm font-medium" style={{ color: '#ababab' }}>Active Jobs</h2>
                                 <span className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -808,7 +814,7 @@ function ProjectsContent() {
                                                 <div>
                                                     <div className="flex items-center justify-center gap-2 mb-2">
                                                         <div className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
-                                                        <span className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(250,249,245,0.4)' }}>Processing</span>
+                                                        <span className="text-[10px] uppercase tracking-wider" style={{ color: '#ababab' }}>Processing</span>
                                                     </div>
                                                     <p className="text-xs" style={{ color: '#faf9f5' }}>
                                                         {getStepLabel(job.current_step || job.step)} {progress > 0 && `(${progress}%)`}
@@ -832,7 +838,7 @@ function ProjectsContent() {
                             style={{ background: '#181817' }}
                         >
                             <FileVideo className="w-12 h-12 mb-3" style={{ color: 'rgba(250,249,245,0.1)' }} />
-                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>No projects yet. Start a new job to create clips.</p>
+                            <p className="text-sm" style={{ color: '#ababab' }}>No projects yet. Start a new job to create clips.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -871,7 +877,7 @@ function ProjectsContent() {
                                                         onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === job.id ? null : job.id); }}
                                                         className="p-1 rounded-lg hover:bg-white/5 transition-colors"
                                                     >
-                                                        <MoreHorizontal size={14} style={{ color: 'rgba(250,249,245,0.35)' }} />
+                                                        <MoreHorizontal size={14} style={{ color: '#ababab' }} />
                                                     </button>
                                                     {openMenuId === job.id && (
                                                         <div
@@ -880,7 +886,7 @@ function ProjectsContent() {
                                                         >
                                                             <button
                                                                 className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-white/5 transition-colors"
-                                                                style={{ color: 'rgba(250,249,245,0.6)' }}
+                                                                style={{ color: '#ababab' }}
                                                                 onClick={e => { e.stopPropagation(); setOpenMenuId(null); selectJob(job); }}
                                                             >
                                                                 View Clips
@@ -895,7 +901,7 @@ function ProjectsContent() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-1.5 mt-1 text-[10px]" style={{ color: 'rgba(250,249,245,0.35)' }}>
+                                            <div className="flex items-center gap-1.5 mt-1 text-[10px]" style={{ color: '#ababab' }}>
                                                 <span>{jobClips.length} clips</span>
                                                 <span>·</span>
                                                 <span>{formatDate(job.created_at)}</span>
@@ -915,7 +921,7 @@ function ProjectsContent() {
                             className="flex flex-col items-center justify-center py-20 rounded-2xl"
                             style={{ background: '#181817' }}
                         >
-                            <p className="text-sm" style={{ color: 'rgba(250,249,245,0.4)' }}>No clips found</p>
+                            <p className="text-sm" style={{ color: '#ababab' }}>No clips found</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -966,13 +972,13 @@ function ProjectsContent() {
                                         <div className="p-3 flex flex-col flex-1">
                                             <p
                                                 className="text-[10px] line-clamp-2 flex-1 leading-relaxed"
-                                                style={{ color: 'rgba(250,249,245,0.5)' }}
+                                                style={{ color: '#ababab' }}
                                             >
                                                 &ldquo;{clip.hook_text || "No hook text"}&rdquo;
                                             </p>
                                             <div className="flex items-center justify-between mt-2">
-                                                <span className="text-[9px] capitalize" style={{ color: 'rgba(250,249,245,0.35)' }}>{clip.clip_strategy_role || "—"}</span>
-                                                <span className="text-[9px]" style={{ color: 'rgba(250,249,245,0.35)' }}>#{clip.posting_order || "—"}</span>
+                                                <span className="text-[9px] capitalize" style={{ color: '#ababab' }}>{clip.clip_strategy_role || "—"}</span>
+                                                <span className="text-[9px]" style={{ color: '#ababab' }}>#{clip.posting_order || "—"}</span>
                                             </div>
                                         </div>
                                     </div>

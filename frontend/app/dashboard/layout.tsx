@@ -372,13 +372,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <Link
                                 href="/dashboard"
                                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl mb-6 text-sm font-medium transition-all hover:bg-white/5 w-fit"
-                                style={{ color: "rgba(250,249,245,0.4)" }}
+                                style={{ color: "#ababab" }}
                             >
                                 <ArrowLeft size={15} strokeWidth={2} />
                                 <span>Dashboard</span>
                             </Link>
 
-                            <p className="text-[11px] font-bold uppercase tracking-widest px-3 mb-3" style={{ color: "rgba(250,249,245,0.3)" }}>
+                            <p className="text-[11px] font-bold uppercase tracking-widest px-3 mb-3" style={{ color: "#ababab" }}>
                                 Settings
                             </p>
 
@@ -410,7 +410,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 className="absolute z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:!text-[#faf9f5]"
                                 style={{
                                     background: "#1c1c1b",
-                                    color: "rgba(250,249,245,0.5)",
+                                    color: "#ababab",
                                     top: "84px",
                                     right: "-12px",
                                     boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
@@ -428,7 +428,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <nav className={`flex-1 flex flex-col overflow-y-auto gap-1 py-6 ${sidebarOpen ? 'px-4' : 'px-3'}`}>
                                 <div className="space-y-0.5">
                                     {sidebarOpen && (
-                                        <p className="text-[11px] font-bold uppercase tracking-widest px-3 pb-2 mt-2" style={{ color: "rgba(250,249,245,0.4)" }}>
+                                        <p className="text-[11px] font-bold uppercase tracking-widest px-3 pb-2 mt-2" style={{ color: "#ababab" }}>
                                             Workspace
                                         </p>
                                     )}
@@ -436,7 +436,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </div>
                                 <div className={`space-y-0.5 ${sidebarOpen ? 'mt-8' : 'mt-4'}`}>
                                     {sidebarOpen && (
-                                        <p className="text-[11px] font-bold uppercase tracking-widest px-3 pb-2" style={{ color: "rgba(250,249,245,0.4)" }}>
+                                        <p className="text-[11px] font-bold uppercase tracking-widest px-3 pb-2" style={{ color: "#ababab" }}>
                                             Library
                                         </p>
                                     )}
@@ -463,7 +463,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <button
                                 onClick={() => setNotifOpen(!notifOpen)}
                                 className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:!text-[#faf9f5]"
-                                style={{ color: "rgba(250,249,245,0.5)", background: "rgba(250,249,245,0.03)" }}
+                                style={{ color: "#ababab", background: "rgba(250,249,245,0.03)" }}
                             >
                                 <Bell size={16} />
                             </button>
@@ -484,15 +484,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         <span className="text-sm font-semibold" style={{ color: "#faf9f5" }}>Notifications</span>
                                         <button
                                             className="text-xs font-medium transition-colors hover:!text-[#faf9f5]"
-                                            style={{ color: "rgba(250,249,245,0.4)" }}
+                                            style={{ color: "#ababab" }}
                                         >
                                             Mark all read
                                         </button>
                                     </div>
                                     <div className="px-5 py-8 text-center">
                                         <Bell size={24} className="mx-auto mb-3" style={{ color: "rgba(250,249,245,0.15)" }} />
-                                        <p className="text-sm font-medium" style={{ color: "rgba(250,249,245,0.4)" }}>No new notifications</p>
-                                        <p className="text-xs mt-1" style={{ color: "rgba(250,249,245,0.25)" }}>You're all caught up</p>
+                                        <p className="text-sm font-medium" style={{ color: "#ababab" }}>No new notifications</p>
+                                        <p className="text-xs mt-1" style={{ color: "#ababab" }}>You're all caught up</p>
                                     </div>
                                 </div>
                             )}
@@ -530,7 +530,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                             <div className="text-sm font-medium leading-tight" style={{ color: "#faf9f5" }}>
                                                 {userName || truncatedEmail || '…'}
                                             </div>
-                                            <div className="text-xs leading-tight mt-0.5" style={{ color: "rgba(250,249,245,0.4)" }}>
+                                            <div className="text-xs leading-tight mt-0.5" style={{ color: "#ababab" }}>
                                                 {selectedChannel?.display_name ?? selectedChannel?.name ?? (channels.length > 0 ? channels[0].display_name : 'No channel')}
                                             </div>
                                         </div>
@@ -561,7 +561,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                                 <div className="text-sm font-semibold truncate" style={{ color: "#faf9f5" }}>
                                                     {userName || userEmail}
                                                 </div>
-                                                <div className="text-xs mt-0.5 truncate" style={{ color: "rgba(250,249,245,0.4)" }}>
+                                                <div className="text-xs mt-0.5 truncate" style={{ color: "#ababab" }}>
                                                     {userEmail}
                                                 </div>
                                             </div>
@@ -572,7 +572,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     <div className="p-2" style={{ borderBottom: "1px solid rgba(250,249,245,0.05)" }}>
                                         <div
                                             className="text-[10px] font-semibold uppercase tracking-wider px-3 py-2"
-                                            style={{ color: "rgba(250,249,245,0.3)" }}
+                                            style={{ color: "#ababab" }}
                                         >
                                             Your Channels
                                         </div>
@@ -593,7 +593,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                             href="/dashboard/settings"
                                             onClick={() => setProfileOpen(false)}
                                             className="flex items-center gap-2 w-full px-3 py-2.5 mt-1 rounded-xl transition-colors text-sm font-medium hover:bg-white/5"
-                                            style={{ color: "rgba(250,249,245,0.5)" }}
+                                            style={{ color: "#ababab" }}
                                         >
                                             <div className="w-4 flex items-center justify-center"><Plus size={14} /></div>
                                             Add new channel
@@ -604,7 +604,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     <div className="p-2">
                                         <button
                                             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-colors text-sm font-medium hover:bg-white/5 hover:!text-[#faf9f5] text-left"
-                                            style={{ color: "rgba(250,249,245,0.5)" }}
+                                            style={{ color: "#ababab" }}
                                         >
                                             <CreditCard size={16} />
                                             <span className="flex-1 text-left">Billing & Credits</span>
@@ -613,7 +613,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                             href="/dashboard/settings"
                                             onClick={() => setProfileOpen(false)}
                                             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-colors text-sm font-medium hover:bg-white/5 hover:!text-[#faf9f5]"
-                                            style={{ color: "rgba(250,249,245,0.5)" }}
+                                            style={{ color: "#ababab" }}
                                         >
                                             <Settings size={16} />
                                             <span className="flex-1">Account Settings</span>
