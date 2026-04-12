@@ -123,7 +123,7 @@ Each candidate MUST follow this exact schema:
   "content_type": "confirmed or corrected content type",
   "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
   "posting_order": integer (1 = post first),
-  "suggested_title": "YouTube Shorts title under 60 chars",
-  "suggested_description": "YouTube description with 3-5 hashtags"
+  "suggested_title": "YouTube Shorts title in the SAME LANGUAGE as the transcript, under 60 chars",
+  "suggested_description": "YouTube description in the SAME LANGUAGE as the transcript, with 3-5 hashtags"
 }
 """
