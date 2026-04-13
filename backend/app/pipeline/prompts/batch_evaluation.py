@@ -85,7 +85,9 @@ Read all three sections before evaluating. This is not optional.
 
 9. **STRATEGY ROLE** — If pass or fixable: assign the optimal role in the posting schedule.
 
-10. **YOUTUBE METADATA** — Title and description.
+10. **OVERLAP RULE** — If two or more candidates in this batch cover substantially the same time range (more than 50% of the shorter clip's duration overlaps with another candidate), evaluate only the highest-scoring one and omit the rest. Do not produce near-duplicate clips of the same content.
+
+11. **YOUTUBE METADATA** — Title and description.
     - Title: If YOUTUBE TITLE STYLE is in CHANNEL CONTEXT, follow it exactly. Otherwise: guest name or boldest claim first, under 60 chars, no emojis, no clickbait the clip doesn't deliver.
     - Description: If YOUTUBE DESCRIPTION TEMPLATE is in CHANNEL CONTEXT, fill it in. Otherwise: 2-3 sentences summarizing the clip, name the speaker, end with 3-5 hashtags.
 

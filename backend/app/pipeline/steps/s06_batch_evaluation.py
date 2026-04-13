@@ -278,6 +278,52 @@ def _evaluate_single_with_claude(
         return None
 
 
+# ── Overlap deduplication ─────────────────────────────────────────────────────
+
+def _deduplicate_by_overlap(clips: list, overlap_threshold: float = 0.5) -> list:
+    """
+    Removes temporally overlapping clips using NMS-style deduplication.
+    Clips are sorted by score descending — higher-scored clip always wins.
+    A candidate is dropped if it overlaps more than `overlap_threshold` of
+    the shorter clip's duration with any already-kept clip.
+    """
+    if not clips:
+        return clips
+
+    sorted_clips = sorted(clips, key=lambda c: c.get("score", 0), reverse=True)
+    kept = []
+
+    for candidate in sorted_clips:
+        c_start = float(candidate.get("recommended_start", 0) or 0)
+        c_end   = float(candidate.get("recommended_end",   0) or 0)
+        c_dur   = c_end - c_start
+        if c_dur <= 0:
+            kept.append(candidate)
+            continue
+
+        is_duplicate = False
+        for kept_clip in kept:
+            k_start = float(kept_clip.get("recommended_start", 0) or 0)
+            k_end   = float(kept_clip.get("recommended_end",   0) or 0)
+
+            overlap = max(0.0, min(c_end, k_end) - max(c_start, k_start))
+            shorter = min(c_dur, k_end - k_start)
+            if shorter > 0 and (overlap / shorter) > overlap_threshold:
+                print(
+                    f"[S06] Dedup: dropped candidate {candidate.get('candidate_id')} "
+                    f"({c_start:.1f}s–{c_end:.1f}s, score={candidate.get('score')}) — "
+                    f"{overlap:.1f}s overlap with candidate {kept_clip.get('candidate_id')} "
+                    f"({k_start:.1f}s–{k_end:.1f}s, score={kept_clip.get('score')})"
+                )
+                is_duplicate = True
+                break
+
+        if not is_duplicate:
+            kept.append(candidate)
+
+    return kept
+
+
 # ── Main run function ─────────────────────────────────────────────────────────
 
 def run(
@@ -434,6 +480,13 @@ def run(
         if not passed:
             print("[S06] No candidates passed quality gate.")
             return []
+
+        # Deduplicate overlapping clips — keeps highest-scoring clip when two
+        # candidates cover substantially the same time range (>50% overlap)
+        before_dedup = len(passed)
+        passed = _deduplicate_by_overlap(passed, overlap_threshold=0.5)
+        if len(passed) < before_dedup:
+            print(f"[S06] Overlap dedup: removed {before_dedup - len(passed)} duplicate(s), {len(passed)} remaining")
 
         # Sort by posting_order
         passed.sort(key=lambda c: c.get("posting_order", 999))

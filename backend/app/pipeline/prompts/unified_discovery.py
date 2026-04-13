@@ -50,7 +50,9 @@ These apply regardless of channel type:
 
 6. **CONTENT DIVERSITY.** Don't select 5 clips of the same type. Mix it up.
 
-7. **TIMESTAMP PRECISION.** Use the exact [MM:SS.ss] timestamps from the transcript for recommended_start and recommended_end. Do not estimate — use the actual values you see in the transcript.
+7. **NO OVERLAPPING CLIPS.** Each candidate must cover a distinct time range. Two candidates must not share more than 20% of their duration. If the same content area contains multiple compelling moments, select only the single best one — do not submit variations of the same moment with slightly different start/end points.
+
+8. **TIMESTAMP PRECISION.** Use the exact [MM:SS.ss] timestamps from the transcript for recommended_start and recommended_end. Do not estimate — use the actual values you see in the transcript.
 
 ## OUTPUT FORMAT
 Return ONLY a valid JSON array. No markdown wrappers. No explanations outside the JSON.

@@ -298,15 +298,20 @@ def _validate_candidates(candidates: list, video_duration_s: float, min_duration
 
 
 def _calculate_max_candidates(duration_s: float) -> int:
-    """Returns max candidate count based on video duration."""
-    if duration_s < 900:
-        return 15
-    elif duration_s < 1800:
+    """Returns max candidate count based on video duration.
+    Short videos get tighter limits — too many candidates on short content
+    causes Gemini to generate overlapping/duplicate clips covering the same range.
+    """
+    if duration_s < 300:       # < 5 min
+        return 5
+    elif duration_s < 900:     # 5–15 min
+        return 10
+    elif duration_s < 1800:    # 15–30 min
+        return 18
+    elif duration_s < 3600:    # 30–60 min
         return 25
-    elif duration_s < 3600:
+    else:                      # 60+ min
         return 35
-    else:
-        return 45
 
 
 def _parse_gemini_json(raw_text: str) -> list:
