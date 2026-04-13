@@ -219,6 +219,9 @@ app.include_router(captions.router)
 app.include_router(proxy.router)
 app.include_router(youtube_metadata.router)
 app.include_router(reframe.router)
+
+from app.api.routes import debug_reframe
+app.include_router(debug_reframe.router)
 app.include_router(progress.router)
 app.include_router(director_router)
 
