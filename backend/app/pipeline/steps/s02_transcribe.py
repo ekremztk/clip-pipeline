@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 from app.services.deepgram_client import transcribe
 
@@ -39,7 +40,12 @@ def _build_keyterms(channel_dna: dict, video_title: str, guest_name: Optional[st
         for kt in channel_dna.get("keyterms", []):
             terms.add(kt.strip())
 
-    result = [t for t in terms if t and len(t) > 1][:100]
+    # Only allow clean alphabetic terms — no special chars, no file extensions, no tech specs
+    result = [
+        t for t in terms
+        if t and len(t) > 1
+        and re.fullmatch(r"[A-Za-z][A-Za-z'\-\s]*", t)
+    ][:100]
     return result
 
 
