@@ -22,6 +22,28 @@ from .types import ReframeKeyframe
 logger = logging.getLogger(__name__)
 
 
+# ─── Helpers ─────────────────────────────────────────────────────────────────
+
+def _clamp_crop_expr(expr: str, low: int, high: int) -> str:
+    """
+    Clamp a crop coordinate expression to [low, high].
+
+    Static values (plain numbers from stationary segments) are clamped in Python
+    — no FFmpeg functions needed, no comma issues.
+
+    Dynamic expressions (panning segments with 't' variable) are wrapped in
+    FFmpeg min(max()) with ALL commas escaped as \\, so the filter_complex
+    parser treats them as literal characters, not filter-chain separators.
+    FFmpeg unescapes \\, → , before the expression evaluator runs.
+    """
+    try:
+        val = float(expr)
+        return str(round(max(low, min(val, high)), 1))
+    except ValueError:
+        escaped = expr.replace(",", "\\,")
+        return f"min(max({escaped}\\,{low})\\,{high})"
+
+
 # ─── Podcast / Single / Generic Reframe ──────────────────────────────────────
 
 def render_podcast_reframe(
@@ -95,9 +117,15 @@ def render_podcast_reframe(
         crop_x_expr = _build_crop_expression(seg["keyframes"], "offset_x", seg["start"], fps)
         crop_y_expr = _build_crop_expression(seg["keyframes"], "offset_y", seg["start"], fps)
 
-        # Clamp crop to source bounds (clip() is not a valid FFmpeg expr; use min/max)
-        crop_x_expr = f"min(max({crop_x_expr},0),{src_w - crop_w})"
-        crop_y_expr = f"min(max({crop_y_expr},0),{src_h - crop_h})"
+        # Clamp crop to source bounds.
+        # Static values (plain numbers) are clamped in Python — no commas needed.
+        # Dynamic expressions (containing 't') use FFmpeg min/max with escaped commas.
+        # Commas MUST be escaped as \, because FFmpeg's filter_complex parser splits
+        # filter chains on unescaped commas — unescaped commas inside function calls
+        # like min(x,0) are misinterpreted as filter separators, causing
+        # "No such filter: '0'" errors.
+        crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
+        crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
 
         seg_label = f"v{i}"
         filter_parts.append(

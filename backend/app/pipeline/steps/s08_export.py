@@ -1,13 +1,49 @@
 import os
 import subprocess
 import traceback
+from typing import Optional
 from app.config import settings
 from app.services.supabase_client import get_client
 from app.services.r2_client import upload_clip
 from app.director.events import director_events
 
 
-def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_title: str = "", user_id: str | None = None) -> list:
+def _sanity_check_word_boundary(final_start: float, final_end: float, words: list, clip_index: int) -> tuple[float, float]:
+    """
+    Cross-references final_start/final_end against Deepgram word timestamps.
+    If final_start+0.3 (breath buffer removed) doesn't land near a word.start,
+    snaps to the nearest word.start within 0.5s tolerance.
+    Returns corrected (final_start, final_end).
+    """
+    if not words:
+        return final_start, final_end
+
+    # The breath buffer in S07 subtracts ~0.3s from word.start.
+    # So final_start + 0.3 should be very close to a word.start.
+    approx_word_start = final_start + 0.3
+    tolerance = 0.5
+
+    # Check if approx_word_start is near any word.start
+    nearest_word_start = None
+    nearest_dist = float('inf')
+    for w in words:
+        ws = w.get("start", 0)
+        dist = abs(ws - approx_word_start)
+        if dist < nearest_dist:
+            nearest_dist = dist
+            nearest_word_start = ws
+
+    if nearest_dist > tolerance and nearest_word_start is not None:
+        corrected_start = max(0.0, nearest_word_start - 0.3)
+        print(f"[S08] Sanity check clip {clip_index+1}: final_start {final_start:.3f}s drifted {nearest_dist:.3f}s from nearest word boundary. Corrected to {corrected_start:.3f}s")
+        final_start = corrected_start
+
+    return final_start, final_end
+
+
+def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
+        video_title: str = "", user_id: str | None = None,
+        transcript_data: Optional[dict] = None) -> list:
     """
     Step 8: Export
     For each clip: FFmpeg frame-accurate cut + encode → R2 upload → Supabase insert.
@@ -16,6 +52,9 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
     print(f"[S08] Starting export for {len(cut_results)} clips. Job: {job_id}")
     exported_clips = []
     supabase = get_client()
+
+    # Word timestamps for sanity check
+    words = transcript_data.get("words", []) if transcript_data else []
 
     # Ensure output directory exists
     job_output_dir = os.path.join(settings.OUTPUT_DIR, job_id)
@@ -26,6 +65,12 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str, video_
         try:
             final_start = clip.get("final_start", 0.0)
             final_duration = clip.get("final_duration_s", 0.0)
+            final_end = clip.get("final_end", final_start + final_duration)
+
+            # Sanity check: verify word boundary alignment before cutting
+            if words:
+                final_start, final_end = _sanity_check_word_boundary(final_start, final_end, words, index)
+                final_duration = final_end - final_start
             content_type = clip.get("content_type", "unknown")
             candidate_id = clip.get("candidate_id", index)
 

@@ -1,5 +1,6 @@
 import json
 import subprocess
+from typing import Optional
 from app.config import settings
 
 
@@ -8,9 +9,7 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
     Finds the nearest word boundary to the target_sec.
     For 'start' mode: prefers word starts slightly BEFORE target (captures full first word).
     For 'end' mode: prefers word ends slightly AFTER target (keeps full last word).
-    Search window: 3s in both directions.
-    
-    This function is copied exactly from s10_precision_cut.py — proven logic, do not modify.
+    Search window: 1.5s — Nova-3 timestamps are precise enough for a tight window.
     """
     if not words:
         return target_sec
@@ -22,7 +21,7 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
         if w_start <= target_sec <= w_end:
             return w_start if mode == "start" else w_end
 
-    search_window = 3.0
+    search_window = 1.5
     best_time = target_sec
     best_score = float('inf')
 
@@ -50,18 +49,35 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
     return best_time
 
 
-def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: str) -> list:
+def _find_prev_word_end(target_start: float, words: list) -> Optional[float]:
+    """Finds the end time of the word immediately before target_start."""
+    prev_end = None
+    for w in words:
+        w_end = w.get("end", 0)
+        if w_end <= target_start:
+            prev_end = w_end
+        else:
+            break
+    return prev_end
+
+
+def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: str,
+        clip_duration_min: Optional[int] = None,
+        clip_duration_max: Optional[int] = None) -> list:
     """
     Step 7: Precision Cut (Math Only)
     Aligns clip boundaries to word boundaries using Deepgram word timestamps.
     Does NOT cut video — only calculates and stores final_start/final_end.
     Actual FFmpeg cutting happens in S08 (Export).
+
+    clip_duration_min/max: job-level override (highest priority).
+    Falls back to settings defaults.
     """
     print(f"[S07] Starting precision cut (math only) for job {job_id}. Clips: {len(evaluated_clips)}")
 
     words = transcript_data.get("words", [])
     if not words:
-        print("[S07] Warning: No word timestamps found. Using Gemini's recommended times as-is.")
+        print("[S07] Warning: No word timestamps found. Using recommended times as-is.")
 
     # Get video duration via ffprobe (needed to clamp end times)
     video_duration = 999999.0
@@ -77,8 +93,10 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
     except Exception as e:
         print(f"[S07] Warning: Could not get video duration: {e}")
 
-    max_dur = settings.MAX_CLIP_DURATION  # 60
-    min_dur = settings.MIN_CLIP_DURATION  # 12
+    # Respect job-level duration overrides — same priority chain as S05/S06
+    max_dur = int(clip_duration_max) if clip_duration_max is not None else settings.MAX_CLIP_DURATION
+    min_dur = int(clip_duration_min) if clip_duration_min is not None else settings.MIN_CLIP_DURATION
+    print(f"[S07] Duration limits: {min_dur}s–{max_dur}s (job_override={'yes' if clip_duration_max is not None else 'no'})")
 
     results = []
 
@@ -92,8 +110,15 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
             snapped_start = snap_to_word_boundary(rec_start, words, "start")
             snapped_end = snap_to_word_boundary(rec_end, words, "end")
 
-            # 2. Apply breath buffers
-            final_start = max(0.0, snapped_start - 0.3)
+            # 2. Apply breath buffers — but don't bleed into previous word
+            breath_start = 0.3
+            prev_end = _find_prev_word_end(snapped_start, words)
+            if prev_end is not None and (snapped_start - breath_start) < prev_end:
+                # Would overlap with previous word — use midpoint of gap instead
+                gap = snapped_start - prev_end
+                breath_start = max(gap * 0.5, 0.05)
+
+            final_start = max(0.0, snapped_start - breath_start)
             final_end = snapped_end + 0.5
 
             # 3. Enforce duration limits
@@ -108,14 +133,14 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
             if final_end > video_duration:
                 final_end = video_duration
 
-            # 5. Skip if start >= end after clamping (can happen if S06 extended start beyond video end)
+            # 5. Skip if start >= end after clamping
             if final_start >= final_end:
                 print(f"[S07] Clip {index+1} ({content_type}): start {final_start:.2f}s >= end {final_end:.2f}s after clamping. Skipping.")
                 continue
 
             final_duration_s = final_end - final_start
 
-            # 5. Write calculated values into clip dict
+            # 6. Write calculated values into clip dict
             clip_copy = dict(clip)
             clip_copy["final_start"] = round(final_start, 3)
             clip_copy["final_end"] = round(final_end, 3)
@@ -126,11 +151,16 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
 
         except Exception as e:
             print(f"[S07] Error processing clip {index+1}: {e}")
-            # Still include the clip with original times as fallback
+            # Fallback: still try to snap even in exception path
             clip_copy = dict(clip)
-            clip_copy["final_start"] = clip.get("recommended_start", 0.0)
-            clip_copy["final_end"] = clip.get("recommended_end", 0.0)
-            clip_copy["final_duration_s"] = clip_copy["final_end"] - clip_copy["final_start"]
+            fb_start = clip.get("recommended_start", 0.0)
+            fb_end = clip.get("recommended_end", 0.0)
+            if words:
+                fb_start = snap_to_word_boundary(fb_start, words, "start")
+                fb_end = snap_to_word_boundary(fb_end, words, "end")
+            clip_copy["final_start"] = round(max(0.0, fb_start - 0.15), 3)
+            clip_copy["final_end"] = round(fb_end + 0.3, 3)
+            clip_copy["final_duration_s"] = round(clip_copy["final_end"] - clip_copy["final_start"], 3)
             results.append(clip_copy)
 
     print(f"[S07] Precision cut complete. {len(results)}/{len(evaluated_clips)} clips processed.")

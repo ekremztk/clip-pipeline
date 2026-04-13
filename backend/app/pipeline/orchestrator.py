@@ -93,6 +93,14 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             reframe_content_type = job_row.data[0].get("reframe_content_type") or "podcast"
             caption_template = job_row.data[0].get("caption_template") or "clean"
 
+        # Fetch channel_dna early — needed by S02 (keyterms) and S05/S06
+        try:
+            channel_res = get_client().table("channels").select("channel_dna").eq("id", channel_id).execute()
+            if channel_res.data and len(channel_res.data) > 0:
+                channel_dna = channel_res.data[0].get("channel_dna") or {}
+        except Exception as e:
+            print(f"[Orchestrator] Warning: Could not fetch channel_dna early: {e}")
+
         steps = [
             (1,  "s01_audio_extract",      5),
             (2,  "s02_transcribe",         15),
@@ -136,7 +144,12 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     audio_path = s01_audio_extract.run(video_path, job_id)
                 elif step_number == 2:
                     from app.pipeline.steps import s02_transcribe
-                    transcript_data = s02_transcribe.run(audio_path, job_id)
+                    transcript_data = s02_transcribe.run(
+                        audio_path, job_id,
+                        channel_dna=channel_dna,
+                        video_title=video_title,
+                        guest_name=guest_name,
+                    )
                 elif step_number == 3:
                     from app.pipeline.steps import s03_speaker_id
                     speaker_data = s03_speaker_id.run(transcript_data, job_id, video_title)
@@ -163,11 +176,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
                     from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
-                    # Fetch channel_dna from Supabase
-                    supabase = get_client()
-                    channel_res = supabase.table("channels").select("channel_dna").eq("id", channel_id).execute()
-                    if channel_res.data and len(channel_res.data) > 0:
-                        channel_dna = channel_res.data[0].get("channel_dna") or {}
+                    # channel_dna already fetched at pipeline start
                     # Get video duration from transcript_data (Deepgram provides this)
                     video_duration_s = transcript_data.get("duration", 0.0) if transcript_data else 0.0
                     # guest_name is already available as a function parameter
@@ -241,7 +250,9 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             evaluated_clips=evaluated_clips,
                             transcript_data=transcript_data,
                             video_path=video_path,
-                            job_id=job_id
+                            job_id=job_id,
+                            clip_duration_min=clip_duration_min,
+                            clip_duration_max=clip_duration_max,
                         )
                     print(f"[Orchestrator] S07 returned {len(cut_results)} clips with boundaries")
                     duration_ms_s07 = int((time.time() - step_start_time) * 1000)
@@ -263,7 +274,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             channel_id=channel_id,
                             video_path=video_path,
                             video_title=video_title,
-                            user_id=user_id
+                            user_id=user_id,
+                            transcript_data=transcript_data,
                         )
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
                     duration_ms_s08 = int((time.time() - step_start_time) * 1000)

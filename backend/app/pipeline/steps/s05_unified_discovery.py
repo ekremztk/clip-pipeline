@@ -1,9 +1,8 @@
 import json
 import re
-import os
 from typing import Optional
 from app.config import settings
-from app.services.gemini_client import analyze_video, generate_json
+from app.services.gemini_client import generate_json
 from app.services.supabase_client import get_client
 from app.pipeline.prompts.unified_discovery import PROMPT
 from datetime import datetime, timezone, timedelta
@@ -278,6 +277,13 @@ def _validate_candidates(candidates: list, video_duration_s: float, min_duration
             continue
         start = float(c.get("recommended_start", 0) or 0)
         end = float(c.get("recommended_end", 0) or 0)
+        # Negative timestamp guard
+        if start < 0:
+            print(f"[S05] Dropped candidate {c.get('candidate_id')}: negative start {start:.1f}s")
+            continue
+        if end < 0:
+            print(f"[S05] Dropped candidate {c.get('candidate_id')}: negative end {end:.1f}s")
+            continue
         if video_duration_s > 0 and start >= video_duration_s:
             print(f"[S05] Dropped candidate {c.get('candidate_id')}: start {start:.1f}s >= video duration {video_duration_s:.1f}s")
             continue
@@ -354,9 +360,9 @@ def run(
     clip_duration_max: Optional[int] = None,
 ) -> list:
     """
-    S05: Unified Discovery
-    Sends video + transcript + channel context + guest profile to Gemini in one call.
-    Returns list of clip candidates.
+    S05: Unified Discovery (Transcript-Only)
+    Uses labeled transcript + channel context + guest profile to find clip candidates.
+    Video/audio analysis is NOT done here — S06 handles visual verification with frames.
 
     clip_duration_min / clip_duration_max: job-level user selection (highest priority).
     Falls back to channel DNA, then to config defaults.
@@ -396,14 +402,20 @@ def run(
         prompt = prompt.replace("MIN_DURATION_PLACEHOLDER", str(min_duration))
         prompt = prompt.replace("MAX_DURATION_PLACEHOLDER", str(max_duration))
 
-        print(f"[S05] Prompt built ({len(prompt)} chars). Sending video to Gemini...")
+        print(f"[S05] Prompt built ({len(prompt)} chars). Sending transcript to Gemini...")
 
-        # 5. Send to Gemini (video + prompt)
-        # analyze_video already uses settings.GEMINI_MODEL_PRO
-        raw_response = analyze_video(video_path, prompt, json_mode=True)
+        # 5. Transcript-only discovery via generate_json (no video upload)
+        raw_response = generate_json(prompt, model=settings.GEMINI_MODEL_PRO)
 
-        # 6. Parse response
-        candidates = _parse_gemini_json(raw_response)
+        # 6. Parse response — generate_json may return dict or list directly
+        if isinstance(raw_response, list):
+            candidates = raw_response
+        elif isinstance(raw_response, dict) and "candidates" in raw_response:
+            candidates = raw_response["candidates"]
+        elif isinstance(raw_response, str):
+            candidates = _parse_gemini_json(raw_response)
+        else:
+            candidates = []
 
         if candidates:
             print(f"[S05] Gemini returned {len(candidates)} candidates")
@@ -419,36 +431,7 @@ def run(
                 pass
             return valid_candidates
 
-        # 7. Fallback: If video analysis returned nothing, try audio-only
-        print("[S05] Video analysis returned no candidates. Trying audio fallback...")
-        try:
-            from app.services.gemini_client import analyze_audio
-            if audio_path and os.path.exists(audio_path):
-                print(f"[S05] Audio fallback: using {audio_path}")
-                raw_response = analyze_audio(audio_path, prompt, model=settings.GEMINI_MODEL_PRO)
-                candidates = _parse_gemini_json(raw_response)
-                if candidates:
-                    print(f"[S05] Audio fallback returned {len(candidates)} candidates")
-                    valid = _validate_candidates(candidates, video_duration_s, min_duration)
-                    print(f"[S05] {len(valid)} valid candidates after validation")
-                    return valid
-            else:
-                print(f"[S05] Audio fallback skipped: audio_path not provided or file not found ({audio_path})")
-        except Exception as fb_err:
-            print(f"[S05] Audio fallback failed: {fb_err}")
-
-        # 8. Final fallback: transcript-only via generate_json
-        print("[S05] Audio fallback failed. Trying transcript-only fallback...")
-        try:
-            transcript_only_prompt = prompt  # Same prompt but no video/audio
-            result = generate_json(transcript_only_prompt, model=settings.GEMINI_MODEL_PRO)
-            if isinstance(result, list):
-                print(f"[S05] Transcript fallback returned {len(result)} candidates")
-                return [c for c in result if isinstance(c, dict) and "candidate_id" in c]
-        except Exception as t_err:
-            print(f"[S05] Transcript fallback failed: {t_err}")
-
-        print("[S05] All methods failed. Returning empty candidate list.")
+        print("[S05] Gemini returned no candidates. Returning empty list.")
         return []
 
     except Exception as e:
