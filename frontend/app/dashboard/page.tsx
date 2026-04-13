@@ -969,7 +969,7 @@ export default function DashboardPage() {
                                                     ref={urlInputRef}
                                                     type="text"
                                                     value={youtubeUrl}
-                                                    onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError(''); }}
+                                                    onChange={e => { setYoutubeUrl(e.target.value); }}
                                                     onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
                                                     onFocus={() => setInputFocused(true)}
                                                     onBlur={() => { if (!youtubeUrl) setInputFocused(false); }}
