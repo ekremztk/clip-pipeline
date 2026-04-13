@@ -124,7 +124,7 @@ def _reframe_podcast(
             job_id=job_id,
             strategy="podcast",
             aspect_ratio="9:16",
-            tracking_mode="dynamic_xy",
+            tracking_mode="x_only",
             content_type_hint="podcast",
             detection_engine="yolo",
         )

@@ -58,11 +58,12 @@ class PathSolverConfig:
     #   Subject walking across frame → spread > 0.15 → TRACKING.
     # motion_threshold = 0.005 (0.5% = ~10px at 1920px):
     #   Filters sensor/detection noise. Catches genuine micro-movements within a TRACKING shot.
-    stationary_threshold: float = 0.10          # Max spread to use stationary mode (10% of frame)
-    # Lowered from 0.15: at 1920px wide, 9:16 crop = ~607px.
-    # Face leaving the crop requires ~303px = 0.158 of frame width, which was
-    # just above the old 0.15 threshold — genuine movement was misclassified as
-    # STATIONARY. 0.10 catches movements from ~192px, median filter absorbs noise.
+    stationary_threshold: float = 0.15          # Max spread to use stationary mode (15% of frame)
+    # Raised back from 0.10: podcast speakers (seated) have head spread of 0.03-0.12.
+    # At 0.10 threshold, subtle leans/nods trigger TRACKING mode → jitter.
+    # At 0.15, only genuine position changes trigger tracking; median filter absorbs noise.
+    # (The "face leaving crop" concern at 0.158 only applies to walking/standing content,
+    # not seated podcast speakers. For those cases use a custom config or content type.)
     panning_linearity_threshold: float = 0.85   # Min R^2 for linear fit to use panning
 
     # Kinematic constraints

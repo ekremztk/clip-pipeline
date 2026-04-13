@@ -114,6 +114,7 @@ def render_podcast_reframe(
 
             duration = seg["end"] - seg["start"]
             vf = (
+                f"setpts=PTS-STARTPTS,"
                 f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
                 f"scale={canvas_w}:{canvas_h}:flags=lanczos"
             )
