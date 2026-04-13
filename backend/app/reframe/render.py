@@ -119,14 +119,19 @@ def render_podcast_reframe(
                 f"scale={canvas_w}:{canvas_h}:flags=lanczos"
             )
 
-            # Use input-side seek (-ss before -i) for fast decode; timestamps reset
-            # to 0 so the 't' variable in crop expressions starts at 0 per segment —
-            # which matches what _build_crop_expression produces (subtracts seg start).
+            # -ss before -i: fast input seek.
+            # -t after -i: precise OUTPUT duration (not input read limit).
+            #   This matters for audio: when -t is an input option, AAC frame
+            #   boundaries may bleed past the cut → overlapping audio at concat seams.
+            #   With -t as output option, FFmpeg applies it after encode → clean cut.
+            # setpts=PTS-STARTPTS: reset video timestamps to 0 so crop expression's
+            #   't' variable starts at 0 per segment (matches _build_crop_expression).
+            # asetpts=PTS-STARTPTS: same reset for audio → clean timestamps for concat.
             cmd = [
                 "ffmpeg", "-y",
                 "-ss", f"{seg['start']:.6f}",
-                "-t", f"{duration:.6f}",
                 "-i", video_path,
+                "-t", f"{duration:.6f}",
                 "-vf", vf,
                 "-c:v", "libx264",
                 "-preset", "fast",
@@ -134,7 +139,7 @@ def render_podcast_reframe(
                 "-movflags", "+faststart",
             ]
             if has_audio:
-                cmd.extend(["-c:a", "aac", "-b:a", "320k"])
+                cmd.extend(["-af", "asetpts=PTS-STARTPTS", "-c:a", "aac", "-b:a", "320k"])
             cmd.append(tmp_path)
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
