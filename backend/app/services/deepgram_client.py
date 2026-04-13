@@ -24,12 +24,9 @@ def transcribe(audio_path: str, keyterms: Optional[list[str]] = None) -> dict:
             "multichannel": "false",
         }
 
-        # Nova-3 keyterm prompting — boosts recognition of domain-specific words
+        # Note: Nova-3 does not support the keywords parameter — skip keyterm injection
         if keyterms:
-            trimmed = [t.strip() for t in keyterms if t and t.strip()][:100]
-            if trimmed:
-                params["keywords"] = trimmed
-                print(f"[Deepgram] Keyterms injected: {len(trimmed)} terms")
+            print(f"[Deepgram] Keyterms provided ({len(keyterms)}) but skipped — not supported by Nova-3")
 
         response = httpx.post(
             "https://api.deepgram.com/v1/listen",
