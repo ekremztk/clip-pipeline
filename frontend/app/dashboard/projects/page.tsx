@@ -33,6 +33,7 @@ interface Clip {
     end_time?: number;
     video_landscape_path?: string | null;
     video_reframed_path?: string | null;
+    video_captioned_path?: string | null;
     reframe_metadata?: any | null;
     caption_metadata?: any | null;
 }
@@ -46,6 +47,10 @@ interface TranscriptWord {
 type FilterType = "all" | "successful" | "failed" | "published";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// Returns the best available video URL: captioned > reframed > raw 16:9
+const getBestUrl = (clip: Clip): string | null =>
+    clip.video_captioned_path || clip.video_reframed_path || clip.file_url || null;
 
 const STEP_LABELS: Record<string, string> = {
     initializing: "Initializing...",
@@ -110,14 +115,14 @@ const getScoreHex = (score: number) => {
 // ─── Open in Editor Button ────────────────────────────────────────────────────
 
 const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: string | null }) => {
-    if (!clip.file_url) {
+    if (!getBestUrl(clip)) {
         return (
             <button disabled style={{ border: "1px solid rgba(250,249,245,0.08)", color: "#ababab" }} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-medium cursor-not-allowed text-xs">
                 <Scissors className="w-3.5 h-3.5" /> Open in Editor
             </button>
         );
     }
-    const params = new URLSearchParams({ clipUrl: clip.file_url });
+    const params = new URLSearchParams({ clipUrl: getBestUrl(clip)! });
     if (clip.suggested_title) params.set("clipTitle", clip.suggested_title);
     if (clip.suggested_description) params.set("clipDesc", clip.suggested_description);
     if (guestName) params.set("clipGuestName", guestName);
@@ -274,10 +279,10 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                 <div className="w-[300px] flex-shrink-0 flex flex-col" style={{ borderRight: '1px solid rgba(250,249,245,0.06)' }}>
                     {/* Video */}
                     <div className="relative flex-1 min-h-0 m-4 mb-3 rounded-xl overflow-hidden" style={{ background: '#111110' }}>
-                        {clip.file_url ? (
+                        {getBestUrl(clip) ? (
                             <video
                                 ref={videoRef}
-                                src={clip.file_url}
+                                src={getBestUrl(clip)!}
                                 className="w-full h-full object-contain"
                                 controls
                                 playsInline
@@ -694,7 +699,7 @@ function ProjectsContent() {
 
     const handleDownload = (id: string) => {
         const clip = clips.find(c => c.id === id) || selectedClip;
-        if (clip?.file_url) window.open(clip.file_url, "_blank");
+        if (clip) { const u = getBestUrl(clip); if (u) window.open(u, "_blank"); }
     };
 
     // Derived data
@@ -865,9 +870,9 @@ function ProjectsContent() {
                                             className="relative aspect-video flex items-center justify-center rounded-t-2xl overflow-hidden"
                                             style={{ background: '#1c1c1b' }}
                                         >
-                                            {firstClip?.file_url ? (
+                                            {firstClip && getBestUrl(firstClip) ? (
                                                 <video
-                                                    src={firstClip.file_url}
+                                                    src={getBestUrl(firstClip)!}
                                                     className="w-full h-full object-cover"
                                                     muted loop playsInline preload="metadata"
                                                     onMouseEnter={e => e.currentTarget.play()}
@@ -954,8 +959,8 @@ function ProjectsContent() {
                                             className="relative aspect-[9/16] overflow-hidden flex items-center justify-center"
                                             style={{ background: '#1c1c1b' }}
                                         >
-                                            {clip.file_url ? (
-                                                <video src={clip.file_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                                            {getBestUrl(clip) ? (
+                                                <video src={getBestUrl(clip)!} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                                             ) : (
                                                 <Play size={20} style={{ color: 'rgba(250,249,245,0.15)' }} />
                                             )}
