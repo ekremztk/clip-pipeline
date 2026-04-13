@@ -70,7 +70,7 @@ function SettingsSidebarNav() {
     const searchParams = useSearchParams();
     const active = searchParams.get('section') ?? 'account';
     return (
-        <nav className="flex flex-col gap-0.5 flex-1">
+        <nav className="flex flex-col gap-1 flex-1">
             {SETTINGS_SECTIONS.map((s) => {
                 const Icon = s.icon;
                 const on = active === s.id;
@@ -78,10 +78,10 @@ function SettingsSidebarNav() {
                     <Link
                         key={s.id}
                         href={`/dashboard/settings?section=${s.id}`}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white/5"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-[rgba(250,249,245,0.08)]"
                         style={{
-                            background: on ? "rgba(250,249,245,0.06)" : "transparent",
-                            color:      on ? "#faf9f5" : "rgba(250,249,245,0.45)",
+                            background: on ? "rgba(250,249,245,0.08)" : undefined,
+                            color: "#faf9f5",
                         }}
                     >
                         <Icon size={16} strokeWidth={on ? 2.2 : 1.7} />
@@ -117,7 +117,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
     const router = useRouter();
 
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('sidebarOpen');
+            return saved !== null ? saved === 'true' : true;
+        }
+        return true;
+    });
     const [profileOpen, setProfileOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
     const [channels, setChannels] = useState<Channel[]>([]);
@@ -128,10 +134,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const profileRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLDivElement>(null);
 
-    // Auto-close sidebar on route change
+    // Persist sidebar state
     useEffect(() => {
-        setSidebarOpen(false);
-    }, [pathname]);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('sidebarOpen', String(sidebarOpen));
+        }
+    }, [sidebarOpen]);
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -306,11 +314,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`;
 
         const activeStyle = {
-            background: active ? "rgba(250,249,245,0.06)" : "transparent",
-            color: active ? "#faf9f5" : "rgba(250,249,245,0.5)",
+            background: active ? "rgba(250,249,245,0.08)" : undefined,
+            color: "#faf9f5",
         };
 
-        const hoverCls = !active ? "hover:bg-white/5 hover:!text-[#faf9f5]" : "";
+        const hoverCls = !active ? "hover:bg-[rgba(250,249,245,0.08)]" : "";
 
         const inner = (
             <>
@@ -363,7 +371,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* ── Sidebar ── */}
                 <aside
                     className={`flex-shrink-0 flex flex-col h-screen transition-all duration-300 relative ${isSettings ? 'w-[220px]' : sidebarOpen ? 'w-[240px]' : 'w-[72px]'}`}
-                    style={{ background: "#141413", borderRight: isSettings ? "1px solid rgba(250,249,245,0.05)" : undefined }}
+                    style={{ background: "#141413", borderRight: "1px solid rgba(250,249,245,0.05)" }}
                 >
                     {isSettings ? (
                         /* ── Settings sidebar ── */
@@ -391,12 +399,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <>
                             {/* Logo */}
                             <div className={`flex items-center h-20 flex-shrink-0 mt-2 ${sidebarOpen ? 'px-6 gap-3' : 'justify-center'}`}>
-                                <div
-                                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                                    style={{ background: "#faf9f5", boxShadow: "0 0 20px rgba(250,249,245,0.2)" }}
-                                >
-                                    <Zap size={16} style={{ color: "#141413" }} strokeWidth={2.5} />
-                                </div>
+                                <img
+                                    src="/favicon.png"
+                                    alt="Prognot"
+                                    className="w-8 h-8 flex-shrink-0"
+                                    style={{ objectFit: 'contain' }}
+                                />
                                 {sidebarOpen && (
                                     <span className="text-lg font-bold tracking-tight" style={{ color: "#faf9f5" }}>
                                         PrognoT

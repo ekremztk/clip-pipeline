@@ -95,9 +95,9 @@ def render_podcast_reframe(
         crop_x_expr = _build_crop_expression(seg["keyframes"], "offset_x", seg["start"], fps)
         crop_y_expr = _build_crop_expression(seg["keyframes"], "offset_y", seg["start"], fps)
 
-        # Clamp crop to source bounds
-        crop_x_expr = f"clip({crop_x_expr},0,{src_w - crop_w})"
-        crop_y_expr = f"clip({crop_y_expr},0,{src_h - crop_h})"
+        # Clamp crop to source bounds (clip() is not a valid FFmpeg expr; use min/max)
+        crop_x_expr = f"min(max({crop_x_expr},0),{src_w - crop_w})"
+        crop_y_expr = f"min(max({crop_y_expr},0),{src_h - crop_h})"
 
         seg_label = f"v{i}"
         filter_parts.append(
@@ -155,7 +155,11 @@ def render_podcast_reframe(
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
-        raise RuntimeError(f"FFmpeg podcast render failed: {result.stderr[-800:]}")
+        raise RuntimeError(
+            f"FFmpeg podcast render failed.\n"
+            f"filter_complex={filter_complex[:600]}\n"
+            f"stderr={result.stderr[-600:]}"
+        )
 
     logger.info("[Render] Podcast render complete: %s", output_path)
     return output_path

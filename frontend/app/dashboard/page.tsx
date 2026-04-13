@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Upload, Play, MoreVertical, Dna, Clapperboard, Search, ArrowRight, Link2, Sparkles, AlertCircle, X } from "lucide-react";
+import { Upload, Play, MoreVertical, Dna, Clapperboard, Search, ArrowRight, Link2, Sparkles, X, Scissors, BarChart3, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useChannel } from "./layout";
 import { authFetch, API_URL } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
+import { toast } from "@/lib/toast";
 
 type Job = {
     id: string;
@@ -17,6 +18,12 @@ type Job = {
     current_step?: string;
     step?: string;
     created_at?: string;
+};
+
+type Clip = {
+    id: string;
+    job_id: string;
+    file_url: string | null;
 };
 
 type UploadPhase = 'idle' | 'uploading' | 'settings' | 'processing';
@@ -135,26 +142,221 @@ function TimeInput({ value, onChange, max }: { value: number; onChange: (v: numb
     );
 }
 
-const features = [
+type FeatureCard = {
+    icon: React.ElementType;
+    name: string;
+    description: string;
+    href: string | null;
+    gradient: string;
+    external?: boolean;
+};
+
+const allFeatures: FeatureCard[] = [
     {
         icon: Dna,
         name: "Channel DNA",
         description: "Train the AI on your channel's unique style and voice",
         href: "/dashboard/channel-dna",
-    },
-    {
-        icon: Clapperboard,
-        name: "AI Director",
-        description: "Intelligent recommendations based on your performance data",
-        href: "/director",
+        gradient: "linear-gradient(135deg, #f59e0b, #b45309)",
     },
     {
         icon: Search,
         name: "Content Finder",
         description: "Discover viral moments across your long-form content",
         href: "/dashboard/content-finder",
+        gradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+    },
+    {
+        icon: Clapperboard,
+        name: "AI Director",
+        description: "Intelligent recommendations based on your performance data",
+        href: "/director",
+        gradient: "linear-gradient(135deg, #22c55e, #15803d)",
+    },
+    {
+        icon: Scissors,
+        name: "Editor",
+        description: "Edit and fine-tune your clips in a powerful online editor",
+        href: "https://edit.prognot.com",
+        gradient: "linear-gradient(135deg, #a855f7, #7c3aed)",
+        external: true,
+    },
+    {
+        icon: BarChart3,
+        name: "Analytics",
+        description: "Track performance metrics and optimize your content strategy",
+        href: "/dashboard/performance",
+        gradient: "linear-gradient(135deg, #f97316, #c2410c)",
+    },
+    {
+        icon: Calendar,
+        name: "Calendar",
+        description: "Plan and schedule your content releases ahead of time",
+        href: null,
+        gradient: "linear-gradient(135deg, #ec4899, #be185d)",
     },
 ];
+
+const BALLOON_WORDS = ['Podcast', 'Gaming', 'Interview', 'Vlog', 'Tutorial', 'Shorts', 'Stream', 'Highlight', 'Recap', 'Review'];
+
+interface Balloon {
+    id: number;
+    word: string;
+    side: 'left' | 'right';
+    size: number;
+    arcX: number;
+    arcY: number;
+    duration: number;
+    wobbleDur: number;
+    jitter: number;
+}
+
+function GlassBubbles() {
+    const [balloons, setBalloons] = useState<Balloon[]>([]);
+    const idRef = useRef(0);
+    const sideRef = useRef<'left' | 'right'>('left');
+
+    useEffect(() => {
+        let active = true;
+        let tid: ReturnType<typeof setTimeout>;
+
+        const spawn = () => {
+            if (!active) return;
+            setBalloons(prev => {
+                if (prev.length >= 3) return prev;
+                const side = sideRef.current;
+                sideRef.current = side === 'left' ? 'right' : 'left';
+                // arcX capped at 130px — safe on all screen sizes, bubble stays within page
+                const arcMag = 80 + Math.random() * 50;
+                return [...prev, {
+                    id: idRef.current++,
+                    word: BALLOON_WORDS[Math.floor(Math.random() * BALLOON_WORDS.length)],
+                    side,
+                    size: 50 + Math.floor(Math.random() * 21),
+                    arcX: side === 'left' ? -arcMag : arcMag,
+                    arcY: -(260 + Math.random() * 100),
+                    duration: 4 + Math.random() * 1.5,
+                    wobbleDur: 0.9 + Math.random() * 0.6,
+                    jitter: Math.random() * 30 - 15,
+                }];
+            });
+            tid = setTimeout(spawn, 4000 + Math.random() * 1000);
+        };
+
+        tid = setTimeout(spawn, 500);
+        return () => { active = false; clearTimeout(tid); };
+    }, []);
+
+    const remove = (id: number) => setBalloons(prev => prev.filter(b => b.id !== id));
+
+    return (
+        <>
+            {balloons.map(b => {
+                const kf = `bbl-${b.id}`;
+                const x = (t: number) => (b.arcX * Math.pow(t, 1.8)).toFixed(1);
+                const y = (t: number) => (b.arcY * t).toFixed(1);
+                const s = (t: number) => (1 - t * 0.45).toFixed(2);
+                const o = (t: number) => Math.max(0, 1 - t * 1.15).toFixed(2);
+                return (
+                    <div key={b.id}>
+                        <style>{`
+                            @keyframes ${kf} {
+                                0%   { transform: translate(0px, 0px) scale(1); opacity: 0; }
+                                6%   { opacity: 0.92; }
+                                25%  { transform: translate(${x(0.25)}px, ${y(0.25)}px) scale(${s(0.25)}); opacity: ${o(0.25)}; }
+                                50%  { transform: translate(${x(0.5)}px, ${y(0.5)}px) scale(${s(0.5)}); opacity: ${o(0.5)}; }
+                                75%  { transform: translate(${x(0.75)}px, ${y(0.75)}px) scale(${s(0.75)}); opacity: ${o(0.75)}; }
+                                100% { transform: translate(${x(1)}px, ${y(1)}px) scale(${s(1)}); opacity: 0; }
+                            }
+                        `}</style>
+                        <div
+                            className="pointer-events-none select-none"
+                            style={{
+                                position: 'absolute',
+                                ...(b.side === 'left'
+                                    ? { left: `${60 + b.jitter}px` }
+                                    : { right: `${60 + b.jitter}px` }),
+                                top: '40%',
+                                width: b.size,
+                                height: b.size,
+                                zIndex: 5,
+                                animation: `${kf} ${b.duration}s linear forwards`,
+                            }}
+                            onAnimationEnd={() => remove(b.id)}
+                        >
+                            {/* Wobble layer */}
+                            <div style={{
+                                width: '100%',
+                                height: '100%',
+                                animation: `bubble-wobble ${b.wobbleDur}s ease-in-out infinite`,
+                            }}>
+                                {/* Balloon sphere */}
+                                <div style={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: '50%',
+                                    background: [
+                                        'radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)',
+                                        'radial-gradient(circle at 55% 55%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 60%, transparent 100%)',
+                                        'radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+                                        'linear-gradient(160deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.05) 100%)',
+                                    ].join(', '),
+                                    boxShadow: [
+                                        'inset 0 -4px 8px rgba(255,255,255,0.06)',
+                                        'inset 0 2px 4px rgba(255,255,255,0.25)',
+                                        '0 4px 16px rgba(0,0,0,0.25)',
+                                        '0 0 12px rgba(255,255,255,0.04)',
+                                    ].join(', '),
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                }}>
+                                    {/* Primary specular highlight */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '12%',
+                                        left: '16%',
+                                        width: '35%',
+                                        height: '28%',
+                                        borderRadius: '50%',
+                                        background: 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+                                        filter: 'blur(1px)',
+                                        transform: 'rotate(-20deg)',
+                                    }} />
+                                    {/* Secondary highlight */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '22%',
+                                        right: '18%',
+                                        width: '12%',
+                                        height: '10%',
+                                        borderRadius: '50%',
+                                        background: 'rgba(255,255,255,0.35)',
+                                        filter: 'blur(0.5px)',
+                                    }} />
+                                    {/* Word label */}
+                                    <span style={{
+                                        fontSize: '9px',
+                                        fontWeight: 600,
+                                        color: 'rgba(255,255,255,0.8)',
+                                        textAlign: 'center',
+                                        lineHeight: 1,
+                                        letterSpacing: '0.02em',
+                                        textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                                        zIndex: 1,
+                                    }}>{b.word}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+        </>
+    );
+}
 
 function Skeleton({ className }: { className?: string }) {
     return (
@@ -168,7 +370,7 @@ function Skeleton({ className }: { className?: string }) {
 function PageSkeleton() {
     return (
         <div className="min-h-screen" style={{ background: '#141413' }}>
-            <div className="max-w-5xl mx-auto px-8 py-10 space-y-12">
+            <div className="px-8 py-10 space-y-12">
                 <div className="text-center space-y-3 pt-4">
                     <Skeleton className="h-10 w-2/3 mx-auto rounded-xl" />
                     <Skeleton className="h-4 w-1/3 mx-auto rounded" />
@@ -202,7 +404,10 @@ export default function DashboardPage() {
 
     // Jobs state
     const [jobs, setJobs] = useState<Job[]>([]);
+    const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState(true);
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     // Upload state machine
     const [uploadPhase, setUploadPhase] = useState<UploadPhase>('idle');
@@ -234,15 +439,36 @@ export default function DashboardPage() {
     // YouTube URL state
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [youtubeFetching, setYoutubeFetching] = useState(false);
-    const [youtubeError, setYoutubeError] = useState('');
 
     // Processing state
     const [statusMsg, setStatusMsg] = useState('');
-    const [submitError, setSubmitError] = useState('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRef = useRef<HTMLDivElement>(null);
+    const featureCarouselRef = useRef<HTMLDivElement>(null);
+    const urlInputRef = useRef<HTMLInputElement>(null);
+    const uploadBoxRef = useRef<HTMLDivElement>(null);
+    const [inputFocused, setInputFocused] = useState(false);
+    const [uploadAreaHovered, setUploadAreaHovered] = useState(false);
+
+    // Feature carousel state
+    const [featuresHovered, setFeaturesHovered] = useState(false);
+    const [featureCanScrollLeft, setFeatureCanScrollLeft] = useState(false);
+    const [featureCanScrollRight, setFeatureCanScrollRight] = useState(true);
+
+    const updateFeatureScroll = () => {
+        const el = featureCarouselRef.current;
+        if (!el) return;
+        setFeatureCanScrollLeft(el.scrollLeft > 2);
+        setFeatureCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+    };
+
+    const scrollFeatures = (dir: 'left' | 'right') => {
+        const el = featureCarouselRef.current;
+        if (!el) return;
+        el.scrollBy({ left: dir === 'right' ? 296 : -296, behavior: 'smooth' });
+    };
 
     // Sync channel selection into form
     useEffect(() => {
@@ -258,12 +484,27 @@ export default function DashboardPage() {
             return;
         }
         setLoading(true);
-        authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`)
-            .then(r => r.ok ? r.json() : [])
-            .then(data => setJobs(data))
+        Promise.all([
+            authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`).then(r => r.ok ? r.json() : []),
+            authFetch(`/clips?channel_id=${activeChannelId}&limit=200`).then(r => r.ok ? r.json() : []),
+        ])
+            .then(([jobsData, clipsData]) => { setJobs(jobsData); setClips(clipsData); })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, [activeChannelId, channelLoading]);
+
+    const handleDeleteJob = async (jobId: string) => {
+        try {
+            const res = await authFetch(`/jobs/${jobId}`, { method: 'DELETE' });
+            if (res.ok) {
+                setJobs(prev => prev.filter(j => j.id !== jobId));
+                toast.success('Project deleted.');
+            } else {
+                toast.error('Failed to delete project.');
+            }
+        } catch { toast.error('Failed to delete project.'); }
+        setDeleteConfirmId(null);
+    };
 
     // Auto-refresh active jobs
     useEffect(() => {
@@ -322,10 +563,8 @@ export default function DashboardPage() {
         setAspectRatio('9:16');
         setGenre('');
         setAutoHook(true);
-        setSubmitError('');
         setStatusMsg('');
         setYoutubeUrl('');
-        setYoutubeError('');
         setYoutubeFetching(false);
         setFormChannelId(activeChannelId);
         setUploadTab('link');
@@ -336,24 +575,23 @@ export default function DashboardPage() {
 
     const handleYoutubeUrl = async (url: string) => {
         const isValid = url.includes('youtube.com/watch') || url.includes('youtu.be/') || url.includes('youtube.com/shorts/');
-        if (!isValid) { setYoutubeError('Please enter a valid YouTube URL'); return; }
-        setYoutubeError('');
+        if (!isValid) { toast.error('Please enter a valid YouTube URL'); return; }
         setYoutubeFetching(true);
 
         let channelId = formChannelId || activeChannelId;
         if (!channelId) {
             try { channelId = await autoCreateChannel(); setFormChannelId(channelId); }
-            catch { setYoutubeError('Failed to create channel. Please create one in Settings first.'); setYoutubeFetching(false); return; }
+            catch { toast.error('Failed to create channel. Please create one in Settings first.'); setYoutubeFetching(false); return; }
         }
 
         // Step 1: fetch title quickly via oEmbed (no download)
         try {
             const infoRes = await authFetch(`/jobs/youtube-info?url=${encodeURIComponent(url)}`);
-            if (!infoRes.ok) { setYoutubeError('Could not fetch video info. Check the URL and try again.'); setYoutubeFetching(false); return; }
+            if (!infoRes.ok) { toast.error('Could not fetch video info. Check the URL and try again.'); setYoutubeFetching(false); return; }
             const info = await infoRes.json();
             setTitle(info.title || '');
         } catch {
-            setYoutubeError('Could not fetch video info. Check the URL and try again.');
+            toast.error('Could not fetch video info. Check the URL and try again.');
             setYoutubeFetching(false);
             return;
         }
@@ -378,12 +616,12 @@ export default function DashboardPage() {
                 setVideoUrl(`${API_URL}/jobs/video-stream/${resp.upload_id}`);
                 setUploadPhase('settings');
             } else {
-                setYoutubeError('Could not download video. Please try again.');
+                toast.error('Could not download video. Please try again.');
                 setUploadPhase('idle');
             }
         };
         xhr.onerror = () => {
-            setYoutubeError('Network error downloading video. Please try again.');
+            toast.error('Network error downloading video. Please try again.');
             setUploadPhase('idle');
         };
         const fd = new FormData();
@@ -407,14 +645,13 @@ export default function DashboardPage() {
         // Validate
         const ext = selectedFile.name.split('.').pop()?.toLowerCase() ?? '';
         if (!['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) {
-            setSubmitError('Unsupported file format. Use MP4, MOV, AVI, MKV, or WEBM.');
+            toast.error('Unsupported file format. Use MP4, MOV, AVI, MKV, or WEBM.');
             return;
         }
 
         setFile(selectedFile);
         setUploadPhase('uploading');
         setUploadProgress(0);
-        setSubmitError('');
 
         // Auto-create channel if none exists
         let channelId = formChannelId || activeChannelId;
@@ -423,7 +660,7 @@ export default function DashboardPage() {
                 channelId = await autoCreateChannel();
                 setFormChannelId(channelId);
             } catch {
-                setSubmitError('Failed to create a channel. Please create one in Settings first.');
+                toast.error('Failed to create a channel. Please create one in Settings first.');
                 setUploadPhase('idle');
                 setFile(null);
                 return;
@@ -461,7 +698,7 @@ export default function DashboardPage() {
                     setUploadPhase('settings');
                 }
             } else {
-                setSubmitError('Upload failed. Please try again.');
+                toast.error('Upload failed. Please try again.');
                 setUploadPhase('idle');
                 setFile(null);
                 URL.revokeObjectURL(url);
@@ -469,7 +706,7 @@ export default function DashboardPage() {
             }
         };
         xhr.onerror = () => {
-            setSubmitError('Network error during upload. Please try again.');
+            toast.error('Network error during upload. Please try again.');
             setUploadPhase('idle');
             setFile(null);
             URL.revokeObjectURL(url);
@@ -484,7 +721,6 @@ export default function DashboardPage() {
         if ((!uploadId && !youtubeUrl) || !title || !formChannelId) return;
         setUploadPhase('processing');
         setStatusMsg('Starting pipeline...');
-        setSubmitError('');
 
         const preset = DURATION_PRESETS.find(p => p.label === durationPreset) ?? DURATION_PRESETS[1];
         const fd = new FormData();
@@ -509,54 +745,25 @@ export default function DashboardPage() {
             const res = await authFetch('/jobs', { method: 'POST', body: fd });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                setSubmitError(err.detail || 'Failed to start processing');
+                toast.error(err.detail || 'Failed to start processing');
                 setUploadPhase('settings');
                 return;
             }
             const job = await res.json();
             const jobId = job?.id || job?.job_id;
             if (!jobId) {
-                setSubmitError('No job ID returned');
+                toast.error('No job ID returned');
                 setUploadPhase('settings');
                 return;
             }
 
-            setStatusMsg('Processing video...');
-            let attempts = 0;
-            const poll = async () => {
-                try {
-                    const statusRes = await authFetch(`/jobs/${jobId}`);
-                    const jobData = await statusRes.json();
-                    const status = jobData?.job?.status || jobData?.status;
-                    if (status === 'completed' || status === 'done') {
-                        setUploadPhase('idle');
-                        resetUpload();
-                        // Refresh jobs list
-                        const r = await authFetch(`/jobs?channel_id=${formChannelId}&limit=20`);
-                        if (r.ok) setJobs(await r.json());
-                        return;
-                    }
-                    if (status === 'failed' || status === 'error') {
-                        setSubmitError('Pipeline failed. Please try again.');
-                        setUploadPhase('settings');
-                        return;
-                    }
-                    const step = jobData?.job?.current_step || jobData?.job?.step || '';
-                    setStatusMsg(getStepLabel(step));
-                    attempts++;
-                    if (attempts < 90) setTimeout(poll, 2000);
-                    else {
-                        setUploadPhase('idle');
-                        resetUpload();
-                    }
-                } catch {
-                    attempts++;
-                    if (attempts < 90) setTimeout(poll, 2000);
-                }
-            };
-            setTimeout(poll, 2000);
+            // Add job to list immediately so it shows in Active Jobs, then reset UI
+            setJobs(prev => [{ id: jobId, video_title: title, status: 'processing', created_at: new Date().toISOString() }, ...prev]);
+            toast.success('Job started! Processing in the background.');
+            setUploadPhase('idle');
+            resetUpload();
         } catch (err: any) {
-            setSubmitError(err.message || 'Failed to start processing.');
+            toast.error(err.message || 'Failed to start processing.');
             setUploadPhase('settings');
         }
     };
@@ -631,7 +838,7 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen" style={{ background: '#141413' }}>
-            <div className="max-w-5xl mx-auto px-8 py-10 space-y-12">
+            <div className="px-8 py-10 space-y-12">
 
                 {/* Hero — hidden during settings/processing to give space */}
                 {uploadPhase === 'idle' && (
@@ -646,7 +853,7 @@ export default function DashboardPage() {
                 )}
 
                 {/* ── Upload Zone ── */}
-                <div className="w-full max-w-5xl mx-auto">
+                <div className="w-full">
 
                     {/* IDLE — tabbed upload widget */}
                     {uploadPhase === 'idle' && (
@@ -659,15 +866,62 @@ export default function DashboardPage() {
                                 onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
                             />
 
+                            {/* Bubble + card wrapper — position:relative creates stacking context for z-index layering */}
+                            <div
+                                ref={uploadBoxRef}
+                                style={{
+                                    position: 'relative',
+                                    zIndex: 0,
+                                    width: (uploadTab === 'file' || uploadAreaHovered || inputFocused || !!youtubeUrl) ? '100%' : '70%',
+                                    margin: '0 auto',
+                                    transition: 'width 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                }}
+                            >
+                            {/* Bubbles — z-index: -1, behind the card */}
+                            <GlassBubbles />
+
                             {/* Outer card */}
                             <div
-                                className="p-3 w-full relative overflow-hidden"
+                                className="p-3 relative overflow-hidden"
                                 style={{
                                     background: '#181817',
                                     borderRadius: '24px',
                                     boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)',
+                                    width: '100%',
+                                    zIndex: 10,
+                                    position: 'relative',
+                                }}
+                                onMouseEnter={() => setUploadAreaHovered(true)}
+                                onMouseLeave={() => setUploadAreaHovered(false)}
+                                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={e => {
+                                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                        setIsDragging(false);
+                                    }
+                                }}
+                                onDrop={e => {
+                                    e.preventDefault();
+                                    setIsDragging(false);
+                                    if (e.dataTransfer.files?.[0]) handleFileSelect(e.dataTransfer.files[0]);
                                 }}
                             >
+                                {/* Drag overlay — shown regardless of active tab */}
+                                {isDragging && (
+                                    <div
+                                        className="absolute inset-0 z-10 flex items-center justify-center"
+                                        style={{
+                                            background: 'rgba(20,20,19,0.9)',
+                                            borderRadius: '21px',
+                                            border: '2px dashed rgba(250,249,245,0.25)',
+                                        }}
+                                    >
+                                        <div className="text-center pointer-events-none">
+                                            <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: '#faf9f5' }} />
+                                            <p className="text-sm font-medium" style={{ color: '#faf9f5' }}>Drop your file here</p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Tab selector */}
                                 <div className="flex gap-2 mb-4 px-2 pt-2">
                                     {[
@@ -693,22 +947,18 @@ export default function DashboardPage() {
                                     })}
                                 </div>
 
-                                {/* Input area */}
+                                {/* Input area — Dynamic Island: synced with outer card width */}
                                 <div
-                                    className="flex items-center justify-between p-2 pl-4 transition-all min-h-[72px]"
+                                    className={`flex items-center justify-between p-2 pl-4 min-h-[72px] ${uploadTab === 'file' ? 'cursor-pointer' : ''}`}
                                     style={{
-                                        background: isDragging ? 'rgba(250,249,245,0.02)' : '#131312',
+                                        background: '#131312',
                                         borderRadius: '18px',
-                                        border: isDragging
-                                            ? '1px dashed rgba(250,249,245,0.2)'
-                                            : '1px solid rgba(250,249,245,0.03)',
+                                        border: '1px solid rgba(250,249,245,0.03)',
+                                        width: '100%',
                                     }}
-                                    onDragOver={e => { e.preventDefault(); if (uploadTab === 'file') setIsDragging(true); }}
-                                    onDragLeave={() => setIsDragging(false)}
-                                    onDrop={e => {
-                                        e.preventDefault();
-                                        setIsDragging(false);
-                                        if (uploadTab === 'file' && e.dataTransfer.files?.[0]) handleFileSelect(e.dataTransfer.files[0]);
+                                    onClick={() => {
+                                        if (uploadTab === 'file') fileInputRef.current?.click();
+                                        if (uploadTab === 'link') urlInputRef.current?.focus();
                                     }}
                                 >
                                     {uploadTab === 'link' ? (
@@ -716,10 +966,13 @@ export default function DashboardPage() {
                                             <div className="flex items-center gap-3 flex-1 px-2">
                                                 <Link2 size={16} style={{ color: '#ababab' }} />
                                                 <input
+                                                    ref={urlInputRef}
                                                     type="text"
                                                     value={youtubeUrl}
                                                     onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError(''); }}
                                                     onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
+                                                    onFocus={() => setInputFocused(true)}
+                                                    onBlur={() => { if (!youtubeUrl) setInputFocused(false); }}
                                                     placeholder="Paste a YouTube, Twitch or Vimeo URL..."
                                                     className="w-full text-sm outline-none h-full"
                                                     style={{
@@ -728,21 +981,49 @@ export default function DashboardPage() {
                                                     }}
                                                 />
                                             </div>
-                                            <button
-                                                onClick={() => youtubeUrl && handleYoutubeUrl(youtubeUrl)}
-                                                disabled={!youtubeUrl || youtubeFetching}
-                                                className="px-6 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ml-2 whitespace-nowrap"
+                                            {/* Snake-border wrapper — scale(1.1) + rotating gradient border when URL present */}
+                                            <div
+                                                className="relative flex-shrink-0 ml-2 overflow-hidden"
                                                 style={{
-                                                    background: youtubeUrl ? '#faf9f5' : 'rgba(250,249,245,0.05)',
-                                                    color: youtubeUrl ? '#141413' : 'rgba(250,249,245,0.3)',
+                                                    borderRadius: '14px',
+                                                    padding: youtubeUrl ? '2px' : '0',
+                                                    transition: 'padding 0.2s ease',
                                                 }}
                                             >
-                                                {youtubeFetching ? (
-                                                    <><span className="w-3.5 h-3.5 border-2 border-[rgba(250,249,245,0.3)] border-t-[#141413] rounded-full animate-spin" />Loading</>
-                                                ) : (
-                                                    <>Get Clips <ArrowRight size={15} /></>
+                                                {/* Spinning conic-gradient — large so rotation looks smooth */}
+                                                {youtubeUrl && (
+                                                    <div
+                                                        className="absolute pointer-events-none"
+                                                        style={{
+                                                            width: '200%',
+                                                            height: '200%',
+                                                            top: '-50%',
+                                                            left: '-50%',
+                                                            background: 'conic-gradient(from 0deg, transparent 0deg, transparent 195deg, #3b0764 210deg, #6d28d9 245deg, #8b5cf6 268deg, #a78bfa 280deg, #8b5cf6 295deg, #6d28d9 318deg, transparent 338deg, transparent 360deg)',
+                                                            animation: 'snake-rotate 1.8s ease-in-out infinite',
+                                                            zIndex: 0,
+                                                        }}
+                                                    />
                                                 )}
-                                            </button>
+                                                <button
+                                                    onClick={() => youtubeUrl && handleYoutubeUrl(youtubeUrl)}
+                                                    disabled={!youtubeUrl || youtubeFetching}
+                                                    className="relative px-6 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 whitespace-nowrap"
+                                                    style={{
+                                                        background: '#faf9f5',
+                                                        color: '#141413',
+                                                        zIndex: 1,
+                                                        opacity: youtubeFetching ? 0.75 : 1,
+                                                        transition: 'opacity 0.2s ease',
+                                                    }}
+                                                >
+                                                    {youtubeFetching ? (
+                                                        <><span className="w-3.5 h-3.5 border-2 border-[rgba(0,0,0,0.15)] border-t-[#141413] rounded-full animate-spin" />Loading</>
+                                                    ) : (
+                                                        <>Get Clips <ArrowRight size={15} /></>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </>
                                     ) : (
                                         <div className="flex items-center justify-between w-full px-2">
@@ -760,33 +1041,19 @@ export default function DashboardPage() {
                                                     <p className="text-xs" style={{ color: '#ababab' }}>MP4, MOV, AVI up to 2GB</p>
                                                 </div>
                                             </div>
-                                            <label
+                                            <button
                                                 className="px-5 py-3 rounded-xl text-sm font-medium cursor-pointer transition-colors hover:bg-white/10"
                                                 style={{ background: 'rgba(250,249,245,0.05)', color: '#faf9f5' }}
+                                                onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                             >
                                                 Browse files
-                                                <input
-                                                    type="file"
-                                                    accept="video/*"
-                                                    className="hidden"
-                                                    onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
-                                                />
-                                            </label>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {youtubeError && (
-                                <p className="mt-2 text-xs text-red-400 text-center">{youtubeError}</p>
-                            )}
-
-                            {submitError && (
-                                <div className="mt-3 p-3 rounded-xl text-red-400 text-sm flex items-center gap-2" style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                    {submitError}
-                                </div>
-                            )}
+                            </div>{/* close bubble+card wrapper */}
 
                             <p className="mt-3 text-center text-xs" style={{ color: '#ababab' }}>
                                 YouTube • Twitch • Vimeo • Direct Upload
@@ -1113,16 +1380,6 @@ export default function DashboardPage() {
                                         </div>
                                     )}
 
-                                    {submitError && (
-                                        <div
-                                            className="p-3 rounded-xl text-red-400 text-xs flex items-center gap-2"
-                                            style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}
-                                        >
-                                            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                                            {submitError}
-                                        </div>
-                                    )}
-
                                     {/* Submit */}
                                     <button
                                         onClick={handleStartProcessing}
@@ -1416,40 +1673,113 @@ export default function DashboardPage() {
 
                 {/* ── Feature Cards ── */}
                 {uploadPhase === 'idle' && (
-                    <div>
+                    <div
+                        onMouseEnter={() => setFeaturesHovered(true)}
+                        onMouseLeave={() => setFeaturesHovered(false)}
+                    >
                         <div className="mb-5">
                             <h2 className="text-base font-medium" style={{ color: '#faf9f5' }}>Powered by AI</h2>
-                            <p className="text-xs mt-0.5" style={{ color: '#ababab' }}>Unique features that set us apart</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {features.map((feature) => (
-                                <Link
-                                    key={feature.name}
-                                    href={feature.href}
-                                    className="group rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1"
-                                    style={{ background: '#181817' }}
-                                >
-                                    <div
-                                        className="w-10 h-10 mb-3 rounded-xl flex items-center justify-center transition-colors"
-                                        style={{ background: 'rgba(250,249,245,0.06)' }}
-                                    >
-                                        <feature.icon className="w-5 h-5" style={{ color: '#faf9f5' }} />
-                                    </div>
-                                    <h3
-                                        className="text-sm font-medium mb-1.5 flex items-center justify-between"
-                                        style={{ color: '#faf9f5' }}
-                                    >
-                                        {feature.name}
-                                        <ArrowRight
-                                            className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-                                            style={{ color: '#ababab' }}
-                                        />
-                                    </h3>
-                                    <p className="text-xs leading-relaxed" style={{ color: '#ababab' }}>
-                                        {feature.description}
-                                    </p>
-                                </Link>
-                            ))}
+
+                        <div className="relative">
+                            {/* Scroll container — padding+negative-margin lets hover:-translate-y-1 render
+                                without being clipped by overflow-x:auto's implicit overflow-y:auto */}
+                            <div
+                                ref={featureCarouselRef}
+                                className="flex gap-4 no-scrollbar"
+                                style={{
+                                    overflowX: 'auto',
+                                    paddingTop: '8px',
+                                    marginTop: '-8px',
+                                    paddingBottom: '8px',
+                                    marginBottom: '-8px',
+                                }}
+                                onScroll={updateFeatureScroll}
+                            >
+                                {allFeatures.map((feature) => {
+                                    const Icon = feature.icon;
+                                    const cardContent = (
+                                        <>
+                                            <div
+                                                className="w-10 h-10 mb-3 rounded-xl flex items-center justify-center flex-shrink-0"
+                                                style={{ background: feature.gradient }}
+                                            >
+                                                <Icon size={25} style={{ color: 'white' }} strokeWidth={1.8} />
+                                            </div>
+                                            <h3
+                                                className="text-sm font-medium mb-1.5 flex items-center justify-between"
+                                                style={{ color: '#faf9f5' }}
+                                            >
+                                                {feature.name}
+                                                {feature.href && (
+                                                    <ArrowRight
+                                                        className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                                                        style={{ color: '#ababab' }}
+                                                    />
+                                                )}
+                                            </h3>
+                                            <p className="text-xs leading-relaxed" style={{ color: '#ababab' }}>
+                                                {feature.description}
+                                            </p>
+                                        </>
+                                    );
+
+                                    const sharedClass = "group rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1";
+                                    const sharedStyle: React.CSSProperties = {
+                                        background: '#181817',
+                                        flex: '0 0 240px',
+                                        width: '240px',
+                                    };
+
+                                    if (!feature.href) {
+                                        return <div key={feature.name} className={sharedClass} style={sharedStyle}>{cardContent}</div>;
+                                    }
+                                    if (feature.external) {
+                                        return <a key={feature.name} href={feature.href} target="_blank" rel="noopener noreferrer" className={sharedClass} style={sharedStyle}>{cardContent}</a>;
+                                    }
+                                    return <Link key={feature.name} href={feature.href} className={sharedClass} style={sharedStyle}>{cardContent}</Link>;
+                                })}
+                            </div>
+
+                            {/* Right fade — partial visibility hint */}
+                            {featureCanScrollRight && (
+                                <div
+                                    className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none"
+                                    style={{ background: 'linear-gradient(to right, transparent, #141413)' }}
+                                />
+                            )}
+
+                            {/* Left arrow */}
+                            <button
+                                onClick={() => scrollFeatures('left')}
+                                className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center hover:text-[#faf9f5]"
+                                style={{
+                                    background: '#1c1c1b',
+                                    border: '1px solid rgba(250,249,245,0.1)',
+                                    color: 'rgba(250,249,245,0.5)',
+                                    opacity: featuresHovered && featureCanScrollLeft ? 1 : 0,
+                                    pointerEvents: featuresHovered && featureCanScrollLeft ? 'auto' : 'none',
+                                    transition: 'opacity 0.2s ease',
+                                }}
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+
+                            {/* Right arrow */}
+                            <button
+                                onClick={() => scrollFeatures('right')}
+                                className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center hover:text-[#faf9f5]"
+                                style={{
+                                    background: '#1c1c1b',
+                                    border: '1px solid rgba(250,249,245,0.1)',
+                                    color: 'rgba(250,249,245,0.5)',
+                                    opacity: featuresHovered && featureCanScrollRight ? 1 : 0,
+                                    pointerEvents: featuresHovered && featureCanScrollRight ? 'auto' : 'none',
+                                    transition: 'opacity 0.2s ease',
+                                }}
+                            >
+                                <ChevronRight size={14} />
+                            </button>
                         </div>
                     </div>
                 )}
@@ -1457,7 +1787,7 @@ export default function DashboardPage() {
                 {/* ── Recent Projects ── */}
                 <div>
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-lg font-medium" style={{ color: '#faf9f5' }}>Recent Projects</h2>
+                        <h2 className="text-base font-medium" style={{ color: '#faf9f5' }}>Recent Projects</h2>
                         <Link
                             href="/dashboard/projects"
                             className="text-sm flex items-center gap-1 transition-colors hover:!text-[#faf9f5]"
@@ -1490,23 +1820,37 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {recentJobs.map((job) => (
-                                <Link
+                            {recentJobs.map((job) => {
+                                const firstClip = clips.find(c => c.job_id === job.id && c.file_url);
+                                return (
+                                <div
                                     key={job.id}
-                                    href="/dashboard/projects"
-                                    className="group rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300"
-                                    style={{ background: '#181817' }}
+                                    className="group rounded-2xl cursor-pointer hover:-translate-y-1 transition-all duration-300"
+                                    style={{ background: '#181817', position: 'relative', zIndex: openMenuId === job.id ? 50 : 1 }}
+                                    onClick={() => router.push('/dashboard/projects')}
+                                    onMouseLeave={() => setOpenMenuId(null)}
                                 >
                                     {/* Thumbnail */}
                                     <div
-                                        className="relative aspect-video flex items-center justify-center"
+                                        className="relative aspect-video flex items-center justify-center rounded-t-2xl overflow-hidden"
                                         style={{ background: '#1c1c1b' }}
                                     >
-                                        <Play
-                                            size={20}
-                                            style={{ color: 'rgba(250,249,245,0.15)' }}
-                                            className="group-hover:opacity-60 transition-opacity"
-                                        />
+                                        {firstClip?.file_url ? (
+                                            <video
+                                                src={firstClip.file_url}
+                                                className="w-full h-full object-cover"
+                                                muted playsInline preload="metadata"
+                                                onMouseEnter={e => e.currentTarget.play()}
+                                                onMouseLeave={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                                            />
+                                        ) : (
+                                            <Play
+                                                size={20}
+                                                style={{ color: 'rgba(250,249,245,0.15)' }}
+                                                className="group-hover:opacity-60 transition-opacity"
+                                            />
+                                        )}
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                         {/* Status badge */}
                                         <div className="absolute top-2.5 left-2.5">
                                             {(job.status === 'completed' || job.status === 'done') && (
@@ -1529,33 +1873,108 @@ export default function DashboardPage() {
                                             )}
                                         </div>
                                         {/* More button */}
-                                        <button
-                                            className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                            style={{ background: 'rgba(0,0,0,0.6)', color: '#ababab' }}
-                                            onClick={e => e.preventDefault()}
-                                        >
-                                            <MoreVertical size={14} />
-                                        </button>
+                                        <div className="absolute top-2.5 right-2.5" style={{ zIndex: 9999 }}>
+                                            <button
+                                                className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                style={{ background: 'rgba(0,0,0,0.6)', color: '#ababab' }}
+                                                onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === job.id ? null : job.id); }}
+                                            >
+                                                <MoreVertical size={14} />
+                                            </button>
+                                            <div
+                                                className="absolute right-0 top-full mt-1 rounded-xl shadow-2xl w-36 overflow-hidden py-1"
+                                                style={{
+                                                    background: '#1c1c1b',
+                                                    border: '1px solid rgba(250,249,245,0.08)',
+                                                    zIndex: 9999,
+                                                    opacity: openMenuId === job.id ? 1 : 0,
+                                                    transform: openMenuId === job.id ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-4px)',
+                                                    pointerEvents: openMenuId === job.id ? 'auto' : 'none',
+                                                    transition: 'opacity 150ms ease, transform 150ms ease',
+                                                    transformOrigin: 'top right',
+                                                }}
+                                            >
+                                                <button
+                                                    className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-white/5 transition-colors"
+                                                    style={{ color: '#ababab' }}
+                                                    onClick={e => { e.stopPropagation(); setOpenMenuId(null); router.push('/dashboard/projects'); }}
+                                                >
+                                                    View Clips
+                                                </button>
+                                                <button
+                                                    className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-red-500/10 transition-colors text-red-400"
+                                                    onClick={e => { e.stopPropagation(); setOpenMenuId(null); setDeleteConfirmId(job.id); }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                     {/* Info */}
                                     <div className="p-4">
-                                        <p
-                                            className="text-sm font-medium truncate mb-2"
-                                            style={{ color: '#faf9f5' }}
-                                        >
+                                        <p className="text-sm font-medium truncate mb-1" style={{ color: '#faf9f5' }}>
                                             {job.video_title || "Untitled"}
                                         </p>
                                         <p className="text-xs" style={{ color: '#ababab' }}>
                                             {formatDate(job.created_at)}
                                         </p>
                                     </div>
-                                </Link>
-                            ))}
+                                </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
 
             </div>
+
+            {/* ── Delete Confirmation Modal ── */}
+            {deleteConfirmId && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.6)' }}
+                    onClick={() => setDeleteConfirmId(null)}
+                >
+                    <div
+                        className="relative w-full max-w-md rounded-2xl p-7"
+                        style={{
+                            background: 'rgba(30,29,28,0.72)',
+                            backdropFilter: 'blur(32px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+                            boxShadow: '0 8px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <button
+                            className="absolute top-4 right-4 w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5"
+                            style={{ color: '#ababab' }}
+                            onClick={() => setDeleteConfirmId(null)}
+                        >
+                            <X size={14} />
+                        </button>
+                        <p className="text-base font-semibold mb-2" style={{ color: '#faf9f5' }}>Delete project?</p>
+                        <p className="text-sm" style={{ color: '#ababab' }}>
+                            This will permanently delete the project and all its clips. This action cannot be undone.
+                        </p>
+                        <div className="flex items-center justify-end gap-2 mt-6">
+                            <button
+                                className="px-4 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-white/5"
+                                style={{ color: '#faf9f5', border: '1px solid rgba(250,249,245,0.12)' }}
+                                onClick={() => setDeleteConfirmId(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 text-sm font-medium rounded-xl transition-colors hover:brightness-110"
+                                style={{ background: '#ef4444', color: '#fff' }}
+                                onClick={() => handleDeleteJob(deleteConfirmId)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

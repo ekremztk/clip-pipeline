@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useChannel } from "../layout";
 import { authFetch } from "@/lib/api";
+import { toast } from "@/lib/toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -558,6 +559,7 @@ function ProjectsContent() {
     const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const urlRestoredRef = useRef(false);
 
     const fetchData = async (silent = false) => {
@@ -629,14 +631,17 @@ function ProjectsContent() {
 
     // Actions
     const handleDeleteProject = async (jobId: string) => {
-        if (!confirm("Delete this project and all its clips?")) return;
         try {
             const res = await authFetch(`/jobs/${jobId}`, { method: "DELETE" });
             if (res.ok) {
                 setJobs(jobs.filter(j => j.id !== jobId));
                 if (selectedJob?.id === jobId) { setSelectedJob(null); router.replace("/dashboard/projects"); }
+                toast.success('Project deleted.');
+            } else {
+                toast.error('Failed to delete project.');
             }
-        } catch (err) { console.error(err); }
+        } catch { toast.error('Failed to delete project.'); }
+        setDeleteConfirmId(null);
     };
 
     const handleApprove = async (id: string) => {
@@ -650,8 +655,9 @@ function ProjectsContent() {
                 const updated = clips.map(c => c.id === id ? { ...c, is_successful: newVal } : c);
                 setClips(updated);
                 if (selectedClip?.id === id) setSelectedClip({ ...selectedClip, is_successful: newVal });
-            }
-        } catch (err) { console.error(err); }
+                toast.success(newVal === true ? 'Clip approved.' : 'Approval removed.');
+            } else { toast.error('Failed to update clip.'); }
+        } catch { toast.error('Failed to update clip.'); }
     };
 
     const handleReject = async (id: string) => {
@@ -665,8 +671,9 @@ function ProjectsContent() {
                 const updated = clips.map(c => c.id === id ? { ...c, is_successful: newVal } : c);
                 setClips(updated);
                 if (selectedClip?.id === id) setSelectedClip({ ...selectedClip, is_successful: newVal });
-            }
-        } catch (err) { console.error(err); }
+                toast.success(newVal === false ? 'Clip rejected.' : 'Rejection removed.');
+            } else { toast.error('Failed to update clip.'); }
+        } catch { toast.error('Failed to update clip.'); }
     };
 
     const handlePublish = async (id: string) => {
@@ -680,8 +687,9 @@ function ProjectsContent() {
                 const updated = clips.map(c => c.id === id ? { ...c, is_published: newVal } : c);
                 setClips(updated);
                 if (selectedClip?.id === id) setSelectedClip({ ...selectedClip, is_published: newVal });
-            }
-        } catch (err) { console.error(err); }
+                toast.success(newVal ? 'Clip marked as published.' : 'Clip unpublished.');
+            } else { toast.error('Failed to update clip.'); }
+        } catch { toast.error('Failed to update clip.'); }
     };
 
     const handleDownload = (id: string) => {
@@ -848,12 +856,13 @@ function ProjectsContent() {
                                 return (
                                     <div
                                         key={job.id}
-                                        className="group rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300"
-                                        style={{ background: '#181817' }}
+                                        className="group rounded-2xl cursor-pointer hover:-translate-y-1 transition-all duration-300"
+                                        style={{ background: '#181817', overflow: 'visible', position: 'relative', zIndex: openMenuId === job.id ? 50 : 1 }}
                                         onClick={() => selectJob(job)}
+                                        onMouseLeave={() => setOpenMenuId(null)}
                                     >
                                         <div
-                                            className="relative aspect-video overflow-hidden flex items-center justify-center"
+                                            className="relative aspect-video flex items-center justify-center rounded-t-2xl overflow-hidden"
                                             style={{ background: '#1c1c1b' }}
                                         >
                                             {firstClip?.file_url ? (
@@ -868,39 +877,46 @@ function ProjectsContent() {
                                                 <Play size={20} style={{ color: 'rgba(250,249,245,0.15)' }} className="group-hover:opacity-60 transition-opacity" />
                                             )}
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                                        </div>
-                                        <div className="p-4">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <p className="text-sm font-medium truncate" style={{ color: '#faf9f5' }}>{job.video_title || "Untitled"}</p>
-                                                <div className="relative flex-shrink-0">
+                                            {/* More button — overlay on thumbnail */}
+                                            <div className="absolute top-2.5 right-2.5" style={{ zIndex: 9999 }}>
+                                                <button
+                                                    className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    style={{ background: 'rgba(0,0,0,0.6)', color: '#ababab' }}
+                                                    onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === job.id ? null : job.id); }}
+                                                >
+                                                    <MoreHorizontal size={14} />
+                                                </button>
+                                                <div
+                                                    className="absolute right-0 top-full mt-1 rounded-xl shadow-2xl w-36 overflow-hidden py-1"
+                                                    style={{
+                                                        background: '#1c1c1b',
+                                                        border: '1px solid rgba(250,249,245,0.08)',
+                                                        zIndex: 9999,
+                                                        opacity: openMenuId === job.id ? 1 : 0,
+                                                        transform: openMenuId === job.id ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-4px)',
+                                                        pointerEvents: openMenuId === job.id ? 'auto' : 'none',
+                                                        transition: 'opacity 150ms ease, transform 150ms ease',
+                                                        transformOrigin: 'top right',
+                                                    }}
+                                                >
                                                     <button
-                                                        onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === job.id ? null : job.id); }}
-                                                        className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+                                                        className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-white/5 transition-colors"
+                                                        style={{ color: '#ababab' }}
+                                                        onClick={e => { e.stopPropagation(); setOpenMenuId(null); selectJob(job); }}
                                                     >
-                                                        <MoreHorizontal size={14} style={{ color: '#ababab' }} />
+                                                        View Clips
                                                     </button>
-                                                    {openMenuId === job.id && (
-                                                        <div
-                                                            className="absolute right-0 top-full mt-1 rounded-xl shadow-xl z-20 w-36 overflow-hidden py-1"
-                                                            style={{ background: '#1c1c1b', border: '1px solid rgba(250,249,245,0.08)' }}
-                                                        >
-                                                            <button
-                                                                className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-white/5 transition-colors"
-                                                                style={{ color: '#ababab' }}
-                                                                onClick={e => { e.stopPropagation(); setOpenMenuId(null); selectJob(job); }}
-                                                            >
-                                                                View Clips
-                                                            </button>
-                                                            <button
-                                                                className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-red-500/10 transition-colors text-red-400"
-                                                                onClick={e => { e.stopPropagation(); setOpenMenuId(null); handleDeleteProject(job.id); }}
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                    <button
+                                                        className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-red-500/10 transition-colors text-red-400"
+                                                        onClick={e => { e.stopPropagation(); setOpenMenuId(null); setDeleteConfirmId(job.id); }}
+                                                    >
+                                                        Delete
+                                                    </button>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <p className="text-sm font-medium truncate" style={{ color: '#faf9f5' }}>{job.video_title || "Untitled"}</p>
                                             <div className="flex items-center gap-1.5 mt-1 text-[10px]" style={{ color: '#ababab' }}>
                                                 <span>{jobClips.length} clips</span>
                                                 <span>·</span>
@@ -1000,6 +1016,59 @@ function ProjectsContent() {
                     onPublish={handlePublish}
                     onDownload={handleDownload}
                 />
+            )}
+
+            {/* ── Delete Confirmation Modal ── */}
+            {deleteConfirmId && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.6)' }}
+                    onClick={() => setDeleteConfirmId(null)}
+                >
+                    <div
+                        className="relative w-full max-w-md rounded-2xl p-7"
+                        style={{
+                            background: 'rgba(30,29,28,0.72)',
+                            backdropFilter: 'blur(32px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+                            boxShadow: '0 8px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Close */}
+                        <button
+                            className="absolute top-4 right-4 w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5"
+                            style={{ color: '#ababab' }}
+                            onClick={() => setDeleteConfirmId(null)}
+                        >
+                            <X size={14} />
+                        </button>
+
+                        <div className="mb-1">
+                            <p className="text-base font-semibold mb-2" style={{ color: '#faf9f5' }}>Delete project?</p>
+                            <p className="text-sm" style={{ color: '#ababab' }}>
+                                This will permanently delete the project and all its clips. This action cannot be undone.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 mt-6">
+                            <button
+                                className="px-4 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-white/5"
+                                style={{ color: '#faf9f5', border: '1px solid rgba(250,249,245,0.12)' }}
+                                onClick={() => setDeleteConfirmId(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 text-sm font-medium rounded-xl transition-colors hover:brightness-110"
+                                style={{ background: '#ef4444', color: '#fff' }}
+                                onClick={() => handleDeleteProject(deleteConfirmId)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

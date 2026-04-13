@@ -28,6 +28,8 @@ html, body {
   color: var(--text);
   font-family: 'Inter', -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -63,6 +65,20 @@ html, body {
 }
 
 .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@keyframes snake-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes bubble-wobble {
+  0%, 100% { transform: translateX(0); }
+  30%  { transform: translateX(7px); }
+  70%  { transform: translateX(-7px); }
+}
+
 .fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
 
 input:focus, textarea:focus, select:focus {
