@@ -101,6 +101,7 @@ def render_podcast_reframe(
     # + lossless concat is far more stable.
     tmp_files = []
     concat_list_path = output_path + ".concat.txt"
+    concat_video_path = output_path + ".concat_video.mp4"
 
     try:
         for i, seg in enumerate(segments):
@@ -112,25 +113,6 @@ def render_podcast_reframe(
             crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
             crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
 
-            # Per-segment render: accurate input seek + output duration limit.
-            #
-            # -ss seg_start (input): accurate_seek is ON by default in FFmpeg.
-            #   Seeks to the keyframe before seg_start, decodes and discards until
-            #   PTS >= seg_start. First output frame is exactly seg_start (no ghost
-            #   frames). seg_start is always a frame boundary (snap() guarantees this).
-            #
-            # setpts=PTS-STARTPTS (before crop): resets video PTS to 0 so the crop
-            #   filter's 't' variable starts at 0, matching _build_crop_expression
-            #   which subtracts segment_start from all keyframe times.
-            #
-            # -t duration (output): frame at seg_end (= first frame of next segment)
-            #   has setpts-PTS = duration. FFmpeg uses strict < so it is excluded.
-            #   Segment ends at the last frame before the cut. No AAC bleed-through.
-            #
-            # asetpts=PTS-STARTPTS: resets audio PTS to 0, matching video.
-            #
-            # No output -ss: avoids 1-frame off-by-one caused by output -ss operating
-            #   on post-setpts (zero-based) timestamps in an unexpected way.
             duration = seg["end"] - seg["start"]
 
             vf = (
@@ -139,20 +121,23 @@ def render_podcast_reframe(
                 f"scale={canvas_w}:{canvas_h}:flags=lanczos"
             )
 
+            # Render video-only (no audio) per segment.
+            # AAC encoder adds priming/padding samples at each segment boundary,
+            # which accumulates during concat and causes A/V drift and frozen frames.
+            # Solution: render all segments silent, concat losslessly, then mux the
+            # original uncut audio in a single final step.
             cmd = [
                 "ffmpeg", "-y",
-                "-ss", f"{seg['start']:.6f}",   # accurate input seek to segment start
+                "-ss", f"{seg['start']:.6f}",
                 "-i", video_path,
                 "-t", f"{duration:.6f}",
                 "-vf", vf,
                 "-c:v", "libx264",
                 "-preset", "fast",
                 "-crf", "18",
-                "-movflags", "+faststart",
+                "-an",  # no audio — added in final mux step
+                tmp_path,
             ]
-            if has_audio:
-                cmd.extend(["-af", "asetpts=PTS-STARTPTS", "-c:a", "aac", "-b:a", "320k"])
-            cmd.append(tmp_path)
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             if result.returncode != 0:
@@ -162,21 +147,18 @@ def render_podcast_reframe(
                 )
             logger.info("[Render] Segment %d/%d done (%.2fs–%.2fs)", i + 1, n, seg["start"], seg["end"])
 
-        # Write concat list and join all segments losslessly
+        # Concat all silent video segments losslessly
         with open(concat_list_path, "w") as f:
             for p in tmp_files:
-                # Must use absolute paths — FFmpeg resolves relative paths in
-                # concat lists relative to the list file's directory, which causes
-                # a double-path error when both the list and segments are in the
-                # same subdirectory (e.g. temp_uploads/temp_uploads/...).
                 f.write(f"file '{os.path.abspath(p)}'\n")
 
+        concat_target = concat_video_path if has_audio else output_path
         concat_cmd = [
             "ffmpeg", "-y",
             "-f", "concat", "-safe", "0",
             "-i", concat_list_path,
             "-c", "copy",
-            output_path,
+            concat_target,
         ]
         result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=300)
         if result.returncode != 0:
@@ -185,12 +167,36 @@ def render_podcast_reframe(
                 f"stderr={result.stderr[-600:]}"
             )
 
+        # Mux original audio (uncut) with the concatenated silent video.
+        # Using the original audio avoids all AAC padding/priming artifacts.
+        if has_audio:
+            mux_cmd = [
+                "ffmpeg", "-y",
+                "-i", concat_video_path,   # concatenated silent video
+                "-i", video_path,          # original source (for audio)
+                "-map", "0:v",
+                "-map", "1:a",
+                "-c:v", "copy",
+                "-c:a", "aac",
+                "-b:a", "320k",
+                "-shortest",
+                "-movflags", "+faststart",
+                output_path,
+            ]
+            result = subprocess.run(mux_cmd, capture_output=True, text=True, timeout=300)
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"FFmpeg audio mux failed.\n"
+                    f"stderr={result.stderr[-600:]}"
+                )
+
     finally:
         for p in tmp_files:
             if os.path.exists(p):
                 os.remove(p)
-        if os.path.exists(concat_list_path):
-            os.remove(concat_list_path)
+        for p in [concat_list_path, concat_video_path]:
+            if os.path.exists(p):
+                os.remove(p)
 
     logger.info("[Render] Podcast render complete: %s", output_path)
     return output_path
