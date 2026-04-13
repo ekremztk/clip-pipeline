@@ -76,10 +76,9 @@ def _ffmpeg_scene_detect(video_path: str, threshold: float, fps: float) -> list[
         times: list[float] = []
         for match in re.finditer(r"pts_time:(\d+\.?\d*)", result.stderr):
             pts_time = float(match.group(1))
-            # FFmpeg's scene filter selects the LAST frame of the old scene (forward diff),
-            # so pts_time is 1 frame before the actual new scene start.
-            # Add 1 frame to get the first frame of the new scene.
-            time_s = round((round(pts_time * fps) + 1) / fps, 6)
+            # FFmpeg's scene filter selects the FIRST frame of the new scene.
+            # pts_time is already the correct cut point — just snap to frame boundary.
+            time_s = round(round(pts_time * fps) / fps, 6)
             times.append(time_s)
         return sorted(set(times))
     except subprocess.TimeoutExpired:
