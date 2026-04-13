@@ -112,29 +112,25 @@ def render_podcast_reframe(
             crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
             crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
 
-            # Two-pass seek for frame-accurate per-segment render:
+            # Per-segment render: accurate input seek + output duration limit.
             #
-            # Pass 1 — input -ss seek_time: fast keyframe seek (3s pre-roll).
-            #   Gives decoder the reference frames needed for the first segment frame.
+            # -ss seg_start (input): accurate_seek is ON by default in FFmpeg.
+            #   Seeks to the keyframe before seg_start, decodes and discards until
+            #   PTS >= seg_start. First output frame is exactly seg_start (no ghost
+            #   frames). seg_start is always a frame boundary (snap() guarantees this).
             #
-            # Pass 2 — output -ss seek_offset: FFmpeg discards decoded frames until
-            #   exactly seek_offset seconds after the input seek point, landing at
-            #   seg["start"] at frame-accurate precision (decoded-frame level, not
-            #   keyframe level — no ghost/blended frames at segment boundaries).
+            # setpts=PTS-STARTPTS (before crop): resets video PTS to 0 so the crop
+            #   filter's 't' variable starts at 0, matching _build_crop_expression
+            #   which subtracts segment_start from all keyframe times.
             #
-            # setpts=PTS-STARTPTS: after the two-pass seek the first frame has PTS
-            #   ≈ seg["start"]. Resetting to 0 ensures the crop filter's 't' variable
-            #   starts at 0, matching _build_crop_expression which subtracts
-            #   segment_start from all keyframe times.
+            # -t duration (output): frame at seg_end (= first frame of next segment)
+            #   has setpts-PTS = duration. FFmpeg uses strict < so it is excluded.
+            #   Segment ends at the last frame before the cut. No AAC bleed-through.
             #
-            # -t duration: output option — limits exactly this segment's duration.
-            #   As output option, AAC encoder sees the correct frame count (no
-            #   AAC bleed-through at segment boundaries).
+            # asetpts=PTS-STARTPTS: resets audio PTS to 0, matching video.
             #
-            # asetpts=PTS-STARTPTS: reset audio PTS to match video PTS=0 start.
-            pre_roll = 3.0
-            seek_time = max(0.0, seg["start"] - pre_roll)
-            seek_offset = seg["start"] - seek_time  # accurate offset after input seek
+            # No output -ss: avoids 1-frame off-by-one caused by output -ss operating
+            #   on post-setpts (zero-based) timestamps in an unexpected way.
             duration = seg["end"] - seg["start"]
 
             vf = (
@@ -145,9 +141,8 @@ def render_podcast_reframe(
 
             cmd = [
                 "ffmpeg", "-y",
-                "-ss", f"{seek_time:.6f}",       # fast input seek (keyframe level)
+                "-ss", f"{seg['start']:.6f}",   # accurate input seek to segment start
                 "-i", video_path,
-                "-ss", f"{seek_offset:.6f}",     # accurate output seek (frame level)
                 "-t", f"{duration:.6f}",
                 "-vf", vf,
                 "-c:v", "libx264",
