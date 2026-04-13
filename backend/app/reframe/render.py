@@ -92,102 +92,83 @@ def render_podcast_reframe(
     logger.info("[Render] Audio stream: %s", "yes" if has_audio else "no (video-only)")
 
     n = len(segments)
-    filter_parts = []
-    concat_inputs = []
+    logger.info("[Render] Podcast render: %d segments, crop=%dx%d → %dx%d", n, crop_w, crop_h, canvas_w, canvas_h)
 
-    # For multiple segments, use explicit split/asplit so [0:v] and [0:a] are
-    # each referenced only once. Modern FFmpeg handles implicit split, but being
-    # explicit avoids edge cases on older FFmpeg builds on Railway.
-    if n > 1:
-        filter_parts.append(
-            "[0:v]split=" + str(n) + "".join(f"[sv{i}]" for i in range(n))
-        )
-        if has_audio:
-            filter_parts.append(
-                "[0:a]asplit=" + str(n) + "".join(f"[sa{i}]" for i in range(n))
+    # Render each segment individually then concat.
+    # A single filter_complex with split=N becomes unreliable beyond ~10 segments:
+    # FFmpeg's filter graph configuration fails with "Error reinitializing filters!"
+    # when N is large (e.g., 22 segments from a dense podcast). Per-segment rendering
+    # + lossless concat is far more stable.
+    tmp_files = []
+    concat_list_path = output_path + ".concat.txt"
+
+    try:
+        for i, seg in enumerate(segments):
+            tmp_path = output_path + f".seg{i}.mp4"
+            tmp_files.append(tmp_path)
+
+            crop_x_expr = _build_crop_expression(seg["keyframes"], "offset_x", seg["start"], fps)
+            crop_y_expr = _build_crop_expression(seg["keyframes"], "offset_y", seg["start"], fps)
+            crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
+            crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
+
+            duration = seg["end"] - seg["start"]
+            vf = (
+                f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
+                f"scale={canvas_w}:{canvas_h}:flags=lanczos"
             )
-        v_src = lambda i: f"[sv{i}]"
-        a_src = lambda i: f"[sa{i}]"
-    else:
-        v_src = lambda i: "[0:v]"
-        a_src = lambda i: "[0:a]"
 
-    for i, seg in enumerate(segments):
-        # Build crop expression for this segment
-        crop_x_expr = _build_crop_expression(seg["keyframes"], "offset_x", seg["start"], fps)
-        crop_y_expr = _build_crop_expression(seg["keyframes"], "offset_y", seg["start"], fps)
+            # Use input-side seek (-ss before -i) for fast decode; timestamps reset
+            # to 0 so the 't' variable in crop expressions starts at 0 per segment —
+            # which matches what _build_crop_expression produces (subtracts seg start).
+            cmd = [
+                "ffmpeg", "-y",
+                "-ss", f"{seg['start']:.6f}",
+                "-t", f"{duration:.6f}",
+                "-i", video_path,
+                "-vf", vf,
+                "-c:v", "libx264",
+                "-preset", "fast",
+                "-crf", "18",
+                "-movflags", "+faststart",
+            ]
+            if has_audio:
+                cmd.extend(["-c:a", "aac", "-b:a", "320k"])
+            cmd.append(tmp_path)
 
-        # Clamp crop to source bounds.
-        # Static values (plain numbers) are clamped in Python — no commas needed.
-        # Dynamic expressions (containing 't') use FFmpeg min/max with escaped commas.
-        # Commas MUST be escaped as \, because FFmpeg's filter_complex parser splits
-        # filter chains on unescaped commas — unescaped commas inside function calls
-        # like min(x,0) are misinterpreted as filter separators, causing
-        # "No such filter: '0'" errors.
-        crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
-        crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"FFmpeg segment {i} render failed.\n"
+                    f"stderr={result.stderr[-600:]}"
+                )
+            logger.info("[Render] Segment %d/%d done (%.2fs–%.2fs)", i + 1, n, seg["start"], seg["end"])
 
-        seg_label = f"v{i}"
-        filter_parts.append(
-            f"{v_src(i)}trim=start={seg['start']:.6f}:end={seg['end']:.6f},"
-            f"setpts=PTS-STARTPTS,"
-            f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
-            f"scale={canvas_w}:{canvas_h}:flags=lanczos"
-            f"[{seg_label}]"
-        )
+        # Write concat list and join all segments losslessly
+        with open(concat_list_path, "w") as f:
+            for p in tmp_files:
+                f.write(f"file '{p}'\n")
 
-        if has_audio:
-            seg_a_label = f"a{i}"
-            filter_parts.append(
-                f"{a_src(i)}atrim=start={seg['start']:.6f}:end={seg['end']:.6f},"
-                f"asetpts=PTS-STARTPTS"
-                f"[{seg_a_label}]"
+        concat_cmd = [
+            "ffmpeg", "-y",
+            "-f", "concat", "-safe", "0",
+            "-i", concat_list_path,
+            "-c", "copy",
+            output_path,
+        ]
+        result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=300)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"FFmpeg concat failed.\n"
+                f"stderr={result.stderr[-600:]}"
             )
-            concat_inputs.append(f"[{seg_label}][{seg_a_label}]")
-        else:
-            concat_inputs.append(f"[{seg_label}]")
 
-    # Concat all segments
-    if n == 1:
-        filter_complex = ";".join(filter_parts)
-        map_v = "[v0]"
-        map_a = "[a0]" if has_audio else None
-    else:
-        if has_audio:
-            concat_str = "".join(concat_inputs) + f"concat=n={n}:v=1:a=1[outv][outa]"
-        else:
-            concat_str = "".join(concat_inputs) + f"concat=n={n}:v=1:a=0[outv]"
-        filter_complex = ";".join(filter_parts) + ";" + concat_str
-        map_v = "[outv]"
-        map_a = "[outa]" if has_audio else None
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", video_path,
-        "-filter_complex", filter_complex,
-        "-map", map_v,
-    ]
-    if map_a:
-        cmd.extend(["-map", map_a])
-    cmd.extend([
-        "-c:v", "libx264",
-        "-preset", "fast",
-        "-crf", "18",
-        "-movflags", "+faststart",
-    ])
-    if has_audio:
-        cmd.extend(["-c:a", "aac", "-b:a", "320k"])
-    cmd.append(output_path)
-
-    logger.info("[Render] Podcast render: %d segments, crop=%dx%d → %dx%d", len(segments), crop_w, crop_h, canvas_w, canvas_h)
-
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"FFmpeg podcast render failed.\n"
-            f"filter_complex={filter_complex[:600]}\n"
-            f"stderr={result.stderr[-600:]}"
-        )
+    finally:
+        for p in tmp_files:
+            if os.path.exists(p):
+                os.remove(p)
+        if os.path.exists(concat_list_path):
+            os.remove(concat_list_path)
 
     logger.info("[Render] Podcast render complete: %s", output_path)
     return output_path
