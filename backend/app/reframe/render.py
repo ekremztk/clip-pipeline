@@ -147,7 +147,11 @@ def render_podcast_reframe(
         # Write concat list and join all segments losslessly
         with open(concat_list_path, "w") as f:
             for p in tmp_files:
-                f.write(f"file '{p}'\n")
+                # Must use absolute paths — FFmpeg resolves relative paths in
+                # concat lists relative to the list file's directory, which causes
+                # a double-path error when both the list and segments are in the
+                # same subdirectory (e.g. temp_uploads/temp_uploads/...).
+                f.write(f"file '{os.path.abspath(p)}'\n")
 
         concat_cmd = [
             "ffmpeg", "-y",
