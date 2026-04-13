@@ -112,28 +112,32 @@ def render_podcast_reframe(
             crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
             crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
 
-            # Frame-accurate per-segment render using trim filter (not -ss/-t):
+            # Two-pass seek for frame-accurate per-segment render:
             #
-            # -ss 3s before segment start: fast keyframe seek (pre-roll gives the
-            #   decoder the reference frames it needs for the first segment frame).
+            # Pass 1 — input -ss seek_time: fast keyframe seek (3s pre-roll).
+            #   Gives decoder the reference frames needed for the first segment frame.
             #
-            # trim=start:end in the filter chain: cuts at EXACT decoded-frame level.
-            #   This is what the original filter_complex used. Unlike -ss/-t input
-            #   seek, trim never produces ghost frames / blended transitions at
-            #   segment boundaries — it is frame-accurate by definition.
+            # Pass 2 — output -ss seek_offset: FFmpeg discards decoded frames until
+            #   exactly seek_offset seconds after the input seek point, landing at
+            #   seg["start"] at frame-accurate precision (decoded-frame level, not
+            #   keyframe level — no ghost/blended frames at segment boundaries).
             #
-            # setpts=PTS-STARTPTS: reset video PTS to 0 so crop expression's 't'
-            #   variable starts at 0 (matching _build_crop_expression which subtracts
-            #   segment_start from all keyframe times).
+            # setpts=PTS-STARTPTS: after the two-pass seek the first frame has PTS
+            #   ≈ seg["start"]. Resetting to 0 ensures the crop filter's 't' variable
+            #   starts at 0, matching _build_crop_expression which subtracts
+            #   segment_start from all keyframe times.
             #
-            # atrim + asetpts: same for audio — exact cut + PTS reset to 0.
-            #   Combined with -c:a aac encoding, this ensures clean audio at every
-            #   segment boundary with no AAC frame bleed-through.
+            # -t duration: output option — limits exactly this segment's duration.
+            #   As output option, AAC encoder sees the correct frame count (no
+            #   AAC bleed-through at segment boundaries).
+            #
+            # asetpts=PTS-STARTPTS: reset audio PTS to match video PTS=0 start.
             pre_roll = 3.0
             seek_time = max(0.0, seg["start"] - pre_roll)
+            seek_offset = seg["start"] - seek_time  # accurate offset after input seek
+            duration = seg["end"] - seg["start"]
 
             vf = (
-                f"trim=start={seg['start']:.6f}:end={seg['end']:.6f},"
                 f"setpts=PTS-STARTPTS,"
                 f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
                 f"scale={canvas_w}:{canvas_h}:flags=lanczos"
@@ -141,8 +145,10 @@ def render_podcast_reframe(
 
             cmd = [
                 "ffmpeg", "-y",
-                "-ss", f"{seek_time:.6f}",
+                "-ss", f"{seek_time:.6f}",       # fast input seek (keyframe level)
                 "-i", video_path,
+                "-ss", f"{seek_offset:.6f}",     # accurate output seek (frame level)
+                "-t", f"{duration:.6f}",
                 "-vf", vf,
                 "-c:v", "libx264",
                 "-preset", "fast",
@@ -150,11 +156,7 @@ def render_podcast_reframe(
                 "-movflags", "+faststart",
             ]
             if has_audio:
-                af = (
-                    f"atrim=start={seg['start']:.6f}:end={seg['end']:.6f},"
-                    f"asetpts=PTS-STARTPTS"
-                )
-                cmd.extend(["-af", af, "-c:a", "aac", "-b:a", "320k"])
+                cmd.extend(["-af", "asetpts=PTS-STARTPTS", "-c:a", "aac", "-b:a", "320k"])
             cmd.append(tmp_path)
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
