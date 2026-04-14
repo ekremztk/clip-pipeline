@@ -105,8 +105,8 @@ def render_podcast_reframe(
         seg_x.append((seg["start"], seg["end"], ex))
         seg_y.append((seg["start"], seg["end"], ey))
 
-    crop_x_expr = _chain_segments(seg_x)
-    crop_y_expr = _chain_segments(seg_y)
+    crop_x_expr = _chain_segments(seg_x, fps)
+    crop_y_expr = _chain_segments(seg_y, fps)
 
     logger.info("[Render] crop_x expr length: %d chars", len(crop_x_expr))
 
@@ -141,12 +141,23 @@ def render_podcast_reframe(
     return output_path
 
 
-def _chain_segments(seg_exprs: list[tuple[float, float, str]]) -> str:
+def _chain_segments(seg_exprs: list[tuple[float, float, str]], fps: float) -> str:
     """
-    Chain per-segment expressions into one: if(lt(t,end0),expr0,if(lt(t,end1),expr1,...,exprN))
+    Chain per-segment expressions using frame number (n), not time (t).
 
-    At the cut boundary (e.g. t=5.68), lt(t, 5.68) is FALSE so FFmpeg immediately
-    jumps to the next segment's expression — 100% frame-accurate, no off-by-one.
+    WHY n INSTEAD OF t:
+      lt(t, cut_time) compares two floats. Due to IEEE 754, the actual PTS of a
+      frame (e.g. 5.679999...) can differ from cut_time (5.680000) by a sub-
+      microsecond epsilon. This causes lt() to fire for the wrong frame, producing
+      a 1-frame coordinate leak at every scene cut — exactly the "142nd frame
+      glitch" where FFmpeg applies the new shot's crop one frame early or late.
+
+      n is FFmpeg's sequential output frame counter (integer, 0-based). Comparing
+      integers is exact. lt(n, cut_frame) never misfires.
+
+    cut_frame = round(cut_time * fps) = 0-based index of the first frame of the
+    new scene. At n == cut_frame: lt(n, cut_frame) is FALSE → new scene expression
+    applies. This matches the editor's splitElements() boundary exactly.
     """
     if not seg_exprs:
         return "0"
@@ -155,7 +166,8 @@ def _chain_segments(seg_exprs: list[tuple[float, float, str]]) -> str:
     result = seg_exprs[-1][2]
     for i in range(len(seg_exprs) - 2, -1, -1):
         cut_time = seg_exprs[i][1]  # end of this segment = start of next
-        result = f"if(lt(t\\,{cut_time:.6f})\\,{seg_exprs[i][2]}\\,{result})"
+        cut_frame = round(cut_time * fps)
+        result = f"if(lt(n\\,{cut_frame})\\,{seg_exprs[i][2]}\\,{result})"
     return result
 
 
