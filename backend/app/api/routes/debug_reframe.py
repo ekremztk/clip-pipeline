@@ -232,24 +232,24 @@ def _diag_probe_video(video_path: str) -> dict:
 
 def _diag_get_first_frame_pts(video_path: str) -> float:
     """
-    Get the pts_time of the FIRST DECODED FRAME from the filter graph.
-    This is the correct offset for converting cut_time → cut_frame (n).
+    Get pts_time of the first frame as seen by FFmpeg's filter graph.
 
-    Different from ffprobe start_time: for videos with B-frame delay or
-    non-standard edit lists, the first decoded frame's PTS ≠ container start_time.
+    Uses 'ffmpeg -frames:v 1 -vf showinfo' (NOT ffprobe) to bypass edit list
+    handling. ffprobe with -read_intervals applies the container edit list and
+    returns 0.08s for videos with B-frame pre-roll; FFmpeg's filter graph does
+    NOT skip those pre-roll frames, so n=0 corresponds to a lower pts (e.g. 0.024s).
     """
     cmd = [
-        "ffprobe", "-v", "quiet", "-print_format", "json",
-        "-show_frames", "-select_streams", "v:0",
-        "-read_intervals", "%+#1",
-        video_path,
+        "ffmpeg", "-i", video_path,
+        "-frames:v", "1",
+        "-vf", "showinfo",
+        "-f", "null", "-",
     ]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        data = json.loads(result.stdout)
-        frames = data.get("frames", [])
-        if frames:
-            return float(frames[0].get("pts_time") or 0.0)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        match = re.search(r"pts_time:([\d.]+)", result.stderr)
+        if match:
+            return float(match.group(1))
     except Exception:
         pass
     return 0.0

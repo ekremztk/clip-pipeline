@@ -14,6 +14,7 @@ Both the pipeline (S09) and a future manual editor API call the same functions.
 import json
 import logging
 import os
+import re
 import subprocess
 from typing import Optional
 
@@ -360,34 +361,33 @@ def render_gaming_vstack(
 
 def _get_start_pts(video_path: str) -> float:
     """
-    Return the container start_time (seconds) of the first video stream.
+    Get pts_time of the first frame as seen by FFmpeg's filter graph.
 
-    MP4 files exported from NLEs often carry a non-zero start_pts (e.g. 1024 ticks
-    at 1/12800 time_base = 0.08s). FFmpeg's 'n' counter is always 0-indexed from
-    the first decoded frame, so cut_frame must be computed relative to start_pts:
-        cut_frame = round((cut_time_raw_pts - start_pts_s) * fps)
-    Returns 0.0 on any error (safe fallback — just reverts to old behaviour).
+    Uses 'ffmpeg -frames:v 1 -vf showinfo' (NOT ffprobe) to bypass edit list
+    handling. ffprobe with -read_intervals applies the container edit list and
+    returns 0.08s for videos with B-frame pre-roll; FFmpeg's filter graph does
+    NOT skip those pre-roll frames, so n=0 corresponds to a lower pts (e.g. 0.024s).
+
+    For this test video: returns 0.024s (not 0.08s from ffprobe)
+      → cut_frame = round((5.68 - 0.024) * 25) = round(141.4) = 141 ✓
+    For S08 libx264 re-encoded outputs: returns ~0.0s
+      → cut_frame = round(cut_time * fps) (same as original formula) ✓
+    Returns 0.0 on any error (safe fallback).
     """
     cmd = [
-        "ffprobe", "-v", "quiet",
-        "-print_format", "json",
-        "-show_streams",
-        "-select_streams", "v:0",
-        video_path,
+        "ffmpeg", "-i", video_path,
+        "-frames:v", "1",
+        "-vf", "showinfo",
+        "-f", "null", "-",
     ]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        if result.returncode != 0:
-            return 0.0
-        data = json.loads(result.stdout)
-        streams = data.get("streams", [])
-        if not streams:
-            return 0.0
-        start_time = float(streams[0].get("start_time", 0.0) or 0.0)
-        return start_time
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        match = re.search(r"pts_time:([\d.]+)", result.stderr)
+        if match:
+            return float(match.group(1))
     except Exception as e:
-        logger.warning("[Render] start_pts probe failed (%s) — assuming 0.0", e)
-        return 0.0
+        logger.warning("[Render] First-frame pts probe failed (%s) — assuming 0.0", e)
+    return 0.0
 
 
 # ─── Audio detection ──────────────────────────────────────────────────────────
