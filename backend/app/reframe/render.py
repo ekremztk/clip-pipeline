@@ -105,8 +105,11 @@ def render_podcast_reframe(
         seg_x.append((seg["start"], seg["end"], ex))
         seg_y.append((seg["start"], seg["end"], ey))
 
-    crop_x_expr = _chain_segments(seg_x, fps)
-    crop_y_expr = _chain_segments(seg_y, fps)
+    start_pts_s = _get_start_pts(video_path)
+    logger.info("[Render] start_pts_s=%.4fs (%.1f frames at %.2ffps)", start_pts_s, start_pts_s * fps, fps)
+
+    crop_x_expr = _chain_segments(seg_x, fps, start_pts_s)
+    crop_y_expr = _chain_segments(seg_y, fps, start_pts_s)
 
     logger.info("[Render] crop_x expr length: %d chars", len(crop_x_expr))
 
@@ -141,23 +144,27 @@ def render_podcast_reframe(
     return output_path
 
 
-def _chain_segments(seg_exprs: list[tuple[float, float, str]], fps: float) -> str:
+def _chain_segments(seg_exprs: list[tuple[float, float, str]], fps: float, start_pts_s: float = 0.0) -> str:
     """
     Chain per-segment expressions using frame number (n), not time (t).
 
     WHY n INSTEAD OF t:
       lt(t, cut_time) compares two floats. Due to IEEE 754, the actual PTS of a
       frame (e.g. 5.679999...) can differ from cut_time (5.680000) by a sub-
-      microsecond epsilon. This causes lt() to fire for the wrong frame, producing
-      a 1-frame coordinate leak at every scene cut — exactly the "142nd frame
-      glitch" where FFmpeg applies the new shot's crop one frame early or late.
+      microsecond epsilon. This causes lt() to fire for the wrong frame.
 
       n is FFmpeg's sequential output frame counter (integer, 0-based). Comparing
       integers is exact. lt(n, cut_frame) never misfires.
 
-    cut_frame = round(cut_time * fps) = 0-based index of the first frame of the
-    new scene. At n == cut_frame: lt(n, cut_frame) is FALSE → new scene expression
-    applies. This matches the editor's splitElements() boundary exactly.
+    WHY start_pts_s MATTERS:
+      n is always 0-indexed from the first decoded frame, regardless of PTS.
+      cut_time is a raw PTS value from the shot detector (e.g. 5.68s).
+      If the container has start_pts=0.08s (2 frames at 25fps):
+        n=0 → t=0.08s, n=140 → t=5.68s
+      Without subtracting start_pts_s: cut_frame = round(5.68*25) = 142
+        → lt(n, 142) holds seg0 for n=140,141 = 2-frame early trigger.
+      With start_pts_s=0.08: cut_frame = round((5.68-0.08)*25) = 140
+        → lt(n, 140) switches exactly at the first frame of the new shot. ✓
     """
     if not seg_exprs:
         return "0"
@@ -165,8 +172,8 @@ def _chain_segments(seg_exprs: list[tuple[float, float, str]], fps: float) -> st
         return seg_exprs[0][2]
     result = seg_exprs[-1][2]
     for i in range(len(seg_exprs) - 2, -1, -1):
-        cut_time = seg_exprs[i][1]  # end of this segment = start of next
-        cut_frame = round(cut_time * fps)
+        cut_time = seg_exprs[i][1]  # end of this segment = start of next (raw PTS)
+        cut_frame = round((cut_time - start_pts_s) * fps)
         result = f"if(lt(n\\,{cut_frame})\\,{seg_exprs[i][2]}\\,{result})"
     return result
 
@@ -347,6 +354,40 @@ def render_gaming_vstack(
         raise RuntimeError(f"FFmpeg gaming render failed: {result.stderr[-800:]}")
 
     logger.info("[Render] Gaming vstack complete: %s", output_path)
+
+
+# ─── Video metadata ───────────────────────────────────────────────────────────
+
+def _get_start_pts(video_path: str) -> float:
+    """
+    Return the container start_time (seconds) of the first video stream.
+
+    MP4 files exported from NLEs often carry a non-zero start_pts (e.g. 1024 ticks
+    at 1/12800 time_base = 0.08s). FFmpeg's 'n' counter is always 0-indexed from
+    the first decoded frame, so cut_frame must be computed relative to start_pts:
+        cut_frame = round((cut_time_raw_pts - start_pts_s) * fps)
+    Returns 0.0 on any error (safe fallback — just reverts to old behaviour).
+    """
+    cmd = [
+        "ffprobe", "-v", "quiet",
+        "-print_format", "json",
+        "-show_streams",
+        "-select_streams", "v:0",
+        video_path,
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        if result.returncode != 0:
+            return 0.0
+        data = json.loads(result.stdout)
+        streams = data.get("streams", [])
+        if not streams:
+            return 0.0
+        start_time = float(streams[0].get("start_time", 0.0) or 0.0)
+        return start_time
+    except Exception as e:
+        logger.warning("[Render] start_pts probe failed (%s) — assuming 0.0", e)
+        return 0.0
 
 
 # ─── Audio detection ──────────────────────────────────────────────────────────
