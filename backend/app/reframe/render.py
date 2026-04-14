@@ -5,7 +5,7 @@ Converts reframe analysis results (keyframes, crop coordinates) into
 actual 9:16 (or other aspect ratio) MP4 files via FFmpeg.
 
 Two render paths:
-  - render_podcast_reframe: keyframes + scene_cuts → crop+scale per segment → concat
+  - render_podcast_reframe: single-pass continuous crop expression — no segmentation
   - render_gaming_reframe: webcam crop + game crop → vstack (moved from gaming_pipeline)
 
 These functions accept ONLY coordinates/parameters — no detection logic inside.
@@ -61,11 +61,12 @@ def render_podcast_reframe(
     canvas_h: int = 1920,
 ) -> str:
     """
-    Render a podcast-style reframe: crop+scale each segment, concat into final MP4.
+    Render a podcast-style reframe: single-pass FFmpeg with a continuous crop expression.
 
-    Segments are defined by scene_cuts. Each segment gets the crop position from
-    its first keyframe (hold keyframe at the cut boundary). Within-segment panning
-    keyframes are interpolated via FFmpeg crop expressions.
+    Instead of splitting into segments and concatenating, we build one giant
+    if(lt(t,...)) expression that covers the entire video. FFmpeg evaluates it
+    per-frame using the actual video PTS — frame-accurate by definition, no concat
+    artifacts, no AAC padding issues.
 
     Args:
         video_path: Source 16:9 video
@@ -83,123 +84,79 @@ def render_podcast_reframe(
     if not keyframes:
         raise ValueError("No keyframes provided for podcast reframe render")
 
-    # Build segments from scene_cuts
-    segments = _build_segments(keyframes, scene_cuts, duration_s, fps)
-    logger.info("[Render] %d segments from %d scene cuts", len(segments), len(scene_cuts))
-
-    # Detect audio stream — clips from S07 may be video-only
     has_audio = _has_audio_stream(video_path)
     logger.info("[Render] Audio stream: %s", "yes" if has_audio else "no (video-only)")
 
-    n = len(segments)
-    logger.info("[Render] Podcast render: %d segments, crop=%dx%d → %dx%d", n, crop_w, crop_h, canvas_w, canvas_h)
+    # Build per-segment keyframe assignments (same logic as editor's applyReframeWithSplits)
+    segments = _build_segments(keyframes, scene_cuts, duration_s, fps)
+    logger.info("[Render] Single-pass render: %d segments, crop=%dx%d → %dx%d",
+                len(segments), crop_w, crop_h, canvas_w, canvas_h)
 
-    # Render each segment individually then concat.
-    # A single filter_complex with split=N becomes unreliable beyond ~10 segments:
-    # FFmpeg's filter graph configuration fails with "Error reinitializing filters!"
-    # when N is large (e.g., 22 segments from a dense podcast). Per-segment rendering
-    # + lossless concat is far more stable.
-    tmp_files = []
-    concat_list_path = output_path + ".concat.txt"
-    concat_video_path = output_path + ".concat_video.mp4"
+    # Build a per-segment crop expression with segment_start=0.0 so that
+    # keyframe times in the expression are ABSOLUTE video PTS values.
+    # FFmpeg's crop filter 't' variable IS the actual video PTS — no setpts needed.
+    seg_x: list[tuple[float, float, str]] = []
+    seg_y: list[tuple[float, float, str]] = []
+    for seg in segments:
+        ex = _build_crop_expression(seg["keyframes"], "offset_x", 0.0, fps)
+        ey = _build_crop_expression(seg["keyframes"], "offset_y", 0.0, fps)
+        ex = _clamp_crop_expr(ex, 0, src_w - crop_w)
+        ey = _clamp_crop_expr(ey, 0, src_h - crop_h)
+        seg_x.append((seg["start"], seg["end"], ex))
+        seg_y.append((seg["start"], seg["end"], ey))
 
-    try:
-        for i, seg in enumerate(segments):
-            tmp_path = output_path + f".seg{i}.mp4"
-            tmp_files.append(tmp_path)
+    crop_x_expr = _chain_segments(seg_x)
+    crop_y_expr = _chain_segments(seg_y)
 
-            crop_x_expr = _build_crop_expression(seg["keyframes"], "offset_x", seg["start"], fps)
-            crop_y_expr = _build_crop_expression(seg["keyframes"], "offset_y", seg["start"], fps)
-            crop_x_expr = _clamp_crop_expr(crop_x_expr, 0, src_w - crop_w)
-            crop_y_expr = _clamp_crop_expr(crop_y_expr, 0, src_h - crop_h)
+    logger.info("[Render] crop_x expr length: %d chars", len(crop_x_expr))
 
-            duration = seg["end"] - seg["start"]
+    vf = (
+        f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
+        f"scale={canvas_w}:{canvas_h}:flags=lanczos"
+    )
 
-            vf = (
-                f"setpts=PTS-STARTPTS,"
-                f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
-                f"scale={canvas_w}:{canvas_h}:flags=lanczos"
-            )
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-vf", vf,
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-crf", "18",
+        "-movflags", "+faststart",
+    ]
+    if has_audio:
+        cmd.extend(["-c:a", "aac", "-b:a", "320k"])
+    else:
+        cmd.append("-an")
+    cmd.append(output_path)
 
-            # Render video-only (no audio) per segment.
-            # AAC encoder adds priming/padding samples at each segment boundary,
-            # which accumulates during concat and causes A/V drift and frozen frames.
-            # Solution: render all segments silent, concat losslessly, then mux the
-            # original uncut audio in a single final step.
-            cmd = [
-                "ffmpeg", "-y",
-                "-ss", f"{seg['start']:.6f}",
-                "-i", video_path,
-                "-t", f"{duration:.6f}",
-                "-vf", vf,
-                "-c:v", "libx264",
-                "-preset", "fast",
-                "-crf", "18",
-                "-an",  # no audio — added in final mux step
-                tmp_path,
-            ]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"FFmpeg single-pass render failed.\n"
+            f"stderr={result.stderr[-800:]}"
+        )
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-            if result.returncode != 0:
-                raise RuntimeError(
-                    f"FFmpeg segment {i} render failed.\n"
-                    f"stderr={result.stderr[-600:]}"
-                )
-            logger.info("[Render] Segment %d/%d done (%.2fs–%.2fs)", i + 1, n, seg["start"], seg["end"])
-
-        # Concat all silent video segments losslessly
-        with open(concat_list_path, "w") as f:
-            for p in tmp_files:
-                f.write(f"file '{os.path.abspath(p)}'\n")
-
-        concat_target = concat_video_path if has_audio else output_path
-        concat_cmd = [
-            "ffmpeg", "-y",
-            "-f", "concat", "-safe", "0",
-            "-i", concat_list_path,
-            "-c", "copy",
-            concat_target,
-        ]
-        result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=300)
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"FFmpeg concat failed.\n"
-                f"stderr={result.stderr[-600:]}"
-            )
-
-        # Mux original audio (uncut) with the concatenated silent video.
-        # Using the original audio avoids all AAC padding/priming artifacts.
-        if has_audio:
-            mux_cmd = [
-                "ffmpeg", "-y",
-                "-i", concat_video_path,   # concatenated silent video
-                "-i", video_path,          # original source (for audio)
-                "-map", "0:v",
-                "-map", "1:a",
-                "-c:v", "copy",
-                "-c:a", "aac",
-                "-b:a", "320k",
-                "-shortest",
-                "-movflags", "+faststart",
-                output_path,
-            ]
-            result = subprocess.run(mux_cmd, capture_output=True, text=True, timeout=300)
-            if result.returncode != 0:
-                raise RuntimeError(
-                    f"FFmpeg audio mux failed.\n"
-                    f"stderr={result.stderr[-600:]}"
-                )
-
-    finally:
-        for p in tmp_files:
-            if os.path.exists(p):
-                os.remove(p)
-        for p in [concat_list_path, concat_video_path]:
-            if os.path.exists(p):
-                os.remove(p)
-
-    logger.info("[Render] Podcast render complete: %s", output_path)
+    logger.info("[Render] Single-pass render complete: %s", output_path)
     return output_path
+
+
+def _chain_segments(seg_exprs: list[tuple[float, float, str]]) -> str:
+    """
+    Chain per-segment expressions into one: if(lt(t,end0),expr0,if(lt(t,end1),expr1,...,exprN))
+
+    At the cut boundary (e.g. t=5.68), lt(t, 5.68) is FALSE so FFmpeg immediately
+    jumps to the next segment's expression — 100% frame-accurate, no off-by-one.
+    """
+    if not seg_exprs:
+        return "0"
+    if len(seg_exprs) == 1:
+        return seg_exprs[0][2]
+    result = seg_exprs[-1][2]
+    for i in range(len(seg_exprs) - 2, -1, -1):
+        cut_time = seg_exprs[i][1]  # end of this segment = start of next
+        result = f"if(lt(t\\,{cut_time:.6f})\\,{seg_exprs[i][2]}\\,{result})"
+    return result
 
 
 def _build_segments(
