@@ -1,0 +1,18 @@
+{
+  "status": "init",
+  "scope": "codebase",
+  "type": "backend",
+  "localEndpoint": "http://localhost:8000/",
+  "serverPort": 50957,
+  "executionArgs": {
+    "projectName": "backend",
+    "projectPath": "/Users/ekrem/prognot/backend",
+    "testIds": [],
+    "additionalInstruction": "IMPORTANT: Do NOT regenerate the test files — use the existing TC*.py files in testsprite_tests/ as-is. They have already been manually fixed to match the real API schema. Just execute them.",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-U9mas6wtZDdzmtqH4CrDn5Onii-UfjjD8aBXpNNRu9yfsQoQX78U0siNPhaaMkq0W69qA-o2EWUQbLBW3ivSjMi_zHxaUgiqI3wJYNMBWzbK1Ba5zqwZZ-2T8T7Q9ddt7-o"
+    }
+  },
+  "proxy": "http://096a2ed5-8e27-4a0b-a03d-fa156d582fb5:3gFtYvwsNpkUNysuxarFWuLzxX0s9ZRw@tun.testsprite.com:8080"
+}

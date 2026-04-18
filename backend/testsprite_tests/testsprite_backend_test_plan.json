@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "get health check status",
+    "description": "Verify GET /health returns 200 with JSON containing ok (boolean), version (string), and environment (string). No auth required."
+  },
+  {
+    "id": "TC002",
+    "title": "create new pipeline job",
+    "description": "Test POST /jobs with multipart form data (NOT json). Required form fields: title (string) and channel_id (existing channel slug). Optional: youtube_url. Response 200 with {job_id: UUID, status: 'queued', message: string}. Note: field is 'title' not 'video_title'; field is 'youtube_url' not 'video_url'; response field is 'job_id' not 'id'. If job status goes to 'failed' within 30 seconds, YouTube IP is blocked — skip the test gracefully. Missing title returns 422. Non-existent channel returns 404."
+  },
+  {
+    "id": "TC003",
+    "title": "get job status and metadata",
+    "description": "Verify GET /jobs/{job_id} returns 200 with nested structure {job: {id, status, current_step, progress_pct, clip_count, video_title, channel_id, ...}, clips: [], speaker_map: null}. Valid statuses: queued, processing, analyzing, awaiting_speaker_confirm, cutting, completed, failed, partial. Non-existent job returns 404. If job fails quickly (YouTube IP blocked), skip additional checks."
+  },
+  {
+    "id": "TC004",
+    "title": "list jobs for channel",
+    "description": "Test GET /jobs?channel_id={id} returns 200 with array of job objects. GET /jobs without channel_id returns 422. Pagination: limit param supported. Each job object has id, status, channel_id, video_title fields."
+  },
+  {
+    "id": "TC005",
+    "title": "upload video preview",
+    "description": "Verify POST /jobs/upload-preview with a real valid MP4 file (field name 'file') returns 200 with {upload_id: UUID, duration_seconds: float > 0}. Must generate a real MP4 using ffmpeg: subprocess.run(['ffmpeg', '-y', '-f', 'lavfi', '-i', 'color=c=black:size=64x64:rate=1', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-t', '1', '-c:v', 'libx264', '-c:a', 'aac', output_path], check=True). Fake bytes or non-MP4 files return 400."
+  },
+  {
+    "id": "TC006",
+    "title": "delete job and associated clips",
+    "description": "Test DELETE /jobs/{job_id} returns 200 with {deleted: true, job_id: string}. GET /jobs/{job_id} after delete returns 404. DELETE on already-deleted or non-existent job returns 404."
+  },
+  {
+    "id": "TC007",
+    "title": "confirm speaker map and resume pipeline",
+    "description": "Verify POST /jobs/{job_id}/confirm-speakers with {speaker_map: {'0': {role: 'host', name: 'Joe'}, '1': {role: 'guest', name: 'Alex'}}}. Non-existent job returns 404. Job not in awaiting_speaker_confirm state returns 400 or 404. Happy path (job in awaiting_speaker_confirm) returns 200 with {confirmed: true, job_id, speaker_map}."
+  },
+  {
+    "id": "TC008",
+    "title": "list clips for channel and job",
+    "description": "Test GET /clips?channel_id={id} returns 200 with array of clip objects. GET /clips without channel_id returns 200 with empty list (NOT 422). Each clip has fields: id, job_id, channel_id, standalone_score (NOT 'score'), user_approved (NOT 'is_successful'), content_type, video_landscape_path, video_reframed_path."
+  },
+  {
+    "id": "TC009",
+    "title": "approve clip and verify status",
+    "description": "Verify PATCH /clips/{clip_id}/approve returns 200 with {approved: true, clip_id: string}. GET /clips/{clip_id} after approve shows user_approved == true (NOT is_successful). PATCH /clips/{clip_id}/reject returns {rejected: true}. PATCH /clips/{clip_id}/unset-approval returns {unset: true}. Non-existent clip returns 404. Use existing channel 'speedy_cast' to find existing clips; if none found, only test 404 case."
+  },
+  {
+    "id": "TC010",
+    "title": "create new channel",
+    "description": "Test POST /channels with {channel_id: 'my_slug', display_name: 'My Channel'} (both required). Response 200 (NOT 201) with {created: true, channel_id: string}. Missing channel_id returns 422. Missing display_name returns 422. GET /channels/{channel_id} after creation returns 200 with channel object where id == channel_id slug."
+  }
+]

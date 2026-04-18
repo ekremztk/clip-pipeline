@@ -1,0 +1,273 @@
+version: "2"
+type: backend
+tech_stack:
+  - Python 3.11
+  - FastAPI
+  - Supabase (PostgreSQL)
+  - Cloudflare R2 (object storage)
+  - Deepgram Nova-3 (transcription + diarization)
+  - Google Gemini 3.1 Pro Preview / 2.5 Flash (AI discovery)
+  - Anthropic Claude Opus 4.6 (AI evaluation)
+  - FFmpeg (video/audio processing)
+  - YOLO v8 (face detection for reframe)
+  - httpx, requests
+features:
+  - name: Health Check
+    description: Simple liveness endpoint
+    files:
+      - app/main.py
+    endpoints:
+      - method: GET
+        path: /health
+        description: Returns service health status
+        auth_required: false
+        response_schema:
+          "200":
+            ok: boolean
+            version: string
+            environment: string
+
+  - name: Job Management
+    description: Create and manage video processing pipeline jobs. Each job runs a 10-step pipeline (audio extract, transcribe, speaker ID, label transcript, AI discovery, AI evaluation, precision cut, export, reframe, captions). Pipeline pauses after S03 for speaker confirmation.
+    files:
+      - app/api/routes/jobs.py
+      - app/pipeline/orchestrator.py
+      - app/pipeline/steps/s01_audio_extract.py
+      - app/pipeline/steps/s02_transcribe.py
+      - app/pipeline/steps/s03_speaker_id.py
+      - app/pipeline/steps/s04_labeled_transcript.py
+      - app/pipeline/steps/s05_unified_discovery.py
+      - app/pipeline/steps/s06_batch_evaluation.py
+      - app/pipeline/steps/s07_precision_cut.py
+      - app/pipeline/steps/s08_export.py
+      - app/pipeline/steps/s09_reframe.py
+      - app/pipeline/steps/s10_captions.py
+    endpoints:
+      - method: POST
+        path: /jobs
+        description: Create a new pipeline job. Accepts multipart form with video_file OR video_url, plus video_title and channel_id. Pipeline starts immediately as background task.
+        auth_required: true
+        request_schema:
+          body:
+            video_title: string
+            channel_id: uuid
+            guest_name: string (optional)
+            video_url: string (optional, YouTube URL)
+            video_file: file (optional, MP4)
+        response_schema:
+          "201":
+            id: uuid
+            status: string
+            channel_id: uuid
+            video_title: string
+          "422": Validation error (missing required fields)
+          "404": Channel not found
+
+      - method: GET
+        path: /jobs/{job_id}
+        description: Get job status and metadata. Status progresses through queued -> processing -> awaiting_speaker_confirm -> cutting -> completed/failed.
+        auth_required: true
+        response_schema:
+          "200":
+            id: uuid
+            status: string
+            current_step: integer
+            progress_pct: integer
+            clip_count: integer
+            video_title: string
+            predicted_speaker_map: object
+          "404": Job not found
+
+      - method: GET
+        path: /jobs
+        description: List jobs for a channel
+        auth_required: true
+        request_schema:
+          query:
+            channel_id: uuid (required)
+            limit: integer (optional)
+            offset: integer (optional)
+        response_schema:
+          "200": array of job objects
+          "422": Missing channel_id
+
+      - method: POST
+        path: /jobs/upload-preview
+        description: Upload a video file for preview before creating a job
+        auth_required: true
+        response_schema:
+          "200":
+            upload_id: string
+            preview_url: string
+
+      - method: DELETE
+        path: /jobs/{job_id}
+        description: Delete a job and all associated clips
+        auth_required: true
+        response_schema:
+          "200": success
+          "404": Job not found
+
+  - name: Speaker Confirmation
+    description: After S03 completes, user confirms speaker roles (host/guest). This resumes the pipeline from S04 onward.
+    files:
+      - app/api/routes/speakers.py
+    endpoints:
+      - method: POST
+        path: /jobs/{job_id}/confirm-speakers
+        description: Confirm speaker map and resume pipeline. speaker_map keys are diarization IDs, values have role (host/guest) and name.
+        auth_required: true
+        request_schema:
+          body:
+            speaker_map:
+              "0":
+                role: string (host or guest)
+                name: string
+              "1":
+                role: string (host or guest)
+                name: string
+        response_schema:
+          "200":
+            status: string
+          "404": Job not found
+          "400": Job not in awaiting_speaker_confirm state
+
+  - name: Clip Management
+    description: Access and manage extracted video clips. Each clip has a landscape (16:9) and reframed (9:16) version stored in R2. Clips go through an approval workflow.
+    files:
+      - app/api/routes/clips.py
+    endpoints:
+      - method: GET
+        path: /clips
+        description: List clips for a channel, optionally filtered by job_id
+        auth_required: true
+        request_schema:
+          query:
+            channel_id: uuid (required)
+            job_id: uuid (optional)
+            limit: integer (optional)
+            offset: integer (optional)
+        response_schema:
+          "200": array of clip objects with score, content_type, video_landscape_path, etc.
+
+      - method: GET
+        path: /clips/{clip_id}
+        description: Get a single clip with full metadata
+        auth_required: true
+        response_schema:
+          "200":
+            id: uuid
+            job_id: uuid
+            channel_id: uuid
+            start_time: float
+            end_time: float
+            duration_s: float
+            hook_text: string
+            content_type: string
+            score: integer
+            clip_strategy_role: string
+            video_landscape_path: string
+            video_reframed_path: string
+            suggested_title: string
+            suggested_description: string
+            is_successful: boolean or null
+          "404": Clip not found
+
+      - method: PATCH
+        path: /clips/{clip_id}/approve
+        description: Approve a clip (sets is_successful=true)
+        auth_required: true
+        response_schema:
+          "200":
+            is_successful: true
+
+      - method: PATCH
+        path: /clips/{clip_id}/reject
+        description: Reject a clip (sets is_successful=false)
+        auth_required: true
+        response_schema:
+          "200":
+            is_successful: false
+
+      - method: PATCH
+        path: /clips/{clip_id}/unset-approval
+        description: Reset approval status to null (pending)
+        auth_required: true
+        response_schema:
+          "200":
+            is_successful: null
+
+      - method: PATCH
+        path: /clips/{clip_id}/publish
+        description: Mark clip as published to social media
+        auth_required: true
+        response_schema:
+          "200": success
+
+      - method: GET
+        path: /clips/{clip_id}/transcript
+        description: Get word-level transcript for clip's time range
+        auth_required: true
+        response_schema:
+          "200":
+            words: array
+            text: string
+
+  - name: Channel Management
+    description: Manage YouTube channels and their DNA configuration. Channel DNA defines clip style, tone, content types, and duration preferences used by the AI pipeline.
+    files:
+      - app/api/routes/channels.py
+    endpoints:
+      - method: GET
+        path: /channels
+        description: List all channels for the user
+        auth_required: true
+        response_schema:
+          "200": array of channel objects
+
+      - method: POST
+        path: /channels
+        description: Create a new channel
+        auth_required: true
+        request_schema:
+          body:
+            name: string
+        response_schema:
+          "201":
+            id: uuid
+            name: string
+          "422": Validation error
+
+      - method: GET
+        path: /channels/{channel_id}
+        description: Get channel details including DNA
+        auth_required: true
+        response_schema:
+          "200":
+            id: uuid
+            name: string
+            channel_dna: object
+          "404": Channel not found
+
+      - method: PATCH
+        path: /channels/{channel_id}
+        description: Update channel name or DNA
+        auth_required: true
+        request_schema:
+          body:
+            name: string (optional)
+            channel_dna: object (optional)
+        response_schema:
+          "200": updated channel object
+          "404": Channel not found
+
+known_limitations:
+  - issue: Pipeline steps require real external API keys (Deepgram, Gemini, Anthropic) — tests that trigger the full pipeline will fail without valid credentials in .env
+    location: app/pipeline/steps/
+    impact: End-to-end pipeline tests need real API keys to succeed
+  - issue: S09 reframe requires YOLO model file (yolov8n-pose.pt) to be present
+    location: app/pipeline/steps/s09_reframe.py
+    impact: Reframe step may fail if model file not downloaded
+  - issue: Video upload endpoint requires a real video file or YouTube URL that is downloadable
+    location: app/api/routes/jobs.py
+    impact: Integration tests need a real short video source
