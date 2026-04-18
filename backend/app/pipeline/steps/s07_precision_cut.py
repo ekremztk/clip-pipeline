@@ -49,6 +49,29 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
     return best_time
 
 
+def _find_sentence_end_before(hard_limit: float, clip_start: float, words: list, min_dur: int) -> Optional[float]:
+    """
+    Finds the end of the last sentence-ending word before hard_limit.
+    Sentence endings: word.word ends with '.', '?', '!' (punctuation markers from Deepgram).
+    Only returns a result if the sentence end is at least min_dur seconds after clip_start.
+    Search window: up to 8s before hard_limit.
+    """
+    sentence_enders = {".", "?", "!", ".."}
+    search_start = hard_limit - 8.0
+    best = None
+    for w in words:
+        w_end = w.get("end", 0)
+        if w_end > hard_limit:
+            break
+        if w_end < search_start:
+            continue
+        text = w.get("word", w.get("punctuated_word", "")).strip()
+        if text and text[-1] in sentence_enders:
+            if (w_end - clip_start) >= min_dur:
+                best = w_end
+    return best
+
+
 def _find_prev_word_end(target_start: float, words: list) -> Optional[float]:
     """Finds the end time of the word immediately before target_start."""
     prev_end = None
@@ -63,15 +86,15 @@ def _find_prev_word_end(target_start: float, words: list) -> Optional[float]:
 
 def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: str,
         clip_duration_min: Optional[int] = None,
-        clip_duration_max: Optional[int] = None) -> list:
+        clip_duration_max: Optional[int] = None,
+        channel_dna: Optional[dict] = None) -> list:
     """
     Step 7: Precision Cut (Math Only)
     Aligns clip boundaries to word boundaries using Deepgram word timestamps.
     Does NOT cut video — only calculates and stores final_start/final_end.
     Actual FFmpeg cutting happens in S08 (Export).
 
-    clip_duration_min/max: job-level override (highest priority).
-    Falls back to settings defaults.
+    Priority for duration limits: job_override > channel_dna > settings defaults.
     """
     print(f"[S07] Starting precision cut (math only) for job {job_id}. Clips: {len(evaluated_clips)}")
 
@@ -93,10 +116,29 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
     except Exception as e:
         print(f"[S07] Warning: Could not get video duration: {e}")
 
-    # Respect job-level duration overrides — same priority chain as S05/S06
-    max_dur = int(clip_duration_max) if clip_duration_max is not None else settings.MAX_CLIP_DURATION
-    min_dur = int(clip_duration_min) if clip_duration_min is not None else settings.MIN_CLIP_DURATION
-    print(f"[S07] Duration limits: {min_dur}s–{max_dur}s (job_override={'yes' if clip_duration_max is not None else 'no'})")
+    # Duration priority: job_override > channel_dna.duration_range > settings defaults
+    dna_dur_range = (channel_dna or {}).get("duration_range", {}) if channel_dna else {}
+    dna_min = dna_dur_range.get("min") if dna_dur_range else None
+    dna_max = dna_dur_range.get("max") if dna_dur_range else None
+
+    if clip_duration_max is not None:
+        max_dur = int(clip_duration_max)
+        dur_source = "job_override"
+    elif dna_max is not None:
+        max_dur = int(dna_max)
+        dur_source = "channel_dna"
+    else:
+        max_dur = settings.MAX_CLIP_DURATION
+        dur_source = "settings_default"
+
+    if clip_duration_min is not None:
+        min_dur = int(clip_duration_min)
+    elif dna_min is not None:
+        min_dur = int(dna_min)
+    else:
+        min_dur = settings.MIN_CLIP_DURATION
+
+    print(f"[S07] Duration limits: {min_dur}s–{max_dur}s (source={dur_source})")
 
     results = []
 
@@ -124,8 +166,15 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
             # 3. Enforce duration limits
             duration = final_end - final_start
             if duration > max_dur:
-                print(f"[S07] Clip {index+1} ({content_type}): {duration:.1f}s > {max_dur}s. Trimming end.")
-                final_end = final_start + max_dur
+                hard_limit = final_start + max_dur
+                # Try to snap to nearest sentence end within 8s before hard limit
+                sentence_end = _find_sentence_end_before(hard_limit, final_start, words, min_dur)
+                if sentence_end:
+                    print(f"[S07] Clip {index+1} ({content_type}): {duration:.1f}s > {max_dur}s. Smart trim to sentence end at {sentence_end:.2f}s.")
+                    final_end = sentence_end + 0.3
+                else:
+                    print(f"[S07] Clip {index+1} ({content_type}): {duration:.1f}s > {max_dur}s. Hard trim (no sentence boundary found).")
+                    final_end = hard_limit
             elif duration < min_dur:
                 print(f"[S07] Warning: Clip {index+1} ({content_type}): {duration:.1f}s < {min_dur}s. Keeping anyway.")
 
