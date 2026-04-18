@@ -76,8 +76,8 @@ backend/app/
 ├── main.py              # FastAPI entry, lifespan schedulers, CORS, router mount
 ├── config.py            # Settings singleton (all env vars)
 ├── pipeline/
-│   ├── orchestrator.py  # State machine: runs S01→S08, handles pause after S03
-│   ├── steps/s01-s08    # Individual pipeline steps
+│   ├── orchestrator.py  # State machine: runs S01→S10, handles pause after S03
+│   ├── steps/s01-s10    # Individual pipeline steps
 │   └── prompts/         # Gemini prompts for S05, S06
 ├── director/
 │   ├── agent.py         # Gemini-powered agentic loop with function calling
@@ -108,7 +108,7 @@ frontend/app/
 ├── dashboard/
 │   ├── layout.tsx            # Sidebar + ChannelContext provider
 │   ├── page.tsx              # Overview: stats, active jobs, recent clips
-│   ├── new-job/              # Video upload + trim + pipeline trigger
+│   ├── page.tsx              # Video upload + trim + pipeline trigger
 │   ├── clips/                # "My Projects" — clip library with approval workflow
 │   ├── channel-dna/          # Channel DNA editor (identity, tone, content types, reference clips)
 │   ├── content-finder/       # Content Finder (coming soon stub)
@@ -187,7 +187,7 @@ POST /jobs → background task → run_pipeline(job_id)
   S01-S03: extract audio, transcribe, speaker ID
   ── PAUSE (status=awaiting_speaker_confirm) ──
   POST /jobs/{id}/confirm-speakers → resumes
-  S04-S08: label transcript, discover clips, evaluate, cut, export
+  S04-S10: label transcript, discover clips, evaluate, cut, export, reframe, captions
   → Clips saved to R2, metadata to Supabase
 ```
 Pipeline state passed between steps: `transcript_data`, `speaker_data`, `labeled_transcript`, `channel_dna`, `candidates`, `evaluated_clips`, `cut_results`.
@@ -197,16 +197,18 @@ Pipeline state passed between steps: `transcript_data`, `speaker_data`, `labeled
 
 ---
 
-## PIPELINE STRUCTURE (V4 — 8 Steps)
+## PIPELINE STRUCTURE (V4 — 10 Steps)
 ```
 S01 Audio Extract (FFmpeg)
 S02 Transcribe (Deepgram)
 S03 Speaker ID (Deepgram diarization + user confirm)
 S04 Labeled Transcript
-S05 Unified Discovery (Gemini Pro + Video — finds clip candidates)
-S06 Batch Evaluation (Gemini Pro + Text — scores, quality gate, strategy)
-S07 Precision Cut (FFmpeg + word boundary snap)
+S05 Unified Discovery (Gemini 3.1 Pro Preview + Video — finds clip candidates)
+S06 Batch Evaluation (Claude Opus 4.6 — scores, quality gate, strategy, hallucination check)
+S07 Precision Cut (word boundary snap — math only, no FFmpeg)
 S08 Export (FFmpeg re-encode + R2 upload + DB write)
+S09 Reframe (YOLO + Gemini direction → 9:16 MP4)
+S10 Captions (Deepgram word timestamps → burned-in subtitles)
 ```
 
 ---
@@ -216,14 +218,14 @@ S08 Export (FFmpeg re-encode + R2 upload + DB write)
 ### Model usage
 | Step / Module | Model | Config key |
 |---------------|-------|------------|
-| S05 Unified Discovery (video analysis) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
+| S05 Unified Discovery (video analysis) | `gemini-3.1-pro-preview` | `settings.GEMINI_MODEL_VIDEO` |
 | S05 channel profile lookup (text only) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
-| S06 Batch Evaluation | **Claude** `claude-sonnet-4-6` | `settings.CLAUDE_MODEL` |
+| S06 Batch Evaluation | **Claude** `claude-opus-4-6` | `settings.CLAUDE_MODEL` |
 | Director agent (tool calling) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
 | Director chat (simple queries) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
 | All other Gemini calls (DNA gen, embeddings, etc.) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
 
-- Default values live in `config.py`: `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-2.5-flash"`, `CLAUDE_MODEL = "claude-sonnet-4-6"`
+- Default values live in `config.py`: `GEMINI_MODEL_VIDEO = "gemini-3.1-pro-preview"`, `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-2.5-flash"`, `CLAUDE_MODEL = "claude-opus-4-6"`
 - Override any model via env var without code changes
 - S06 uses `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
 - Never change models without being asked

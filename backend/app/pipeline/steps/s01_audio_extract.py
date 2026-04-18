@@ -1,6 +1,7 @@
 import subprocess
 import os
 import json
+from app.config import settings
 
 
 def _validate_audio(audio_path: str, video_path: str) -> None:
@@ -52,7 +53,8 @@ def run(video_path: str, job_id: str) -> str:
     Extracts audio from a video file using FFmpeg.
     Returns the path to the extracted audio file.
     """
-    audio_path = f"temp_{job_id}.m4a"
+    os.makedirs(str(settings.UPLOAD_DIR), exist_ok=True)
+    audio_path = os.path.join(str(settings.UPLOAD_DIR), f"temp_{job_id}.m4a")
     print(f"[S01] Starting audio extraction from {video_path} to {audio_path}")
 
     command = [

@@ -41,6 +41,44 @@ def _sanity_check_word_boundary(final_start: float, final_end: float, words: lis
     return final_start, final_end
 
 
+def _encode_segment(video_path: str, start: float, duration: float, output_path: str) -> None:
+    """Encodes a video segment with normalized parameters for concat compatibility."""
+    cmd = [
+        "ffmpeg", "-y",
+        "-ss", str(start),
+        "-i", video_path,
+        "-t", str(duration),
+        "-c:v", "libx264", "-preset", "fast", "-crf", str(settings.FFMPEG_CRF),
+        "-c:a", "aac", "-b:a", "320k",
+        "-r", "30",
+        "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart",
+        "-avoid_negative_ts", "make_zero",
+        "-map", "0:v:0", "-map", "0:a:0",
+        output_path,
+    ]
+    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+
+
+def _stitch_segments(setup_path: str, main_path: str, output_path: str, job_output_dir: str) -> None:
+    """Concatenates two normalized video segments using FFmpeg concat demuxer."""
+    concat_file = os.path.join(job_output_dir, f"_concat_{os.path.basename(output_path)}.txt")
+    try:
+        with open(concat_file, "w") as f:
+            f.write(f"file '{setup_path}'\nfile '{main_path}'\n")
+        cmd = [
+            "ffmpeg", "-y",
+            "-f", "concat", "-safe", "0",
+            "-i", concat_file,
+            "-c", "copy",
+            output_path,
+        ]
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    finally:
+        if os.path.exists(concat_file):
+            os.remove(concat_file)
+
+
 def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
         video_title: str = "", user_id: str | None = None,
         transcript_data: Optional[dict] = None) -> list:
@@ -62,6 +100,7 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
 
     for index, clip in enumerate(cut_results):
         output_path = None
+        r2_uploaded = False
         try:
             final_start = clip.get("final_start", 0.0)
             final_duration = clip.get("final_duration_s", 0.0)
@@ -78,30 +117,55 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
                 print(f"[S08] Clip {index+1}: Invalid duration ({final_duration}s). Skipping.")
                 continue
 
-            # 1. FFmpeg: frame-accurate cut + high-quality encode in ONE call
+            # 1. FFmpeg: frame-accurate cut + high-quality encode
             output_filename = f"clip_{index:02d}_{content_type}.mp4"
             output_path = os.path.join(job_output_dir, output_filename)
 
-            ffmpeg_cmd = [
-                "ffmpeg", "-y",
-                "-ss", str(final_start),
-                "-i", video_path,
-                "-t", str(final_duration),
-                "-c:v", "libx264",
-                "-preset", settings.FFMPEG_PRESET,       # "slow"
-                "-crf", str(settings.FFMPEG_CRF),         # 18
-                "-c:a", "aac",
-                "-b:a", "320k",
-                "-movflags", "+faststart",
-                "-pix_fmt", "yuv420p",
-                "-avoid_negative_ts", "make_zero",
-                "-map", "0:v:0",
-                "-map", "0:a:0",
-                output_path
-            ]
+            stitch_setup = clip.get("stitch_setup") or {}
+            requires_stitch = bool(clip.get("requires_stitch") and stitch_setup)
 
-            print(f"[S08] Clip {index+1}/{len(cut_results)}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
-            subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            if requires_stitch:
+                setup_start = float(stitch_setup.get("setup_start", 0))
+                setup_end = float(stitch_setup.get("setup_end", 0))
+                setup_duration = setup_end - setup_start
+                if setup_duration > 0 and os.path.exists(video_path):
+                    setup_path = os.path.join(job_output_dir, f"_setup_{index:02d}.mp4")
+                    main_path = os.path.join(job_output_dir, f"_main_{index:02d}.mp4")
+                    try:
+                        _encode_segment(video_path, setup_start, setup_duration, setup_path)
+                        _encode_segment(video_path, final_start, final_duration, main_path)
+                        _stitch_segments(setup_path, main_path, output_path, job_output_dir)
+                        print(f"[S08] Clip {index+1}: Stitched setup ({setup_start:.1f}–{setup_end:.1f}s) + main ({final_start:.2f}–{final_end:.2f}s)")
+                    finally:
+                        for p in [setup_path, main_path]:
+                            if os.path.exists(p):
+                                try:
+                                    os.remove(p)
+                                except Exception:
+                                    pass
+                else:
+                    requires_stitch = False
+
+            if not requires_stitch:
+                ffmpeg_cmd = [
+                    "ffmpeg", "-y",
+                    "-ss", str(final_start),
+                    "-i", video_path,
+                    "-t", str(final_duration),
+                    "-c:v", "libx264",
+                    "-preset", settings.FFMPEG_PRESET,
+                    "-crf", str(settings.FFMPEG_CRF),
+                    "-c:a", "aac",
+                    "-b:a", "320k",
+                    "-movflags", "+faststart",
+                    "-pix_fmt", "yuv420p",
+                    "-avoid_negative_ts", "make_zero",
+                    "-map", "0:v:0",
+                    "-map", "0:a:0",
+                    output_path,
+                ]
+                print(f"[S08] Clip {index+1}/{len(cut_results)}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
+                subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
             # 2. Verify output
             if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
@@ -109,13 +173,17 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
                 continue
 
             # 3. Upload to Cloudflare R2
-            file_url = output_path  # fallback
+            file_url = output_path  # fallback until upload confirmed
             try:
                 r2_url = upload_clip(job_id, output_filename, output_path)
                 print(f"[S08] Uploaded to R2: {r2_url}")
                 file_url = r2_url
+                r2_uploaded = True
             except Exception as r2_err:
-                print(f"[S08] R2 upload failed: {r2_err}. Using local path.")
+                print(f"[S08] R2 upload failed: {r2_err}. Clip will not be saved.")
+
+            if not r2_uploaded:
+                continue
 
             # 4. Insert into Supabase clips table
             clip_data = {
@@ -156,13 +224,6 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
                 print(f"[S08] DB insert error for clip {index+1}: {db_err}")
                 exported_clips.append(clip_data)
 
-            # 5. Clean up local file after successful R2 upload
-            if file_url != output_path:
-                try:
-                    os.remove(output_path)
-                except Exception:
-                    pass
-
         except subprocess.CalledProcessError as e:
             stderr_output = e.stderr.decode() if e.stderr else "no stderr"
             print(f"[S08] FFmpeg error for clip {index+1}: {stderr_output[:500]}")
@@ -170,7 +231,6 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
             print(f"[S08] Unexpected error for clip {index+1}: {e}")
             traceback.print_exc()
         finally:
-            # Clean up output file if it exists and wasn't uploaded
             if output_path and os.path.exists(output_path):
                 try:
                     os.remove(output_path)

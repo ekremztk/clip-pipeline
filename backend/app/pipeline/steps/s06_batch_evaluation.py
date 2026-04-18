@@ -6,7 +6,6 @@ from app.config import settings
 from app.pipeline.prompts.batch_evaluation import SYSTEM_PROMPT, EVALUATION_PROMPT
 from app.pipeline.steps.s05_unified_discovery import build_channel_context
 from app.services.claude_client import call_claude
-from app.director.events import director_events
 
 
 # ── Transcript segment extractor ─────────────────────────────────────────────
@@ -83,9 +82,9 @@ def _extract_context_segments(
         if not words or len(words) <= 10:
             return empty
 
-        pre_words  = [w for w in words if pre_start  <= w.get("start", 0) <  rec_start]
-        clip_words = [w for w in words if rec_start  <= w.get("start", 0) <= rec_end]
-        post_words = [w for w in words if rec_end    <  w.get("start", 0) <= post_end]
+        pre_words  = [w for w in words if pre_start  <= w.get("start", 0) < rec_start and w.get("end", 0) <= rec_start]
+        clip_words = [w for w in words if w.get("end", 0) >= rec_start and w.get("start", 0) <= rec_end]
+        post_words = [w for w in words if w.get("start", 0) > rec_end and w.get("start", 0) <= post_end]
 
         return {
             "pre_context":  _words_to_natural_text(pre_words),
@@ -252,15 +251,17 @@ def _evaluate_batch_with_claude(
     channel_context: str,
     min_duration: int = 12,
     max_duration: int = 60,
+    full_transcript_block: Optional[list] = None,
 ) -> list:
     """
     Evaluates a batch of candidates with Claude using transcript only.
     Returns all evaluated candidates (pass + fixable).
+    full_transcript_block: optional extra system blocks containing the full labeled transcript.
     """
     print(f"[S06] Claude batch: {len(batch_items)} candidates (text-only)")
 
     content = _build_claude_content(batch_items, channel_context, min_duration, max_duration)
-    raw = call_claude(content, system=SYSTEM_PROMPT)
+    raw = call_claude(content, system=SYSTEM_PROMPT, extra_system_blocks=full_transcript_block)
     return _parse_claude_json(raw)
 
 
@@ -269,9 +270,10 @@ def _evaluate_single_with_claude(
     channel_context: str,
     min_duration: int = 12,
     max_duration: int = 60,
+    full_transcript_block: Optional[list] = None,
 ) -> Optional[dict]:
     try:
-        results = _evaluate_batch_with_claude([item], channel_context, min_duration, max_duration)
+        results = _evaluate_batch_with_claude([item], channel_context, min_duration, max_duration, full_transcript_block)
         return results[0] if results else None
     except Exception as e:
         print(f"[S06] Single retry failed for candidate {item.get('candidate_id')}: {e}")
@@ -368,6 +370,23 @@ def run(
     try:
         channel_context = build_channel_context(channel_dna, channel_id)
 
+        # Build a cached system block with the full labeled transcript — Claude uses it
+        # for hallucination detection (verifying hook_text locations) and inspector role.
+        # Caching means the transcript tokens are paid once and reused across all batches.
+        full_transcript_block: Optional[list] = None
+        if labeled_transcript and len(labeled_transcript) > 100:
+            full_transcript_block = [
+                {
+                    "type": "text",
+                    "text": (
+                        "## FULL LABELED TRANSCRIPT (for Inspector Role verification)\n"
+                        "Use this to verify hook_text locations and timestamp accuracy.\n\n"
+                        + labeled_transcript
+                    ),
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ]
+
         # Build batch items with transcript segments + context windows
         all_batch_data = []
         for candidate in candidates:
@@ -411,7 +430,7 @@ def run(
             print(f"[S06] Batch {batch_num}/{total_batches} ({len(batch)} candidates)")
 
             try:
-                evaluated = _evaluate_batch_with_claude(batch, channel_context, min_duration, max_duration)
+                evaluated = _evaluate_batch_with_claude(batch, channel_context, min_duration, max_duration, full_transcript_block)
 
                 returned_ids = {str(item.get("candidate_id", "")) for item in evaluated}
                 sent_ids = {str(item.get("candidate_id", "")) for item in batch}
@@ -427,7 +446,7 @@ def run(
                             None,
                         )
                         if missing_item:
-                            retry = _evaluate_single_with_claude(missing_item, channel_context, min_duration, max_duration)
+                            retry = _evaluate_single_with_claude(missing_item, channel_context, min_duration, max_duration, full_transcript_block)
                             if retry:
                                 all_evaluated.append(retry)
                                 print(f"[S06] Recovered candidate {missing_id}")
@@ -438,13 +457,20 @@ def run(
                 print(f"[S06] Batch {batch_num} failed: {batch_err}. Falling back to individual evaluation.")
                 for item in batch:
                     try:
-                        single = _evaluate_single_with_claude(item, channel_context, min_duration, max_duration)
+                        single = _evaluate_single_with_claude(item, channel_context, min_duration, max_duration, full_transcript_block)
                         if single:
                             all_evaluated.append(single)
                     except Exception as single_err:
                         print(f"[S06] Individual eval failed for candidate {item.get('candidate_id')}: {single_err}")
 
         print(f"[S06] Claude evaluated {len(all_evaluated)} total candidates")
+
+        # Log hallucination flags from inspector role
+        flagged = [c for c in all_evaluated if c.get("s05_hallucination_flag")]
+        if flagged:
+            print(f"[S06] Inspector role flagged {len(flagged)} candidates with hook_text hallucination")
+            for c in flagged:
+                print(f"[S06]   Candidate {c.get('candidate_id')}: {c.get('hook_text', '')[:60]}")
 
         # Safety filter — fails should not appear in output (Claude omits them), but guard anyway
         passed = []
@@ -499,21 +525,6 @@ def run(
                 clip["posting_order"] = order  # normalize to sequential
 
         print(f"[S06] Final: {len(passed)} clips proceeding to S07")
-
-        fail_count = len(all_evaluated) - len(passed)
-        try:
-            director_events.emit_sync(
-                module="module_1", event="s06_evaluation_completed",
-                payload={
-                    "job_id": job_id,
-                    "pass_count": len(passed),
-                    "fail_count": fail_count,
-                    "total_evaluated": len(all_evaluated),
-                },
-                channel_id=channel_id,
-            )
-        except Exception:
-            pass
 
         return passed
 

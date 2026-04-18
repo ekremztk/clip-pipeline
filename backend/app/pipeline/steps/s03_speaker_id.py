@@ -63,9 +63,25 @@ def run(transcript_data: dict, job_id: str, video_title: str = "") -> dict:
             predicted_map[speaker] = {"role": "guest", "name": guest_name}
             print(f"[S03] Only one speaker found, assigned as guest")
         elif len(speaker_stats) >= 2:
-            # Sort speakers by duration, descending
-            # Speaker with MORE total duration is assumed to be the guest
-            sorted_speakers = sorted(speaker_stats.items(), key=lambda x: x[1]["duration"], reverse=True)
+            # Guest heuristic: hosts ask short questions, guests give long answers.
+            # Rank by average utterance duration DESC — highest avg = guest.
+            # Tiebreaker: total duration (more total time = more likely guest).
+            def avg_utt_duration(stats):
+                count = stats["utterance_count"]
+                return stats["duration"] / count if count > 0 else 0.0
+
+            sorted_speakers = sorted(
+                speaker_stats.items(),
+                key=lambda x: (avg_utt_duration(x[1]), x[1]["duration"]),
+                reverse=True,
+            )
+
+            for sp_id, stats in sorted_speakers:
+                print(
+                    f"[S03]   Speaker {sp_id}: total={stats['duration']:.1f}s, "
+                    f"utterances={stats['utterance_count']}, "
+                    f"avg={avg_utt_duration(stats):.1f}s"
+                )
 
             guest_speaker = sorted_speakers[0][0]
             predicted_map[guest_speaker] = {"role": "guest", "name": guest_name}
@@ -77,7 +93,7 @@ def run(transcript_data: dict, job_id: str, video_title: str = "") -> dict:
                 speaker = sorted_speakers[i][0]
                 predicted_map[speaker] = {"role": "unknown", "name": None}
 
-            print(f"[S03] Heuristic: {guest_speaker} = guest, {host_speaker} = host")
+            print(f"[S03] Heuristic (avg utterance length): {guest_speaker} = guest, {host_speaker} = host")
 
         return {
             "speaker_stats": speaker_stats,

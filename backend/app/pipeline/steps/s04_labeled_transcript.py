@@ -57,15 +57,16 @@ def run(transcript_data: dict, speaker_map: dict, guest_name: str | None = None)
             seconds = start_sec % 60
             timestamp = f"[{minutes:02d}:{seconds:05.2f}]"
 
-            # Format sentiment
+            # Format sentiment — Nova-3 returns {"sentiment": "positive", "sentiment_score": 0.87}
             sentiment_str = ""
-            sentiment_score = utt.get("sentiment", 0.0)
-            if sentiment_score is not None:
+            raw_sentiment = utt.get("sentiment_score") or utt.get("sentiment")
+            if raw_sentiment is not None:
                 try:
-                    score = float(sentiment_score)
+                    score = float(raw_sentiment)
                     if abs(score) > 0.3:
                         sentiment_str = f" [sentiment:{score:.2f}]"
                 except (ValueError, TypeError):
+                    # sentiment is a string label like "positive" — skip numeric display
                     pass
 
             line = f"{timestamp} {speaker_label}:{sentiment_str} {text}"

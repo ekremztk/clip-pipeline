@@ -6,7 +6,6 @@ from app.services.gemini_client import generate_json
 from app.services.supabase_client import get_client
 from app.pipeline.prompts.unified_discovery import PROMPT
 from datetime import datetime, timezone, timedelta
-from app.director.events import director_events
 
 
 def build_channel_context(channel_dna: dict, channel_id: str) -> str:
@@ -269,29 +268,38 @@ def _get_guest_profile(guest_name: str) -> str:
         return f"Guest: {guest_name} (profile lookup failed)"
 
 
-def _validate_candidates(candidates: list, video_duration_s: float, min_duration: int) -> list:
-    """Filters out candidates with invalid timestamps before sending to S06."""
+def _validate_candidates(
+    candidates: list,
+    video_duration_s: float,
+    min_duration: int,
+    max_duration: int,
+) -> list:
+    """Filters out candidates with invalid timestamps or out-of-range durations."""
     valid = []
     for c in candidates:
         if not isinstance(c, dict) or "candidate_id" not in c:
             continue
         start = float(c.get("recommended_start", 0) or 0)
         end = float(c.get("recommended_end", 0) or 0)
-        # Negative timestamp guard
+        cid = c.get("candidate_id")
         if start < 0:
-            print(f"[S05] Dropped candidate {c.get('candidate_id')}: negative start {start:.1f}s")
+            print(f"[S05] Dropped candidate {cid}: negative start {start:.1f}s")
             continue
         if end < 0:
-            print(f"[S05] Dropped candidate {c.get('candidate_id')}: negative end {end:.1f}s")
+            print(f"[S05] Dropped candidate {cid}: negative end {end:.1f}s")
             continue
         if video_duration_s > 0 and start >= video_duration_s:
-            print(f"[S05] Dropped candidate {c.get('candidate_id')}: start {start:.1f}s >= video duration {video_duration_s:.1f}s")
+            print(f"[S05] Dropped candidate {cid}: start {start:.1f}s >= video duration {video_duration_s:.1f}s")
             continue
         if end <= start:
-            print(f"[S05] Dropped candidate {c.get('candidate_id')}: end {end:.1f}s <= start {start:.1f}s")
+            print(f"[S05] Dropped candidate {cid}: end {end:.1f}s <= start {start:.1f}s")
             continue
-        if (end - start) < min_duration:
-            print(f"[S05] Dropped candidate {c.get('candidate_id')}: duration {end - start:.1f}s < min {min_duration}s")
+        duration = end - start
+        if duration < min_duration:
+            print(f"[S05] Dropped candidate {cid}: duration {duration:.1f}s < min {min_duration}s")
+            continue
+        if duration > max_duration:
+            print(f"[S05] Dropped candidate {cid}: duration {duration:.1f}s > max {max_duration}s")
             continue
         valid.append(c)
     return valid
@@ -312,6 +320,174 @@ def _calculate_max_candidates(duration_s: float) -> int:
         return 25
     else:                      # 60+ min
         return 35
+
+
+def _segment_transcript(labeled_transcript: str, video_duration_s: float) -> list:
+    """
+    Uses Gemini Flash to find topic change points in the labeled transcript.
+    Returns a list of dicts: {"topic": str, "start": float, "end": float}
+
+    Rules:
+    - Min segment: 8 min (480s), max: 20 min (1200s)
+    - Segments that exceed 20min are time-split
+    - 2-minute overlap added between segments so boundary candidates aren't lost
+    - Falls back to equal 15-min chunks on failure or for videos < 20min
+    """
+    MIN_SEG = 480.0
+    MAX_SEG = 1200.0
+    OVERLAP = 120.0
+
+    # Skip segmentation for short videos
+    if video_duration_s < MIN_SEG:
+        return [{"topic": "full_video", "start": 0.0, "end": video_duration_s}]
+
+    try:
+        from app.services.gemini_client import generate
+        prompt = (
+            "You are a podcast topic analyzer. Read the labeled transcript below and identify topic change points.\n\n"
+            "Return a JSON array of topic segments. Each segment: {\"topic\": \"short description\", \"start\": float, \"end\": float}\n"
+            "Rules:\n"
+            f"- Video duration: {video_duration_s:.0f}s\n"
+            "- Minimum segment length: 480 seconds\n"
+            "- Maximum segment length: 1200 seconds\n"
+            "- Cover the entire video from start to end with no gaps\n"
+            "- Return ONLY the JSON array, no markdown\n\n"
+            "TRANSCRIPT:\n" + labeled_transcript[:40000]
+        )
+        raw = generate(prompt, model=settings.GEMINI_MODEL_FLASH)
+        if raw:
+            cleaned = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+            segs = json.loads(cleaned)
+            if isinstance(segs, list) and all(isinstance(s, dict) for s in segs):
+                # Apply max segment safety split and add overlaps
+                final_segs = []
+                for seg in segs:
+                    s = float(seg.get("start", 0))
+                    e = float(seg.get("end", 0))
+                    topic = seg.get("topic", "segment")
+                    while e - s > MAX_SEG:
+                        mid = s + MAX_SEG
+                        final_segs.append({"topic": topic, "start": s, "end": mid + OVERLAP})
+                        s = mid
+                    final_segs.append({"topic": topic, "start": s, "end": e})
+                # Add overlaps between segments
+                overlapped = []
+                for i, seg in enumerate(final_segs):
+                    s = max(0.0, seg["start"] - (OVERLAP if i > 0 else 0))
+                    e = min(video_duration_s, seg["end"] + (OVERLAP if i < len(final_segs) - 1 else 0))
+                    overlapped.append({"topic": seg["topic"], "start": s, "end": e})
+                print(f"[S05] Topic segmentation: {len(overlapped)} segments")
+                return overlapped
+    except Exception as e:
+        print(f"[S05] Topic segmentation failed: {e}. Falling back to equal 15-min chunks.")
+
+    # Fallback: equal 15-min chunks with 2-min overlap
+    chunk = 900.0
+    segs = []
+    s = 0.0
+    while s < video_duration_s:
+        e = min(video_duration_s, s + chunk)
+        segs.append({"topic": "segment", "start": max(0.0, s - OVERLAP), "end": min(video_duration_s, e + OVERLAP)})
+        s = e
+    return segs
+
+
+def _validate_and_repair_candidates(
+    raw_candidates: list,
+    video_duration_s: float,
+    min_duration: int,
+    max_duration: int,
+) -> list:
+    """
+    Validates and auto-repairs Gemini's JSON output.
+    Handles type coercion, negative timestamps, empty hook_text, and duration bounds.
+    Replaces the simpler _validate_candidates() for full validation.
+    """
+    REQUIRED_FIELDS = {
+        "candidate_id": (int, float),
+        "recommended_start": (int, float),
+        "recommended_end": (int, float),
+        "hook_text": str,
+        "content_type": str,
+    }
+    valid = []
+    for i, c in enumerate(raw_candidates):
+        if not isinstance(c, dict):
+            print(f"[S05-Validate] Dropped item {i}: not a dict ({type(c).__name__})")
+            continue
+
+        # Coerce required fields
+        missing = []
+        type_errors = []
+        for field, expected_type in REQUIRED_FIELDS.items():
+            val = c.get(field)
+            if val is None:
+                missing.append(field)
+            elif not isinstance(val, expected_type):
+                try:
+                    if expected_type in ((int, float),):
+                        c[field] = float(val)
+                    elif expected_type == str:
+                        c[field] = str(val)
+                except (ValueError, TypeError):
+                    type_errors.append(field)
+
+        if missing:
+            print(f"[S05-Validate] Dropped candidate {c.get('candidate_id', '?')}: missing {missing}")
+            continue
+        if type_errors:
+            print(f"[S05-Validate] Dropped candidate {c.get('candidate_id', '?')}: type errors {type_errors}")
+            continue
+
+        cid = c.get("candidate_id", "?")
+        start = float(c["recommended_start"])
+        end = float(c["recommended_end"])
+
+        if start < 0:
+            start = 0.0
+            c["recommended_start"] = start
+        if end <= start:
+            print(f"[S05-Validate] Dropped candidate {cid}: end ({end}) <= start ({start})")
+            continue
+        if video_duration_s > 0 and start >= video_duration_s:
+            print(f"[S05-Validate] Dropped candidate {cid}: start ({start:.1f}) >= video ({video_duration_s:.1f})")
+            continue
+        if video_duration_s > 0 and end > video_duration_s:
+            end = video_duration_s
+            c["recommended_end"] = end
+
+        dur = end - start
+        if dur < min_duration:
+            print(f"[S05-Validate] Dropped candidate {cid}: duration {dur:.1f}s < min {min_duration}s")
+            continue
+        if dur > max_duration * 1.5:
+            print(f"[S05-Validate] Dropped candidate {cid}: duration {dur:.1f}s >> max {max_duration}s")
+            continue
+
+        if not c.get("hook_text", "").strip():
+            print(f"[S05-Validate] Warning: candidate {cid} has empty hook_text")
+
+        valid.append(c)
+    return valid
+
+
+def _extract_segment_transcript(labeled_transcript: str, seg_start: float, seg_end: float) -> str:
+    """
+    Extracts labeled transcript lines that fall within [seg_start, seg_end].
+    Uses the [MM:SS.ss] timestamps in the labeled transcript.
+    """
+    pattern = re.compile(r'\[(\d+):(\d+\.?\d*)\]')
+    lines = labeled_transcript.split("\n")
+    result = []
+    for line in lines:
+        m = pattern.search(line)
+        if m:
+            ts = float(m.group(1)) * 60 + float(m.group(2))
+            if seg_start <= ts <= seg_end:
+                result.append(line)
+        elif not result:
+            continue  # skip header lines before first in-range line
+    return "\n".join(result)
 
 
 def _parse_gemini_json(raw_text: str) -> list:
@@ -407,37 +583,78 @@ def run(
         prompt = prompt.replace("MIN_DURATION_PLACEHOLDER", str(min_duration))
         prompt = prompt.replace("MAX_DURATION_PLACEHOLDER", str(max_duration))
 
-        print(f"[S05] Prompt built ({len(prompt)} chars). Sending transcript to Gemini...")
+        # 5. Topic segmentation — splits long videos into overlapping chunks
+        segments = _segment_transcript(labeled_transcript, video_duration_s)
+        print(f"[S05] Discovery will run over {len(segments)} segment(s)")
 
-        # 5. Transcript-only discovery via generate_json (no video upload)
-        raw_response = generate_json(prompt, model=settings.GEMINI_MODEL_PRO)
+        all_raw_candidates = []
 
-        # 6. Parse response — generate_json may return dict or list directly
-        if isinstance(raw_response, list):
-            candidates = raw_response
-        elif isinstance(raw_response, dict) and "candidates" in raw_response:
-            candidates = raw_response["candidates"]
-        elif isinstance(raw_response, str):
-            candidates = _parse_gemini_json(raw_response)
-        else:
-            candidates = []
+        for seg_idx, segment in enumerate(segments):
+            seg_start = segment["start"]
+            seg_end = segment["end"]
+            seg_topic = segment["topic"]
+            print(f"[S05] Segment {seg_idx+1}/{len(segments)}: '{seg_topic}' ({seg_start:.0f}s–{seg_end:.0f}s)")
 
-        if candidates:
-            print(f"[S05] Gemini returned {len(candidates)} candidates")
-            valid_candidates = _validate_candidates(candidates, video_duration_s, min_duration)
-            print(f"[S05] {len(valid_candidates)} valid candidates after validation")
+            # Extract transcript lines for this segment
+            seg_transcript = _extract_segment_transcript(labeled_transcript, seg_start, seg_end)
+            if not seg_transcript.strip():
+                print(f"[S05] Segment {seg_idx+1}: empty transcript. Skipping.")
+                continue
+
+            seg_duration = seg_end - seg_start
+            seg_max_candidates = max(3, int(max_candidates * (seg_duration / video_duration_s) * 1.5))
+
+            seg_prompt = PROMPT
+            seg_prompt = seg_prompt.replace("VIDEO_DURATION_PLACEHOLDER", str(int(seg_duration)))
+            seg_prompt = seg_prompt.replace("MAX_CANDIDATES_PLACEHOLDER", str(seg_max_candidates))
+            seg_prompt = seg_prompt.replace("CHANNEL_CONTEXT_PLACEHOLDER", channel_context)
+            seg_prompt = seg_prompt.replace("GUEST_PROFILE_PLACEHOLDER", guest_profile_text)
+            seg_prompt = seg_prompt.replace("LABELED_TRANSCRIPT_PLACEHOLDER", seg_transcript)
+            seg_prompt = seg_prompt.replace("MIN_DURATION_PLACEHOLDER", str(min_duration))
+            seg_prompt = seg_prompt.replace("MAX_DURATION_PLACEHOLDER", str(max_duration))
+
             try:
-                director_events.emit_sync(
-                    module="module_1", event="s05_discovery_completed",
-                    payload={"job_id": job_id, "candidate_count": len(valid_candidates)},
-                    channel_id=channel_id,
-                )
-            except Exception:
-                pass
-            return valid_candidates
+                raw_response = generate_json(seg_prompt, model=settings.GEMINI_MODEL_VIDEO)
+            except Exception as model_err:
+                print(f"[S05] Segment {seg_idx+1}: {settings.GEMINI_MODEL_VIDEO} failed ({model_err}). Falling back to {settings.GEMINI_MODEL_PRO}")
+                try:
+                    raw_response = generate_json(seg_prompt, model=settings.GEMINI_MODEL_PRO)
+                except Exception as fallback_err:
+                    print(f"[S05] Segment {seg_idx+1}: fallback model also failed: {fallback_err}. Skipping segment.")
+                    continue
 
-        print("[S05] Gemini returned no candidates. Returning empty list.")
-        return []
+            if isinstance(raw_response, list):
+                seg_candidates = raw_response
+            elif isinstance(raw_response, dict) and "candidates" in raw_response:
+                seg_candidates = raw_response["candidates"]
+            elif isinstance(raw_response, str):
+                seg_candidates = _parse_gemini_json(raw_response)
+            else:
+                seg_candidates = []
+
+            print(f"[S05] Segment {seg_idx+1}: {len(seg_candidates)} raw candidates")
+            all_raw_candidates.extend(seg_candidates)
+
+        if not all_raw_candidates:
+            print("[S05] Gemini returned no candidates from any segment. Returning empty list.")
+            return []
+
+        print(f"[S05] Total raw candidates across all segments: {len(all_raw_candidates)}")
+
+        # 6. Validate, repair, and deduplicate
+        valid_candidates = _validate_and_repair_candidates(all_raw_candidates, video_duration_s, min_duration, max_duration)
+        print(f"[S05] {len(valid_candidates)} candidates after validation")
+
+        # Deduplicate overlapping candidates from multi-segment discovery
+        from app.pipeline.steps.s06_batch_evaluation import _deduplicate_by_overlap
+        valid_candidates = _deduplicate_by_overlap(valid_candidates, overlap_threshold=0.5)
+        print(f"[S05] {len(valid_candidates)} candidates after cross-segment dedup")
+
+        # Reassign sequential candidate_id after merge + dedup
+        for idx, c in enumerate(valid_candidates, start=1):
+            c["candidate_id"] = idx
+
+        return valid_candidates
 
     except Exception as e:
         print(f"[S05] Critical error: {e}")

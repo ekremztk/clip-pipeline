@@ -19,10 +19,12 @@ def call_claude(
     content: list,
     system: str | None = None,
     max_tokens: int = 8000,
+    extra_system_blocks: list | None = None,
 ) -> str:
     """
     Calls Claude with a pre-built content array (text + images interleaved).
     content: list of Anthropic content blocks (text / image dicts)
+    extra_system_blocks: additional cached system blocks (e.g. full transcript) appended after main system.
     Retries on rate limits: 30s, 60s, then raise RuntimeError.
 
     The system prompt is sent as a cacheable content block (cache_control ephemeral).
@@ -45,6 +47,10 @@ def call_claude(
             "cache_control": {"type": "ephemeral"},
         }
     ]
+    # Append extra cacheable system blocks (e.g., full labeled transcript)
+    if extra_system_blocks:
+        system_blocks.extend(extra_system_blocks)
+
     messages = [{"role": "user", "content": content}]
 
     delays = [30, 60]
@@ -55,7 +61,7 @@ def call_claude(
                 max_tokens=max_tokens,
                 system=system_blocks,
                 messages=messages,
-                extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+                timeout=300.0,
             )
             usage = response.usage
             cache_read  = getattr(usage, "cache_read_input_tokens",  0) or 0

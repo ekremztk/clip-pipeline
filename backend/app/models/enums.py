@@ -28,7 +28,7 @@ class ClipStrategyRole(str, Enum):
     LAUNCH = "launch"
     VIRAL = "viral"
     FAN_SERVICE = "fan_service"
-    CONTEXT_BUILDER = "context_builder"
+    ENGAGEMENT = "engagement"
 
 class FeedbackStatus(str, Enum):
     PENDING = "pending"

@@ -15,12 +15,12 @@ Use the timestamps, speaker turns, and sentiment markers to identify moments whe
 - Speaker dynamics change (interruptions, laughter markers, pauses)
 - Strong opening hooks exist (bold claims, provocative questions, surprising revelations)
 
-A separate evaluation stage will watch the actual video frames to visually verify each candidate. Your job is to COLLECT every strong moment from the transcript.
+A separate evaluation stage will read the full transcript with extended context windows to verify standalone quality, arc completeness, and hook strength of each candidate. Your job is to COLLECT every strong moment from the transcript.
 
 ## VIDEO INFO
 - Duration: VIDEO_DURATION_PLACEHOLDER seconds
 - Find up to MAX_CANDIDATES_PLACEHOLDER candidate moments
-- Your job is to COLLECT strong candidates, NOT to make the final selection — a separate evaluation stage will ruthlessly judge each one using video frames. Capture every genuinely strong moment you find. Do not self-filter or pre-rank.
+- Your job is to COLLECT strong candidates, NOT to make the final selection — a separate evaluation stage will ruthlessly judge each one using the full transcript with extended context. Capture every genuinely strong moment you find. Do not self-filter or pre-rank.
 
 ## CHANNEL CONTEXT — YOUR PRIMARY GUIDE
 Everything below defines what THIS specific channel wants. Follow these instructions above all else.

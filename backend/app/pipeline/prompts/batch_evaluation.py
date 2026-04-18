@@ -44,6 +44,14 @@ Each candidate gives you THREE labeled transcript sections:
 
 Read all three sections before evaluating. This is not optional.
 
+## INSPECTOR ROLE — VERIFY GEMINI'S CLAIMS FIRST
+
+Before running any evaluation tests, verify Gemini's metadata using the FULL TRANSCRIPT (available in your system context):
+
+**HOOK_TEXT VERIFICATION**: Find the exact `hook_text` in the full transcript. If you cannot locate this text near the stated `recommended_start` (±10 seconds), set `s05_hallucination_flag: true`. This is not a disqualifier alone — it may mean the transcript wording differs slightly — but flag it so timestamps can be investigated.
+
+**TIMESTAMP SANITY**: The stated `recommended_start`/`recommended_end` must correspond to actual content in the transcript. If the time range contains only silence, filler, or unrelated content, treat this as a Gemini error: omit the candidate and note it.
+
 ## YOUR EVALUATION TASKS FOR EACH CANDIDATE
 
 1. **STANDALONE TEST** — Can a complete stranger understand this clip with ZERO prior context? If the clip assumes the viewer knows what was said earlier, or who the guest is, it FAILS. Read the PRE_CONTEXT to verify no critical setup is missing from the clip.
@@ -116,6 +124,7 @@ Each candidate MUST follow this exact schema:
   "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
   "posting_order": integer (1 = post first),
   "suggested_title": "YouTube Shorts title in the SAME LANGUAGE as the transcript, under 60 chars",
-  "suggested_description": "YouTube description in the SAME LANGUAGE as the transcript, with 3-5 hashtags"
+  "suggested_description": "YouTube description in the SAME LANGUAGE as the transcript, with 3-5 hashtags",
+  "s05_hallucination_flag": boolean (true if hook_text could not be located near recommended_start in the full transcript)
 }
 """

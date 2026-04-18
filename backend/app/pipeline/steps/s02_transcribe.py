@@ -40,11 +40,12 @@ def _build_keyterms(channel_dna: dict, video_title: str, guest_name: Optional[st
         for kt in channel_dna.get("keyterms", []):
             terms.add(kt.strip())
 
-    # Only allow clean alphabetic terms — no special chars, no file extensions, no tech specs
+    # Allow Unicode letters — covers international names and non-ASCII terms
     result = [
         t for t in terms
         if t and len(t) > 1
-        and re.fullmatch(r"[A-Za-z][A-Za-z'\-\s]*", t)
+        and re.fullmatch(r"[\w][\w'\-\s]*", t, re.UNICODE)
+        and not re.search(r"[/\\<>{}|]", t)
     ][:100]
     return result
 

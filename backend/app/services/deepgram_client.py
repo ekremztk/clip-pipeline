@@ -13,25 +13,26 @@ def transcribe(audio_path: str, keyterms: Optional[list[str]] = None) -> dict:
             "Content-Type": "audio/mp4"
         }
 
-        params = {
-            "model": "nova-3",
-            "diarize": "true",
-            "sentiment": "true",
-            "punctuate": "true",
-            "utterances": "true",
-            "words": "true",
-            "detect_language": "true",
-            "multichannel": "false",
-        }
-
-        # Note: Nova-3 does not support the keywords parameter — skip keyterm injection
+        # Nova-3 uses "keyterm" (repeated param) for domain-specific hint terms
+        base_params = [
+            ("model", "nova-3"),
+            ("diarize", "true"),
+            ("sentiment", "true"),
+            ("punctuate", "true"),
+            ("utterances", "true"),
+            ("words", "true"),
+            ("detect_language", "true"),
+            ("multichannel", "false"),
+        ]
         if keyterms:
-            print(f"[Deepgram] Keyterms provided ({len(keyterms)}) but skipped — not supported by Nova-3")
+            for term in keyterms:
+                base_params.append(("keyterm", term))
+            print(f"[Deepgram] Sending {len(keyterms)} keyterms to Nova-3")
 
         response = httpx.post(
             "https://api.deepgram.com/v1/listen",
             headers=headers,
-            params=params,
+            params=base_params,
             content=audio_data,
             timeout=300.0
         )
