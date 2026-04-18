@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import time
 import os
+import json
 import traceback
 
 from app.config import settings
@@ -8,6 +9,22 @@ from app.services.supabase_client import get_client
 from app.models.enums import JobStatus, StepStatus
 from app.services import storage
 from app.director.events import director_events
+
+PIPELINE_DEBUG = os.getenv("PIPELINE_DEBUG", "0") == "1"
+_DEBUG_DIR = None
+
+def _debug_dump(job_id: str, step: str, data: object) -> None:
+    if not PIPELINE_DEBUG:
+        return
+    debug_dir = f"/tmp/pipeline_debug_{job_id}"
+    os.makedirs(debug_dir, exist_ok=True)
+    path = f"{debug_dir}/{step}.json"
+    try:
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+        print(f"[DEBUG] {step} → {path}")
+    except Exception as e:
+        print(f"[DEBUG] Could not write {step}: {e}")
 
 
 def update_job(job_id: str, **kwargs) -> None:
@@ -93,14 +110,6 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             reframe_content_type = job_row.data[0].get("reframe_content_type") or "podcast"
             caption_template = job_row.data[0].get("caption_template") or "clean"
 
-        # Fetch channel_dna early — needed by S02 (keyterms) and S05/S06
-        try:
-            channel_res = get_client().table("channels").select("channel_dna").eq("id", channel_id).execute()
-            if channel_res.data and len(channel_res.data) > 0:
-                channel_dna = channel_res.data[0].get("channel_dna") or {}
-        except Exception as e:
-            print(f"[Orchestrator] Warning: Could not fetch channel_dna early: {e}")
-
         steps = [
             (1,  "s01_audio_extract",      5),
             (2,  "s02_transcribe",         15),
@@ -114,12 +123,22 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             (10, "s10_captions",           100),
         ]
 
-        # State variables to pass between steps
+        # State variables to pass between steps — channel_dna MUST be declared
+        # before the fetch block so the fetch can populate it
         transcript_data = None
         speaker_data = None
         labeled_transcript = None
         channel_dna = {}
         candidates = []
+
+        # Fetch channel_dna early — needed by S02 (keyterms) and S05/S06
+        try:
+            channel_res = get_client().table("channels").select("channel_dna").eq("id", channel_id).execute()
+            if channel_res.data and len(channel_res.data) > 0:
+                channel_dna = channel_res.data[0].get("channel_dna") or {}
+                print(f"[Orchestrator] channel_dna loaded ({len(channel_dna)} keys)")
+        except Exception as e:
+            print(f"[Orchestrator] Warning: Could not fetch channel_dna early: {e}")
         evaluated_clips = []
         cut_results = []
         exported_clips = []
@@ -142,6 +161,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 if step_number == 1:
                     from app.pipeline.steps import s01_audio_extract
                     audio_path = s01_audio_extract.run(video_path, job_id)
+                    _debug_dump(job_id, "s01_audio_extract", {"audio_path": audio_path})
                 elif step_number == 2:
                     from app.pipeline.steps import s02_transcribe
                     transcript_data = s02_transcribe.run(
@@ -150,6 +170,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         video_title=video_title,
                         guest_name=guest_name,
                     )
+                    _debug_dump(job_id, "s02_transcribe", transcript_data)
                 elif step_number == 3:
                     from app.pipeline.steps import s03_speaker_id
                     speaker_data = s03_speaker_id.run(transcript_data, job_id, video_title)
@@ -168,11 +189,13 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         "speaker_confirmed": True
                     }).execute()
 
+                    _debug_dump(job_id, "s03_speaker_id", speaker_data)
                     print(f"[Orchestrator] S03 completed, continuing to S04 automatically")
                 elif step_number == 4:
                     from app.pipeline.steps import s04_labeled_transcript
                     predicted_map = speaker_data.get("predicted_map", {}) if speaker_data else {}
                     labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, guest_name)
+                    _debug_dump(job_id, "s04_labeled_transcript", {"labeled_transcript": labeled_transcript})
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
                     from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
@@ -194,6 +217,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         clip_duration_max=clip_duration_max,
                     )
                     s05_token_usage = get_accumulated_token_usage()
+                    _debug_dump(job_id, "s05_unified_discovery", candidates)
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
                     duration_ms_s05 = int((time.time() - step_start_time) * 1000)
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
@@ -224,6 +248,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             clip_duration_min=clip_duration_min,
                             clip_duration_max=clip_duration_max,
                         )
+                    _debug_dump(job_id, "s06_batch_evaluation", evaluated_clips)
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
@@ -253,7 +278,9 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             job_id=job_id,
                             clip_duration_min=clip_duration_min,
                             clip_duration_max=clip_duration_max,
+                            channel_dna=channel_dna,
                         )
+                    _debug_dump(job_id, "s07_precision_cut", cut_results)
                     print(f"[Orchestrator] S07 returned {len(cut_results)} clips with boundaries")
                     duration_ms_s07 = int((time.time() - step_start_time) * 1000)
                     director_events.emit_sync(
@@ -277,6 +304,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             user_id=user_id,
                             transcript_data=transcript_data,
                         )
+                    _debug_dump(job_id, "s08_export", exported_clips)
                     print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
                     duration_ms_s08 = int((time.time() - step_start_time) * 1000)
                     director_events.emit_sync(
@@ -298,6 +326,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             reframe_content_type=reframe_content_type,
                         )
                     reframed_count = sum(1 for c in reframed_clips if c.get("video_reframed_path"))
+                    _debug_dump(job_id, "s09_reframe", reframed_clips)
                     print(f"[Orchestrator] S09 reframed {reframed_count}/{len(exported_clips)} clips")
                     duration_ms_s09 = int((time.time() - step_start_time) * 1000)
                     director_events.emit_sync(
@@ -321,6 +350,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             caption_template=caption_template,
                         )
                     captioned_count = sum(1 for c in captioned_clips if c.get("video_captioned_path"))
+                    _debug_dump(job_id, "s10_captions", captioned_clips)
                     print(f"[Orchestrator] S10 captioned {captioned_count}/{len(source_clips)} clips")
                     duration_ms_s10 = int((time.time() - step_start_time) * 1000)
                     director_events.emit_sync(
