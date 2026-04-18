@@ -171,7 +171,6 @@ def get_gemini_client() -> genai.Client:
                     project=settings.GCP_PROJECT,
                     location=settings.GCP_LOCATION,
                     credentials=credentials,
-                    http_options={"timeout": 600},  # 10 min timeout
                 )
             else:
                 # Application Default Credentials fallback
@@ -179,7 +178,6 @@ def get_gemini_client() -> genai.Client:
                     vertexai=True,
                     project=settings.GCP_PROJECT,
                     location=settings.GCP_LOCATION,
-                    http_options={"timeout": 600},
                 )
             print(f"[GeminiClient] Vertex AI initialized for project {settings.GCP_PROJECT}")
         except Exception as e:
