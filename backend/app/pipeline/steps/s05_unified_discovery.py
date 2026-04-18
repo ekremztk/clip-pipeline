@@ -614,11 +614,11 @@ def run(
             seg_prompt = seg_prompt.replace("MAX_DURATION_PLACEHOLDER", str(max_duration))
 
             try:
-                raw_response = generate_json(seg_prompt, model=settings.GEMINI_MODEL_VIDEO)
+                raw_response = generate_json(seg_prompt, model=settings.GEMINI_MODEL_PRO)
             except Exception as model_err:
-                print(f"[S05] Segment {seg_idx+1}: {settings.GEMINI_MODEL_VIDEO} failed ({model_err}). Falling back to {settings.GEMINI_MODEL_PRO}")
+                print(f"[S05] Segment {seg_idx+1}: {settings.GEMINI_MODEL_PRO} failed ({model_err}). Falling back to {settings.GEMINI_MODEL_FLASH}")
                 try:
-                    raw_response = generate_json(seg_prompt, model=settings.GEMINI_MODEL_PRO)
+                    raw_response = generate_json(seg_prompt, model=settings.GEMINI_MODEL_FLASH)
                 except Exception as fallback_err:
                     print(f"[S05] Segment {seg_idx+1}: fallback model also failed: {fallback_err}. Skipping segment.")
                     continue
