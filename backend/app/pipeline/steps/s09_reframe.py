@@ -12,6 +12,7 @@ import logging
 import os
 import traceback
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.config import settings
 from app.services.supabase_client import get_client
@@ -41,14 +42,13 @@ def run(
     supabase = get_client()
     reframed_clips = []
 
-    for index, clip in enumerate(exported_clips):
+    def _process_clip(index: int, clip: dict) -> dict:
         clip_id = clip.get("id")
         landscape_url = clip.get("video_landscape_path") or clip.get("file_url")
 
         if not landscape_url:
             print(f"[S09] Clip {index+1}: No video_landscape_path. Skipping reframe.")
-            reframed_clips.append(clip)
-            continue
+            return clip
 
         reframed_url = None
         reframe_meta = {}
@@ -61,14 +61,12 @@ def run(
                     clip_index=index,
                 )
             else:
-                # Default: podcast
                 reframed_url, reframe_meta = _reframe_podcast(
                     clip_url=landscape_url,
                     job_id=job_id,
                     clip_index=index,
                 )
 
-            # Update clip row in Supabase
             if clip_id and reframed_url:
                 try:
                     supabase.table("clips").update({
@@ -79,13 +77,29 @@ def run(
                 except Exception as db_err:
                     print(f"[S09] DB update error for clip {index+1}: {db_err}")
 
-            updated_clip = {**clip, "video_reframed_path": reframed_url, "reframe_metadata": reframe_meta}
-            reframed_clips.append(updated_clip)
+            return {**clip, "video_reframed_path": reframed_url, "reframe_metadata": reframe_meta, "local_reframed_path": reframe_meta.get("local_reframed_path")}
 
         except Exception as e:
             print(f"[S09] Reframe error for clip {index+1}: {e}")
             traceback.print_exc()
-            reframed_clips.append(clip)
+            return clip
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = {
+            executor.submit(_process_clip, index, clip): index
+            for index, clip in enumerate(exported_clips)
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                result = future.result()
+                reframed_clips.append((idx, result))
+            except Exception as e:
+                print(f"[S09] Thread error for clip {idx+1}: {e}")
+                reframed_clips.append((idx, exported_clips[idx]))
+
+    reframed_clips.sort(key=lambda x: x[0])
+    reframed_clips = [clip for _, clip in reframed_clips]
 
     successful = sum(1 for c in reframed_clips if c.get("video_reframed_path"))
     print(f"[S09] Reframe complete. {successful}/{len(exported_clips)} clips reframed.")
@@ -157,15 +171,15 @@ def _reframe_podcast(
         r2_url = _upload_to_r2(output_path, f"reframe/podcast_{uuid.uuid4().hex}.mp4")
 
     finally:
-        for path in [local_path, output_path]:
-            if os.path.exists(path):
-                try:
-                    os.remove(path)
-                except Exception:
-                    pass
+        if os.path.exists(local_path):
+            try:
+                os.remove(local_path)
+            except Exception:
+                pass
 
     meta = {
         "strategy": "podcast",
+        "local_reframed_path": output_path,
         "keyframe_count": len(result.keyframes),
         "scene_cut_count": len(result.scene_cuts),
         "crop_w": crop_w,

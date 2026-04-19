@@ -201,6 +201,17 @@ def _classify_motion(
     if max_spread < config.stationary_threshold:
         return STRATEGY_STATIONARY
 
+    # Single-subject wide shot: YOLO jitter is higher than true camera motion.
+    # Use relaxed threshold (2x) — spread under 0.30 is just detection noise.
+    if len(subject_ids) <= 1:
+        relaxed = config.stationary_threshold * 2.0
+        if max_spread < relaxed:
+            logger.info(
+                "[PathSolver] Single-subject stabilization: spread=%.3f < %.3f → STATIONARY",
+                max_spread, relaxed,
+            )
+            return STRATEGY_STATIONARY
+
     # Check if motion is linear (panning)
     times = np.array([fp.time_s for fp in points])
     values = np.array(xs) if x_spread >= y_spread else np.array(ys)

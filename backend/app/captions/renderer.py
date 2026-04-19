@@ -16,6 +16,8 @@ import subprocess
 import uuid
 from typing import Optional
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 CANVAS_W = 1080
@@ -28,7 +30,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
         "font": "Open Sans",
         "bold": True,
-        "fontsize": 68,
+        "fontsize": 80,
         "primary_color": "&H00FFFFFF",   # white
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",   # black stroke
@@ -37,17 +39,17 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 8,
         "shadow": 0,
         "alignment": 2,                  # bottom center
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "capitalize",
         "karaoke": False,
         "words_per_group": 4,
-        "fade": (150, 100),
+        "fade": (0, 0),
     },
     "hormozi": {
         "font": "Open Sans",
         "bold": True,
-        "fontsize": 72,
+        "fontsize": 84,
         "primary_color": "&H0000E5FF",   # yellow — spoken/highlighted (BGR of #FFE500)
         "secondary_color": "&H00FFFFFF", # white — unspoken
         "outline_color": "&H00000000",
@@ -56,7 +58,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 8,
         "shadow": 0,
         "alignment": 2,
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "uppercase",
         "karaoke": True,
@@ -66,7 +68,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "outline": {
         "font": "Open Sans",
         "bold": True,
-        "fontsize": 76,
+        "fontsize": 86,
         "primary_color": "&H00FFFFFF",
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
@@ -75,7 +77,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 6,
         "shadow": 0,
         "alignment": 2,
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "none",
         "karaoke": False,
@@ -85,7 +87,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "pill": {
         "font": "Open Sans",
         "bold": True,
-        "fontsize": 68,
+        "fontsize": 80,
         "primary_color": "&H00FFFFFF",
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
@@ -94,17 +96,17 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 30,                   # box padding
         "shadow": 0,
         "alignment": 2,
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "none",
         "karaoke": False,
         "words_per_group": 4,
-        "fade": (150, 100),
+        "fade": (0, 0),
     },
     "neon": {
         "font": "Open Sans",
         "bold": False,
-        "fontsize": 88,
+        "fontsize": 96,
         "primary_color": "&H00FFFFFF",   # white text
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00FFFF00",   # cyan glow border (BGR of #00FFFF)
@@ -113,7 +115,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 8,
         "shadow": 0,
         "alignment": 2,
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "none",
         "karaoke": False,
@@ -123,7 +125,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "cinematic": {
         "font": "Open Sans",
         "bold": False,
-        "fontsize": 64,
+        "fontsize": 74,
         "primary_color": "&H00FFFFFF",
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
@@ -142,7 +144,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "bold_pop": {
         "font": "Open Sans",
         "bold": True,
-        "fontsize": 92,
+        "fontsize": 100,
         "primary_color": "&H00FFFFFF",
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
@@ -151,7 +153,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 4,
         "shadow": 3,
         "alignment": 2,
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "none",
         "karaoke": False,
@@ -161,7 +163,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "fire": {
         "font": "Open Sans",
         "bold": True,
-        "fontsize": 72,
+        "fontsize": 84,
         "primary_color": "&H003568FF",   # orange (BGR of #FF6835)
         "secondary_color": "&H003568FF",
         "outline_color": "&H00000000",
@@ -170,7 +172,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "outline": 6,
         "shadow": 0,
         "alignment": 2,
-        "margin_v": 380,
+        "margin_v": 610,
         "margin_h": 100,
         "text_transform": "none",
         "karaoke": False,
@@ -351,7 +353,7 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
         "-i", input_path,
         "-vf", f"ass={safe_path}",
         "-c:v", "libx264",
-        "-preset", "fast",
+        "-preset", settings.FFMPEG_PRESET,
         "-crf", "18",
         "-c:a", "aac",
         "-b:a", "320k",

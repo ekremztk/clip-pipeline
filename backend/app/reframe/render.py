@@ -16,6 +16,8 @@ import logging
 import os
 import re
 import subprocess
+
+from app.config import settings
 from typing import Optional
 
 from .types import ReframeKeyframe
@@ -124,7 +126,7 @@ def render_podcast_reframe(
         "-i", video_path,
         "-vf", vf,
         "-c:v", "libx264",
-        "-preset", "fast",
+        "-preset", settings.FFMPEG_PRESET,
         "-crf", "18",
         "-movflags", "+faststart",
     ]
@@ -337,7 +339,7 @@ def render_gaming_vstack(
         "-map", "[out]",
         "-map", "0:a?",
         "-c:v", "libx264",
-        "-preset", "fast",
+        "-preset", settings.FFMPEG_PRESET,
         "-crf", "18",
         "-c:a", "aac",
         "-b:a", "320k",

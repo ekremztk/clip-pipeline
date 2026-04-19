@@ -9,6 +9,7 @@ import logging
 import os
 import traceback
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.config import settings
 from app.services.supabase_client import get_client
@@ -40,26 +41,24 @@ def run(
     supabase = get_client()
     captioned_clips = []
 
-    for index, clip in enumerate(reframed_clips):
+    def _process_clip(index: int, clip: dict) -> tuple[int, dict]:
         clip_id = clip.get("id")
         reframed_url = clip.get("video_reframed_path")
 
         if not reframed_url:
             print(f"[S10] Clip {index+1}: No video_reframed_path. Skipping captions.")
-            captioned_clips.append(clip)
-            continue
+            return index, clip
 
-        captioned_url = None
-        caption_meta = {}
+        local_hint = clip.get("local_reframed_path")
 
         try:
             captioned_url, caption_meta = _caption_clip(
                 clip_url=reframed_url,
                 clip_index=index,
                 template_key=caption_template,
+                local_path_hint=local_hint,
             )
 
-            # Update clip row in Supabase
             if clip_id and captioned_url:
                 try:
                     supabase.table("clips").update({
@@ -70,13 +69,29 @@ def run(
                 except Exception as db_err:
                     print(f"[S10] DB update error for clip {index+1}: {db_err}")
 
-            updated_clip = {**clip, "video_captioned_path": captioned_url, "caption_metadata": caption_meta}
-            captioned_clips.append(updated_clip)
+            return index, {**clip, "video_captioned_path": captioned_url, "caption_metadata": caption_meta}
 
         except Exception as e:
             print(f"[S10] Caption error for clip {index+1}: {e}")
             traceback.print_exc()
-            captioned_clips.append(clip)
+            return index, clip
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(_process_clip, index, clip): index
+            for index, clip in enumerate(reframed_clips)
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                result_idx, result_clip = future.result()
+                captioned_clips.append((result_idx, result_clip))
+            except Exception as e:
+                print(f"[S10] Thread error for clip {idx+1}: {e}")
+                captioned_clips.append((idx, reframed_clips[idx]))
+
+    captioned_clips.sort(key=lambda x: x[0])
+    captioned_clips = [clip for _, clip in captioned_clips]
 
     successful = sum(1 for c in captioned_clips if c.get("video_captioned_path"))
     print(f"[S10] Captions complete. {successful}/{len(reframed_clips)} clips captioned.")
@@ -87,10 +102,11 @@ def _caption_clip(
     clip_url: str,
     clip_index: int,
     template_key: str,
+    local_path_hint: str | None = None,
 ) -> tuple[str, dict]:
     """
     Transcribe a clip and burn captions:
-    1. Download clip to temp
+    1. Use local path from S09 if available, otherwise download from R2
     2. Deepgram transcription → words + segments
     3. render_captions() → captioned MP4
     4. Upload to R2
@@ -101,11 +117,15 @@ def _caption_clip(
 
     print(f"[S10] Captioning clip {clip_index+1}: {clip_url}")
 
-    # Download clip to temp
-    local_path = os.path.join(str(settings.UPLOAD_DIR), f"s10_dl_{uuid.uuid4().hex}.mp4")
+    downloaded = False
     output_path = os.path.join(str(settings.UPLOAD_DIR), f"s10_captioned_{uuid.uuid4().hex}.mp4")
 
-    try:
+    if local_path_hint and os.path.exists(local_path_hint):
+        local_path = local_path_hint
+        print(f"[S10] Clip {clip_index+1}: using local path from S09 (skipping download)")
+    else:
+        local_path = os.path.join(str(settings.UPLOAD_DIR), f"s10_dl_{uuid.uuid4().hex}.mp4")
+        downloaded = True
         resp = requests.get(clip_url, stream=True, timeout=120)
         resp.raise_for_status()
         with open(local_path, "wb") as f:
@@ -113,6 +133,7 @@ def _caption_clip(
                 if chunk:
                     f.write(chunk)
 
+    try:
         # Transcribe
         transcription = transcribe_video(local_path, language=None)
         words = transcription["words"]
@@ -147,7 +168,7 @@ def _caption_clip(
 
     finally:
         for path in [local_path, output_path]:
-            if os.path.exists(path):
+            if path and os.path.exists(path):
                 try:
                     os.remove(path)
                 except Exception:

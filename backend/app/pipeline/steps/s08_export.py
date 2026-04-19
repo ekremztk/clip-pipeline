@@ -1,6 +1,7 @@
 import os
 import subprocess
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
 from app.config import settings
 from app.services.supabase_client import get_client
@@ -48,7 +49,7 @@ def _encode_segment(video_path: str, start: float, duration: float, output_path:
         "-ss", str(start),
         "-i", video_path,
         "-t", str(duration),
-        "-c:v", "libx264", "-preset", "fast", "-crf", str(settings.FFMPEG_CRF),
+        "-c:v", "libx264", "-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF),
         "-c:a", "aac", "-b:a", "320k",
         "-r", "30",
         "-pix_fmt", "yuv420p",
@@ -79,164 +80,181 @@ def _stitch_segments(setup_path: str, main_path: str, output_path: str, job_outp
             os.remove(concat_file)
 
 
+def _export_single_clip(
+    index: int, clip: dict, job_id: str, channel_id: str, video_path: str,
+    user_id: str | None, words: list, job_output_dir: str, total_clips: int,
+) -> Optional[dict]:
+    """Export a single clip: FFmpeg cut → R2 upload → Supabase insert. Returns clip dict or None."""
+    supabase = get_client()
+    output_path = None
+    r2_uploaded = False
+    try:
+        final_start = clip.get("final_start", 0.0)
+        final_duration = clip.get("final_duration_s", 0.0)
+        final_end = clip.get("final_end", final_start + final_duration)
+
+        if words:
+            final_start, final_end = _sanity_check_word_boundary(final_start, final_end, words, index)
+            final_duration = final_end - final_start
+        content_type = clip.get("content_type", "unknown")
+
+        if final_duration <= 0:
+            print(f"[S08] Clip {index+1}: Invalid duration ({final_duration}s). Skipping.")
+            return None
+
+        output_filename = f"clip_{index:02d}_{content_type}.mp4"
+        output_path = os.path.join(job_output_dir, output_filename)
+
+        stitch_setup = clip.get("stitch_setup") or {}
+        requires_stitch = bool(clip.get("requires_stitch") and stitch_setup)
+
+        if requires_stitch:
+            setup_start = float(stitch_setup.get("setup_start", 0))
+            setup_end = float(stitch_setup.get("setup_end", 0))
+            setup_duration = setup_end - setup_start
+            if setup_duration > 0 and os.path.exists(video_path):
+                setup_path = os.path.join(job_output_dir, f"_setup_{index:02d}.mp4")
+                main_path = os.path.join(job_output_dir, f"_main_{index:02d}.mp4")
+                try:
+                    _encode_segment(video_path, setup_start, setup_duration, setup_path)
+                    _encode_segment(video_path, final_start, final_duration, main_path)
+                    _stitch_segments(setup_path, main_path, output_path, job_output_dir)
+                    print(f"[S08] Clip {index+1}: Stitched setup ({setup_start:.1f}–{setup_end:.1f}s) + main ({final_start:.2f}–{final_end:.2f}s)")
+                finally:
+                    for p in [setup_path, main_path]:
+                        if os.path.exists(p):
+                            try:
+                                os.remove(p)
+                            except Exception:
+                                pass
+            else:
+                requires_stitch = False
+
+        if not requires_stitch:
+            ffmpeg_cmd = [
+                "ffmpeg", "-y",
+                "-ss", str(final_start),
+                "-i", video_path,
+                "-t", str(final_duration),
+                "-c:v", "libx264",
+                "-preset", settings.FFMPEG_PRESET,
+                "-crf", str(settings.FFMPEG_CRF),
+                "-c:a", "aac",
+                "-b:a", "320k",
+                "-movflags", "+faststart",
+                "-pix_fmt", "yuv420p",
+                "-avoid_negative_ts", "make_zero",
+                "-map", "0:v:0",
+                "-map", "0:a:0",
+                output_path,
+            ]
+            print(f"[S08] Clip {index+1}/{total_clips}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
+            subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+
+        if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+            print(f"[S08] Error: Output missing or empty for clip {index+1}. Skipping.")
+            return None
+
+        file_url = output_path
+        try:
+            r2_url = upload_clip(job_id, output_filename, output_path)
+            print(f"[S08] Uploaded to R2: {r2_url}")
+            file_url = r2_url
+            r2_uploaded = True
+        except Exception as r2_err:
+            print(f"[S08] R2 upload failed: {r2_err}. Clip will not be saved.")
+
+        if not r2_uploaded:
+            return None
+
+        clip_data = {
+            "job_id": job_id,
+            "channel_id": channel_id,
+            "user_id": user_id,
+            "clip_index": index,
+            "start_time": float(final_start),
+            "end_time": float(clip.get("final_end", 0.0)),
+            "duration_s": float(final_duration),
+            "hook_text": clip.get("hook_text"),
+            "content_type": content_type,
+            "standalone_score": clip.get("score"),
+            "standalone_result": clip.get("quality_verdict"),
+            "clip_strategy_role": clip.get("clip_strategy_role"),
+            "posting_order": clip.get("posting_order"),
+            "suggested_title": clip.get("suggested_title"),
+            "suggested_description": clip.get("suggested_description"),
+            "video_landscape_path": file_url,
+            "file_url": file_url,
+            "is_successful": None,
+            "quality_notes": clip.get("quality_notes"),
+        }
+        clip_data = {k: v for k, v in clip_data.items() if v is not None}
+
+        try:
+            result = supabase.table("clips").insert(clip_data).execute()
+            if result.data:
+                clip_id = result.data[0].get("id")
+                print(f"[S08] Clip {index+1} saved to DB (id: {clip_id})")
+                return result.data[0]
+            else:
+                print(f"[S08] Warning: DB insert returned no data for clip {index+1}")
+                return clip_data
+        except Exception as db_err:
+            print(f"[S08] DB insert error for clip {index+1}: {db_err}")
+            return clip_data
+
+    except subprocess.CalledProcessError as e:
+        stderr_output = e.stderr.decode() if e.stderr else "no stderr"
+        print(f"[S08] FFmpeg error for clip {index+1}: {stderr_output[:500]}")
+        return None
+    except Exception as e:
+        print(f"[S08] Unexpected error for clip {index+1}: {e}")
+        traceback.print_exc()
+        return None
+    finally:
+        if output_path and os.path.exists(output_path):
+            try:
+                os.remove(output_path)
+            except Exception:
+                pass
+
+
 def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
         video_title: str = "", user_id: str | None = None,
         transcript_data: Optional[dict] = None) -> list:
     """
     Step 8: Export
     For each clip: FFmpeg frame-accurate cut + encode → R2 upload → Supabase insert.
-    Single FFmpeg call per clip — no intermediate files, no double encoding.
+    Clips are processed in parallel via ThreadPoolExecutor.
     """
     print(f"[S08] Starting export for {len(cut_results)} clips. Job: {job_id}")
     exported_clips = []
-    supabase = get_client()
 
-    # Word timestamps for sanity check
     words = transcript_data.get("words", []) if transcript_data else []
 
-    # Ensure output directory exists
     job_output_dir = os.path.join(settings.OUTPUT_DIR, job_id)
     os.makedirs(job_output_dir, exist_ok=True)
 
-    for index, clip in enumerate(cut_results):
-        output_path = None
-        r2_uploaded = False
-        try:
-            final_start = clip.get("final_start", 0.0)
-            final_duration = clip.get("final_duration_s", 0.0)
-            final_end = clip.get("final_end", final_start + final_duration)
-
-            # Sanity check: verify word boundary alignment before cutting
-            if words:
-                final_start, final_end = _sanity_check_word_boundary(final_start, final_end, words, index)
-                final_duration = final_end - final_start
-            content_type = clip.get("content_type", "unknown")
-            candidate_id = clip.get("candidate_id", index)
-
-            if final_duration <= 0:
-                print(f"[S08] Clip {index+1}: Invalid duration ({final_duration}s). Skipping.")
-                continue
-
-            # 1. FFmpeg: frame-accurate cut + high-quality encode
-            output_filename = f"clip_{index:02d}_{content_type}.mp4"
-            output_path = os.path.join(job_output_dir, output_filename)
-
-            stitch_setup = clip.get("stitch_setup") or {}
-            requires_stitch = bool(clip.get("requires_stitch") and stitch_setup)
-
-            if requires_stitch:
-                setup_start = float(stitch_setup.get("setup_start", 0))
-                setup_end = float(stitch_setup.get("setup_end", 0))
-                setup_duration = setup_end - setup_start
-                if setup_duration > 0 and os.path.exists(video_path):
-                    setup_path = os.path.join(job_output_dir, f"_setup_{index:02d}.mp4")
-                    main_path = os.path.join(job_output_dir, f"_main_{index:02d}.mp4")
-                    try:
-                        _encode_segment(video_path, setup_start, setup_duration, setup_path)
-                        _encode_segment(video_path, final_start, final_duration, main_path)
-                        _stitch_segments(setup_path, main_path, output_path, job_output_dir)
-                        print(f"[S08] Clip {index+1}: Stitched setup ({setup_start:.1f}–{setup_end:.1f}s) + main ({final_start:.2f}–{final_end:.2f}s)")
-                    finally:
-                        for p in [setup_path, main_path]:
-                            if os.path.exists(p):
-                                try:
-                                    os.remove(p)
-                                except Exception:
-                                    pass
-                else:
-                    requires_stitch = False
-
-            if not requires_stitch:
-                ffmpeg_cmd = [
-                    "ffmpeg", "-y",
-                    "-ss", str(final_start),
-                    "-i", video_path,
-                    "-t", str(final_duration),
-                    "-c:v", "libx264",
-                    "-preset", settings.FFMPEG_PRESET,
-                    "-crf", str(settings.FFMPEG_CRF),
-                    "-c:a", "aac",
-                    "-b:a", "320k",
-                    "-movflags", "+faststart",
-                    "-pix_fmt", "yuv420p",
-                    "-avoid_negative_ts", "make_zero",
-                    "-map", "0:v:0",
-                    "-map", "0:a:0",
-                    output_path,
-                ]
-                print(f"[S08] Clip {index+1}/{len(cut_results)}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
-                subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-
-            # 2. Verify output
-            if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-                print(f"[S08] Error: Output missing or empty for clip {index+1}. Skipping.")
-                continue
-
-            # 3. Upload to Cloudflare R2
-            file_url = output_path  # fallback until upload confirmed
+    total = len(cut_results)
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(
+                _export_single_clip,
+                index, clip, job_id, channel_id, video_path,
+                user_id, words, job_output_dir, total,
+            ): index
+            for index, clip in enumerate(cut_results)
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
             try:
-                r2_url = upload_clip(job_id, output_filename, output_path)
-                print(f"[S08] Uploaded to R2: {r2_url}")
-                file_url = r2_url
-                r2_uploaded = True
-            except Exception as r2_err:
-                print(f"[S08] R2 upload failed: {r2_err}. Clip will not be saved.")
+                result = future.result()
+                if result:
+                    exported_clips.append(result)
+            except Exception as e:
+                print(f"[S08] Thread error for clip {idx+1}: {e}")
 
-            if not r2_uploaded:
-                continue
-
-            # 4. Insert into Supabase clips table
-            clip_data = {
-                "job_id": job_id,
-                "channel_id": channel_id,
-                "user_id": user_id,
-                "clip_index": index,
-                "start_time": float(final_start),
-                "end_time": float(clip.get("final_end", 0.0)),
-                "duration_s": float(final_duration),
-                "hook_text": clip.get("hook_text"),
-                "content_type": content_type,
-                "standalone_score": clip.get("score"),          # single 0-100 score
-                "standalone_result": clip.get("quality_verdict"),  # "pass" | "fixable"
-                "clip_strategy_role": clip.get("clip_strategy_role"),
-                "posting_order": clip.get("posting_order"),
-                "suggested_title": clip.get("suggested_title"),
-                "suggested_description": clip.get("suggested_description"),
-                "video_landscape_path": file_url,
-                "file_url": file_url,
-                "is_successful": None,  # user sets this manually via approve/reject UI
-                "quality_notes": clip.get("quality_notes"),    # non-empty only for fixable clips
-            }
-
-            # Remove None values to avoid Supabase errors
-            clip_data = {k: v for k, v in clip_data.items() if v is not None}
-
-            try:
-                result = supabase.table("clips").insert(clip_data).execute()
-                if result.data:
-                    clip_id = result.data[0].get("id")
-                    print(f"[S08] Clip {index+1} saved to DB (id: {clip_id})")
-                    exported_clips.append(result.data[0])
-                else:
-                    print(f"[S08] Warning: DB insert returned no data for clip {index+1}")
-                    exported_clips.append(clip_data)
-            except Exception as db_err:
-                print(f"[S08] DB insert error for clip {index+1}: {db_err}")
-                exported_clips.append(clip_data)
-
-        except subprocess.CalledProcessError as e:
-            stderr_output = e.stderr.decode() if e.stderr else "no stderr"
-            print(f"[S08] FFmpeg error for clip {index+1}: {stderr_output[:500]}")
-        except Exception as e:
-            print(f"[S08] Unexpected error for clip {index+1}: {e}")
-            traceback.print_exc()
-        finally:
-            if output_path and os.path.exists(output_path):
-                try:
-                    os.remove(output_path)
-                except Exception:
-                    pass
-
+    exported_clips.sort(key=lambda c: c.get("clip_index", 0))
     print(f"[S08] Export complete. {len(exported_clips)}/{len(cut_results)} clips exported.")
     try:
         director_events.emit_sync(

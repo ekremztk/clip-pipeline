@@ -7,6 +7,7 @@ Produces FaceDetection output consumed by focus_resolver, path_solver, etc.
 Performance (per-frame ms) is logged for monitoring.
 """
 import logging
+import threading
 import time
 import os
 from abc import ABC, abstractmethod
@@ -169,12 +170,15 @@ class YoloDetector(BaseDetector):
 # ─── Factory ──────────────────────────────────────────────────────────────────
 
 _detector_cache: dict[str, BaseDetector] = {}
+_detector_lock = threading.Lock()
 
 
 def _get_detector(engine_type: str, config: FaceTrackerConfig) -> BaseDetector:
-    """Lazy-init and cache the YOLO face detector."""
+    """Lazy-init and cache the YOLO face detector (thread-safe)."""
     if "yolo" not in _detector_cache:
-        _detector_cache["yolo"] = YoloDetector(config)
+        with _detector_lock:
+            if "yolo" not in _detector_cache:
+                _detector_cache["yolo"] = YoloDetector(config)
     return _detector_cache["yolo"]
 
 
