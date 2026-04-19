@@ -112,6 +112,7 @@ class PathPoint:
     time_s: float
     x: float                # 0.0-1.0 smooth crop center X
     y: float                # 0.0-1.0 smooth crop center Y
+    subject_id: str = ""    # Gemini subject ID — used for hard cut detection in keyframe emitter
 
 
 @dataclass

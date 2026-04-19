@@ -58,11 +58,7 @@ def emit_keyframes(
     keyframes: list[ReframeKeyframe] = []
     last_ox = -999.0
     last_oy = -999.0
-
-    # Pixel distance threshold for intra-shot subject switch detection.
-    # A jump larger than this means the focus resolver changed persons (not just head movement).
-    # Matches PathSolverConfig.subject_switch_threshold in normalized space.
-    subject_switch_px = kf_config.subject_switch_threshold * src_w
+    last_subject_id = ""
 
     for path_idx, path in enumerate(shot_paths):
         if not path.points:
@@ -77,14 +73,17 @@ def emit_keyframes(
             is_first_point = (pt_idx == 0)
             is_first_path = (path_idx == 0)
             is_shot_boundary = is_first_point and not is_first_path and last_ox != -999.0
-            # Intra-shot subject switch: large X jump within the same ShotPath means
-            # the focus person changed (path_solver already teleported the path point).
-            # We emit a hold+hold pair identical to shot boundaries so the frontend
-            # hard-cuts instead of linearly interpolating across the person change.
+            # Intra-shot subject switch: subject_id changed → path_solver already teleported.
+            # Emit hold+hold hard cut so the renderer jumps instantly instead of panning.
+            # subject_id check works regardless of how many people are on screen — no pixel
+            # threshold needed, so it's reliable for 2-person podcasts and 5-person panels alike.
+            curr_subject_id = pt.subject_id if hasattr(pt, "subject_id") else ""
             is_subject_switch = (
                 not is_first_point
                 and last_ox != -999.0
-                and abs(ox - last_ox) > subject_switch_px
+                and curr_subject_id != ""
+                and last_subject_id != ""
+                and curr_subject_id != last_subject_id
             )
 
             if is_shot_boundary:
@@ -133,8 +132,8 @@ def emit_keyframes(
                     interpolation="hold",
                 ))
                 logger.info(
-                    "[KeyframeEmitter] t=%.3fs: subject switch hard-cut (ox %.1f → %.1f, Δ=%.1fpx > %.0fpx threshold)",
-                    pt.time_s, last_ox, ox, abs(ox - last_ox), subject_switch_px,
+                    "[KeyframeEmitter] t=%.3fs: subject switch hard-cut (%s → %s, ox %.1f → %.1f)",
+                    pt.time_s, last_subject_id, curr_subject_id, last_ox, ox,
                 )
 
             else:
@@ -142,6 +141,7 @@ def emit_keyframes(
                 if (not is_first_point
                         and abs(ox - last_ox) < kf_config.dedup_threshold_px
                         and abs(oy - last_oy) < kf_config.dedup_threshold_px):
+                    last_subject_id = curr_subject_id
                     continue
 
                 keyframes.append(ReframeKeyframe(
@@ -153,6 +153,7 @@ def emit_keyframes(
 
             last_ox = ox
             last_oy = oy
+            last_subject_id = curr_subject_id
 
     # Pin last position to video end
     if keyframes and keyframes[-1].time_s < duration_s - frame_dur:

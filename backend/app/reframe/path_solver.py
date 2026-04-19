@@ -311,10 +311,12 @@ def _compute_tracking_path(
     # Initialize at first focus point
     curr_x = points[0].x
     curr_y = points[0].y
+    curr_subject_id = points[0].subject_id
     path.append(PathPoint(
         time_s=round(points[0].time_s, 4),
         x=round(curr_x, 5),
         y=round(curr_y, 5),
+        subject_id=curr_subject_id,
     ))
 
     for i in range(1, len(points)):
@@ -336,6 +338,7 @@ def _compute_tracking_path(
                 time_s=round(points[i].time_s, 4),
                 x=round(curr_x, 5),
                 y=round(curr_y, 5),
+                subject_id=curr_subject_id,
             ))
             continue
 
@@ -345,19 +348,20 @@ def _compute_tracking_path(
         # subject_id check takes priority: even a small positional jump triggers a hard cut
         # when the directive switched to a different person.
         prev_subject_id = points[i - 1].subject_id
-        curr_subject_id = points[i].subject_id
+        next_subject_id = points[i].subject_id
         is_subject_change = (
             prev_subject_id != ""
-            and curr_subject_id != ""
-            and prev_subject_id != curr_subject_id
+            and next_subject_id != ""
+            and prev_subject_id != next_subject_id
         )
         if is_subject_change or distance > config.subject_switch_threshold:
             curr_x = target_x
             curr_y = target_y
+            curr_subject_id = next_subject_id
             if is_subject_change:
                 logger.debug(
                     "[PathSolver] t=%.3fs: subject_id change (%s → %s), teleporting to (%.3f, %.3f)",
-                    points[i].time_s, prev_subject_id, curr_subject_id, curr_x, curr_y,
+                    points[i].time_s, prev_subject_id, next_subject_id, curr_x, curr_y,
                 )
             else:
                 logger.debug(
@@ -382,6 +386,7 @@ def _compute_tracking_path(
             time_s=round(points[i].time_s, 4),
             x=round(curr_x, 5),
             y=round(curr_y, 5),
+            subject_id=curr_subject_id,
         ))
 
     # Ensure path covers full shot duration

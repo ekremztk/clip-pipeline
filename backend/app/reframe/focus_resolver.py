@@ -66,6 +66,12 @@ def resolve_focus(
     last_known_x: dict[int, float] = {}
     last_known_y: dict[int, float] = {}
 
+    # Per-directive track_id lock: key = (shot_idx, directive_start_s) → track_id
+    # At the start of each directive, pick the track_id closest to the target position
+    # and hold it for the entire directive. Prevents frame-by-frame YOLO jitter when
+    # multiple faces are on screen (e.g. 5-person wide shot).
+    directive_track_lock: dict[tuple, int] = {}
+
     for frame in frames:
         shot = _get_shot_at(frame.time_s, shots)
         if shot is None:
@@ -145,7 +151,31 @@ def resolve_focus(
             # Wide shot: use per-shot subject positions to select the right face
             active_subject_id = directive.subject_id if directive else ""
             target_pos = subject_positions.get(active_subject_id, "")
-            face = _pick_face_by_position(frame.faces, target_pos)
+
+            # Per-directive track_id lock: at the first frame of each directive,
+            # pick the track_id closest to target_pos and hold it for the full directive.
+            # This prevents YOLO from oscillating between multiple faces each frame.
+            directive_start_s = directive.start_s if directive else 0.0
+            lock_key = (shot_idx, directive_start_s)
+            locked_track_id = directive_track_lock.get(lock_key)
+
+            if locked_track_id is None and frame.faces:
+                # First frame of this directive in this shot — pick and lock a track_id
+                best = _pick_face_by_position(frame.faces, target_pos)
+                locked_track_id = best.track_id if best.track_id != -1 else None
+                if locked_track_id is not None:
+                    directive_track_lock[lock_key] = locked_track_id
+                    logger.debug(
+                        "[FocusResolver] t=%.2fs: locked track_id=%d for directive %s (subject=%s, pos=%s)",
+                        frame.time_s, locked_track_id, lock_key, active_subject_id, target_pos,
+                    )
+
+            # Use locked track_id if available, otherwise fall back to position-based pick
+            if locked_track_id is not None:
+                locked_faces = [f for f in frame.faces if f.track_id == locked_track_id]
+                face = locked_faces[0] if locked_faces else _pick_face_by_position(frame.faces, target_pos)
+            else:
+                face = _pick_face_by_position(frame.faces, target_pos)
 
             # If only 1 face found and it's clearly on the wrong side,
             # don't lock onto the wrong person — hold last known position instead.
