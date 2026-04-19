@@ -84,6 +84,15 @@ def _find_prev_word_end(target_start: float, words: list) -> Optional[float]:
     return prev_end
 
 
+def _find_next_word_start(after_time: float, words: list) -> Optional[float]:
+    """Finds the start time of the first word that begins strictly after after_time."""
+    for w in words:
+        w_start = w.get("start", 0)
+        if w_start > after_time + 0.01:
+            return w_start
+    return None
+
+
 def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: str,
         clip_duration_min: Optional[int] = None,
         clip_duration_max: Optional[int] = None,
@@ -161,7 +170,16 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
                 breath_start = max(gap * 0.5, 0.05)
 
             final_start = max(0.0, snapped_start - breath_start)
-            final_end = snapped_end + 0.5
+
+            # End buffer: add 0.5s BUT cap before the next word starts.
+            # This prevents bleeding into the next sentence when snapped_end
+            # is very close to the start of the following speech.
+            next_word_start = _find_next_word_start(snapped_end, words)
+            if next_word_start is not None and next_word_start < snapped_end + 0.5:
+                end_buffer = max((next_word_start - snapped_end) * 0.5, 0.05)
+            else:
+                end_buffer = 0.5
+            final_end = snapped_end + end_buffer
 
             # 3. Enforce duration limits
             duration = final_end - final_start
