@@ -18,7 +18,7 @@ def get_claude_client() -> anthropic.Anthropic:
 def call_claude(
     content: list,
     system: str | None = None,
-    max_tokens: int = 8000,
+    max_tokens: int = 4000,
     extra_system_blocks: list | None = None,
 ) -> str:
     """

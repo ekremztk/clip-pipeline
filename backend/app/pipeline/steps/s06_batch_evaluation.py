@@ -183,15 +183,15 @@ def _build_claude_content(batch_items: list, channel_context: str, min_duration:
 
         meta = {
             "candidate_id":       cid,
-            "timestamp":          item.get("timestamp"),
-            "hook_text":          item.get("hook_text"),
-            "reason":             item.get("reason"),
-            "primary_signal":     item.get("primary_signal"),
-            "content_type":       item.get("content_type"),
-            "estimated_duration": item.get("estimated_duration"),
-            "needs_context":      item.get("needs_context"),
             "recommended_start":  item.get("recommended_start"),
             "recommended_end":    item.get("recommended_end"),
+            "hook_text":          item.get("hook_text"),
+            "end_text":           item.get("end_text"),
+            "reason":             item.get("reason"),
+            "primary_signal":     item.get("primary_signal"),
+            "loop_potential":     item.get("loop_potential"),
+            "content_type":       item.get("content_type"),
+            "estimated_duration": item.get("estimated_duration"),
         }
         candidates_text_parts.append(
             f"CANDIDATE {cid}:\n{json.dumps(meta, indent=2)}\n\nTRANSCRIPT:\n{transcript_block}"
