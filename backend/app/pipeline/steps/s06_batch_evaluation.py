@@ -432,26 +432,24 @@ def run(
             try:
                 evaluated = _evaluate_batch_with_claude(batch, channel_context, min_duration, max_duration, full_transcript_block)
 
-                returned_ids = {str(item.get("candidate_id", "")) for item in evaluated}
-                sent_ids = {str(item.get("candidate_id", "")) for item in batch}
-                missing_ids = sent_ids - returned_ids
-
                 all_evaluated.extend(evaluated)
 
-                if missing_ids:
-                    print(f"[S06] Batch {batch_num}: Claude missed {len(missing_ids)} candidates — retrying: {missing_ids}")
-                    for missing_id in missing_ids:
-                        missing_item = next(
-                            (item for item in batch if str(item.get("candidate_id")) == missing_id),
-                            None,
-                        )
-                        if missing_item:
-                            retry = _evaluate_single_with_claude(missing_item, channel_context, min_duration, max_duration, full_transcript_block)
-                            if retry:
-                                all_evaluated.append(retry)
-                                print(f"[S06] Recovered candidate {missing_id}")
-                            else:
-                                print(f"[S06] Could not recover candidate {missing_id} — dropping")
+                # Only retry if Claude returned ZERO results — that's a failure.
+                # If Claude returned ≥1 result, missing candidates were intentionally
+                # omitted (score < 55). Retrying them wastes tokens and produces 3x extra requests.
+                if len(evaluated) == 0:
+                    print(f"[S06] Batch {batch_num}: Claude returned 0 results — retrying candidates individually")
+                    for item in batch:
+                        retry = _evaluate_single_with_claude(item, channel_context, min_duration, max_duration, full_transcript_block)
+                        if retry:
+                            all_evaluated.append(retry)
+                            print(f"[S06] Recovered candidate {item.get('candidate_id')}")
+                else:
+                    returned_ids = {str(item.get("candidate_id", "")) for item in evaluated}
+                    sent_ids = {str(item.get("candidate_id", "")) for item in batch}
+                    omitted_ids = sent_ids - returned_ids
+                    if omitted_ids:
+                        print(f"[S06] Batch {batch_num}: {len(omitted_ids)} candidates intentionally omitted by Claude: {omitted_ids}")
 
             except Exception as batch_err:
                 print(f"[S06] Batch {batch_num} failed: {batch_err}. Falling back to individual evaluation.")
