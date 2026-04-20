@@ -37,7 +37,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "back_color": "&H80000000",      # shadow: black at 50% opacity (&H80 = 128 = 50%)
         "border_style": 1,
         "outline": 8,                    # matches editor stroke width 8 outsideOnly
-        "shadow": 0,
+        "shadow": 3,                     # matches editor shadow x:3 y:3 opacity:50%
         "alignment": 2,                  # bottom center
         "margin_v": 610,
         "margin_h": 80,
