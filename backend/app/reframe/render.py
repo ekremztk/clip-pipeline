@@ -121,15 +121,17 @@ def render_podcast_reframe(
         f"scale={canvas_w}:{canvas_h}:flags=lanczos"
     )
 
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", video_path,
-        "-vf", vf,
-        "-c:v", "libx264",
-        "-preset", settings.FFMPEG_PRESET,
-        "-crf", "18",
-        "-movflags", "+faststart",
-    ]
+    codec = settings.FFMPEG_VIDEO_CODEC
+    cmd = ["ffmpeg", "-y"]
+    if settings.FFMPEG_HWACCEL:
+        cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
+    cmd.extend(["-i", video_path, "-vf", vf, "-c:v", codec])
+    if codec == "h264_nvenc":
+        cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+    else:
+        cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
+    cmd.append("-movflags")
+    cmd.append("+faststart")
     if has_audio:
         cmd.extend(["-c:a", "aac", "-b:a", "320k"])
     else:
@@ -338,14 +340,18 @@ def render_gaming_vstack(
         "-filter_complex", filter_complex,
         "-map", "[out]",
         "-map", "0:a?",
-        "-c:v", "libx264",
-        "-preset", settings.FFMPEG_PRESET,
-        "-crf", "18",
+        "-c:v", settings.FFMPEG_VIDEO_CODEC,
+    ]
+    if settings.FFMPEG_VIDEO_CODEC == "h264_nvenc":
+        cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+    else:
+        cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
+    cmd.extend([
         "-c:a", "aac",
         "-b:a", "320k",
         "-movflags", "+faststart",
         output_path,
-    ]
+    ])
 
     logger.info(
         "[Render] Gaming vstack: wc=crop(%d:%d:%d:%d) game=crop(%d:%d:%d:%d)",

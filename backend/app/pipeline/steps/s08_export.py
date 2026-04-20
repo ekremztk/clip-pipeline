@@ -44,12 +44,23 @@ def _sanity_check_word_boundary(final_start: float, final_end: float, words: lis
 
 def _encode_segment(video_path: str, start: float, duration: float, output_path: str) -> None:
     """Encodes a video segment with normalized parameters for concat compatibility."""
-    cmd = [
-        "ffmpeg", "-y",
+    codec = settings.FFMPEG_VIDEO_CODEC
+    preset = settings.FFMPEG_ENCODE_PRESET
+
+    cmd = ["ffmpeg", "-y"]
+    if settings.FFMPEG_HWACCEL:
+        cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
+    cmd.extend([
         "-ss", str(start),
         "-i", video_path,
         "-t", str(duration),
-        "-c:v", "libx264", "-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF),
+    ])
+    cmd.extend(["-c:v", codec])
+    if codec == "h264_nvenc":
+        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+    else:
+        cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+    cmd.extend([
         "-c:a", "aac", "-b:a", "320k",
         "-r", "30",
         "-pix_fmt", "yuv420p",
@@ -57,7 +68,7 @@ def _encode_segment(video_path: str, start: float, duration: float, output_path:
         "-avoid_negative_ts", "make_zero",
         "-map", "0:v:0", "-map", "0:a:0",
         output_path,
-    ]
+    ])
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
 
@@ -131,14 +142,23 @@ def _export_single_clip(
                 requires_stitch = False
 
         if not requires_stitch:
-            ffmpeg_cmd = [
-                "ffmpeg", "-y",
+            codec = settings.FFMPEG_VIDEO_CODEC
+            preset = settings.FFMPEG_ENCODE_PRESET
+
+            ffmpeg_cmd = ["ffmpeg", "-y"]
+            if settings.FFMPEG_HWACCEL:
+                ffmpeg_cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
+            ffmpeg_cmd.extend([
                 "-ss", str(final_start),
                 "-i", video_path,
                 "-t", str(final_duration),
-                "-c:v", "libx264",
-                "-preset", settings.FFMPEG_PRESET,
-                "-crf", str(settings.FFMPEG_CRF),
+            ])
+            ffmpeg_cmd.extend(["-c:v", codec])
+            if codec == "h264_nvenc":
+                ffmpeg_cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+            else:
+                ffmpeg_cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+            ffmpeg_cmd.extend([
                 "-c:a", "aac",
                 "-b:a", "320k",
                 "-movflags", "+faststart",
@@ -147,7 +167,7 @@ def _export_single_clip(
                 "-map", "0:v:0",
                 "-map", "0:a:0",
                 output_path,
-            ]
+            ])
             print(f"[S08] Clip {index+1}/{total_clips}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
             subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 

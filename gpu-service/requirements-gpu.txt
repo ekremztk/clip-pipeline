@@ -1,0 +1,33 @@
+# --- Web & API ---
+fastapi==0.135.1
+uvicorn==0.41.0
+python-dotenv==1.2.2
+python-multipart
+
+# --- Database ---
+supabase
+
+# --- Storage ---
+boto3
+
+# --- AI & Models ---
+google-genai
+deepgram-sdk==3.2.7
+anthropic
+
+# --- Video & Audio Processing ---
+numpy
+Pillow
+opencv-python-headless
+
+# YOLOv8 face detection (GPU inference)
+ultralytics>=8.1.0
+
+# PyTorch with CUDA 12.4 support (for YOLO GPU inference)
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch
+torchvision
+
+# --- HTTP Client ---
+httpx>=0.27.0
+requests

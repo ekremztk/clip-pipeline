@@ -454,14 +454,18 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
         "ffmpeg", "-y",
         "-i", input_path,
         "-vf", f"ass={safe_path}:fontsdir={safe_fonts}",
-        "-c:v", "libx264",
-        "-preset", settings.FFMPEG_PRESET,
-        "-crf", "18",
+        "-c:v", settings.FFMPEG_VIDEO_CODEC,
+    ]
+    if settings.FFMPEG_VIDEO_CODEC == "h264_nvenc":
+        cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+    else:
+        cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
+    cmd.extend([
         "-c:a", "aac",
         "-b:a", "320k",
         "-movflags", "+faststart",
         output_path,
-    ]
+    ])
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg ASS render failed: {result.stderr[-800:]}")
