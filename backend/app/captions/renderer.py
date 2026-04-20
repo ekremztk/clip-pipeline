@@ -1,12 +1,8 @@
 """
-Caption renderer v2 — ASS subtitle format burned via FFmpeg.
+Caption renderer — dispatches to Pillow (clean) or ASS (karaoke templates).
 
-Replaces drawtext-based renderer. Key improvements:
-  - Automatic word wrap via margins (no overflow at any line length)
-  - True karaoke via \\k tags (hormozi: active word highlights, others white)
-  - Fade in/out via \\fad() override
-  - bold_pop: one word at a time with fade
-  - No new dependencies — ASS generated as plain text
+- clean template: Pillow PNG overlay (pixel-perfect editor match)
+- karaoke templates (hormozi, etc.): ASS via libass (\\k tags required)
 
 render_captions() signature is unchanged.
 """
@@ -20,6 +16,9 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Templates that use Pillow renderer (no karaoke needed)
+PILLOW_TEMPLATES = {"clean"}
+
 CANVAS_W = 1080
 CANVAS_H = 1920
 
@@ -28,16 +27,16 @@ CANVAS_H = 1920
 # Alpha: 0x00 = fully opaque, 0xFF = fully transparent
 TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
-        "font": "Montserrat Bold",
+        "font": "Montserrat",
         "bold": True,
         "fontsize": 85,
         "primary_color": "&H00FFFFFF",   # white text
         "secondary_color": "&H00FFFFFF",
-        "outline_color": "&H00000000",   # black stroke (8px outside = outline:8 in ASS)
-        "back_color": "&H80000000",      # shadow: black at 50% opacity (&H80 = 128 = 50%)
+        "outline_color": "&H00000000",   # black stroke
+        "back_color": "&H00000000",      # no shadow color
         "border_style": 1,
         "outline": 8,                    # matches editor stroke width 8 outsideOnly
-        "shadow": 3,                     # matches editor shadow x:3 y:3 opacity:50%
+        "shadow": 0,                     # editor shadow disabled
         "alignment": 2,                  # bottom center
         "margin_v": 610,
         "margin_h": 80,
@@ -192,17 +191,35 @@ def render_captions(
     template_key: str = "clean",
 ) -> str:
     """
-    Burn captions onto video using FFmpeg + ASS subtitle format.
+    Burn captions onto video.
+
+    Dispatches to Pillow renderer for templates that don't need karaoke
+    (pixel-perfect editor match). Falls back to ASS for karaoke templates.
 
     Args:
-        video_path: Path to input video (9:16, 1080×1920)
+        video_path: Path to input video (9:16, 1080x1920)
         output_path: Path to output captioned MP4
         words: Word-level timestamps from Deepgram [{word, start, end, ...}]
         segments: Sentence segments (kept for API compatibility, unused internally)
-        template_key: One of the 8 pipelineKey values
+        template_key: One of the pipelineKey values
 
     Returns: output_path
     """
+    if template_key in PILLOW_TEMPLATES:
+        from app.captions.renderer_pillow import render_captions as render_pillow
+        return render_pillow(video_path, output_path, words, segments, template_key)
+
+    return _render_ass(video_path, output_path, words, segments, template_key)
+
+
+def _render_ass(
+    video_path: str,
+    output_path: str,
+    words: list[dict],
+    segments: list[dict],
+    template_key: str,
+) -> str:
+    """ASS-based render for karaoke templates (hormozi, bold_pop, etc.)."""
     cfg = TEMPLATE_CONFIGS.get(template_key) or TEMPLATE_CONFIGS["clean"]
 
     if not words:
@@ -233,7 +250,7 @@ def render_captions(
 
         _run_ffmpeg_ass(video_path, output_path, ass_path)
         logger.info(
-            "[CaptionRenderer] Rendered %d groups (%s) → %s",
+            "[CaptionRenderer] Rendered %d groups (%s) -> %s",
             len(groups), template_key, output_path,
         )
     finally:
@@ -448,6 +465,10 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg ASS render failed: {result.stderr[-800:]}")
+    if result.stderr:
+        stderr_lower = result.stderr.lower()
+        if "font" in stderr_lower or "glyph" in stderr_lower or "libass" in stderr_lower:
+            logger.warning("[CaptionRenderer] FFmpeg font warnings: %s", result.stderr[-600:])
 
 
 def _run_ffmpeg_copy(input_path: str, output_path: str) -> None:

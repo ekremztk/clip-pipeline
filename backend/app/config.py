@@ -48,6 +48,9 @@ class Settings:
     CLIPS_PER_VIDEO = 7
     FFMPEG_CRF = 18
     FFMPEG_PRESET = "slow"
+    FFMPEG_VIDEO_CODEC: str = os.getenv("FFMPEG_VIDEO_CODEC", "libx264")
+    FFMPEG_ENCODE_PRESET: str = os.getenv("FFMPEG_ENCODE_PRESET", "slow")
+    FFMPEG_HWACCEL: str = os.getenv("FFMPEG_HWACCEL", "")
 
     # Director Module
     RAILWAY_API_TOKEN: str = os.getenv("RAILWAY_API_TOKEN", "")
