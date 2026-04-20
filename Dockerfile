@@ -23,11 +23,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Montserrat font (required for caption rendering)
-RUN mkdir -p /usr/share/fonts/truetype/montserrat \
+# Copied to both /usr/share/fonts (fontconfig) and /root/.fonts (libass home dir lookup)
+RUN mkdir -p /usr/share/fonts/truetype/montserrat /root/.fonts \
     && curl -fsSL -o /usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf \
        "https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf/Montserrat-Bold.ttf" \
     && curl -fsSL -o /usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf \
        "https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf/Montserrat-Regular.ttf" \
+    && cp /usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf /root/.fonts/ \
+    && cp /usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf /root/.fonts/ \
     && fc-cache -fv \
     && fc-list | grep -i montserrat
 

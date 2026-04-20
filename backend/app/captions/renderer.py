@@ -28,7 +28,7 @@ CANVAS_H = 1920
 # Alpha: 0x00 = fully opaque, 0xFF = fully transparent
 TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
-        "font": "Montserrat",
+        "font": "Montserrat Bold",
         "bold": True,
         "fontsize": 85,
         "primary_color": "&H00FFFFFF",   # white text
