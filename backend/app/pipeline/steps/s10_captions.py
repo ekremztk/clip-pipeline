@@ -112,13 +112,15 @@ def _caption_clip(
     print(f"[S10] Captioning clip {clip_index+1}: {clip_url}")
 
     downloaded = False
-    output_path = os.path.join(str(settings.UPLOAD_DIR), f"s10_captioned_{uuid.uuid4().hex}.mp4")
+    upload_dir = str(settings.UPLOAD_DIR)
+    os.makedirs(upload_dir, exist_ok=True)
+    output_path = os.path.join(upload_dir, f"s10_captioned_{uuid.uuid4().hex}.mp4")
 
     if local_path_hint and os.path.exists(local_path_hint):
         local_path = local_path_hint
         print(f"[S10] Clip {clip_index+1}: using local path from S09 (skipping download)")
     else:
-        local_path = os.path.join(str(settings.UPLOAD_DIR), f"s10_dl_{uuid.uuid4().hex}.mp4")
+        local_path = os.path.join(upload_dir, f"s10_dl_{uuid.uuid4().hex}.mp4")
         downloaded = True
         resp = requests.get(clip_url, stream=True, timeout=120)
         resp.raise_for_status()

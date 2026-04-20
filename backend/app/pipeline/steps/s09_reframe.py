@@ -259,10 +259,9 @@ def _download_temp(url: str) -> str:
     """Download a URL to a temp file, return local path."""
     import requests
 
-    temp_path = os.path.join(
-        str(settings.UPLOAD_DIR),
-        f"s09_dl_{uuid.uuid4().hex}.mp4",
-    )
+    upload_dir = str(settings.UPLOAD_DIR)
+    os.makedirs(upload_dir, exist_ok=True)
+    temp_path = os.path.join(upload_dir, f"s09_dl_{uuid.uuid4().hex}.mp4")
     try:
         resp = requests.get(url, stream=True, timeout=120)
         resp.raise_for_status()
