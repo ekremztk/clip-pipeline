@@ -31,16 +31,16 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "font": "Montserrat",
         "bold": True,
         "fontsize": 64,
-        "primary_color": "&H00FFFFFF",   # white
+        "primary_color": "&H00FFFFFF",   # white text
         "secondary_color": "&H00FFFFFF",
-        "outline_color": "&H00000000",   # black stroke outside only
-        "back_color": "&H80000000",      # shadow color: 50% opacity black
-        "border_style": 1,               # outline mode
-        "outline": 8,
-        "shadow": 3,                     # shadow offset 3px (x=3, y=3 in ASS)
+        "outline_color": "&H00000000",   # black stroke (8px outside = outline:8 in ASS)
+        "back_color": "&H80000000",      # shadow: black at 50% opacity (&H80 = 128 = 50%)
+        "border_style": 1,               # outline+shadow mode
+        "outline": 8,                    # matches editor stroke width 8 outsideOnly
+        "shadow": 2,                     # subtle shadow (editor: x3 y3 blur6 50% — ASS no blur, approximate)
         "alignment": 2,                  # bottom center
         "margin_v": 610,
-        "margin_h": 100,
+        "margin_h": 80,
         "text_transform": "capitalize",
         "karaoke": False,
         "words_per_group": 4,
@@ -288,52 +288,53 @@ def _build_groups_by_chars(
 ) -> list[dict]:
     """
     Build subtitle events with character-per-line and max-lines limits.
-    Each event has up to max_lines lines, each line up to max_chars characters.
-    Lines are joined with ASS hard line break (\\N).
+    Fills line 1 up to max_chars, overflows into line 2, then starts new event.
+    Lines joined with ASS hard line break (\\N).
     """
     groups: list[dict] = []
     i = 0
 
     while i < len(words):
-        event_words: list[dict] = []
-        event_lines: list[str] = []
-        current_line = ""
-        line_count = 0
+        lines: list[list[dict]] = [[]]  # lines[0] = first line words, lines[1] = second
 
-        while i < len(words) and line_count < max_lines:
-            word_text = words[i].get("punctuated_word") or words[i].get("word", "")
+        while i < len(words):
+            word = words[i]
+            word_text = word.get("punctuated_word") or word.get("word", "")
+            current_line_words = lines[-1]
+            current_line_text = " ".join(
+                w.get("punctuated_word") or w.get("word", "") for w in current_line_words
+            )
+            candidate = (current_line_text + " " + word_text).strip()
 
-            if not current_line:
-                if len(word_text) > max_chars:
-                    current_line = word_text
-                    event_words.append(words[i])
-                    i += 1
-                    event_lines.append(current_line)
-                    current_line = ""
-                    line_count += 1
-                else:
-                    current_line = word_text
-                    event_words.append(words[i])
-                    i += 1
-            elif len(current_line) + 1 + len(word_text) <= max_chars:
-                current_line += " " + word_text
-                event_words.append(words[i])
+            if len(candidate) <= max_chars:
+                current_line_words.append(word)
+                i += 1
+            elif len(lines) < max_lines:
+                # Overflow to next line
+                lines.append([word])
                 i += 1
             else:
-                event_lines.append(current_line)
-                current_line = ""
-                line_count += 1
+                # Event full — start new event
+                break
 
-        if current_line:
-            event_lines.append(current_line)
+        # Drop empty trailing lines
+        lines = [ln for ln in lines if ln]
+        if not lines:
+            i += 1
+            continue
 
-        if event_words:
-            groups.append({
-                "text": "\\N".join(event_lines),
-                "start": event_words[0].get("start", 0.0),
-                "end": event_words[-1].get("end", event_words[-1].get("start", 0.0) + 0.5),
-                "words": event_words,
-            })
+        all_words = [w for ln in lines for w in ln]
+        line_texts = [
+            " ".join(w.get("punctuated_word") or w.get("word", "") for w in ln)
+            for ln in lines
+        ]
+
+        groups.append({
+            "text": "\\N".join(line_texts),
+            "start": all_words[0].get("start", 0.0),
+            "end": all_words[-1].get("end", all_words[-1].get("start", 0.0) + 0.5),
+            "words": all_words,
+        })
 
     return groups
 
@@ -363,7 +364,7 @@ def _build_ass(groups: list[dict], cfg: dict) -> str:
         "ScriptType: v4.00+\n"
         f"PlayResX: {CANVAS_W}\n"
         f"PlayResY: {CANVAS_H}\n"
-        "WrapStyle: 1\n"
+        "WrapStyle: 2\n"
         "ScaledBorderAndShadow: yes\n"
         "\n"
         "[V4+ Styles]\n"
