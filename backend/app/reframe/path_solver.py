@@ -298,6 +298,62 @@ def _compute_panning_path(
     ]
 
 
+# --- Subject Segment Stabilization -------------------------------------------
+
+def _stabilize_subject_segments(points: list[FocusPoint]) -> list[FocusPoint]:
+    """
+    Within each run of consecutive same-subject focus points, snap all
+    positions to the segment median.  This eliminates YOLO detection jitter
+    inside a subject's screen time while preserving hard jumps at subject
+    boundaries.
+
+    Points with empty subject_id are passed through unchanged so genuine
+    tracking (no Gemini direction) is not affected.
+    """
+    if len(points) <= 1:
+        return points
+
+    segments: list[list[int]] = []
+    current_seg = [0]
+
+    for i in range(1, len(points)):
+        prev_sid = points[current_seg[0]].subject_id
+        curr_sid = points[i].subject_id
+        if curr_sid and prev_sid and curr_sid == prev_sid:
+            current_seg.append(i)
+        else:
+            segments.append(current_seg)
+            current_seg = [i]
+    segments.append(current_seg)
+
+    stabilized: list[FocusPoint] = []
+    for seg_indices in segments:
+        seg_points = [points[idx] for idx in seg_indices]
+        sid = seg_points[0].subject_id
+
+        if sid and len(seg_points) >= 2:
+            med_x = statistics.median(fp.x for fp in seg_points)
+            med_y = statistics.median(fp.y for fp in seg_points)
+            logger.debug(
+                "[PathSolver] Stabilize subject %s: %d pts → median (%.3f, %.3f)",
+                sid, len(seg_points), med_x, med_y,
+            )
+            for idx in seg_indices:
+                stabilized.append(FocusPoint(
+                    time_s=points[idx].time_s,
+                    x=round(med_x, 5),
+                    y=round(med_y, 5),
+                    weight=points[idx].weight,
+                    shot_index=points[idx].shot_index,
+                    subject_id=points[idx].subject_id,
+                ))
+        else:
+            for idx in seg_indices:
+                stabilized.append(points[idx])
+
+    return stabilized
+
+
 # --- Tracking Path (Kinematic Filter) ----------------------------------------
 
 def _compute_tracking_path(
@@ -316,6 +372,8 @@ def _compute_tracking_path(
     """
     if not points:
         return _make_static_path(shot, 0.5, 0.4, fps)
+
+    points = _stabilize_subject_segments(points)
 
     path: list[PathPoint] = []
 
