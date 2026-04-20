@@ -9,7 +9,6 @@ import logging
 import os
 import traceback
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.config import settings
 from app.services.supabase_client import get_client
@@ -76,19 +75,14 @@ def run(
             traceback.print_exc()
             return index, clip
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        futures = {
-            executor.submit(_process_clip, index, clip): index
-            for index, clip in enumerate(reframed_clips)
-        }
-        for future in as_completed(futures):
-            idx = futures[future]
-            try:
-                result_idx, result_clip = future.result()
-                captioned_clips.append((result_idx, result_clip))
-            except Exception as e:
-                print(f"[S10] Thread error for clip {idx+1}: {e}")
-                captioned_clips.append((idx, reframed_clips[idx]))
+    for index, clip in enumerate(reframed_clips):
+        try:
+            result_idx, result_clip = _process_clip(index, clip)
+            captioned_clips.append((result_idx, result_clip))
+        except Exception as e:
+            print(f"[S10] Caption error for clip {index+1}: {e}")
+            traceback.print_exc()
+            captioned_clips.append((index, clip))
 
     captioned_clips.sort(key=lambda x: x[0])
     captioned_clips = [clip for _, clip in captioned_clips]
