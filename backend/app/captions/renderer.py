@@ -28,22 +28,24 @@ CANVAS_H = 1920
 # Alpha: 0x00 = fully opaque, 0xFF = fully transparent
 TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
-        "font": "Open Sans",
+        "font": "Montserrat",
         "bold": True,
-        "fontsize": 80,
+        "fontsize": 64,
         "primary_color": "&H00FFFFFF",   # white
         "secondary_color": "&H00FFFFFF",
-        "outline_color": "&H00000000",   # black stroke
-        "back_color": "&H00000000",
+        "outline_color": "&H00000000",   # black stroke outside only
+        "back_color": "&H80000000",      # shadow color: 50% opacity black
         "border_style": 1,               # outline mode
         "outline": 8,
-        "shadow": 0,
+        "shadow": 3,                     # shadow offset 3px (x=3, y=3 in ASS)
         "alignment": 2,                  # bottom center
         "margin_v": 610,
         "margin_h": 100,
         "text_transform": "capitalize",
         "karaoke": False,
         "words_per_group": 4,
+        "max_lines": 2,
+        "max_chars_per_line": 18,
         "fade": (0, 0),
     },
     "hormozi": {
@@ -208,7 +210,12 @@ def render_captions(
         _run_ffmpeg_copy(video_path, output_path)
         return output_path
 
-    groups = _build_word_groups(words, cfg["words_per_group"])
+    groups = _build_word_groups(
+        words,
+        cfg["words_per_group"],
+        max_lines=cfg.get("max_lines", 0),
+        max_chars_per_line=cfg.get("max_chars_per_line", 0),
+    )
 
     if not groups:
         logger.warning("[CaptionRenderer] No word groups generated, copying input unchanged")
@@ -241,8 +248,24 @@ def render_captions(
 
 # ─── Word grouping ─────────────────────────────────────────────────────────────
 
-def _build_word_groups(words: list[dict], n: int) -> list[dict]:
-    """Slice word list into chunks of n. Each chunk = one subtitle event."""
+def _build_word_groups(
+    words: list[dict],
+    n: int,
+    max_lines: int = 0,
+    max_chars_per_line: int = 0,
+) -> list[dict]:
+    """
+    Build subtitle events from word list.
+
+    If max_lines and max_chars_per_line are set, uses line-aware wrapping:
+    fills lines up to max_chars_per_line, up to max_lines lines per event,
+    then starts a new event. Uses ASS \\N for hard line breaks.
+
+    Otherwise falls back to simple N-word chunking.
+    """
+    if max_lines > 0 and max_chars_per_line > 0:
+        return _build_groups_by_chars(words, max_lines, max_chars_per_line)
+
     groups = []
     for i in range(0, len(words), n):
         chunk = words[i:i + n]
@@ -255,6 +278,63 @@ def _build_word_groups(words: list[dict], n: int) -> list[dict]:
             "end": chunk[-1].get("end", chunk[-1].get("start", 0.0) + 0.5),
             "words": chunk,
         })
+    return groups
+
+
+def _build_groups_by_chars(
+    words: list[dict],
+    max_lines: int,
+    max_chars: int,
+) -> list[dict]:
+    """
+    Build subtitle events with character-per-line and max-lines limits.
+    Each event has up to max_lines lines, each line up to max_chars characters.
+    Lines are joined with ASS hard line break (\\N).
+    """
+    groups: list[dict] = []
+    i = 0
+
+    while i < len(words):
+        event_words: list[dict] = []
+        event_lines: list[str] = []
+        current_line = ""
+        line_count = 0
+
+        while i < len(words) and line_count < max_lines:
+            word_text = words[i].get("punctuated_word") or words[i].get("word", "")
+
+            if not current_line:
+                if len(word_text) > max_chars:
+                    current_line = word_text
+                    event_words.append(words[i])
+                    i += 1
+                    event_lines.append(current_line)
+                    current_line = ""
+                    line_count += 1
+                else:
+                    current_line = word_text
+                    event_words.append(words[i])
+                    i += 1
+            elif len(current_line) + 1 + len(word_text) <= max_chars:
+                current_line += " " + word_text
+                event_words.append(words[i])
+                i += 1
+            else:
+                event_lines.append(current_line)
+                current_line = ""
+                line_count += 1
+
+        if current_line:
+            event_lines.append(current_line)
+
+        if event_words:
+            groups.append({
+                "text": "\\N".join(event_lines),
+                "start": event_words[0].get("start", 0.0),
+                "end": event_words[-1].get("end", event_words[-1].get("start", 0.0) + 0.5),
+                "words": event_words,
+            })
+
     return groups
 
 
@@ -307,9 +387,9 @@ def _build_ass(groups: list[dict], cfg: dict) -> str:
         if cfg.get("karaoke") and group.get("words"):
             text_body = _build_karaoke_text(group["words"], cfg.get("text_transform", "none"))
         else:
-            text_body = _escape_ass(
-                _apply_transform(group["text"], cfg.get("text_transform", "none"))
-            )
+            raw = _apply_transform(group["text"], cfg.get("text_transform", "none"))
+            parts = raw.split("\\N")
+            text_body = "\\N".join(_escape_ass(p) for p in parts)
 
         text = fade_prefix + text_body
         lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}")

@@ -20,7 +20,13 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     curl \
     fonts-open-sans \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /usr/share/fonts/truetype/montserrat \
+    && curl -fsSL -o /usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf \
+       "https://raw.githubusercontent.com/JulietaUla/Montserrat/master/fonts/ttf/Montserrat-Bold.ttf" \
+    && curl -fsSL -o /usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf \
+       "https://raw.githubusercontent.com/JulietaUla/Montserrat/master/fonts/ttf/Montserrat-Regular.ttf" \
+    && fc-cache -f
 
 # Install Node.js 20 (yt-dlp n-param decipher + bgutil PO token server)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
