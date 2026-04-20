@@ -27,6 +27,93 @@ def _debug_dump(job_id: str, step: str, data: object) -> None:
         print(f"[DEBUG] Could not write {step}: {e}")
 
 
+def _upload_source_video_to_r2(job_id: str, video_path: str) -> str:
+    """Upload source video to R2 and return public URL for Modal to download."""
+    import uuid
+    from app.services.r2_client import get_r2_client
+    from app.config import settings as _s
+
+    s3 = get_r2_client()
+    key = f"source_videos/{job_id}/{uuid.uuid4().hex}.mp4"
+    with open(video_path, "rb") as f:
+        s3.put_object(
+            Bucket=_s.R2_BUCKET_NAME,
+            Key=key,
+            Body=f.read(),
+            ContentType="video/mp4",
+        )
+    public_url = _s.R2_PUBLIC_URL.rstrip("/")
+    return f"{public_url}/{key}"
+
+
+def _dispatch_to_modal(
+    job_id: str, channel_id: str, user_id, video_title: str,
+    video_path: str, cut_results: list, transcript_data: dict | None,
+    reframe_content_type: str, caption_template: str,
+) -> dict:
+    """
+    Upload source video to R2, then call Modal GPU function for S08+S09+S10.
+    Falls back to local CPU execution if Modal fails.
+    """
+    import modal as _modal
+
+    print("[Orchestrator] Uploading source video to R2 for Modal...")
+    source_video_url = _upload_source_video_to_r2(job_id, video_path)
+    print(f"[Orchestrator] Source video URL: {source_video_url[:80]}...")
+
+    try:
+        fn = _modal.Function.from_name("gpu-pipeline", "process_clips")
+        result = fn.remote(
+            job_id=job_id,
+            channel_id=channel_id,
+            user_id=user_id,
+            video_title=video_title,
+            source_video_url=source_video_url,
+            clips=cut_results,
+            transcript_data=transcript_data,
+            reframe_content_type=reframe_content_type,
+            caption_template=caption_template,
+        )
+        return result
+    except Exception as e:
+        print(f"[Orchestrator] Modal dispatch failed: {e}. Falling back to local CPU.")
+        return _run_local_fallback(
+            job_id=job_id, channel_id=channel_id, user_id=user_id,
+            video_title=video_title, video_path=video_path,
+            cut_results=cut_results, transcript_data=transcript_data,
+            reframe_content_type=reframe_content_type, caption_template=caption_template,
+        )
+
+
+def _run_local_fallback(
+    job_id: str, channel_id: str, user_id, video_title: str,
+    video_path: str, cut_results: list, transcript_data: dict | None,
+    reframe_content_type: str, caption_template: str,
+) -> dict:
+    """CPU fallback — runs S08+S09+S10 locally on Railway if Modal fails."""
+    from app.pipeline.steps import s08_export, s09_reframe, s10_captions
+    exported_clips = s08_export.run(
+        cut_results=cut_results, job_id=job_id, channel_id=channel_id,
+        video_path=video_path, video_title=video_title,
+        user_id=user_id, transcript_data=transcript_data,
+    )
+    reframed_clips = s09_reframe.run(
+        exported_clips=exported_clips, job_id=job_id,
+        channel_id=channel_id, reframe_content_type=reframe_content_type,
+    )
+    source = reframed_clips if reframed_clips else exported_clips
+    captioned_clips = s10_captions.run(
+        reframed_clips=source, job_id=job_id,
+        channel_id=channel_id, caption_template=caption_template,
+    )
+    return {
+        "status": "completed",
+        "exported_clips": exported_clips,
+        "reframed_clips": reframed_clips,
+        "captioned_clips": captioned_clips,
+    }
+
+
 def update_job(job_id: str, **kwargs) -> None:
     """
     Updates jobs table in Supabase with given kwargs.
@@ -118,9 +205,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             (5,  "s05_unified_discovery",   65),
             (6,  "s06_batch_evaluation",    85),
             (7,  "s07_precision_cut",       92),
-            (8,  "s08_export",              95),
-            (9,  "s09_reframe",             98),
-            (10, "s10_captions",           100),
+            (8,  "s08_s09_s10_gpu",        100),
         ]
 
         # State variables to pass between steps — channel_dna MUST be declared
@@ -291,73 +376,33 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     )
 
                 elif step_number == 8:
-                    from app.pipeline.steps import s08_export
                     if not cut_results:
-                        print("[Orchestrator] No cut results. Skipping export.")
+                        print("[Orchestrator] No cut results. Skipping GPU steps.")
                     else:
-                        exported_clips = s08_export.run(
-                            cut_results=cut_results,
+                        print(f"[Orchestrator] Dispatching S08+S09+S10 to Modal GPU ({len(cut_results)} clips)...")
+                        result = _dispatch_to_modal(
                             job_id=job_id,
                             channel_id=channel_id,
-                            video_path=video_path,
-                            video_title=video_title,
                             user_id=user_id,
+                            video_title=video_title,
+                            video_path=video_path,
+                            cut_results=cut_results,
                             transcript_data=transcript_data,
-                        )
-                    _debug_dump(job_id, "s08_export", exported_clips)
-                    print(f"[Orchestrator] S08 exported {len(exported_clips)} clips")
-                    duration_ms_s08 = int((time.time() - step_start_time) * 1000)
-                    director_events.emit_sync(
-                        module="module_1", event="s08_export_completed",
-                        payload={"job_id": job_id, "exported_count": len(exported_clips),
-                                 "duration_ms": duration_ms_s08},
-                        channel_id=channel_id,
-                    )
-
-                elif step_number == 9:
-                    from app.pipeline.steps import s09_reframe
-                    if not exported_clips:
-                        print("[Orchestrator] No exported clips. Skipping reframe.")
-                    else:
-                        reframed_clips = s09_reframe.run(
-                            exported_clips=exported_clips,
-                            job_id=job_id,
-                            channel_id=channel_id,
                             reframe_content_type=reframe_content_type,
-                        )
-                    reframed_count = sum(1 for c in reframed_clips if c.get("video_reframed_path"))
-                    _debug_dump(job_id, "s09_reframe", reframed_clips)
-                    print(f"[Orchestrator] S09 reframed {reframed_count}/{len(exported_clips)} clips")
-                    duration_ms_s09 = int((time.time() - step_start_time) * 1000)
-                    director_events.emit_sync(
-                        module="module_1", event="s09_reframe_completed",
-                        payload={"job_id": job_id, "reframed_count": reframed_count,
-                                 "strategy": reframe_content_type,
-                                 "duration_ms": duration_ms_s09},
-                        channel_id=channel_id,
-                    )
-
-                elif step_number == 10:
-                    from app.pipeline.steps import s10_captions
-                    source_clips = reframed_clips if reframed_clips else exported_clips
-                    if not source_clips:
-                        print("[Orchestrator] No clips to caption. Skipping S10.")
-                    else:
-                        captioned_clips = s10_captions.run(
-                            reframed_clips=source_clips,
-                            job_id=job_id,
-                            channel_id=channel_id,
                             caption_template=caption_template,
                         )
-                    captioned_count = sum(1 for c in captioned_clips if c.get("video_captioned_path"))
-                    _debug_dump(job_id, "s10_captions", captioned_clips)
-                    print(f"[Orchestrator] S10 captioned {captioned_count}/{len(source_clips)} clips")
-                    duration_ms_s10 = int((time.time() - step_start_time) * 1000)
+                        exported_clips = result.get("exported_clips", [])
+                        reframed_clips = result.get("reframed_clips", [])
+                        captioned_clips = result.get("captioned_clips", [])
+                        duration_gpu = result.get("duration_s", 0)
+                        print(f"[Orchestrator] Modal GPU done in {duration_gpu:.1f}s — "
+                              f"exported={len(exported_clips)}, reframed={len(reframed_clips)}, captioned={len(captioned_clips)}")
                     director_events.emit_sync(
-                        module="module_1", event="s10_captions_completed",
-                        payload={"job_id": job_id, "captioned_count": captioned_count,
-                                 "template": caption_template,
-                                 "duration_ms": duration_ms_s10},
+                        module="module_1", event="s08_s09_s10_gpu_completed",
+                        payload={"job_id": job_id,
+                                 "exported_count": len(exported_clips),
+                                 "reframed_count": sum(1 for c in reframed_clips if c.get("video_reframed_path")),
+                                 "captioned_count": sum(1 for c in captioned_clips if c.get("video_captioned_path"))},
                         channel_id=channel_id,
                     )
 

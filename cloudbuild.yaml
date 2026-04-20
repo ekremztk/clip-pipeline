@@ -1,0 +1,19 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - -f
+      - gpu-service/Dockerfile
+      - -t
+      - us-central1-docker.pkg.dev/gen-lang-client-0866339456/gpu-pipeline/gpu-service:latest
+      - .
+    timeout: 1800s
+
+images:
+  - us-central1-docker.pkg.dev/gen-lang-client-0866339456/gpu-pipeline/gpu-service:latest
+
+options:
+  machineType: E2_HIGHCPU_8
+  diskSizeGb: 50
+
+timeout: 1800s
