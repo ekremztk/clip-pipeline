@@ -30,14 +30,14 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
         "font": "Montserrat",
         "bold": True,
-        "fontsize": 64,
+        "fontsize": 85,
         "primary_color": "&H00FFFFFF",   # white text
         "secondary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",   # black stroke (8px outside = outline:8 in ASS)
         "back_color": "&H80000000",      # shadow: black at 50% opacity (&H80 = 128 = 50%)
-        "border_style": 1,               # outline+shadow mode
+        "border_style": 1,
         "outline": 8,                    # matches editor stroke width 8 outsideOnly
-        "shadow": 2,                     # subtle shadow (editor: x3 y3 blur6 50% — ASS no blur, approximate)
+        "shadow": 0,
         "alignment": 2,                  # bottom center
         "margin_v": 610,
         "margin_h": 80,
@@ -425,14 +425,18 @@ def _build_karaoke_text(words: list[dict], transform: str) -> str:
 
 # ─── FFmpeg runners ────────────────────────────────────────────────────────────
 
+MONTSERRAT_FONTS_DIR = "/usr/share/fonts/truetype/montserrat"
+
+
 def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
     """Burn ASS subtitles via FFmpeg."""
-    # On Linux paths never contain colons, but escape just in case for FFmpeg filter parser
     safe_path = ass_path.replace("\\", "/").replace(":", "\\:")
+    # Pass fontsdir so libass finds Montserrat even if system fontconfig cache is stale
+    safe_fonts = MONTSERRAT_FONTS_DIR.replace(":", "\\:")
     cmd = [
         "ffmpeg", "-y",
         "-i", input_path,
-        "-vf", f"ass={safe_path}",
+        "-vf", f"ass={safe_path}:fontsdir={safe_fonts}",
         "-c:v", "libx264",
         "-preset", settings.FFMPEG_PRESET,
         "-crf", "18",
