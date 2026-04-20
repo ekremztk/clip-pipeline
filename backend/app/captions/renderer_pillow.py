@@ -2,8 +2,7 @@
 Pillow-based caption renderer — pixel-perfect match with editor (Canvas2D + freetype).
 
 Renders each subtitle group as a transparent 1080x1920 PNG, then composites
-them onto the video via FFmpeg overlay filters. No libass, no font-matching
-issues, no ASS quirks.
+them onto the video via FFmpeg overlay filters (multi-pass to avoid fd limits).
 
 GPU-ready: encode codec/preset is configurable via env vars. Switch to
 h264_nvenc by changing FFMPEG_VIDEO_CODEC + FFMPEG_ENCODE_PRESET.
@@ -14,7 +13,7 @@ import subprocess
 import uuid
 from typing import Optional
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from app.config import settings
 
@@ -27,20 +26,22 @@ FONT_SIZE_SCALE_REFERENCE = 90
 FONT_PATH = "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf"
 FONT_PATH_REGULAR = "/usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf"
 
+MAX_OVERLAYS_PER_PASS = 8
+
 TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
         "font_path": FONT_PATH,
-        "font_size_relative": 4,
+        "font_size_relative": 3,
         "line_height": 1.0,
         "text_color": (255, 255, 255, 255),
         "stroke_enabled": True,
         "stroke_color": (0, 0, 0),
         "stroke_width": 8,
-        "shadow_enabled": False,
+        "shadow_enabled": True,
         "shadow_color": (0, 0, 0, 128),
-        "shadow_offset_x": 0,
-        "shadow_offset_y": 0,
-        "shadow_blur": 0,
+        "shadow_offset_x": 3,
+        "shadow_offset_y": 3,
+        "shadow_blur": 6,
         "text_align": "center",
         "position_y_offset": 150,
         "words_per_group": 4,
@@ -80,6 +81,7 @@ def render_captions(
         return output_path
 
     words = _clean_and_transform_words(words)
+    words = _deduplicate_stutters(words)
 
     groups = _build_word_groups(
         words,
@@ -106,7 +108,7 @@ def render_captions(
             group["png_path"] = png_path
             png_paths.append(png_path)
 
-        _run_ffmpeg_overlay(video_path, output_path, groups)
+        _run_ffmpeg_overlay_multipass(video_path, output_path, groups, out_dir)
 
         logger.info(
             "[PillowRenderer] Rendered %d groups (%s) -> %s",
@@ -128,9 +130,10 @@ def render_captions(
 def _clean_and_transform_words(words: list[dict]) -> list[dict]:
     """
     Process word list:
-    1. Remove punctuation (keep apostrophes for contractions)
-    2. Lowercase everything
-    3. Capitalize first word + words after sentence-ending periods
+    1. Track sentence boundaries (words ending with '.')
+    2. Remove punctuation EXCEPT apostrophes and sentence-ending periods
+    3. Lowercase everything
+    4. Capitalize first word + words after sentence-ending periods
     """
     capitalize_next = True
 
@@ -145,12 +148,36 @@ def _clean_and_transform_words(words: list[dict]) -> list[dict]:
             cleaned = cleaned[0].upper() + cleaned[1:]
             capitalize_next = False
 
-        word["display_text"] = cleaned.strip()
-
         if ends_with_period:
+            cleaned = cleaned.rstrip() + "."
             capitalize_next = True
 
+        word["display_text"] = cleaned.strip()
+
     return words
+
+
+def _deduplicate_stutters(words: list[dict]) -> list[dict]:
+    """
+    Remove consecutive duplicate words (stutters like "I i i" → "I").
+    Comparison is case-insensitive on the cleaned display_text (without trailing period).
+    """
+    if not words:
+        return words
+
+    result = [words[0]]
+
+    for word in words[1:]:
+        prev_text = result[-1].get("display_text", "").rstrip(".").lower()
+        curr_text = word.get("display_text", "").rstrip(".").lower()
+
+        if curr_text and curr_text == prev_text:
+            result[-1]["end"] = word.get("end", result[-1].get("end", 0))
+            continue
+
+        result.append(word)
+
+    return result
 
 
 # --- Word grouping ------------------------------------------------------------
@@ -246,7 +273,7 @@ def _render_subtitle_png(
     font_size_px: int,
     output_path: str,
 ) -> None:
-    """Render subtitle text onto a transparent 1080x1920 PNG."""
+    """Render subtitle text onto a transparent 1080x1920 PNG with stroke and shadow."""
     img = Image.new("RGBA", (CANVAS_W, CANVAS_H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -259,6 +286,40 @@ def _render_subtitle_png(
 
     stroke_width = cfg["stroke_width"] if cfg["stroke_enabled"] else 0
     stroke_fill = cfg["stroke_color"] if cfg["stroke_enabled"] else None
+
+    if cfg["shadow_enabled"]:
+        shadow_layer = Image.new("RGBA", (CANVAS_W, CANVAS_H), (0, 0, 0, 0))
+        shadow_draw = ImageDraw.Draw(shadow_layer)
+        sr, sg, sb, sa = cfg["shadow_color"]
+        shadow_offset_x = cfg["shadow_offset_x"]
+        shadow_offset_y = cfg["shadow_offset_y"]
+        shadow_blur = cfg["shadow_blur"]
+
+        for i, line in enumerate(lines):
+            if not line.strip():
+                continue
+            y = start_y + i * line_height_px
+            if cfg["text_align"] == "center":
+                bbox = shadow_draw.textbbox((0, 0), line, font=font, stroke_width=stroke_width)
+                text_width = bbox[2] - bbox[0]
+                x = (CANVAS_W - text_width) // 2
+            else:
+                x = cfg.get("margin_h", 80)
+
+            shadow_draw.text(
+                (x + shadow_offset_x, y + shadow_offset_y),
+                line,
+                font=font,
+                fill=(sr, sg, sb, sa),
+                stroke_width=stroke_width,
+                stroke_fill=(sr, sg, sb, sa),
+            )
+
+        if shadow_blur > 0:
+            shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=shadow_blur))
+
+        img = Image.alpha_composite(img, shadow_layer)
+        draw = ImageDraw.Draw(img)
 
     for i, line in enumerate(lines):
         if not line.strip():
@@ -285,14 +346,61 @@ def _render_subtitle_png(
     img.save(output_path, "PNG")
 
 
-# --- FFmpeg overlay -----------------------------------------------------------
+# --- FFmpeg overlay (multi-pass) ----------------------------------------------
 
-def _run_ffmpeg_overlay(
+def _run_ffmpeg_overlay_multipass(
     video_path: str,
     output_path: str,
     groups: list[dict],
+    work_dir: str,
 ) -> None:
-    """Overlay subtitle PNGs onto video using FFmpeg filtergraph."""
+    """
+    Overlay subtitle PNGs using multi-pass FFmpeg to avoid file descriptor limits.
+    Each pass handles at most MAX_OVERLAYS_PER_PASS overlays.
+    """
+    if not groups:
+        _run_ffmpeg_copy(video_path, output_path)
+        return
+
+    total = len(groups)
+    passes = (total + MAX_OVERLAYS_PER_PASS - 1) // MAX_OVERLAYS_PER_PASS
+    intermediate_paths: list[str] = []
+
+    try:
+        current_input = video_path
+
+        for pass_idx in range(passes):
+            start_i = pass_idx * MAX_OVERLAYS_PER_PASS
+            end_i = min(start_i + MAX_OVERLAYS_PER_PASS, total)
+            batch = groups[start_i:end_i]
+
+            is_last_pass = (pass_idx == passes - 1)
+
+            if is_last_pass:
+                pass_output = output_path
+            else:
+                pass_output = os.path.join(work_dir, f"pass_{uuid.uuid4().hex}.mp4")
+                intermediate_paths.append(pass_output)
+
+            _run_ffmpeg_overlay_single(current_input, pass_output, batch, is_last_pass)
+            current_input = pass_output
+
+    finally:
+        for p in intermediate_paths:
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
+
+
+def _run_ffmpeg_overlay_single(
+    video_path: str,
+    output_path: str,
+    groups: list[dict],
+    final_pass: bool,
+) -> None:
+    """Run a single FFmpeg overlay pass for a batch of subtitle PNGs."""
     codec = getattr(settings, "FFMPEG_VIDEO_CODEC", "libx264")
     preset = getattr(settings, "FFMPEG_ENCODE_PRESET", settings.FFMPEG_PRESET)
     hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
@@ -321,25 +429,28 @@ def _run_ffmpeg_overlay(
         cmd.extend(["-hwaccel", hwaccel])
     cmd.extend(inputs)
     cmd.extend(["-filter_complex", filtergraph])
-    cmd.extend(["-map", f"[vout]", "-map", "0:a?"])
+    cmd.extend(["-map", "[vout]", "-map", "0:a?"])
     cmd.extend(["-c:v", codec])
 
     if codec == "h264_nvenc":
         cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
-        cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+        if final_pass:
+            cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+        else:
+            cmd.extend(["-preset", "fast", "-crf", "16"])
 
     cmd.extend(["-c:a", "aac", "-b:a", "320k", "-movflags", "+faststart"])
     cmd.append(output_path)
 
-    logger.info("[PillowRenderer] FFmpeg cmd: %d inputs, %d overlays", len(groups) + 1, len(groups))
+    logger.info(
+        "[PillowRenderer] FFmpeg pass: %d inputs, %d overlays, final=%s",
+        len(groups) + 1, len(groups), final_pass,
+    )
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
 
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg overlay render failed: {result.stderr[-800:]}")
-
-    if result.stderr and ("error" in result.stderr.lower() or "font" in result.stderr.lower()):
-        logger.warning("[PillowRenderer] FFmpeg stderr: %s", result.stderr[-400:])
 
 
 def _run_ffmpeg_copy(input_path: str, output_path: str) -> None:
