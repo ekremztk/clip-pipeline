@@ -60,11 +60,24 @@ No test suite exists. No linter is configured for `frontend/` or `backend/`.
 
 ## DEPLOYMENT
 - Backend → Railway (Docker, CPU only, 8GB RAM)
+- GPU Pipeline (S08+S09+S10) → Modal (`modal_app.py`, A10G GPU)
 - Prognot Frontend → Vercel (`frontend/`)
 - Editor → Vercel (`opencut/apps/web/`)
 - Database → Supabase (PostgreSQL + pgvector)
 - Storage → Cloudflare R2 (clip exports + editor media)
-- CI/CD → `git push` to main → auto deploy both
+- CI/CD → `git push` to main → auto deploy Railway + Vercel
+
+### Modal GPU deploy
+```bash
+# Deploy (run from monorepo root):
+modal deploy modal_app.py
+
+# Secrets stored in Modal as 'gpu-pipeline-secrets' — do NOT add GEMINI_API_KEY,
+# Vertex AI auth uses GCP_CREDENTIALS_JSON (service account JSON).
+# After ANY change to backend/app/pipeline/steps/s08*, s09*, s10*,
+# backend/app/captions/, or backend/app/reframe/ → must redeploy Modal.
+```
+Modal app: `https://modal.com/apps/hesapiki2000/main/deployed/gpu-pipeline`
 
 ---
 
@@ -199,17 +212,20 @@ Pipeline state passed between steps: `transcript_data`, `speaker_data`, `labeled
 
 ## PIPELINE STRUCTURE (V4 — 10 Steps)
 ```
-S01 Audio Extract (FFmpeg)
-S02 Transcribe (Deepgram)
-S03 Speaker ID (Deepgram diarization + user confirm)
-S04 Labeled Transcript
-S05 Unified Discovery (Gemini 3.1 Pro Preview + Video — finds clip candidates)
-S06 Batch Evaluation (Claude Opus 4.6 — scores, quality gate, strategy, hallucination check)
-S07 Precision Cut (word boundary snap — math only, no FFmpeg)
-S08 Export (FFmpeg re-encode + R2 upload + DB write)
-S09 Reframe (YOLO + Gemini direction → 9:16 MP4)
-S10 Captions (Deepgram word timestamps → burned-in subtitles)
+S01 Audio Extract (FFmpeg)                   — Railway CPU
+S02 Transcribe (Deepgram)                    — Railway CPU
+S03 Speaker ID (Deepgram diarization + user confirm) — Railway CPU
+S04 Labeled Transcript                       — Railway CPU
+S05 Unified Discovery (Gemini 3.1 Pro Preview + Video) — Railway CPU
+S06 Batch Evaluation (Claude Opus 4.6)       — Railway CPU
+S07 Precision Cut (word boundary snap)       — Railway CPU
+── orchestrator dispatches to Modal after S07 ──
+S08 Export (FFmpeg h264_nvenc + R2 upload + DB write) — Modal A10G GPU
+S09 Reframe (YOLO + Gemini direction → 9:16 MP4)      — Modal A10G GPU
+S10 Captions (Deepgram word timestamps → burned-in)   — Modal A10G GPU
 ```
+S08+S09+S10 run as a single Modal function call (`process_clips` in `modal_app.py`).
+CPU fallback: if Modal fails, orchestrator runs S08-S10 locally on Railway.
 
 ---
 
@@ -230,10 +246,11 @@ S10 Captions (Deepgram word timestamps → burned-in subtitles)
 - S06 uses `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
 - Never change models without being asked
 
-### No GPU libraries — ever
-Railway has no GPU. These will crash the build:
+### No GPU libraries in Railway — ever
+Railway has no GPU. These will crash the Railway build:
 - PyTorch, TensorFlow, transformers, WhisperX (local), MediaPipe
 - Any local AI model
+GPU libraries (PyTorch, ultralytics) are only allowed in `modal_app.py` and `gpu-service/`.
 
 ### No Turkish in code
 - Variable names, function names, comments, prompts, string literals → English only
@@ -245,8 +262,19 @@ Railway has no GPU. These will crash the build:
 
 ### FFmpeg encoding
 - S07 (precision cut): `-c copy` (lossless stream copy, fast)
-- S08 (export): `-c:v libx264 -preset slow -crf 18 -c:a aac -b:a 320k`
+- S08 (export, Modal GPU): `h264_nvenc -preset p4 -rc vbr -cq 18 -c:a aac -b:a 320k`
+- S08 (export, Railway CPU fallback): `libx264 -preset slow -crf 18 -c:a aac -b:a 320k`
+- Codec controlled by env vars: `FFMPEG_VIDEO_CODEC`, `FFMPEG_ENCODE_PRESET`, `FFMPEG_HWACCEL`
 - Only ONE re-encode per clip (in S08). S07 does lossless copy.
+
+### Modal deploy rule
+After ANY change to these files → `modal deploy modal_app.py` immediately:
+- `backend/app/pipeline/steps/s08_export.py`
+- `backend/app/pipeline/steps/s09_reframe.py`
+- `backend/app/pipeline/steps/s10_captions.py`
+- `backend/app/captions/` (any file)
+- `backend/app/reframe/` (any file)
+- `modal_app.py` itself
 
 ### pgvector embedding size
 - clips.clip_summary_embedding → `vector(768)` — do NOT change
