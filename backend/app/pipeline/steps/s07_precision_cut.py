@@ -8,18 +8,40 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
     """
     Finds the nearest word boundary to the target_sec.
     For 'start' mode: prefers word starts slightly BEFORE target (captures full first word).
-    For 'end' mode: prefers word ends slightly AFTER target (keeps full last word).
+    For 'end' mode: strongly prefers word ends BEFORE target; sentence-ending words
+      (. ? !) get a score bonus to prevent bleeding into the next sentence.
     Search window: 1.5s — Nova-3 timestamps are precise enough for a tight window.
     """
     if not words:
         return target_sec
+
+    sentence_enders = {".", "?", "!", ".."}
 
     # 1. If target is inside a word, snap to that word's boundary
     for word in words:
         w_start = word.get("start", 0)
         w_end = word.get("end", 0)
         if w_start <= target_sec <= w_end:
-            return w_start if mode == "start" else w_end
+            if mode == "start":
+                return w_start
+            # End mode: if we're inside a non-sentence-ending word, prefer
+            # the end of the last sentence-ending word before this word.
+            text = word.get("word", word.get("punctuated_word", "")).strip()
+            is_sentence_end = text and text[-1] in sentence_enders
+            if not is_sentence_end:
+                # Look back for a sentence-ending word within 2s
+                for prev in reversed(words):
+                    p_end = prev.get("end", 0)
+                    if p_end >= w_start:
+                        continue
+                    if w_start - p_end > 2.0:
+                        break
+                    p_text = prev.get("word", prev.get("punctuated_word", "")).strip()
+                    if p_text and p_text[-1] in sentence_enders:
+                        return p_end
+                # No sentence end nearby — snap to start of this word (cut before it)
+                return w_start
+            return w_end
 
     search_window = 1.5
     best_time = target_sec
@@ -31,7 +53,10 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
             abs_diff = abs(diff)
             if abs_diff > search_window:
                 continue
-            score = abs_diff * (1.5 if diff > 0 else 1.0)
+            # Strongly penalize words that start BEFORE target (3x) to avoid
+            # grabbing the tail end of the previous sentence.
+            penalty = 3.0 if diff < 0 else 1.0
+            score = abs_diff * penalty
             if score < best_score:
                 best_score = score
                 best_time = word["start"]
@@ -41,7 +66,14 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
             abs_diff = abs(diff)
             if abs_diff > search_window:
                 continue
-            score = abs_diff * (1.5 if diff > 0 else 1.0)
+            # Strongly penalize words that end AFTER target (3x) to avoid
+            # bleeding into the next sentence. Sentence-ending words get a
+            # 0.6x bonus to prefer clean cuts at punctuation boundaries.
+            penalty = 3.0 if diff > 0 else 1.0
+            text = word.get("word", word.get("punctuated_word", "")).strip()
+            is_sentence_end = text and text[-1] in sentence_enders
+            bonus = 0.6 if is_sentence_end else 1.0
+            score = abs_diff * penalty * bonus
             if score < best_score:
                 best_score = score
                 best_time = word["end"]

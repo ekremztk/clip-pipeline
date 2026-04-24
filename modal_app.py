@@ -99,8 +99,27 @@ def process_clips(
     import uuid
     import requests
     import traceback
+    import json
+    import tempfile
 
     sys.path.insert(0, "/app")
+
+    # Write GCP credentials to a temp file so all google-auth code paths
+    # (including implicit ADC fallback) find credentials without needing
+    # explicit credential passing.
+    gcp_json = os.environ.get("GCP_CREDENTIALS_JSON", "")
+    if gcp_json and not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        try:
+            _cred_file = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", delete=False
+            )
+            _cred_file.write(gcp_json)
+            _cred_file.flush()
+            _cred_file.close()
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = _cred_file.name
+            print(f"[Modal] GCP ADC credentials written to {_cred_file.name}")
+        except Exception as _e:
+            print(f"[Modal] Warning: could not write GCP credentials file: {_e}")
 
     start = time.time()
     print(f"[Modal] Job {job_id}: {len(clips)} clips, reframe={reframe_content_type}, template={caption_template}")
