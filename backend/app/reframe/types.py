@@ -61,9 +61,9 @@ class Frame:
 @dataclass
 class SubjectInfo:
     """A subject identified by Gemini in the video."""
-    id: str                 # "A", "B", "C" etc.
-    position: str           # "left", "right", "center" — visual position in wide shots
-    description: str        # Brief visual description
+    id: str                         # "S0", "S1", "S2" etc.
+    scene_track_ids: dict           # {scene_idx_str: track_id} e.g. {"0": 1, "2": 0}
+    description: str                # Brief visual description
 
 
 @dataclass

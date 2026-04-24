@@ -159,11 +159,32 @@ def run_reframe(
         else:
             logger.warning("[Reframe] No job_id — visual only mode")
 
-        # 7. Gemini creative direction
+        # 7. Render numbered-person video for Gemini, then get creative direction
+        progress("Preparing AI analysis...", 48)
+        gemini_video_path: Optional[str] = None
+        try:
+            from .debug_overlay import generate_gemini_video
+            gemini_video_path = os.path.join(
+                str(settings.UPLOAD_DIR),
+                f"gemini_numbered_{uuid.uuid4().hex}.mp4",
+            )
+            generate_gemini_video(
+                input_path=input_path,
+                src_w=src_w,
+                src_h=src_h,
+                fps=fps,
+                frames=frames,
+                output_path=gemini_video_path,
+            )
+            logger.info("[Reframe] Gemini numbered video ready: %s", gemini_video_path)
+        except Exception as e:
+            logger.warning("[Reframe] Gemini numbered video failed: %s — using original", e)
+            gemini_video_path = None
+
         progress("AI analyzing video...", 50)
         try:
             director_plan = gemini_analyze(
-                video_path=input_path,
+                video_path=gemini_video_path or input_path,
                 diarization_segments=diarization,
                 shots=shots,
                 frames=frames,
@@ -177,6 +198,12 @@ def run_reframe(
         except Exception as e:
             logger.warning("[Reframe] Gemini failed: %s — using fallback", e)
             director_plan = build_fallback_plan(diarization, shots, duration_s)
+        finally:
+            if gemini_video_path and os.path.exists(gemini_video_path):
+                try:
+                    os.remove(gemini_video_path)
+                except Exception:
+                    pass
 
         result_content_type = director_plan.content_type
 
@@ -313,7 +340,7 @@ def _build_pipeline_decisions(
             "frames_with_0_faces": sum(1 for c in face_counts if c == 0),
         })
 
-    subjects = [{"id": s.id, "position": s.position, "description": s.description}
+    subjects = [{"id": s.id, "scene_track_ids": s.scene_track_ids, "description": s.description}
                 for s in director_plan.subjects]
     directives = [{
         "start_s": round(d.start_s, 2), "end_s": round(d.end_s, 2),

@@ -72,7 +72,7 @@ def analyze_video(
         plan.content_type, len(plan.subjects), len(plan.directives),
     )
     for s in plan.subjects:
-        logger.info("[GeminiDirector]   Subject %s: position=%s, desc='%s'", s.id, s.position, s.description)
+        logger.info("[GeminiDirector]   Subject %s: track_ids=%s, desc='%s'", s.id, s.scene_track_ids, s.description)
     for d in plan.directives:
         logger.info(
             "[GeminiDirector]   %.1f-%.1fs → subject=%s importance=%s reason='%s'",
@@ -91,17 +91,17 @@ def build_fallback_plan(
     logger.warning("[GeminiDirector] Using diarization fallback")
 
     subjects = [
-        SubjectInfo(id="A", position="left", description="speaker 0"),
-        SubjectInfo(id="B", position="right", description="speaker 1"),
+        SubjectInfo(id="S0", scene_track_ids={}, description="speaker 0"),
+        SubjectInfo(id="S1", scene_track_ids={}, description="speaker 1"),
     ]
-    speaker_to_subject = {0: "A", 1: "B"}
+    speaker_to_subject = {0: "S0", 1: "S1"}
 
     if not diarization_segments:
         return DirectorPlan(
             content_type="unknown", layout="unknown",
-            subjects=[SubjectInfo(id="A", position="center", description="unknown")],
+            subjects=[SubjectInfo(id="S0", scene_track_ids={}, description="unknown")],
             directives=[FocusDirective(
-                start_s=0.0, end_s=duration_s, subject_id="A",
+                start_s=0.0, end_s=duration_s, subject_id="S0",
                 importance="medium", reason="no_data_fallback",
             )],
         )
@@ -110,7 +110,7 @@ def build_fallback_plan(
     directives: list[FocusDirective] = []
     for seg in diarization_segments:
         speaker = seg.get("speaker", 0)
-        subj = speaker_to_subject.get(speaker, "A")
+        subj = speaker_to_subject.get(speaker, "S0")
         directives.append(FocusDirective(
             start_s=seg.get("start", 0), end_s=seg.get("end", 0),
             subject_id=subj, importance="high",
@@ -167,9 +167,14 @@ Audio timeline (reference — not rules):
 Duration: {duration_s:.1f}s
 Source: {src_w}x{src_h} → Target: {ar_str}
 
+HOW TO READ THE VIDEO:
+The video you receive has numbered labels burned above each detected face (white number on black background, green box around the face). These numbers are the person's tracking ID for that scene.
+IMPORTANT: Numbers reset at every camera cut (scene change). The same person may have a different number in a different scene. Use the number you see in the video at the relevant time — do not assume continuity across scenes.
+
 YOUR TASK:
-1. Identify all visible subjects (give each an ID: A, B, C...) and their typical position in wide shots
-2. Create a focus plan: who to show and why, moment by moment
+1. Watch the video and identify all visible persons using their burned-in numbers per scene
+2. For each unique person you observe across the full video, assign a subject entry using the format "S0", "S1", "S2"... (your own stable IDs across the full clip)
+3. Create a focus plan referencing your stable subject IDs
 
 DECISION GUIDELINES:
 - Showing a REACTION can be more powerful than showing the speaker
@@ -185,14 +190,14 @@ OUTPUT — Return ONLY valid JSON:
   "content_type": "<podcast|interview|talk_show|presentation|vlog|tutorial|sports|gaming|music|other>",
   "layout": "<side_by_side|single_person|over_shoulder|panel|stage|other>",
   "subjects": [
-    {{"id": "A", "position": "left", "description": "brief visual description"}},
-    {{"id": "B", "position": "right", "description": "brief visual description"}}
+    {{"id": "S0", "scene_track_ids": {{"0": 1, "2": 0}}, "description": "brief visual description"}},
+    {{"id": "S1", "scene_track_ids": {{"0": 0, "2": 1}}, "description": "brief visual description"}}
   ],
   "focus_plan": [
     {{
       "start_s": 0.0,
       "end_s": 4.2,
-      "subject_id": "A",
+      "subject_id": "S0",
       "importance": "high",
       "reason": "brief creative reason"
     }}
@@ -200,10 +205,11 @@ OUTPUT — Return ONLY valid JSON:
 }}
 
 SUBJECT ID RULES (CRITICAL — violating these causes hard visual bugs):
-- The target output is a VERTICAL frame. Every unique human or active entity visible on screen MUST receive its own Subject ID.
-- Multiple entities must NEVER be grouped under a single Subject ID regardless of their spatial proximity or how close together they appear.
-- If two people are both visible in a wide shot, they are two subjects (e.g. "A" and "B") — never one.
-- A subject_id represents exactly one physical person or entity. Do not reuse an ID for a different person.
+- "subjects" lists every unique person you see. Use stable IDs "S0", "S1", "S2"...
+- "scene_track_ids" maps scene index (as string) to the burned-in number you see for that person in that scene. Only include scenes where the person is visible.
+- Every unique human visible on screen MUST receive its own subject entry.
+- A subject_id in focus_plan must match an id in the subjects array.
+- Do not reuse an id for a different person.
 
 STRUCTURAL RULES:
 1. First segment starts at 0.0, last ends at {duration_s:.1f}
@@ -291,9 +297,11 @@ def _parse_response(raw: str, duration_s: float) -> DirectorPlan:
 
     subjects = []
     for s in data.get("subjects", []):
+        raw_track_ids = s.get("scene_track_ids", {})
+        scene_track_ids = {str(k): int(v) for k, v in raw_track_ids.items() if str(v).isdigit() or isinstance(v, int)}
         subjects.append(SubjectInfo(
-            id=str(s.get("id", "A")),
-            position=str(s.get("position", "center")),
+            id=str(s.get("id", "S0")),
+            scene_track_ids=scene_track_ids,
             description=str(s.get("description", "")),
         ))
 

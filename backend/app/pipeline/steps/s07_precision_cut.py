@@ -41,7 +41,7 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
             abs_diff = abs(diff)
             if abs_diff > search_window:
                 continue
-            score = abs_diff * (1.5 if diff < 0 else 1.0)
+            score = abs_diff * (1.5 if diff > 0 else 1.0)
             if score < best_score:
                 best_score = score
                 best_time = word["end"]

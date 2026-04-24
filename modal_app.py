@@ -75,6 +75,7 @@ app = modal.App("gpu-pipeline", image=gpu_image)
     memory=16384,
     cpu=4,
     timeout=900,
+    scaledown_window=10,
     secrets=[modal.Secret.from_name("gpu-pipeline-secrets")],
 )
 def process_clips(

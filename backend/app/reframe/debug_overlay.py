@@ -259,3 +259,88 @@ def generate_debug_video(
     except Exception as e:
         logger.warning("[DebugOverlay] H.264 re-encode failed: %s — returning mp4v file", e)
         return output_path
+
+
+def generate_gemini_video(
+    input_path: str,
+    src_w: int,
+    src_h: int,
+    fps: float,
+    frames: list[Frame],
+    output_path: str,
+) -> str:
+    """
+    Render a numbered-person video for Gemini consumption.
+
+    For each detected face: green bbox (same as debug) + large track_id number
+    above the bbox. Numbers are per-shot (reset at shot boundaries).
+
+    Returns output_path on success, raises on failure.
+    """
+    cap = cv2.VideoCapture(input_path)
+    if not cap.isOpened():
+        raise RuntimeError(f"[GeminiVideo] Cannot open video: {input_path}")
+
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(output_path, fourcc, fps, (src_w, src_h))
+
+    face_by_time = {f.time_s: f for f in frames}
+
+    frame_count = 0
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        t = frame_count / fps
+
+        # Find nearest analyzed frame (within 0.15s)
+        nearest_frame = None
+        best_dist = 0.15
+        for ft, ff in face_by_time.items():
+            dist = abs(ft - t)
+            if dist < best_dist:
+                best_dist = dist
+                nearest_frame = ff
+
+        if nearest_frame:
+            for face in nearest_frame.faces:
+                if face.track_id < 0:
+                    continue
+
+                bx1 = int((face.face_x - face.face_width / 2) * src_w)
+                by1 = int((face.face_y - face.face_height / 2) * src_h)
+                bx2 = int((face.face_x + face.face_width / 2) * src_w)
+
+                # Green bbox — same as existing debug overlay
+                by2 = int((face.face_y + face.face_height / 2) * src_h)
+                cv2.rectangle(frame, (bx1, by1), (bx2, by2), (0, 255, 0), 2)
+
+                # Large number above the bbox
+                label = str(face.track_id)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = 2.5
+                thickness = 7
+                (tw, th), baseline = cv2.getTextSize(label, font, font_scale, thickness)
+                pad = 6
+                # Center horizontally over bbox, place above bbox top
+                tx = bx1 + (bx2 - bx1) // 2 - tw // 2
+                ty_bottom = max(by1 - pad, th + pad)  # text baseline y
+                # Small dark background behind number only
+                cv2.rectangle(
+                    frame,
+                    (tx - pad, ty_bottom - th - pad),
+                    (tx + tw + pad, ty_bottom + baseline + pad),
+                    (0, 0, 0),
+                    -1,
+                )
+                cv2.putText(frame, label, (tx, ty_bottom), font, font_scale, (255, 255, 255), thickness)
+
+        out.write(frame)
+        frame_count += 1
+
+    cap.release()
+    out.release()
+
+    logger.info("[GeminiVideo] Written: %s (%d frames)", output_path, frame_count)
+    return output_path
