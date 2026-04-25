@@ -78,12 +78,16 @@ def emit_keyframes(
             # subject_id check works regardless of how many people are on screen — no pixel
             # threshold needed, so it's reliable for 2-person podcasts and 5-person panels alike.
             curr_subject_id = pt.subject_id if hasattr(pt, "subject_id") else ""
+            ox_jump = abs(ox - last_ox) if last_ox != -999.0 else 0.0
             is_subject_switch = (
                 not is_first_point
                 and last_ox != -999.0
-                and curr_subject_id != ""
-                and last_subject_id != ""
-                and curr_subject_id != last_subject_id
+                and (
+                    # Subject ID changed (Gemini switched person)
+                    (curr_subject_id != "" and last_subject_id != "" and curr_subject_id != last_subject_id)
+                    # OR same subject but huge pixel jump (tracking loss recovered)
+                    or ox_jump > kf_config.subject_switch_threshold * src_w
+                )
             )
 
             if is_shot_boundary:

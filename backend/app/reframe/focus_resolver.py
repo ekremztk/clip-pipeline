@@ -111,16 +111,29 @@ def resolve_focus(
                 subject_track_map.get(active_subject_id, {}),
                 shot_idx,
             )
-            last_known_x[shot_idx] = face.face_x
-            last_known_y[shot_idx] = face.face_y
-            focus_points.append(FocusPoint(
-                time_s=frame.time_s,
-                x=face.face_x,
-                y=face.face_y,
-                weight=weight,
-                shot_index=shot_idx,
-                subject_id=active_subject_id,
-            ))
+            if face is None:
+                # Track ID lost for this frame — hold last known position
+                # instead of jumping to wrong person
+                if shot_idx in last_known_x:
+                    x = last_known_x[shot_idx]
+                    y = last_known_y[shot_idx]
+                else:
+                    x, y = 0.5, 0.35
+                focus_points.append(FocusPoint(
+                    time_s=frame.time_s, x=x, y=y,
+                    weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
+                ))
+            else:
+                last_known_x[shot_idx] = face.face_x
+                last_known_y[shot_idx] = face.face_y
+                focus_points.append(FocusPoint(
+                    time_s=frame.time_s,
+                    x=face.face_x,
+                    y=face.face_y,
+                    weight=weight,
+                    shot_index=shot_idx,
+                    subject_id=active_subject_id,
+                ))
 
     logger.info(
         "[FocusResolver] %d focus points from %d frames (%d directives)",
@@ -156,10 +169,10 @@ def _pick_face_by_track_id(
     faces: list[FaceDetection],
     shot_track_map: dict[int, int],
     shot_idx: int,
-) -> FaceDetection:
+) -> Optional[FaceDetection]:
     """
     Find the face matching the track_id Gemini assigned to this subject
-    in this shot. Falls back to the largest face if not found.
+    in this shot. Returns None if not found — caller holds last known position.
     """
     target_track_id = shot_track_map.get(shot_idx)
 
@@ -168,11 +181,11 @@ def _pick_face_by_track_id(
         if matches:
             return matches[0]
         logger.debug(
-            "[FocusResolver] track_id=%d not found in shot %d (have: %s), "
-            "falling back to largest face",
+            "[FocusResolver] track_id=%d not found in shot %d (have: %s), holding last position",
             target_track_id, shot_idx,
             [f.track_id for f in faces],
         )
+        return None
 
-    # Fallback: largest face by area
+    # No track_id mapping for this shot — largest face
     return max(faces, key=lambda f: f.face_width * f.face_height)

@@ -103,16 +103,18 @@ class YoloDetector(BaseDetector):
     def engine_name(self) -> str:
         return "yolo-face"
 
-    def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
+    def detect_with_tracking(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
+        """ByteTrack-powered detection — IDs survive low-confidence frames."""
         try:
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # Face model: class 0 = face bbox directly. No class filtering needed.
-            results = self._model(
+            results = self._model.track(
                 rgb,
                 imgsz=config.yolo_imgsz,
                 conf=config.min_detection_confidence,
                 iou=0.45,
+                tracker="bytetrack.yaml",
+                persist=True,
                 verbose=False,
             )
 
@@ -125,7 +127,6 @@ class YoloDetector(BaseDetector):
             for i in range(len(boxes)):
                 conf = float(boxes.conf[i])
 
-                # xyxyn: normalized [x1, y1, x2, y2] — face bounding box directly
                 x1, y1, x2, y2 = [float(v) for v in boxes.xyxyn[i]]
                 x1 = max(0.0, min(1.0, x1))
                 y1 = max(0.0, min(1.0, y1))
@@ -141,7 +142,11 @@ class YoloDetector(BaseDetector):
                 face_cx = (x1 + x2) / 2
                 face_cy = (y1 + y2) / 2
 
-                # Estimate body position from face (used by focus_resolver)
+                # ByteTrack assigns stable IDs — use directly
+                track_id = -1
+                if boxes.id is not None:
+                    track_id = int(boxes.id[i])
+
                 person_h = min(1.0, face_h * config.person_height_multiplier)
                 person_x = face_cx
                 person_y = min(1.0, face_cy + person_h * 0.2)
@@ -155,6 +160,7 @@ class YoloDetector(BaseDetector):
                     person_x=round(person_x, 5),
                     person_y=round(person_y, 5),
                     person_height=round(person_h, 5),
+                    track_id=track_id,
                 ))
 
             detections.sort(key=lambda d: d.face_width * d.face_height, reverse=True)
@@ -165,6 +171,9 @@ class YoloDetector(BaseDetector):
         except Exception as e:
             logger.error("[FaceTracker/YOLO-face] Detection error: %s", e)
             return []
+
+    def detect(self, frame: np.ndarray, config: FaceTrackerConfig) -> list[FaceDetection]:
+        return self.detect_with_tracking(frame, config)
 
 
 # ─── Factory ──────────────────────────────────────────────────────────────────
@@ -205,13 +214,19 @@ def analyze_video(
         return []
 
     frames: list[Frame] = []
-    prev_faces: list[FaceDetection] = []
     total_ms = 0.0
     frame_count = 0
 
     try:
         for shot_idx, shot in enumerate(shots):
             sample_times = _get_sample_times(shot, config.sample_fps)
+
+            # Reset ByteTrack state at shot boundaries so IDs don't bleed across cuts
+            if hasattr(detector, '_model'):
+                try:
+                    detector._model.predictor = None
+                except Exception:
+                    pass
 
             for t in sample_times:
                 raw_frame = _read_frame(cap, t)
@@ -229,12 +244,7 @@ def analyze_video(
                     detector.engine_name, t, shot_idx, len(faces), elapsed_ms,
                 )
 
-                faces = _assign_track_ids(faces, prev_faces)
                 frames.append(Frame(time_s=t, shot_index=shot_idx, faces=faces))
-                prev_faces = faces
-
-            # Reset tracking at shot boundaries
-            prev_faces = []
 
     finally:
         cap.release()
@@ -322,49 +332,3 @@ def _read_frame(cap: cv2.VideoCapture, time_s: float) -> Optional[np.ndarray]:
     return frame if ret else None
 
 
-# ─── Tracking ID assignment ───────────────────────────────────────────────────
-
-def _assign_track_ids(
-    current: list[FaceDetection],
-    previous: list[FaceDetection],
-) -> list[FaceDetection]:
-    """
-    Assign stable tracking IDs by spatial proximity to previous frame.
-    Resets at shot boundaries (caller passes empty previous list).
-    """
-    if not previous:
-        for i, face in enumerate(current):
-            face.track_id = i
-        return current
-
-    if not current:
-        return current
-
-    used_prev: set[int] = set()
-    used_curr: set[int] = set()
-    pairs: list[tuple[float, int, int]] = []
-
-    for ci, c in enumerate(current):
-        for pi, p in enumerate(previous):
-            dist = ((c.face_x - p.face_x) ** 2 + (c.face_y - p.face_y) ** 2) ** 0.5
-            pairs.append((dist, ci, pi))
-
-    pairs.sort(key=lambda p: p[0])
-    max_match_dist = 0.15
-
-    for dist, ci, pi in pairs:
-        if ci in used_curr or pi in used_prev:
-            continue
-        if dist > max_match_dist:
-            break
-        current[ci].track_id = previous[pi].track_id
-        used_curr.add(ci)
-        used_prev.add(pi)
-
-    next_id = max((p.track_id for p in previous), default=-1) + 1
-    for ci, face in enumerate(current):
-        if ci not in used_curr:
-            face.track_id = next_id
-            next_id += 1
-
-    return current
