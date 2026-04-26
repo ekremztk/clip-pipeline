@@ -22,7 +22,7 @@ class ShotDetectionConfig:
 class FaceTrackerConfig:
     """YOLO face detection + tracking parameters."""
     sample_fps: float = 5.0                     # How many frames per second to sample
-    min_detection_confidence: float = 0.40      # Detection confidence threshold
+    min_detection_confidence: float = 0.50      # Detection confidence threshold
     max_faces: int = 4                          # Max faces to track per frame
     person_height_multiplier: float = 3.5       # Estimate person height from face height
     yolo_imgsz: int = 1280                      # YOLO inference resolution

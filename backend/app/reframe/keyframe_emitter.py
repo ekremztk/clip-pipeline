@@ -79,14 +79,18 @@ def emit_keyframes(
             # threshold needed, so it's reliable for 2-person podcasts and 5-person panels alike.
             curr_subject_id = pt.subject_id if hasattr(pt, "subject_id") else ""
             ox_jump = abs(ox - last_ox) if last_ox != -999.0 else 0.0
+            same_subject = (curr_subject_id != "" and last_subject_id != "" and curr_subject_id == last_subject_id)
+            # When same subject: use 0.35 threshold (zoom/natural movement won't exceed this).
+            # When subject changed or IDs unknown: use 0.22 threshold (catch speaker switch).
+            ox_jump_threshold = (0.35 if same_subject else kf_config.subject_switch_threshold) * src_w
             is_subject_switch = (
                 not is_first_point
                 and last_ox != -999.0
                 and (
                     # Subject ID changed (Gemini switched person)
                     (curr_subject_id != "" and last_subject_id != "" and curr_subject_id != last_subject_id)
-                    # OR same subject but huge pixel jump (tracking loss recovered)
-                    or ox_jump > kf_config.subject_switch_threshold * src_w
+                    # OR large pixel jump (tracking loss recovered or unknown subject)
+                    or ox_jump > ox_jump_threshold
                 )
             )
 

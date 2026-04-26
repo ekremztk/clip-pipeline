@@ -58,6 +58,17 @@ def resolve_focus(
     last_known_x: dict[int, float] = {}
     last_known_y: dict[int, float] = {}
 
+    # Pre-compute per-shot face position medians as fallback for first-frame misses
+    shot_median_x: dict[int, float] = {}
+    shot_median_y: dict[int, float] = {}
+    import statistics as _stats
+    for shot_idx_pre in set(f.shot_index for f in frames):
+        xs = [face.face_x for f in frames if f.shot_index == shot_idx_pre for face in f.faces]
+        ys = [face.face_y for f in frames if f.shot_index == shot_idx_pre for face in f.faces]
+        if xs:
+            shot_median_x[shot_idx_pre] = _stats.median(xs)
+            shot_median_y[shot_idx_pre] = _stats.median(ys)
+
     for frame in frames:
         shot = _get_shot_at(frame.time_s, shots)
         if shot is None:
@@ -84,7 +95,8 @@ def resolve_focus(
                 x = last_known_x[shot_idx]
                 y = last_known_y[shot_idx]
             else:
-                x, y = 0.5, 0.35
+                x = shot_median_x.get(shot_idx, 0.5)
+                y = shot_median_y.get(shot_idx, 0.35)
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=x, y=y,
                 weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
@@ -118,7 +130,8 @@ def resolve_focus(
                     x = last_known_x[shot_idx]
                     y = last_known_y[shot_idx]
                 else:
-                    x, y = 0.5, 0.35
+                    x = shot_median_x.get(shot_idx, 0.5)
+                    y = shot_median_y.get(shot_idx, 0.35)
                 focus_points.append(FocusPoint(
                     time_s=frame.time_s, x=x, y=y,
                     weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,

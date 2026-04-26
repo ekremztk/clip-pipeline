@@ -176,6 +176,11 @@ YOUR TASK:
 2. For each unique person you observe across the full video, assign a subject entry using the format "S0", "S1", "S2"... (your own stable IDs across the full clip)
 3. Create a focus plan referencing your stable subject IDs
 
+SCENE INDEX RULE (CRITICAL):
+scene_track_ids uses 0-based scene index — the first scene is "0", second is "1", etc.
+Example: if Scene 0 shows person with label 1, write {{"0": 1}}.
+Do NOT use 1-based numbering even though scene descriptions say "Scene 0", "Scene 1".
+
 DECISION GUIDELINES:
 - Showing a REACTION can be more powerful than showing the speaker
 - During cross-talk: pick whoever has stronger visual presence — do NOT bounce between them
@@ -227,12 +232,12 @@ def _format_scene_structure(shots: list[Shot]) -> str:
         return "Single continuous shot"
     if len(shots) == 1:
         s = shots[0]
-        return f"[{s.start_s:.1f}s-{s.end_s:.1f}s] {s.shot_type}"
+        return f"Scene 0: [{s.start_s:.1f}s-{s.end_s:.1f}s] {s.shot_type}"
 
     lines = []
     descs = {"wide": "WIDE (2+ people)", "closeup": "CLOSE-UP (1 person)", "b_roll": "B-ROLL"}
     for i, s in enumerate(shots):
-        line = f"Scene {i+1}: [{s.start_s:.1f}s-{s.end_s:.1f}s] {descs.get(s.shot_type, s.shot_type)}"
+        line = f"Scene {i}: [{s.start_s:.1f}s-{s.end_s:.1f}s] {descs.get(s.shot_type, s.shot_type)}"
         if i > 0:
             line += " <- CAMERA CUT"
         lines.append(line)
@@ -245,7 +250,7 @@ def _format_face_summary(shots: list[Shot], frames: list[Frame]) -> str:
     for shot_idx, shot in enumerate(shots):
         shot_frames = [f for f in frames if f.shot_index == shot_idx]
         if not shot_frames:
-            lines.append(f"Scene {shot_idx+1}: no face data")
+            lines.append(f"Scene {shot_idx}: no face data")
             continue
 
         face_counts = [len(f.faces) for f in shot_frames]
@@ -261,9 +266,9 @@ def _format_face_summary(shots: list[Shot], frames: list[Frame]) -> str:
             positions = ", ".join(f"x={x:.2f}" for x in sorted(set(
                 round(x, 1) for x in all_faces_x
             )))
-            lines.append(f"Scene {shot_idx+1}: ~{avg_faces:.0f} faces, positions: {positions}")
+            lines.append(f"Scene {shot_idx}: ~{avg_faces:.0f} faces, positions: {positions}")
         else:
-            lines.append(f"Scene {shot_idx+1}: no faces detected")
+            lines.append(f"Scene {shot_idx}: no faces detected")
 
     return "\n".join(lines)
 
