@@ -261,6 +261,7 @@ def _parse_claude_json(raw_text: str) -> list:
 
     cleaned = raw_text.strip()
 
+    # Strip markdown wrappers
     if cleaned.startswith("```json"):
         cleaned = cleaned[7:]
     if cleaned.startswith("```"):
@@ -270,6 +271,12 @@ def _parse_claude_json(raw_text: str) -> list:
 
     cleaned = cleaned.strip()
     cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned)
+
+    # Extract just the JSON array — Claude sometimes appends explanation after the closing ]
+    start = cleaned.find("[")
+    end = cleaned.rfind("]")
+    if start != -1 and end != -1 and end > start:
+        cleaned = cleaned[start:end + 1]
 
     try:
         result = json.loads(cleaned)
