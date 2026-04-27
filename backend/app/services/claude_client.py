@@ -74,6 +74,8 @@ def call_claude(
                 print(f"[ClaudeClient] Cache — read: {cache_read} tokens, write: {cache_write} tokens")
 
             # Extract text block — thinking blocks come first, skip them
+            block_types = [block.type for block in response.content]
+            print(f"[ClaudeClient] Response blocks: {block_types}")
             for block in response.content:
                 if block.type == "text":
                     return block.text
