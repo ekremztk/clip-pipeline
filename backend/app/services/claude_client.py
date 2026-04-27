@@ -57,13 +57,14 @@ def call_claude(
     delays = [30, 60]
     for attempt in range(3):
         try:
-            response = client.messages.create(
+            response = client.beta.messages.create(
                 model=settings.CLAUDE_MODEL,
                 max_tokens=max_tokens,
                 system=system_blocks,
                 thinking={"type": "adaptive"},
                 output_config={"effort": effort},
                 messages=messages,
+                betas=["effort-2025-11-24"],
                 timeout=600.0,
             )
 
