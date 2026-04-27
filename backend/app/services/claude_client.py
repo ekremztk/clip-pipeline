@@ -2,33 +2,37 @@ import time
 import anthropic
 from app.config import settings
 
-_client: anthropic.Anthropic | None = None
+_client: anthropic.AnthropicBedrock | None = None
 
 
-def get_claude_client() -> anthropic.Anthropic:
+def get_claude_client() -> anthropic.AnthropicBedrock:
     global _client
     if _client is None:
-        if not settings.ANTHROPIC_API_KEY:
-            raise ValueError("ANTHROPIC_API_KEY is not set in environment.")
-        _client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-        print(f"[ClaudeClient] Initialized. Model: {settings.CLAUDE_MODEL}")
+        _client = anthropic.AnthropicBedrock(
+            aws_access_key=settings.AWS_BEDROCK_ACCESS_KEY,
+            aws_secret_key=settings.AWS_BEDROCK_SECRET_KEY,
+            aws_region=settings.AWS_BEDROCK_REGION,
+        )
+        print(f"[ClaudeClient] Initialized (Bedrock). Model: {settings.CLAUDE_MODEL}")
     return _client
 
 
 def call_claude(
     content: list,
     system: str | None = None,
-    max_tokens: int = 4000,
+    max_tokens: int = 16000,
     extra_system_blocks: list | None = None,
+    effort: str = "high",
 ) -> str:
     """
-    Calls Claude with a pre-built content array (text + images interleaved).
-    content: list of Anthropic content blocks (text / image dicts)
-    extra_system_blocks: additional cached system blocks (e.g. full transcript) appended after main system.
-    Retries on rate limits: 30s, 60s, then raise RuntimeError.
+    Calls Claude on AWS Bedrock with adaptive thinking.
 
-    The system prompt is sent as a cacheable content block (cache_control ephemeral).
-    Subsequent batches within the 5-minute TTL window pay ~10% of normal input token cost.
+    content: list of Anthropic content blocks (text / image dicts)
+    system: system prompt text
+    extra_system_blocks: additional cached system blocks appended after main system
+    effort: "max" (S05 — unlimited thinking), "high" (S06 — default deep reasoning)
+
+    Retries on rate limits: 30s, 60s, then raise RuntimeError.
     """
     client = get_claude_client()
 
@@ -37,9 +41,7 @@ def call_claude(
         or "You are a ruthless viral clip quality analyst. "
            "Return only valid JSON. Never wrap output in markdown code blocks."
     )
-    # Prompt caching: pass system as a list with cache_control so Anthropic caches it.
-    # Cache writes cost the same as regular tokens; cache reads cost ~10%.
-    # This means batches 2+ in the same job benefit automatically within the 5-min TTL.
+
     system_blocks = [
         {
             "type": "text",
@@ -47,7 +49,6 @@ def call_claude(
             "cache_control": {"type": "ephemeral"},
         }
     ]
-    # Append extra cacheable system blocks (e.g., full labeled transcript)
     if extra_system_blocks:
         system_blocks.extend(extra_system_blocks)
 
@@ -60,15 +61,26 @@ def call_claude(
                 model=settings.CLAUDE_MODEL,
                 max_tokens=max_tokens,
                 system=system_blocks,
+                thinking={"type": "adaptive"},
+                output_config={"effort": effort},
                 messages=messages,
-                timeout=300.0,
+                timeout=600.0,
             )
+
             usage = response.usage
             cache_read  = getattr(usage, "cache_read_input_tokens",  0) or 0
             cache_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
             if cache_read or cache_write:
                 print(f"[ClaudeClient] Cache — read: {cache_read} tokens, write: {cache_write} tokens")
-            return response.content[0].text
+
+            # Extract text block — thinking blocks come first, skip them
+            for block in response.content:
+                if block.type == "text":
+                    return block.text
+
+            print("[ClaudeClient] Warning: no text block in response")
+            return ""
+
         except anthropic.RateLimitError as e:
             if attempt < 2:
                 delay = delays[attempt]

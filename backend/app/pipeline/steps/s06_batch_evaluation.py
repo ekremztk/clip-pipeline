@@ -261,7 +261,7 @@ def _evaluate_batch_with_claude(
     print(f"[S06] Claude batch: {len(batch_items)} candidates (text-only)")
 
     content = _build_claude_content(batch_items, channel_context, min_duration, max_duration)
-    raw = call_claude(content, system=SYSTEM_PROMPT, extra_system_blocks=full_transcript_block)
+    raw = call_claude(content, system=SYSTEM_PROMPT, extra_system_blocks=full_transcript_block, effort="high")
     return _parse_claude_json(raw)
 
 

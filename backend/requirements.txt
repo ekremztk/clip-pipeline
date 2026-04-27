@@ -20,7 +20,7 @@ google-cloud-storage
 # --- AI & Models ---
 google-genai
 deepgram-sdk==3.2.7
-anthropic
+anthropic[bedrock]
 
 # --- Video & Audio Processing ---
 librosa
