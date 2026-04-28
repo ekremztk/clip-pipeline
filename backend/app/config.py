@@ -53,6 +53,10 @@ class Settings:
     FFMPEG_VIDEO_CODEC: str = os.getenv("FFMPEG_VIDEO_CODEC", "libx264")
     FFMPEG_ENCODE_PRESET: str = os.getenv("FFMPEG_ENCODE_PRESET", "slow")
     FFMPEG_HWACCEL: str = os.getenv("FFMPEG_HWACCEL", "")
+    # Quality target for the merged reframe+captions single-pass encode (S10).
+    # Lower than FFMPEG_CRF because this is the ONLY final encode in the
+    # merged path — no generation loss stacking afterwards.
+    FFMPEG_CRF_PILLOW: int = int(os.getenv("FFMPEG_CRF_PILLOW", "15"))
 
     # Director Module
     RAILWAY_API_TOKEN: str = os.getenv("RAILWAY_API_TOKEN", "")

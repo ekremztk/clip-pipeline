@@ -42,33 +42,58 @@ def run(
 
     def _process_clip(index: int, clip: dict) -> tuple[int, dict]:
         clip_id = clip.get("id")
-        reframed_url = clip.get("video_reframed_path")
 
-        if not reframed_url:
-            print(f"[S10] Clip {index+1}: No video_reframed_path. Skipping captions.")
+        # Merged mode: S09 produced a filter chain instead of a rendered file.
+        # Input is the landscape cut from S08; vf prepends crop+scale before captions.
+        reframe_filter_chain = clip.get("reframe_filter_chain")
+        local_source_path = clip.get("local_source_path")
+
+        if reframe_filter_chain and local_source_path:
+            clip_url = clip.get("video_landscape_path") or clip.get("file_url")
+            local_hint = local_source_path
+            prepend_vf = reframe_filter_chain
+            merged_mode = True
+        else:
+            # Legacy / gaming path: S09 rendered a 9:16 file.
+            clip_url = clip.get("video_reframed_path")
+            local_hint = clip.get("local_reframed_path")
+            prepend_vf = None
+            merged_mode = False
+
+        if not clip_url and not local_hint:
+            print(f"[S10] Clip {index+1}: No reframed/landscape source. Skipping captions.")
             return index, clip
-
-        local_hint = clip.get("local_reframed_path")
 
         try:
             captioned_url, caption_meta = _caption_clip(
-                clip_url=reframed_url,
+                clip_url=clip_url,
                 clip_index=index,
                 template_key=caption_template,
                 local_path_hint=local_hint,
+                prepend_vf=prepend_vf,
             )
+
+            db_update = {
+                "video_captioned_path": captioned_url,
+                "caption_metadata": caption_meta,
+            }
+            if merged_mode:
+                # Reframe+captions collapsed into one pass — the captioned MP4 is
+                # also the definitive 9:16 output, so align video_reframed_path
+                # with the captioned URL.
+                db_update["video_reframed_path"] = captioned_url
 
             if clip_id and captioned_url:
                 try:
-                    supabase.table("clips").update({
-                        "video_captioned_path": captioned_url,
-                        "caption_metadata": caption_meta,
-                    }).eq("id", str(clip_id)).execute()
+                    supabase.table("clips").update(db_update).eq("id", str(clip_id)).execute()
                     print(f"[S10] Clip {index+1} (id: {clip_id}) captioned: {captioned_url}")
                 except Exception as db_err:
                     print(f"[S10] DB update error for clip {index+1}: {db_err}")
 
-            return index, {**clip, "video_captioned_path": captioned_url, "caption_metadata": caption_meta}
+            out = {**clip, "video_captioned_path": captioned_url, "caption_metadata": caption_meta}
+            if merged_mode:
+                out["video_reframed_path"] = captioned_url
+            return index, out
 
         except Exception as e:
             print(f"[S10] Caption error for clip {index+1}: {e}")
@@ -93,23 +118,24 @@ def run(
 
 
 def _caption_clip(
-    clip_url: str,
+    clip_url: str | None,
     clip_index: int,
     template_key: str,
     local_path_hint: str | None = None,
+    prepend_vf: str | None = None,
 ) -> tuple[str, dict]:
     """
     Transcribe a clip and burn captions:
-    1. Use local path from S09 if available, otherwise download from R2
+    1. Use local path if provided (from S08 landscape or S09 reframed), else download
     2. Deepgram transcription → words + segments
-    3. render_captions() → captioned MP4
+    3. render_captions() → captioned MP4 (with optional prepend_vf for merged reframe+caption pass)
     4. Upload to R2
 
     Returns (captioned_r2_url, caption_metadata)
     """
     import requests
 
-    print(f"[S10] Captioning clip {clip_index+1}: {clip_url}")
+    print(f"[S10] Captioning clip {clip_index+1}: {clip_url or local_path_hint}")
 
     downloaded = False
     upload_dir = str(settings.UPLOAD_DIR)
@@ -118,8 +144,10 @@ def _caption_clip(
 
     if local_path_hint and os.path.exists(local_path_hint):
         local_path = local_path_hint
-        print(f"[S10] Clip {clip_index+1}: using local path from S09 (skipping download)")
+        print(f"[S10] Clip {clip_index+1}: using local source (skipping download)")
     else:
+        if not clip_url:
+            raise RuntimeError(f"[S10] Clip {clip_index+1}: no local path and no URL")
         local_path = os.path.join(upload_dir, f"s10_dl_{uuid.uuid4().hex}.mp4")
         downloaded = True
         resp = requests.get(clip_url, stream=True, timeout=120)
@@ -130,7 +158,6 @@ def _caption_clip(
                     f.write(chunk)
 
     try:
-        # Transcribe
         transcription = transcribe_video(local_path, language=None)
         words = transcription["words"]
         segments = transcription["segments"]
@@ -139,16 +166,15 @@ def _caption_clip(
 
         print(f"[S10] Clip {clip_index+1}: {len(words)} words, {len(segments)} segments, lang={detected_language}")
 
-        # Burn captions
         render_captions(
             video_path=local_path,
             output_path=output_path,
             words=words,
             segments=segments,
             template_key=template_key,
+            prepend_vf=prepend_vf,
         )
 
-        # Upload to R2
         r2_url = _upload_to_r2(output_path, f"captions/{uuid.uuid4().hex}.mp4")
 
         caption_meta = {
@@ -157,18 +183,25 @@ def _caption_clip(
             "segment_count": len(segments),
             "language": detected_language,
             "text": transcript_text[:500] if transcript_text else "",
-            "words": words,   # full word list stored for "Open in Editor" replay
+            "words": words,
+            "merged_reframe": bool(prepend_vf),
         }
 
         return r2_url, caption_meta
 
     finally:
-        for path in [local_path, output_path]:
-            if path and os.path.exists(path):
-                try:
-                    os.remove(path)
-                except Exception:
-                    pass
+        # Only remove files this function created. Local source paths owned by
+        # S08 (landscape) or S09 (reframed) are cleaned up later by modal_app.
+        if downloaded and os.path.exists(local_path):
+            try:
+                os.remove(local_path)
+            except Exception:
+                pass
+        if output_path and os.path.exists(output_path):
+            try:
+                os.remove(output_path)
+            except Exception:
+                pass
 
 
 def _upload_to_r2(local_path: str, r2_key: str) -> str:

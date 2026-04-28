@@ -49,6 +49,54 @@ def _clamp_crop_expr(expr: str, low: int, high: int) -> str:
 
 # ─── Podcast / Single / Generic Reframe ──────────────────────────────────────
 
+def build_podcast_reframe_vf(
+    video_path: str,
+    keyframes: list[ReframeKeyframe],
+    scene_cuts: list[float],
+    src_w: int,
+    src_h: int,
+    crop_w: int,
+    crop_h: int,
+    fps: float,
+    duration_s: float,
+    canvas_w: int = 1080,
+    canvas_h: int = 1920,
+) -> str:
+    """
+    Build ONLY the FFmpeg video filter string for a podcast 9:16 reframe.
+
+    Returns a filtergraph fragment (`crop=...,scale=...:flags=lanczos`) that can
+    be prepended to another filter chain (e.g. caption overlays in S10) so the
+    reframe and captions collapse into a single FFmpeg encode pass.
+
+    No FFmpeg process is spawned. See render_podcast_reframe for the standalone
+    render path (still used by the debug endpoint).
+    """
+    if not keyframes:
+        raise ValueError("No keyframes provided for podcast reframe vf build")
+
+    segments = _build_segments(keyframes, scene_cuts, duration_s, fps)
+
+    seg_x: list[tuple[float, float, str]] = []
+    seg_y: list[tuple[float, float, str]] = []
+    for seg in segments:
+        ex = _build_crop_expression(seg["keyframes"], "offset_x", 0.0, fps)
+        ey = _build_crop_expression(seg["keyframes"], "offset_y", 0.0, fps)
+        ex = _clamp_crop_expr(ex, 0, src_w - crop_w)
+        ey = _clamp_crop_expr(ey, 0, src_h - crop_h)
+        seg_x.append((seg["start"], seg["end"], ex))
+        seg_y.append((seg["start"], seg["end"], ey))
+
+    start_pts_s = _get_start_pts(video_path)
+    crop_x_expr = _chain_segments(seg_x, fps, start_pts_s)
+    crop_y_expr = _chain_segments(seg_y, fps, start_pts_s)
+
+    return (
+        f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
+        f"scale={canvas_w}:{canvas_h}:flags=lanczos"
+    )
+
+
 def render_podcast_reframe(
     video_path: str,
     keyframes: list[ReframeKeyframe],
@@ -84,42 +132,25 @@ def render_podcast_reframe(
 
     Returns: output_path
     """
-    if not keyframes:
-        raise ValueError("No keyframes provided for podcast reframe render")
-
     has_audio = _has_audio_stream(video_path)
     logger.info("[Render] Audio stream: %s", "yes" if has_audio else "no (video-only)")
 
-    # Build per-segment keyframe assignments (same logic as editor's applyReframeWithSplits)
-    segments = _build_segments(keyframes, scene_cuts, duration_s, fps)
-    logger.info("[Render] Single-pass render: %d segments, crop=%dx%d → %dx%d",
-                len(segments), crop_w, crop_h, canvas_w, canvas_h)
-
-    # Build a per-segment crop expression with segment_start=0.0 so that
-    # keyframe times in the expression are ABSOLUTE video PTS values.
-    # FFmpeg's crop filter 't' variable IS the actual video PTS — no setpts needed.
-    seg_x: list[tuple[float, float, str]] = []
-    seg_y: list[tuple[float, float, str]] = []
-    for seg in segments:
-        ex = _build_crop_expression(seg["keyframes"], "offset_x", 0.0, fps)
-        ey = _build_crop_expression(seg["keyframes"], "offset_y", 0.0, fps)
-        ex = _clamp_crop_expr(ex, 0, src_w - crop_w)
-        ey = _clamp_crop_expr(ey, 0, src_h - crop_h)
-        seg_x.append((seg["start"], seg["end"], ex))
-        seg_y.append((seg["start"], seg["end"], ey))
-
-    start_pts_s = _get_start_pts(video_path)
-    logger.info("[Render] start_pts_s=%.4fs (%.1f frames at %.2ffps)", start_pts_s, start_pts_s * fps, fps)
-
-    crop_x_expr = _chain_segments(seg_x, fps, start_pts_s)
-    crop_y_expr = _chain_segments(seg_y, fps, start_pts_s)
-
-    logger.info("[Render] crop_x expr length: %d chars", len(crop_x_expr))
-
-    vf = (
-        f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
-        f"scale={canvas_w}:{canvas_h}:flags=lanczos"
+    vf = build_podcast_reframe_vf(
+        video_path=video_path,
+        keyframes=keyframes,
+        scene_cuts=scene_cuts,
+        src_w=src_w,
+        src_h=src_h,
+        crop_w=crop_w,
+        crop_h=crop_h,
+        fps=fps,
+        duration_s=duration_s,
+        canvas_w=canvas_w,
+        canvas_h=canvas_h,
     )
+
+    logger.info("[Render] Single-pass render: crop=%dx%d → %dx%d, vf length=%d chars",
+                crop_w, crop_h, canvas_w, canvas_h, len(vf))
 
     codec = settings.FFMPEG_VIDEO_CODEC
     cmd = ["ffmpeg", "-y"]

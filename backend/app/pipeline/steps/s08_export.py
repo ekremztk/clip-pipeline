@@ -9,6 +9,25 @@ from app.services.r2_client import upload_clip
 from app.director.events import director_events
 
 
+def _lossless_cut(video_path: str, start: float, duration: float, output_path: str) -> None:
+    """Stream-copy cut (no re-encode). FFmpeg auto-snaps to the nearest keyframe
+    ≤ start when used with -c copy, so the clip may begin slightly earlier than
+    `start` (up to ~1 GOP, typically <2s). Use only when -c copy is safe."""
+    cmd = [
+        "ffmpeg", "-y",
+        "-ss", str(start),
+        "-i", video_path,
+        "-t", str(duration),
+        "-c", "copy",
+        "-avoid_negative_ts", "make_zero",
+        "-map", "0:v:0",
+        "-map", "0:a:0",
+        "-movflags", "+faststart",
+        output_path,
+    ]
+    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+
+
 def _sanity_check_word_boundary(final_start: float, final_end: float, words: list, clip_index: int) -> tuple[float, float]:
     """
     Cross-references final_start/final_end against Deepgram word timestamps.
@@ -142,34 +161,43 @@ def _export_single_clip(
                 requires_stitch = False
 
         if not requires_stitch:
-            codec = settings.FFMPEG_VIDEO_CODEC
-            preset = settings.FFMPEG_ENCODE_PRESET
+            lossless_enabled = os.getenv("LOSSLESS_CUT_ENABLED", "0") == "1"
 
-            ffmpeg_cmd = ["ffmpeg", "-y"]
-            if settings.FFMPEG_HWACCEL:
-                ffmpeg_cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
-            ffmpeg_cmd.extend([
-                "-ss", str(final_start),
-                "-i", video_path,
-                "-t", str(final_duration),
-            ])
-            ffmpeg_cmd.extend(["-c:v", codec])
-            if codec == "h264_nvenc":
-                ffmpeg_cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+            if lossless_enabled:
+                # Stream-copy: no re-encode. FFmpeg snaps start back to the
+                # nearest keyframe ≤ final_start, so actual clip start may be
+                # a bit earlier. S10 merged pass is the only re-encode afterwards.
+                print(f"[S08] Clip {index+1}/{total_clips}: LOSSLESS cut {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
+                _lossless_cut(video_path, final_start, final_duration, output_path)
             else:
-                ffmpeg_cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
-            ffmpeg_cmd.extend([
-                "-c:a", "aac",
-                "-b:a", "320k",
-                "-movflags", "+faststart",
-                "-pix_fmt", "yuv420p",
-                "-avoid_negative_ts", "make_zero",
-                "-map", "0:v:0",
-                "-map", "0:a:0",
-                output_path,
-            ])
-            print(f"[S08] Clip {index+1}/{total_clips}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
-            subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                codec = settings.FFMPEG_VIDEO_CODEC
+                preset = settings.FFMPEG_ENCODE_PRESET
+
+                ffmpeg_cmd = ["ffmpeg", "-y"]
+                if settings.FFMPEG_HWACCEL:
+                    ffmpeg_cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
+                ffmpeg_cmd.extend([
+                    "-ss", str(final_start),
+                    "-i", video_path,
+                    "-t", str(final_duration),
+                ])
+                ffmpeg_cmd.extend(["-c:v", codec])
+                if codec == "h264_nvenc":
+                    ffmpeg_cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+                else:
+                    ffmpeg_cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+                ffmpeg_cmd.extend([
+                    "-c:a", "aac",
+                    "-b:a", "320k",
+                    "-movflags", "+faststart",
+                    "-pix_fmt", "yuv420p",
+                    "-avoid_negative_ts", "make_zero",
+                    "-map", "0:v:0",
+                    "-map", "0:a:0",
+                    output_path,
+                ])
+                print(f"[S08] Clip {index+1}/{total_clips}: Cutting {final_start:.2f}s + {final_duration:.1f}s [{content_type}]")
+                subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
         if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
             print(f"[S08] Error: Output missing or empty for clip {index+1}. Skipping.")
@@ -210,33 +238,43 @@ def _export_single_clip(
         }
         clip_data = {k: v for k, v in clip_data.items() if v is not None}
 
+        # local_landscape_path is NOT persisted to DB — it's a pipeline-only hint
+        # consumed by S09 (analyze-only) + S10 (caption merge). Final cleanup runs
+        # at end of modal_app.process_clips.
+        pipeline_extras = {"local_landscape_path": output_path}
+
         try:
             result = supabase.table("clips").insert(clip_data).execute()
             if result.data:
                 clip_id = result.data[0].get("id")
                 print(f"[S08] Clip {index+1} saved to DB (id: {clip_id})")
-                return result.data[0]
+                return {**result.data[0], **pipeline_extras}
             else:
                 print(f"[S08] Warning: DB insert returned no data for clip {index+1}")
-                return clip_data
+                return {**clip_data, **pipeline_extras}
         except Exception as db_err:
             print(f"[S08] DB insert error for clip {index+1}: {db_err}")
-            return clip_data
+            return {**clip_data, **pipeline_extras}
 
     except subprocess.CalledProcessError as e:
         stderr_output = e.stderr.decode() if e.stderr else "no stderr"
         print(f"[S08] FFmpeg error for clip {index+1}: {stderr_output[:500]}")
-        return None
-    except Exception as e:
-        print(f"[S08] Unexpected error for clip {index+1}: {e}")
-        traceback.print_exc()
-        return None
-    finally:
+        # Failed clip — clean up local file immediately
         if output_path and os.path.exists(output_path):
             try:
                 os.remove(output_path)
             except Exception:
                 pass
+        return None
+    except Exception as e:
+        print(f"[S08] Unexpected error for clip {index+1}: {e}")
+        traceback.print_exc()
+        if output_path and os.path.exists(output_path):
+            try:
+                os.remove(output_path)
+            except Exception:
+                pass
+        return None
 
 
 def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
