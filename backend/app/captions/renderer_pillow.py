@@ -2,12 +2,7 @@
 Pillow-based caption renderer — pixel-perfect match with editor (Canvas2D + freetype).
 
 Renders each subtitle group as a transparent 1080x1920 PNG, then composites
-them onto the video via FFmpeg overlay filters.
-
-Default path: single FFmpeg pass (≤ MAX_OVERLAYS_PER_PASS overlays). Most clips
-have 30–40 overlay groups, well under the threshold, so reframe+caption can
-collapse into one encode when prepend_vf is set. The multi-pass fallback only
-triggers on unusually long clips with lots of groups.
+them onto the video via FFmpeg overlay filters (multi-pass to avoid fd limits).
 
 GPU-ready: encode codec/preset is configurable via env vars. Switch to
 h264_nvenc by changing FFMPEG_VIDEO_CODEC + FFMPEG_ENCODE_PRESET.
@@ -31,23 +26,7 @@ FONT_SIZE_SCALE_REFERENCE = 90
 FONT_PATH = "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf"
 FONT_PATH_REGULAR = "/usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf"
 
-# Raised from 8 → 64 after adding setrlimit(RLIMIT_NOFILE, 4096). Default path
-# should always fit in a single pass so reframe+caption merge cleanly.
-MAX_OVERLAYS_PER_PASS = 64
-
-
-def _raise_fd_limit() -> None:
-    """Raise RLIMIT_NOFILE to 4096 so single-pass FFmpeg can open ~40+ PNG inputs
-    plus codec/muxer handles without hitting the default Modal soft limit (1024)."""
-    try:
-        import resource
-        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-        target = min(4096, hard) if hard > 0 else 4096
-        if soft < target:
-            resource.setrlimit(resource.RLIMIT_NOFILE, (target, hard))
-            logger.info("[PillowRenderer] RLIMIT_NOFILE raised %d → %d", soft, target)
-    except Exception as e:
-        logger.warning("[PillowRenderer] Could not raise fd limit: %s", e)
+MAX_OVERLAYS_PER_PASS = 8
 
 TEMPLATE_CONFIGS: dict[str, dict] = {
     "clean": {
@@ -78,27 +57,19 @@ def render_captions(
     words: list[dict],
     segments: list[dict],
     template_key: str = "clean",
-    prepend_vf: str | None = None,
 ) -> str:
     """
     Burn captions onto video using Pillow PNG render + FFmpeg overlay.
 
     Args:
-        video_path: Path to input video. Normally 9:16 (1080x1920); when
-                    prepend_vf is set, this may be the landscape source and
-                    prepend_vf handles crop+scale inline (single-pass reframe
-                    + captions).
+        video_path: Path to input video (9:16, 1080x1920)
         output_path: Path to output captioned MP4
         words: Word-level timestamps from Deepgram [{word, start, end, ...}]
         segments: Sentence segments (kept for API compatibility, unused)
         template_key: Template name (currently only "clean" uses Pillow)
-        prepend_vf: Optional FFmpeg video filter string prepended to the
-                    overlay filtergraph (e.g. a crop+scale reframe chain from S09).
 
     Returns: output_path
     """
-    _raise_fd_limit()
-
     cfg = TEMPLATE_CONFIGS.get(template_key)
     if not cfg:
         logger.warning("[PillowRenderer] Unknown template '%s', falling back to clean", template_key)
@@ -137,7 +108,7 @@ def render_captions(
             group["png_path"] = png_path
             png_paths.append(png_path)
 
-        _run_ffmpeg_overlay_multipass(video_path, output_path, groups, out_dir, prepend_vf=prepend_vf)
+        _run_ffmpeg_overlay_multipass(video_path, output_path, groups, out_dir)
 
         logger.info(
             "[PillowRenderer] Rendered %d groups (%s) -> %s",
@@ -382,22 +353,13 @@ def _run_ffmpeg_overlay_multipass(
     output_path: str,
     groups: list[dict],
     work_dir: str,
-    prepend_vf: str | None = None,
 ) -> None:
     """
     Overlay subtitle PNGs using multi-pass FFmpeg to avoid file descriptor limits.
     Each pass handles at most MAX_OVERLAYS_PER_PASS overlays.
-
-    prepend_vf (if set) is applied ONLY on the first pass, so crop+scale happens
-    once upstream of all overlays. Subsequent passes operate on the already
-    reframed intermediate.
     """
     if not groups:
-        if prepend_vf:
-            # Still need to apply reframe even with no caption groups.
-            _run_ffmpeg_vf_only(video_path, output_path, prepend_vf)
-        else:
-            _run_ffmpeg_copy(video_path, output_path)
+        _run_ffmpeg_copy(video_path, output_path)
         return
 
     total = len(groups)
@@ -413,7 +375,6 @@ def _run_ffmpeg_overlay_multipass(
             batch = groups[start_i:end_i]
 
             is_last_pass = (pass_idx == passes - 1)
-            is_first_pass = (pass_idx == 0)
 
             if is_last_pass:
                 pass_output = output_path
@@ -421,13 +382,7 @@ def _run_ffmpeg_overlay_multipass(
                 pass_output = os.path.join(work_dir, f"pass_{uuid.uuid4().hex}.mp4")
                 intermediate_paths.append(pass_output)
 
-            _run_ffmpeg_overlay_single(
-                current_input,
-                pass_output,
-                batch,
-                is_last_pass,
-                prepend_vf=prepend_vf if is_first_pass else None,
-            )
+            _run_ffmpeg_overlay_single(current_input, pass_output, batch, is_last_pass)
             current_input = pass_output
 
     finally:
@@ -444,30 +399,18 @@ def _run_ffmpeg_overlay_single(
     output_path: str,
     groups: list[dict],
     final_pass: bool,
-    prepend_vf: str | None = None,
 ) -> None:
-    """Run a single FFmpeg overlay pass for a batch of subtitle PNGs.
-
-    If prepend_vf is given, the first chain node becomes
-    [0:v]{prepend_vf}[src] and overlays start from [src] instead of [0:v],
-    so reframe (crop+scale) and captions collapse into one encode pass.
-    """
+    """Run a single FFmpeg overlay pass for a batch of subtitle PNGs."""
     codec = getattr(settings, "FFMPEG_VIDEO_CODEC", "libx264")
     preset = getattr(settings, "FFMPEG_ENCODE_PRESET", settings.FFMPEG_PRESET)
     hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
-    crf_final = getattr(settings, "FFMPEG_CRF_PILLOW", settings.FFMPEG_CRF)
 
     inputs = ["-i", video_path]
     for group in groups:
         inputs.extend(["-i", group["png_path"]])
 
-    filter_parts: list[str] = []
-
-    if prepend_vf:
-        filter_parts.append(f"[0:v]{prepend_vf}[src]")
-        prev_label = "src"
-    else:
-        prev_label = "0:v"
+    filter_parts = []
+    prev_label = "0:v"
 
     for i, group in enumerate(groups):
         input_idx = i + 1
@@ -490,11 +433,10 @@ def _run_ffmpeg_overlay_single(
     cmd.extend(["-c:v", codec])
 
     if codec == "h264_nvenc":
-        cq = crf_final if final_pass else settings.FFMPEG_CRF
-        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(cq)])
+        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         if final_pass:
-            cmd.extend(["-preset", preset, "-crf", str(crf_final)])
+            cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
         else:
             cmd.extend(["-preset", "fast", "-crf", "16"])
 
@@ -502,35 +444,13 @@ def _run_ffmpeg_overlay_single(
     cmd.append(output_path)
 
     logger.info(
-        "[PillowRenderer] FFmpeg pass: %d inputs, %d overlays, final=%s, merged_reframe=%s",
-        len(groups) + 1, len(groups), final_pass, bool(prepend_vf),
+        "[PillowRenderer] FFmpeg pass: %d inputs, %d overlays, final=%s",
+        len(groups) + 1, len(groups), final_pass,
     )
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
 
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg overlay render failed: {result.stderr[-800:]}")
-
-
-def _run_ffmpeg_vf_only(input_path: str, output_path: str, vf: str) -> None:
-    """Apply vf (crop+scale) without any caption overlays. Used when reframe
-    is requested but there are zero caption groups."""
-    codec = getattr(settings, "FFMPEG_VIDEO_CODEC", "libx264")
-    preset = getattr(settings, "FFMPEG_ENCODE_PRESET", settings.FFMPEG_PRESET)
-    hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
-    crf_final = getattr(settings, "FFMPEG_CRF_PILLOW", settings.FFMPEG_CRF)
-
-    cmd = ["ffmpeg", "-y"]
-    if hwaccel:
-        cmd.extend(["-hwaccel", hwaccel])
-    cmd.extend(["-i", input_path, "-vf", vf, "-c:v", codec])
-    if codec == "h264_nvenc":
-        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(crf_final)])
-    else:
-        cmd.extend(["-preset", preset, "-crf", str(crf_final)])
-    cmd.extend(["-c:a", "aac", "-b:a", "320k", "-movflags", "+faststart", output_path])
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-    if result.returncode != 0:
-        raise RuntimeError(f"FFmpeg vf-only render failed: {result.stderr[-600:]}")
 
 
 def _run_ffmpeg_copy(input_path: str, output_path: str) -> None:

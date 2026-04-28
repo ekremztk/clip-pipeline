@@ -42,18 +42,16 @@ def run(
     supabase = get_client()
     reframed_clips = []
 
-    legacy_render = os.getenv("PROGNOT_LEGACY_S09_RENDER", "0") == "1"
-    if legacy_render:
-        print("[S09] PROGNOT_LEGACY_S09_RENDER=1 — using old render-in-S09 path")
-
     def _process_clip(index: int, clip: dict) -> dict:
         clip_id = clip.get("id")
         landscape_url = clip.get("video_landscape_path") or clip.get("file_url")
-        local_landscape_path = clip.get("local_landscape_path")
 
         if not landscape_url:
             print(f"[S09] Clip {index+1}: No video_landscape_path. Skipping reframe.")
             return clip
+
+        reframed_url = None
+        reframe_meta = {}
 
         try:
             if reframe_content_type == "gaming":
@@ -61,78 +59,25 @@ def run(
                     clip_url=landscape_url,
                     job_id=job_id,
                     clip_index=index,
-                    local_landscape_path=local_landscape_path,
                 )
-                update_payload = {
-                    "video_reframed_path": reframed_url,
-                    "reframe_metadata": reframe_meta,
-                }
-                if clip_id and reframed_url:
-                    try:
-                        supabase.table("clips").update(update_payload).eq("id", str(clip_id)).execute()
-                        print(f"[S09] Clip {index+1} (id: {clip_id}) reframed: {reframed_url}")
-                    except Exception as db_err:
-                        print(f"[S09] DB update error for clip {index+1}: {db_err}")
-                return {
-                    **clip,
-                    "video_reframed_path": reframed_url,
-                    "reframe_metadata": reframe_meta,
-                }
-
-            # Podcast branch
-            if legacy_render:
-                reframed_url, reframe_meta = _reframe_podcast_legacy(
+            else:
+                reframed_url, reframe_meta = _reframe_podcast(
                     clip_url=landscape_url,
                     job_id=job_id,
                     clip_index=index,
-                    local_landscape_path=local_landscape_path,
                 )
-                update_payload = {
-                    "video_reframed_path": reframed_url,
-                    "reframe_metadata": reframe_meta,
-                }
-                if clip_id and reframed_url:
-                    try:
-                        supabase.table("clips").update(update_payload).eq("id", str(clip_id)).execute()
-                        print(f"[S09] Clip {index+1} (id: {clip_id}) reframed (legacy): {reframed_url}")
-                    except Exception as db_err:
-                        print(f"[S09] DB update error for clip {index+1}: {db_err}")
-                return {
-                    **clip,
-                    "video_reframed_path": reframed_url,
-                    "reframe_metadata": reframe_meta,
-                    "local_reframed_path": reframe_meta.get("local_reframed_path"),
-                }
 
-            # Analyze-only path: compute crop geometry + filter chain, no render.
-            # Reframe render is merged with captions in S10 (single FFmpeg pass).
-            filter_chain, analysis_meta, local_source_path = _analyze_podcast(
-                clip_url=landscape_url,
-                job_id=job_id,
-                clip_index=index,
-                local_landscape_path=local_landscape_path,
-            )
-
-            # No reframed file exists yet — S10 will produce the captioned 9:16 MP4.
-            # Keep landscape URL as placeholder so DB stays consistent; S10 overwrites
-            # video_reframed_path on upload.
-            analysis_meta["podcast_merged"] = True
-
-            if clip_id:
+            if clip_id and reframed_url:
                 try:
                     supabase.table("clips").update({
-                        "reframe_metadata": analysis_meta,
+                        "video_reframed_path": reframed_url,
+                        "reframe_metadata": reframe_meta,
                     }).eq("id", str(clip_id)).execute()
-                    print(f"[S09] Clip {index+1} (id: {clip_id}) analyzed — filter chain prepared for S10")
+                    print(f"[S09] Clip {index+1} (id: {clip_id}) reframed: {reframed_url}")
                 except Exception as db_err:
                     print(f"[S09] DB update error for clip {index+1}: {db_err}")
 
-            return {
-                **clip,
-                "reframe_filter_chain": filter_chain,
-                "local_source_path": local_source_path,
-                "reframe_metadata": analysis_meta,
-            }
+            return {**clip, "video_reframed_path": reframed_url, "reframe_metadata": reframe_meta, "local_reframed_path": reframe_meta.get("local_reframed_path")}
 
         except Exception as e:
             print(f"[S09] Reframe error for clip {index+1}: {e}")
@@ -161,129 +106,33 @@ def run(
     return reframed_clips
 
 
-def _analyze_podcast(
+def _reframe_podcast(
     clip_url: str,
     job_id: str,
     clip_index: int,
-    local_landscape_path: str | None,
-) -> tuple[str, dict, str]:
-    """
-    Podcast analyze-only:
-    1. Run YOLO + Gemini analysis → keyframes + crop geometry
-    2. Build vf filter string (crop + scale) — no FFmpeg render
-    3. Return (filter_chain, metadata, local_source_path)
-
-    S10 prepends the returned filter_chain to its caption filtergraph so the
-    entire reframe+caption stack collapses into a single encode pass.
-    """
-    from app.reframe.pipeline import run_reframe
-    from app.reframe.render import build_podcast_reframe_vf
-
-    print(f"[S09] Podcast analyze for clip {clip_index+1}: {clip_url}")
-
-    # Reuse local file from S08 when available; otherwise download.
-    if local_landscape_path and os.path.exists(local_landscape_path):
-        local_path = local_landscape_path
-        downloaded = False
-        print(f"[S09] Reusing local landscape file: {local_path}")
-    else:
-        local_path = _download_temp(clip_url)
-        downloaded = True
-
-    try:
-        result = run_reframe(
-            clip_local_path=local_path,
-            job_id=job_id,
-            strategy="podcast",
-            aspect_ratio="9:16",
-            tracking_mode="x_only",
-            content_type_hint="podcast",
-            detection_engine="yolo",
-        )
-
-        crop_w = result.metadata.get("crop_w", 0)
-        crop_h = result.metadata.get("crop_h", 0)
-        if not crop_w or not crop_h:
-            raise RuntimeError(f"[S09] Missing crop dimensions: crop_w={crop_w} crop_h={crop_h}")
-        if not result.keyframes:
-            raise RuntimeError("[S09] No keyframes returned from podcast reframe analysis")
-
-        filter_chain = build_podcast_reframe_vf(
-            video_path=local_path,
-            keyframes=result.keyframes,
-            scene_cuts=result.scene_cuts,
-            src_w=result.src_w,
-            src_h=result.src_h,
-            crop_w=crop_w,
-            crop_h=crop_h,
-            fps=result.fps,
-            duration_s=result.duration_s,
-            canvas_w=1080,
-            canvas_h=1920,
-        )
-
-        meta = {
-            "strategy": "podcast",
-            "keyframe_count": len(result.keyframes),
-            "scene_cut_count": len(result.scene_cuts),
-            "crop_w": crop_w,
-            "crop_h": crop_h,
-            "src_w": result.src_w,
-            "src_h": result.src_h,
-            "fps": result.fps,
-            "duration_s": result.duration_s,
-            "keyframes": [
-                {
-                    "time_s": kf.time_s,
-                    "offset_x": kf.offset_x,
-                    "offset_y": kf.offset_y,
-                    "interpolation": kf.interpolation,
-                }
-                for kf in result.keyframes
-            ],
-            "scene_cuts": result.scene_cuts,
-        }
-
-        return filter_chain, meta, local_path
-
-    except Exception:
-        # Clean up only if we downloaded it here — never delete a file S08 owns.
-        if downloaded and os.path.exists(local_path):
-            try:
-                os.remove(local_path)
-            except Exception:
-                pass
-        raise
-
-
-def _reframe_podcast_legacy(
-    clip_url: str,
-    job_id: str,
-    clip_index: int,
-    local_landscape_path: str | None,
 ) -> tuple[str, dict]:
     """
-    Legacy podcast reframe (render + upload). Only used when
-    PROGNOT_LEGACY_S09_RENDER=1 is set. Kept as rollback safety valve.
+    Podcast reframe:
+    1. Run YOLO + Gemini analysis → keyframes (via run_reframe)
+    2. render_podcast_reframe() → 9:16 MP4
+    3. Upload to R2
+
+    Returns (reframed_r2_url, metadata_dict)
     """
     from app.reframe.pipeline import run_reframe
     from app.reframe.render import render_podcast_reframe
 
-    print(f"[S09-Legacy] Podcast reframe for clip {clip_index+1}: {clip_url}")
+    print(f"[S09] Podcast reframe for clip {clip_index+1}: {clip_url}")
 
-    if local_landscape_path and os.path.exists(local_landscape_path):
-        local_path = local_landscape_path
-        downloaded = False
-    else:
-        local_path = _download_temp(clip_url)
-        downloaded = True
-
+    # Download once — reused for both analysis and render
+    local_path = _download_temp(clip_url)
     output_path = os.path.join(
         str(settings.UPLOAD_DIR),
         f"podcast_reframe_{uuid.uuid4().hex}.mp4",
     )
 
     try:
+        # Run analysis pipeline — gets keyframes + scene_cuts + crop dimensions
         result = run_reframe(
             clip_local_path=local_path,
             job_id=job_id,
@@ -303,6 +152,7 @@ def _reframe_podcast_legacy(
         if not result.keyframes:
             raise RuntimeError("[S09] No keyframes returned from podcast reframe analysis")
 
+        # Render 9:16 MP4 via FFmpeg (same local_path, no re-download)
         render_podcast_reframe(
             video_path=local_path,
             keyframes=result.keyframes,
@@ -321,7 +171,7 @@ def _reframe_podcast_legacy(
         r2_url = _upload_to_r2(output_path, f"reframe/podcast_{uuid.uuid4().hex}.mp4")
 
     finally:
-        if downloaded and os.path.exists(local_path):
+        if os.path.exists(local_path):
             try:
                 os.remove(local_path)
             except Exception:
@@ -357,7 +207,6 @@ def _reframe_gaming(
     clip_url: str,
     job_id: str,
     clip_index: int,
-    local_landscape_path: str | None = None,
 ) -> tuple[str, dict]:
     """
     Gaming reframe: YOLO webcam detection → FFmpeg vstack render.
@@ -369,13 +218,7 @@ def _reframe_gaming(
 
     print(f"[S09] Gaming reframe for clip {clip_index+1}: {clip_url}")
 
-    if local_landscape_path and os.path.exists(local_landscape_path):
-        local_path = local_landscape_path
-        downloaded = False
-    else:
-        local_path = _download_temp(clip_url)
-        downloaded = True
-
+    local_path = _download_temp(clip_url)
     try:
         result = run_reframe(
             clip_local_path=local_path,
@@ -387,7 +230,7 @@ def _reframe_gaming(
             detection_engine="yolo",
         )
     finally:
-        if downloaded and os.path.exists(local_path):
+        if os.path.exists(local_path):
             try:
                 os.remove(local_path)
             except Exception:

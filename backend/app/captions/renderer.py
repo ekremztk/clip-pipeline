@@ -189,7 +189,6 @@ def render_captions(
     words: list[dict],
     segments: list[dict],
     template_key: str = "clean",
-    prepend_vf: str | None = None,
 ) -> str:
     """
     Burn captions onto video.
@@ -198,26 +197,19 @@ def render_captions(
     (pixel-perfect editor match). Falls back to ASS for karaoke templates.
 
     Args:
-        video_path: Path to input video. Normally a 1080x1920 reframed MP4; when
-                    prepend_vf is set, this may be the landscape cut instead
-                    (reframe + captions collapse into a single pass).
+        video_path: Path to input video (9:16, 1080x1920)
         output_path: Path to output captioned MP4
         words: Word-level timestamps from Deepgram [{word, start, end, ...}]
         segments: Sentence segments (kept for API compatibility, unused internally)
         template_key: One of the pipelineKey values
-        prepend_vf: Optional FFmpeg filter string prepended to the caption
-                    filtergraph (e.g. a crop+scale reframe chain from S09).
 
     Returns: output_path
     """
     if template_key in PILLOW_TEMPLATES:
         from app.captions.renderer_pillow import render_captions as render_pillow
-        return render_pillow(
-            video_path, output_path, words, segments, template_key,
-            prepend_vf=prepend_vf,
-        )
+        return render_pillow(video_path, output_path, words, segments, template_key)
 
-    return _render_ass(video_path, output_path, words, segments, template_key, prepend_vf=prepend_vf)
+    return _render_ass(video_path, output_path, words, segments, template_key)
 
 
 def _render_ass(
@@ -226,7 +218,6 @@ def _render_ass(
     words: list[dict],
     segments: list[dict],
     template_key: str,
-    prepend_vf: str | None = None,
 ) -> str:
     """ASS-based render for karaoke templates (hormozi, bold_pop, etc.)."""
     cfg = TEMPLATE_CONFIGS.get(template_key) or TEMPLATE_CONFIGS["clean"]
@@ -257,12 +248,10 @@ def _render_ass(
         with open(ass_path, "w", encoding="utf-8") as f:
             f.write(ass_content)
 
-        _run_ffmpeg_ass(video_path, output_path, ass_path, prepend_vf=prepend_vf)
+        _run_ffmpeg_ass(video_path, output_path, ass_path)
         logger.info(
-            "[CaptionRenderer] Rendered %d groups (%s)%s -> %s",
-            len(groups), template_key,
-            " [merged reframe]" if prepend_vf else "",
-            output_path,
+            "[CaptionRenderer] Rendered %d groups (%s) -> %s",
+            len(groups), template_key, output_path,
         )
     finally:
         if os.path.exists(ass_path):
@@ -456,18 +445,15 @@ def _build_karaoke_text(words: list[dict], transform: str) -> str:
 MONTSERRAT_FONTS_DIR = "/usr/share/fonts/truetype/montserrat"
 
 
-def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str, prepend_vf: str | None = None) -> None:
-    """Burn ASS subtitles via FFmpeg. If prepend_vf is set, it is applied
-    before the ass filter in the same filtergraph (single encode pass)."""
+def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
+    """Burn ASS subtitles via FFmpeg."""
     safe_path = ass_path.replace("\\", "/").replace(":", "\\:")
     # Pass fontsdir so libass finds Montserrat even if system fontconfig cache is stale
     safe_fonts = MONTSERRAT_FONTS_DIR.replace(":", "\\:")
-    ass_filter = f"ass={safe_path}:fontsdir={safe_fonts}"
-    vf = f"{prepend_vf},{ass_filter}" if prepend_vf else ass_filter
     cmd = [
         "ffmpeg", "-y",
         "-i", input_path,
-        "-vf", vf,
+        "-vf", f"ass={safe_path}:fontsdir={safe_fonts}",
         "-c:v", settings.FFMPEG_VIDEO_CODEC,
     ]
     if settings.FFMPEG_VIDEO_CODEC == "h264_nvenc":

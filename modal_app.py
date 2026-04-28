@@ -203,20 +203,3 @@ def process_clips(
                 os.remove(local_video)
             except Exception:
                 pass
-
-        # Merged-mode cleanup: S08 defers deletion of landscape cuts so S10
-        # can reuse them as input to the combined reframe+captions pass. Sweep
-        # them here once the whole pipeline is done.
-        for _clip_list in (
-            locals().get("captioned_clips") or [],
-            locals().get("reframed_clips") or [],
-            locals().get("exported_clips") or [],
-        ):
-            for _c in _clip_list:
-                for _key in ("local_landscape_path", "local_source_path", "local_reframed_path"):
-                    _p = _c.get(_key)
-                    if _p and os.path.exists(_p):
-                        try:
-                            os.remove(_p)
-                        except Exception:
-                            pass
