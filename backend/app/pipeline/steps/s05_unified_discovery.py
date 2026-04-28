@@ -368,7 +368,6 @@ def run(
                 "Return ONLY a valid JSON array. No markdown, no explanation outside the JSON."
             ),
             max_tokens=16000,
-            effort="max",
         )
 
         raw_candidates = _parse_claude_json(raw_response)

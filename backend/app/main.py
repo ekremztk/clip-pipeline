@@ -3,7 +3,15 @@ from dotenv import load_dotenv
 # Load .env variables at the top
 load_dotenv()
 
+import logging
 import sentry_sdk
+
+class _SuppressJobsPolling(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        msg = record.getMessage()
+        return "GET /jobs" not in msg
+
+logging.getLogger("uvicorn.access").addFilter(_SuppressJobsPolling())
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager

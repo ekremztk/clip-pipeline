@@ -434,7 +434,6 @@ async def list_jobs(channel_id: str, limit: int = 20, current_user: dict = Depen
         
         jobs_response = supabase.table("jobs").select("*").eq("channel_id", channel_id).eq("user_id", current_user["id"]).order("created_at", desc=True).limit(limit).execute()
         
-        print(f"[JobsRoute] Fetched jobs for channel {channel_id}")
         return jobs_response.data if jobs_response.data else []
         
     except Exception as e:

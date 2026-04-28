@@ -22,7 +22,6 @@ def call_claude(
     system: str | None = None,
     max_tokens: int = 16000,
     extra_system_blocks: list | None = None,
-    effort: str = "high",
 ) -> str:
     """
     Calls Claude on AWS Bedrock with adaptive thinking.
@@ -30,7 +29,6 @@ def call_claude(
     content: list of Anthropic content blocks (text / image dicts)
     system: system prompt text
     extra_system_blocks: additional cached system blocks appended after main system
-    effort: "max" (S05 — unlimited thinking), "high" (S06 — default deep reasoning)
 
     Retries on rate limits: 30s, 60s, then raise RuntimeError.
     """
@@ -57,14 +55,12 @@ def call_claude(
     delays = [30, 60]
     for attempt in range(3):
         try:
-            response = client.beta.messages.create(
+            response = client.messages.create(
                 model=settings.CLAUDE_MODEL,
                 max_tokens=max_tokens,
                 system=system_blocks,
                 thinking={"type": "adaptive"},
-                output_config={"effort": effort},
                 messages=messages,
-                betas=["effort-2025-11-24"],
                 timeout=600.0,
             )
 
