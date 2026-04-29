@@ -378,7 +378,7 @@ export default function NewJobPage() {
                                         <Upload style={{ color: isDragging ? '#faf9f5' : 'rgba(250,249,245,0.4)' }} className="w-5 h-5" />
                                     </div>
                                     <h3 style={{ color: '#faf9f5' }} className="text-base font-medium mb-1">Drop your video here</h3>
-                                    <p style={{ color: '#ababab' }} className="text-sm mb-5">MP4, MOV, WEBM up to 2GB</p>
+                                    <p style={{ color: '#ababab' }} className="text-sm mb-5">MP4, MOV, WEBM up to 5GB</p>
                                     <button
                                         onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                         className="px-5 py-2.5 bg-white text-black rounded-xl text-sm font-medium hover:bg-[#e5e5e5] transition-colors"

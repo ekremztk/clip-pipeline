@@ -83,16 +83,17 @@ async def _proactive_scheduler():
 async def _r2_ttl_scheduler():
     """
     Daily cleanup of non-pipeline R2 uploads.
-    Deletes debug/, gaming-debug/, reframe-uploads/ objects older than 24h.
+    Deletes debug/, gaming-debug/, reframe-uploads/, upload_sources/ objects older than 24h.
+    Also expires stale video_uploads rows (>24h, never consumed).
     Pipeline prefixes (source_videos/, reframe/, {job_id}/) are cleaned
     synchronously by the orchestrator when a pipeline finishes — this scheduler
-    is the safety net for manual/debug uploads that have no pipeline owner.
+    is the safety net for manual/debug uploads + abandoned direct uploads.
     """
     import asyncio
     from datetime import datetime, timezone, timedelta
     from app.services.r2_client import get_r2_client
 
-    TTL_PREFIXES = ["debug/", "gaming-debug/", "reframe-uploads/"]
+    TTL_PREFIXES = ["debug/", "gaming-debug/", "reframe-uploads/", "upload_sources/"]
     TTL_HOURS = 24
 
     await asyncio.sleep(180)  # wait 3 min after startup
@@ -125,6 +126,19 @@ async def _r2_ttl_scheduler():
                     total_deleted += len(to_delete)
             if total_deleted:
                 print(f"[R2TTL] Deleted {total_deleted} objects older than {TTL_HOURS}h")
+
+            # Delete expired rows in video_uploads (consumed=false + past expires_at).
+            # Consumed rows point to objects the pipeline is managing; leave them alone.
+            try:
+                from app.services.supabase_client import get_client
+                sb = get_client()
+                sb.table("video_uploads") \
+                    .delete() \
+                    .eq("consumed", False) \
+                    .lt("expires_at", datetime.now(timezone.utc).isoformat()) \
+                    .execute()
+            except Exception as e:
+                print(f"[R2TTL] video_uploads DB cleanup error: {e}")
         except Exception as e:
             print(f"[R2TTL] error: {e}")
         await asyncio.sleep(86400)  # once a day

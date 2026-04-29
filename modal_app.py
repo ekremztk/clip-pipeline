@@ -21,6 +21,7 @@ gpu_image = (
         "libglib2.0-0",
         "libgl1",
         "curl",
+        "git",
         "pkg-config",
         "build-essential",
     )
@@ -32,8 +33,9 @@ gpu_image = (
         "fc-cache -fv",
     )
     .pip_install(
-        "torch",
-        "torchvision",
+        "torch==2.4.0",
+        "torchvision==0.19.0",
+        "torchaudio==2.4.0",
         extra_index_url="https://download.pytorch.org/whl/cu124",
     )
     .pip_install(
@@ -55,11 +57,17 @@ gpu_image = (
         "python-dotenv",
         "pydantic",
         "aiohttp",
+        "soundfile",
+        "librosa",
+        "huggingface_hub==0.25.2",
+        "speechbrain==1.0.2",
     )
     .run_commands(
         "mkdir -p /app/models",
         'curl -fsSL -o /app/models/yolov8l-face.pt "https://huggingface.co/arnabdhar/YOLOv8-Face-Detection/resolve/main/model.pt"',
         "mkdir -p /app/output /app/temp_uploads && chmod 777 /app/output /app/temp_uploads",
+        # Pre-download SpeechBrain ECAPA-TDNN (VoxCeleb1-O EER 0.80%, 192-dim)
+        'python -c "from speechbrain.inference.speaker import EncoderClassifier; EncoderClassifier.from_hparams(source=\'speechbrain/spkrec-ecapa-voxceleb\', savedir=\'/app/models/ecapa\')"',
     )
     .add_local_dir(
         "/Users/ekrem/prognot/backend/app",
@@ -201,5 +209,90 @@ def process_clips(
         if os.path.exists(local_video):
             try:
                 os.remove(local_video)
+            except Exception:
+                pass
+
+
+@app.function(
+    gpu="A10G",
+    memory=8192,
+    cpu=2,
+    timeout=300,
+    scaledown_window=10,
+    secrets=[modal.Secret.from_name("gpu-pipeline-secrets")],
+)
+def compute_voice_embedding(audio_bytes: bytes, filename: str) -> dict:
+    """
+    Extract a speaker embedding from an audio file using SpeechBrain ECAPA-TDNN.
+    Returns {"embedding": [192 floats], "duration_sec": float}.
+    VoxCeleb1-O EER 0.80%. Used by Voice Library for voice fingerprints.
+    """
+    import sys
+    import time
+    import tempfile
+    import traceback
+
+    sys.path.insert(0, "/app")
+
+    start = time.time()
+    print(f"[Modal/voice] Computing embedding for {filename} ({len(audio_bytes)} bytes)")
+
+    tmp = tempfile.NamedTemporaryFile(
+        mode="wb", suffix=os.path.splitext(filename)[1] or ".wav", delete=False
+    )
+    tmp.write(audio_bytes)
+    tmp.flush()
+    tmp.close()
+    audio_path = tmp.name
+    wav_path = audio_path.rsplit(".", 1)[0] + "_16k.wav"
+
+    try:
+        import subprocess
+        import soundfile as sf
+        import torch
+        import torchaudio
+        from speechbrain.inference.speaker import EncoderClassifier
+
+        # Resample to 16kHz mono WAV (ECAPA expects 16kHz)
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-i", audio_path,
+                "-ac", "1", "-ar", "16000",
+                "-c:a", "pcm_s16le", wav_path,
+            ],
+            check=True,
+            capture_output=True,
+        )
+
+        info = sf.info(wav_path)
+        duration = float(info.frames) / float(info.samplerate)
+
+        classifier = EncoderClassifier.from_hparams(
+            source="speechbrain/spkrec-ecapa-voxceleb",
+            savedir="/app/models/ecapa",
+            run_opts={"device": "cuda"},
+        )
+
+        signal, _ = torchaudio.load(wav_path)
+        embedding = classifier.encode_batch(signal.to("cuda"))
+        emb_tensor = embedding.squeeze().detach().cpu()
+        emb_list = [float(x) for x in emb_tensor.tolist()]
+
+        elapsed = time.time() - start
+        print(f"[Modal/voice] Done in {elapsed:.1f}s — duration={duration:.1f}s, dim={len(emb_list)}")
+
+        return {
+            "embedding": emb_list,
+            "duration_sec": duration,
+        }
+
+    except Exception as e:
+        traceback.print_exc()
+        return {"error": str(e)}
+    finally:
+        for p in [audio_path, wav_path]:
+            try:
+                if os.path.exists(p):
+                    os.remove(p)
             except Exception:
                 pass

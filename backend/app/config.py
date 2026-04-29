@@ -37,9 +37,19 @@ class Settings:
     OUTPUT_DIR = Path("output")
     UPLOAD_DIR = Path("temp_uploads")
 
+    # Direct-upload: max bytes allowed for presigned PUT (default 5 GB)
+    MAX_UPLOAD_BYTES: int = int(os.getenv("MAX_UPLOAD_BYTES", str(5 * 1024 * 1024 * 1024)))
+
     # Cloudflare WARP proxy (wireproxy SOCKS5 — set WARP_PRIVATE_KEY + WARP_ADDRESS to enable)
     WARP_PRIVATE_KEY: str = os.getenv("WARP_PRIVATE_KEY", "")
     WARP_ADDRESS: str = os.getenv("WARP_ADDRESS", "")
+
+    # Content Finder — Usenet sources
+    BBC_PROXY_URL: str = os.getenv("BBC_PROXY_URL", "")
+    NZBGEEK_API_KEY: str = os.getenv("NZBGEEK_API_KEY", "")
+    NZBGEEK_API_URL: str = os.getenv("NZBGEEK_API_URL", "https://api.nzbgeek.info/api")
+    SABNZBD_URL: str = os.getenv("SABNZBD_URL", "http://127.0.0.1:8080")
+    SABNZBD_API_KEY: str = os.getenv("SABNZBD_API_KEY", "")
 
     # Reframe — YOLOv8 model path (pre-downloaded in Docker build)
     YOLOV8_MODEL_PATH: str = os.getenv("YOLOV8_MODEL_PATH", "yolov8n-pose.pt")

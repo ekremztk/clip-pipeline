@@ -1,5 +1,6 @@
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Depends, Request
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Depends, Request, Body
+from pydantic import BaseModel
 from app.services.supabase_client import get_client
 from app.middleware.auth import get_current_user
 from app.services import storage
@@ -86,6 +87,102 @@ async def upload_preview(
     except Exception as e:
         print(f"[UploadPreview] Error: {e}")
         raise HTTPException(status_code=500, detail="Upload failed")
+
+
+class PresignUploadBody(BaseModel):
+    filename: str
+    content_type: str
+    size_bytes: int
+
+
+class RegisterUploadBody(BaseModel):
+    upload_id: str
+    duration_seconds: float
+
+
+@router.post("/presign-upload")
+@limiter.limit("20/hour")
+async def presign_upload(
+    request: Request,
+    body: PresignUploadBody,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Return a presigned R2 PUT URL so the browser uploads directly, bypassing Railway.
+    Creates a `video_uploads` row; frontend calls /register-upload once the PUT completes.
+    """
+    if body.content_type not in _ALLOWED_VIDEO_TYPES:
+        raise HTTPException(status_code=400, detail="Unsupported file format")
+    if body.size_bytes <= 0:
+        raise HTTPException(status_code=400, detail="size_bytes must be > 0")
+    if body.size_bytes > settings.MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large (max {settings.MAX_UPLOAD_BYTES // (1024 * 1024 * 1024)} GB)",
+        )
+
+    ext = os.path.splitext(body.filename or "")[1].lower()
+    if ext not in _ALLOWED_VIDEO_EXTS:
+        ext = ".mp4"
+
+    upload_id = str(uuid.uuid4())
+    r2_key = f"upload_sources/{current_user['id']}/{upload_id}{ext}"
+
+    try:
+        from app.services.r2_client import generate_presigned_put
+        upload_url = generate_presigned_put(r2_key, body.content_type, expires_in=3600)
+    except Exception as e:
+        print(f"[PresignUpload] R2 presign error: {e}")
+        raise HTTPException(status_code=500, detail="Could not create upload URL")
+
+    try:
+        supabase = get_client()
+        supabase.table("video_uploads").insert({
+            "id": upload_id,
+            "user_id": current_user["id"],
+            "r2_key": r2_key,
+            "filename": body.filename,
+            "content_type": body.content_type,
+            "size_bytes": body.size_bytes,
+        }).execute()
+    except Exception as e:
+        print(f"[PresignUpload] DB insert error: {e}")
+        raise HTTPException(status_code=500, detail="Could not register upload")
+
+    print(f"[PresignUpload] user={current_user['id']} id={upload_id} size={body.size_bytes}")
+    return {"upload_id": upload_id, "upload_url": upload_url, "r2_key": r2_key}
+
+
+@router.post("/register-upload")
+@limiter.limit("40/hour")
+async def register_upload(
+    request: Request,
+    body: RegisterUploadBody,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Called by the browser right after the presigned PUT finishes, with the duration
+    read from `<video>.onloadedmetadata`. Marks the row ready=true so /jobs can use it.
+    """
+    try:
+        supabase = get_client()
+        res = (
+            supabase.table("video_uploads")
+            .update({"duration_seconds": body.duration_seconds, "ready": True})
+            .eq("id", body.upload_id)
+            .eq("user_id", current_user["id"])
+            .execute()
+        )
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Upload not found")
+        print(f"[RegisterUpload] id={body.upload_id} duration={body.duration_seconds:.1f}s")
+        return {"ok": True, "upload_id": body.upload_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[RegisterUpload] error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to register upload")
+
 
 async def _download_and_run_pipeline(
     job_id: str,
@@ -207,15 +304,63 @@ async def create_job(
             video_path = ""  # Will be set by background downloader
 
         elif upload_id:
+            # 1. Legacy path: local temp_uploads/ (old upload-preview flow)
             upload_dir = storage.UPLOAD_DIR
             video_path = None
-            for f in os.listdir(upload_dir):
-                if f.startswith(upload_id):
-                    video_path = os.path.join(upload_dir, f)
-                    break
+            try:
+                for f in os.listdir(upload_dir):
+                    if f.startswith(upload_id):
+                        video_path = os.path.join(upload_dir, f)
+                        break
+            except FileNotFoundError:
+                video_path = None
 
+            # 2. New path: presigned direct upload → download R2 object to local temp
             if not video_path:
-                raise HTTPException(status_code=404, detail="Uploaded file not found.")
+                sb = get_client()
+                vu = (
+                    sb.table("video_uploads")
+                    .select("*")
+                    .eq("id", upload_id)
+                    .eq("user_id", current_user["id"])
+                    .eq("ready", True)
+                    .eq("consumed", False)
+                    .limit(1)
+                    .execute()
+                )
+                if not vu.data:
+                    raise HTTPException(status_code=404, detail="Uploaded file not found.")
+                upload_row = vu.data[0]
+
+                # Atomic claim — flip consumed=true; if another request won, bail
+                claim = (
+                    sb.table("video_uploads")
+                    .update({"consumed": True})
+                    .eq("id", upload_id)
+                    .eq("consumed", False)
+                    .execute()
+                )
+                if not claim.data:
+                    raise HTTPException(status_code=409, detail="Upload already consumed.")
+
+                ext = os.path.splitext(upload_row.get("filename") or "")[1].lower()
+                if ext not in _ALLOWED_VIDEO_EXTS:
+                    ext = ".mp4"
+                storage.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+                video_path = str(storage.UPLOAD_DIR / f"{job_id}{ext}")
+
+                try:
+                    from app.services.r2_client import download_r2_to_local
+                    print(f"[JobsRoute] Downloading upload {upload_id} from R2 → {video_path}")
+                    download_r2_to_local(upload_row["r2_key"], video_path)
+                except Exception as e:
+                    # Revert claim so the user can retry
+                    try:
+                        sb.table("video_uploads").update({"consumed": False}).eq("id", upload_id).execute()
+                    except Exception:
+                        pass
+                    print(f"[JobsRoute] R2 download failed for upload {upload_id}: {e}")
+                    raise HTTPException(status_code=500, detail="Could not retrieve uploaded video")
 
         elif video:
             # YÜKS-3: Validate MIME type

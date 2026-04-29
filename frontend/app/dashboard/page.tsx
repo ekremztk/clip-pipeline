@@ -649,6 +649,12 @@ export default function DashboardPage() {
             return;
         }
 
+        const MAX_UPLOAD_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB
+        if (selectedFile.size > MAX_UPLOAD_BYTES) {
+            toast.error('File too large. Maximum size is 5 GB.');
+            return;
+        }
+
         setFile(selectedFile);
         setUploadPhase('uploading');
         setUploadProgress(0);
@@ -670,51 +676,83 @@ export default function DashboardPage() {
         const url = URL.createObjectURL(selectedFile);
         setVideoUrl(url);
 
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData?.session?.access_token;
-
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${API_URL}/jobs/upload-preview`, true);
-        if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-        xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                const resp = JSON.parse(xhr.responseText);
-                setUploadId(resp.upload_id);
-                const dur = resp.duration_seconds || 0;
-                if (dur === 0) {
-                    const tmp = document.createElement('video');
-                    tmp.src = url;
-                    tmp.onloadedmetadata = () => {
-                        setVideoDuration(tmp.duration);
-                        setEndTime(tmp.duration);
-                        setUploadPhase('settings');
-                    };
-                } else {
-                    setVideoDuration(dur);
-                    setEndTime(dur);
-                    setUploadPhase('settings');
-                }
-            } else {
-                toast.error('Upload failed. Please try again.');
-                setUploadPhase('idle');
-                setFile(null);
-                URL.revokeObjectURL(url);
-                setVideoUrl('');
-            }
-        };
-        xhr.onerror = () => {
-            toast.error('Network error during upload. Please try again.');
+        const resetOnError = (msg: string) => {
+            toast.error(msg);
             setUploadPhase('idle');
             setFile(null);
             URL.revokeObjectURL(url);
             setVideoUrl('');
         };
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        xhr.send(formData);
+
+        // 1) Ask backend for a presigned PUT URL.
+        let upload_id: string;
+        let upload_url: string;
+        try {
+            const presignRes = await authFetch('/jobs/presign-upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: selectedFile.name,
+                    content_type: selectedFile.type || 'video/mp4',
+                    size_bytes: selectedFile.size,
+                }),
+            });
+            if (!presignRes.ok) {
+                const err = await presignRes.json().catch(() => ({}));
+                resetOnError(err.detail || 'Could not prepare upload. Please try again.');
+                return;
+            }
+            const body = await presignRes.json();
+            upload_id = body.upload_id;
+            upload_url = body.upload_url;
+        } catch {
+            resetOnError('Network error preparing upload. Please try again.');
+            return;
+        }
+
+        // 2) Direct PUT to R2 with progress tracking.
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', upload_url, true);
+        xhr.setRequestHeader('Content-Type', selectedFile.type || 'video/mp4');
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+            if (xhr.status < 200 || xhr.status >= 300) {
+                resetOnError('Upload failed. Please try again.');
+                return;
+            }
+            // 3) Read duration via hidden <video>, then register.
+            const tmp = document.createElement('video');
+            tmp.preload = 'metadata';
+            tmp.src = url;
+            const finalize = async (duration: number) => {
+                try {
+                    const regRes = await authFetch('/jobs/register-upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ upload_id, duration_seconds: duration }),
+                    });
+                    if (!regRes.ok) {
+                        resetOnError('Could not finalize upload. Please try again.');
+                        return;
+                    }
+                    setUploadId(upload_id);
+                    setVideoDuration(duration);
+                    setEndTime(duration);
+                    setUploadPhase('settings');
+                } catch {
+                    resetOnError('Network error finalizing upload. Please try again.');
+                }
+            };
+            tmp.onloadedmetadata = () => {
+                const dur = Number.isFinite(tmp.duration) && tmp.duration > 0 ? tmp.duration : 0;
+                finalize(dur);
+            };
+            tmp.onerror = () => resetOnError('Could not read video metadata. File may be corrupt.');
+        };
+        xhr.onerror = () => resetOnError('Network error during upload. Please try again.');
+        xhr.send(selectedFile);
     };
 
     const handleStartProcessing = async () => {
@@ -1038,7 +1076,7 @@ export default function DashboardPage() {
                                                     <p className="text-sm font-medium" style={{ color: '#faf9f5' }}>
                                                         {isDragging ? 'Release to upload' : 'Drag & Drop your video'}
                                                     </p>
-                                                    <p className="text-xs" style={{ color: '#ababab' }}>MP4, MOV, AVI up to 2GB</p>
+                                                    <p className="text-xs" style={{ color: '#ababab' }}>MP4, MOV, AVI up to 5GB</p>
                                                 </div>
                                             </div>
                                             <button

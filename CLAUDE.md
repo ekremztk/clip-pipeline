@@ -89,9 +89,9 @@ backend/app/
 ├── main.py              # FastAPI entry, lifespan schedulers, CORS, router mount
 ├── config.py            # Settings singleton (all env vars)
 ├── pipeline/
-│   ├── orchestrator.py  # State machine: runs S01→S10, handles pause after S03
+│   ├── orchestrator.py  # State machine: runs S01→S10 in a single loop (no user pause); dispatches S08–S10 to Modal
 │   ├── steps/s01-s10    # Individual pipeline steps
-│   └── prompts/         # Gemini prompts for S05, S06
+│   └── prompts/         # unified_discovery (S05, Claude), batch_evaluation (S06, Claude), channel_dna / clip_summary / failure_analysis (Gemini Flash, onboarding + feedback)
 ├── director/
 │   ├── agent.py         # Gemini-powered agentic loop with function calling
 │   ├── router.py        # SSE chat, memory, analysis endpoints
@@ -197,35 +197,77 @@ Design language is Figma-derived: pure black backgrounds, no purple, no glassmor
 ### Pipeline flow
 ```
 POST /jobs → background task → run_pipeline(job_id)
-  S01-S03: extract audio, transcribe, speaker ID
-  ── PAUSE (status=awaiting_speaker_confirm) ──
-  POST /jobs/{id}/confirm-speakers → resumes
-  S04-S10: label transcript, discover clips, evaluate, cut, export, reframe, captions
+  S01-S07 run sequentially on Railway CPU (no user pause after S03 —
+  speaker map is auto-assigned and stored with speaker_confirmed=True)
+  ── orchestrator dispatches to Modal after S07 ──
+  S08-S10 run in a single Modal call (process_clips); CPU fallback on Modal failure
   → Clips saved to R2, metadata to Supabase
 ```
 Pipeline state passed between steps: `transcript_data`, `speaker_data`, `labeled_transcript`, `channel_dna`, `candidates`, `evaluated_clips`, `cut_results`.
 
+Note: `frontend/app/dashboard/speakers/[jobId]/` exists as a manual-review UI but is **not** wired into the orchestrator loop — the pipeline currently does not wait for it.
+
 ### Supabase tables (key ones)
 `jobs`, `clips`, `transcripts`, `channels`, `director_events`, `director_analyses`, `director_memories`, `viral_library`, `editor_projects`, `editor_media_assets`
+
+### Reframe V5 (`backend/app/reframe/`)
+14-file pipeline that converts 16:9 → 9:16. Entry: `run_reframe()` in `pipeline.py`; dispatches to one of two modes:
+
+- **Podcast** (default): 12-step flow — video probe → shot detection (FFmpeg scene filter) → face tracking (YOLOv8l-face) → Gemini director (`gemini-2.5-pro`, multi-modal, full video + diarization + shot data + face summary → DirectorPlan: subjects + focus directives) → focus resolver → path solver (AutoFlip kinematic) → keyframe emitter → `render.py::render_podcast_reframe` (single-pass FFmpeg continuous crop expression, outputs MP4). Fallback on Gemini failure: diarization-only plan.
+- **Gaming**: `gaming_pipeline.py` — detects webcam overlay via standard YOLO + custom `prognot-webcam.pt` model, renders vstack (1080×640 webcam top + 1080×1280 game bottom). No Gemini, no diarization.
+
+Key files: `pipeline.py` (orchestrator), `render.py` (MP4 renderer), `gaming_pipeline.py`, `face_tracker.py` (YOLO loader), `gemini_director.py`, `shot_detector.py`, `focus_resolver.py`, `path_solver.py`, `keyframe_emitter.py`, `debug_overlay.py`, `debug_analyzer.py`, `config.py`, `types.py`.
+
+YOLO model: `yolov8l-face.pt` (large face-specific). Loader probes `/root/yolov8l-face.pt` → `/app/models/yolov8l-face.pt` → HuggingFace fallback download. `settings.YOLOV8_MODEL_PATH` in `config.py` currently defaults to `yolov8n-pose.pt` but the reframe face tracker does not read that env var — it hardcodes the `yolov8l-face.pt` search paths.
+
+### Captions V2 (`backend/app/captions/`)
+4 files: `renderer.py` (entry + dispatcher), `renderer_pillow.py` (Pillow path), `core.py` (Deepgram transcription), `__init__.py`.
+
+Entry: `render_captions(video_path, output_path, words, segments, template_key)` in `renderer.py`. Two render paths, chosen by template key:
+
+- **Pillow path** (template `clean`): render each subtitle group as transparent 1080×1920 PNG, then composite onto video via FFmpeg `overlay` filters. `MAX_OVERLAYS_PER_PASS = 8` → multi-pass encode when a clip has many overlays (default multi-pass). Plan `scalable-stargazing-beaver.md` proposes a single-pass mode + `prepend_vf` to merge reframe+caption into one encode — NOT implemented yet.
+- **ASS path** (all other templates): build `.ass` file, burn via `ffmpeg -vf ass=…` in one FFmpeg call.
+
+Templates in `renderer.py` (8 total): `clean` (Pillow), `hormozi`, `outline`, `pill`, `neon`, `cinematic`, `bold_pop`, `fire`. Each template config: font, fontsize, colors, karaoke flag, `words_per_group`, `max_lines`, `max_chars_per_line`.
+
+Word timestamps in S10 are produced by a **fresh** Deepgram Nova-2 call on the reframed clip (`captions/core.py::transcribe_video`) — S02's word list is NOT reused. This is intentional: the reframed clip duration may differ from the source cut window, and Nova-2 re-aligns timestamps on the final rendered audio.
 
 ---
 
 ## PIPELINE STRUCTURE (V4 — 10 Steps)
 ```
-S01 Audio Extract (FFmpeg)                   — Railway CPU
-S02 Transcribe (Deepgram)                    — Railway CPU
-S03 Speaker ID (Deepgram diarization + user confirm) — Railway CPU
-S04 Labeled Transcript                       — Railway CPU
-S05 Unified Discovery (Gemini 3.1 Pro Preview + Video) — Railway CPU
-S06 Batch Evaluation (Claude Opus 4.6)       — Railway CPU
-S07 Precision Cut (word boundary snap)       — Railway CPU
+S01 Audio Extract (FFmpeg, ffprobe validation)              — Railway CPU
+S02 Transcribe (Deepgram Nova-3, keyterm prompting)         — Railway CPU
+S03 Speaker ID (Deepgram diarization + Gemini Flash
+    guest-name heuristic; auto-assigns, does NOT pause)     — Railway CPU
+S04 Labeled Transcript (pure string formatting, no API)     — Railway CPU
+S05 Unified Discovery (Claude Opus 4.7, TEXT-only —
+    labeled transcript + channel DNA → clip candidates)     — Railway CPU
+S06 Batch Evaluation (Claude — CLAUDE_MODEL env var,
+    scores S05 candidates in batches of 4, dedup >50%)      — Railway CPU
+S07 Precision Cut (word-boundary snap, breath buffers,
+    math-only, no encode)                                   — Railway CPU
 ── orchestrator dispatches to Modal after S07 ──
-S08 Export (FFmpeg h264_nvenc + R2 upload + DB write) — Modal A10G GPU
-S09 Reframe (YOLO + Gemini direction → 9:16 MP4)      — Modal A10G GPU
-S10 Captions (Deepgram word timestamps → burned-in)   — Modal A10G GPU
+S08 Export (FFmpeg cut+encode, ThreadPool×3, R2 upload,
+    Supabase insert)                                        — Modal A10G GPU
+S09 Reframe V5 (podcast: YOLOv8l-face + Gemini director →
+    keyframes → single-pass crop expression; gaming: YOLO
+    webcam detect → vstack), ThreadPool×2                   — Modal A10G GPU
+S10 Captions V2 (fresh Deepgram Nova-2 transcription of the
+    reframed clip → Pillow PNG overlays OR ASS libass burn) — Modal A10G GPU
 ```
 S08+S09+S10 run as a single Modal function call (`process_clips` in `modal_app.py`).
-CPU fallback: if Modal fails, orchestrator runs S08-S10 locally on Railway.
+CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Railway CPU.
+
+### Pipeline prompts (backend/app/pipeline/prompts/)
+| File | Used by | Model | Purpose |
+|------|---------|-------|---------|
+| `unified_discovery.py` | S05 | Claude (`CLAUDE_MODEL`) | Select clip candidates from labeled transcript + channel DNA |
+| `batch_evaluation.py` | S06 | Claude (`CLAUDE_MODEL`) | Score hook quality, retention, loop potential with channel rules |
+| `channel_dna.py` | onboarding / reference_analyzer | Gemini Flash | Extract patterns + tone + do/don't lists from successful reference clips |
+| `clip_summary.py` | onboarding + post-pipeline feedback | Gemini Flash | Generate RAG-searchable summary of what made a clip work |
+| `failure_analysis.py` | feedback_processor (post-pipeline) | Gemini Flash | Root-cause analysis on underperforming clips |
+| `guest_research.py` | *not currently wired* | — | Would research guest background for clip-worthiness signals |
 
 ---
 
@@ -234,16 +276,21 @@ CPU fallback: if Modal fails, orchestrator runs S08-S10 locally on Railway.
 ### Model usage
 | Step / Module | Model | Config key |
 |---------------|-------|------------|
-| S05 Unified Discovery (video analysis) | `gemini-3.1-pro-preview` | `settings.GEMINI_MODEL_VIDEO` |
-| S05 channel profile lookup (text only) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
-| S06 Batch Evaluation | **Claude** `claude-opus-4-6` | `settings.CLAUDE_MODEL` |
+| S02 Transcribe | Deepgram **Nova-3** | hardcoded in `services/deepgram_client.py` |
+| S03 Speaker guest-name heuristic | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+| S05 Unified Discovery (TEXT transcript, NOT video) | **Claude** `us.anthropic.claude-opus-4-7` | `settings.CLAUDE_MODEL` |
+| S06 Batch Evaluation | **Claude** (same `CLAUDE_MODEL`) | `settings.CLAUDE_MODEL` |
+| S09 Reframe — director | `gemini-2.5-pro` (multimodal video + context) | `settings.GEMINI_MODEL_PRO` |
+| S10 Captions — transcription | Deepgram **Nova-2** (fresh call per clip) | hardcoded in `captions/core.py` |
 | Director agent (tool calling) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
 | Director chat (simple queries) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
-| All other Gemini calls (DNA gen, embeddings, etc.) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+| Onboarding DNA + clip summary + failure analysis | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+| Embeddings (vector(768)) | Gemini `text-embedding-004` | via `services/gemini_client.py` |
 
-- Default values live in `config.py`: `GEMINI_MODEL_VIDEO = "gemini-3.1-pro-preview"`, `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-2.5-flash"`, `CLAUDE_MODEL = "claude-opus-4-6"`
+- Defaults in `config.py`: `CLAUDE_MODEL = "us.anthropic.claude-opus-4-7"`, `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-2.5-flash"`, `GEMINI_MODEL_VIDEO = "gemini-3.1-pro-preview"` (kept for future use, not currently read by any step)
 - Override any model via env var without code changes
-- S06 uses `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
+- S05 & S06 use `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
+- S05 receives `video_path` / `audio_path` parameters but does NOT use them — it's pure text-in-text-out on the labeled transcript
 - Never change models without being asked
 
 ### No GPU libraries in Railway — ever
@@ -365,17 +412,3 @@ FREESOUND_API_KEY=             # freesound.org API key (real key required — pl
 ```
 
 ---
-
-## KNOWN PITFALLS
-| Problem | Fix |
-|---------|-----|
-| Supabase "Network unreachable" | DATABASE_URL port must be 6543 |
-| Gemini JSON parse error | Strip ` ```json ``` ` wrappers, use `re.sub(r'[\x00-\x1f]', '', raw)` |
-| Gemini 429 rate limit | Retry: 30s wait × 2, then 60s, then raise |
-| Docker build slow | COPY requirements.txt before COPY code |
-| Video file not found | Always check `os.path.exists()` before FFmpeg |
-| Editor reframe/captions 401 | All Railway calls from editor need `Authorization: Bearer {supabase_token}` |
-| Editor media disappears after reload | Pass client `id` to POST /api/media; never let Supabase generate a new UUID |
-| Editor project 404 loop | POST /api/projects must receive `id` from client; uses upsert to handle races |
-| Vercel 4.5MB body limit | Never proxy large files through Next.js routes; use R2 presigned PUT URLs |
-| `npm install` fails in opencut/ | Use `bun install` — opencut uses Bun workspaces, not npm |

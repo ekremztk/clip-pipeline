@@ -4,6 +4,27 @@ from botocore.exceptions import ClientError
 from app.config import settings
 
 
+def generate_presigned_put(key: str, content_type: str, expires_in: int = 3600) -> str:
+    """Generate a presigned PUT URL so the browser can upload directly to R2."""
+    s3 = get_r2_client()
+    return s3.generate_presigned_url(
+        "put_object",
+        Params={
+            "Bucket": settings.R2_BUCKET_NAME,
+            "Key": key,
+            "ContentType": content_type,
+        },
+        ExpiresIn=expires_in,
+    )
+
+
+def download_r2_to_local(r2_key: str, local_path: str) -> None:
+    """Stream-download an R2 object to disk without buffering in memory."""
+    os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)
+    s3 = get_r2_client()
+    s3.download_file(settings.R2_BUCKET_NAME, r2_key, local_path)
+
+
 def delete_prefix(prefix: str) -> int:
     """
     Delete ALL objects under a given R2 prefix. Returns count deleted.
