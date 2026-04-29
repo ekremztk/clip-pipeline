@@ -64,6 +64,36 @@ async def get_clips(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.delete("/{clip_id}")
+async def delete_clip(clip_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a single clip: cascades to R2 (captioned + reframed + landscape)."""
+    try:
+        supabase = get_client()
+        clip = _verify_clip_owner(clip_id, current_user["id"], supabase)
+
+        # Remove R2 objects first (best-effort — DB row goes away regardless)
+        try:
+            from app.services.r2_client import delete_url
+            for url in [
+                clip.get("video_captioned_path"),
+                clip.get("video_reframed_path"),
+                clip.get("file_url"),
+            ]:
+                if url:
+                    delete_url(url)
+        except Exception as _e:
+            print(f"[ClipsRoute] R2 cleanup warning (non-fatal): {_e}")
+
+        supabase.table("clips").delete().eq("id", clip_id).execute()
+        print(f"[ClipsRoute] Deleted clip {clip_id}")
+        return {"deleted": True, "id": clip_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error deleting clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete clip")
+
+
 @router.get("/{clip_id}")
 async def get_clip(clip_id: str, current_user: dict = Depends(get_current_user)):
     try:

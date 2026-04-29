@@ -27,6 +27,60 @@ def _debug_dump(job_id: str, step: str, data: object) -> None:
         print(f"[DEBUG] Could not write {step}: {e}")
 
 
+def _cleanup_pipeline_r2(
+    job_id: str,
+    exported_clips: list,
+    reframed_clips: list,
+    captioned_clips: list,
+) -> None:
+    """
+    After S10 finishes, delete transient R2 objects that the UI doesn't need.
+    Only captions/ (S10 final) and voice-library/ are permanent.
+
+    - source_videos/{job_id}/* → Modal input, always deletable
+    - {job_id}/* (S08 landscape) → deletable ONLY if S10 produced a captioned URL
+      for every clip; if some S10 failed, keep S08 as fallback.
+    - reframe/*, gaming-reframe/* → deletable if corresponding S10 succeeded
+    """
+    from app.services.r2_client import delete_prefix, delete_url
+
+    # source_videos is always safe to remove after pipeline finishes
+    try:
+        n = delete_prefix(f"source_videos/{job_id}/")
+        print(f"[Cleanup] Removed {n} source_videos objects for {job_id}")
+    except Exception as e:
+        print(f"[Cleanup] source_videos/{job_id}/ delete error: {e}")
+
+    # Build a map of clip_id → captioned URL to know which reframe/landscape to keep
+    cap_by_clip = {}
+    for c in captioned_clips or []:
+        cid = c.get("id") or c.get("clip_id")
+        cap_url = c.get("video_captioned_path")
+        if cid and cap_url:
+            cap_by_clip[cid] = cap_url
+
+    all_have_captions = (
+        exported_clips
+        and captioned_clips
+        and len(cap_by_clip) == len(exported_clips)
+    )
+
+    # If every clip has a caption URL, S08 landscape output is safe to drop
+    if all_have_captions:
+        try:
+            n = delete_prefix(f"{job_id}/")
+            print(f"[Cleanup] Removed {n} landscape (S08) objects for {job_id}")
+        except Exception as e:
+            print(f"[Cleanup] {job_id}/ delete error: {e}")
+
+    # Reframe intermediates — delete per-clip where captioned exists
+    for c in reframed_clips or []:
+        cid = c.get("id") or c.get("clip_id")
+        reframe_url = c.get("video_reframed_path")
+        if cid in cap_by_clip and reframe_url:
+            delete_url(reframe_url)
+
+
 def _upload_source_video_to_r2(job_id: str, video_path: str) -> str:
     """Upload source video to R2 and return public URL for Modal to download."""
     import uuid
@@ -404,6 +458,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                                  "captioned_count": sum(1 for c in captioned_clips if c.get("video_captioned_path"))},
                         channel_id=channel_id,
                     )
+                    # Cleanup transient R2 objects — only captions/ stays permanent
+                    try:
+                        _cleanup_pipeline_r2(job_id, exported_clips, reframed_clips, captioned_clips)
+                    except Exception as _ce:
+                        print(f"[Orchestrator] R2 cleanup error (non-critical): {_ce}")
 
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -504,4 +563,13 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     print(f"[Orchestrator] Cleaned up {path}")
                 except Exception as e:
                     print(f"[Orchestrator] Error cleaning up {path}: {e}")
+        # Always purge source_videos/{job_id}/ — uploaded for Modal, never needed
+        # after pipeline finishes (success or failure).
+        try:
+            from app.services.r2_client import delete_prefix
+            n = delete_prefix(f"source_videos/{job_id}/")
+            if n:
+                print(f"[Orchestrator] finally: removed {n} source_videos objects")
+        except Exception as _e:
+            print(f"[Orchestrator] finally: source_videos cleanup error: {_e}")
 

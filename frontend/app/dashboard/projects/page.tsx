@@ -565,6 +565,7 @@ function ProjectsContent() {
     const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [deleteClipId, setDeleteClipId] = useState<string | null>(null);
     const urlRestoredRef = useRef(false);
 
     const fetchData = async (silent = false) => {
@@ -647,6 +648,20 @@ function ProjectsContent() {
             }
         } catch { toast.error('Failed to delete project.'); }
         setDeleteConfirmId(null);
+    };
+
+    const handleDeleteClip = async (id: string) => {
+        try {
+            const res = await authFetch(`/clips/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                setClips(clips.filter(c => c.id !== id));
+                if (selectedClip?.id === id) { setSelectedClip(null); }
+                toast.success('Clip deleted.');
+            } else {
+                toast.error('Failed to delete clip.');
+            }
+        } catch { toast.error('Failed to delete clip.'); }
+        setDeleteClipId(null);
     };
 
     const handleApprove = async (id: string) => {
@@ -989,6 +1004,15 @@ function ProjectsContent() {
                                                     <X className="w-3 h-3" />
                                                 </div>
                                             )}
+                                            {/* Delete button — hover overlay */}
+                                            <button
+                                                className="absolute bottom-2 left-2 w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                style={{ background: 'rgba(0,0,0,0.75)', color: '#f87171' }}
+                                                title="Delete clip"
+                                                onClick={e => { e.stopPropagation(); setDeleteClipId(clip.id); }}
+                                            >
+                                                <X size={12} />
+                                            </button>
                                         </div>
                                         <div className="p-3 flex flex-col flex-1">
                                             <p
@@ -1024,11 +1048,11 @@ function ProjectsContent() {
             )}
 
             {/* ── Delete Confirmation Modal ── */}
-            {deleteConfirmId && (
+            {(deleteConfirmId || deleteClipId) && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     style={{ backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.6)' }}
-                    onClick={() => setDeleteConfirmId(null)}
+                    onClick={() => { setDeleteConfirmId(null); setDeleteClipId(null); }}
                 >
                     <div
                         className="relative w-full max-w-md rounded-2xl p-7"
@@ -1044,15 +1068,19 @@ function ProjectsContent() {
                         <button
                             className="absolute top-4 right-4 w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5"
                             style={{ color: '#ababab' }}
-                            onClick={() => setDeleteConfirmId(null)}
+                            onClick={() => { setDeleteConfirmId(null); setDeleteClipId(null); }}
                         >
                             <X size={14} />
                         </button>
 
                         <div className="mb-1">
-                            <p className="text-base font-semibold mb-2" style={{ color: '#faf9f5' }}>Delete project?</p>
+                            <p className="text-base font-semibold mb-2" style={{ color: '#faf9f5' }}>
+                                {deleteClipId ? 'Delete clip?' : 'Delete project?'}
+                            </p>
                             <p className="text-sm" style={{ color: '#ababab' }}>
-                                This will permanently delete the project and all its clips. This action cannot be undone.
+                                {deleteClipId
+                                    ? 'This will permanently delete the clip and its video files. This action cannot be undone.'
+                                    : 'This will permanently delete the project and all its clips. This action cannot be undone.'}
                             </p>
                         </div>
 
@@ -1060,14 +1088,17 @@ function ProjectsContent() {
                             <button
                                 className="px-4 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-white/5"
                                 style={{ color: '#faf9f5', border: '1px solid rgba(250,249,245,0.12)' }}
-                                onClick={() => setDeleteConfirmId(null)}
+                                onClick={() => { setDeleteConfirmId(null); setDeleteClipId(null); }}
                             >
                                 Cancel
                             </button>
                             <button
                                 className="px-4 py-2 text-sm font-medium rounded-xl transition-colors hover:brightness-110"
                                 style={{ background: '#ef4444', color: '#fff' }}
-                                onClick={() => handleDeleteProject(deleteConfirmId)}
+                                onClick={() => {
+                                    if (deleteClipId) { handleDeleteClip(deleteClipId); }
+                                    else if (deleteConfirmId) { handleDeleteProject(deleteConfirmId); }
+                                }}
                             >
                                 Delete
                             </button>

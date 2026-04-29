@@ -61,10 +61,14 @@ export function useClipImport(projectId: string) {
 
 				toast.loading("Importing clip from Prognot...", { id: "clip-import" });
 
-				// Proxy through backend to avoid R2 CORS restrictions
+				// Proxy through backend to avoid R2 CORS restrictions.
+				// Pass clipId so the backend can verify ownership for captions/ and reframe/ URLs
+				// (legacy S08-only URLs embed job_id in the path and still work without clipId).
 				const apiBase = process.env.NEXT_PUBLIC_PROGNOT_API_URL ?? "";
+				const proxyQuery = new URLSearchParams({ url: clipUrl });
+				if (clipId) proxyQuery.set("clip_id", clipId);
 				const proxyUrl = apiBase
-					? `${apiBase}/proxy/clip?url=${encodeURIComponent(clipUrl)}`
+					? `${apiBase}/proxy/clip?${proxyQuery.toString()}`
 					: clipUrl;
 
 				const supabase = createClient();

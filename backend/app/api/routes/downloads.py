@@ -37,7 +37,12 @@ async def download_clip(clip_id: str, current_user: dict = Depends(get_current_u
             if not job_check.data:
                 raise HTTPException(status_code=404, detail="Clip not found")
 
-        file_url = clip.get("file_url")
+        # Prefer the captioned S10 output (permanent), fall back to legacy landscape.
+        file_url = (
+            clip.get("video_captioned_path")
+            or clip.get("video_reframed_path")
+            or clip.get("file_url")
+        )
 
         if not file_url:
             raise HTTPException(status_code=404, detail="Video file URL not found")

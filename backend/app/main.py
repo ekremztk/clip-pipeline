@@ -80,6 +80,56 @@ async def _proactive_scheduler():
         await asyncio.sleep(3600)  # 1 hour
 
 
+async def _r2_ttl_scheduler():
+    """
+    Daily cleanup of non-pipeline R2 uploads.
+    Deletes debug/, gaming-debug/, reframe-uploads/ objects older than 24h.
+    Pipeline prefixes (source_videos/, reframe/, {job_id}/) are cleaned
+    synchronously by the orchestrator when a pipeline finishes — this scheduler
+    is the safety net for manual/debug uploads that have no pipeline owner.
+    """
+    import asyncio
+    from datetime import datetime, timezone, timedelta
+    from app.services.r2_client import get_r2_client
+
+    TTL_PREFIXES = ["debug/", "gaming-debug/", "reframe-uploads/"]
+    TTL_HOURS = 24
+
+    await asyncio.sleep(180)  # wait 3 min after startup
+    while True:
+        try:
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=TTL_HOURS)
+            s3 = get_r2_client()
+            bucket = settings.R2_BUCKET_NAME
+            total_deleted = 0
+            for prefix in TTL_PREFIXES:
+                to_delete: list[dict] = []
+                paginator = s3.get_paginator("list_objects_v2")
+                for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+                    for obj in page.get("Contents", []) or []:
+                        last_mod = obj.get("LastModified")
+                        if last_mod and last_mod < cutoff:
+                            to_delete.append({"Key": obj["Key"]})
+                        if len(to_delete) >= 1000:
+                            s3.delete_objects(
+                                Bucket=bucket,
+                                Delete={"Objects": to_delete, "Quiet": True},
+                            )
+                            total_deleted += len(to_delete)
+                            to_delete = []
+                if to_delete:
+                    s3.delete_objects(
+                        Bucket=bucket,
+                        Delete={"Objects": to_delete, "Quiet": True},
+                    )
+                    total_deleted += len(to_delete)
+            if total_deleted:
+                print(f"[R2TTL] Deleted {total_deleted} objects older than {TTL_HOURS}h")
+        except Exception as e:
+            print(f"[R2TTL] error: {e}")
+        await asyncio.sleep(86400)  # once a day
+
+
 async def _analysis_scheduler():
     """Run AI analysis every 6 hours. Weekly digest on Mondays."""
     import asyncio
@@ -168,6 +218,7 @@ async def lifespan(app: FastAPI):
     pulse_task = asyncio.create_task(_health_pulse_scheduler())
     proactive_task = asyncio.create_task(_proactive_scheduler())
     daily_task = asyncio.create_task(_analysis_scheduler())
+    r2_ttl_task = asyncio.create_task(_r2_ttl_scheduler())
     yield
     # Cleanup Director connection pool
     try:
@@ -177,14 +228,14 @@ async def lifespan(app: FastAPI):
             print("[DB] Director connection pool closed.")
     except Exception:
         pass
-    for task in [startup_task, pulse_task, proactive_task, daily_task]:
+    for task in [startup_task, pulse_task, proactive_task, daily_task, r2_ttl_task]:
         task.cancel()
         try:
             await task
         except asyncio.CancelledError:
             pass
 
-from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe
+from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library
 from app.api.websocket import progress
 from app.director.router import router as director_router
 from app.limiter import limiter
@@ -227,6 +278,7 @@ app.include_router(captions.router)
 app.include_router(proxy.router)
 app.include_router(youtube_metadata.router)
 app.include_router(reframe.router)
+app.include_router(voice_library.router)
 
 from app.api.routes import debug_reframe, debug_pipeline
 app.include_router(debug_reframe.router)

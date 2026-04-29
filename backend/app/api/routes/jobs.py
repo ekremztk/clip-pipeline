@@ -451,6 +451,29 @@ async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)
         if not check.data:
             raise HTTPException(status_code=404, detail="Job not found")
 
+        # Cascade R2 cleanup — remove every clip's remote asset for this job.
+        try:
+            from app.services.r2_client import delete_prefix, delete_url
+            clips_res = (
+                supabase.table("clips")
+                .select("video_captioned_path,video_reframed_path,file_url")
+                .eq("job_id", job_id)
+                .execute()
+            )
+            for c in clips_res.data or []:
+                for url in [
+                    c.get("video_captioned_path"),
+                    c.get("video_reframed_path"),
+                    c.get("file_url"),
+                ]:
+                    if url:
+                        delete_url(url)
+            # Also remove any leftover landscape/source prefixes for this job.
+            delete_prefix(f"{job_id}/")
+            delete_prefix(f"source_videos/{job_id}/")
+        except Exception as _e:
+            print(f"[JobsRoute] R2 cascade warning: {_e}")
+
         # Delete clips
         supabase.table("clips").delete().eq("job_id", job_id).execute()
 
@@ -458,13 +481,13 @@ async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)
         job_response = supabase.table("jobs").delete().eq("id", job_id).execute()
         if not job_response.data:
             raise HTTPException(status_code=404, detail="Job not found")
-            
+
         # Delete output directory for job using storage
         job_dir = os.path.join(storage.OUTPUT_DIR, job_id)
         if os.path.exists(job_dir):
             shutil.rmtree(job_dir)
             print(f"[JobsRoute] Deleted output directory: {job_dir}")
-            
+
         print(f"[JobsRoute] Deleted job {job_id}")
         return {"deleted": True, "job_id": job_id}
         
