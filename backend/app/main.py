@@ -127,16 +127,43 @@ async def _r2_ttl_scheduler():
             if total_deleted:
                 print(f"[R2TTL] Deleted {total_deleted} objects older than {TTL_HOURS}h")
 
-            # Delete expired rows in video_uploads (consumed=false + past expires_at).
-            # Consumed rows point to objects the pipeline is managing; leave them alone.
+            # Clean up video_uploads rows + their R2 objects:
+            # 1. consumed=false + expired → abandoned uploads, safe to delete
+            # 2. consumed=true + older than 48h → pipeline is long done, delete R2 object too
             try:
                 from app.services.supabase_client import get_client
                 sb = get_client()
+                now = datetime.now(timezone.utc)
+
+                # Abandoned (never consumed, expired)
                 sb.table("video_uploads") \
                     .delete() \
                     .eq("consumed", False) \
-                    .lt("expires_at", datetime.now(timezone.utc).isoformat()) \
+                    .lt("expires_at", now.isoformat()) \
                     .execute()
+
+                # Consumed but old — delete R2 objects then DB rows
+                old_cutoff = (now - timedelta(hours=48)).isoformat()
+                old_rows = (
+                    sb.table("video_uploads")
+                    .select("id,r2_key")
+                    .eq("consumed", True)
+                    .lt("created_at", old_cutoff)
+                    .execute()
+                )
+                r2_deleted = 0
+                for row in old_rows.data or []:
+                    r2_key = row.get("r2_key")
+                    if r2_key:
+                        try:
+                            s3.delete_object(Bucket=bucket, Key=r2_key)
+                            r2_deleted += 1
+                        except Exception:
+                            pass
+                if old_rows.data:
+                    ids = [r["id"] for r in old_rows.data]
+                    sb.table("video_uploads").delete().in_("id", ids).execute()
+                    print(f"[R2TTL] Cleaned {len(ids)} consumed uploads, {r2_deleted} R2 objects deleted")
             except Exception as e:
                 print(f"[R2TTL] video_uploads DB cleanup error: {e}")
         except Exception as e:
