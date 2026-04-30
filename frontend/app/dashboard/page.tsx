@@ -556,7 +556,7 @@ export default function DashboardPage() {
         setUploadId('');
         setVideoDuration(0);
         setTitle('');
-        setGuestName('');
+        setTargetGuest('');
         setStartTime(0);
         setEndTime(0);
         setDurationPreset('<60s');
