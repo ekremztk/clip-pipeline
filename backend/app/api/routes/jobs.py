@@ -456,6 +456,88 @@ async def mpu_abort(
     return {"ok": True}
 
 
+async def _fetch_upload_and_run_pipeline(
+    job_id: str,
+    upload_id: str,
+    r2_key: str,
+    ext: str,
+    video_title: str,
+    guest_name: Optional[str],
+    channel_id: str,
+    user_id: str,
+    clip_duration_min: Optional[int],
+    clip_duration_max: Optional[int],
+    trim_start_seconds: float = 0.0,
+    trim_end_seconds: Optional[float] = None,
+) -> None:
+    """
+    Background task for R2-uploaded videos. Downloads R2 object to local disk,
+    applies optional trim, then runs the pipeline. This runs outside the HTTP
+    request so multi-GB downloads can't hit Railway's ~10min HTTP timeout.
+    """
+    from app.pipeline.orchestrator import run_pipeline, update_job
+    from app.services.r2_client import download_r2_to_local
+    from app.services.supabase_client import get_client
+
+    if ext not in _ALLOWED_VIDEO_EXTS:
+        ext = ".mp4"
+    storage.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    video_path = str(storage.UPLOAD_DIR / f"{job_id}{ext}")
+    trimmed_path: Optional[str] = None
+
+    try:
+        update_job(
+            job_id,
+            status=JobStatus.PROCESSING.value,
+            current_step="fetching_upload",
+            current_step_number=0,
+            progress_pct=1,
+        )
+        print(f"[JobsRoute] Downloading upload {upload_id} from R2 → {video_path}")
+        download_r2_to_local(r2_key, video_path)
+
+        if trim_start_seconds > 0.0 or trim_end_seconds is not None:
+            duration = get_video_duration(video_path)
+            end = trim_end_seconds if trim_end_seconds is not None else duration
+            if trim_start_seconds > 0.0 or end < duration:
+                trimmed_path = video_path.replace(".", "_trimmed.", 1)
+                cmd = [
+                    "ffmpeg", "-y",
+                    "-ss", str(trim_start_seconds),
+                    "-i", video_path,
+                    "-t", str(end - trim_start_seconds),
+                    "-c", "copy",
+                    trimmed_path,
+                ]
+                result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode == 0 and os.path.exists(trimmed_path):
+                    try:
+                        os.remove(video_path)
+                    except Exception:
+                        pass
+                    video_path = trimmed_path
+                    trimmed_path = None
+                else:
+                    print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
+
+        get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
+        run_pipeline(job_id, video_path, video_title, guest_name, channel_id, user_id, clip_duration_min, clip_duration_max)
+    except Exception as e:
+        print(f"[JobsRoute] R2 fetch/pipeline failed for job {job_id}: {e}")
+        update_job(job_id, status=JobStatus.FAILED.value, error_message=f"Upload fetch failed: {e}")
+        # Let user retry — release the claim
+        try:
+            get_client().table("video_uploads").update({"consumed": False}).eq("id", upload_id).execute()
+        except Exception:
+            pass
+        for path in [video_path, trimmed_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
+
+
 async def _download_and_run_pipeline(
     job_id: str,
     youtube_url: str,
@@ -568,6 +650,8 @@ async def create_job(
     channel_id = channel_id.replace("-", "_")
     try:
         job_id = str(uuid.uuid4())
+        r2_upload_row: Optional[dict] = None
+        r2_upload_ext: Optional[str] = None
 
         if youtube_url:
             # Validate it's a real YouTube URL
@@ -587,7 +671,9 @@ async def create_job(
             except FileNotFoundError:
                 video_path = None
 
-            # 2. New path: presigned direct upload → download R2 object to local temp
+            # 2. New path: presigned direct upload. Validate the row, claim it, and
+            # DEFER the actual R2 download to a background task — multi-GB downloads
+            # would otherwise exceed Railway's HTTP timeout and cause 500/404 retries.
             if not video_path:
                 sb = get_client()
                 vu = (
@@ -602,7 +688,7 @@ async def create_job(
                 )
                 if not vu.data:
                     raise HTTPException(status_code=404, detail="Uploaded file not found.")
-                upload_row = vu.data[0]
+                r2_upload_row = vu.data[0]
 
                 # Atomic claim — flip consumed=true; if another request won, bail
                 claim = (
@@ -615,24 +701,12 @@ async def create_job(
                 if not claim.data:
                     raise HTTPException(status_code=409, detail="Upload already consumed.")
 
-                ext = os.path.splitext(upload_row.get("filename") or "")[1].lower()
-                if ext not in _ALLOWED_VIDEO_EXTS:
-                    ext = ".mp4"
-                storage.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-                video_path = str(storage.UPLOAD_DIR / f"{job_id}{ext}")
-
-                try:
-                    from app.services.r2_client import download_r2_to_local
-                    print(f"[JobsRoute] Downloading upload {upload_id} from R2 → {video_path}")
-                    download_r2_to_local(upload_row["r2_key"], video_path)
-                except Exception as e:
-                    # Revert claim so the user can retry
-                    try:
-                        sb.table("video_uploads").update({"consumed": False}).eq("id", upload_id).execute()
-                    except Exception:
-                        pass
-                    print(f"[JobsRoute] R2 download failed for upload {upload_id}: {e}")
-                    raise HTTPException(status_code=500, detail="Could not retrieve uploaded video")
+                r2_upload_ext = os.path.splitext(r2_upload_row.get("filename") or "")[1].lower()
+                if r2_upload_ext not in _ALLOWED_VIDEO_EXTS:
+                    r2_upload_ext = ".mp4"
+                # Placeholder path — real path is written by background task once R2
+                # download finishes. Pipeline never sees this placeholder.
+                video_path = f"pending_r2:{upload_id}"
 
         elif video:
             # YÜKS-3: Validate MIME type
@@ -652,8 +726,9 @@ async def create_job(
         else:
             raise HTTPException(status_code=400, detail="Must provide youtube_url, upload_id, or video file.")
             
-        # Trimming logic (skip for YouTube — video isn't downloaded yet)
-        if not youtube_url and (trim_start_seconds > 0.0 or (trim_end_seconds is not None)):
+        # Trimming logic (skip for YouTube + R2-pending uploads — those trim in the background task)
+        _defer_to_background = youtube_url or (upload_id and r2_upload_row is not None)
+        if not _defer_to_background and (trim_start_seconds > 0.0 or (trim_end_seconds is not None)):
             duration = get_video_duration(video_path)
             if trim_end_seconds is None:
                 trim_end_seconds = duration
@@ -729,6 +804,22 @@ async def create_job(
                 _download_and_run_pipeline,
                 job_id,
                 youtube_url,
+                title,
+                guest_name,
+                channel_id,
+                current_user["id"],
+                clip_duration_min,
+                clip_duration_max,
+                trim_start_seconds,
+                trim_end_seconds,
+            )
+        elif upload_id and r2_upload_row is not None:
+            background_tasks.add_task(
+                _fetch_upload_and_run_pipeline,
+                job_id,
+                upload_id,
+                r2_upload_row["r2_key"],
+                r2_upload_ext or ".mp4",
                 title,
                 guest_name,
                 channel_id,
