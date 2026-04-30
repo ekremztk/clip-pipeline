@@ -103,7 +103,8 @@ backend/app/
 │   ├── phases/          # Discovery pipeline phases
 │   ├── prompts/         # Gemini prompts for analysis
 │   ├── strategies/      # Search strategies
-│   └── utils/           # youtube_api, transcript_fetcher, score_calculator, guest_extractor
+│   ├── utils/           # youtube_api, transcript_fetcher, score_calculator, guest_extractor
+│   └── sourcing/        # UK talk-show sourcing (BBC → NZBgeek → Newshosting); see below
 ├── api/routes/          # 13 route modules (jobs, clips, speakers, channels, etc.)
 ├── services/            # External clients: Supabase, Gemini, Deepgram, R2
 │   ├── video_downloader.py  # yt-dlp wrapper for video download
@@ -208,7 +209,27 @@ Pipeline state passed between steps: `transcript_data`, `speaker_data`, `labeled
 Note: `frontend/app/dashboard/speakers/[jobId]/` exists as a manual-review UI but is **not** wired into the orchestrator loop — the pipeline currently does not wait for it.
 
 ### Supabase tables (key ones)
-`jobs`, `clips`, `transcripts`, `channels`, `director_events`, `director_analyses`, `director_memories`, `viral_library`, `editor_projects`, `editor_media_assets`
+`jobs`, `clips`, `transcripts`, `channels`, `director_events`, `director_analyses`, `director_memories`, `viral_library`, `editor_projects`, `editor_media_assets`, `video_uploads` (direct-to-R2 browser uploads), `person_voices` (voice fingerprints, vector(192)), `source_videos` + `show_registry` (UK talk-show sourcing catalog)
+
+### Voice Library (`backend/app/api/routes/voice_library.py` + Modal)
+Shared library of reference voice fingerprints (hosts + recurring guests). One clean audio sample per person → ECAPA-TDNN (SpeechBrain `spkrec-ecapa-voxceleb`, VoxCeleb1-O EER 0.80%) → **192-dim vector** stored in `person_voices`.
+
+- **Route prefix**: `/voice-library` — `GET /` (list), `POST /` (multipart audio + name), `DELETE /{id}`. Max upload 25 MB, allowed ext: wav, mp3, m4a, flac, ogg, webm, mp4.
+- **Storage**: audio uploaded to R2 under `voice-library/<uuid>.<ext>`, public URL written to `person_voices.audio_path`.
+- **Embedding**: computed via Modal `compute_voice_embedding` (A10G, 300 s timeout). FFmpeg-resamples to 16 kHz mono WAV inside Modal, then ECAPA `.encode_batch()`. Model pre-downloaded to `/app/models/ecapa` at image build — **do not** re-download per call.
+- **Frontend**: `frontend/app/dashboard/voice-library/page.tsx` + sidebar nav entry (`AudioLines` icon).
+- **Dimension guard**: route asserts `len(embedding) == 192`. DB column is `vector(192)`. Legacy commit messages mention "256-dim WeSpeaker ResNet293" — ignore, actual deploy is 192-dim ECAPA.
+- **S03 integration**: not wired yet (2026-04-30). Plan: extract representative 5-10 s segment per Deepgram cluster → embed via Modal → cosine-match against `person_voices` (`1 - (a <=> b)` pgvector) → assign name if best score > threshold, else fall back to existing Gemini guest-name heuristic.
+
+### UK Talk-show Sourcing (`backend/app/content_finder/sourcing/`)
+3-platform pipeline for sourcing high-quality UK talk-show episodes (Graham Norton, HIGNFY, etc.) as 1080p MP4s — YouTube copies are cropped/compressed, iPlayer is geofenced + DRM.
+
+- **BBC Programmes API** (`bbc_client.py`, `bbc_scraper.py`): catalog-only (pid, `synopsis_long`, first_broadcast, thumbnail). Hit through residential UK proxy (`BBC_PROXY_URL`) because endpoints are UK-geofenced. `/credits.json` endpoint returns 404 across the catalog — guests must be parsed from synopsis.
+- **Guest parser** (`guest_parser.py`): Gemini Flash extracts `{host, team_captains, guests, musical_act}` from `synopsis_long`. VERBATIM guard — every returned name must appear literally in the synopsis (zero hallucinations). TVmaze cross-check when `tvmaze_episode_id` is known. Writes `source_videos.guests` jsonb + `guests_source` + `metadata_confidence`.
+- **NZBgeek matcher** (`nzb_matcher.py`): Newznab `tvsearch` query (`q=show&season=N&ep=N&o=json`). **Keep ONLY 1080p / 2160p** (720p breaks reframe/captions visually, verified). Among survivors > 300 MB, pick largest (bigger = higher bitrate). Env: `NZBGEEK_API_KEY`, `NZBGEEK_API_URL` (default `https://api.nzbgeek.info/api`).
+- **Newshosting + SABnzbd**: paid Usenet provider consumed by self-hosted SABnzbd. Env: `SABNZBD_URL` (default `http://127.0.0.1:8080`), `SABNZBD_API_KEY`. SABnzbd handles the actual Usenet fetch + par2 repair + unrar; backend just queues the NZB returned by NZBgeek and polls completion.
+
+Current state (2026-04-30): `BBC_PROXY_URL` set in `.env`. `NZBGEEK_API_KEY` / `SABNZBD_API_KEY` declared in `config.py` but **not yet written to `.env`**. nzb_matcher + SABnzbd enqueue loop not yet wired to a scheduler. Sourced MP4s will flow into `source_videos` and can then be passed through S01–S10 like any upload, with Voice Library providing speaker-name enrichment.
 
 ### Reframe V5 (`backend/app/reframe/`)
 14-file pipeline that converts 16:9 → 9:16. Entry: `run_reframe()` in `pipeline.py`; dispatches to one of two modes:
@@ -326,6 +347,7 @@ After ANY change to these files → `modal deploy modal_app.py` immediately:
 ### pgvector embedding size
 - clips.clip_summary_embedding → `vector(768)` — do NOT change
 - reference_clips.clip_summary_embedding → `vector(768)`
+- person_voices.embedding → `vector(192)` — ECAPA-TDNN output; do NOT change. Legacy docs mentioning 256-dim WeSpeaker are stale.
 
 ### Temp file cleanup — always use finally
 ```python
@@ -389,6 +411,13 @@ SUPABASE_URL=
 SUPABASE_SERVICE_KEY=
 DATABASE_URL=           # port 6543 mandatory
 FRONTEND_URL=
+MAX_UPLOAD_BYTES=       # optional, default 5 GB (5368709120). Presigned PUT + /jobs limit.
+# UK talk-show sourcing (optional until sourcing pipeline is wired to a scheduler):
+BBC_PROXY_URL=          # residential UK proxy, required for BBC Programmes API
+NZBGEEK_API_KEY=        # Newznab API key for NZBgeek
+NZBGEEK_API_URL=        # default https://api.nzbgeek.info/api
+SABNZBD_URL=            # default http://127.0.0.1:8080
+SABNZBD_API_KEY=
 ```
 
 ### Vercel — Prognot Frontend
