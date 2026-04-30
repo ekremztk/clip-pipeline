@@ -987,9 +987,10 @@ async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)
                 ]:
                     if url:
                         delete_url(url)
-            # Also remove any leftover landscape/source prefixes for this job.
+            # Also remove any leftover prefixes for this job.
             delete_prefix(f"{job_id}/")
             delete_prefix(f"source_videos/{job_id}/")
+            delete_prefix(f"gaming-reframe/{job_id}/")
         except Exception as _e:
             print(f"[JobsRoute] R2 cascade warning: {_e}")
 
