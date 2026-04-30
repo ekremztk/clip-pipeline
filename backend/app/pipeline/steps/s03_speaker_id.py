@@ -1,104 +1,89 @@
-def _extract_guest_name_from_title(video_title: str) -> str | None:
-    """
-    Uses Gemini Flash to extract a guest name from the video title.
-    Returns the guest name string or None if not found.
-    """
-    try:
-        from app.services.gemini_client import generate
-        from app.config import settings
-
-        prompt = (
-            "Extract the guest's name from this podcast/video title if one exists. "
-            "Return ONLY the name (first and last name if available), nothing else. "
-            "If no guest name is present, return the word NULL.\n\n"
-            "Title: " + video_title
-        )
-        result = generate(prompt, model=settings.GEMINI_MODEL_FLASH)
-        result = result.strip()
-        if result and result.upper() != "NULL" and len(result) < 60:
-            return result
-        return None
-    except Exception as e:
-        print(f"[S03] Guest name extraction error (non-critical): {e}")
-        return None
-
-
-def run(transcript_data: dict, job_id: str, video_title: str = "") -> dict:
+def run(
+    transcript_data: dict,
+    job_id: str,
+    video_title: str = "",
+    audio_path: str | None = None,
+) -> dict:
     """
     Step 03: Speaker ID
-    Analyzes diarization output to identify speakers.
-    Tries to extract a guest name from the video title automatically.
+
+    1. Compute speaker stats (total duration, utterance count) from Deepgram utterances.
+    2. Assign roles: longest-average-utterance speaker = guest, second = host, rest = unknown.
+       (Hosts ask short questions; guests give long answers.)
+    3. If audio_path is provided, attempt voice matching via person_voices DB:
+       - Extract up to 5 clean 3–9s segments per speaker
+       - Embed via Modal ECAPA-TDNN → centroid → pgvector cosine query
+       - If similarity ≥ 0.65: assign matched name
+       - No match: speaker label stays as SPEAKER_{n}
+    4. No LLM fallback — unmatched speakers keep their Deepgram label.
     """
     print(f"[S03] Starting speaker identification for job {job_id}")
 
     try:
         utterances = transcript_data.get("utterances", [])
 
-        speaker_stats = {}
-        for utterance in utterances:
-            speaker = utterance.get("speaker", "UNKNOWN")
-            start = utterance.get("start", 0.0)
-            end = utterance.get("end", 0.0)
+        # --- Step 1: compute stats ---
+        speaker_stats: dict = {}
+        for utt in utterances:
+            speaker = str(utt.get("speaker", "UNKNOWN"))
+            start = float(utt.get("start", 0.0))
+            end = float(utt.get("end", 0.0))
             duration = end - start
-
             if speaker not in speaker_stats:
                 speaker_stats[speaker] = {"duration": 0.0, "utterance_count": 0}
-
             speaker_stats[speaker]["duration"] += duration
             speaker_stats[speaker]["utterance_count"] += 1
 
         print(f"[S03] Found {len(speaker_stats)} speakers")
 
-        # Try to extract guest name from video title
-        guest_name = None
-        if video_title:
-            guest_name = _extract_guest_name_from_title(video_title)
-            if guest_name:
-                print(f"[S03] Extracted guest name from title: {guest_name}")
+        # --- Step 2: role assignment by heuristic ---
+        def avg_utt_duration(stats: dict) -> float:
+            count = stats["utterance_count"]
+            return stats["duration"] / count if count > 0 else 0.0
 
-        predicted_map = {}
-
-        if len(speaker_stats) == 1:
-            speaker = list(speaker_stats.keys())[0]
-            predicted_map[speaker] = {"role": "guest", "name": guest_name}
-            print(f"[S03] Only one speaker found, assigned as guest")
-        elif len(speaker_stats) >= 2:
-            # Guest heuristic: hosts ask short questions, guests give long answers.
-            # Rank by average utterance duration DESC — highest avg = guest.
-            # Tiebreaker: total duration (more total time = more likely guest).
-            def avg_utt_duration(stats):
-                count = stats["utterance_count"]
-                return stats["duration"] / count if count > 0 else 0.0
-
-            sorted_speakers = sorted(
-                speaker_stats.items(),
-                key=lambda x: (avg_utt_duration(x[1]), x[1]["duration"]),
-                reverse=True,
+        sorted_speakers = sorted(
+            speaker_stats.items(),
+            key=lambda x: (avg_utt_duration(x[1]), x[1]["duration"]),
+            reverse=True,
+        )
+        for sp_id, stats in sorted_speakers:
+            print(
+                f"[S03]   Speaker {sp_id}: total={stats['duration']:.1f}s, "
+                f"utterances={stats['utterance_count']}, "
+                f"avg={avg_utt_duration(stats):.1f}s"
             )
 
-            for sp_id, stats in sorted_speakers:
-                print(
-                    f"[S03]   Speaker {sp_id}: total={stats['duration']:.1f}s, "
-                    f"utterances={stats['utterance_count']}, "
-                    f"avg={avg_utt_duration(stats):.1f}s"
-                )
+        predicted_map: dict = {}
+        if len(sorted_speakers) == 0:
+            pass
+        elif len(sorted_speakers) == 1:
+            predicted_map[sorted_speakers[0][0]] = {"role": "guest", "name": None}
+        else:
+            predicted_map[sorted_speakers[0][0]] = {"role": "guest", "name": None}
+            predicted_map[sorted_speakers[1][0]] = {"role": "host", "name": None}
+            for sp_id, _ in sorted_speakers[2:]:
+                predicted_map[sp_id] = {"role": "unknown", "name": None}
 
-            guest_speaker = sorted_speakers[0][0]
-            predicted_map[guest_speaker] = {"role": "guest", "name": guest_name}
+        # --- Step 3: voice matching ---
+        if audio_path and utterances:
+            try:
+                from app.services.voice_matcher import match_speakers
+                matched = match_speakers(utterances, audio_path)
+                for speaker_id, name in matched.items():
+                    if name and speaker_id in predicted_map:
+                        predicted_map[speaker_id]["name"] = name
+            except Exception as e:
+                print(f"[S03] Voice matching error (non-critical, continuing): {e}")
+        else:
+            print(f"[S03] Skipping voice matching (audio_path={'missing' if not audio_path else 'ok'}, utterances={len(utterances)})")
 
-            host_speaker = sorted_speakers[1][0]
-            predicted_map[host_speaker] = {"role": "host", "name": None}
-
-            for i in range(2, len(sorted_speakers)):
-                speaker = sorted_speakers[i][0]
-                predicted_map[speaker] = {"role": "unknown", "name": None}
-
-            print(f"[S03] Heuristic (avg utterance length): {guest_speaker} = guest, {host_speaker} = host")
+        matched_count = sum(1 for v in predicted_map.values() if v.get("name"))
+        print(f"[S03] Completed: {len(predicted_map)} speakers, {matched_count} matched by voice")
 
         return {
             "speaker_stats": speaker_stats,
             "predicted_map": predicted_map,
-            "needs_confirmation": False
+            "needs_confirmation": False,
         }
 
     except Exception as e:

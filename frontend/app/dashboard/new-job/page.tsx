@@ -87,7 +87,7 @@ export default function NewJobPage() {
     const [isDragging, setIsDragging] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [title, setTitle] = useState("");
-    const [guestName, setGuestName] = useState("");
+    const [targetGuest, setGuestName] = useState("");
     const [youtubeUrl, setYoutubeUrl] = useState("");
     const [youtubeUrlError, setYoutubeUrlError] = useState("");
 
@@ -195,7 +195,7 @@ export default function NewJobPage() {
         formData.append("youtube_url", youtubeUrl);
         formData.append("title", title);
         formData.append("channel_id", activeChannelId);
-        if (guestName) formData.append("guest_name", guestName);
+        if (targetGuest) formData.append("target_guest", targetGuest);
         formData.append("reframe_content_type", reframeContentType);
 
         try {
@@ -239,7 +239,7 @@ export default function NewJobPage() {
         formData.append("upload_id", uploadId);
         formData.append("title", title);
         formData.append("channel_id", activeChannelId);
-        if (guestName) formData.append("guest_name", guestName);
+        if (targetGuest) formData.append("target_guest", targetGuest);
         formData.append("trim_start_seconds", startTime.toString());
         formData.append("trim_end_seconds", endTime.toString());
         formData.append("reframe_content_type", reframeContentType);
@@ -416,10 +416,10 @@ export default function NewJobPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                    <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Target Guest <span className="normal-case">(optional)</span></label>
                                     <input
                                         type="text"
-                                        value={guestName}
+                                        value={targetGuest}
                                         onChange={e => setGuestName(e.target.value)}
                                         placeholder="e.g. Elon Musk"
                                         style={inputStyle}
@@ -579,10 +579,10 @@ export default function NewJobPage() {
                                 />
                             </div>
                             <div>
-                                <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Guest Name <span className="normal-case">(optional)</span></label>
+                                <label style={{ color: '#ababab' }} className="block text-[10px] uppercase tracking-widest mb-1.5">Target Guest <span className="normal-case">(optional)</span></label>
                                 <input
                                     type="text"
-                                    value={guestName}
+                                    value={targetGuest}
                                     onChange={e => setGuestName(e.target.value)}
                                     placeholder="e.g. Elon Musk"
                                     style={{ background: '#111110', border: '1px solid rgba(250,249,245,0.1)', color: '#faf9f5' }}

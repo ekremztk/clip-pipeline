@@ -1,4 +1,4 @@
-def run(transcript_data: dict, speaker_map: dict, guest_name: str | None = None) -> str:
+def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = None) -> str:
     """
     s04: Merges transcript data with speaker map to create a labeled transcript.
 
@@ -6,7 +6,7 @@ def run(transcript_data: dict, speaker_map: dict, guest_name: str | None = None)
         transcript_data: dict from s02 containing 'words' or 'utterances' with text and timestamps
         speaker_map: dict mapping speaker IDs to roles and names.
             Keys can be raw integers (0, 1) from S03 or strings ("SPEAKER_0").
-        guest_name: optional string to use for guest speaker label
+        target_guest: optional string to use for guest speaker label
 
     Returns:
         Full labeled transcript as a single string
@@ -42,8 +42,8 @@ def run(transcript_data: dict, speaker_map: dict, guest_name: str | None = None)
             name = speaker_info.get("name", "")
 
             # Override guest name if provided and role is GUEST
-            if role == "GUEST" and guest_name:
-                name = guest_name
+            if role == "GUEST" and target_guest:
+                name = target_guest
 
             # Format speaker label
             if name:

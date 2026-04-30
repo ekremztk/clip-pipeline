@@ -421,7 +421,7 @@ export default function DashboardPage() {
 
     // Form state
     const [title, setTitle] = useState('');
-    const [guestName, setGuestName] = useState('');
+    const [targetGuest, setTargetGuest] = useState('');
     const [formChannelId, setFormChannelId] = useState('');
     const [durationPreset, setDurationPreset] = useState('<60s');
     const [aspectRatio, setAspectRatio] = useState('9:16');
@@ -887,7 +887,7 @@ export default function DashboardPage() {
         }
         fd.append('title', title);
         fd.append('channel_id', formChannelId);
-        if (guestName) fd.append('guest_name', guestName);
+        if (targetGuest) fd.append('target_guest', targetGuest);
         fd.append('trim_start_seconds', startTime.toString());
         fd.append('trim_end_seconds', endTime.toString());
         fd.append('clip_duration_min', preset.min.toString());
@@ -1464,12 +1464,12 @@ export default function DashboardPage() {
                                                 className="block text-[10px] uppercase tracking-widest mb-1.5"
                                                 style={{ color: '#ababab' }}
                                             >
-                                                Guest Name
+                                                Target Guest
                                             </label>
                                             <input
                                                 type="text"
-                                                value={guestName}
-                                                onChange={e => setGuestName(e.target.value)}
+                                                value={targetGuest}
+                                                onChange={e => setTargetGuest(e.target.value)}
                                                 placeholder="Optional"
                                                 className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors"
                                                 style={{

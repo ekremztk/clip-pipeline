@@ -547,7 +547,7 @@ TOOL_DECLARATIONS = [
             properties={
                 "channel_id": types.Schema(type="STRING", description="Channel. Default: speedy_cast"),
                 "title": types.Schema(type="STRING", description="Test run title"),
-                "guest_name": types.Schema(type="STRING"),
+                "target_guest": types.Schema(type="STRING"),
                 "video_url": types.Schema(type="STRING", description="R2 URL or leave empty for default test video"),
             },
         )
@@ -975,7 +975,7 @@ def _dispatch_tool(name: str, args: dict[str, Any]) -> Any:
     elif name == "create_test_pipeline":
         from app.director.tools.pipeline_executor import create_test_job
         return create_test_job(video_url=args.get("video_url"), channel_id=args.get("channel_id", "speedy_cast"),
-                               title=args.get("title", "Director Test Run"), guest_name=args.get("guest_name"))
+                               title=args.get("title", "Director Test Run"), target_guest=args.get("target_guest"))
     elif name == "get_test_pipeline_status":
         from app.director.tools.pipeline_executor import get_test_pipeline_status
         return get_test_pipeline_status(args["job_id"])

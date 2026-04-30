@@ -462,7 +462,7 @@ async def _fetch_upload_and_run_pipeline(
     r2_key: str,
     ext: str,
     video_title: str,
-    guest_name: Optional[str],
+    target_guest: Optional[str],
     channel_id: str,
     user_id: str,
     clip_duration_min: Optional[int],
@@ -523,7 +523,7 @@ async def _fetch_upload_and_run_pipeline(
                     print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
 
         get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
-        run_pipeline(job_id, video_path, video_title, guest_name, channel_id, user_id, clip_duration_min, clip_duration_max)
+        run_pipeline(job_id, video_path, video_title, target_guest, channel_id, user_id, clip_duration_min, clip_duration_max)
     except Exception as e:
         print(f"[JobsRoute] R2 fetch/pipeline failed for job {job_id}: {e}")
         update_job(job_id, status=JobStatus.FAILED.value, error_message=f"Upload fetch failed: {e}")
@@ -553,7 +553,7 @@ async def _download_and_run_pipeline(
     job_id: str,
     youtube_url: str,
     video_title: str,
-    guest_name: Optional[str],
+    target_guest: Optional[str],
     channel_id: str,
     user_id: str,
     clip_duration_min: Optional[int],
@@ -605,7 +605,7 @@ async def _download_and_run_pipeline(
                     print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
 
         get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
-        run_pipeline(job_id, video_path, video_title, guest_name, channel_id, user_id, clip_duration_min, clip_duration_max)
+        run_pipeline(job_id, video_path, video_title, target_guest, channel_id, user_id, clip_duration_min, clip_duration_max)
     except Exception as e:
         print(f"[JobsRoute] YouTube download failed for job {job_id}: {e}")
         update_job(job_id, status=JobStatus.FAILED.value, error_message=f"YouTube download failed: {e}")
@@ -645,7 +645,7 @@ async def create_job(
     video: UploadFile = File(None),
     youtube_url: Optional[str] = Form(None),
     title: str = Form(...),
-    guest_name: Optional[str] = Form(None),
+    target_guest: Optional[str] = Form(None),
     channel_id: str = Form(...),
     trim_start_seconds: float = Form(0.0),
     trim_end_seconds: float = Form(None),
@@ -788,7 +788,7 @@ async def create_job(
             "channel_id": channel_id,
             "user_id": current_user["id"],
             "video_title": title,
-            "guest_name": guest_name,
+            "target_guest": target_guest,
             "status": JobStatus.QUEUED.value,
             "current_step": "queued",
             "progress_pct": 0,
@@ -816,7 +816,7 @@ async def create_job(
                 job_id,
                 youtube_url,
                 title,
-                guest_name,
+                target_guest,
                 channel_id,
                 current_user["id"],
                 clip_duration_min,
@@ -832,7 +832,7 @@ async def create_job(
                 r2_upload_row["r2_key"],
                 r2_upload_ext or ".mp4",
                 title,
-                guest_name,
+                target_guest,
                 channel_id,
                 current_user["id"],
                 clip_duration_min,
@@ -846,7 +846,7 @@ async def create_job(
                 job_id,
                 video_path,
                 title,
-                guest_name,
+                target_guest,
                 channel_id,
                 current_user["id"],
                 clip_duration_min,

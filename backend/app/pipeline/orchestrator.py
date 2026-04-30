@@ -215,7 +215,7 @@ def log_step(job_id: str, step_number: int, step_name: str, status: str,
 
 
 def run_pipeline(job_id: str, video_path: str, video_title: str,
-                 guest_name: str | None, channel_id: str, user_id: str | None = None,
+                 target_guest: str | None, channel_id: str, user_id: str | None = None,
                  clip_duration_min: int | None = None,
                  clip_duration_max: int | None = None) -> None:
     """
@@ -239,7 +239,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             module="module_1",
             event="pipeline_started",
             payload={"job_id": job_id, "channel_id": channel_id,
-                     "guest_name_provided": bool(guest_name)},
+                     "target_guest_provided": bool(target_guest)},
             channel_id=channel_id,
         )
 
@@ -307,12 +307,12 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         audio_path, job_id,
                         channel_dna=channel_dna,
                         video_title=video_title,
-                        guest_name=guest_name,
+                        target_guest=target_guest,
                     )
                     _debug_dump(job_id, "s02_transcribe", transcript_data)
                 elif step_number == 3:
                     from app.pipeline.steps import s03_speaker_id
-                    speaker_data = s03_speaker_id.run(transcript_data, job_id, video_title)
+                    speaker_data = s03_speaker_id.run(transcript_data, job_id, video_title, audio_path=audio_path)
 
                     supabase = get_client()
                     transcript_raw = transcript_data.get("raw_response", {}) if isinstance(transcript_data, dict) else {}
@@ -333,7 +333,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 elif step_number == 4:
                     from app.pipeline.steps import s04_labeled_transcript
                     predicted_map = speaker_data.get("predicted_map", {}) if speaker_data else {}
-                    labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, guest_name)
+                    labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, target_guest)
                     _debug_dump(job_id, "s04_labeled_transcript", {"labeled_transcript": labeled_transcript})
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
@@ -341,7 +341,6 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     # channel_dna already fetched at pipeline start
                     # Get video duration from transcript_data (Deepgram provides this)
                     video_duration_s = transcript_data.get("duration", 0.0) if transcript_data else 0.0
-                    # guest_name is already available as a function parameter
                     reset_token_accumulator()
                     candidates = s05_unified_discovery.run(
                         video_path=video_path,
@@ -365,7 +364,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         payload={"job_id": job_id, "candidate_count": len(candidates),
                                  "duration_ms": duration_ms_s05,
                                  "channel_dna_present": bool(channel_dna),
-                                 "guest_name_provided": bool(guest_name)},
+                                 "target_guest_provided": bool(target_guest)},
                         channel_id=channel_id,
                     )
                     continue  # log_step already called above

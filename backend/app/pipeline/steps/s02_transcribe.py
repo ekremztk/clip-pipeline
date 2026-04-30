@@ -3,7 +3,7 @@ from typing import Optional
 from app.services.deepgram_client import transcribe
 
 
-def _build_keyterms(channel_dna: dict, video_title: str, guest_name: Optional[str]) -> list[str]:
+def _build_keyterms(channel_dna: dict, video_title: str, target_guest: Optional[str]) -> list[str]:
     """
     Extracts domain-specific terms from channel DNA, video title, and guest name
     for Deepgram Nova-3 keyterm prompting (max 100 terms).
@@ -11,10 +11,10 @@ def _build_keyterms(channel_dna: dict, video_title: str, guest_name: Optional[st
     terms = set()
 
     # Guest name (highest priority)
-    if guest_name and guest_name.strip():
-        terms.add(guest_name.strip())
+    if target_guest and target_guest.strip():
+        terms.add(target_guest.strip())
         # Also add individual name parts for better recognition
-        for part in guest_name.strip().split():
+        for part in target_guest.strip().split():
             if len(part) > 2:
                 terms.add(part)
 
@@ -53,7 +53,7 @@ def _build_keyterms(channel_dna: dict, video_title: str, guest_name: Optional[st
 def run(audio_path: str, job_id: str,
         channel_dna: Optional[dict] = None,
         video_title: Optional[str] = None,
-        guest_name: Optional[str] = None) -> dict:
+        target_guest: Optional[str] = None) -> dict:
     """
     Step 02: Transcribe
     Calls Deepgram Nova-3 to transcribe the audio file and returns structured data.
@@ -63,7 +63,7 @@ def run(audio_path: str, job_id: str,
 
     try:
         # Build keyterms for Nova-3 prompting
-        keyterms = _build_keyterms(channel_dna or {}, video_title or "", guest_name)
+        keyterms = _build_keyterms(channel_dna or {}, video_title or "", target_guest)
         if keyterms:
             print(f"[S02] Keyterms for Nova-3: {keyterms[:10]}{'...' if len(keyterms) > 10 else ''}")
 

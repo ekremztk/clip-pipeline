@@ -59,7 +59,7 @@ class FusedSignalEntry(BaseModel):
 
 class JobCreateRequest(BaseModel):
     video_title: str
-    guest_name: Optional[str] = None
+    target_guest: Optional[str] = None
     channel_id: str
     upload_id: Optional[str] = None
     trim_start_seconds: Optional[float] = 0.0

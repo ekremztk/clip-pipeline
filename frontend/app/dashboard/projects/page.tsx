@@ -114,7 +114,7 @@ const getScoreHex = (score: number) => {
 
 // ─── Open in Editor Button ────────────────────────────────────────────────────
 
-const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: string | null }) => {
+const OpenInEditorButton = ({ clip, targetGuest }: { clip: Clip; targetGuest?: string | null }) => {
     if (!getBestUrl(clip)) {
         return (
             <button disabled style={{ border: "1px solid rgba(250,249,245,0.08)", color: "#ababab" }} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-medium cursor-not-allowed text-xs">
@@ -125,7 +125,7 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
     const params = new URLSearchParams({ clipUrl: getBestUrl(clip)! });
     if (clip.suggested_title) params.set("clipTitle", clip.suggested_title);
     if (clip.suggested_description) params.set("clipDesc", clip.suggested_description);
-    if (guestName) params.set("clipGuestName", guestName);
+    if (targetGuest) params.set("clipGuestName", targetGuest);
     if (clip.job_id) params.set("clipJobId", clip.job_id);
     // Pass clip ID so the editor can fetch reframe keyframes + caption words
     params.set("clipId", clip.id);
@@ -158,7 +158,7 @@ const OpenInEditorButton = ({ clip, guestName }: { clip: Clip; guestName?: strin
 
 interface ClipModalProps {
     clip: Clip;
-    guestName?: string | null;
+    targetGuest?: string | null;
     onClose: () => void;
     onApprove: (id: string) => void;
     onReject: (id: string) => void;
@@ -166,7 +166,7 @@ interface ClipModalProps {
     onDownload: (id: string) => void;
 }
 
-function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, onDownload }: ClipModalProps) {
+function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish, onDownload }: ClipModalProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const transcriptContainerRef = useRef<HTMLDivElement>(null);
     const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -396,7 +396,7 @@ function ClipModal({ clip, guestName, onClose, onApprove, onReject, onPublish, o
                             <Upload className="w-3.5 h-3.5" />
                             {clip.is_published ? "Mark Unpublished" : "Mark Published"}
                         </button>
-                        <OpenInEditorButton clip={clip} guestName={guestName} />
+                        <OpenInEditorButton clip={clip} targetGuest={targetGuest} />
                     </div>
                 </div>
 
@@ -1038,7 +1038,7 @@ function ProjectsContent() {
             {selectedClip && (
                 <ClipModal
                     clip={selectedClip}
-                    guestName={selectedJob?.guest_name}
+                    targetGuest={selectedJob?.target_guest}
                     onClose={closeClip}
                     onApprove={handleApprove}
                     onReject={handleReject}

@@ -13,7 +13,7 @@ def create_test_job(
     video_path: str | None = None,
     channel_id: str = "speedy_cast",
     title: str = "Director Test Run",
-    guest_name: str | None = None,
+    target_guest: str | None = None,
 ) -> dict:
     """Create and start a test pipeline job."""
     try:
@@ -41,7 +41,7 @@ def create_test_job(
         job_data = {
             "channel_id": channel_id,
             "video_title": f"[TEST] {title}",
-            "guest_name": guest_name,
+            "target_guest": target_guest,
             "status": "queued",
             "is_test_run": True,
         }
@@ -59,13 +59,13 @@ def create_test_job(
         try:
             asyncio.create_task(
                 _run_pipeline_async(job_id, video_url or video_path,
-                                    title, guest_name, channel_id)
+                                    title, target_guest, channel_id)
             )
         except RuntimeError:
             import threading
             thread = threading.Thread(
                 target=_run_pipeline_sync,
-                args=(job_id, video_url or video_path, title, guest_name, channel_id)
+                args=(job_id, video_url or video_path, title, target_guest, channel_id)
             )
             thread.daemon = True
             thread.start()
@@ -88,10 +88,10 @@ def create_test_job(
         return {"error": f"Test pipeline oluşturma hatası: {e}"}
 
 
-async def _run_pipeline_async(job_id, video_source, title, guest_name, channel_id):
+async def _run_pipeline_async(job_id, video_source, title, target_guest, channel_id):
     try:
         from app.pipeline.orchestrator import run_pipeline
-        await run_pipeline(job_id, video_source, title, guest_name, channel_id)
+        await run_pipeline(job_id, video_source, title, target_guest, channel_id)
     except Exception as e:
         print(f"[Director] Test pipeline failed: {e}")
         director_events.emit_sync(
@@ -100,13 +100,13 @@ async def _run_pipeline_async(job_id, video_source, title, guest_name, channel_i
         )
 
 
-def _run_pipeline_sync(job_id, video_source, title, guest_name, channel_id):
+def _run_pipeline_sync(job_id, video_source, title, target_guest, channel_id):
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
         loop.run_until_complete(
-            _run_pipeline_async(job_id, video_source, title, guest_name, channel_id)
+            _run_pipeline_async(job_id, video_source, title, target_guest, channel_id)
         )
     finally:
         loop.close()
