@@ -481,8 +481,10 @@ async def _fetch_upload_and_run_pipeline(
 
     if ext not in _ALLOWED_VIDEO_EXTS:
         ext = ".mp4"
-    storage.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    video_path = str(storage.UPLOAD_DIR / f"{job_id}{ext}")
+    from pathlib import Path
+    upload_dir = Path(storage.UPLOAD_DIR)
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    video_path = str(upload_dir / f"{job_id}{ext}")
     trimmed_path: Optional[str] = None
 
     try:
