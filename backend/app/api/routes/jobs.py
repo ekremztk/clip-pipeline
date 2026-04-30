@@ -97,7 +97,9 @@ class PresignUploadBody(BaseModel):
 
 class RegisterUploadBody(BaseModel):
     upload_id: str
-    duration_seconds: float
+    # Optional: if frontend couldn't read metadata (big files, moov at end),
+    # backend will measure it by downloading the R2 head and running ffprobe.
+    duration_seconds: Optional[float] = None
 
 
 @router.post("/presign-upload")
@@ -153,6 +155,25 @@ async def presign_upload(
     return {"upload_id": upload_id, "upload_url": upload_url, "r2_key": r2_key}
 
 
+def _probe_duration_from_url(url: str) -> float:
+    """
+    Run ffprobe over an HTTP(S) URL so we don't have to download the full
+    object — ffprobe will range-request only the moov atom.
+    """
+    cmd = [
+        "ffprobe",
+        "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        url,
+    ]
+    result = subprocess.run(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, check=True, timeout=120,
+    )
+    return float(result.stdout.strip())
+
+
 @router.post("/register-upload")
 @limiter.limit("40/hour")
 async def register_upload(
@@ -161,22 +182,60 @@ async def register_upload(
     current_user: dict = Depends(get_current_user),
 ):
     """
-    Called by the browser right after the presigned PUT finishes, with the duration
-    read from `<video>.onloadedmetadata`. Marks the row ready=true so /jobs can use it.
+    Called by the browser right after the presigned PUT finishes. The frontend
+    tries to read duration via `<video>.onloadedmetadata`, but big files with
+    a trailing `moov` atom often fail. If duration_seconds is missing/zero,
+    fall back to server-side ffprobe over a short-lived presigned GET URL.
     """
     try:
         supabase = get_client()
-        res = (
+
+        # Look up the row so we know the R2 key (needed for ffprobe fallback).
+        lookup = (
             supabase.table("video_uploads")
-            .update({"duration_seconds": body.duration_seconds, "ready": True})
+            .select("id, r2_key")
+            .eq("id", body.upload_id)
+            .eq("user_id", current_user["id"])
+            .single()
+            .execute()
+        )
+        if not lookup.data:
+            raise HTTPException(status_code=404, detail="Upload not found")
+        r2_key = lookup.data["r2_key"]
+
+        duration = body.duration_seconds or 0.0
+        if duration <= 0:
+            # Browser couldn't read metadata; measure server-side.
+            try:
+                from app.services.r2_client import generate_presigned_get, object_exists
+                if not object_exists(r2_key):
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Upload not found in storage — PUT may not have completed.",
+                    )
+                signed_get = generate_presigned_get(r2_key, expires_in=600)
+                duration = _probe_duration_from_url(signed_get)
+                print(f"[RegisterUpload] ffprobe fallback id={body.upload_id} duration={duration:.1f}s")
+            except HTTPException:
+                raise
+            except Exception as e:
+                print(f"[RegisterUpload] ffprobe fallback failed: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Could not read video duration. File may be corrupt.",
+                )
+
+        upd = (
+            supabase.table("video_uploads")
+            .update({"duration_seconds": duration, "ready": True})
             .eq("id", body.upload_id)
             .eq("user_id", current_user["id"])
             .execute()
         )
-        if not res.data:
+        if not upd.data:
             raise HTTPException(status_code=404, detail="Upload not found")
-        print(f"[RegisterUpload] id={body.upload_id} duration={body.duration_seconds:.1f}s")
-        return {"ok": True, "upload_id": body.upload_id}
+        print(f"[RegisterUpload] id={body.upload_id} duration={duration:.1f}s ready=True")
+        return {"ok": True, "upload_id": body.upload_id, "duration_seconds": duration}
     except HTTPException:
         raise
     except Exception as e:

@@ -718,15 +718,21 @@ export default function DashboardPage() {
             if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
         };
         xhr.onload = () => {
+            console.log(`[Upload] PUT complete status=${xhr.status} id=${upload_id}`);
             if (xhr.status < 200 || xhr.status >= 300) {
                 resetOnError('Upload failed. Please try again.');
                 return;
             }
-            // 3) Read duration via hidden <video>, then register.
-            const tmp = document.createElement('video');
-            tmp.preload = 'metadata';
-            tmp.src = url;
+
+            // 3) Finalize: tell backend the upload is done. Browser tries to
+            //    read duration first; for large files whose moov atom sits at
+            //    the end, this can hang — so we race it against a timeout and
+            //    let the server fall back to ffprobe.
+            let finalized = false;
             const finalize = async (duration: number) => {
+                if (finalized) return;
+                finalized = true;
+                console.log(`[Upload] Registering id=${upload_id} duration=${duration.toFixed(1)}s`);
                 try {
                     const regRes = await authFetch('/jobs/register-upload', {
                         method: 'POST',
@@ -734,22 +740,43 @@ export default function DashboardPage() {
                         body: JSON.stringify({ upload_id, duration_seconds: duration }),
                     });
                     if (!regRes.ok) {
-                        resetOnError('Could not finalize upload. Please try again.');
+                        const err = await regRes.json().catch(() => ({}));
+                        resetOnError(err.detail || 'Could not finalize upload. Please try again.');
                         return;
                     }
+                    const regBody = await regRes.json().catch(() => ({}));
+                    const serverDuration = Number(regBody.duration_seconds) || duration;
                     setUploadId(upload_id);
-                    setVideoDuration(duration);
-                    setEndTime(duration);
+                    setVideoDuration(serverDuration);
+                    setEndTime(serverDuration);
                     setUploadPhase('settings');
-                } catch {
+                } catch (e) {
+                    console.error('[Upload] register-upload network error', e);
                     resetOnError('Network error finalizing upload. Please try again.');
                 }
             };
+
+            const tmp = document.createElement('video');
+            tmp.preload = 'metadata';
+            tmp.muted = true;
+            tmp.src = url;
             tmp.onloadedmetadata = () => {
                 const dur = Number.isFinite(tmp.duration) && tmp.duration > 0 ? tmp.duration : 0;
                 finalize(dur);
             };
-            tmp.onerror = () => resetOnError('Could not read video metadata. File may be corrupt.');
+            tmp.onerror = () => {
+                console.warn('[Upload] <video> metadata error — falling back to server ffprobe');
+                finalize(0);
+            };
+            // Safety net: if the browser can't extract metadata within 20s
+            // (big files, trailing moov atom), register with duration=0 and
+            // let the server measure it via ffprobe over a presigned URL.
+            window.setTimeout(() => {
+                if (!finalized) {
+                    console.warn('[Upload] metadata read timed out — falling back to server ffprobe');
+                    finalize(0);
+                }
+            }, 20000);
         };
         xhr.onerror = () => resetOnError('Network error during upload. Please try again.');
         xhr.send(selectedFile);

@@ -25,6 +25,26 @@ def download_r2_to_local(r2_key: str, local_path: str) -> None:
     s3.download_file(settings.R2_BUCKET_NAME, r2_key, local_path)
 
 
+def generate_presigned_get(key: str, expires_in: int = 3600) -> str:
+    """Presigned GET URL so remote tools (ffprobe/ffmpeg) can read without credentials."""
+    s3 = get_r2_client()
+    return s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.R2_BUCKET_NAME, "Key": key},
+        ExpiresIn=expires_in,
+    )
+
+
+def object_exists(key: str) -> bool:
+    """HEAD an R2 object; True if found, False if 404."""
+    s3 = get_r2_client()
+    try:
+        s3.head_object(Bucket=settings.R2_BUCKET_NAME, Key=key)
+        return True
+    except ClientError:
+        return False
+
+
 def delete_prefix(prefix: str) -> int:
     """
     Delete ALL objects under a given R2 prefix. Returns count deleted.
