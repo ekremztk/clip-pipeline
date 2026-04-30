@@ -18,6 +18,58 @@ def generate_presigned_put(key: str, content_type: str, expires_in: int = 3600) 
     )
 
 
+def create_multipart_upload(key: str, content_type: str) -> str:
+    """Start an S3 multipart upload on R2. Returns the UploadId."""
+    s3 = get_r2_client()
+    resp = s3.create_multipart_upload(
+        Bucket=settings.R2_BUCKET_NAME,
+        Key=key,
+        ContentType=content_type,
+    )
+    return resp["UploadId"]
+
+
+def generate_presigned_upload_part(
+    key: str, upload_id: str, part_number: int, expires_in: int = 3600
+) -> str:
+    """Presigned PUT URL for a single part of a multipart upload."""
+    s3 = get_r2_client()
+    return s3.generate_presigned_url(
+        "upload_part",
+        Params={
+            "Bucket": settings.R2_BUCKET_NAME,
+            "Key": key,
+            "UploadId": upload_id,
+            "PartNumber": part_number,
+        },
+        ExpiresIn=expires_in,
+    )
+
+
+def complete_multipart_upload(key: str, upload_id: str, parts: list[dict]) -> dict:
+    """
+    Complete a multipart upload. `parts` must be a list of
+    {"PartNumber": int, "ETag": str} sorted by PartNumber ascending.
+    """
+    s3 = get_r2_client()
+    return s3.complete_multipart_upload(
+        Bucket=settings.R2_BUCKET_NAME,
+        Key=key,
+        UploadId=upload_id,
+        MultipartUpload={"Parts": parts},
+    )
+
+
+def abort_multipart_upload(key: str, upload_id: str) -> None:
+    """Abort a multipart upload to free storage of any uploaded parts."""
+    s3 = get_r2_client()
+    s3.abort_multipart_upload(
+        Bucket=settings.R2_BUCKET_NAME,
+        Key=key,
+        UploadId=upload_id,
+    )
+
+
 def download_r2_to_local(r2_key: str, local_path: str) -> None:
     """Stream-download an R2 object to disk without buffering in memory."""
     os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)

@@ -4,6 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## PENDING WORK (next session — remind user at start)
+
+- **R2→Railway download bottleneck**: After a multi-GB upload to R2, `POST /jobs` still downloads the full file to Railway disk before S01 can start. This is slow enough that users hit retry → backend 404s because `video_uploads.consumed=true` was flipped by the first attempt. Two possible fixes: (a) feed S01 ffmpeg a presigned R2 GET URL directly (range-reads, no local copy) — minimally invasive; (b) move pre-S08 steps to Modal. Go with (a) unless there is a specific reason not to. Also consider not flipping `consumed=true` until after the R2 download completes (or moving the whole fetch+trim to a background task) so retries stay valid.
+- **R2 CORS `ExposeHeaders: ["ETag"]`** — required for multipart upload. Browser reads the part ETag from each PUT response, sends them to `/jobs/mpu/complete`. Without this header exposed, complete fails with "missing ETag" after every part succeeded. Cloudflare dashboard → R2 → bucket → Settings → CORS → add `"ExposeHeaders": ["ETag"]` to the existing rule. Also ensure `AllowedHeaders` covers `Content-Type` and the `AllowedMethods` includes `PUT` for both origins.
+- **Optional follow-up**: tus.io protocol for resumable uploads (page reload continues from where it left off). Only if the user wants resumability — multipart alone addresses the speed issue.
+- **Unpushed commits on main**: `91d8431` (voice-library async fix). `6e3c662` (upload finalization fix) already pushed. Ask user before pushing `91d8431`.
+
+---
+
 ## REPO STRUCTURE
 
 This is a **monorepo with two separate web applications**:

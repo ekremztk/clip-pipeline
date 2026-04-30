@@ -684,11 +684,22 @@ export default function DashboardPage() {
             setVideoUrl('');
         };
 
-        // 1) Ask backend for a presigned PUT URL.
+        // S3-compatible multipart upload against R2. Single PUT saturates at ~40%
+        // of the link's capacity on multi-GB files; splitting into parallel parts
+        // typically doubles the effective throughput.
+        //
+        // Part sizing: R2 requires ≥5 MiB per part (except the last) and ≤10,000
+        // total parts. We target ~64 MiB parts so a 5 GB file fits comfortably
+        // under the 10k cap while keeping each part small enough that 6 in
+        // parallel saturate the link.
+        const PART_SIZE = 64 * 1024 * 1024;           // 64 MiB per part
+        const MAX_CONCURRENT_PARTS = 6;               // parallel PUTs
+        const MAX_PART_ATTEMPTS = 3;                  // retry each part on transient failure
+
+        // 1) Init multipart upload.
         let upload_id: string;
-        let upload_url: string;
         try {
-            const presignRes = await authFetch('/jobs/presign-upload', {
+            const initRes = await authFetch('/jobs/mpu/init', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -697,89 +708,169 @@ export default function DashboardPage() {
                     size_bytes: selectedFile.size,
                 }),
             });
-            if (!presignRes.ok) {
-                const err = await presignRes.json().catch(() => ({}));
+            if (!initRes.ok) {
+                const err = await initRes.json().catch(() => ({}));
                 resetOnError(err.detail || 'Could not prepare upload. Please try again.');
                 return;
             }
-            const body = await presignRes.json();
+            const body = await initRes.json();
             upload_id = body.upload_id;
-            upload_url = body.upload_url;
         } catch {
             resetOnError('Network error preparing upload. Please try again.');
             return;
         }
 
-        // 2) Direct PUT to R2 with progress tracking.
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', upload_url, true);
-        xhr.setRequestHeader('Content-Type', selectedFile.type || 'video/mp4');
-        xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => {
-            console.log(`[Upload] PUT complete status=${xhr.status} id=${upload_id}`);
-            if (xhr.status < 200 || xhr.status >= 300) {
-                resetOnError('Upload failed. Please try again.');
-                return;
-            }
+        const totalParts = Math.ceil(selectedFile.size / PART_SIZE);
 
-            // 3) Finalize: tell backend the upload is done. Browser tries to
-            //    read duration first; for large files whose moov atom sits at
-            //    the end, this can hang — so we race it against a timeout and
-            //    let the server fall back to ffprobe.
-            let finalized = false;
-            const finalize = async (duration: number) => {
-                if (finalized) return;
-                finalized = true;
-                console.log(`[Upload] Registering id=${upload_id} duration=${duration.toFixed(1)}s`);
-                try {
-                    const regRes = await authFetch('/jobs/register-upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ upload_id, duration_seconds: duration }),
-                    });
-                    if (!regRes.ok) {
-                        const err = await regRes.json().catch(() => ({}));
-                        resetOnError(err.detail || 'Could not finalize upload. Please try again.');
+        // Track progress per part so the bar reflects bytes uploaded across all
+        // parallel streams — not just the most recent one.
+        const partProgress = new Array<number>(totalParts).fill(0);
+        const totalSize = selectedFile.size;
+        const refreshProgress = () => {
+            const sent = partProgress.reduce((a, b) => a + b, 0);
+            setUploadProgress(Math.min(99, Math.round((sent / totalSize) * 100)));
+        };
+
+        const uploadPart = (partIndex: number): Promise<{ part_number: number; etag: string }> => {
+            const partNumber = partIndex + 1;
+            const start = partIndex * PART_SIZE;
+            const end = Math.min(start + PART_SIZE, selectedFile.size);
+            const blob = selectedFile.slice(start, end);
+
+            return new Promise(async (resolve, reject) => {
+                let attempt = 0;
+                const tryOnce = async () => {
+                    attempt += 1;
+                    let signedUrl: string;
+                    try {
+                        const signRes = await authFetch('/jobs/mpu/sign-part', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ upload_id, part_number: partNumber }),
+                        });
+                        if (!signRes.ok) throw new Error('sign failed');
+                        const { url: partUrl } = await signRes.json();
+                        signedUrl = partUrl;
+                    } catch (e) {
+                        if (attempt < MAX_PART_ATTEMPTS) { setTimeout(tryOnce, 1000 * attempt); return; }
+                        reject(e instanceof Error ? e : new Error('sign failed'));
                         return;
                     }
-                    const regBody = await regRes.json().catch(() => ({}));
-                    const serverDuration = Number(regBody.duration_seconds) || duration;
-                    setUploadId(upload_id);
-                    setVideoDuration(serverDuration);
-                    setEndTime(serverDuration);
-                    setUploadPhase('settings');
-                } catch (e) {
-                    console.error('[Upload] register-upload network error', e);
-                    resetOnError('Network error finalizing upload. Please try again.');
-                }
-            };
 
-            const tmp = document.createElement('video');
-            tmp.preload = 'metadata';
-            tmp.muted = true;
-            tmp.src = url;
-            tmp.onloadedmetadata = () => {
-                const dur = Number.isFinite(tmp.duration) && tmp.duration > 0 ? tmp.duration : 0;
-                finalize(dur);
-            };
-            tmp.onerror = () => {
-                console.warn('[Upload] <video> metadata error — falling back to server ffprobe');
-                finalize(0);
-            };
-            // Safety net: if the browser can't extract metadata within 20s
-            // (big files, trailing moov atom), register with duration=0 and
-            // let the server measure it via ffprobe over a presigned URL.
-            window.setTimeout(() => {
-                if (!finalized) {
-                    console.warn('[Upload] metadata read timed out — falling back to server ffprobe');
-                    finalize(0);
-                }
-            }, 20000);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('PUT', signedUrl, true);
+                    xhr.upload.onprogress = (ev) => {
+                        if (ev.lengthComputable) {
+                            partProgress[partIndex] = ev.loaded;
+                            refreshProgress();
+                        }
+                    };
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            // R2/S3 return the part ETag in this header. CORS must
+                            // expose it — handled in deploy notes (ExposeHeaders: ETag).
+                            const etag = xhr.getResponseHeader('ETag') || xhr.getResponseHeader('etag');
+                            if (!etag) {
+                                if (attempt < MAX_PART_ATTEMPTS) { partProgress[partIndex] = 0; refreshProgress(); setTimeout(tryOnce, 1000 * attempt); return; }
+                                reject(new Error('missing ETag — check R2 CORS ExposeHeaders'));
+                                return;
+                            }
+                            partProgress[partIndex] = blob.size;
+                            refreshProgress();
+                            resolve({ part_number: partNumber, etag });
+                        } else if (attempt < MAX_PART_ATTEMPTS) {
+                            partProgress[partIndex] = 0; refreshProgress();
+                            setTimeout(tryOnce, 1000 * attempt);
+                        } else {
+                            reject(new Error(`part ${partNumber} failed: ${xhr.status}`));
+                        }
+                    };
+                    xhr.onerror = () => {
+                        if (attempt < MAX_PART_ATTEMPTS) { partProgress[partIndex] = 0; refreshProgress(); setTimeout(tryOnce, 1000 * attempt); }
+                        else reject(new Error(`part ${partNumber} network error`));
+                    };
+                    xhr.send(blob);
+                };
+                tryOnce();
+            });
         };
-        xhr.onerror = () => resetOnError('Network error during upload. Please try again.');
-        xhr.send(selectedFile);
+
+        // 2) Run up to MAX_CONCURRENT_PARTS in flight; refill as each finishes.
+        const collected: { part_number: number; etag: string }[] = [];
+        let nextPart = 0;
+        const aborted = { value: false };
+        const abortUpload = async (message: string) => {
+            if (aborted.value) return;
+            aborted.value = true;
+            try {
+                await authFetch('/jobs/mpu/abort', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ upload_id }),
+                });
+            } catch { /* best-effort */ }
+            resetOnError(message);
+        };
+
+        const runWorker = async () => {
+            while (!aborted.value) {
+                const idx = nextPart;
+                if (idx >= totalParts) return;
+                nextPart += 1;
+                try {
+                    const part = await uploadPart(idx);
+                    collected.push(part);
+                } catch (e) {
+                    console.error('[Upload] part failed', e);
+                    await abortUpload('Upload failed. Please try again.');
+                    return;
+                }
+            }
+        };
+
+        try {
+            await Promise.all(
+                Array.from({ length: Math.min(MAX_CONCURRENT_PARTS, totalParts) }, runWorker),
+            );
+        } catch (e) {
+            console.error('[Upload] worker crashed', e);
+            await abortUpload('Upload failed. Please try again.');
+            return;
+        }
+        if (aborted.value) return;
+        if (collected.length !== totalParts) {
+            await abortUpload('Upload failed. Please try again.');
+            return;
+        }
+
+        // 3) Complete the multipart upload. Backend will measure duration via ffprobe.
+        setUploadProgress(100);
+        try {
+            const completeRes = await authFetch('/jobs/mpu/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    upload_id,
+                    parts: collected
+                        .sort((a, b) => a.part_number - b.part_number)
+                        .map(p => ({ part_number: p.part_number, etag: p.etag })),
+                }),
+            });
+            if (!completeRes.ok) {
+                const err = await completeRes.json().catch(() => ({}));
+                resetOnError(err.detail || 'Could not finalize upload. Please try again.');
+                return;
+            }
+            const body = await completeRes.json();
+            const serverDuration = Number(body.duration_seconds) || 0;
+            setUploadId(upload_id);
+            setVideoDuration(serverDuration);
+            setEndTime(serverDuration);
+            setUploadPhase('settings');
+        } catch (e) {
+            console.error('[Upload] complete network error', e);
+            resetOnError('Network error finalizing upload. Please try again.');
+        }
     };
 
     const handleStartProcessing = async () => {

@@ -102,6 +102,31 @@ class RegisterUploadBody(BaseModel):
     duration_seconds: Optional[float] = None
 
 
+class MpuInitBody(BaseModel):
+    filename: str
+    content_type: str
+    size_bytes: int
+
+
+class MpuSignPartBody(BaseModel):
+    upload_id: str
+    part_number: int
+
+
+class MpuCompletePart(BaseModel):
+    part_number: int
+    etag: str
+
+
+class MpuCompleteBody(BaseModel):
+    upload_id: str
+    parts: list[MpuCompletePart]
+
+
+class MpuAbortBody(BaseModel):
+    upload_id: str
+
+
 @router.post("/presign-upload")
 @limiter.limit("20/hour")
 async def presign_upload(
@@ -241,6 +266,194 @@ async def register_upload(
     except Exception as e:
         print(f"[RegisterUpload] error: {e}")
         raise HTTPException(status_code=500, detail="Failed to register upload")
+
+
+# --- Multipart upload (parallel parts) ---------------------------------------
+# Single PUT of multi-GB files saturates a single TCP connection at ~40% of the
+# link's capacity. S3-compatible multipart upload splits the object into parts
+# that the browser uploads in parallel, typically 2–4× faster on the same link.
+# R2 supports this 1:1 with the S3 API.
+
+# R2 requires parts to be 5 MiB–5 GiB and at most 10,000 per upload.
+_MPU_MIN_PART_SIZE = 5 * 1024 * 1024            # 5 MiB (R2 minimum)
+_MPU_MAX_PARTS = 10_000
+_MPU_PART_URL_TTL = 6 * 3600                    # 6h per-part URL
+
+
+@router.post("/mpu/init")
+@limiter.limit("20/hour")
+async def mpu_init(
+    request: Request,
+    body: MpuInitBody,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Start a multipart upload. Returns `upload_id` (our DB id) and the R2 `mpu_upload_id`
+    needed when signing parts / completing. The frontend decides its own part size and
+    count; we only enforce R2's 5 MiB / 10,000-part limits at sign + complete time.
+    """
+    if body.content_type not in _ALLOWED_VIDEO_TYPES:
+        raise HTTPException(status_code=400, detail="Unsupported file format")
+    if body.size_bytes <= 0:
+        raise HTTPException(status_code=400, detail="size_bytes must be > 0")
+    if body.size_bytes > settings.MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large (max {settings.MAX_UPLOAD_BYTES // (1024 * 1024 * 1024)} GB)",
+        )
+
+    ext = os.path.splitext(body.filename or "")[1].lower()
+    if ext not in _ALLOWED_VIDEO_EXTS:
+        ext = ".mp4"
+
+    upload_id = str(uuid.uuid4())
+    r2_key = f"upload_sources/{current_user['id']}/{upload_id}{ext}"
+
+    try:
+        from app.services.r2_client import create_multipart_upload
+        mpu_upload_id = create_multipart_upload(r2_key, body.content_type)
+    except Exception as e:
+        print(f"[MpuInit] R2 create error: {e}")
+        raise HTTPException(status_code=500, detail="Could not start multipart upload")
+
+    try:
+        get_client().table("video_uploads").insert({
+            "id": upload_id,
+            "user_id": current_user["id"],
+            "r2_key": r2_key,
+            "filename": body.filename,
+            "content_type": body.content_type,
+            "size_bytes": body.size_bytes,
+            "mpu_upload_id": mpu_upload_id,
+        }).execute()
+    except Exception as e:
+        # Best-effort: release the R2 multipart handle so storage doesn't leak.
+        try:
+            from app.services.r2_client import abort_multipart_upload
+            abort_multipart_upload(r2_key, mpu_upload_id)
+        except Exception:
+            pass
+        print(f"[MpuInit] DB insert error: {e}")
+        raise HTTPException(status_code=500, detail="Could not register upload")
+
+    print(f"[MpuInit] user={current_user['id']} id={upload_id} size={body.size_bytes}")
+    return {
+        "upload_id": upload_id,
+        "r2_key": r2_key,
+        "mpu_upload_id": mpu_upload_id,
+        "min_part_size": _MPU_MIN_PART_SIZE,
+        "max_parts": _MPU_MAX_PARTS,
+    }
+
+
+def _lookup_mpu_row(supabase, upload_id: str, user_id: str) -> dict:
+    row = (
+        supabase.table("video_uploads")
+        .select("id,user_id,r2_key,mpu_upload_id,ready")
+        .eq("id", upload_id)
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+    if not row.data:
+        raise HTTPException(status_code=404, detail="Upload not found")
+    if not row.data.get("mpu_upload_id"):
+        raise HTTPException(status_code=400, detail="This upload is not multipart")
+    return row.data
+
+
+@router.post("/mpu/sign-part")
+@limiter.limit("1000/hour")
+async def mpu_sign_part(
+    request: Request,
+    body: MpuSignPartBody,
+    current_user: dict = Depends(get_current_user),
+):
+    """Return a short-lived presigned URL for a single part PUT."""
+    if body.part_number < 1 or body.part_number > _MPU_MAX_PARTS:
+        raise HTTPException(status_code=400, detail="part_number out of range")
+
+    row = _lookup_mpu_row(get_client(), body.upload_id, current_user["id"])
+    try:
+        from app.services.r2_client import generate_presigned_upload_part
+        url = generate_presigned_upload_part(
+            row["r2_key"], row["mpu_upload_id"], body.part_number, expires_in=_MPU_PART_URL_TTL,
+        )
+    except Exception as e:
+        print(f"[MpuSignPart] R2 sign error: {e}")
+        raise HTTPException(status_code=500, detail="Could not sign part")
+    return {"url": url, "part_number": body.part_number}
+
+
+@router.post("/mpu/complete")
+@limiter.limit("60/hour")
+async def mpu_complete(
+    request: Request,
+    body: MpuCompleteBody,
+    current_user: dict = Depends(get_current_user),
+):
+    """Finalize the multipart upload. Caller sends collected part ETags."""
+    if not body.parts:
+        raise HTTPException(status_code=400, detail="parts must not be empty")
+    if len(body.parts) > _MPU_MAX_PARTS:
+        raise HTTPException(status_code=400, detail="too many parts")
+
+    row = _lookup_mpu_row(get_client(), body.upload_id, current_user["id"])
+
+    # R2 requires ascending, contiguous part numbers starting at 1.
+    ordered = sorted(body.parts, key=lambda p: p.part_number)
+    for idx, p in enumerate(ordered, start=1):
+        if p.part_number != idx:
+            raise HTTPException(status_code=400, detail="parts must be contiguous starting at 1")
+    s3_parts = [{"PartNumber": p.part_number, "ETag": p.etag} for p in ordered]
+
+    try:
+        from app.services.r2_client import complete_multipart_upload
+        complete_multipart_upload(row["r2_key"], row["mpu_upload_id"], s3_parts)
+    except Exception as e:
+        print(f"[MpuComplete] R2 complete error: {e}")
+        raise HTTPException(status_code=500, detail="Could not finalize upload")
+
+    # Measure duration server-side (ffprobe over presigned GET), then mark ready.
+    try:
+        from app.services.r2_client import generate_presigned_get
+        signed_get = generate_presigned_get(row["r2_key"], expires_in=600)
+        duration = _probe_duration_from_url(signed_get)
+    except Exception as e:
+        print(f"[MpuComplete] ffprobe failed: {e}")
+        duration = 0.0
+
+    try:
+        get_client().table("video_uploads").update({
+            "duration_seconds": duration,
+            "ready": True,
+        }).eq("id", body.upload_id).eq("user_id", current_user["id"]).execute()
+    except Exception as e:
+        print(f"[MpuComplete] DB update error: {e}")
+
+    print(f"[MpuComplete] id={body.upload_id} parts={len(ordered)} duration={duration:.1f}s")
+    return {"ok": True, "upload_id": body.upload_id, "duration_seconds": duration}
+
+
+@router.post("/mpu/abort")
+@limiter.limit("60/hour")
+async def mpu_abort(
+    request: Request,
+    body: MpuAbortBody,
+    current_user: dict = Depends(get_current_user),
+):
+    """Abort a multipart upload. Frees storage for any parts already uploaded."""
+    row = _lookup_mpu_row(get_client(), body.upload_id, current_user["id"])
+    try:
+        from app.services.r2_client import abort_multipart_upload
+        abort_multipart_upload(row["r2_key"], row["mpu_upload_id"])
+    except Exception as e:
+        print(f"[MpuAbort] R2 abort error: {e}")
+    try:
+        get_client().table("video_uploads").delete().eq("id", body.upload_id).eq("user_id", current_user["id"]).execute()
+    except Exception as e:
+        print(f"[MpuAbort] DB delete error: {e}")
+    return {"ok": True}
 
 
 async def _download_and_run_pipeline(
