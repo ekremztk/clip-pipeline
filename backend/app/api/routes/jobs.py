@@ -538,6 +538,15 @@ async def _fetch_upload_and_run_pipeline(
                     os.remove(path)
                 except Exception:
                     pass
+    finally:
+        # Delete upload_sources R2 object — pipeline has it locally now, no longer needed
+        try:
+            from app.services.r2_client import get_r2_client
+            from app.config import settings as _s
+            get_r2_client().delete_object(Bucket=_s.R2_BUCKET_NAME, Key=r2_key)
+            print(f"[JobsRoute] Deleted upload_sources R2 object: {r2_key}")
+        except Exception as _e:
+            print(f"[JobsRoute] upload_sources R2 delete error (non-critical): {_e}")
 
 
 async def _download_and_run_pipeline(

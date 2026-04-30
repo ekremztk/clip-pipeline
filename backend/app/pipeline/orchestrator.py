@@ -458,11 +458,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                                  "captioned_count": sum(1 for c in captioned_clips if c.get("video_captioned_path"))},
                         channel_id=channel_id,
                     )
-                    # Cleanup transient R2 objects — only captions/ stays permanent
-                    try:
-                        _cleanup_pipeline_r2(job_id, exported_clips, reframed_clips, captioned_clips)
-                    except Exception as _ce:
-                        print(f"[Orchestrator] R2 cleanup error (non-critical): {_ce}")
+                    pass  # R2 cleanup moved to finally block
 
                 duration_ms = int((time.time() - step_start_time) * 1000)
                 log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value, duration_ms=duration_ms)
@@ -572,4 +568,17 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 print(f"[Orchestrator] finally: removed {n} source_videos objects")
         except Exception as _e:
             print(f"[Orchestrator] finally: source_videos cleanup error: {_e}")
+        # Always cleanup transient R2 objects — success or failure
+        try:
+            _cleanup_pipeline_r2(job_id, exported_clips, reframed_clips, captioned_clips)
+        except Exception as _ce:
+            print(f"[Orchestrator] finally: R2 cleanup error (non-critical): {_ce}")
+        # gaming-reframe/ prefix — always delete, never needed after pipeline
+        try:
+            from app.services.r2_client import delete_prefix
+            n = delete_prefix(f"gaming-reframe/{job_id}/")
+            if n:
+                print(f"[Orchestrator] finally: removed {n} gaming-reframe objects")
+        except Exception as _e:
+            print(f"[Orchestrator] finally: gaming-reframe cleanup error: {_e}")
 
