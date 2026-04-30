@@ -70,7 +70,7 @@ def _upload_audio_to_r2(audio_bytes: bytes, filename: str) -> str:
     return f"{public_url}/{key}"
 
 
-def _compute_embedding_via_modal(audio_bytes: bytes, filename: str) -> dict:
+async def _compute_embedding_via_modal(audio_bytes: bytes, filename: str) -> dict:
     """
     Call the Modal `compute_voice_embedding` function. Returns dict with
     `embedding` (list[float], 256-dim) and `duration_sec`, or raises on error.
@@ -85,7 +85,7 @@ def _compute_embedding_via_modal(audio_bytes: bytes, filename: str) -> dict:
     except Exception as e:
         raise RuntimeError(f"Modal function not deployed: {e}")
 
-    result = fn.remote(audio_bytes, filename)
+    result = await fn.remote.aio(audio_bytes, filename)
     if not isinstance(result, dict):
         raise RuntimeError(f"Unexpected Modal response: {type(result)}")
     if "error" in result:
@@ -156,7 +156,7 @@ async def create_voice(
 
     # Compute embedding via Modal
     try:
-        emb_result = _compute_embedding_via_modal(audio_bytes, safe_name)
+        emb_result = await _compute_embedding_via_modal(audio_bytes, safe_name)
     except Exception as e:
         print(f"[VoiceLibrary] embedding failed: {e}")
         raise HTTPException(status_code=500, detail=f"Embedding failed: {e}")
