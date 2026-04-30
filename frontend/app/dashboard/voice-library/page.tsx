@@ -7,6 +7,7 @@ import { authFetch } from '@/lib/api';
 interface Voice {
     id: string;
     name: string;
+    role: 'host' | 'guest';
     sample_duration_sec: number | null;
     audio_path: string | null;
     created_at: string;
@@ -40,6 +41,7 @@ export default function VoiceLibraryPage() {
 
     const [showAdd, setShowAdd] = useState(false);
     const [name, setName] = useState('');
+    const [role, setRole] = useState<'host' | 'guest'>('guest');
     const [file, setFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export default function VoiceLibraryPage() {
 
     const resetForm = () => {
         setName('');
+        setRole('guest');
         setFile(null);
         setFormError(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -128,6 +131,7 @@ export default function VoiceLibraryPage() {
         try {
             const formData = new FormData();
             formData.append('name', trimmed);
+            formData.append('role', role);
             formData.append('file', file);
 
             const res = await authFetch('/voice-library', {
@@ -247,9 +251,10 @@ export default function VoiceLibraryPage() {
                                 color: '#737373',
                             }}
                         >
-                            <div className="col-span-6">Name</div>
+                            <div className="col-span-5">Name</div>
+                            <div className="col-span-2">Role</div>
                             <div className="col-span-2">Duration</div>
-                            <div className="col-span-3">Added</div>
+                            <div className="col-span-2">Added</div>
                             <div className="col-span-1"></div>
                         </div>
                         {voices.map(v => (
@@ -258,7 +263,7 @@ export default function VoiceLibraryPage() {
                                 className="grid grid-cols-12 gap-4 px-5 py-3 items-center text-sm"
                                 style={{ borderBottom: '1px solid rgba(250,249,245,0.05)' }}
                             >
-                                <div className="col-span-6 flex items-center gap-3">
+                                <div className="col-span-5 flex items-center gap-3">
                                     <div
                                         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                                         style={{ background: 'rgba(250,249,245,0.06)' }}
@@ -269,10 +274,22 @@ export default function VoiceLibraryPage() {
                                         {v.name}
                                     </span>
                                 </div>
+                                <div className="col-span-2">
+                                    <span
+                                        className="px-2 py-0.5 rounded-md text-xs font-medium"
+                                        style={{
+                                            background: v.role === 'host' ? 'rgba(139,92,246,0.12)' : 'rgba(34,197,94,0.10)',
+                                            color: v.role === 'host' ? '#a78bfa' : '#4ade80',
+                                            border: v.role === 'host' ? '1px solid rgba(139,92,246,0.25)' : '1px solid rgba(34,197,94,0.2)',
+                                        }}
+                                    >
+                                        {v.role ?? 'guest'}
+                                    </span>
+                                </div>
                                 <div className="col-span-2" style={{ color: '#ababab' }}>
                                     {formatDuration(v.sample_duration_sec)}
                                 </div>
-                                <div className="col-span-3" style={{ color: '#ababab' }}>
+                                <div className="col-span-2" style={{ color: '#ababab' }}>
                                     {formatDate(v.created_at)}
                                 </div>
                                 <div className="col-span-1 flex justify-end">
@@ -358,6 +375,39 @@ export default function VoiceLibraryPage() {
                                         color: '#faf9f5',
                                     }}
                                 />
+                            </div>
+
+                            <div>
+                                <label
+                                    className="block text-xs uppercase tracking-wider mb-2"
+                                    style={{ color: '#737373' }}
+                                >
+                                    Role
+                                </label>
+                                <div className="flex gap-2">
+                                    {(['guest', 'host'] as const).map(r => (
+                                        <button
+                                            key={r}
+                                            type="button"
+                                            disabled={submitting}
+                                            onClick={() => setRole(r)}
+                                            className="flex-1 py-2 rounded-xl text-sm font-medium transition-colors capitalize disabled:opacity-40"
+                                            style={{
+                                                background: role === r
+                                                    ? (r === 'host' ? 'rgba(139,92,246,0.15)' : 'rgba(34,197,94,0.12)')
+                                                    : 'rgba(250,249,245,0.04)',
+                                                border: role === r
+                                                    ? (r === 'host' ? '1px solid rgba(139,92,246,0.35)' : '1px solid rgba(34,197,94,0.3)')
+                                                    : '1px solid rgba(250,249,245,0.08)',
+                                                color: role === r
+                                                    ? (r === 'host' ? '#a78bfa' : '#4ade80')
+                                                    : '#737373',
+                                            }}
+                                        >
+                                            {r}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             <div>

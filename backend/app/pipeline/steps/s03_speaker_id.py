@@ -69,9 +69,10 @@ def run(
             try:
                 from app.services.voice_matcher import match_speakers
                 matched = match_speakers(utterances, audio_path)
-                for speaker_id, name in matched.items():
-                    if name and speaker_id in predicted_map:
-                        predicted_map[speaker_id]["name"] = name
+                for speaker_id, info in matched.items():
+                    if info and speaker_id in predicted_map:
+                        predicted_map[speaker_id]["name"] = info["name"]
+                        predicted_map[speaker_id]["role"] = info["role"]
             except Exception as e:
                 print(f"[S03] Voice matching error (non-critical, continuing): {e}")
         else:

@@ -82,8 +82,8 @@ def _centroid(vectors: list[list[float]]) -> list[float]:
     return [x / n for x in result]
 
 
-def _query_db(embedding: list[float], threshold: float = MATCH_THRESHOLD) -> Optional[tuple[str, float]]:
-    """Query person_voices via match_voice RPC. Returns (name, similarity) or None."""
+def _query_db(embedding: list[float], threshold: float = MATCH_THRESHOLD) -> Optional[tuple[str, str, float]]:
+    """Query person_voices via match_voice RPC. Returns (name, role, similarity) or None."""
     try:
         from app.services.supabase_client import get_client
         sb = get_client()
@@ -94,7 +94,7 @@ def _query_db(embedding: list[float], threshold: float = MATCH_THRESHOLD) -> Opt
         }).execute()
         if res.data:
             row = res.data[0]
-            return row["name"], float(row["similarity"])
+            return row["name"], row.get("role", "guest"), float(row["similarity"])
         return None
     except Exception as e:
         print(f"[VoiceMatcher] DB query error: {e}")
@@ -105,7 +105,7 @@ def match_speakers(
     utterances: list[dict],
     audio_path: str,
     threshold: float = MATCH_THRESHOLD,
-) -> dict[str, Optional[str]]:
+) -> dict[str, Optional[dict]]:
     """
     Main entry point. Given Deepgram utterances and the local audio file,
     returns {speaker_id: matched_name_or_None} for every unique speaker.
@@ -118,6 +118,8 @@ def match_speakers(
       - confidence ≥ 0.70
     are used for embedding. Up to MAX_SEGMENTS_PER_SPEAKER per speaker.
     Multiple embeddings are averaged (centroid) before DB lookup.
+
+    Returns {speaker_id: {"name": str, "role": str} or None}
     """
     # Group utterances by speaker
     by_speaker: dict = {}
@@ -127,7 +129,7 @@ def match_speakers(
             by_speaker[sid] = []
         by_speaker[sid].append(utt)
 
-    results: dict[str, Optional[str]] = {}
+    results: dict[str, Optional[dict]] = {}
 
     for speaker_id, utts in by_speaker.items():
         # Filter by confidence and duration, sort longest first
@@ -168,9 +170,9 @@ def match_speakers(
         match = _query_db(centroid, threshold)
 
         if match:
-            name, similarity = match
-            print(f"[VoiceMatcher] Speaker {speaker_id} → '{name}' (similarity={similarity:.3f}, segments={len(embeddings)})")
-            results[speaker_id] = name
+            name, role, similarity = match
+            print(f"[VoiceMatcher] Speaker {speaker_id} → '{name}' ({role}, similarity={similarity:.3f}, segments={len(embeddings)})")
+            results[speaker_id] = {"name": name, "role": role}
         else:
             print(f"[VoiceMatcher] Speaker {speaker_id}: no match above threshold={threshold}")
             results[speaker_id] = None

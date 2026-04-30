@@ -102,7 +102,7 @@ async def list_voices(current_user: dict = Depends(get_current_user)):
         sb = get_client()
         result = (
             sb.table("person_voices")
-            .select("id,name,sample_duration_sec,audio_path,created_at,updated_at")
+            .select("id,name,role,sample_duration_sec,audio_path,created_at,updated_at")
             .order("created_at", desc=True)
             .execute()
         )
@@ -112,9 +112,12 @@ async def list_voices(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail="Failed to list voices")
 
 
+_ALLOWED_ROLES = {"host", "guest"}
+
 @router.post("")
 async def create_voice(
     name: str = Form(...),
+    role: str = Form("guest"),
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
 ):
@@ -127,6 +130,9 @@ async def create_voice(
         raise HTTPException(status_code=400, detail="Name cannot be empty")
     if len(name) > 120:
         raise HTTPException(status_code=400, detail="Name too long (max 120 chars)")
+    role = role.strip().lower()
+    if role not in _ALLOWED_ROLES:
+        raise HTTPException(status_code=400, detail="Role must be 'host' or 'guest'")
 
     ext = _safe_audio_ext(file.filename or "")
 
@@ -177,6 +183,7 @@ async def create_voice(
             .insert(
                 {
                     "name": name,
+                    "role": role,
                     "embedding": embedding,
                     "sample_duration_sec": duration,
                     "audio_path": audio_url,
@@ -192,6 +199,7 @@ async def create_voice(
     return {
         "id": row.get("id"),
         "name": name,
+        "role": role,
         "sample_duration_sec": duration,
         "audio_path": audio_url,
         "created_at": row.get("created_at"),
