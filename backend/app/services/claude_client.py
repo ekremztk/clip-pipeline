@@ -2,19 +2,15 @@ import time
 import anthropic
 from app.config import settings
 
-_client: anthropic.AnthropicBedrock | None = None
+CLAUDE_MODEL_FALLBACK = "us.anthropic.claude-opus-4-6"
 
 
-def get_claude_client() -> anthropic.AnthropicBedrock:
-    global _client
-    if _client is None:
-        _client = anthropic.AnthropicBedrock(
-            aws_access_key=settings.AWS_BEDROCK_ACCESS_KEY,
-            aws_secret_key=settings.AWS_BEDROCK_SECRET_KEY,
-            aws_region=settings.AWS_BEDROCK_REGION,
-        )
-        print(f"[ClaudeClient] Initialized (Bedrock). Model: {settings.CLAUDE_MODEL}")
-    return _client
+def _make_client() -> anthropic.AnthropicBedrock:
+    return anthropic.AnthropicBedrock(
+        aws_access_key=settings.AWS_BEDROCK_ACCESS_KEY,
+        aws_secret_key=settings.AWS_BEDROCK_SECRET_KEY,
+        aws_region=settings.AWS_BEDROCK_REGION,
+    )
 
 
 def call_claude(
@@ -24,16 +20,10 @@ def call_claude(
     extra_system_blocks: list | None = None,
 ) -> str:
     """
-    Calls Claude on AWS Bedrock with adaptive thinking.
-
-    content: list of Anthropic content blocks (text / image dicts)
-    system: system prompt text
-    extra_system_blocks: additional cached system blocks appended after main system
-
-    Retries on rate limits: 30s, 60s, then raise RuntimeError.
+    Calls Claude on AWS Bedrock with max thinking budget.
+    Falls back to CLAUDE_MODEL_FALLBACK if primary model returns an error.
+    Retries on rate limits: 60s, 120s, 180s (4 attempts).
     """
-    client = get_claude_client()
-
     system_text = (
         system
         or "You are a ruthless viral clip quality analyst. "
@@ -52,43 +42,49 @@ def call_claude(
 
     messages = [{"role": "user", "content": content}]
 
-    delays = [60, 120, 180]
-    for attempt in range(4):
-        try:
-            response = client.messages.create(
-                model=settings.CLAUDE_MODEL,
-                max_tokens=max_tokens,
-                system=system_blocks,
-                thinking={"type": "adaptive"},
-                messages=messages,
-                timeout=600.0,
-            )
+    models_to_try = [settings.CLAUDE_MODEL, CLAUDE_MODEL_FALLBACK]
 
-            usage = response.usage
-            cache_read  = getattr(usage, "cache_read_input_tokens",  0) or 0
-            cache_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
-            if cache_read or cache_write:
-                print(f"[ClaudeClient] Cache — read: {cache_read} tokens, write: {cache_write} tokens")
+    for model in models_to_try:
+        client = _make_client()
+        delays = [60, 120, 180]
+        for attempt in range(4):
+            try:
+                print(f"[ClaudeClient] Calling model={model} attempt={attempt + 1}")
+                response = client.messages.create(
+                    model=model,
+                    max_tokens=max_tokens,
+                    system=system_blocks,
+                    thinking={"type": "enabled", "budget_tokens": max_tokens - 1000},
+                    messages=messages,
+                    timeout=600.0,
+                )
 
-            # Extract text block — thinking blocks come first, skip them
-            block_types = [block.type for block in response.content]
-            print(f"[ClaudeClient] Response blocks: {block_types}")
-            for block in response.content:
-                if block.type == "text":
-                    return block.text
+                usage = response.usage
+                cache_read  = getattr(usage, "cache_read_input_tokens",  0) or 0
+                cache_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
+                if cache_read or cache_write:
+                    print(f"[ClaudeClient] Cache — read: {cache_read}, write: {cache_write} tokens")
 
-            print("[ClaudeClient] Warning: no text block in response")
-            return ""
+                block_types = [block.type for block in response.content]
+                print(f"[ClaudeClient] Response blocks: {block_types}")
+                for block in response.content:
+                    if block.type == "text":
+                        return block.text
 
-        except anthropic.RateLimitError as e:
-            if attempt < 3:
-                delay = delays[attempt]
-                print(f"[ClaudeClient] Rate limit (attempt {attempt + 1}/4). Sleeping {delay}s...")
-                time.sleep(delay)
-            else:
-                raise RuntimeError(f"Claude rate limit exhausted after 4 attempts: {e}")
-        except Exception as e:
-            print(f"[ClaudeClient] Error on attempt {attempt + 1}: {e}")
-            raise
+                print("[ClaudeClient] Warning: no text block in response")
+                return ""
 
-    raise RuntimeError("Claude call failed — unreachable")
+            except anthropic.RateLimitError as e:
+                if attempt < 3:
+                    delay = delays[attempt]
+                    print(f"[ClaudeClient] Rate limit model={model} (attempt {attempt + 1}/4). Sleeping {delay}s...")
+                    time.sleep(delay)
+                else:
+                    print(f"[ClaudeClient] Rate limit exhausted for model={model}, trying fallback...")
+                    break
+            except Exception as e:
+                print(f"[ClaudeClient] Error model={model} attempt={attempt + 1}: {e}")
+                # Non-rate-limit error (model unavailable etc.) → try fallback immediately
+                break
+
+    raise RuntimeError("Claude call failed on all models")
