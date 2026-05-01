@@ -16,7 +16,7 @@ def _make_client() -> anthropic.AnthropicBedrock:
 def call_claude(
     content: list,
     system: str | None = None,
-    max_tokens: int = 32000,
+    max_tokens: int = 16000,
     extra_system_blocks: list | None = None,
 ) -> str:
     """
@@ -54,7 +54,7 @@ def call_claude(
                 print(f"[ClaudeClient] Calling model={model} attempt={attempt + 1}")
                 is_fallback = model == CLAUDE_MODEL_FALLBACK
                 thinking_config = (
-                    {"type": "enabled", "budget_tokens": 16000}
+                    {"type": "enabled", "budget_tokens": 10000}
                     if is_fallback
                     else {"type": "adaptive"}
                 )
