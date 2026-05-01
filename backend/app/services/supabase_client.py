@@ -1,25 +1,17 @@
 from supabase import create_client, Client
 from app.config import settings
 
-_supabase_client = None
 
 def get_client() -> Client | None:
-    global _supabase_client
-    
-    if _supabase_client is not None:
-        return _supabase_client
-        
     try:
         url = settings.SUPABASE_URL
         key = settings.SUPABASE_SERVICE_KEY
-        
+
         if not url or not key:
             print("[SupabaseClient] Error: SUPABASE_URL or SUPABASE_SERVICE_KEY is missing.")
             return None
-            
-        _supabase_client = create_client(url, key)
-        print("[SupabaseClient] Successfully connected to Supabase.")
-        return _supabase_client
+
+        return create_client(url, key)
     except Exception as e:
         print(f"[SupabaseClient] Error: {e}")
         return None
