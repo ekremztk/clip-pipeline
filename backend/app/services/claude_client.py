@@ -47,7 +47,7 @@ def call_claude(
     for model in models_to_try:
         client = _make_client()
         is_primary = model == settings.CLAUDE_MODEL
-        delays = [10] if is_primary else [60, 120, 180]
+        delays = [10]
         max_attempts = 2 if is_primary else 4
         for attempt in range(max_attempts):
             try:
