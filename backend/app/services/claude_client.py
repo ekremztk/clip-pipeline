@@ -52,8 +52,8 @@ def call_claude(
 
     messages = [{"role": "user", "content": content}]
 
-    delays = [30, 60]
-    for attempt in range(3):
+    delays = [60, 120, 180]
+    for attempt in range(4):
         try:
             response = client.messages.create(
                 model=settings.CLAUDE_MODEL,
@@ -81,12 +81,12 @@ def call_claude(
             return ""
 
         except anthropic.RateLimitError as e:
-            if attempt < 2:
+            if attempt < 3:
                 delay = delays[attempt]
-                print(f"[ClaudeClient] Rate limit (attempt {attempt + 1}/3). Sleeping {delay}s...")
+                print(f"[ClaudeClient] Rate limit (attempt {attempt + 1}/4). Sleeping {delay}s...")
                 time.sleep(delay)
             else:
-                raise RuntimeError(f"Claude rate limit exhausted after 3 attempts: {e}")
+                raise RuntimeError(f"Claude rate limit exhausted after 4 attempts: {e}")
         except Exception as e:
             print(f"[ClaudeClient] Error on attempt {attempt + 1}: {e}")
             raise
