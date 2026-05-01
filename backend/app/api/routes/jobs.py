@@ -523,7 +523,14 @@ async def _fetch_upload_and_run_pipeline(
                     print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
 
         get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
-        run_pipeline(job_id, video_path, video_title, target_guest, channel_id, user_id, clip_duration_min, clip_duration_max)
+        # Run sync pipeline in a worker thread so the event loop stays free.
+        # Without this, Modal's sync calls block the loop, print buffers stall,
+        # and Modal itself warns about blocking interfaces inside async context.
+        import asyncio
+        await asyncio.to_thread(
+            run_pipeline, job_id, video_path, video_title, target_guest,
+            channel_id, user_id, clip_duration_min, clip_duration_max,
+        )
     except Exception as e:
         print(f"[JobsRoute] R2 fetch/pipeline failed for job {job_id}: {e}")
         update_job(job_id, status=JobStatus.FAILED.value, error_message=f"Upload fetch failed: {e}")
@@ -605,7 +612,12 @@ async def _download_and_run_pipeline(
                     print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
 
         get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
-        run_pipeline(job_id, video_path, video_title, target_guest, channel_id, user_id, clip_duration_min, clip_duration_max)
+        # Run sync pipeline in a worker thread so the event loop stays free.
+        import asyncio
+        await asyncio.to_thread(
+            run_pipeline, job_id, video_path, video_title, target_guest,
+            channel_id, user_id, clip_duration_min, clip_duration_max,
+        )
     except Exception as e:
         print(f"[JobsRoute] YouTube download failed for job {job_id}: {e}")
         update_job(job_id, status=JobStatus.FAILED.value, error_message=f"YouTube download failed: {e}")
