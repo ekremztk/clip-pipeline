@@ -56,32 +56,37 @@ MIN_COVERAGE_SEC = 180.0      # <3 min kept → filter too aggressive or wrong g
 MAX_COVERAGE_WARN_PCT = 0.70  # >70% kept → filter not biting → warn (still applied)
 
 
-def _resolve_target_speaker(
+def _resolve_target_speakers(
     predicted_map: dict,
     target_guest: str | None,
-) -> tuple[str | None, str]:
+) -> tuple[list[str], str]:
     """
-    Find which Deepgram speaker_id corresponds to the target guest.
-    Returns (speaker_id, reason). speaker_id=None when no match.
+    Find ALL Deepgram speaker_ids that correspond to the target guest.
+    Deepgram frequently over-diarizes a single person into multiple clusters.
+    Returns (speaker_ids, reason). Empty list when no match.
     """
     if not target_guest:
-        return None, "no target_guest provided by user"
+        return [], "no target_guest provided by user"
 
     target_norm = target_guest.strip().lower()
+    matched_ids = []
     for spk_id, info in (predicted_map or {}).items():
         name = (info or {}).get("name")
         if not name:
             continue
         if name.strip().lower() == target_norm:
-            role = (info or {}).get("role", "?")
-            return str(spk_id), f"voice-matched target '{name}' → speaker {spk_id} ({role})"
+            matched_ids.append(str(spk_id))
 
-    return None, f"no speaker voice-matched to target '{target_guest}'"
+    if matched_ids:
+        ids_str = ", ".join(matched_ids)
+        return matched_ids, f"voice-matched target '{target_guest}' → speaker(s) {ids_str}"
+
+    return [], f"no speaker voice-matched to target '{target_guest}'"
 
 
 def _compute_density_windows(
     utterances: list[dict],
-    target_speaker_id: str,
+    target_speaker_ids: list[str],
     episode_end_sec: float,
 ) -> list[dict]:
     """
@@ -89,11 +94,14 @@ def _compute_density_windows(
       target_pct  = target guest duration / window duration
       utt_count   = utterances overlapping window
       speakers    = unique speakers in window
+    Accepts multiple speaker IDs — Deepgram over-diarizes one person into
+    multiple clusters, so all matched clusters count as the target.
     Classification:
       KEEP            → target_pct ≥ 15% AND utt_count ≥ 3
       KEEP_ADJACENT   → target_pct ≥ 5% (promoted later if adjacent to KEEP)
       SKIP            → otherwise
     """
+    target_id_set = set(target_speaker_ids)
     windows: list[dict] = []
     t = 0.0
     while t < episode_end_sec:
@@ -117,7 +125,7 @@ def _compute_density_windows(
                 continue
             utt_count += 1
             speakers_set.add(str(utt.get("speaker", "")))
-            if str(utt.get("speaker", "")) == target_speaker_id:
+            if str(utt.get("speaker", "")) in target_id_set:
                 target_dur += overlap
 
         target_pct = target_dur / w_dur if w_dur > 0 else 0.0
@@ -244,8 +252,8 @@ def run(
         default=0.0,
     )
 
-    target_speaker_id, reason = _resolve_target_speaker(predicted_map, target_guest)
-    if not target_speaker_id:
+    target_speaker_ids, reason = _resolve_target_speakers(predicted_map, target_guest)
+    if not target_speaker_ids:
         print(f"[S03.5] Filter disabled — {reason}")
         return {
             "active": False,
@@ -258,14 +266,14 @@ def run(
         }
 
     try:
-        windows = _compute_density_windows(utterances, target_speaker_id, episode_end_sec)
+        windows = _compute_density_windows(utterances, target_speaker_ids, episode_end_sec)
         scenes = _merge_windows_to_scenes(windows, utterances, episode_end_sec)
     except Exception as e:
         print(f"[S03.5] Density/merge error: {e} — disabling filter")
         return {
             "active": False,
             "reason": f"density/merge error: {e}",
-            "target_speaker_id": target_speaker_id,
+            "target_speaker_id": target_speaker_ids[0] if target_speaker_ids else None,
             "kept_ranges": [],
             "windows": [],
             "stats": {"episode_sec": round(episode_end_sec, 2),
@@ -282,7 +290,7 @@ def run(
         return {
             "active": False,
             "reason": msg,
-            "target_speaker_id": target_speaker_id,
+            "target_speaker_id": target_speaker_ids[0] if target_speaker_ids else None,
             "kept_ranges": scenes,
             "windows": windows,
             "stats": {"episode_sec": round(episode_end_sec, 2),
@@ -294,8 +302,9 @@ def run(
     if coverage_pct > MAX_COVERAGE_WARN_PCT:
         print(f"[S03.5] WARN: kept {coverage_pct*100:.1f}% of episode — thresholds may be too loose")
 
+    ids_str = ", ".join(target_speaker_ids)
     print(
-        f"[S03.5] Active — target='{target_guest}' → speaker {target_speaker_id}. "
+        f"[S03.5] Active — target='{target_guest}' → speaker(s) [{ids_str}]. "
         f"Kept {kept_sec:.1f}s / {episode_end_sec:.1f}s ({coverage_pct*100:.1f}%) "
         f"in {len(scenes)} scene(s)."
     )
@@ -303,7 +312,7 @@ def run(
     return {
         "active": True,
         "reason": reason,
-        "target_speaker_id": target_speaker_id,
+        "target_speaker_id": target_speaker_ids[0] if target_speaker_ids else None,
         "kept_ranges": scenes,
         "windows": windows,
         "stats": {

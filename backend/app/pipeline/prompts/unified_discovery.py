@@ -77,14 +77,17 @@ This episode features multiple guests. The user only cares about clips featuring
 
   TARGET GUEST: TARGET_GUEST_NAME_PLACEHOLDER
 
-Every clip you select MUST satisfy all of:
-- TARGET_GUEST_NAME_PLACEHOLDER is speaking in the clip — either as the hook or as the payoff
-- A host question to TARGET_GUEST_NAME_PLACEHOLDER counts ONLY if their reply is in the same clip
-- If TARGET_GUEST_NAME_PLACEHOLDER is silent for the entire clip, reject it — even if it is funny, dramatic, or otherwise strong
+**What "dominant" means:** TARGET_GUEST_NAME_PLACEHOLDER is the subject of the clip — the person being asked about, the one telling the story, delivering the punchline, or answering the question. It does NOT mean they must speak 100% of the time. A host question followed by TARGET_GUEST_NAME_PLACEHOLDER's answer counts. Another guest teasing TARGET_GUEST_NAME_PLACEHOLDER who then reacts counts. The test is: "Is this clip ABOUT TARGET_GUEST_NAME_PLACEHOLDER?"
 
-Other guests, the host, and audience reactions may appear in the clip (panel chatter, back-and-forth, laughter), but TARGET_GUEST_NAME_PLACEHOLDER must be the central voice — the reason this clip exists. When in doubt, ask yourself: "Would a fan of TARGET_GUEST_NAME_PLACEHOLDER want to see this?" If the answer is unclear, skip the moment.
+Every clip you select MUST satisfy:
+- TARGET_GUEST_NAME_PLACEHOLDER must speak at least one line in the clip
+- If a host sets up a question and TARGET_GUEST_NAME_PLACEHOLDER answers it, include the setup — that's part of the clip
+- If TARGET_GUEST_NAME_PLACEHOLDER is completely silent for the entire clip, reject it
 
-Look for TARGET_GUEST_NAME_PLACEHOLDER's own stories, anecdotes, jokes, reactions, and exchanges with the host. Do NOT select another guest's solo story even if it is entertaining.
+Acceptable: host asks → TARGET_GUEST_NAME_PLACEHOLDER tells a story → others laugh/react → TARGET_GUEST_NAME_PLACEHOLDER delivers punchline. This is a TARGET_GUEST_NAME_PLACEHOLDER clip.
+Not acceptable: another guest tells a 60-second solo story with no involvement from TARGET_GUEST_NAME_PLACEHOLDER.
+
+Do NOT select another guest's solo story even if it is entertaining.
 
 """
 

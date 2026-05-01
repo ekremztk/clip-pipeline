@@ -56,10 +56,16 @@ def _build_scene_filter_report(
     lines.append("")
 
     lines.append("=== SPEAKER MAP (from S03) ===")
+    # Collect all speaker IDs matched to target (multi-cluster support)
+    target_name = (target_guest or "").strip().lower()
     for spk_id, info in (speaker_data.get("predicted_map", {}) or {}).items():
         role = (info or {}).get("role", "?")
         name = (info or {}).get("name") or "(unmatched)"
-        is_target = "  ← TARGET" if str(spk_id) == str(scene_result.get("target_speaker_id")) else ""
+        is_target = ""
+        if name and name.strip().lower() == target_name:
+            is_target = "  ← TARGET"
+        elif str(spk_id) == str(scene_result.get("target_speaker_id")):
+            is_target = "  ← TARGET (primary)"
         lines.append(f"  speaker {spk_id}: {role} / {name}{is_target}")
     lines.append("")
 
