@@ -52,7 +52,7 @@ def call_claude(
                 print(f"[ClaudeClient] Calling model={model} attempt={attempt + 1}")
                 is_fallback = model == CLAUDE_MODEL_FALLBACK
                 thinking_config = (
-                    {"type": "enabled", "budget_tokens": max_tokens - 1000}
+                    {"type": "enabled", "budget_tokens": max_tokens - 10000}
                     if is_fallback
                     else {"type": "adaptive"}
                 )
