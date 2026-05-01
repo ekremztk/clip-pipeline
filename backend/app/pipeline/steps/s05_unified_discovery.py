@@ -5,7 +5,11 @@ from typing import Optional
 from app.config import settings
 from app.services.claude_client import call_claude
 from app.services.supabase_client import get_client
-from app.pipeline.prompts.unified_discovery import PROMPT
+from app.pipeline.prompts.unified_discovery import (
+    PROMPT,
+    TARGET_GUEST_BLOCK,
+    SCENE_BOUNDARY_BLOCK,
+)
 
 
 def build_channel_context(channel_dna: dict, channel_id: str) -> str:
@@ -182,6 +186,7 @@ def _validate_and_repair_candidates(
     video_duration_s: float,
     min_duration: int,
     max_duration: int,
+    scene_ranges: Optional[list] = None,
 ) -> list:
     """
     Validates and auto-repairs Claude's JSON output.
@@ -250,6 +255,30 @@ def _validate_and_repair_candidates(
         if not c.get("hook_text", "").strip():
             print(f"[S05-Validate] Warning: candidate {cid} has empty hook_text")
 
+        # Scene boundary guard: clip MUST fit inside a single scene.
+        # Source video has hard cuts between scenes — spanning them would
+        # stitch unrelated audio together.
+        if scene_ranges:
+            inside = False
+            for s_start, s_end in scene_ranges:
+                if start >= s_start and end <= s_end:
+                    inside = True
+                    break
+            if not inside:
+                print(
+                    f"[S05-Validate] Dropped candidate {cid}: "
+                    f"[{start:.1f}s-{end:.1f}s] crosses scene boundary"
+                )
+                continue
+
+        # Clamp & record target_guest_dominance (0.0-1.0).
+        tgd = c.get("target_guest_dominance")
+        if tgd is not None:
+            try:
+                c["target_guest_dominance"] = max(0.0, min(1.0, float(tgd)))
+            except (ValueError, TypeError):
+                c["target_guest_dominance"] = None
+
         valid.append(c)
     return valid
 
@@ -303,6 +332,9 @@ def run(
     audio_path: Optional[str] = None,
     clip_duration_min: Optional[int] = None,
     clip_duration_max: Optional[int] = None,
+    target_guest: Optional[str] = None,
+    scene_filter_active: bool = False,
+    scene_ranges: Optional[list] = None,
 ) -> list:
     """
     S05: Unified Discovery — single Claude Opus call over the full transcript.
@@ -346,14 +378,31 @@ def run(
             f"soft candidate guidance: {max_candidates}"
         )
 
-        # 3. Build prompt — full transcript in one shot
+        # 3. Build prompt — full transcript in one shot.
+        # Conditional blocks are included only when relevant so the LLM doesn't
+        # see "TARGET GUEST: none" style prompts (which cause hallucination of
+        # a target from episode context).
+        target_block = ""
+        if target_guest and target_guest.strip():
+            target_block = TARGET_GUEST_BLOCK.replace(
+                "TARGET_GUEST_NAME_PLACEHOLDER", target_guest.strip()
+            )
+        scene_block = SCENE_BOUNDARY_BLOCK if scene_filter_active else ""
+
         prompt = PROMPT
+        prompt = prompt.replace("TARGET_GUEST_BLOCK_PLACEHOLDER", target_block)
+        prompt = prompt.replace("SCENE_BOUNDARY_BLOCK_PLACEHOLDER", scene_block)
         prompt = prompt.replace("VIDEO_DURATION_PLACEHOLDER", str(int(video_duration_s)))
         prompt = prompt.replace("MAX_CANDIDATES_PLACEHOLDER", str(max_candidates))
         prompt = prompt.replace("CHANNEL_CONTEXT_PLACEHOLDER", channel_context)
         prompt = prompt.replace("LABELED_TRANSCRIPT_PLACEHOLDER", labeled_transcript)
         prompt = prompt.replace("MIN_DURATION_PLACEHOLDER", str(min_duration))
         prompt = prompt.replace("MAX_DURATION_PLACEHOLDER", str(discovery_max))
+
+        print(
+            f"[S05] Prompt flags — target_guest={bool(target_guest)}, "
+            f"scene_filter={scene_filter_active}"
+        )
 
         # 4. Single Claude call — no chunking, full context
         print(
@@ -379,7 +428,8 @@ def run(
 
         # 5. Validate and repair
         valid_candidates = _validate_and_repair_candidates(
-            raw_candidates, video_duration_s, min_duration, discovery_max
+            raw_candidates, video_duration_s, min_duration, discovery_max,
+            scene_ranges=scene_ranges if scene_filter_active else None,
         )
         print(f"[S05] {len(valid_candidates)} candidates after validation")
 

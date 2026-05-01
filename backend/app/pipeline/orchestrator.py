@@ -496,6 +496,16 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         audio_path=audio_path,
                         clip_duration_min=clip_duration_min,
                         clip_duration_max=clip_duration_max,
+                        target_guest=target_guest,
+                        scene_filter_active=bool(
+                            scene_filter_result
+                            and scene_filter_result.get("active")
+                        ),
+                        scene_ranges=(
+                            scene_filter_result.get("kept_ranges")
+                            if scene_filter_result
+                            else None
+                        ),
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     _debug_dump(job_id, "s05_unified_discovery", candidates)
