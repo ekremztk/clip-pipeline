@@ -50,11 +50,17 @@ def call_claude(
         for attempt in range(4):
             try:
                 print(f"[ClaudeClient] Calling model={model} attempt={attempt + 1}")
+                is_fallback = model == CLAUDE_MODEL_FALLBACK
+                thinking_config = (
+                    {"type": "enabled", "budget_tokens": max_tokens - 1000}
+                    if is_fallback
+                    else {"type": "adaptive"}
+                )
                 response = client.messages.create(
                     model=model,
                     max_tokens=max_tokens,
                     system=system_blocks,
-                    thinking={"type": "enabled", "budget_tokens": max_tokens - 1000},
+                    thinking=thinking_config,
                     messages=messages,
                     timeout=600.0,
                 )
