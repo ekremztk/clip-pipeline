@@ -2,7 +2,7 @@ import time
 import anthropic
 from app.config import settings
 
-CLAUDE_MODEL_FALLBACK = "us.anthropic.claude-opus-4-6"
+CLAUDE_MODEL_FALLBACK = "us.anthropic.claude-opus-4-6-v1"
 
 
 def _make_client() -> anthropic.AnthropicBedrock:
@@ -46,8 +46,10 @@ def call_claude(
 
     for model in models_to_try:
         client = _make_client()
-        delays = [60, 120, 180]
-        for attempt in range(4):
+        is_primary = model == settings.CLAUDE_MODEL
+        delays = [10] if is_primary else [60, 120, 180]
+        max_attempts = 2 if is_primary else 4
+        for attempt in range(max_attempts):
             try:
                 print(f"[ClaudeClient] Calling model={model} attempt={attempt + 1}")
                 is_fallback = model == CLAUDE_MODEL_FALLBACK
@@ -81,9 +83,9 @@ def call_claude(
                 return ""
 
             except anthropic.RateLimitError as e:
-                if attempt < 3:
-                    delay = delays[attempt]
-                    print(f"[ClaudeClient] Rate limit model={model} (attempt {attempt + 1}/4). Sleeping {delay}s...")
+                if attempt < max_attempts - 1:
+                    delay = delays[min(attempt, len(delays) - 1)]
+                    print(f"[ClaudeClient] Rate limit model={model} (attempt {attempt + 1}/{max_attempts}). Sleeping {delay}s...")
                     time.sleep(delay)
                 else:
                     print(f"[ClaudeClient] Rate limit exhausted for model={model}, trying fallback...")
