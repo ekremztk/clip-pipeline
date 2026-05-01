@@ -11,6 +11,7 @@ from app.services import storage
 from app.director.events import director_events
 
 PIPELINE_DEBUG = os.getenv("PIPELINE_DEBUG", "0") == "1"
+SCENE_FILTER_DEBUG = os.getenv("SCENE_FILTER_DEBUG", "0") == "1"
 _DEBUG_DIR = None
 
 def _debug_dump(job_id: str, step: str, data: object) -> None:
@@ -25,6 +26,91 @@ def _debug_dump(job_id: str, step: str, data: object) -> None:
         print(f"[DEBUG] {step} → {path}")
     except Exception as e:
         print(f"[DEBUG] Could not write {step}: {e}")
+
+
+def _fmt_ts(sec: float) -> str:
+    m = int(sec // 60)
+    s = sec % 60
+    return f"{m:02d}:{s:05.2f}"
+
+
+def _build_scene_filter_report(
+    job_id: str,
+    video_title: str,
+    target_guest: str | None,
+    speaker_data: dict,
+    scene_result: dict,
+    transcript_data: dict,
+    labeled_transcript_full: str,
+    labeled_transcript_filtered: str,
+) -> str:
+    """Render a human-readable scene-filter audit report."""
+    lines: list[str] = []
+    lines.append(f"=== JOB {job_id} ===")
+    lines.append(f"Episode title: {video_title}")
+    stats = scene_result.get("stats", {}) or {}
+    lines.append(f"Episode length: {_fmt_ts(stats.get('episode_sec', 0.0))}")
+    lines.append(f"Target guest: {target_guest or '(none)'}")
+    lines.append(f"Filter active: {scene_result.get('active')}")
+    lines.append(f"Reason: {scene_result.get('reason')}")
+    lines.append("")
+
+    lines.append("=== SPEAKER MAP (from S03) ===")
+    for spk_id, info in (speaker_data.get("predicted_map", {}) or {}).items():
+        role = (info or {}).get("role", "?")
+        name = (info or {}).get("name") or "(unmatched)"
+        is_target = "  ← TARGET" if str(spk_id) == str(scene_result.get("target_speaker_id")) else ""
+        lines.append(f"  speaker {spk_id}: {role} / {name}{is_target}")
+    lines.append("")
+
+    lines.append("=== DENSITY MAP (30s windows, 15s stride) ===")
+    for w in scene_result.get("windows", []) or []:
+        lines.append(
+            f"  {_fmt_ts(w['start'])}-{_fmt_ts(w['end'])}  "
+            f"target={w['target_pct']*100:5.1f}%  "
+            f"utts={w['utt_count']:>2}  "
+            f"spk={w['speakers']}  "
+            f"→ {w['decision']}"
+        )
+    lines.append("")
+
+    lines.append("=== KEPT SCENES (merged, padded, utterance-snapped) ===")
+    for i, (s, e) in enumerate(scene_result.get("kept_ranges", []) or []):
+        lines.append(f"  Scene {i + 1}: {_fmt_ts(s)} → {_fmt_ts(e)}  ({_fmt_ts(e - s)})")
+    lines.append(f"  Total kept: {_fmt_ts(stats.get('kept_sec', 0.0))} / "
+                 f"{_fmt_ts(stats.get('episode_sec', 0.0))} "
+                 f"({stats.get('coverage_pct', 0.0) * 100:.1f}%)")
+    lines.append("")
+
+    lines.append("=== RAW UTTERANCES (full transcript, pre-filter) ===")
+    lines.append(labeled_transcript_full or "(empty)")
+    lines.append("")
+
+    lines.append("=== FILTERED UTTERANCES (what S05 sees) ===")
+    lines.append(labeled_transcript_filtered or "(filter disabled — S05 sees full transcript)")
+
+    return "\n".join(lines)
+
+
+def _upload_scene_filter_report(job_id: str, report: str) -> str | None:
+    """Upload the scene-filter debug report as text to R2. Returns public URL."""
+    try:
+        from app.services.r2_client import get_r2_client
+        s3 = get_r2_client()
+        if not settings.R2_BUCKET_NAME:
+            return None
+        key = f"debug/scene_filter/{job_id}.txt"
+        s3.put_object(
+            Bucket=settings.R2_BUCKET_NAME,
+            Key=key,
+            Body=report.encode("utf-8"),
+            ContentType="text/plain; charset=utf-8",
+        )
+        base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+        return f"{base}/{key}" if base else key
+    except Exception as e:
+        print(f"[SceneFilter] R2 upload error: {e}")
+        return None
 
 
 def _cleanup_pipeline_r2(
@@ -266,6 +352,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
         # before the fetch block so the fetch can populate it
         transcript_data = None
         speaker_data = None
+        scene_filter_result = None
         labeled_transcript = None
         channel_dna = {}
         candidates = []
@@ -329,12 +416,69 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     }).execute()
 
                     _debug_dump(job_id, "s03_speaker_id", speaker_data)
+
+                    # S03.5 — scene filter (deterministic, never raises)
+                    try:
+                        from app.pipeline.steps import s03_5_scene_filter
+                        scene_filter_result = s03_5_scene_filter.run(
+                            transcript_data=transcript_data,
+                            speaker_data=speaker_data,
+                            target_guest=target_guest,
+                        )
+                        _debug_dump(job_id, "s03_5_scene_filter", scene_filter_result)
+                    except Exception as e:
+                        print(f"[Orchestrator] S03.5 scene filter error (non-critical): {e}")
+                        scene_filter_result = {"active": False, "reason": f"exception: {e}",
+                                               "target_speaker_id": None, "kept_ranges": [],
+                                               "windows": [], "stats": {}}
+
                     print(f"[Orchestrator] S03 completed, continuing to S04 automatically")
                 elif step_number == 4:
                     from app.pipeline.steps import s04_labeled_transcript
                     predicted_map = speaker_data.get("predicted_map", {}) if speaker_data else {}
-                    labeled_transcript = s04_labeled_transcript.run(transcript_data, predicted_map, target_guest)
-                    _debug_dump(job_id, "s04_labeled_transcript", {"labeled_transcript": labeled_transcript})
+
+                    # Always build the full labeled transcript (needed for debug report)
+                    labeled_transcript_full = s04_labeled_transcript.run(
+                        transcript_data, predicted_map, target_guest
+                    )
+
+                    # If scene filter is active, build a second, filtered version for S05
+                    if scene_filter_result and scene_filter_result.get("active"):
+                        scene_ranges = scene_filter_result.get("kept_ranges") or []
+                        labeled_transcript = s04_labeled_transcript.run(
+                            transcript_data, predicted_map, target_guest,
+                            scene_ranges=scene_ranges,
+                        )
+                    else:
+                        labeled_transcript = labeled_transcript_full
+
+                    _debug_dump(job_id, "s04_labeled_transcript", {
+                        "labeled_transcript": labeled_transcript,
+                        "filter_active": bool(scene_filter_result and scene_filter_result.get("active")),
+                    })
+
+                    # Emit scene-filter debug report to R2 when SCENE_FILTER_DEBUG=1
+                    if SCENE_FILTER_DEBUG and scene_filter_result is not None:
+                        try:
+                            report = _build_scene_filter_report(
+                                job_id=job_id,
+                                video_title=video_title,
+                                target_guest=target_guest,
+                                speaker_data=speaker_data or {},
+                                scene_result=scene_filter_result,
+                                transcript_data=transcript_data or {},
+                                labeled_transcript_full=labeled_transcript_full,
+                                labeled_transcript_filtered=(
+                                    labeled_transcript
+                                    if scene_filter_result.get("active")
+                                    else ""
+                                ),
+                            )
+                            url = _upload_scene_filter_report(job_id, report)
+                            if url:
+                                print(f"[SceneFilter] debug report → {url}")
+                        except Exception as _re:
+                            print(f"[SceneFilter] debug report error (non-critical): {_re}")
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
                     from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage

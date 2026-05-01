@@ -1,4 +1,9 @@
-def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = None) -> str:
+def run(
+    transcript_data: dict,
+    speaker_map: dict,
+    target_guest: str | None = None,
+    scene_ranges: list[tuple[float, float]] | None = None,
+) -> str:
     """
     s04: Merges transcript data with speaker map to create a labeled transcript.
 
@@ -7,6 +12,10 @@ def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = Non
         speaker_map: dict mapping speaker IDs to roles and names.
             Keys can be raw integers (0, 1) from S03 or strings ("SPEAKER_0").
         target_guest: optional string to use for guest speaker label
+        scene_ranges: optional list of (start, end) tuples (episode seconds). When
+            provided, only utterances inside one of the ranges are emitted and
+            each range is prefixed with a `[Scene N — MM:SS to MM:SS]` header so
+            S05 can see where the gaps are. Timestamps remain absolute.
 
     Returns:
         Full labeled transcript as a single string
@@ -15,12 +24,25 @@ def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = Non
         if not transcript_data:
             raise RuntimeError("transcript_data is empty")
 
-        # Get utterances from transcript_data
         utterances = transcript_data.get("utterances", [])
         if not utterances:
             raise RuntimeError("No utterances found in transcript_data")
 
-        labeled_lines = []
+        def _fmt_ts(sec: float) -> str:
+            m = int(sec // 60)
+            s = sec % 60
+            return f"{m:02d}:{s:05.2f}"
+
+        def _scene_for(start_sec: float) -> int | None:
+            if not scene_ranges:
+                return None
+            for idx, (s, e) in enumerate(scene_ranges):
+                if s <= start_sec < e:
+                    return idx
+            return None
+
+        labeled_lines: list[str] = []
+        current_scene: int | None = None
         count = 0
 
         for utt in utterances:
@@ -28,10 +50,21 @@ def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = Non
             if not text:
                 continue
 
-            raw_speaker = utt.get("speaker", "")
+            start_sec = float(utt.get("start", 0.0))
 
-            # Lookup speaker info — try all key formats that S03 might have used:
-            # raw int (0), raw str ("0"), prefixed str ("SPEAKER_0")
+            # Scene filter: skip if filter active and utterance is outside all scenes
+            if scene_ranges is not None:
+                scene_idx = _scene_for(start_sec)
+                if scene_idx is None:
+                    continue
+                if scene_idx != current_scene:
+                    s, e = scene_ranges[scene_idx]
+                    labeled_lines.append(
+                        f"\n[Scene {scene_idx + 1} — {_fmt_ts(s)} to {_fmt_ts(e)}]"
+                    )
+                    current_scene = scene_idx
+
+            raw_speaker = utt.get("speaker", "")
             speaker_info = (
                 speaker_map.get(raw_speaker)
                 or speaker_map.get(str(raw_speaker))
@@ -41,23 +74,15 @@ def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = Non
             role = speaker_info.get("role", "UNKNOWN").upper()
             name = speaker_info.get("name", "")
 
-            # Override guest name if provided and role is GUEST
             if role == "GUEST" and target_guest:
                 name = target_guest
 
-            # Format speaker label
-            if name:
-                speaker_label = f"{role} ({name})"
-            else:
-                speaker_label = role
+            speaker_label = f"{role} ({name})" if name else role
 
-            # Format timestamp MM:SS.ss — preserve millisecond precision from Deepgram
-            start_sec = float(utt.get("start", 0.0))
             minutes = int(start_sec // 60)
             seconds = start_sec % 60
             timestamp = f"[{minutes:02d}:{seconds:05.2f}]"
 
-            # Format sentiment — Nova-3 returns {"sentiment": "positive", "sentiment_score": 0.87}
             sentiment_str = ""
             raw_sentiment = utt.get("sentiment_score") or utt.get("sentiment")
             if raw_sentiment is not None:
@@ -66,15 +91,20 @@ def run(transcript_data: dict, speaker_map: dict, target_guest: str | None = Non
                     if abs(score) > 0.3:
                         sentiment_str = f" [sentiment:{score:.2f}]"
                 except (ValueError, TypeError):
-                    # sentiment is a string label like "positive" — skip numeric display
                     pass
 
             line = f"{timestamp} {speaker_label}:{sentiment_str} {text}"
             labeled_lines.append(line)
             count += 1
 
-        result_str = "\n".join(labeled_lines)
-        print(f"[S04] Generated labeled transcript with {count} utterances")
+        result_str = "\n".join(labeled_lines).lstrip("\n")
+        if scene_ranges is not None:
+            print(
+                f"[S04] Scene-filtered transcript: {count} utterances across "
+                f"{len(scene_ranges)} scene(s)"
+            )
+        else:
+            print(f"[S04] Generated labeled transcript with {count} utterances")
         return result_str
 
     except RuntimeError as re:
