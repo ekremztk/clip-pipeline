@@ -11,6 +11,7 @@ class Settings:
     # Vertex AI model names — override via env var if Vertex releases a new version string
     GEMINI_MODEL_VIDEO: str = os.getenv("GEMINI_MODEL_VIDEO", "gemini-3.1-pro-preview")
     GEMINI_MODEL_PRO: str = os.getenv("GEMINI_MODEL_PRO", "gemini-2.5-pro")
+    GEMINI_MODEL_PRO_PREVIEW: str = os.getenv("GEMINI_MODEL_PRO_PREVIEW", "gemini-3.1-pro-preview")
     GEMINI_MODEL_FLASH: str = os.getenv("GEMINI_MODEL_FLASH", "gemini-2.5-flash")
     # Claude (AWS Bedrock)
     AWS_BEDROCK_ACCESS_KEY: str = os.getenv("AWS_BEDROCK_ACCESS_KEY", "")

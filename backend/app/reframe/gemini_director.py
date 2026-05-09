@@ -49,7 +49,7 @@ def analyze_video(
     from app.services.gemini_client import analyze_video as gemini_analyze_video
     from app.config import settings
 
-    model = config.model or settings.GEMINI_MODEL_PRO
+    model = config.model or settings.GEMINI_MODEL_PRO_PREVIEW
 
     prompt = _build_prompt(
         diarization_segments, shots, frames,
