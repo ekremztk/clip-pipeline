@@ -211,6 +211,9 @@ def analyze_video(
             sample_times = _get_sample_times(shot, config.sample_fps)
             prev_faces = []  # reset at every shot boundary
 
+            # Per-shot track_id stability tracking
+            shot_track_positions: dict[int, list[tuple[float, float]]] = {}
+
             for t in sample_times:
                 raw_frame = _read_frame(cap, t)
                 if raw_frame is None:
@@ -230,6 +233,23 @@ def analyze_video(
                 faces = _assign_track_ids(faces, prev_faces)
                 frames.append(Frame(time_s=t, shot_index=shot_idx, faces=faces))
                 prev_faces = faces
+
+                for f in faces:
+                    shot_track_positions.setdefault(f.track_id, []).append((f.face_x, f.face_y))
+
+            # Log per-shot track_id stability diagnostics
+            if shot_track_positions:
+                for tid, positions in sorted(shot_track_positions.items()):
+                    if len(positions) < 2:
+                        continue
+                    xs = [p[0] for p in positions]
+                    x_spread = max(xs) - min(xs)
+                    avg_x = sum(xs) / len(xs)
+                    logger.info(
+                        "[FaceTracker] Shot %d track_id=%d: %d frames, avg_x=%.3f, x_spread=%.3f%s",
+                        shot_idx, tid, len(positions), avg_x, x_spread,
+                        " ⚠️UNSTABLE" if x_spread > 0.15 else "",
+                    )
 
     finally:
         cap.release()
