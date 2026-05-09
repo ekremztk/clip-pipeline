@@ -9,6 +9,8 @@ from app.services.r2_client import upload_clip
 from app.director.events import director_events
 
 
+
+
 def _sanity_check_word_boundary(final_start: float, final_end: float, words: list, clip_index: int) -> tuple[float, float]:
     """
     Cross-references final_start/final_end against Deepgram word timestamps.
@@ -56,13 +58,13 @@ def _encode_segment(video_path: str, start: float, duration: float, output_path:
         "-t", str(duration),
     ])
     cmd.extend(["-c:v", codec])
-    if codec == "h264_nvenc":
+    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
         cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
     cmd.extend([
         "-c:a", "aac", "-b:a", "320k",
-        "-r", "30",
+        "-profile:v", "high",
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         "-avoid_negative_ts", "make_zero",
@@ -154,13 +156,14 @@ def _export_single_clip(
                 "-t", str(final_duration),
             ])
             ffmpeg_cmd.extend(["-c:v", codec])
-            if codec == "h264_nvenc":
+            if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
                 ffmpeg_cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
             else:
                 ffmpeg_cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
             ffmpeg_cmd.extend([
                 "-c:a", "aac",
                 "-b:a", "320k",
+                "-profile:v", "high",
                 "-movflags", "+faststart",
                 "-pix_fmt", "yuv420p",
                 "-avoid_negative_ts", "make_zero",

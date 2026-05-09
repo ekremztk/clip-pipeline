@@ -9,11 +9,10 @@ import modal
 # --- Image ---
 gpu_image = (
     modal.Image.from_registry(
-        "nvidia/cuda:12.4.1-runtime-ubuntu22.04",
+        "nvidia/cuda:12.4.1-devel-ubuntu22.04",
         add_python="3.11",
     )
     .apt_install(
-        "ffmpeg",
         "libsndfile1",
         "libfreetype6-dev",
         "libjpeg-dev",
@@ -24,6 +23,27 @@ gpu_image = (
         "git",
         "pkg-config",
         "build-essential",
+        "xz-utils",
+        "nasm",
+        "libass-dev",
+        "libfdk-aac-dev",
+        "libx264-dev",
+        "libx265-dev",
+        "fontconfig",
+    )
+    .run_commands(
+        # Build FFmpeg 7.1 with NVENC (av1_nvenc, hevc_nvenc, h264_nvenc)
+        "git clone --depth 1 https://git.videolan.org/git/ffmpeg/nv-codec-headers.git /tmp/nv-codec-headers",
+        "cd /tmp/nv-codec-headers && make install",
+        'curl -fsSL "https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz" -o /tmp/ffmpeg-7.1.tar.xz',
+        "tar -xf /tmp/ffmpeg-7.1.tar.xz -C /tmp",
+        "cd /tmp/ffmpeg-7.1 && ./configure --enable-gpl --enable-nonfree --enable-cuda-nvcc "
+        "--enable-libnpp --enable-nvenc --enable-libass --enable-libfdk-aac "
+        "--enable-libx264 --enable-libx265 --extra-cflags=-I/usr/local/cuda/include "
+        "--extra-ldflags=-L/usr/local/cuda/lib64 --prefix=/usr/local && "
+        "make -j$(nproc) && make install",
+        "rm -rf /tmp/ffmpeg-7.1* /tmp/nv-codec-headers",
+        "ldconfig",
     )
     .run_commands(
         "mkdir -p /usr/share/fonts/truetype/montserrat /root/.fonts",

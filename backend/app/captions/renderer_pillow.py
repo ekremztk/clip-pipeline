@@ -5,12 +5,13 @@ Renders each subtitle group as a transparent 1080x1920 PNG, then composites
 them onto the video via FFmpeg overlay filters (multi-pass to avoid fd limits).
 
 GPU-ready: encode codec/preset is configurable via env vars. Switch to
-h264_nvenc by changing FFMPEG_VIDEO_CODEC + FFMPEG_ENCODE_PRESET.
+av1_nvenc by changing FFMPEG_VIDEO_CODEC + FFMPEG_ENCODE_PRESET.
 """
 import logging
 import os
 import subprocess
 import uuid
+from datetime import datetime, timezone
 from typing import Optional
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -432,7 +433,7 @@ def _run_ffmpeg_overlay_single(
     cmd.extend(["-map", "[vout]", "-map", "0:a?"])
     cmd.extend(["-c:v", codec])
 
-    if codec == "h264_nvenc":
+    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
         cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         if final_pass:
@@ -440,7 +441,20 @@ def _run_ffmpeg_overlay_single(
         else:
             cmd.extend(["-preset", "fast", "-crf", "16"])
 
-    cmd.extend(["-c:a", "aac", "-b:a", "320k", "-movflags", "+faststart"])
+    cmd.extend(["-profile:v", "high", "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart"])
+
+    if final_pass:
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
+        cmd.extend([
+            "-timecode", "01:00:00:00",
+            "-brand", "qt",
+            "-metadata", f"creation_time={now}",
+            "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
+            "-metadata:s:v", "handler_name=VideoHandler",
+            "-metadata:s:v", "encoder=H.264",
+            "-metadata:s:a", "handler_name=SoundHandler",
+        ])
+
     cmd.append(output_path)
 
     logger.info(

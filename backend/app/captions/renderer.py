@@ -10,6 +10,7 @@ import logging
 import os
 import subprocess
 import uuid
+from datetime import datetime, timezone
 from typing import Optional
 
 from app.config import settings
@@ -446,24 +447,33 @@ MONTSERRAT_FONTS_DIR = "/usr/share/fonts/truetype/montserrat"
 
 
 def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
-    """Burn ASS subtitles via FFmpeg."""
+    """Burn ASS subtitles via FFmpeg. Final render — includes DaVinci metadata."""
     safe_path = ass_path.replace("\\", "/").replace(":", "\\:")
-    # Pass fontsdir so libass finds Montserrat even if system fontconfig cache is stale
     safe_fonts = MONTSERRAT_FONTS_DIR.replace(":", "\\:")
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
     cmd = [
         "ffmpeg", "-y",
         "-i", input_path,
-        "-vf", f"ass={safe_path}:fontsdir={safe_fonts}",
+        "-vf", f"ass={safe_path}:fontsdir={safe_fonts},setsar=1",
         "-c:v", settings.FFMPEG_VIDEO_CODEC,
     ]
-    if settings.FFMPEG_VIDEO_CODEC == "h264_nvenc":
+    if settings.FFMPEG_VIDEO_CODEC in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
         cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
     cmd.extend([
+        "-profile:v", "high",
         "-c:a", "aac",
         "-b:a", "320k",
+        "-ar", "48000",
         "-movflags", "+faststart",
+        "-timecode", "01:00:00:00",
+        "-brand", "qt",
+        "-metadata", f"creation_time={now}",
+        "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
+        "-metadata:s:v", "handler_name=VideoHandler",
+        "-metadata:s:v", "encoder=H.264",
+        "-metadata:s:a", "handler_name=SoundHandler",
         output_path,
     ])
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
