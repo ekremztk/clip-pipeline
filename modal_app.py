@@ -79,7 +79,7 @@ app = modal.App("gpu-pipeline", image=gpu_image)
 
 
 @app.function(
-    gpu="A10G",
+    gpu="H100",
     memory=16384,
     cpu=4,
     timeout=900,
@@ -214,7 +214,7 @@ def process_clips(
 
 
 @app.function(
-    gpu="A10G",
+    gpu="T4",
     memory=8192,
     cpu=2,
     timeout=300,
