@@ -463,6 +463,10 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
         cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
     if settings.FFMPEG_VIDEO_CODEC in ("libx264", "h264_nvenc"):
         cmd.extend(["-profile:v", "high"])
+    if settings.FFMPEG_VIDEO_CODEC in ("hevc_nvenc", "libx265"):
+        cmd.extend(["-pix_fmt", "p010le", "-tag:v", "hvc1"])
+    else:
+        cmd.extend(["-pix_fmt", "yuv420p"])
     cmd.extend([
         "-c:a", "aac",
         "-b:a", "320k",
@@ -472,6 +476,7 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
         "-metadata", f"creation_time={now}",
         "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
         "-metadata:s:v", "handler_name=VideoHandler",
+        "-metadata:s:v", "encoder=H.265 10-bit",
         "-metadata:s:a", "handler_name=SoundHandler",
         output_path,
     ])

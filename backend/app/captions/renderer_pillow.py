@@ -443,6 +443,10 @@ def _run_ffmpeg_overlay_single(
 
     if codec in ("libx264", "h264_nvenc"):
         cmd.extend(["-profile:v", "high"])
+    if codec in ("hevc_nvenc", "libx265"):
+        cmd.extend(["-pix_fmt", "p010le", "-tag:v", "hvc1"])
+    else:
+        cmd.extend(["-pix_fmt", "yuv420p"])
     cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart"])
 
     if final_pass:
@@ -452,6 +456,7 @@ def _run_ffmpeg_overlay_single(
             "-metadata", f"creation_time={now}",
             "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
             "-metadata:s:v", "handler_name=VideoHandler",
+            "-metadata:s:v", "encoder=H.265 10-bit",
             "-metadata:s:a", "handler_name=SoundHandler",
         ])
 
