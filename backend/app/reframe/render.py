@@ -130,7 +130,9 @@ def render_podcast_reframe(
         cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
-    cmd.extend(["-profile:v", "high", "-movflags", "+faststart"])
+    if codec in ("libx264", "h264_nvenc"):
+        cmd.extend(["-profile:v", "high"])
+    cmd.extend(["-movflags", "+faststart"])
     if has_audio:
         cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000"])
     else:
@@ -360,8 +362,9 @@ def render_gaming_vstack(
         cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
+    if settings.FFMPEG_VIDEO_CODEC in ("libx264", "h264_nvenc"):
+        cmd.extend(["-profile:v", "high"])
     cmd.extend([
-        "-profile:v", "high",
         "-c:a", "aac",
         "-b:a", "320k",
         "-ar", "48000",

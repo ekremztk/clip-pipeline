@@ -441,17 +441,17 @@ def _run_ffmpeg_overlay_single(
         else:
             cmd.extend(["-preset", "fast", "-crf", "16"])
 
-    cmd.extend(["-profile:v", "high", "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart"])
+    if codec in ("libx264", "h264_nvenc"):
+        cmd.extend(["-profile:v", "high"])
+    cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart"])
 
     if final_pass:
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
         cmd.extend([
             "-timecode", "01:00:00:00",
-            "-brand", "qt",
             "-metadata", f"creation_time={now}",
             "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
             "-metadata:s:v", "handler_name=VideoHandler",
-            "-metadata:s:v", "encoder=H.264",
             "-metadata:s:a", "handler_name=SoundHandler",
         ])
 

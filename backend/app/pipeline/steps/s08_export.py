@@ -62,9 +62,10 @@ def _encode_segment(video_path: str, start: float, duration: float, output_path:
         cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
         cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+    if codec in ("libx264", "h264_nvenc"):
+        cmd.extend(["-profile:v", "high"])
     cmd.extend([
         "-c:a", "aac", "-b:a", "320k",
-        "-profile:v", "high",
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         "-avoid_negative_ts", "make_zero",
@@ -160,10 +161,11 @@ def _export_single_clip(
                 ffmpeg_cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
             else:
                 ffmpeg_cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+            if codec in ("libx264", "h264_nvenc"):
+                ffmpeg_cmd.extend(["-profile:v", "high"])
             ffmpeg_cmd.extend([
                 "-c:a", "aac",
                 "-b:a", "320k",
-                "-profile:v", "high",
                 "-movflags", "+faststart",
                 "-pix_fmt", "yuv420p",
                 "-avoid_negative_ts", "make_zero",
