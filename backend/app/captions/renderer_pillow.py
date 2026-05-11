@@ -52,6 +52,26 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
 }
 
 
+def _target_final_video_codec() -> str:
+    override = os.getenv("FFMPEG_FINAL_VIDEO_CODEC")
+    if override:
+        return override
+    pipeline_codec = getattr(settings, "FFMPEG_VIDEO_CODEC", "libx264")
+    if pipeline_codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
+        return "hevc_nvenc"
+    return "libx265"
+
+
+def _target_final_preset(codec: str) -> str:
+    override = os.getenv("FFMPEG_FINAL_ENCODE_PRESET")
+    if override:
+        return override
+    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
+        preset = getattr(settings, "FFMPEG_ENCODE_PRESET", "p4")
+        return preset if preset.startswith("p") else "p4"
+    return getattr(settings, "FFMPEG_PRESET", "slow")
+
+
 def render_captions(
     video_path: str,
     output_path: str,
@@ -402,8 +422,8 @@ def _run_ffmpeg_overlay_single(
     final_pass: bool,
 ) -> None:
     """Run a single FFmpeg overlay pass for a batch of subtitle PNGs."""
-    codec = getattr(settings, "FFMPEG_VIDEO_CODEC", "libx264")
-    preset = getattr(settings, "FFMPEG_ENCODE_PRESET", settings.FFMPEG_PRESET)
+    codec = _target_final_video_codec()
+    preset = _target_final_preset(codec)
     hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
 
     inputs = ["-i", video_path]
@@ -430,7 +450,7 @@ def _run_ffmpeg_overlay_single(
         cmd.extend(["-hwaccel", hwaccel])
     cmd.extend(inputs)
     cmd.extend(["-filter_complex", filtergraph])
-    cmd.extend(["-map", "[vout]", "-map", "0:a?"])
+    cmd.extend(["-map", "[vout]", "-map", "0:a?", "-map_metadata", "-1", "-fflags", "+bitexact"])
     cmd.extend(["-c:v", codec])
 
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
@@ -440,6 +460,10 @@ def _run_ffmpeg_overlay_single(
             cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
         else:
             cmd.extend(["-preset", "fast", "-crf", "16"])
+    if codec == "libx265":
+        cmd.extend(["-x265-params", "info=0:colorprim=bt709:transfer=bt709:colormatrix=bt709"])
+    if codec == "libx264":
+        cmd.extend(["-x264-params", "no-info=1"])
 
     if codec in ("libx264", "h264_nvenc"):
         cmd.extend(["-profile:v", "high"])
@@ -447,7 +471,18 @@ def _run_ffmpeg_overlay_single(
         cmd.extend(["-pix_fmt", "p010le", "-tag:v", "hvc1"])
     else:
         cmd.extend(["-pix_fmt", "yuv420p"])
-    cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart"])
+    cmd.extend([
+        "-flags:v", "+bitexact",
+        "-flags:a", "+bitexact",
+        "-color_range", "tv",
+        "-colorspace", "bt709",
+        "-color_trc", "bt709",
+        "-color_primaries", "bt709",
+        "-c:a", "aac",
+        "-b:a", "320k",
+        "-ar", "48000",
+        "-movflags", "+faststart",
+    ])
 
     if final_pass:
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
@@ -457,7 +492,10 @@ def _run_ffmpeg_overlay_single(
             "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
             "-metadata:s:v", "handler_name=VideoHandler",
             "-metadata:s:v", "encoder=H.265 10-bit",
+            "-metadata:s:v:0", "language=und",
             "-metadata:s:a", "handler_name=SoundHandler",
+            "-metadata:s:a:0", "language=und",
+            "-metadata:s:d:0", "language=eng",
         ])
 
     cmd.append(output_path)

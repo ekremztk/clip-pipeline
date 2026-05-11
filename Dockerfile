@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     curl \
     fonts-open-sans \
+    atomicparsley \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Montserrat font (required for caption rendering)

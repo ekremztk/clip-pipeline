@@ -230,7 +230,7 @@ def _export_single_clip(
 
     except subprocess.CalledProcessError as e:
         stderr_output = e.stderr.decode() if e.stderr else "no stderr"
-        print(f"[S08] FFmpeg error for clip {index+1}: {stderr_output[:500]}")
+        print(f"[S08] FFmpeg error for clip {index+1}: {stderr_output[-2000:]}")
         return None
     except Exception as e:
         print(f"[S08] Unexpected error for clip {index+1}: {e}")

@@ -14,6 +14,7 @@ from app.config import settings
 from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
 from app.captions.core import transcribe_video
+from app.captions.finalizer import finalize_davinci_mp4
 from app.captions.renderer import render_captions
 
 logger = logging.getLogger(__name__)
@@ -147,6 +148,7 @@ def _caption_clip(
             segments=segments,
             template_key=template_key,
         )
+        finalizer_meta = finalize_davinci_mp4(output_path)
 
         # Upload to R2
         r2_url = _upload_to_r2(output_path, f"captions/{uuid.uuid4().hex}.mp4")
@@ -158,6 +160,7 @@ def _caption_clip(
             "language": detected_language,
             "text": transcript_text[:500] if transcript_text else "",
             "words": words,   # full word list stored for "Open in Editor" replay
+            "finalizer": finalizer_meta,
         }
 
         return r2_url, caption_meta

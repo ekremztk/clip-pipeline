@@ -446,28 +446,62 @@ def _build_karaoke_text(words: list[dict], transform: str) -> str:
 MONTSERRAT_FONTS_DIR = "/usr/share/fonts/truetype/montserrat"
 
 
+def _target_final_video_codec() -> str:
+    override = os.getenv("FFMPEG_FINAL_VIDEO_CODEC")
+    if override:
+        return override
+    pipeline_codec = settings.FFMPEG_VIDEO_CODEC
+    if pipeline_codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
+        return "hevc_nvenc"
+    return "libx265"
+
+
+def _target_final_preset(codec: str) -> str:
+    override = os.getenv("FFMPEG_FINAL_ENCODE_PRESET")
+    if override:
+        return override
+    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
+        preset = settings.FFMPEG_ENCODE_PRESET
+        return preset if preset.startswith("p") else "p4"
+    return settings.FFMPEG_PRESET
+
+
 def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
     """Burn ASS subtitles via FFmpeg. Final render — includes DaVinci metadata."""
     safe_path = ass_path.replace("\\", "/").replace(":", "\\:")
     safe_fonts = MONTSERRAT_FONTS_DIR.replace(":", "\\:")
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
+    codec = _target_final_video_codec()
+    preset = _target_final_preset(codec)
     cmd = [
         "ffmpeg", "-y",
         "-i", input_path,
         "-vf", f"ass={safe_path}:fontsdir={safe_fonts},setsar=1",
-        "-c:v", settings.FFMPEG_VIDEO_CODEC,
+        "-map_metadata", "-1",
+        "-fflags", "+bitexact",
+        "-c:v", codec,
     ]
-    if settings.FFMPEG_VIDEO_CODEC in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
+        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
-        cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
-    if settings.FFMPEG_VIDEO_CODEC in ("libx264", "h264_nvenc"):
+        cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
+    if codec == "libx265":
+        cmd.extend(["-x265-params", "info=0:colorprim=bt709:transfer=bt709:colormatrix=bt709"])
+    if codec == "libx264":
+        cmd.extend(["-x264-params", "no-info=1"])
+    if codec in ("libx264", "h264_nvenc"):
         cmd.extend(["-profile:v", "high"])
-    if settings.FFMPEG_VIDEO_CODEC in ("hevc_nvenc", "libx265"):
+    if codec in ("hevc_nvenc", "libx265"):
         cmd.extend(["-pix_fmt", "p010le", "-tag:v", "hvc1"])
     else:
         cmd.extend(["-pix_fmt", "yuv420p"])
     cmd.extend([
+        "-flags:v", "+bitexact",
+        "-flags:a", "+bitexact",
+        "-color_range", "tv",
+        "-colorspace", "bt709",
+        "-color_trc", "bt709",
+        "-color_primaries", "bt709",
         "-c:a", "aac",
         "-b:a", "320k",
         "-ar", "48000",
@@ -477,7 +511,10 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
         "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
         "-metadata:s:v", "handler_name=VideoHandler",
         "-metadata:s:v", "encoder=H.265 10-bit",
+        "-metadata:s:v:0", "language=und",
         "-metadata:s:a", "handler_name=SoundHandler",
+        "-metadata:s:a:0", "language=und",
+        "-metadata:s:d:0", "language=eng",
         output_path,
     ])
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)

@@ -30,6 +30,7 @@ gpu_image = (
         "libx264-dev",
         "libx265-dev",
         "fontconfig",
+        "atomicparsley",
     )
     .run_commands(
         # Build FFmpeg 7.1 with NVENC (av1_nvenc, hevc_nvenc, h264_nvenc)
@@ -99,7 +100,7 @@ app = modal.App("gpu-pipeline", image=gpu_image)
 
 
 @app.function(
-    gpu="H100",
+    gpu=["L40S", "A10G"],
     memory=16384,
     cpu=4,
     timeout=900,
@@ -131,6 +132,14 @@ def process_clips(
     import tempfile
 
     sys.path.insert(0, "/app")
+
+    # Keep the GPU pipeline compatible with both L40S and A10G. Older secrets may
+    # still contain av1_nvenc, which L40S supports but A10G does not.
+    os.environ["FFMPEG_VIDEO_CODEC"] = os.environ.get("FFMPEG_PIPELINE_VIDEO_CODEC", "hevc_nvenc")
+    os.environ["FFMPEG_ENCODE_PRESET"] = os.environ.get("FFMPEG_PIPELINE_ENCODE_PRESET", "p4")
+    os.environ["FFMPEG_HWACCEL"] = os.environ.get("FFMPEG_PIPELINE_HWACCEL", "cuda")
+    os.environ.setdefault("FFMPEG_FINAL_VIDEO_CODEC", "hevc_nvenc")
+    os.environ.setdefault("FFMPEG_FINAL_ENCODE_PRESET", "p4")
 
     # Write GCP credentials to a temp file so all google-auth code paths
     # (including implicit ADC fallback) find credentials without needing
