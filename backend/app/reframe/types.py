@@ -3,7 +3,7 @@ Reframe V5 data types.
 
 Data flow:
   Shot                    → shot_detector (FFmpeg scene cuts)
-  FaceDetection, Frame    → face_tracker (MediaPipe per-frame detections)
+  FaceDetection, Frame    → face_tracker (per-frame detections + persistent tracklets)
   SubjectInfo, FocusPlan  → gemini_director (high-level creative plan)
   FocusPoint              → focus_resolver (merged Gemini + detections)
   SmoothPath              → path_solver (AutoFlip-style kinematic path)
@@ -32,11 +32,11 @@ class Shot:
         return self.end_s - self.start_s
 
 
-# --- Face Tracker (MediaPipe) -----------------------------------------------
+# --- Face Tracker ------------------------------------------------------------
 
 @dataclass
 class FaceDetection:
-    """Single face detected in one frame by MediaPipe."""
+    """Single face detected in one frame by the active detector."""
     face_x: float           # 0.0-1.0 normalized face center X
     face_y: float           # 0.0-1.0 normalized face center Y
     face_width: float       # 0.0-1.0 normalized face bbox width
@@ -45,7 +45,9 @@ class FaceDetection:
     person_x: float         # 0.0-1.0 estimated person center X (from pose or face)
     person_y: float         # 0.0-1.0 estimated person center Y
     person_height: float    # 0.0-1.0 estimated person height (face-based heuristic or pose)
-    track_id: int = -1      # Stable tracking ID across frames (-1 = unassigned)
+    track_id: int = -1      # Stable tracking ID within the final shot (-1 = unassigned)
+    track_age: int = 0      # Number of matched samples seen for this track
+    track_gap_s: float = 0.0  # Seconds since the same track was last detected before this sample
 
 
 @dataclass

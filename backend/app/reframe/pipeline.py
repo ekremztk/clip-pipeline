@@ -25,7 +25,12 @@ from app.config import settings
 
 from .config import ReframeConfig
 from .shot_detector import detect_shots
-from .face_tracker import analyze_video as track_faces, classify_shots
+from .face_tracker import (
+    analyze_video as track_faces,
+    classify_shots,
+    normalize_detection_engine,
+    parse_detection_engine_spec,
+)
 from .gemini_director import analyze_video as gemini_analyze, build_fallback_plan
 from .focus_resolver import resolve_focus
 from .path_solver import solve_paths
@@ -67,6 +72,25 @@ def run_reframe(
     V5 reframe pipeline.
     Function signature unchanged from V4 — frontend needs no changes.
     """
+    engine_mode, engine_list = parse_detection_engine_spec(detection_engine)
+    if engine_mode == "compare":
+        return _run_reframe_comparison(
+            clip_url=clip_url,
+            clip_local_path=clip_local_path,
+            clip_id=clip_id,
+            job_id=job_id,
+            clip_start=clip_start,
+            clip_end=clip_end,
+            strategy=strategy,
+            aspect_ratio=aspect_ratio,
+            tracking_mode=tracking_mode,
+            content_type_hint=content_type_hint,
+            detection_engines=engine_list,
+            on_progress=on_progress,
+            debug_mode=debug_mode,
+        )
+
+    detection_engine = normalize_detection_engine(engine_list[0])
     _configure_reframe_logging()
 
     if not clip_url and not clip_local_path:
@@ -129,21 +153,50 @@ def run_reframe(
 
         # 3. Shot detection
         progress("Detecting scene cuts...", 12)
-        shots = detect_shots(input_path, duration_s, config.shot_detection, fps)
-        logger.info("[Reframe] %d shots detected", len(shots))
+        raw_shots = detect_shots(input_path, duration_s, config.shot_detection, fps)
+        logger.info("[Reframe] %d raw shots detected", len(raw_shots))
 
-        # 4. Face tracking
+        # 4. Build the final scene list before the production tracking pass.
+        # A preliminary face pass is allowed to classify and merge false cuts,
+        # but Gemini and rendering only ever see detections from final shots.
         engine_label = detection_engine.upper()
-        progress(f"Tracking faces ({engine_label})...", 20)
-        frames = track_faces(input_path, shots, src_w, src_h, config.face_tracker, engine_type=detection_engine)
-        logger.info("[Reframe] %d frames analyzed (engine=%s)", len(frames), detection_engine)
+        shots = raw_shots
+        preliminary_frames: list[Frame] = []
 
-        # 5. Classify shots by face count
-        progress("Classifying shots...", 35)
-        classify_shots(shots, frames)
+        if len(raw_shots) > 1:
+            progress(f"Pre-scanning scene layout ({engine_label})...", 18)
+            preliminary_frames = track_faces(
+                input_path,
+                raw_shots,
+                src_w,
+                src_h,
+                config.face_tracker,
+                engine_type=detection_engine,
+            )
+            classify_shots(raw_shots, preliminary_frames)
+            shots = _merge_false_cuts(raw_shots, preliminary_frames)
 
-        # Merge false-positive cuts
-        shots = _merge_false_cuts(shots, frames)
+        false_cut_merges = max(0, len(raw_shots) - len(shots))
+        if false_cut_merges:
+            logger.info("[Reframe] Final scene list merged %d false cuts", false_cut_merges)
+
+        needs_final_tracking = not preliminary_frames or not _same_shots(raw_shots, shots)
+        if needs_final_tracking:
+            progress(f"Tracking faces on final scenes ({engine_label})...", 24)
+            frames = track_faces(
+                input_path,
+                shots,
+                src_w,
+                src_h,
+                config.face_tracker,
+                engine_type=detection_engine,
+            )
+            progress("Classifying final scenes...", 35)
+            classify_shots(shots, frames)
+        else:
+            frames = preliminary_frames
+
+        logger.info("[Reframe] %d final frames analyzed (engine=%s)", len(frames), detection_engine)
         for s in shots:
             logger.info("[Reframe] Shot %.1f-%.1fs: %s (%.1fs)", s.start_s, s.end_s, s.shot_type, s.duration_s)
 
@@ -209,7 +262,7 @@ def run_reframe(
 
         # 8. Focus resolver
         progress("Resolving focus targets...", 65)
-        focus_points = resolve_focus(director_plan, frames, shots)
+        focus_points = resolve_focus(director_plan, frames, shots, config.focus_resolver)
 
         # 9. Path solver (AutoFlip kinematic)
         progress("Computing smooth camera paths...", 75)
@@ -237,6 +290,15 @@ def run_reframe(
         )
 
         result.content_type = result_content_type
+        result.metadata["raw_shot_count"] = len(raw_shots)
+        result.metadata["final_shot_count"] = len(shots)
+        result.metadata["false_cut_merge_count"] = false_cut_merges
+        result.metadata["detection_engine"] = detection_engine
+        result.metadata["detector_quality"] = _build_detector_quality_summary(
+            frames,
+            shots,
+            sample_fps=config.face_tracker.sample_fps,
+        )
 
         # Attach full pipeline decisions to metadata for debug analyzer
         result.metadata["pipeline_decisions"] = _build_pipeline_decisions(
@@ -313,6 +375,93 @@ def run_reframe(
                 os.remove(temp_path)
             except Exception:
                 pass
+
+
+def _run_reframe_comparison(
+    clip_url: Optional[str],
+    clip_local_path: Optional[str],
+    clip_id: Optional[str],
+    job_id: Optional[str],
+    clip_start: float,
+    clip_end: Optional[float],
+    strategy: str,
+    aspect_ratio: str,
+    tracking_mode: str,
+    content_type_hint: Optional[str],
+    detection_engines: list[str],
+    on_progress: Optional[Callable[[str, int], None]],
+    debug_mode: bool,
+) -> ReframeResult:
+    _configure_reframe_logging()
+
+    variants: list[dict] = []
+    failures: list[dict] = []
+    primary: Optional[ReframeResult] = None
+    primary_engine = ""
+
+    for index, engine in enumerate(detection_engines):
+        if on_progress:
+            on_progress(f"Detector compare {index + 1}/{len(detection_engines)}: {engine}", 5)
+
+        try:
+            result = run_reframe(
+                clip_url=clip_url,
+                clip_local_path=clip_local_path,
+                clip_id=clip_id,
+                job_id=job_id,
+                clip_start=clip_start,
+                clip_end=clip_end,
+                strategy=strategy,
+                aspect_ratio=aspect_ratio,
+                tracking_mode=tracking_mode,
+                content_type_hint=content_type_hint,
+                detection_engine=engine,
+                on_progress=on_progress,
+                debug_mode=debug_mode,
+            )
+            variant_summary = _summarize_reframe_variant(engine, result)
+            variants.append(variant_summary)
+            if primary is None:
+                primary = result
+                primary_engine = engine
+        except Exception as exc:
+            logger.exception("[Reframe] Detector variant failed: %s", engine)
+            failures.append({
+                "engine": engine,
+                "status": "error",
+                "error": str(exc)[:300],
+            })
+
+    if primary is None:
+        raise RuntimeError(
+            "All detector comparison variants failed: "
+            + ", ".join(f"{item['engine']}={item['error']}" for item in failures)
+        )
+
+    primary.metadata["detector_comparison"] = {
+        "mode": "compare",
+        "requested_engines": detection_engines,
+        "primary_engine": primary_engine,
+        "variants": variants,
+        "failures": failures,
+    }
+    primary.metadata["detection_engine_spec"] = f"compare:{','.join(detection_engines)}"
+    return primary
+
+
+def _summarize_reframe_variant(engine: str, result: ReframeResult) -> dict:
+    return {
+        "engine": engine,
+        "status": "ok",
+        "keyframe_count": len(result.keyframes),
+        "scene_cut_count": len(result.scene_cuts),
+        "content_type": result.content_type,
+        "debug_video_url": result.metadata.get("debug_video_url"),
+        "raw_shot_count": result.metadata.get("raw_shot_count"),
+        "final_shot_count": result.metadata.get("final_shot_count"),
+        "false_cut_merge_count": result.metadata.get("false_cut_merge_count"),
+        "detector_quality": result.metadata.get("detector_quality"),
+    }
 
 
 # --- Pipeline decisions builder (for debug analyzer) ------------------------
@@ -396,7 +545,64 @@ def _build_pipeline_decisions(
     }
 
 
+def _build_detector_quality_summary(
+    frames: list[Frame],
+    shots: list[Shot],
+    sample_fps: float,
+) -> dict:
+    face_counts = [len(frame.faces) for frame in frames]
+    total_frames = len(frames)
+    total_detections = sum(face_counts)
+    frames_with_faces = sum(1 for count in face_counts if count > 0)
+    confidences = [face.confidence for frame in frames for face in frame.faces]
+    recovery_gap = 1.5 / max(sample_fps, 0.1)
+
+    track_ids: set[tuple[int, int]] = set()
+    recovered_assignments = 0
+    per_shot: list[dict] = []
+
+    for shot_idx, shot in enumerate(shots):
+        shot_frames = [frame for frame in frames if frame.shot_index == shot_idx]
+        shot_faces = [face for frame in shot_frames for face in frame.faces]
+        shot_track_ids = sorted({face.track_id for face in shot_faces if face.track_id >= 0})
+        for track_id in shot_track_ids:
+            track_ids.add((shot_idx, track_id))
+        recovered_assignments += sum(1 for face in shot_faces if face.track_gap_s > recovery_gap)
+
+        per_shot.append({
+            "shot_index": shot_idx,
+            "type": shot.shot_type,
+            "frames_sampled": len(shot_frames),
+            "frames_with_faces": sum(1 for frame in shot_frames if frame.faces),
+            "unique_track_count": len(shot_track_ids),
+            "max_track_age": max((face.track_age for face in shot_faces), default=0),
+        })
+
+    return {
+        "frames_sampled": total_frames,
+        "detections_total": total_detections,
+        "avg_faces_per_frame": round(total_detections / total_frames, 3) if total_frames else 0.0,
+        "face_frame_coverage": round(frames_with_faces / total_frames, 3) if total_frames else 0.0,
+        "empty_frame_rate": round(1.0 - frames_with_faces / total_frames, 3) if total_frames else 1.0,
+        "avg_confidence": round(sum(confidences) / len(confidences), 4) if confidences else 0.0,
+        "unique_track_count": len(track_ids),
+        "recovered_assignments": recovered_assignments,
+        "shots": per_shot,
+    }
+
+
 # --- False cut detection -----------------------------------------------------
+
+def _same_shots(left: list[Shot], right: list[Shot]) -> bool:
+    if len(left) != len(right):
+        return False
+    for a, b in zip(left, right):
+        if abs(a.start_s - b.start_s) > 0.001:
+            return False
+        if abs(a.end_s - b.end_s) > 0.001:
+            return False
+    return True
+
 
 def _merge_false_cuts(
     shots: list[Shot],

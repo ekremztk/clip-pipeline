@@ -54,6 +54,8 @@ class Settings:
 
     # Reframe — YOLOv8 model path (pre-downloaded in Docker build)
     YOLOV8_MODEL_PATH: str = os.getenv("YOLOV8_MODEL_PATH", "yolov8n-pose.pt")
+    REFRAME_DETECTION_ENGINE: str = os.getenv("REFRAME_DETECTION_ENGINE", "yolo")
+    REFRAME_DEBUG_COMPARE_OUTPUTS: bool = os.getenv("REFRAME_DEBUG_COMPARE_OUTPUTS", "").lower() in ("1", "true", "yes", "on")
     
     # Pipeline constants
     MIN_CLIP_DURATION = 12

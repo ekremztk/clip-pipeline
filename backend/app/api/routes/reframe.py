@@ -18,6 +18,7 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.middleware.auth import get_current_user
+from app.reframe.face_tracker import available_detection_engines, parse_detection_engine_spec
 from app.reframe.types import ReframeKeyframe
 from app.reframe.pipeline import run_reframe
 from app.services.supabase_client import get_client
@@ -31,7 +32,7 @@ _STALE_MINUTES = 15
 _VALID_ASPECT_RATIOS = {"9:16", "1:1", "4:5", "16:9"}
 _VALID_TRACKING_MODES = {"x_only", "dynamic_xy"}
 _VALID_CONTENT_TYPES = {"auto", "podcast", "single", "gaming", "generic"}
-_VALID_DETECTION_ENGINES = {"yolo"}
+_VALID_DETECTION_ENGINES = set(available_detection_engines())
 
 
 # ─── Request / Response Modelleri ─────────────────────────────────────────────
@@ -91,7 +92,13 @@ def _sanitize_content_type(value: Optional[str]) -> Optional[str]:
 
 
 def _sanitize_detection_engine(value: Optional[str]) -> str:
-    return "yolo"
+    try:
+        mode, engines = parse_detection_engine_spec(value)
+    except Exception:
+        return "yolo"
+    if mode == "compare":
+        return f"compare:{','.join(engines)}"
+    return engines[0]
 
 
 def _keyframes_to_dicts(keyframes: list[ReframeKeyframe]) -> list[dict]:
@@ -108,6 +115,17 @@ def _keyframes_to_dicts(keyframes: list[ReframeKeyframe]) -> list[dict]:
 
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
+
+@router.get("/detection-engines")
+async def get_detection_engines(
+    current_user: dict = Depends(get_current_user),
+):
+    return {
+        "default": _sanitize_detection_engine(settings.REFRAME_DETECTION_ENGINE),
+        "engines": sorted(_VALID_DETECTION_ENGINES),
+        "compare_syntax": "compare:yolo-face-large,insightface-scrfd",
+    }
+
 
 @router.post("/upload")
 async def upload_reframe_video(

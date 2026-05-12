@@ -26,6 +26,22 @@ class FaceTrackerConfig:
     max_faces: int = 4                          # Max faces to track per frame
     person_height_multiplier: float = 3.5       # Estimate person height from face height
     yolo_imgsz: int = 1280                      # YOLO inference resolution
+    track_lost_ttl_s: float = 2.0               # Keep an unmatched track alive for brief face loss
+    track_match_base_dist: float = 0.16         # Base normalized distance gate for track matching
+    track_match_growth_per_s: float = 0.06      # Expand gate while a track is temporarily lost
+    track_match_max_dist: float = 0.28          # Hard cap to avoid cross-person ID swaps
+    track_size_weight: float = 0.12             # Add mild size consistency to the match cost
+
+
+# --- Stage 2b: Focus Resolution ---------------------------------------------
+
+@dataclass
+class FocusResolverConfig:
+    """Rules for locking the active subject when detections temporarily disappear."""
+    max_subject_jump: float = 0.18              # Same-shot jump above this is treated as suspicious
+    target_lock_ttl_s: float = 2.0              # Strongly hold the last target during brief loss
+    locked_hold_weight: float = 0.55            # Weight while the target is temporarily hidden
+    stale_hold_weight: float = 0.35             # Weight after the strong lock window expires
 
 
 # --- Stage 3: Gemini Director -----------------------------------------------
@@ -107,6 +123,7 @@ class ReframeConfig:
     """Main configuration — nests all sub-configs."""
     shot_detection: ShotDetectionConfig = field(default_factory=ShotDetectionConfig)
     face_tracker: FaceTrackerConfig = field(default_factory=FaceTrackerConfig)
+    focus_resolver: FocusResolverConfig = field(default_factory=FocusResolverConfig)
     gemini_director: GeminiDirectorConfig = field(default_factory=GeminiDirectorConfig)
     path_solver: PathSolverConfig = field(default_factory=PathSolverConfig)
     keyframe_emitter: KeyframeEmitterConfig = field(default_factory=KeyframeEmitterConfig)
