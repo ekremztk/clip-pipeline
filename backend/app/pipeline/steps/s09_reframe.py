@@ -26,7 +26,6 @@ def run(
     job_id: str,
     channel_id: str,
     reframe_content_type: str = "podcast",
-    detection_engine: str | None = None,
 ) -> list:
     """
     Step 9: Reframe — produces a 9:16 MP4 for each exported clip.
@@ -39,11 +38,7 @@ def run(
 
     Returns: List of updated clip dicts with video_reframed_path set.
     """
-    detection_engine = detection_engine or settings.REFRAME_DETECTION_ENGINE
-    print(
-        f"[S09] Starting reframe for {len(exported_clips)} clips. "
-        f"Strategy: {reframe_content_type}, detector={detection_engine}"
-    )
+    print(f"[S09] Starting reframe for {len(exported_clips)} clips. Strategy: {reframe_content_type}")
     supabase = get_client()
     reframed_clips = []
 
@@ -64,14 +59,12 @@ def run(
                     clip_url=landscape_url,
                     job_id=job_id,
                     clip_index=index,
-                    detection_engine=detection_engine,
                 )
             else:
                 reframed_url, reframe_meta = _reframe_podcast(
                     clip_url=landscape_url,
                     job_id=job_id,
                     clip_index=index,
-                    detection_engine=detection_engine,
                 )
 
             if clip_id and reframed_url:
@@ -117,7 +110,6 @@ def _reframe_podcast(
     clip_url: str,
     job_id: str,
     clip_index: int,
-    detection_engine: str | None = None,
 ) -> tuple[str, dict]:
     """
     Podcast reframe:
@@ -127,39 +119,56 @@ def _reframe_podcast(
 
     Returns (reframed_r2_url, metadata_dict)
     """
-    from app.reframe.face_tracker import parse_detection_engine_spec
+    from app.reframe.pipeline import run_reframe
+    from app.reframe.render import render_podcast_reframe
 
-    detection_engine = detection_engine or settings.REFRAME_DETECTION_ENGINE
-    engine_mode, engines = parse_detection_engine_spec(detection_engine)
     print(f"[S09] Podcast reframe for clip {clip_index+1}: {clip_url}")
 
     # Download once — reused for both analysis and render
     local_path = _download_temp(clip_url)
+    output_path = os.path.join(
+        str(settings.UPLOAD_DIR),
+        f"podcast_reframe_{uuid.uuid4().hex}.mp4",
+    )
 
     try:
-        if engine_mode == "compare":
-            return _reframe_podcast_compare(
-                local_path=local_path,
-                job_id=job_id,
-                clip_index=clip_index,
-                engines=engines,
-            )
+        # Run analysis pipeline — gets keyframes + scene_cuts + crop dimensions
+        result = run_reframe(
+            clip_local_path=local_path,
+            job_id=job_id,
+            strategy="podcast",
+            aspect_ratio="9:16",
+            tracking_mode="x_only",
+            content_type_hint="podcast",
+            detection_engine="yolo",
+        )
 
-        result = _analyze_podcast(local_path, job_id, engines[0])
-        output_path = _new_podcast_output_path(engines[0])
-        r2_url = _render_upload_podcast_variant(
-            local_path=local_path,
-            result=result,
+        crop_w = result.metadata.get("crop_w", 0)
+        crop_h = result.metadata.get("crop_h", 0)
+
+        if not crop_w or not crop_h:
+            raise RuntimeError(f"[S09] Missing crop dimensions: crop_w={crop_w} crop_h={crop_h}")
+
+        if not result.keyframes:
+            raise RuntimeError("[S09] No keyframes returned from podcast reframe analysis")
+
+        # Render 9:16 MP4 via FFmpeg (same local_path, no re-download)
+        render_podcast_reframe(
+            video_path=local_path,
+            keyframes=result.keyframes,
+            scene_cuts=result.scene_cuts,
+            src_w=result.src_w,
+            src_h=result.src_h,
+            crop_w=crop_w,
+            crop_h=crop_h,
+            fps=result.fps,
+            duration_s=result.duration_s,
             output_path=output_path,
-            r2_engine_key=engines[0],
+            canvas_w=1080,
+            canvas_h=1920,
         )
-        meta = _build_podcast_meta(
-            result=result,
-            output_path=output_path,
-            engine=engines[0],
-            detection_engine_spec=detection_engine,
-        )
-        return r2_url, meta
+
+        r2_url = _upload_to_r2(output_path, f"reframe/podcast_{uuid.uuid4().hex}.mp4")
 
     finally:
         if os.path.exists(local_path):
@@ -168,219 +177,17 @@ def _reframe_podcast(
             except Exception:
                 pass
 
-
-def _reframe_podcast_compare(
-    local_path: str,
-    job_id: str,
-    clip_index: int,
-    engines: list[str],
-) -> tuple[str, dict]:
-    variants: list[dict] = []
-    failures: list[dict] = []
-    primary_url = ""
-    primary_meta: dict = {}
-    primary_engine = ""
-    primary_output_path = ""
-
-    print(
-        f"[S09] Clip {clip_index+1}: detector compare mode "
-        f"({', '.join(engines)})"
-    )
-
-    for engine in engines:
-        output_path = _new_podcast_output_path(engine)
-        try:
-            result = _analyze_podcast(local_path, job_id, engine)
-            r2_url = _render_upload_podcast_variant(
-                local_path=local_path,
-                result=result,
-                output_path=output_path,
-                r2_engine_key=engine,
-            )
-            variant_meta = _build_podcast_meta(
-                result=result,
-                output_path=output_path,
-                engine=engine,
-                detection_engine_spec=f"compare:{','.join(engines)}",
-            )
-            variant_entry = {
-                "engine": engine,
-                "status": "ok",
-                "video_reframed_path": r2_url,
-                "keyframe_count": variant_meta["keyframe_count"],
-                "scene_cut_count": variant_meta["scene_cut_count"],
-                "detector_quality": variant_meta.get("detector_quality"),
-                "raw_shot_count": variant_meta.get("raw_shot_count"),
-                "final_shot_count": variant_meta.get("final_shot_count"),
-                "false_cut_merge_count": variant_meta.get("false_cut_merge_count"),
-            }
-            if settings.REFRAME_DEBUG_COMPARE_OUTPUTS:
-                debug_url = _upload_debug_compare_output(
-                    local_path=output_path,
-                    job_id=job_id,
-                    clip_index=clip_index,
-                    engine=engine,
-                )
-                if debug_url:
-                    variant_entry["debug_output_url"] = debug_url
-                    print(
-                        f"[S09] DEBUG compare output "
-                        f"clip={clip_index+1} engine={engine} url={debug_url}"
-                    )
-            variants.append(variant_entry)
-
-            if not primary_url:
-                primary_url = r2_url
-                primary_meta = variant_meta
-                primary_engine = engine
-                primary_output_path = output_path
-            else:
-                _remove_file(output_path)
-
-        except Exception as exc:
-            _remove_file(output_path)
-            failures.append({
-                "engine": engine,
-                "status": "error",
-                "error": str(exc)[:300],
-            })
-            print(f"[S09] Clip {clip_index+1}: detector {engine} failed: {exc}")
-
-    if not primary_url:
-        raise RuntimeError(
-            "All detector compare variants failed: "
-            + ", ".join(f"{item['engine']}={item['error']}" for item in failures)
-        )
-
-    primary_meta["local_reframed_path"] = primary_output_path
-    primary_meta["detector_comparison"] = {
-        "mode": "compare",
-        "requested_engines": engines,
-        "primary_engine": primary_engine,
-        "variants": variants,
-        "failures": failures,
-    }
-    if settings.REFRAME_DEBUG_COMPARE_OUTPUTS:
-        primary_meta["debug_compare_outputs"] = [
-            {
-                "engine": item["engine"],
-                "video_reframed_path": item.get("debug_output_url") or item.get("video_reframed_path"),
-                "pipeline_reframed_path": item.get("video_reframed_path"),
-                "preserved_debug_copy": bool(item.get("debug_output_url")),
-            }
-            for item in variants
-            if item.get("status") == "ok"
-        ]
-    return primary_url, primary_meta
-
-
-def _upload_debug_compare_output(
-    local_path: str,
-    job_id: str,
-    clip_index: int,
-    engine: str,
-) -> str | None:
-    try:
-        if not local_path or not os.path.exists(local_path):
-            return None
-        r2 = get_r2_client()
-        r2_key = (
-            f"debug/reframe_compare/{job_id}/"
-            f"clip_{clip_index:02d}_{_safe_engine_key(engine)}_{uuid.uuid4().hex}.mp4"
-        )
-        with open(local_path, "rb") as f:
-            r2.put_object(
-                Bucket=settings.R2_BUCKET_NAME,
-                Key=r2_key,
-                Body=f,
-                ContentType="video/mp4",
-            )
-        return f"{settings.R2_PUBLIC_URL.rstrip('/')}/{r2_key}"
-    except Exception as exc:
-        print(f"[S09] Debug compare upload failed ({engine}): {exc}")
-        return None
-
-
-def _analyze_podcast(local_path: str, job_id: str, detection_engine: str):
-    from app.reframe.pipeline import run_reframe
-
-    result = run_reframe(
-        clip_local_path=local_path,
-        job_id=job_id,
-        strategy="podcast",
-        aspect_ratio="9:16",
-        tracking_mode="x_only",
-        content_type_hint="podcast",
-        detection_engine=detection_engine,
-    )
-
-    crop_w = result.metadata.get("crop_w", 0)
-    crop_h = result.metadata.get("crop_h", 0)
-
-    if not crop_w or not crop_h:
-        raise RuntimeError(f"[S09] Missing crop dimensions: crop_w={crop_w} crop_h={crop_h}")
-
-    if not result.keyframes:
-        raise RuntimeError("[S09] No keyframes returned from podcast reframe analysis")
-
-    return result
-
-
-def _render_upload_podcast_variant(
-    local_path: str,
-    result,
-    output_path: str,
-    r2_engine_key: str,
-) -> str:
-    from app.reframe.render import render_podcast_reframe
-
-    crop_w = result.metadata.get("crop_w", 0)
-    crop_h = result.metadata.get("crop_h", 0)
-
-    render_podcast_reframe(
-        video_path=local_path,
-        keyframes=result.keyframes,
-        scene_cuts=result.scene_cuts,
-        src_w=result.src_w,
-        src_h=result.src_h,
-        crop_w=crop_w,
-        crop_h=crop_h,
-        fps=result.fps,
-        duration_s=result.duration_s,
-        output_path=output_path,
-        canvas_w=1080,
-        canvas_h=1920,
-    )
-
-    return _upload_to_r2(
-        output_path,
-        f"reframe/podcast_{_safe_engine_key(r2_engine_key)}_{uuid.uuid4().hex}.mp4",
-    )
-
-
-def _build_podcast_meta(
-    result,
-    output_path: str,
-    engine: str,
-    detection_engine_spec: str,
-) -> dict:
-    return {
+    meta = {
         "strategy": "podcast",
         "local_reframed_path": output_path,
         "keyframe_count": len(result.keyframes),
         "scene_cut_count": len(result.scene_cuts),
-        "crop_w": result.metadata.get("crop_w", 0),
-        "crop_h": result.metadata.get("crop_h", 0),
+        "crop_w": crop_w,
+        "crop_h": crop_h,
         "src_w": result.src_w,
         "src_h": result.src_h,
         "fps": result.fps,
         "duration_s": result.duration_s,
-        "detection_engine": engine,
-        "detection_engine_spec": detection_engine_spec,
-        "detector_quality": result.metadata.get("detector_quality"),
-        "raw_shot_count": result.metadata.get("raw_shot_count"),
-        "final_shot_count": result.metadata.get("final_shot_count"),
-        "false_cut_merge_count": result.metadata.get("false_cut_merge_count"),
         "keyframes": [
             {
                 "time_s": kf.time_s,
@@ -393,31 +200,13 @@ def _build_podcast_meta(
         "scene_cuts": result.scene_cuts,
     }
 
-
-def _new_podcast_output_path(engine: str) -> str:
-    return os.path.join(
-        str(settings.UPLOAD_DIR),
-        f"podcast_reframe_{_safe_engine_key(engine)}_{uuid.uuid4().hex}.mp4",
-    )
-
-
-def _safe_engine_key(engine: str) -> str:
-    return "".join(ch if ch.isalnum() else "_" for ch in engine.lower()).strip("_") or "detector"
-
-
-def _remove_file(path: str) -> None:
-    if path and os.path.exists(path):
-        try:
-            os.remove(path)
-        except Exception:
-            pass
+    return r2_url, meta
 
 
 def _reframe_gaming(
     clip_url: str,
     job_id: str,
     clip_index: int,
-    detection_engine: str | None = None,
 ) -> tuple[str, dict]:
     """
     Gaming reframe: YOLO webcam detection → FFmpeg vstack render.
@@ -426,11 +215,7 @@ def _reframe_gaming(
     Returns (reframed_r2_url, metadata_dict)
     """
     from app.reframe.pipeline import run_reframe
-    from app.reframe.face_tracker import parse_detection_engine_spec
 
-    detection_engine = detection_engine or settings.REFRAME_DETECTION_ENGINE
-    _engine_mode, engines = parse_detection_engine_spec(detection_engine)
-    selected_engine = engines[0]
     print(f"[S09] Gaming reframe for clip {clip_index+1}: {clip_url}")
 
     local_path = _download_temp(clip_url)
@@ -442,7 +227,7 @@ def _reframe_gaming(
             aspect_ratio="9:16",
             tracking_mode="x_only",
             content_type_hint="gaming",
-            detection_engine=selected_engine,
+            detection_engine="yolo",
         )
     finally:
         if os.path.exists(local_path):
@@ -465,8 +250,6 @@ def _reframe_gaming(
         "overlap_pct": result.metadata.get("overlap_pct"),
         "source_w": result.metadata.get("source_w"),
         "source_h": result.metadata.get("source_h"),
-        "detection_engine": selected_engine,
-        "detection_engine_spec": detection_engine,
     }
 
     return reframed_url, meta

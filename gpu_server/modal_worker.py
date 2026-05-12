@@ -47,8 +47,6 @@ _BACKEND_DIR = _REPO_ROOT / "backend"
 # System packages required by ffmpeg, OpenCV, MediaPipe, and YOLO
 _APT_PACKAGES = [
     "ffmpeg",
-    "build-essential",
-    "clang",
     "libgl1",
     "libglib2.0-0",
     "libsm6",
@@ -78,30 +76,26 @@ _PIP_PACKAGES = [
     "opencv-python-headless",
     "mediapipe>=0.10.0",
     "ultralytics>=8.1.0",   # YOLOv8 — yolov8l.pt pre-downloaded at image build time
-    "insightface==0.7.3",
-    "onnxruntime-gpu",
 ]
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .env({"CACHE_DATE": "2026-05-12_detector-compare-v1"})
+    .env({"CACHE_DATE": "2026-04-11_gaming-v6-clamp-fix"})
     .apt_install(_APT_PACKAGES)
     .pip_install(_PIP_PACKAGES)
-    # Pre-download face detector models at image build time.
+    # Pre-download yolov8l-face.pt (face-specific model) at image build time.
+    # Source: HuggingFace arnabdhar/YOLOv8-Face-Detection (requests already installed)
     .run_commands(
         "python -c \""
         "import requests, os; "
-        "path = '/root/yolov8l-face.pt'; "
         "url = 'https://huggingface.co/arnabdhar/YOLOv8-Face-Detection/resolve/main/model.pt'; "
-        "from ultralytics import YOLO; "
-        "print(f'[Modal build] Downloading {os.path.basename(path)} from HuggingFace...'); "
+        "print('[Modal build] Downloading face model from HuggingFace...'); "
         "r = requests.get(url, stream=True, timeout=300); r.raise_for_status(); "
-        "open(path, 'wb').write(r.content); "
-        "YOLO(path); "
-        "sz = os.path.getsize(path) / 1024 / 1024; "
-        "print(f'[Modal build] {os.path.basename(path)} ready size={sz:.1f}MB')"
-        "\"",
-        "python -c \"from insightface.app import FaceAnalysis; app = FaceAnalysis(name='buffalo_l', allowed_modules=['detection'], providers=['CPUExecutionProvider']); app.prepare(ctx_id=-1, det_size=(640, 640))\""
+        "open('/root/yolov8l-face.pt', 'wb').write(r.content); "
+        "from ultralytics import YOLO; m = YOLO('/root/yolov8l-face.pt'); "
+        "sz = os.path.getsize('/root/yolov8l-face.pt') / 1024 / 1024; "
+        "print(f'[Modal build] yolov8l-face.pt ready size={sz:.1f}MB')"
+        "\""
     )
     # Include backend source tree at /backend inside the container.
     # copy=True bakes it into the image layer (required for GPU functions).

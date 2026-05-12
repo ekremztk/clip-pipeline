@@ -17,7 +17,6 @@ Key principle: Gemini says WHO (by track_id number), detections say WHERE.
 import logging
 from typing import Optional
 
-from .config import FocusResolverConfig
 from .types import (
     DirectorPlan,
     FaceDetection,
@@ -36,7 +35,6 @@ def resolve_focus(
     plan: DirectorPlan,
     frames: list[Frame],
     shots: list[Shot],
-    config: Optional[FocusResolverConfig] = None,
 ) -> list[FocusPoint]:
     """
     Merge Gemini directives with face detections into focus points.
@@ -48,9 +46,7 @@ def resolve_focus(
     4. Find the face with that track_id; fallback to largest face
     5. Validate position consistency — reject track_id swaps
     """
-    resolver_config = config or FocusResolverConfig()
-
-    # Build: subject_id -> shot_idx(int) -> track_id(int)
+    # Build: subject_id → shot_idx(int) → track_id(int)
     subject_track_map: dict[str, dict[int, int]] = {}
     for s in plan.subjects:
         subject_track_map[s.id] = {int(k): int(v) for k, v in s.scene_track_ids.items()}
@@ -63,13 +59,18 @@ def resolve_focus(
     last_known_x: dict[int, float] = {}
     last_known_y: dict[int, float] = {}
 
-    # Per-subject position tracking catches same-shot ID swaps. Scene cuts are
-    # allowed to jump because the same person can appear at a different x position.
+    # Per-subject position tracking — catches track_id swaps that spatial matching
+    # misassigns. If a "matched" face is far from where this subject was last seen,
+    # it's a YOLO track_id swap, not actual movement. Hold position instead.
     subject_last_x: dict[str, float] = {}
     subject_last_y: dict[str, float] = {}
-    subject_last_time: dict[str, float] = {}
-    subject_last_shot: dict[str, int] = {}
-    rejected_jump_count = 0
+    # Max allowed per-sample jump (at 5fps = 200ms interval). Seated speakers move
+    # ~2-5% of frame per sample. 8% catches fast head turns; anything above that
+    # is almost certainly a track_id that swapped to the other person's face.
+    MAX_SUBJECT_JUMP = 0.08
+    # After N consecutive holds, accept the new position (genuine movement, not swap)
+    MAX_CONSECUTIVE_HOLDS = 3
+    subject_hold_count: dict[str, int] = {}
 
     # Pre-compute per-shot face position medians as fallback for first-frame misses
     shot_median_x: dict[int, float] = {}
@@ -81,28 +82,6 @@ def resolve_focus(
         if xs:
             shot_median_x[shot_idx_pre] = _stats.median(xs)
             shot_median_y[shot_idx_pre] = _stats.median(ys)
-
-    def remember_subject(subject_id: str, shot_idx_local: int, face: FaceDetection, time_s: float) -> None:
-        last_known_x[shot_idx_local] = face.face_x
-        last_known_y[shot_idx_local] = face.face_y
-        if subject_id:
-            subject_last_x[subject_id] = face.face_x
-            subject_last_y[subject_id] = face.face_y
-            subject_last_time[subject_id] = time_s
-            subject_last_shot[subject_id] = shot_idx_local
-
-    def held_position(subject_id: str, shot_idx_local: int, time_s: float) -> tuple[float, float, float]:
-        if subject_id and subject_last_shot.get(subject_id) == shot_idx_local:
-            age_s = max(0.0, time_s - subject_last_time.get(subject_id, time_s))
-            weight = (
-                resolver_config.locked_hold_weight
-                if age_s <= resolver_config.target_lock_ttl_s
-                else resolver_config.stale_hold_weight
-            )
-            return subject_last_x[subject_id], subject_last_y[subject_id], weight
-        if shot_idx_local in last_known_x:
-            return last_known_x[shot_idx_local], last_known_y[shot_idx_local], 0.4
-        return shot_median_x.get(shot_idx_local, 0.5), shot_median_y.get(shot_idx_local, 0.35), 0.4
 
     for frame in frames:
         shot = _get_shot_at(frame.time_s, shots)
@@ -125,32 +104,26 @@ def resolve_focus(
             ))
 
         elif not frame.faces:
-            # No faces: hold the active subject if it was recently seen in this shot.
-            x, y, hold_weight = held_position(active_subject_id, shot_idx, frame.time_s)
+            # No faces — hold last known position for this shot
+            if shot_idx in last_known_x:
+                x = last_known_x[shot_idx]
+                y = last_known_y[shot_idx]
+            else:
+                x = shot_median_x.get(shot_idx, 0.5)
+                y = shot_median_y.get(shot_idx, 0.35)
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=x, y=y,
-                weight=hold_weight, shot_index=shot_idx, subject_id=active_subject_id,
+                weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
             ))
 
         elif shot_type == SHOT_CLOSEUP and len(frame.faces) == 1:
             face = frame.faces[0]
-            target_track_id = _target_track_id(
-                subject_track_map.get(active_subject_id, {}),
-                shot_idx,
-            )
-            if target_track_id is not None and face.track_id != target_track_id:
-                x, y, hold_weight = held_position(active_subject_id, shot_idx, frame.time_s)
-                focus_points.append(FocusPoint(
-                    time_s=frame.time_s,
-                    x=x,
-                    y=y,
-                    weight=hold_weight,
-                    shot_index=shot_idx,
-                    subject_id=active_subject_id,
-                ))
-                continue
-
-            remember_subject(active_subject_id, shot_idx, face, frame.time_s)
+            last_known_x[shot_idx] = face.face_x
+            last_known_y[shot_idx] = face.face_y
+            if active_subject_id:
+                subject_last_x[active_subject_id] = face.face_x
+                subject_last_y[active_subject_id] = face.face_y
+                subject_hold_count[active_subject_id] = 0
             focus_points.append(FocusPoint(
                 time_s=frame.time_s,
                 x=face.face_x,
@@ -169,39 +142,50 @@ def resolve_focus(
                 shot_idx,
             )
 
-            # Position consistency gate: reject large same-shot jumps. Scene cuts
-            # can legitimately move the same person to a different screen position.
-            if (
-                face is not None
-                and active_subject_id
-                and active_subject_id in subject_last_x
-                and subject_last_shot.get(active_subject_id) == shot_idx
-            ):
+            # Position consistency gate: if we have a prior position for this
+            # subject and the matched face jumped too far, it's a track_id swap.
+            if face is not None and active_subject_id and active_subject_id in subject_last_x:
                 dist = ((face.face_x - subject_last_x[active_subject_id]) ** 2
                         + (face.face_y - subject_last_y[active_subject_id]) ** 2) ** 0.5
-                if dist > resolver_config.max_subject_jump:
-                    rejected_jump_count += 1
-                    logger.debug(
-                        "[FocusResolver] t=%.3fs: same-shot jump rejected for %s "
-                        "(track_id=%s gap=%.2fs jump=%.3f > %.3f)",
-                        frame.time_s,
-                        active_subject_id,
-                        getattr(face, "track_id", "?"),
-                        getattr(face, "track_gap_s", 0.0),
-                        dist,
-                        resolver_config.max_subject_jump,
-                    )
-                    face = None
+                if dist > MAX_SUBJECT_JUMP:
+                    holds = subject_hold_count.get(active_subject_id, 0)
+                    if holds < MAX_CONSECUTIVE_HOLDS:
+                        logger.debug(
+                            "[FocusResolver] t=%.3fs: track_id swap suspected for %s "
+                            "(jump=%.3f > %.3f, hold #%d), holding position",
+                            frame.time_s, active_subject_id, dist, MAX_SUBJECT_JUMP, holds + 1,
+                        )
+                        subject_hold_count[active_subject_id] = holds + 1
+                        face = None  # reject → hold last known
+                    else:
+                        # Held too many times — accept new position (genuine movement)
+                        logger.debug(
+                            "[FocusResolver] t=%.3fs: accepting new position for %s "
+                            "after %d holds (dist=%.3f)",
+                            frame.time_s, active_subject_id, holds, dist,
+                        )
+                        subject_hold_count[active_subject_id] = 0
+                else:
+                    subject_hold_count[active_subject_id] = 0
 
             if face is None:
                 # Track ID lost or swap rejected — hold last known position
-                x, y, hold_weight = held_position(active_subject_id, shot_idx, frame.time_s)
+                if shot_idx in last_known_x:
+                    x = last_known_x[shot_idx]
+                    y = last_known_y[shot_idx]
+                else:
+                    x = shot_median_x.get(shot_idx, 0.5)
+                    y = shot_median_y.get(shot_idx, 0.35)
                 focus_points.append(FocusPoint(
                     time_s=frame.time_s, x=x, y=y,
-                    weight=hold_weight, shot_index=shot_idx, subject_id=active_subject_id,
+                    weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
                 ))
             else:
-                remember_subject(active_subject_id, shot_idx, face, frame.time_s)
+                last_known_x[shot_idx] = face.face_x
+                last_known_y[shot_idx] = face.face_y
+                if active_subject_id:
+                    subject_last_x[active_subject_id] = face.face_x
+                    subject_last_y[active_subject_id] = face.face_y
                 focus_points.append(FocusPoint(
                     time_s=frame.time_s,
                     x=face.face_x,
@@ -212,17 +196,13 @@ def resolve_focus(
                 ))
 
     # Diagnostic: per-shot track_id stability summary
-    total_holds = sum(
-        1
-        for fp in focus_points
-        if fp.shot_index >= 0 and fp.weight <= resolver_config.locked_hold_weight
-    )
-    total_tracked = sum(1 for fp in focus_points if fp.weight > resolver_config.locked_hold_weight)
+    total_holds = sum(1 for fp in focus_points if fp.weight == 0.4 and fp.shot_index >= 0)
+    total_tracked = sum(1 for fp in focus_points if fp.weight > 0.4)
     if total_holds > 0:
         logger.info(
-            "[FocusResolver] Track stability: %d tracked, %d held, %d rejected jumps (%.0f%% hold rate)",
+            "[FocusResolver] Track stability: %d tracked, %d held (%.0f%% hold rate — "
+            "high rate indicates frequent track_id swaps)",
             total_tracked, total_holds,
-            rejected_jump_count,
             100 * total_holds / (total_tracked + total_holds) if (total_tracked + total_holds) > 0 else 0,
         )
 
@@ -265,7 +245,7 @@ def _pick_face_by_track_id(
     Find the face matching the track_id Gemini assigned to this subject
     in this shot. Returns None if not found — caller holds last known position.
     """
-    target_track_id = _target_track_id(shot_track_map, shot_idx)
+    target_track_id = shot_track_map.get(shot_idx)
 
     if target_track_id is not None:
         matches = [f for f in faces if f.track_id == target_track_id]
@@ -280,10 +260,3 @@ def _pick_face_by_track_id(
 
     # No track_id mapping for this shot — largest face
     return max(faces, key=lambda f: f.face_width * f.face_height)
-
-
-def _target_track_id(
-    shot_track_map: dict[int, int],
-    shot_idx: int,
-) -> Optional[int]:
-    return shot_track_map.get(shot_idx)

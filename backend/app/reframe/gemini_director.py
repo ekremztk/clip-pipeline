@@ -168,8 +168,8 @@ Duration: {duration_s:.1f}s
 Source: {src_w}x{src_h} → Target: {ar_str}
 
 HOW TO READ THE VIDEO:
-The video you receive has numbered labels burned above each detected face (white number on black background, green box around the face). These numbers are stable person tracklet IDs for the final scene.
-IMPORTANT: Numbers reset at every camera cut (scene change). Within one scene, the same visible person should keep the same number even if their face briefly disappears. The same person may still have a different number in a different scene. Use the number you see in the video at the relevant time — do not assume continuity across scenes.
+The video you receive has numbered labels burned above each detected face (white number on black background, green box around the face). These numbers are the person's tracking ID for that scene.
+IMPORTANT: Numbers reset at every camera cut (scene change). The same person may have a different number in a different scene. Use the number you see in the video at the relevant time — do not assume continuity across scenes.
 
 YOUR TASK:
 1. Watch the video and identify all visible persons using their burned-in numbers per scene

@@ -20,7 +20,6 @@ router = APIRouter(prefix="/debug", tags=["debug"])
 
 class ReframeTestRequest(BaseModel):
     clip_url: str
-    detection_engine: str = "yolo"
 
 
 # ─── Full render test ─────────────────────────────────────────────────────────
@@ -37,7 +36,6 @@ def reframe_test(req: ReframeTestRequest):
             clip_url=req.clip_url,
             job_id="",
             clip_index=0,
-            detection_engine=req.detection_engine,
         )
         return {"reframed_url": reframed_url, "metadata": metadata}
     except Exception as e:
@@ -97,7 +95,7 @@ def reframe_diagnose(req: ReframeTestRequest):
             aspect_ratio="9:16",
             tracking_mode="x_only",
             content_type_hint="podcast",
-            detection_engine=req.detection_engine,
+            detection_engine="yolo",
         )
         crop_w = result.metadata.get("crop_w", 0)
         crop_h = result.metadata.get("crop_h", 0)

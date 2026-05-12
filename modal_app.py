@@ -21,7 +21,6 @@ gpu_image = (
         "libgl1",
         "curl",
         "git",
-        "clang",
         "pkg-config",
         "build-essential",
         "xz-utils",
@@ -66,8 +65,6 @@ gpu_image = (
         "ultralytics>=8.1.0",
         "Pillow",
         "opencv-python-headless",
-        "insightface==0.7.3",
-        "onnxruntime-gpu",
         "google-genai",
         "google-cloud-storage",
         "google-auth",
@@ -90,7 +87,6 @@ gpu_image = (
         "mkdir -p /app/models",
         'curl -fsSL -o /app/models/yolov8l-face.pt "https://huggingface.co/arnabdhar/YOLOv8-Face-Detection/resolve/main/model.pt"',
         "mkdir -p /app/output /app/temp_uploads && chmod 777 /app/output /app/temp_uploads",
-        "python -c \"from insightface.app import FaceAnalysis; app = FaceAnalysis(name='buffalo_l', allowed_modules=['detection'], providers=['CPUExecutionProvider']); app.prepare(ctx_id=-1, det_size=(640, 640))\"",
         # Pre-download SpeechBrain ECAPA-TDNN (VoxCeleb1-O EER 0.80%, 192-dim)
         'python -c "from speechbrain.inference.speaker import EncoderClassifier; EncoderClassifier.from_hparams(source=\'speechbrain/spkrec-ecapa-voxceleb\', savedir=\'/app/models/ecapa\')"',
     )
@@ -209,15 +205,6 @@ def process_clips(
         )
         reframed_count = sum(1 for c in reframed_clips if c.get("video_reframed_path"))
         print(f"[Modal] S09 done: {reframed_count}/{len(reframed_clips)} reframed")
-        debug_compare_outputs = _collect_debug_compare_outputs(reframed_clips)
-        if debug_compare_outputs:
-            print(f"[Modal] Debug compare outputs: {len(debug_compare_outputs)}")
-            for item in debug_compare_outputs:
-                print(
-                    "[Modal] Debug compare output "
-                    f"clip={item.get('clip_index')} engine={item.get('engine')} "
-                    f"url={item.get('video_reframed_path')}"
-                )
 
         # S10: Captions
         source_clips = reframed_clips if reframed_clips else exported_clips
@@ -241,7 +228,6 @@ def process_clips(
             "exported_clips": exported_clips,
             "reframed_clips": reframed_clips,
             "captioned_clips": captioned_clips,
-            "debug_compare_outputs": debug_compare_outputs,
         }
 
     except Exception as e:
@@ -254,22 +240,6 @@ def process_clips(
                 os.remove(local_video)
             except Exception:
                 pass
-
-
-def _collect_debug_compare_outputs(reframed_clips: list[dict]) -> list[dict]:
-    outputs: list[dict] = []
-    for clip in reframed_clips or []:
-        meta = clip.get("reframe_metadata") or {}
-        for item in meta.get("debug_compare_outputs") or []:
-            outputs.append({
-                "clip_id": clip.get("id"),
-                "clip_index": clip.get("clip_index"),
-                "engine": item.get("engine"),
-                "video_reframed_path": item.get("video_reframed_path"),
-                "pipeline_reframed_path": item.get("pipeline_reframed_path"),
-                "preserved_debug_copy": item.get("preserved_debug_copy"),
-            })
-    return outputs
 
 
 @app.function(

@@ -272,8 +272,8 @@ def generate_gemini_video(
     """
     Render a numbered-person video for Gemini consumption.
 
-    For each detected face: green bbox (same as debug) + large stable tracklet
-    number above the bbox. Numbers are per-shot and reset at shot boundaries.
+    For each detected face: green bbox (same as debug) + large track_id number
+    above the bbox. Numbers are per-shot (reset at shot boundaries).
 
     Returns output_path on success, raises on failure.
     """
