@@ -191,28 +191,13 @@ def _build_segments(
     fps: float,
 ) -> list[dict]:
     """
-    Build segments from scene cuts AND intra-shot hard cuts.
-    Intra-shot subject switches emit hold+hold pairs — the second hold's
-    timestamp becomes an additional segment boundary so FFmpeg jumps instantly
-    instead of linearly interpolating across the gap.
+    Build segments from scene cuts. Each segment gets its relevant keyframes.
+    Same logic as the frontend applyReframeWithSplits.
     """
     snap = lambda t: round(round(t * fps) / fps, 6)
 
     # Filter and snap scene cuts
     valid_cuts = sorted(set(snap(c) for c in scene_cuts if 0 < c < duration_s))
-
-    # Detect intra-shot hold+hold pairs and add their second timestamp as cuts.
-    # These are subject switches WITHIN a single shot — not at scene boundaries.
-    sorted_kfs_tmp = sorted(keyframes, key=lambda kf: kf.time_s)
-    for i in range(len(sorted_kfs_tmp) - 1):
-        kf_a = sorted_kfs_tmp[i]
-        kf_b = sorted_kfs_tmp[i + 1]
-        if kf_a.interpolation == "hold" and kf_b.interpolation == "hold":
-            cut_t = snap(kf_b.time_s)
-            if 0 < cut_t < duration_s and cut_t not in valid_cuts:
-                valid_cuts.append(cut_t)
-
-    valid_cuts = sorted(set(valid_cuts))
 
     boundaries = [0.0] + valid_cuts + [duration_s]
     sorted_kfs = sorted(keyframes, key=lambda kf: kf.time_s)
