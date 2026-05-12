@@ -96,6 +96,7 @@ class FocusPoint:
     weight: float = 1.0     # Importance weight (higher = path solver prioritizes more)
     shot_index: int = 0
     subject_id: str = ""    # Gemini subject ID — used to detect person changes (hard cut)
+    face_count: int = 0      # Visible faces in the source frame
 
 
 # --- Path Solver (AutoFlip-style) -------------------------------------------

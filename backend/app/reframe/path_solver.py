@@ -155,6 +155,7 @@ def _median_filter(
             weight=max_w,
             shot_index=points[i].shot_index,
             subject_id=points[i].subject_id,
+            face_count=points[i].face_count,
         ))
 
     return filtered
@@ -196,21 +197,15 @@ def _classify_motion(
     x_spread = max(xs) - min(xs)
     y_spread = max(ys) - min(ys)
     max_spread = max(x_spread, y_spread)
+    stationary_threshold = _stationary_threshold_for_faces(points, config)
 
     # Small motion → stationary
-    if max_spread < config.stationary_threshold:
+    if max_spread < stationary_threshold:
+        logger.info(
+            "[PathSolver] Face-aware stabilization: faces=%d spread=%.3f < %.3f → STATIONARY",
+            _dominant_face_count(points), max_spread, stationary_threshold,
+        )
         return STRATEGY_STATIONARY
-
-    # Single-subject wide shot: YOLO jitter is higher than true camera motion.
-    # Use relaxed threshold (2x) — spread under 0.30 is just detection noise.
-    if len(subject_ids) <= 1:
-        relaxed = config.stationary_threshold * 2.0
-        if max_spread < relaxed:
-            logger.info(
-                "[PathSolver] Single-subject stabilization: spread=%.3f < %.3f → STATIONARY",
-                max_spread, relaxed,
-            )
-            return STRATEGY_STATIONARY
 
     # Check if motion is linear (panning)
     times = np.array([fp.time_s for fp in points])
@@ -223,6 +218,29 @@ def _classify_motion(
             return STRATEGY_PANNING
 
     return STRATEGY_TRACKING
+
+
+def _dominant_face_count(points: list[FocusPoint]) -> int:
+    """Return the median visible face count for this shot."""
+    counts = [fp.face_count for fp in points if fp.face_count > 0]
+    if not counts:
+        return 0
+    return int(round(statistics.median(counts)))
+
+
+def _stationary_threshold_for_faces(
+    points: list[FocusPoint],
+    config: PathSolverConfig,
+) -> float:
+    """Use tighter stationary thresholds when multiple faces are visible."""
+    face_count = _dominant_face_count(points)
+    if face_count <= 0:
+        return config.stationary_threshold
+    if face_count == 1:
+        return 0.12
+    if face_count == 2:
+        return 0.06
+    return 0.08
 
 
 def _linear_r_squared(x: np.ndarray, y: np.ndarray) -> float:

@@ -153,6 +153,7 @@ def resolve_focus(
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=0.5, y=0.4,
                 weight=0.3, shot_index=shot_idx, subject_id="",
+                face_count=len(frame.faces),
             ))
 
         elif not frame.faces:
@@ -161,6 +162,7 @@ def resolve_focus(
             focus_points.append(FocusPoint(
                 time_s=frame.time_s, x=x, y=y,
                 weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
+                face_count=len(frame.faces),
             ))
 
         elif shot_type == SHOT_CLOSEUP and len(frame.faces) == 1:
@@ -183,6 +185,7 @@ def resolve_focus(
                 weight=weight,
                 shot_index=shot_idx,
                 subject_id=active_subject_id,
+                face_count=len(frame.faces),
             ))
 
         else:
@@ -255,6 +258,7 @@ def resolve_focus(
                 focus_points.append(FocusPoint(
                     time_s=frame.time_s, x=x, y=y,
                     weight=0.4, shot_index=shot_idx, subject_id=active_subject_id,
+                    face_count=len(frame.faces),
                 ))
             else:
                 if active_subject_id:
@@ -274,6 +278,7 @@ def resolve_focus(
                     weight=weight,
                     shot_index=shot_idx,
                     subject_id=active_subject_id,
+                    face_count=len(frame.faces),
                 ))
 
     # Diagnostic: per-shot track_id stability summary
