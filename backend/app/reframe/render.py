@@ -218,23 +218,22 @@ def _build_segments(
                      if kf.interpolation == "hold" and abs(kf.time_s - cut_time) < frame_tol]
             anchor = holds[-1] if holds else None
 
-        # Collect linear keyframes within this segment
-        if s == 0:
-            linear_kfs = [kf for kf in sorted_kfs
-                          if kf.interpolation == "linear"
-                          and kf.time_s >= seg_start - 0.5 / fps
-                          and kf.time_s <= seg_end + frame_tol]
-        else:
-            linear_kfs = [kf for kf in sorted_kfs
-                          if kf.interpolation == "linear"
-                          and kf.time_s > seg_start
-                          and kf.time_s <= seg_end + frame_tol]
+        # Collect all keyframes after the segment start. Hold keyframes matter:
+        # intra-shot subject switches are emitted as hold+hold pairs, and dropping
+        # them turns the switch into a visible pan between people.
+        segment_kfs = [kf for kf in sorted_kfs
+                       if kf.time_s > seg_start
+                       and kf.time_s <= seg_end + frame_tol]
 
-        # Build segment keyframe list
-        if s == 0:
-            seg_kfs = linear_kfs if linear_kfs else ([anchor] if anchor else [])
+        # Build segment keyframe list. For non-first segments, anchor on the new
+        # shot position at the scene cut and intentionally exclude the previous
+        # shot's hold keyframe from just before the cut.
+        if anchor:
+            seg_kfs = [anchor] + segment_kfs
         else:
-            seg_kfs = ([anchor] + linear_kfs) if anchor else linear_kfs
+            seg_kfs = segment_kfs
+
+        seg_kfs = _dedupe_keyframes(seg_kfs)
 
         # Fallback: use the last known position
         if not seg_kfs and segments:
@@ -265,6 +264,7 @@ def _build_crop_expression(
     if not keyframes:
         return "0"
 
+    keyframes = _dedupe_keyframes(sorted(keyframes, key=lambda kf: kf.time_s))
     values = [getattr(kf, field, 0.0) or 0.0 for kf in keyframes]
 
     # Check if all values are the same (static segment)
@@ -284,7 +284,7 @@ def _build_crop_expression(
         v2 = values[i + 1]
         dt = t2 - t1
 
-        if dt <= 0 or abs(v2 - v1) < 0.5:
+        if keyframes[i + 1].interpolation == "hold" or dt <= 0 or abs(v2 - v1) < 0.5:
             # No movement in this interval
             parts.append((t1, t2, str(round(v1, 1))))
         else:
@@ -303,6 +303,24 @@ def _build_crop_expression(
         result = f"if(lt(t,{t_end:.4f}),{parts[i][2]},{result})"
 
     return result
+
+
+def _dedupe_keyframes(keyframes: list[ReframeKeyframe]) -> list[ReframeKeyframe]:
+    """Keep keyframes ordered and remove exact duplicates."""
+    deduped: list[ReframeKeyframe] = []
+    seen: set[tuple[float, float, float, str]] = set()
+    for kf in sorted(keyframes, key=lambda item: item.time_s):
+        marker = (
+            round(kf.time_s, 6),
+            round(kf.offset_x, 3),
+            round(kf.offset_y, 3),
+            kf.interpolation,
+        )
+        if marker in seen:
+            continue
+        seen.add(marker)
+        deduped.append(kf)
+    return deduped
 
 
 # ─── Gaming Reframe ──────────────────────────────────────────────────────────
