@@ -56,44 +56,24 @@ const CAPTION_TEMPLATES = [
     {
         key: 'clean', label: 'Clean',
         textStyle: { color: '#ffffff', fontSize: 17, fontWeight: 600, lineHeight: 1.35 } as React.CSSProperties,
+        highlightColor: undefined,
         phase2Animation: 'ct-fade',
     },
     {
-        key: 'hormozi', label: 'Hormozi',
-        textStyle: { color: '#FFE500', fontSize: 16, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: 2 } as React.CSSProperties,
-        phase2Animation: 'ct-pop',
-    },
-    {
-        key: 'outline', label: 'Outline',
-        textStyle: { color: '#fff', fontSize: 16, fontWeight: 900, WebkitTextStroke: '0.8px rgba(255,255,255,0.4)', textTransform: 'uppercase' as const } as React.CSSProperties,
-        phase2Animation: 'ct-slide-up',
-    },
-    {
-        key: 'pill', label: 'Pill',
-        textStyle: { color: '#fff', fontSize: 14, fontWeight: 700, background: 'rgba(255,255,255,0.18)', borderRadius: 4, padding: '3px 10px' } as React.CSSProperties,
-        phase2Animation: 'ct-slide-right',
-    },
-    {
-        key: 'neon', label: 'Neon',
-        textStyle: { color: '#00e5ff', fontSize: 16, fontWeight: 800, textShadow: '0 0 12px #00e5ff, 0 0 24px #00a8ff' } as React.CSSProperties,
-        phase2Animation: 'ct-neon',
-    },
-    {
-        key: 'cinematic', label: 'Cinematic',
-        textStyle: { color: '#e8d5a0', fontSize: 14, fontWeight: 300, fontStyle: 'italic' as const, letterSpacing: 4 } as React.CSSProperties,
-        phase2Animation: 'ct-cinematic',
-    },
-    {
-        key: 'bold_pop', label: 'Bold Pop',
-        textStyle: { color: '#ff5500', fontSize: 19, fontWeight: 900, fontStyle: 'italic' as const } as React.CSSProperties,
-        phase2Animation: 'ct-bounce',
-    },
-    {
-        key: 'fire', label: 'Fire',
-        textStyle: { color: '#ff3300', fontSize: 19, fontWeight: 900, textShadow: '0 0 10px #ff2200, 0 0 22px #ff4400' } as React.CSSProperties,
-        phase2Animation: 'ct-fire',
+        key: 'capcut_word_highlight_ii', label: 'Word Highlight II',
+        textStyle: {
+            color: '#ffffff',
+            fontSize: 17,
+            fontWeight: 800,
+            lineHeight: 1.15,
+            textShadow: '0 2px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000',
+        } as React.CSSProperties,
+        highlightColor: '#ffff00',
+        phase2Animation: 'ct-fade',
     },
 ];
+const CAPTION_TEMPLATE_WINDOW_SIZE = Math.min(5, CAPTION_TEMPLATES.length);
+const MAX_CAPTION_WINDOW_START = Math.max(0, CAPTION_TEMPLATES.length - CAPTION_TEMPLATE_WINDOW_SIZE);
 
 function getStepLabel(step: string | undefined): string {
     if (!step) return "Processing...";
@@ -1651,18 +1631,18 @@ export default function DashboardPage() {
                                     style={{
                                         WebkitMaskImage: windowStart === 0
                                             ? 'linear-gradient(to right, black 0%, black 84%, transparent 100%)'
-                                            : windowStart >= CAPTION_TEMPLATES.length - 5
+                                            : windowStart >= MAX_CAPTION_WINDOW_START
                                                 ? 'linear-gradient(to right, transparent 0%, black 16%, black 100%)'
                                                 : 'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
                                         maskImage: windowStart === 0
                                             ? 'linear-gradient(to right, black 0%, black 84%, transparent 100%)'
-                                            : windowStart >= CAPTION_TEMPLATES.length - 5
+                                            : windowStart >= MAX_CAPTION_WINDOW_START
                                                 ? 'linear-gradient(to right, transparent 0%, black 16%, black 100%)'
                                                 : 'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
                                     }}
                                 >
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
-                                        {CAPTION_TEMPLATES.slice(windowStart, windowStart + 5).map((tpl, posIdx) => {
+                                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${CAPTION_TEMPLATE_WINDOW_SIZE},1fr)`, gap: 12 }}>
+                                        {CAPTION_TEMPLATES.slice(windowStart, windowStart + CAPTION_TEMPLATE_WINDOW_SIZE).map((tpl, posIdx) => {
                                             const tplIdx = windowStart + posIdx;
                                             const isActive = tplIdx === captionTemplateIdx;
                                             const isHovered = tplIdx === hoveredIdx;
@@ -1735,6 +1715,7 @@ export default function DashboardPage() {
                                                                         key={word}
                                                                         style={{
                                                                             ...tpl.textStyle,
+                                                                            color: tpl.highlightColor || tpl.textStyle.color,
                                                                             position: 'absolute',
                                                                             top: '50%',
                                                                             left: '50%',
@@ -1757,15 +1738,15 @@ export default function DashboardPage() {
 
                                 {/* Right arrow */}
                                 <button
-                                    onClick={() => setWindowStart(w => Math.min(CAPTION_TEMPLATES.length - 5, w + 1))}
-                                    disabled={windowStart >= CAPTION_TEMPLATES.length - 5}
+                                    onClick={() => setWindowStart(w => Math.min(MAX_CAPTION_WINDOW_START, w + 1))}
+                                    disabled={windowStart >= MAX_CAPTION_WINDOW_START}
                                     className="flex-shrink-0 flex items-center justify-center rounded-full transition-colors duration-150"
                                     style={{
                                         width: 26, height: 26,
                                         background: 'rgba(250,249,245,0.05)',
                                         border: '1px solid rgba(250,249,245,0.08)',
-                                        color: windowStart >= CAPTION_TEMPLATES.length - 5 ? 'rgba(250,249,245,0.12)' : 'rgba(250,249,245,0.6)',
-                                        cursor: windowStart >= CAPTION_TEMPLATES.length - 5 ? 'default' : 'pointer',
+                                        color: windowStart >= MAX_CAPTION_WINDOW_START ? 'rgba(250,249,245,0.12)' : 'rgba(250,249,245,0.6)',
+                                        cursor: windowStart >= MAX_CAPTION_WINDOW_START ? 'default' : 'pointer',
                                     }}
                                 >
                                     <svg width="7" height="12" viewBox="0 0 7 12" fill="none">

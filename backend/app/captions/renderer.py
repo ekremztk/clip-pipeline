@@ -1,10 +1,9 @@
 """
-Caption renderer — dispatches to Pillow (clean) or ASS (karaoke templates).
+Caption renderer dispatcher.
 
-- clean template: Pillow PNG overlay (pixel-perfect editor match)
-- karaoke templates (hormozi, etc.): ASS via libass (\\k tags required)
-
-render_captions() signature is unchanged.
+- clean: legacy Pillow PNG overlay renderer
+- Caption Template V2: frame-based transparent overlay video renderer
+- legacy ASS templates: kept as a fallback for old jobs
 """
 import logging
 import os
@@ -20,6 +19,8 @@ from app.captions.davinci_fingerprint import (
     has_audio_stream,
     probe_video_rate,
 )
+from app.captions.v2.renderer import render_captions_v2
+from app.captions.v2.templates import is_v2_template
 
 logger = logging.getLogger(__name__)
 
@@ -200,8 +201,7 @@ def render_captions(
     """
     Burn captions onto video.
 
-    Dispatches to Pillow renderer for templates that don't need karaoke
-    (pixel-perfect editor match). Falls back to ASS for karaoke templates.
+    Dispatches to the renderer that owns the requested template.
 
     Args:
         video_path: Path to input video (9:16, 1080x1920)
@@ -212,6 +212,9 @@ def render_captions(
 
     Returns: output_path
     """
+    if is_v2_template(template_key):
+        return render_captions_v2(video_path, output_path, words, segments, template_key)
+
     if template_key in PILLOW_TEMPLATES:
         from app.captions.renderer_pillow import render_captions as render_pillow
         return render_pillow(video_path, output_path, words, segments, template_key)
