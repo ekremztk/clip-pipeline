@@ -50,6 +50,7 @@ def validate_davinci_mp4(path: str, strict: bool = True) -> dict[str, Any]:
             "video_profile": video.get("profile") == "Main 10",
             "video_tag": video.get("codec_tag_string") == "hvc1",
             "video_size": video.get("width") == 1080 and video.get("height") == 1920,
+            "video_start_zero": _float_value(video.get("start_time")) == 0.0,
             "video_aspect": video.get("sample_aspect_ratio") == "1:1"
             and video.get("display_aspect_ratio") == "9:16",
             "video_pix_fmt": video.get("pix_fmt") == "yuv420p10le",
@@ -65,6 +66,7 @@ def validate_davinci_mp4(path: str, strict: bool = True) -> dict[str, Any]:
             "audio_handler": audio.get("tags", {}).get("handler_name") == "SoundHandler",
             "timecode_track": timecode.get("codec_tag_string") == "tmcd",
             "timecode_handler": timecode.get("tags", {}).get("handler_name") == "TimeCodeHandler",
+            "timecode_default": timecode.get("disposition", {}).get("default") == 1,
             "timecode_value": timecode.get("tags", {}).get("timecode") == TIMECODE,
             "no_bad_strings": not strings_found,
         }
@@ -166,7 +168,7 @@ def _patch_top_level_boxes(data: bytes) -> tuple[bytes, bool]:
 
 
 def _patch_child_boxes(data: bytes) -> tuple[bytes, bool]:
-    container_types = {b"moov", b"trak", b"mdia"}
+    container_types = {b"moov", b"mdia"}
     changed = False
     pos = 0
     out = bytearray()
@@ -177,7 +179,11 @@ def _patch_child_boxes(data: bytes) -> tuple[bytes, bool]:
             box = data[pos:box_end]
             payload = box[8:]
 
-            if typ == b"hdlr" and len(payload) >= 24:
+            if typ == b"trak":
+                new_payload, child_changed = _patch_trak_box(payload)
+                out.extend(struct.pack(">I", 8 + len(new_payload)) + typ + new_payload)
+                changed = changed or child_changed
+            elif typ == b"hdlr" and len(payload) >= 24:
                 handler_type = payload[8:12]
                 if handler_type == b"tmcd":
                     name_start = 24
@@ -200,6 +206,60 @@ def _patch_child_boxes(data: bytes) -> tuple[bytes, bool]:
         return bytes(out), changed
     except Exception as e:
         print(f"[Finalizer] Child atom patch error: {e}")
+        raise
+
+
+def _patch_trak_box(data: bytes) -> tuple[bytes, bool]:
+    changed = False
+    pos = 0
+    out = bytearray()
+    is_timecode_track = _contains_handler(data, b"tmcd")
+
+    try:
+        while pos + 8 <= len(data):
+            size, typ, box_end = _read_box_header(data, pos, len(data))
+            box = data[pos:box_end]
+            payload = box[8:]
+
+            if typ == b"tkhd" and is_timecode_track and len(payload) >= 4:
+                new_payload = bytearray(payload)
+                flags = int.from_bytes(new_payload[1:4], "big")
+                new_flags = flags | 0x1
+                if new_flags != flags:
+                    new_payload[1:4] = new_flags.to_bytes(3, "big")
+                    changed = True
+                out.extend(struct.pack(">I", 8 + len(new_payload)) + typ + bytes(new_payload))
+            elif typ in {b"mdia"}:
+                new_payload, child_changed = _patch_child_boxes(payload)
+                out.extend(struct.pack(">I", 8 + len(new_payload)) + typ + new_payload)
+                changed = changed or child_changed
+            else:
+                out.extend(box)
+
+            pos = box_end
+
+        if pos < len(data):
+            out.extend(data[pos:])
+        return bytes(out), changed
+    except Exception as e:
+        print(f"[Finalizer] Track atom patch error: {e}")
+        raise
+
+
+def _contains_handler(data: bytes, handler_type: bytes) -> bool:
+    pos = 0
+    try:
+        while pos + 8 <= len(data):
+            size, typ, box_end = _read_box_header(data, pos, len(data))
+            payload = data[pos + 8:box_end]
+            if typ == b"hdlr" and len(payload) >= 12 and payload[8:12] == handler_type:
+                return True
+            if typ in {b"mdia", b"trak", b"moov"} and _contains_handler(payload, handler_type):
+                return True
+            pos = box_end
+        return False
+    except Exception as e:
+        print(f"[Finalizer] Handler scan error: {e}")
         raise
 
 
@@ -272,6 +332,13 @@ def _first_stream(streams: list[dict[str, Any]], codec_type: str, codec_tag: str
     except Exception as e:
         print(f"[Finalizer] Stream lookup error: {e}")
         raise
+
+
+def _float_value(value: Any) -> float:
+    try:
+        return round(float(value or 0.0), 6)
+    except Exception:
+        return 0.0
 
 
 def _stream_summary(stream: dict[str, Any]) -> dict[str, Any]:

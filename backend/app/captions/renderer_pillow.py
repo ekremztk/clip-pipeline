@@ -17,6 +17,12 @@ from typing import Optional
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from app.config import settings
+from app.captions.davinci_fingerprint import (
+    davinci_timescale_for_rate,
+    frame_duration_s,
+    has_audio_stream,
+    probe_video_rate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -425,23 +431,41 @@ def _run_ffmpeg_overlay_single(
     codec = _target_final_video_codec()
     preset = _target_final_preset(codec)
     hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
+    rate = probe_video_rate(video_path)
+    frame_pad = frame_duration_s(rate)
+    timescale = davinci_timescale_for_rate(rate)
+    has_audio = has_audio_stream(video_path)
 
     inputs = ["-i", video_path]
     for group in groups:
         inputs.extend(["-i", group["png_path"]])
 
-    filter_parts = []
-    prev_label = "0:v"
+    filter_parts = ["[0:v]setpts=PTS-STARTPTS[vbase]"]
+    prev_label = "vbase"
 
     for i, group in enumerate(groups):
         input_idx = i + 1
-        out_label = f"v{i}" if i < len(groups) - 1 else "vout"
+        out_label = f"v{i}"
         start = f"{group['start']:.3f}"
         end = f"{group['end']:.3f}"
         filter_parts.append(
             f"[{prev_label}][{input_idx}:v]overlay=0:0:enable='between(t,{start},{end})'[{out_label}]"
         )
         prev_label = out_label
+
+    if final_pass:
+        filter_parts.append(
+            f"[{prev_label}]tpad=stop_mode=clone:stop_duration={frame_pad:.6f},setsar=1[vout]"
+        )
+    else:
+        filter_parts.append(f"[{prev_label}]setsar=1[vout]")
+
+    if has_audio and final_pass:
+        filter_parts.append(
+            f"[0:a]asetpts=PTS-STARTPTS,apad=pad_dur={frame_pad * 2:.6f}[aout]"
+        )
+    elif has_audio:
+        filter_parts.append("[0:a]asetpts=PTS-STARTPTS[aout]")
 
     filtergraph = ";".join(filter_parts)
 
@@ -450,7 +474,10 @@ def _run_ffmpeg_overlay_single(
         cmd.extend(["-hwaccel", hwaccel])
     cmd.extend(inputs)
     cmd.extend(["-filter_complex", filtergraph])
-    cmd.extend(["-map", "[vout]", "-map", "0:a?", "-map_metadata", "-1", "-fflags", "+bitexact"])
+    cmd.extend(["-map", "[vout]"])
+    if has_audio:
+        cmd.extend(["-map", "[aout]"])
+    cmd.extend(["-map_metadata", "-1", "-fflags", "+bitexact"])
     cmd.extend(["-c:v", codec])
 
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
@@ -478,11 +505,14 @@ def _run_ffmpeg_overlay_single(
         "-colorspace", "bt709",
         "-color_trc", "bt709",
         "-color_primaries", "bt709",
-        "-c:a", "aac",
-        "-b:a", "320k",
-        "-ar", "48000",
         "-movflags", "+faststart",
+        "-movie_timescale", str(timescale),
+        "-video_track_timescale", str(timescale),
     ])
+    if has_audio:
+        cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000"])
+    else:
+        cmd.append("-an")
 
     if final_pass:
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
@@ -493,10 +523,13 @@ def _run_ffmpeg_overlay_single(
             "-metadata:s:v", "handler_name=VideoHandler",
             "-metadata:s:v", "encoder=H.265 10-bit",
             "-metadata:s:v:0", "language=und",
-            "-metadata:s:a", "handler_name=SoundHandler",
-            "-metadata:s:a:0", "language=und",
             "-metadata:s:d:0", "language=eng",
         ])
+        if has_audio:
+            cmd.extend([
+                "-metadata:s:a", "handler_name=SoundHandler",
+                "-metadata:s:a:0", "language=und",
+            ])
 
     cmd.append(output_path)
 
