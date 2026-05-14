@@ -163,6 +163,8 @@ export default function ChannelDNAPage() {
             audience_identity: parsed.audience_identity || parsed.target_audience || '',
             speaker_preference: parsed.speaker_preference || '',
             avg_successful_duration: parsed.avg_successful_duration || 30,
+            title_style: parsed.title_style || '',
+            description_template: parsed.description_template || '',
 
         });
         setEditingDna(true);
@@ -518,6 +520,32 @@ export default function ChannelDNAPage() {
                                             />
                                         </div>
 
+                                        {/* YouTube Metadata Style */}
+                                        <div className="col-span-2 grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">YouTube Title Style</label>
+                                                <textarea
+                                                    value={dnaForm.title_style}
+                                                    onChange={e => setDnaForm((p: any) => ({ ...p, title_style: e.target.value }))}
+                                                    rows={4}
+                                                    style={inputStyle}
+                                                    className="w-full rounded-xl px-3 py-2 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none resize-none"
+                                                    placeholder="e.g. Guest name first, punchy claim, no emojis, under 55 chars..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">YouTube Description Template</label>
+                                                <textarea
+                                                    value={dnaForm.description_template}
+                                                    onChange={e => setDnaForm((p: any) => ({ ...p, description_template: e.target.value }))}
+                                                    rows={4}
+                                                    style={inputStyle}
+                                                    className="w-full rounded-xl px-3 py-2 text-sm placeholder:text-[rgba(250,249,245,0.25)] focus:outline-none resize-none"
+                                                    placeholder="Use placeholders like [GUEST], [TOPIC], [CHANNEL_NAME], [CLIP_SUMMARY]..."
+                                                />
+                                            </div>
+                                        </div>
+
                                         {/* Speaker Pref & Duration */}
                                         <div>
                                             <label style={{ color: '#ababab' }} className="block text-[10px] mb-1.5 uppercase tracking-widest">Speaker Preference</label>
@@ -611,6 +639,18 @@ export default function ChannelDNAPage() {
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {dna.best_content_types.map((t: string, i: number) => <span key={i}>{renderTag(t)}</span>)}
                                                 </div>
+                                            </div>
+                                        )}
+                                        {dna.title_style && (
+                                            <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="rounded-xl p-4">
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">YouTube Title Style</p>
+                                                <p style={{ color: '#faf9f5' }} className="text-xs leading-relaxed whitespace-pre-wrap">{dna.title_style}</p>
+                                            </div>
+                                        )}
+                                        {dna.description_template && (
+                                            <div style={{ background: '#141413', border: '1px solid rgba(250,249,245,0.06)' }} className="rounded-xl p-4">
+                                                <p style={{ color: '#ababab' }} className="text-[10px] uppercase tracking-wider font-semibold mb-2.5">YouTube Description Template</p>
+                                                <p style={{ color: '#faf9f5' }} className="text-xs leading-relaxed whitespace-pre-wrap">{dna.description_template}</p>
                                             </div>
                                         )}
                                     </div>

@@ -8,6 +8,8 @@ These define what this audience wants. Apply without exception.
 
 CHANNEL_CONTEXT_PLACEHOLDER
 
+If channel instructions include a YouTube title style or description template, suggested_title and suggested_description must follow those instructions exactly. Do not fall back to a generic title/description format unless no channel metadata style is provided.
+
 ## DURATION RULE
 Every clip must satisfy: MIN_DURATION_PLACEHOLDER ≤ (recommended_end - recommended_start) ≤ MAX_DURATION_PLACEHOLDER seconds.
 
