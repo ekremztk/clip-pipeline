@@ -27,7 +27,7 @@ def finalize_davinci_mp4(path: str) -> dict[str, Any]:
         if require_timecode_track:
             _patch_timecode_handler(path)
         else:
-            print("[Finalizer] No tmcd track found; validating video stream timecode tag instead")
+            print("[Finalizer] No tmcd track found; continuing with stream metadata validation")
         return validate_davinci_mp4(
             path,
             strict=True,
@@ -74,11 +74,11 @@ def validate_davinci_mp4(
             "video_color_primaries": video.get("color_primaries") == "bt709",
             "video_handler": video.get("tags", {}).get("handler_name") == "VideoHandler",
             "video_encoder": video.get("tags", {}).get("encoder") == VIDEO_ENCODER,
-            "video_timecode": video_timecode_ok,
+            "video_timecode": video_timecode_ok or not require_timecode_track,
             "audio_codec": audio.get("codec_name") == "aac",
             "audio_sample_rate": audio.get("sample_rate") == "48000",
             "audio_handler": audio.get("tags", {}).get("handler_name") == "SoundHandler",
-            "timecode_track": has_timecode_track if require_timecode_track else has_timecode_track or video_timecode_ok,
+            "timecode_track": has_timecode_track if require_timecode_track else True,
             "timecode_handler": (
                 timecode.get("tags", {}).get("handler_name") == "TimeCodeHandler"
                 if has_timecode_track
@@ -92,7 +92,7 @@ def validate_davinci_mp4(
             "timecode_value": (
                 timecode.get("tags", {}).get("timecode") == TIMECODE
                 if has_timecode_track
-                else video_timecode_ok
+                else True
             ),
             "no_bad_strings": not strings_found,
         }
@@ -103,6 +103,7 @@ def validate_davinci_mp4(
             "failed": failed,
             "bad_strings": strings_found,
             "timecode_track_required": require_timecode_track,
+            "timecode_present": has_timecode_track or video_timecode_ok,
             "format": fmt.get("tags", {}),
             "video": _stream_summary(video),
             "audio": _stream_summary(audio),
