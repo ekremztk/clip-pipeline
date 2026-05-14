@@ -85,7 +85,7 @@ Return ONLY a valid JSON array of pass and fixable candidates. Omitted candidate
     "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
     "posting_order": integer,
     "suggested_title": "under 60 chars, same language as transcript",
-    "suggested_description": "same language as transcript; follow channel description template exactly when provided, otherwise 2 sentences max + 3 hashtags",
+    "suggested_description": "same language as transcript; follow channel description template exactly when provided, otherwise one compact sentence plus relevant hashtags",
     "s05_hallucination_flag": boolean
   }
 ]"""
