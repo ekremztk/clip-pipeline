@@ -39,6 +39,15 @@ def run(
     Returns: List of updated clip dicts with video_captioned_path set.
     """
     print(f"[S10] Starting captions for {len(reframed_clips)} clips. Template: {caption_template}")
+    print(
+        "[S10] Final encode settings: "
+        f"codec={os.getenv('FFMPEG_FINAL_VIDEO_CODEC', '')}, "
+        f"preset={os.getenv('FFMPEG_FINAL_ENCODE_PRESET', '')}, "
+        f"rc={os.getenv('FFMPEG_FINAL_RATE_CONTROL', '')}, "
+        f"bitrate={os.getenv('FFMPEG_FINAL_VIDEO_BITRATE', '')}, "
+        f"minrate={os.getenv('FFMPEG_FINAL_VIDEO_MINRATE', '')}, "
+        f"maxrate={os.getenv('FFMPEG_FINAL_VIDEO_MAXRATE', '')}"
+    )
     supabase = get_client()
     captioned_clips = []
 

@@ -140,6 +140,16 @@ def process_clips(
     os.environ["FFMPEG_HWACCEL"] = os.environ.get("FFMPEG_PIPELINE_HWACCEL", "cuda")
     os.environ.setdefault("FFMPEG_FINAL_VIDEO_CODEC", "hevc_nvenc")
     os.environ.setdefault("FFMPEG_FINAL_ENCODE_PRESET", "p4")
+    final_bitrate = "10M"
+    os.environ["FFMPEG_FINAL_RATE_CONTROL"] = "cbr"
+    os.environ["FFMPEG_FINAL_VIDEO_BITRATE"] = final_bitrate
+    os.environ["FFMPEG_FINAL_VIDEO_MINRATE"] = final_bitrate
+    os.environ["FFMPEG_FINAL_VIDEO_MAXRATE"] = final_bitrate
+    os.environ["FFMPEG_FINAL_VIDEO_BUFSIZE"] = "20M"
+    os.environ["FFMPEG_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE"] = os.environ.get(
+        "FFMPEG_PIPELINE_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE",
+        "5000000",
+    )
 
     # Write GCP credentials to a temp file so all google-auth code paths
     # (including implicit ADC fallback) find credentials without needing
