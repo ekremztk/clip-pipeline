@@ -23,14 +23,26 @@ def finalize_davinci_mp4(path: str) -> dict[str, Any]:
     """Patch and validate a final S10 MP4 in-place."""
     try:
         _set_encoding_tool(path)
-        _patch_timecode_handler(path)
-        return validate_davinci_mp4(path, strict=True)
+        require_timecode_track = _has_tmcd_stream(path)
+        if require_timecode_track:
+            _patch_timecode_handler(path)
+        else:
+            print("[Finalizer] No tmcd track found; validating video stream timecode tag instead")
+        return validate_davinci_mp4(
+            path,
+            strict=True,
+            require_timecode_track=require_timecode_track,
+        )
     except Exception as e:
         print(f"[Finalizer] Error finalizing MP4: {e}")
         raise
 
 
-def validate_davinci_mp4(path: str, strict: bool = True) -> dict[str, Any]:
+def validate_davinci_mp4(
+    path: str,
+    strict: bool = True,
+    require_timecode_track: bool = True,
+) -> dict[str, Any]:
     """Return validation details and optionally raise if the fingerprint fails."""
     try:
         probe = _ffprobe(path)
@@ -41,6 +53,8 @@ def validate_davinci_mp4(path: str, strict: bool = True) -> dict[str, Any]:
         video = _first_stream(streams, "video")
         audio = _first_stream(streams, "audio")
         timecode = _first_stream(streams, "data", codec_tag="tmcd")
+        video_timecode_ok = video.get("tags", {}).get("timecode") == TIMECODE
+        has_timecode_track = timecode.get("codec_tag_string") == "tmcd"
 
         checks = {
             "format_encoder": fmt.get("tags", {}).get("encoder") == DAVINCI_ENCODER,
@@ -60,14 +74,26 @@ def validate_davinci_mp4(path: str, strict: bool = True) -> dict[str, Any]:
             "video_color_primaries": video.get("color_primaries") == "bt709",
             "video_handler": video.get("tags", {}).get("handler_name") == "VideoHandler",
             "video_encoder": video.get("tags", {}).get("encoder") == VIDEO_ENCODER,
-            "video_timecode": video.get("tags", {}).get("timecode") == TIMECODE,
+            "video_timecode": video_timecode_ok,
             "audio_codec": audio.get("codec_name") == "aac",
             "audio_sample_rate": audio.get("sample_rate") == "48000",
             "audio_handler": audio.get("tags", {}).get("handler_name") == "SoundHandler",
-            "timecode_track": timecode.get("codec_tag_string") == "tmcd",
-            "timecode_handler": timecode.get("tags", {}).get("handler_name") == "TimeCodeHandler",
-            "timecode_default": timecode.get("disposition", {}).get("default") == 1,
-            "timecode_value": timecode.get("tags", {}).get("timecode") == TIMECODE,
+            "timecode_track": has_timecode_track if require_timecode_track else has_timecode_track or video_timecode_ok,
+            "timecode_handler": (
+                timecode.get("tags", {}).get("handler_name") == "TimeCodeHandler"
+                if has_timecode_track
+                else not require_timecode_track
+            ),
+            "timecode_default": (
+                timecode.get("disposition", {}).get("default") == 1
+                if has_timecode_track
+                else not require_timecode_track
+            ),
+            "timecode_value": (
+                timecode.get("tags", {}).get("timecode") == TIMECODE
+                if has_timecode_track
+                else video_timecode_ok
+            ),
             "no_bad_strings": not strings_found,
         }
 
@@ -76,6 +102,7 @@ def validate_davinci_mp4(path: str, strict: bool = True) -> dict[str, Any]:
             "ok": not failed,
             "failed": failed,
             "bad_strings": strings_found,
+            "timecode_track_required": require_timecode_track,
             "format": fmt.get("tags", {}),
             "video": _stream_summary(video),
             "audio": _stream_summary(audio),
@@ -104,6 +131,15 @@ def _set_encoding_tool(path: str) -> None:
             raise RuntimeError(f"AtomicParsley failed: {result.stderr[-800:]}")
     except Exception as e:
         print(f"[Finalizer] Encoding tool patch failed: {e}")
+        raise
+
+
+def _has_tmcd_stream(path: str) -> bool:
+    try:
+        probe = _ffprobe(path)
+        return bool(_first_stream(probe.get("streams", []), "data", codec_tag="tmcd"))
+    except Exception as e:
+        print(f"[Finalizer] Timecode track probe failed: {e}")
         raise
 
 

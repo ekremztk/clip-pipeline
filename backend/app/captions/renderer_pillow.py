@@ -32,6 +32,13 @@ CANVAS_H = 1920
 FONT_SIZE_SCALE_REFERENCE = 90
 FONT_PATH = "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf"
 FONT_PATH_REGULAR = "/usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf"
+FONT_FALLBACK_PATHS = (
+    FONT_PATH,
+    "/Users/ekrem/Downloads/Montserrat/static/Montserrat-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+)
 
 MAX_OVERLAYS_PER_PASS = 8
 
@@ -285,12 +292,16 @@ def _build_groups_by_chars(
 
 # --- Pillow PNG render --------------------------------------------------------
 
-def _load_font(font_path: str, size: int) -> ImageFont.FreeTypeFont:
-    try:
-        return ImageFont.truetype(font_path, size=size)
-    except OSError:
-        logger.error("[PillowRenderer] Font not found: %s — using fallback", font_path)
-        return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size=size)
+def _load_font(font_path: str, size: int) -> ImageFont.ImageFont:
+    for candidate in (font_path, *FONT_FALLBACK_PATHS):
+        try:
+            if candidate and os.path.exists(candidate):
+                return ImageFont.truetype(candidate, size=size)
+        except OSError:
+            continue
+
+    logger.warning("[PillowRenderer] No TrueType caption font found; using PIL default font")
+    return ImageFont.load_default()
 
 
 def _render_subtitle_png(

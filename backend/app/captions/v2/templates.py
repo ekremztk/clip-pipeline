@@ -65,7 +65,9 @@ class CaptionV2Template:
 MONTSERRAT_BOLD_PATHS = (
     "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf",
     "/Users/ekrem/Library/Containers/com.lemon.lvoverseas/Data/Movies/CapCut/User Data/Cache/effect/7540633113777540353/22fcff44f7c0042554e0352f76f7111e/font.ttf",
+    "/Users/ekrem/Downloads/Montserrat/static/Montserrat-Bold.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
 )
 
 

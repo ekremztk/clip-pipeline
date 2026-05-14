@@ -569,14 +569,16 @@ def _shadow_offset(distance: float, angle_degrees: float) -> tuple[float, float]
     return math.cos(radians) * distance, math.sin(radians) * distance
 
 
-def _load_font(paths: tuple[str, ...], size: int) -> ImageFont.FreeTypeFont:
+def _load_font(paths: tuple[str, ...], size: int) -> ImageFont.ImageFont:
     for path in paths:
         try:
             if path and os.path.exists(path):
                 return ImageFont.truetype(path, size=size)
         except OSError:
             continue
-    return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size=size)
+
+    logger.warning("[CaptionV2] No TrueType caption font found; using PIL default font")
+    return ImageFont.load_default()
 
 
 def _hex_to_rgba(hex_color: str, alpha: float) -> tuple[int, int, int, int]:
