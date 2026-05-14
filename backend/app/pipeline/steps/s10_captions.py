@@ -14,7 +14,6 @@ from app.config import settings
 from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
 from app.captions.core import transcribe_video
-from app.captions.finalizer import finalize_davinci_mp4
 from app.captions.renderer import render_captions
 
 logger = logging.getLogger(__name__)
@@ -148,7 +147,7 @@ def _caption_clip(
             segments=segments,
             template_key=template_key,
         )
-        finalizer_meta = finalize_davinci_mp4(output_path)
+        finalizer_meta = _finalize_caption_output(output_path)
 
         # Upload to R2
         r2_url = _upload_to_r2(output_path, f"captions/{uuid.uuid4().hex}.mp4")
@@ -185,3 +184,15 @@ def _upload_to_r2(local_path: str, r2_key: str) -> str:
             ContentType="video/mp4",
         )
     return f"{settings.R2_PUBLIC_URL.rstrip('/')}/{r2_key}"
+
+
+def _finalize_caption_output(output_path: str) -> dict:
+    """Optionally apply strict MP4 metadata finalization."""
+    enabled = os.getenv("ENABLE_DAVINCI_FINALIZER", "").lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        print("[S10] DaVinci finalizer disabled; uploading rendered MP4 as-is")
+        return {"skipped": True, "reason": "disabled"}
+
+    from app.captions.finalizer import finalize_davinci_mp4
+
+    return finalize_davinci_mp4(output_path)
