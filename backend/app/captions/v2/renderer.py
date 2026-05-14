@@ -62,6 +62,7 @@ def render_captions_v2(
     template_key: str,
 ) -> str:
     """Render a Caption Template V2 template onto a video."""
+    del segments
     template = get_v2_template(template_key)
     normalized_words = _normalize_words(words)
 
@@ -71,7 +72,7 @@ def render_captions_v2(
         return output_path
 
     video = _probe_video_info(video_path)
-    pages = _build_pages(normalized_words, template.layout.max_words_per_page, segments)
+    pages = _build_pages(normalized_words, template.layout.max_words_per_page)
 
     if not pages:
         logger.warning("[CaptionV2] No caption pages generated, copying input unchanged")
@@ -153,60 +154,17 @@ def _normalize_words(words: list[dict]) -> list[CaptionWord]:
     return normalized
 
 
-def _build_pages(
-    words: list[CaptionWord],
-    max_words_per_page: int,
-    segments: list[dict] | None = None,
-) -> list[CaptionPage]:
+def _build_pages(words: list[CaptionWord], max_words_per_page: int) -> list[CaptionPage]:
     pages: list[CaptionPage] = []
     step = max(1, max_words_per_page)
 
-    segment_ends = _segment_end_times(segments)
-    segment_idx = 0
-    chunk: list[CaptionWord] = []
-
-    def flush() -> None:
+    for i in range(0, len(words), step):
+        chunk = words[i:i + step]
         if not chunk:
-            return
-        pages.append(CaptionPage(words=list(chunk), start=chunk[0].start, end=chunk[-1].end))
-        chunk.clear()
-
-    for word in words:
-        while segment_idx < len(segment_ends) and word.start >= segment_ends[segment_idx] - 0.001:
-            flush()
-            segment_idx += 1
-
-        chunk.append(word)
-        if len(chunk) >= step:
-            flush()
-
-    flush()
-    _extend_page_ends(pages)
+            continue
+        pages.append(CaptionPage(words=chunk, start=chunk[0].start, end=chunk[-1].end))
 
     return pages
-
-
-def _segment_end_times(segments: list[dict] | None) -> list[float]:
-    if not segments:
-        return []
-
-    ends: list[float] = []
-    for segment in segments:
-        end = _safe_float(segment.get("end"))
-        if end is not None:
-            ends.append(end)
-    return sorted(set(ends))
-
-
-def _extend_page_ends(pages: list[CaptionPage]) -> None:
-    for idx, page in enumerate(pages):
-        natural_end = page.words[-1].end
-        if idx >= len(pages) - 1:
-            page.end = natural_end
-            continue
-
-        next_start = pages[idx + 1].start
-        page.end = max(natural_end, min(next_start, natural_end + 0.45))
 
 
 def _render_overlay_video(
@@ -432,7 +390,6 @@ def _compose_overlay(
 ) -> None:
     codec = _target_final_video_codec()
     preset = _target_final_preset(codec)
-    quality_value = _target_final_quality(codec)
     hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
     frame_pad = frame_duration_s(video.rate)
     timescale = davinci_timescale_for_rate(video.rate)
@@ -457,24 +414,9 @@ def _compose_overlay(
     cmd.extend(["-map_metadata", "-1", "-fflags", "+bitexact", "-c:v", codec])
 
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend([
-            "-preset",
-            preset,
-            "-tune",
-            "hq",
-            "-rc",
-            "vbr",
-            "-cq",
-            str(quality_value),
-            "-b:v",
-            os.getenv("FFMPEG_CAPTION_V2_BITRATE", "16M"),
-            "-maxrate",
-            os.getenv("FFMPEG_CAPTION_V2_MAXRATE", "28M"),
-            "-bufsize",
-            os.getenv("FFMPEG_CAPTION_V2_BUFSIZE", "56M"),
-        ])
+        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
     else:
-        cmd.extend(["-preset", preset, "-crf", str(quality_value)])
+        cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
     if codec == "libx265":
         cmd.extend(["-x265-params", "info=0:colorprim=bt709:transfer=bt709:colormatrix=bt709"])
     if codec == "libx264":
@@ -540,21 +482,14 @@ def _compose_overlay(
         cmd.append("-an")
     cmd.append(output_path)
 
-    logger.info(
-        "[CaptionV2] FFmpeg compose: codec=%s preset=%s quality=%s",
-        codec,
-        preset,
-        quality_value,
-    )
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg V2 overlay compose failed: {result.stderr[-800:]}")
 
 
 def _page_at_time(pages: list[CaptionPage], t: float) -> CaptionPage | None:
-    for idx, page in enumerate(pages):
-        is_last = idx == len(pages) - 1
-        if page.start <= t and (t <= page.end if is_last else t < page.end):
+    for page in pages:
+        if page.start <= t <= page.end:
             return page
     return None
 
@@ -670,25 +605,13 @@ def _target_final_video_codec() -> str:
 
 
 def _target_final_preset(codec: str) -> str:
-    override = os.getenv("FFMPEG_CAPTION_V2_ENCODE_PRESET")
+    override = os.getenv("FFMPEG_FINAL_ENCODE_PRESET")
     if override:
         return override
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        return "p7"
+        preset = settings.FFMPEG_ENCODE_PRESET
+        return preset if preset.startswith("p") else "p4"
     return settings.FFMPEG_PRESET
-
-
-def _target_final_quality(codec: str) -> int:
-    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        override = os.getenv("FFMPEG_CAPTION_V2_CQ")
-        if override:
-            return int(override)
-        return max(10, settings.FFMPEG_CRF - 4)
-
-    override = os.getenv("FFMPEG_CAPTION_V2_CRF")
-    if override:
-        return int(override)
-    return max(12, settings.FFMPEG_CRF - 4)
 
 
 def _run_ffmpeg_copy(input_path: str, output_path: str) -> None:
