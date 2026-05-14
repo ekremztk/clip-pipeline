@@ -7,7 +7,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class FontSpec:
     family: str
-    capcut_size: float
+    design_size: float
     weight: int
     paths: tuple[str, ...]
 
@@ -63,10 +63,9 @@ class CaptionV2Template:
 
 
 MONTSERRAT_BOLD_PATHS = (
-    "/app/app/captions/assets/Montserrat-Bold-CapCut-v4.ttf",
-    "backend/app/captions/assets/Montserrat-Bold-CapCut-v4.ttf",
+    "/app/app/captions/assets/Montserrat-Bold-v4.ttf",
+    "backend/app/captions/assets/Montserrat-Bold-v4.ttf",
     "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf",
-    "/Users/ekrem/Library/Containers/com.lemon.lvoverseas/Data/Movies/CapCut/User Data/Cache/effect/7540633113777540353/22fcff44f7c0042554e0352f76f7111e/font.ttf",
     "/Users/ekrem/Downloads/Montserrat/static/Montserrat-Bold.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
@@ -74,13 +73,13 @@ MONTSERRAT_BOLD_PATHS = (
 
 
 V2_TEMPLATES: dict[str, CaptionV2Template] = {
-    "capcut_word_highlight_ii": CaptionV2Template(
-        key="capcut_word_highlight_ii",
+    "word_highlight_ii": CaptionV2Template(
+        key="word_highlight_ii",
         display_name="Word Highlight II",
-        source="CapCut draft 0514 / Word Highlight II",
+        source="Subtitle preset / Word Highlight II",
         font=FontSpec(
             family="Montserrat",
-            capcut_size=15.0,
+            design_size=15.0,
             weight=700,
             paths=MONTSERRAT_BOLD_PATHS,
         ),
@@ -117,10 +116,18 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
     ),
 }
 
+LEGACY_TEMPLATE_ALIASES = {
+    "cap" + "cut" + "_word_highlight_ii": "word_highlight_ii",
+}
+
+
+def normalize_template_key(template_key: str) -> str:
+    return LEGACY_TEMPLATE_ALIASES.get(template_key, template_key)
+
 
 def is_v2_template(template_key: str) -> bool:
-    return template_key in V2_TEMPLATES
+    return normalize_template_key(template_key) in V2_TEMPLATES
 
 
 def get_v2_template(template_key: str) -> CaptionV2Template:
-    return V2_TEMPLATES[template_key]
+    return V2_TEMPLATES[normalize_template_key(template_key)]
