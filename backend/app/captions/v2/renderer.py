@@ -414,7 +414,7 @@ def _compose_overlay(
     cmd.extend(["-map_metadata", "-1", "-fflags", "+bitexact", "-c:v", codec])
 
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+        _append_nvenc_quality_args(cmd, preset)
     else:
         cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
     if codec == "libx265":
@@ -610,6 +610,25 @@ def _target_final_preset(codec: str) -> str:
         preset = settings.FFMPEG_ENCODE_PRESET
         return preset if preset.startswith("p") else "p4"
     return settings.FFMPEG_PRESET
+
+
+def _append_nvenc_quality_args(cmd: list[str], preset: str) -> None:
+    cmd.extend([
+        "-preset",
+        preset,
+        "-rc",
+        os.getenv("FFMPEG_FINAL_RATE_CONTROL", "vbr"),
+        "-cq",
+        os.getenv("FFMPEG_FINAL_CQ", str(settings.FFMPEG_CRF)),
+        "-b:v",
+        os.getenv("FFMPEG_FINAL_VIDEO_BITRATE", "10M"),
+        "-minrate",
+        os.getenv("FFMPEG_FINAL_VIDEO_MINRATE", "8M"),
+        "-maxrate",
+        os.getenv("FFMPEG_FINAL_VIDEO_MAXRATE", "14M"),
+        "-bufsize",
+        os.getenv("FFMPEG_FINAL_VIDEO_BUFSIZE", "20M"),
+    ])
 
 
 def _run_ffmpeg_copy(input_path: str, output_path: str) -> None:

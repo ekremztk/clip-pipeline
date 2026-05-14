@@ -475,6 +475,25 @@ def _target_final_preset(codec: str) -> str:
     return settings.FFMPEG_PRESET
 
 
+def _append_nvenc_quality_args(cmd: list[str], preset: str) -> None:
+    cmd.extend([
+        "-preset",
+        preset,
+        "-rc",
+        os.getenv("FFMPEG_FINAL_RATE_CONTROL", "vbr"),
+        "-cq",
+        os.getenv("FFMPEG_FINAL_CQ", str(settings.FFMPEG_CRF)),
+        "-b:v",
+        os.getenv("FFMPEG_FINAL_VIDEO_BITRATE", "10M"),
+        "-minrate",
+        os.getenv("FFMPEG_FINAL_VIDEO_MINRATE", "8M"),
+        "-maxrate",
+        os.getenv("FFMPEG_FINAL_VIDEO_MAXRATE", "14M"),
+        "-bufsize",
+        os.getenv("FFMPEG_FINAL_VIDEO_BUFSIZE", "20M"),
+    ])
+
+
 def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
     """Burn ASS subtitles via FFmpeg. Final render — includes DaVinci metadata."""
     safe_path = ass_path.replace("\\", "/").replace(":", "\\:")
@@ -500,7 +519,7 @@ def _run_ffmpeg_ass(input_path: str, output_path: str, ass_path: str) -> None:
         "-c:v", codec,
     ]
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+        _append_nvenc_quality_args(cmd, preset)
     else:
         cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
     if codec == "libx265":

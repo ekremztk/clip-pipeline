@@ -85,6 +85,25 @@ def _target_final_preset(codec: str) -> str:
     return getattr(settings, "FFMPEG_PRESET", "slow")
 
 
+def _append_nvenc_quality_args(cmd: list[str], preset: str) -> None:
+    cmd.extend([
+        "-preset",
+        preset,
+        "-rc",
+        os.getenv("FFMPEG_FINAL_RATE_CONTROL", "vbr"),
+        "-cq",
+        os.getenv("FFMPEG_FINAL_CQ", str(settings.FFMPEG_CRF)),
+        "-b:v",
+        os.getenv("FFMPEG_FINAL_VIDEO_BITRATE", "10M"),
+        "-minrate",
+        os.getenv("FFMPEG_FINAL_VIDEO_MINRATE", "8M"),
+        "-maxrate",
+        os.getenv("FFMPEG_FINAL_VIDEO_MAXRATE", "14M"),
+        "-bufsize",
+        os.getenv("FFMPEG_FINAL_VIDEO_BUFSIZE", "20M"),
+    ])
+
+
 def render_captions(
     video_path: str,
     output_path: str,
@@ -492,7 +511,7 @@ def _run_ffmpeg_overlay_single(
     cmd.extend(["-c:v", codec])
 
     if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
+        _append_nvenc_quality_args(cmd, preset)
     else:
         if final_pass:
             cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
