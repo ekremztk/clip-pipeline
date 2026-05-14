@@ -463,6 +463,7 @@ async def _fetch_upload_and_run_pipeline(
     ext: str,
     video_title: str,
     target_guest: Optional[str],
+    metadata_subject_name: Optional[str],
     channel_id: str,
     user_id: str,
     clip_duration_min: Optional[int],
@@ -530,6 +531,7 @@ async def _fetch_upload_and_run_pipeline(
         await asyncio.to_thread(
             run_pipeline, job_id, video_path, video_title, target_guest,
             channel_id, user_id, clip_duration_min, clip_duration_max,
+            metadata_subject_name,
         )
     except Exception as e:
         print(f"[JobsRoute] R2 fetch/pipeline failed for job {job_id}: {e}")
@@ -561,6 +563,7 @@ async def _download_and_run_pipeline(
     youtube_url: str,
     video_title: str,
     target_guest: Optional[str],
+    metadata_subject_name: Optional[str],
     channel_id: str,
     user_id: str,
     clip_duration_min: Optional[int],
@@ -617,6 +620,7 @@ async def _download_and_run_pipeline(
         await asyncio.to_thread(
             run_pipeline, job_id, video_path, video_title, target_guest,
             channel_id, user_id, clip_duration_min, clip_duration_max,
+            metadata_subject_name,
         )
     except Exception as e:
         print(f"[JobsRoute] YouTube download failed for job {job_id}: {e}")
@@ -658,6 +662,7 @@ async def create_job(
     youtube_url: Optional[str] = Form(None),
     title: str = Form(...),
     target_guest: Optional[str] = Form(None),
+    metadata_subject_name: Optional[str] = Form(None),
     channel_id: str = Form(...),
     trim_start_seconds: float = Form(0.0),
     trim_end_seconds: float = Form(None),
@@ -675,6 +680,7 @@ async def create_job(
         job_id = str(uuid.uuid4())
         r2_upload_row: Optional[dict] = None
         r2_upload_ext: Optional[str] = None
+        metadata_subject_name = metadata_subject_name.strip() if metadata_subject_name and metadata_subject_name.strip() else None
 
         if youtube_url:
             # Validate it's a real YouTube URL
@@ -829,6 +835,7 @@ async def create_job(
                 youtube_url,
                 title,
                 target_guest,
+                metadata_subject_name,
                 channel_id,
                 current_user["id"],
                 clip_duration_min,
@@ -845,6 +852,7 @@ async def create_job(
                 r2_upload_ext or ".mp4",
                 title,
                 target_guest,
+                metadata_subject_name,
                 channel_id,
                 current_user["id"],
                 clip_duration_min,
@@ -863,6 +871,7 @@ async def create_job(
                 current_user["id"],
                 clip_duration_min,
                 clip_duration_max,
+                metadata_subject_name,
             )
 
         print(f"[JobsRoute] Started job {job_id} for video '{title}'" + (" (YouTube)" if youtube_url else ""))

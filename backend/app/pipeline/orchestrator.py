@@ -309,7 +309,8 @@ def log_step(job_id: str, step_number: int, step_name: str, status: str,
 def run_pipeline(job_id: str, video_path: str, video_title: str,
                  target_guest: str | None, channel_id: str, user_id: str | None = None,
                  clip_duration_min: int | None = None,
-                 clip_duration_max: int | None = None) -> None:
+                 clip_duration_max: int | None = None,
+                 metadata_subject_name: str | None = None) -> None:
     """
     Main pipeline function called by the worker.
     Runs steps exactly as defined.
@@ -330,8 +331,12 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
         director_events.emit_sync(
             module="module_1",
             event="pipeline_started",
-            payload={"job_id": job_id, "channel_id": channel_id,
-                     "target_guest_provided": bool(target_guest)},
+            payload={
+                "job_id": job_id,
+                "channel_id": channel_id,
+                "target_guest_provided": bool(target_guest),
+                "metadata_subject_provided": bool(metadata_subject_name),
+            },
             channel_id=channel_id,
         )
 
@@ -544,6 +549,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             video_path=video_path,
                             clip_duration_min=clip_duration_min,
                             clip_duration_max=clip_duration_max,
+                            video_title=video_title,
+                            metadata_subject_name=metadata_subject_name,
                         )
                     _debug_dump(job_id, "s06_batch_evaluation", evaluated_clips)
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
@@ -740,4 +747,3 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 print(f"[Orchestrator] finally: removed {n} gaming-reframe objects")
         except Exception as _e:
             print(f"[Orchestrator] finally: gaming-reframe cleanup error: {_e}")
-

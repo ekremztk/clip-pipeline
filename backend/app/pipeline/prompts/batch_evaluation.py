@@ -10,6 +10,11 @@ CHANNEL_CONTEXT_PLACEHOLDER
 
 If channel instructions include a YouTube title style or description template, suggested_title and suggested_description must follow those instructions exactly. Do not fall back to a generic title/description format unless no channel metadata style is provided.
 
+## METADATA SUBJECT
+METADATA_CONTEXT_PLACEHOLDER
+
+If an explicit metadata subject is provided, suggested_title and suggested_description must include that person's name or a natural short form of it. Do not omit the known person name from metadata. Use this subject only for title/description metadata; do not use it to reject candidates or infer speaker dominance.
+
 ## DURATION RULE
 Every clip must satisfy: MIN_DURATION_PLACEHOLDER ≤ (recommended_end - recommended_start) ≤ MAX_DURATION_PLACEHOLDER seconds.
 
@@ -84,7 +89,7 @@ Return ONLY a valid JSON array of pass and fixable candidates. Omitted candidate
     "content_type": "confirmed or corrected type",
     "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
     "posting_order": integer,
-    "suggested_title": "under 60 chars, same language as transcript",
+    "suggested_title": "under 60 chars, same language as transcript; include explicit metadata subject when provided",
     "suggested_description": "same language as transcript; follow channel description template exactly when provided, otherwise one compact sentence plus relevant hashtags",
     "s05_hallucination_flag": boolean
   }

@@ -407,6 +407,7 @@ export default function DashboardPage() {
     // Form state
     const [title, setTitle] = useState('');
     const [targetGuest, setTargetGuest] = useState('');
+    const [metadataSubjectName, setMetadataSubjectName] = useState('');
     const [formChannelId, setFormChannelId] = useState('');
     const [durationPreset, setDurationPreset] = useState('<60s');
     const [aspectRatio, setAspectRatio] = useState('9:16');
@@ -542,6 +543,7 @@ export default function DashboardPage() {
         setVideoDuration(0);
         setTitle('');
         setTargetGuest('');
+        setMetadataSubjectName('');
         setStartTime(0);
         setEndTime(0);
         setDurationPreset('<60s');
@@ -873,6 +875,7 @@ export default function DashboardPage() {
         fd.append('title', title);
         fd.append('channel_id', formChannelId);
         if (targetGuest) fd.append('target_guest', targetGuest);
+        if (metadataSubjectName) fd.append('metadata_subject_name', metadataSubjectName);
         fd.append('trim_start_seconds', startTime.toString());
         fd.append('trim_end_seconds', endTime.toString());
         fd.append('clip_duration_min', preset.min.toString());
@@ -1449,7 +1452,7 @@ export default function DashboardPage() {
                                                 className="block text-[10px] uppercase tracking-widest mb-1.5"
                                                 style={{ color: '#ababab' }}
                                             >
-                                                Target Guest
+                                                Target Guest Filter
                                             </label>
                                             <input
                                                 type="text"
@@ -1464,6 +1467,27 @@ export default function DashboardPage() {
                                                 }}
                                             />
                                         </div>
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                            style={{ color: '#ababab' }}
+                                        >
+                                            Main Person
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={metadataSubjectName}
+                                            onChange={e => setMetadataSubjectName(e.target.value)}
+                                            placeholder="Optional"
+                                            className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors"
+                                            style={{
+                                                background: 'rgba(250,249,245,0.03)',
+                                                color: '#faf9f5',
+                                                border: '1px solid rgba(250,249,245,0.08)',
+                                            }}
+                                        />
                                     </div>
 
                                     {/* Auto Hook */}

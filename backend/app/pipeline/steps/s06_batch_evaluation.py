@@ -154,7 +154,39 @@ def _extract_transcript_segment(
 
 # ── Claude message builder ────────────────────────────────────────────────────
 
-def _build_claude_content(batch_items: list, channel_context: str, min_duration: int, max_duration: int) -> list:
+def _build_metadata_context(video_title: str, metadata_subject_name: Optional[str]) -> str:
+    title = (video_title or "").strip()
+    subject = (metadata_subject_name or "").strip()
+
+    lines = []
+    if title:
+        lines.append(f"Source video title: {title}")
+    else:
+        lines.append("Source video title: (not provided)")
+
+    if subject:
+        lines.append(f"Explicit metadata subject: {subject}")
+        lines.append(
+            "Use this exact person as the named subject in suggested_title and suggested_description."
+        )
+    else:
+        lines.append("Explicit metadata subject: (not provided)")
+        lines.append(
+            "If the source title clearly names the main person, use that name in metadata. "
+            "If it does not, do not invent a person name."
+        )
+
+    return "\n".join(lines)
+
+
+def _build_claude_content(
+    batch_items: list,
+    channel_context: str,
+    min_duration: int,
+    max_duration: int,
+    video_title: str = "",
+    metadata_subject_name: Optional[str] = None,
+) -> list:
     """
     Builds the Claude content array (text only) for a batch.
     Each item has:
@@ -201,6 +233,8 @@ def _build_claude_content(batch_items: list, channel_context: str, min_duration:
 
     instructions = EVALUATION_PROMPT.replace(
         "CHANNEL_CONTEXT_PLACEHOLDER", channel_context
+    ).replace(
+        "METADATA_CONTEXT_PLACEHOLDER", _build_metadata_context(video_title, metadata_subject_name)
     ).replace(
         "CANDIDATES_PLACEHOLDER", candidates_block
     ).replace(
@@ -252,6 +286,8 @@ def _evaluate_batch_with_claude(
     min_duration: int = 12,
     max_duration: int = 60,
     full_transcript_block: Optional[list] = None,
+    video_title: str = "",
+    metadata_subject_name: Optional[str] = None,
 ) -> list:
     """
     Evaluates a batch of candidates with Claude using transcript only.
@@ -260,7 +296,14 @@ def _evaluate_batch_with_claude(
     """
     print(f"[S06] Claude batch: {len(batch_items)} candidates (text-only)")
 
-    content = _build_claude_content(batch_items, channel_context, min_duration, max_duration)
+    content = _build_claude_content(
+        batch_items,
+        channel_context,
+        min_duration,
+        max_duration,
+        video_title=video_title,
+        metadata_subject_name=metadata_subject_name,
+    )
     raw = call_claude(content, system=SYSTEM_PROMPT, extra_system_blocks=full_transcript_block)
     return _parse_claude_json(raw)
 
@@ -271,9 +314,19 @@ def _evaluate_single_with_claude(
     min_duration: int = 12,
     max_duration: int = 60,
     full_transcript_block: Optional[list] = None,
+    video_title: str = "",
+    metadata_subject_name: Optional[str] = None,
 ) -> Optional[dict]:
     try:
-        results = _evaluate_batch_with_claude([item], channel_context, min_duration, max_duration, full_transcript_block)
+        results = _evaluate_batch_with_claude(
+            [item],
+            channel_context,
+            min_duration,
+            max_duration,
+            full_transcript_block,
+            video_title=video_title,
+            metadata_subject_name=metadata_subject_name,
+        )
         return results[0] if results else None
     except Exception as e:
         print(f"[S06] Single retry failed for candidate {item.get('candidate_id')}: {e}")
@@ -338,6 +391,8 @@ def run(
     video_path: Optional[str] = None,
     clip_duration_min: Optional[int] = None,
     clip_duration_max: Optional[int] = None,
+    video_title: str = "",
+    metadata_subject_name: Optional[str] = None,
 ) -> list:
     """
     S06: Batch Evaluation (Claude Sonnet)
@@ -362,6 +417,8 @@ def run(
     )
     print(f"[S06] Duration limits: {min_duration}s–{max_duration}s (job_override={'yes' if clip_duration_min is not None else 'no'})")
     print(f"[S06] Starting Claude evaluation for job {job_id}: {len(candidates)} candidates")
+    if metadata_subject_name:
+        print(f"[S06] Metadata subject provided: {metadata_subject_name}")
 
     if not candidates:
         print("[S06] No candidates. Returning empty list.")
@@ -430,7 +487,15 @@ def run(
             print(f"[S06] Batch {batch_num}/{total_batches} ({len(batch)} candidates)")
 
             try:
-                evaluated = _evaluate_batch_with_claude(batch, channel_context, min_duration, max_duration, full_transcript_block)
+                evaluated = _evaluate_batch_with_claude(
+                    batch,
+                    channel_context,
+                    min_duration,
+                    max_duration,
+                    full_transcript_block,
+                    video_title=video_title,
+                    metadata_subject_name=metadata_subject_name,
+                )
 
                 all_evaluated.extend(evaluated)
 
@@ -440,7 +505,15 @@ def run(
                 if len(evaluated) == 0:
                     print(f"[S06] Batch {batch_num}: Claude returned 0 results — retrying candidates individually")
                     for item in batch:
-                        retry = _evaluate_single_with_claude(item, channel_context, min_duration, max_duration, full_transcript_block)
+                        retry = _evaluate_single_with_claude(
+                            item,
+                            channel_context,
+                            min_duration,
+                            max_duration,
+                            full_transcript_block,
+                            video_title=video_title,
+                            metadata_subject_name=metadata_subject_name,
+                        )
                         if retry:
                             all_evaluated.append(retry)
                             print(f"[S06] Recovered candidate {item.get('candidate_id')}")
@@ -455,7 +528,15 @@ def run(
                 print(f"[S06] Batch {batch_num} failed: {batch_err}. Falling back to individual evaluation.")
                 for item in batch:
                     try:
-                        single = _evaluate_single_with_claude(item, channel_context, min_duration, max_duration, full_transcript_block)
+                        single = _evaluate_single_with_claude(
+                            item,
+                            channel_context,
+                            min_duration,
+                            max_duration,
+                            full_transcript_block,
+                            video_title=video_title,
+                            metadata_subject_name=metadata_subject_name,
+                        )
                         if single:
                             all_evaluated.append(single)
                     except Exception as single_err:
