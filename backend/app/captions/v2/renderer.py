@@ -460,8 +460,6 @@ def _compose_overlay(
         "encoder=H.265 10-bit",
         "-metadata:s:v:0",
         "language=und",
-        "-metadata:s:v:0",
-        "timecode=01:00:00:00",
         "-metadata:s:d:0",
         "language=eng",
     ])

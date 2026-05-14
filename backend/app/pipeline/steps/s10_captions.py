@@ -16,7 +16,6 @@ from app.services.r2_client import get_r2_client
 from app.captions.core import transcribe_video
 from app.captions.finalizer import finalize_davinci_mp4
 from app.captions.renderer import render_captions
-from app.captions.v2.templates import normalize_template_key
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,6 @@ def run(
 
     Returns: List of updated clip dicts with video_captioned_path set.
     """
-    caption_template = normalize_template_key(caption_template)
     print(f"[S10] Starting captions for {len(reframed_clips)} clips. Template: {caption_template}")
     supabase = get_client()
     captioned_clips = []
