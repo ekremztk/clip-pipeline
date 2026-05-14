@@ -60,7 +60,7 @@ const CAPTION_TEMPLATES = [
         phase2Animation: 'ct-fade',
     },
     {
-        key: 'word_highlight_ii', label: 'Word Highlight II',
+        key: 'capcut_word_highlight_ii', label: 'Word Highlight II',
         textStyle: {
             color: '#ffffff',
             fontSize: 17,
@@ -72,7 +72,7 @@ const CAPTION_TEMPLATES = [
         phase2Animation: 'ct-fade',
     },
 ];
-const DEFAULT_CAPTION_TEMPLATE_KEY = 'word_highlight_ii';
+const DEFAULT_CAPTION_TEMPLATE_KEY = 'capcut_word_highlight_ii';
 const DEFAULT_CAPTION_TEMPLATE_INDEX = Math.max(
     0,
     CAPTION_TEMPLATES.findIndex(template => template.key === DEFAULT_CAPTION_TEMPLATE_KEY),
@@ -1566,7 +1566,7 @@ export default function DashboardPage() {
                           Word-by-word caption loop: 4 words in a 3.2s infinite cycle.
                           Each word is absolutely centered; only one is visible at a time.
                           This simulates real short-form caption rendering (one word flashes
-                          in, holds, then disappears like short-form caption output).
+                          in, holds, then disappears — exactly like CapCut/Opus/Submagic output).
                           All transforms include translate(-50%,-50%) for centering so there
                           is no conflict with position math.
                         */}

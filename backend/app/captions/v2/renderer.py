@@ -173,7 +173,7 @@ def _render_overlay_video(
     video: VideoInfo,
     template: CaptionV2Template,
 ) -> None:
-    font_size_px = _design_font_size_to_px(template.font.design_size, video.width)
+    font_size_px = _capcut_font_size_to_px(template.font.capcut_size, video.width)
     stroke_px = max(0, int(round(font_size_px * template.stroke.width_ratio)))
     font = _load_font(template.font.paths, font_size_px)
 
@@ -560,8 +560,8 @@ def _measure_text(
     return max(0.0, width - letter_spacing_px)
 
 
-def _design_font_size_to_px(design_size: float, output_width: int) -> int:
-    return max(1, int(round(design_size * output_width / 200.0)))
+def _capcut_font_size_to_px(capcut_size: float, output_width: int) -> int:
+    return max(1, int(round(capcut_size * output_width / 200.0)))
 
 
 def _shadow_offset(distance: float, angle_degrees: float) -> tuple[float, float]:
