@@ -86,19 +86,26 @@ def _target_final_preset(codec: str) -> str:
 
 
 def _append_nvenc_quality_args(cmd: list[str], preset: str) -> None:
+    rate_control = os.getenv("FFMPEG_FINAL_RATE_CONTROL", "cbr")
+    target_bitrate = os.getenv("FFMPEG_FINAL_VIDEO_BITRATE", "10M")
+    minrate = os.getenv("FFMPEG_FINAL_VIDEO_MINRATE", target_bitrate if rate_control == "cbr" else "8M")
+    maxrate = os.getenv("FFMPEG_FINAL_VIDEO_MAXRATE", target_bitrate if rate_control == "cbr" else "14M")
+
     cmd.extend([
         "-preset",
         preset,
         "-rc",
-        os.getenv("FFMPEG_FINAL_RATE_CONTROL", "vbr"),
-        "-cq",
-        os.getenv("FFMPEG_FINAL_CQ", str(settings.FFMPEG_CRF)),
+        rate_control,
+    ])
+    if rate_control not in ("cbr", "cbr_ld_hq"):
+        cmd.extend(["-cq", os.getenv("FFMPEG_FINAL_CQ", str(settings.FFMPEG_CRF))])
+    cmd.extend([
         "-b:v",
-        os.getenv("FFMPEG_FINAL_VIDEO_BITRATE", "10M"),
+        target_bitrate,
         "-minrate",
-        os.getenv("FFMPEG_FINAL_VIDEO_MINRATE", "8M"),
+        minrate,
         "-maxrate",
-        os.getenv("FFMPEG_FINAL_VIDEO_MAXRATE", "14M"),
+        maxrate,
         "-bufsize",
         os.getenv("FFMPEG_FINAL_VIDEO_BUFSIZE", "20M"),
     ])

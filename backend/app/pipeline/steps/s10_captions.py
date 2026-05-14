@@ -6,7 +6,9 @@ Uses the caption template from channel_dna (defaults to "clean").
 Result: video_captioned_path updated on each clip row.
 """
 import logging
+import json
 import os
+import subprocess
 import traceback
 import uuid
 
@@ -147,6 +149,18 @@ def _caption_clip(
             segments=segments,
             template_key=template_key,
         )
+        output_stats = _probe_caption_output(output_path)
+        if output_stats:
+            print(
+                f"[S10] Clip {clip_index+1}: output size={output_stats.get('size_mb', 0):.1f}MB, "
+                f"video_bitrate={output_stats.get('video_bitrate_mbps', 0):.2f}Mbps"
+            )
+            min_bitrate = int(os.getenv("FFMPEG_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
+            video_bitrate = output_stats.get("video_bitrate_bps")
+            if video_bitrate and video_bitrate < min_bitrate:
+                raise RuntimeError(
+                    f"S10 output bitrate too low: {video_bitrate}bps < {min_bitrate}bps"
+                )
         finalizer_meta = _finalize_caption_output(output_path)
 
         # Upload to R2
@@ -160,6 +174,7 @@ def _caption_clip(
             "text": transcript_text[:500] if transcript_text else "",
             "words": words,   # full word list stored for "Open in Editor" replay
             "finalizer": finalizer_meta,
+            "output_stats": output_stats,
         }
 
         return r2_url, caption_meta
@@ -171,6 +186,42 @@ def _caption_clip(
                     os.remove(path)
                 except Exception:
                     pass
+
+
+def _probe_caption_output(path: str) -> dict:
+    """Return output size and bitrate stats for S10 quality checks."""
+    try:
+        size_bytes = os.path.getsize(path)
+        cmd = [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=bit_rate",
+            "-show_entries", "format=bit_rate",
+            "-of", "json",
+            path,
+        ]
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=30)
+        data = json.loads(result.stdout or "{}")
+        streams = data.get("streams") or []
+        video_bitrate = None
+        if streams:
+            raw = streams[0].get("bit_rate")
+            if raw:
+                video_bitrate = int(raw)
+        format_bitrate = None
+        raw_format = (data.get("format") or {}).get("bit_rate")
+        if raw_format:
+            format_bitrate = int(raw_format)
+        return {
+            "size_bytes": size_bytes,
+            "size_mb": round(size_bytes / (1024 * 1024), 2),
+            "video_bitrate_bps": video_bitrate,
+            "video_bitrate_mbps": round(video_bitrate / 1_000_000, 3) if video_bitrate else 0,
+            "format_bitrate_bps": format_bitrate,
+        }
+    except Exception as e:
+        print(f"[S10] Output bitrate probe failed: {e}")
+        return {}
 
 
 def _upload_to_r2(local_path: str, r2_key: str) -> str:
