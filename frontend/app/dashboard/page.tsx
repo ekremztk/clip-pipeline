@@ -54,7 +54,7 @@ const DURATION_PRESETS = [
 
 const CAPTION_TEMPLATES = [
     {
-        key: 'clean', label: 'Clean',
+        key: 'clean', label: 'Legacy Clean',
         textStyle: { color: '#ffffff', fontSize: 17, fontWeight: 600, lineHeight: 1.35 } as React.CSSProperties,
         highlightColor: undefined,
         phase2Animation: 'ct-fade',
@@ -72,6 +72,11 @@ const CAPTION_TEMPLATES = [
         phase2Animation: 'ct-fade',
     },
 ];
+const DEFAULT_CAPTION_TEMPLATE_KEY = 'capcut_word_highlight_ii';
+const DEFAULT_CAPTION_TEMPLATE_INDEX = Math.max(
+    0,
+    CAPTION_TEMPLATES.findIndex(template => template.key === DEFAULT_CAPTION_TEMPLATE_KEY),
+);
 const CAPTION_TEMPLATE_WINDOW_SIZE = Math.min(5, CAPTION_TEMPLATES.length);
 const MAX_CAPTION_WINDOW_START = Math.max(0, CAPTION_TEMPLATES.length - CAPTION_TEMPLATE_WINDOW_SIZE);
 
@@ -412,7 +417,7 @@ export default function DashboardPage() {
 
     // Upload tab (link vs file)
     const [uploadTab, setUploadTab] = useState<'link' | 'file'>('link');
-    const [captionTemplateIdx, setCaptionTemplateIdx] = useState(0);
+    const [captionTemplateIdx, setCaptionTemplateIdx] = useState(DEFAULT_CAPTION_TEMPLATE_INDEX);
     const [windowStart, setWindowStart] = useState(0);
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
@@ -548,7 +553,7 @@ export default function DashboardPage() {
         setYoutubeFetching(false);
         setFormChannelId(activeChannelId);
         setUploadTab('link');
-        setCaptionTemplateIdx(0);
+        setCaptionTemplateIdx(DEFAULT_CAPTION_TEMPLATE_INDEX);
         setWindowStart(0);
         setHoveredIdx(null);
     };

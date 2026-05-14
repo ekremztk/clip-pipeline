@@ -63,6 +63,8 @@ class CaptionV2Template:
 
 
 MONTSERRAT_BOLD_PATHS = (
+    "/app/app/captions/assets/Montserrat-Bold-CapCut-v4.ttf",
+    "backend/app/captions/assets/Montserrat-Bold-CapCut-v4.ttf",
     "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf",
     "/Users/ekrem/Library/Containers/com.lemon.lvoverseas/Data/Movies/CapCut/User Data/Cache/effect/7540633113777540353/22fcff44f7c0042554e0352f76f7111e/font.ttf",
     "/Users/ekrem/Downloads/Montserrat/static/Montserrat-Bold.ttf",
