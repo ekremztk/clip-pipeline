@@ -3,6 +3,7 @@ import re
 from typing import Optional
 
 from app.config import settings
+from app.pipeline.json_parser import parse_json_list_response
 from app.pipeline.prompts.batch_evaluation import SYSTEM_PROMPT, EVALUATION_PROMPT
 from app.pipeline.steps.s05_unified_discovery import build_channel_context
 from app.services.claude_client import call_claude
@@ -253,29 +254,7 @@ def _build_claude_content(
 # ── JSON parser ───────────────────────────────────────────────────────────────
 
 def _parse_claude_json(raw: str) -> list:
-    if not raw:
-        return []
-    cleaned = raw.strip()
-    # Strip markdown fences just in case
-    if cleaned.startswith("```json"):
-        cleaned = cleaned[7:]
-    if cleaned.startswith("```"):
-        cleaned = cleaned[3:]
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3]
-    cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned.strip())
-    try:
-        result = json.loads(cleaned)
-        if isinstance(result, list):
-            return [item for item in result if isinstance(item, dict)]
-        if isinstance(result, dict):
-            for key in ("candidates", "evaluated", "results"):
-                if key in result and isinstance(result[key], list):
-                    return [item for item in result[key] if isinstance(item, dict)]
-    except json.JSONDecodeError as e:
-        print(f"[S06] Claude JSON parse error: {e}")
-        print(f"[S06] Raw snippet: {cleaned[:400]}")
-    return []
+    return parse_json_list_response(raw, log_prefix="[S06]")
 
 
 # ── Core evaluation logic ─────────────────────────────────────────────────────

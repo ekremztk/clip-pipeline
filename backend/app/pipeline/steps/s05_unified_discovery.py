@@ -1,8 +1,7 @@
-import json
-import re
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from app.config import settings
+from app.pipeline.json_parser import parse_json_list_response
 from app.services.claude_client import call_claude
 from app.services.supabase_client import get_client
 from app.pipeline.prompts.unified_discovery import (
@@ -285,41 +284,7 @@ def _validate_and_repair_candidates(
 
 def _parse_claude_json(raw_text: str) -> list:
     """Safely parses Claude's JSON response."""
-    if not raw_text:
-        return []
-
-    cleaned = raw_text.strip()
-
-    # Strip markdown wrappers
-    if cleaned.startswith("```json"):
-        cleaned = cleaned[7:]
-    if cleaned.startswith("```"):
-        cleaned = cleaned[3:]
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3]
-
-    cleaned = cleaned.strip()
-    cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned)
-
-    # Extract just the JSON array — Claude sometimes appends explanation after the closing ]
-    start = cleaned.find("[")
-    end = cleaned.rfind("]")
-    if start != -1 and end != -1 and end > start:
-        cleaned = cleaned[start:end + 1]
-
-    try:
-        result = json.loads(cleaned)
-        if isinstance(result, list):
-            return result
-        elif isinstance(result, dict) and "candidates" in result:
-            return result["candidates"]
-        else:
-            print(f"[S05] Unexpected JSON structure: {type(result)}")
-            return []
-    except json.JSONDecodeError as e:
-        print(f"[S05] JSON parse error: {e}")
-        print(f"[S05] Raw snippet: {cleaned[:300]}")
-        return []
+    return parse_json_list_response(raw_text, log_prefix="[S05]")
 
 
 def run(
