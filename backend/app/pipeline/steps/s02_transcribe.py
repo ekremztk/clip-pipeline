@@ -1,3 +1,4 @@
+import os
 import re
 from typing import Optional
 from app.services.deepgram_client import transcribe
@@ -62,10 +63,14 @@ def run(audio_path: str, job_id: str,
     print(f"[S02] Starting transcription for job {job_id}, audio: {audio_path}")
 
     try:
-        # Build keyterms for Nova-3 prompting
-        keyterms = _build_keyterms(channel_dna or {}, video_title or "", target_guest)
+        # Keyterm prompting is disabled by default because oversized or unsafe
+        # query params can make Deepgram reject the whole transcription request.
+        keyterms_enabled = os.getenv("DEEPGRAM_ENABLE_KEYTERMS", "").lower() in {"1", "true", "yes", "on"}
+        keyterms = _build_keyterms(channel_dna or {}, video_title or "", target_guest) if keyterms_enabled else []
         if keyterms:
             print(f"[S02] Keyterms for Nova-3: {keyterms[:10]}{'...' if len(keyterms) > 10 else ''}")
+        else:
+            print("[S02] Deepgram keyterms disabled")
 
         result = transcribe(audio_path, keyterms=keyterms if keyterms else None)
 
