@@ -29,6 +29,9 @@ frontend/.env.local
 *.log
 .mcp.json
 
+# Local source video archive
+Source Videos/
+
 # Editor — ignore build artifacts and secrets, not source
 opencut/.next/
 opencut/apps/web/.next/

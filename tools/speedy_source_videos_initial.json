@@ -1,0 +1,165 @@
+[
+  {
+    "series": "A Series",
+    "guest": "Kevin Hart",
+    "urls": [
+      "https://www.youtube.com/watch?v=rBKfRy0M-30",
+      "https://www.youtube.com/watch?v=hEM5TKzUI8Q"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Ryan Reynolds",
+    "urls": [
+      "https://www.youtube.com/watch?v=kOYS9lX2pgg",
+      "https://www.youtube.com/watch?v=8ARCrlFLu88"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Ryan Gosling",
+    "urls": [
+      "https://www.youtube.com/watch?v=V9uHZ2uQ8YI",
+      "https://www.youtube.com/watch?v=_WtbbszO838"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Greg Davies",
+    "urls": [
+      "https://www.youtube.com/watch?v=9AXJSG6Qzcs",
+      "https://www.youtube.com/watch?v=zaCk5AKwmk0"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Rowan Atkinson",
+    "urls": [
+      "https://www.youtube.com/watch?v=Mmtgt-xs5Gk"
+    ],
+    "missing": "second source video"
+  },
+  {
+    "series": "A Series",
+    "guest": "Cillian Murphy",
+    "urls": [],
+    "missing": "no source video"
+  },
+  {
+    "series": "A Series",
+    "guest": "Dwayne Johnson",
+    "urls": [
+      "https://www.youtube.com/watch?v=OQKAEjPIDNk",
+      "https://www.youtube.com/watch?v=an1xCA5-UHw"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Jack Black",
+    "urls": [
+      "https://www.youtube.com/watch?v=4Y4YSpF6d6w"
+    ],
+    "missing": "second source video"
+  },
+  {
+    "series": "A Series",
+    "guest": "Jim Carrey",
+    "urls": [
+      "https://www.youtube.com/watch?v=s68F_E9NfR0",
+      "https://www.youtube.com/watch?v=RDwrdSBbyaY"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Will Smith",
+    "urls": [
+      "https://www.youtube.com/watch?v=2rJUAyilFmA"
+    ],
+    "manual_upscaled": [
+      "https://www.youtube.com/watch?v=xdCTNas_YwQ"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Andrew Garfield",
+    "urls": [
+      "https://www.youtube.com/watch?v=_u_TswLQ4ws",
+      "https://www.youtube.com/watch?v=nmMpwZrRLRQ"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Hugh Grant",
+    "urls": [
+      "https://www.youtube.com/watch?v=X4puhH8kMwU",
+      "https://www.youtube.com/watch?v=jIeyVA45TF4"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Tom Holland",
+    "urls": [
+      "https://www.youtube.com/watch?v=8cVJvlix3EA",
+      "https://www.youtube.com/watch?v=e72pSP8lDLs"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Robert Downey Jr.",
+    "urls": [
+      "https://www.youtube.com/watch?v=b4M4I6FPiwU"
+    ],
+    "manual_upscaled": [
+      "https://www.youtube.com/watch?v=Z_2A5adT3FI"
+    ]
+  },
+  {
+    "series": "A Series",
+    "guest": "Conan O'Brien",
+    "urls": [],
+    "manual_upscaled": [
+      "https://www.youtube.com/watch?v=AxG14lbL2Iw",
+      "https://www.youtube.com/watch?v=cq1er8IWz1U"
+    ]
+  },
+  {
+    "series": "B Series",
+    "guest": "Ricky Gervais",
+    "urls": [],
+    "missing": "no source video"
+  },
+  {
+    "series": "B Series",
+    "guest": "Kit Harington",
+    "urls": [
+      "https://www.youtube.com/watch?v=Dy-3FxwVf_M"
+    ]
+  },
+  {
+    "series": "B Series",
+    "guest": "Tom Hiddleston",
+    "urls": [
+      "https://www.youtube.com/watch?v=fFRl9sacyEQ"
+    ]
+  },
+  {
+    "series": "B Series",
+    "guest": "Daniel Radcliffe",
+    "urls": [
+      "https://www.youtube.com/watch?v=Pl8AJAt3TDg"
+    ]
+  },
+  {
+    "series": "B Series",
+    "guest": "Paul Rudd",
+    "urls": [],
+    "missing": "no source video"
+  },
+  {
+    "series": "B Series",
+    "guest": "Chris Hemsworth",
+    "urls": [
+      "https://www.youtube.com/watch?v=k-Z1kKhelig"
+    ]
+  }
+]
