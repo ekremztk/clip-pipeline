@@ -18,6 +18,7 @@ import re
 import subprocess
 
 from app.config import settings
+from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline_video_encode_args
 from typing import Optional
 
 from .types import ReframeKeyframe
@@ -121,22 +122,13 @@ def render_podcast_reframe(
         f"scale={canvas_w}:{canvas_h}:flags=lanczos,setsar=1"
     )
 
-    codec = settings.FFMPEG_VIDEO_CODEC
     cmd = ["ffmpeg", "-y"]
     if settings.FFMPEG_HWACCEL:
         cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
-    cmd.extend(["-i", video_path, "-vf", vf, "-c:v", codec])
-    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
-    else:
-        cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
-    if codec in ("libx264", "h264_nvenc"):
-        cmd.extend(["-profile:v", "high"])
+    cmd.extend(["-i", video_path, "-vf", vf])
+    append_pipeline_video_encode_args(cmd)
     cmd.extend(["-movflags", "+faststart"])
-    if has_audio:
-        cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000"])
-    else:
-        cmd.append("-an")
+    append_pipeline_audio_encode_args(cmd, has_audio=has_audio)
     cmd.append(output_path)
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
@@ -359,21 +351,10 @@ def render_gaming_vstack(
         "-filter_complex", filter_complex,
         "-map", "[out]",
         "-map", "0:a?",
-        "-c:v", settings.FFMPEG_VIDEO_CODEC,
     ]
-    if settings.FFMPEG_VIDEO_CODEC in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", settings.FFMPEG_ENCODE_PRESET, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
-    else:
-        cmd.extend(["-preset", settings.FFMPEG_PRESET, "-crf", str(settings.FFMPEG_CRF)])
-    if settings.FFMPEG_VIDEO_CODEC in ("libx264", "h264_nvenc"):
-        cmd.extend(["-profile:v", "high"])
-    cmd.extend([
-        "-c:a", "aac",
-        "-b:a", "320k",
-        "-ar", "48000",
-        "-movflags", "+faststart",
-        output_path,
-    ])
+    append_pipeline_video_encode_args(cmd)
+    append_pipeline_audio_encode_args(cmd, has_audio=True)
+    cmd.extend(["-movflags", "+faststart", output_path])
 
     logger.info(
         "[Render] Gaming vstack: wc=crop(%d:%d:%d:%d) game=crop(%d:%d:%d:%d)",

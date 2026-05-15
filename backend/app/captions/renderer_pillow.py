@@ -11,18 +11,13 @@ import logging
 import os
 import subprocess
 import uuid
-from datetime import datetime, timezone
 from typing import Optional
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from app.config import settings
-from app.captions.davinci_fingerprint import (
-    davinci_timescale_for_rate,
-    frame_duration_s,
-    has_audio_stream,
-    probe_video_rate,
-)
+from app.captions.davinci_fingerprint import has_audio_stream
+from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline_video_encode_args
 
 logger = logging.getLogger(__name__)
 
@@ -63,52 +58,6 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "max_chars_per_line": 18,
     },
 }
-
-
-def _target_final_video_codec() -> str:
-    override = os.getenv("FFMPEG_FINAL_VIDEO_CODEC")
-    if override:
-        return override
-    pipeline_codec = getattr(settings, "FFMPEG_VIDEO_CODEC", "libx264")
-    if pipeline_codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        return "hevc_nvenc"
-    return "libx265"
-
-
-def _target_final_preset(codec: str) -> str:
-    override = os.getenv("FFMPEG_FINAL_ENCODE_PRESET")
-    if override:
-        return override
-    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        preset = getattr(settings, "FFMPEG_ENCODE_PRESET", "p4")
-        return preset if preset.startswith("p") else "p4"
-    return getattr(settings, "FFMPEG_PRESET", "slow")
-
-
-def _append_nvenc_quality_args(cmd: list[str], preset: str) -> None:
-    rate_control = os.getenv("FFMPEG_FINAL_RATE_CONTROL", "cbr")
-    target_bitrate = os.getenv("FFMPEG_FINAL_VIDEO_BITRATE", "10M")
-    minrate = os.getenv("FFMPEG_FINAL_VIDEO_MINRATE", target_bitrate if rate_control == "cbr" else "8M")
-    maxrate = os.getenv("FFMPEG_FINAL_VIDEO_MAXRATE", target_bitrate if rate_control == "cbr" else "14M")
-
-    cmd.extend([
-        "-preset",
-        preset,
-        "-rc",
-        rate_control,
-    ])
-    if rate_control not in ("cbr", "cbr_ld_hq"):
-        cmd.extend(["-cq", os.getenv("FFMPEG_FINAL_CQ", str(settings.FFMPEG_CRF))])
-    cmd.extend([
-        "-b:v",
-        target_bitrate,
-        "-minrate",
-        minrate,
-        "-maxrate",
-        maxrate,
-        "-bufsize",
-        os.getenv("FFMPEG_FINAL_VIDEO_BUFSIZE", "20M"),
-    ])
 
 
 def render_captions(
@@ -465,12 +414,7 @@ def _run_ffmpeg_overlay_single(
     final_pass: bool,
 ) -> None:
     """Run a single FFmpeg overlay pass for a batch of subtitle PNGs."""
-    codec = _target_final_video_codec()
-    preset = _target_final_preset(codec)
     hwaccel = getattr(settings, "FFMPEG_HWACCEL", "")
-    rate = probe_video_rate(video_path)
-    frame_pad = frame_duration_s(rate)
-    timescale = davinci_timescale_for_rate(rate)
     has_audio = has_audio_stream(video_path)
 
     inputs = ["-i", video_path]
@@ -490,18 +434,9 @@ def _run_ffmpeg_overlay_single(
         )
         prev_label = out_label
 
-    if final_pass:
-        filter_parts.append(
-            f"[{prev_label}]tpad=stop_mode=clone:stop_duration={frame_pad:.6f},setsar=1[vout]"
-        )
-    else:
-        filter_parts.append(f"[{prev_label}]setsar=1[vout]")
+    filter_parts.append(f"[{prev_label}]setsar=1[vout]")
 
-    if has_audio and final_pass:
-        filter_parts.append(
-            f"[0:a]asetpts=PTS-STARTPTS,apad=pad_dur={frame_pad * 2:.6f}[aout]"
-        )
-    elif has_audio:
+    if has_audio:
         filter_parts.append("[0:a]asetpts=PTS-STARTPTS[aout]")
 
     filtergraph = ";".join(filter_parts)
@@ -514,60 +449,15 @@ def _run_ffmpeg_overlay_single(
     cmd.extend(["-map", "[vout]"])
     if has_audio:
         cmd.extend(["-map", "[aout]"])
-    cmd.extend(["-map_metadata", "-1", "-fflags", "+bitexact"])
-    cmd.extend(["-c:v", codec])
-
-    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        _append_nvenc_quality_args(cmd, preset)
-    else:
-        if final_pass:
-            cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
-        else:
-            cmd.extend(["-preset", "fast", "-crf", "16"])
-    if codec == "libx265":
-        cmd.extend(["-x265-params", "info=0:colorprim=bt709:transfer=bt709:colormatrix=bt709"])
-    if codec == "libx264":
-        cmd.extend(["-x264-params", "no-info=1"])
-
-    if codec in ("libx264", "h264_nvenc"):
-        cmd.extend(["-profile:v", "high"])
-    if codec in ("hevc_nvenc", "libx265"):
-        cmd.extend(["-pix_fmt", "p010le", "-tag:v", "hvc1"])
-    else:
-        cmd.extend(["-pix_fmt", "yuv420p"])
+    append_pipeline_video_encode_args(cmd)
     cmd.extend([
-        "-flags:v", "+bitexact",
-        "-flags:a", "+bitexact",
         "-color_range", "tv",
         "-colorspace", "bt709",
         "-color_trc", "bt709",
         "-color_primaries", "bt709",
         "-movflags", "+faststart",
-        "-movie_timescale", str(timescale),
-        "-video_track_timescale", str(timescale),
     ])
-    if has_audio:
-        cmd.extend(["-c:a", "aac", "-b:a", "320k", "-ar", "48000"])
-    else:
-        cmd.append("-an")
-
-    if final_pass:
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
-        cmd.extend([
-            "-timecode", "01:00:00:00",
-            "-metadata", f"creation_time={now}",
-            "-metadata", "encoder=Blackmagic Design DaVinci Resolve",
-            "-metadata:s:v", "handler_name=VideoHandler",
-            "-metadata:s:v", "encoder=H.265 10-bit",
-            "-metadata:s:v:0", "language=und",
-            "-metadata:s:d:0", "language=eng",
-        ])
-        if has_audio:
-            cmd.extend([
-                "-metadata:s:a", "handler_name=SoundHandler",
-                "-metadata:s:a:0", "language=und",
-            ])
-
+    append_pipeline_audio_encode_args(cmd, has_audio=has_audio)
     cmd.append(output_path)
 
     logger.info(

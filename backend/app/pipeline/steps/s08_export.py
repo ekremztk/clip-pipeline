@@ -4,6 +4,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
 from app.config import settings
+from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline_video_encode_args
 from app.services.supabase_client import get_client
 from app.services.r2_client import upload_clip
 from app.director.events import director_events
@@ -46,9 +47,6 @@ def _sanity_check_word_boundary(final_start: float, final_end: float, words: lis
 
 def _encode_segment(video_path: str, start: float, duration: float, output_path: str) -> None:
     """Encodes a video segment with normalized parameters for concat compatibility."""
-    codec = settings.FFMPEG_VIDEO_CODEC
-    preset = settings.FFMPEG_ENCODE_PRESET
-
     cmd = ["ffmpeg", "-y"]
     if settings.FFMPEG_HWACCEL:
         cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
@@ -57,16 +55,9 @@ def _encode_segment(video_path: str, start: float, duration: float, output_path:
         "-i", video_path,
         "-t", str(duration),
     ])
-    cmd.extend(["-c:v", codec])
-    if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-        cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
-    else:
-        cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
-    if codec in ("libx264", "h264_nvenc"):
-        cmd.extend(["-profile:v", "high"])
+    append_pipeline_video_encode_args(cmd)
+    append_pipeline_audio_encode_args(cmd, has_audio=True)
     cmd.extend([
-        "-c:a", "aac", "-b:a", "320k",
-        "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         "-avoid_negative_ts", "make_zero",
         "-map", "0:v:0", "-map", "0:a:0",
@@ -145,9 +136,6 @@ def _export_single_clip(
                 requires_stitch = False
 
         if not requires_stitch:
-            codec = settings.FFMPEG_VIDEO_CODEC
-            preset = settings.FFMPEG_ENCODE_PRESET
-
             ffmpeg_cmd = ["ffmpeg", "-y"]
             if settings.FFMPEG_HWACCEL:
                 ffmpeg_cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
@@ -156,18 +144,10 @@ def _export_single_clip(
                 "-i", video_path,
                 "-t", str(final_duration),
             ])
-            ffmpeg_cmd.extend(["-c:v", codec])
-            if codec in ("av1_nvenc", "hevc_nvenc", "h264_nvenc"):
-                ffmpeg_cmd.extend(["-preset", preset, "-rc", "vbr", "-cq", str(settings.FFMPEG_CRF)])
-            else:
-                ffmpeg_cmd.extend(["-preset", preset, "-crf", str(settings.FFMPEG_CRF)])
-            if codec in ("libx264", "h264_nvenc"):
-                ffmpeg_cmd.extend(["-profile:v", "high"])
+            append_pipeline_video_encode_args(ffmpeg_cmd)
+            append_pipeline_audio_encode_args(ffmpeg_cmd, has_audio=True)
             ffmpeg_cmd.extend([
-                "-c:a", "aac",
-                "-b:a", "320k",
                 "-movflags", "+faststart",
-                "-pix_fmt", "yuv420p",
                 "-avoid_negative_ts", "make_zero",
                 "-map", "0:v:0",
                 "-map", "0:a:0",

@@ -17,6 +17,7 @@ from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
 from app.captions.core import transcribe_video
 from app.captions.renderer import render_captions
+from app.ffmpeg_encode import describe_pipeline_encode_profile
 
 logger = logging.getLogger(__name__)
 
@@ -39,15 +40,7 @@ def run(
     Returns: List of updated clip dicts with video_captioned_path set.
     """
     print(f"[S10] Starting captions for {len(reframed_clips)} clips. Template: {caption_template}")
-    print(
-        "[S10] Final encode settings: "
-        f"codec={os.getenv('FFMPEG_FINAL_VIDEO_CODEC', '')}, "
-        f"preset={os.getenv('FFMPEG_FINAL_ENCODE_PRESET', '')}, "
-        f"rc={os.getenv('FFMPEG_FINAL_RATE_CONTROL', '')}, "
-        f"bitrate={os.getenv('FFMPEG_FINAL_VIDEO_BITRATE', '')}, "
-        f"minrate={os.getenv('FFMPEG_FINAL_VIDEO_MINRATE', '')}, "
-        f"maxrate={os.getenv('FFMPEG_FINAL_VIDEO_MAXRATE', '')}"
-    )
+    print(f"[S10] Pipeline encode profile: {describe_pipeline_encode_profile()}")
     supabase = get_client()
     captioned_clips = []
 
@@ -164,7 +157,7 @@ def _caption_clip(
                 f"[S10] Clip {clip_index+1}: output size={output_stats.get('size_mb', 0):.1f}MB, "
                 f"video_bitrate={output_stats.get('video_bitrate_mbps', 0):.2f}Mbps"
             )
-            min_bitrate = int(os.getenv("FFMPEG_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
+            min_bitrate = int(os.getenv("FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
             video_bitrate = output_stats.get("video_bitrate_bps")
             if video_bitrate and video_bitrate < min_bitrate:
                 raise RuntimeError(
@@ -247,12 +240,6 @@ def _upload_to_r2(local_path: str, r2_key: str) -> str:
 
 
 def _finalize_caption_output(output_path: str) -> dict:
-    """Optionally apply strict MP4 metadata finalization."""
-    enabled = os.getenv("ENABLE_DAVINCI_FINALIZER", "").lower() in {"1", "true", "yes", "on"}
-    if not enabled:
-        print("[S10] DaVinci finalizer disabled; uploading rendered MP4 as-is")
-        return {"skipped": True, "reason": "disabled"}
-
-    from app.captions.finalizer import finalize_davinci_mp4
-
-    return finalize_davinci_mp4(output_path)
+    """Keep S10 focused on captions; final delivery metadata is handled outside the pipeline."""
+    del output_path
+    return {"skipped": True, "reason": "pipeline_encode_only"}

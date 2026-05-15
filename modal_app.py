@@ -133,20 +133,16 @@ def process_clips(
 
     sys.path.insert(0, "/app")
 
-    # Keep the GPU pipeline compatible with both L40S and A10G. Older secrets may
-    # still contain av1_nvenc, which L40S supports but A10G does not.
-    os.environ["FFMPEG_VIDEO_CODEC"] = os.environ.get("FFMPEG_PIPELINE_VIDEO_CODEC", "hevc_nvenc")
+    # Keep S08/S09/S10 on the same encode profile. h264_nvenc is the production
+    # default. Old HEVC metadata experiments must not silently take over the
+    # pipeline unless explicitly re-enabled.
+    pipeline_codec = os.environ.get("FFMPEG_PIPELINE_VIDEO_CODEC", "h264_nvenc")
+    if pipeline_codec == "hevc_nvenc" and os.environ.get("ALLOW_HEVC_PIPELINE", "").lower() not in {"1", "true", "yes"}:
+        pipeline_codec = "h264_nvenc"
+    os.environ["FFMPEG_VIDEO_CODEC"] = pipeline_codec
     os.environ["FFMPEG_ENCODE_PRESET"] = os.environ.get("FFMPEG_PIPELINE_ENCODE_PRESET", "p4")
     os.environ["FFMPEG_HWACCEL"] = os.environ.get("FFMPEG_PIPELINE_HWACCEL", "cuda")
-    os.environ.setdefault("FFMPEG_FINAL_VIDEO_CODEC", "hevc_nvenc")
-    os.environ.setdefault("FFMPEG_FINAL_ENCODE_PRESET", "p4")
-    final_bitrate = "10M"
-    os.environ["FFMPEG_FINAL_RATE_CONTROL"] = "cbr"
-    os.environ["FFMPEG_FINAL_VIDEO_BITRATE"] = final_bitrate
-    os.environ["FFMPEG_FINAL_VIDEO_MINRATE"] = final_bitrate
-    os.environ["FFMPEG_FINAL_VIDEO_MAXRATE"] = final_bitrate
-    os.environ["FFMPEG_FINAL_VIDEO_BUFSIZE"] = "20M"
-    os.environ["FFMPEG_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE"] = os.environ.get(
+    os.environ["FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE"] = os.environ.get(
         "FFMPEG_PIPELINE_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE",
         "5000000",
     )
