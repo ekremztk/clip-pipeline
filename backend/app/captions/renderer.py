@@ -19,10 +19,8 @@ from app.captions.v2.templates import is_v2_template
 
 logger = logging.getLogger(__name__)
 
-# Keep production clean captions on the ASS single-pass renderer. The Pillow
-# overlay path is useful for pixel experiments, but it can require many FFmpeg
-# passes and causes repeated re-encoding on normal pipeline clips.
-PILLOW_TEMPLATES: set[str] = set()
+# Templates that use the legacy Pillow PNG overlay renderer.
+PILLOW_TEMPLATES = {"clean"}
 
 CANVAS_W = 1080
 CANVAS_H = 1920

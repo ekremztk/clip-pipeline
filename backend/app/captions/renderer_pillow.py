@@ -45,7 +45,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "text_color": (255, 255, 255, 255),
         "stroke_enabled": True,
         "stroke_color": (0, 0, 0),
-        "stroke_width": 8,
+        "stroke_width": 5,
         "shadow_enabled": True,
         "shadow_color": (0, 0, 0, 128),
         "shadow_offset_x": 3,
@@ -53,7 +53,7 @@ TEMPLATE_CONFIGS: dict[str, dict] = {
         "shadow_blur": 6,
         "text_align": "center",
         "position_y_offset": 150,
-        "words_per_group": 4,
+        "words_per_group": 3,
         "max_lines": 2,
         "max_chars_per_line": 18,
     },
@@ -198,7 +198,7 @@ def _build_word_groups(
     max_chars_per_line: int = 0,
 ) -> list[dict]:
     if max_lines > 0 and max_chars_per_line > 0:
-        return _build_groups_by_chars(words, max_lines, max_chars_per_line)
+        return _build_groups_by_chars(words, max_lines, max_chars_per_line, n)
 
     groups = []
     for i in range(0, len(words), n):
@@ -219,6 +219,7 @@ def _build_groups_by_chars(
     words: list[dict],
     max_lines: int,
     max_chars: int,
+    max_words: int,
 ) -> list[dict]:
     groups: list[dict] = []
     i = 0
@@ -227,6 +228,10 @@ def _build_groups_by_chars(
         lines: list[list[dict]] = [[]]
 
         while i < len(words):
+            current_word_count = sum(len(line) for line in lines)
+            if current_word_count >= max_words:
+                break
+
             word = words[i]
             word_text = word.get("display_text") or word.get("word", "")
             current_line_words = lines[-1]
