@@ -20,7 +20,7 @@ class Settings:
     AWS_BEDROCK_ACCESS_KEY_2: str = os.getenv("AWS_BEDROCK_ACCESS_KEY_2", "")
     AWS_BEDROCK_SECRET_KEY_2: str = os.getenv("AWS_BEDROCK_SECRET_KEY_2", "")
     AWS_BEDROCK_REGION_2: str = os.getenv("AWS_BEDROCK_REGION_2", os.getenv("AWS_BEDROCK_REGION", "us-east-1"))
-    CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "us.anthropic.claude-opus-4-7")
+    CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "us.anthropic.claude-opus-4-6-v1")
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
     # Separate key with Member role for usage/billing API (usage:read scope)
     # Falls back to DEEPGRAM_API_KEY if not set (will still 403 if key lacks permissions)

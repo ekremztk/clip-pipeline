@@ -1,14 +1,10 @@
 import time
-import threading
 from dataclasses import dataclass
 
 import anthropic
 from app.config import settings
 
 CLAUDE_MODEL_FALLBACK = "us.anthropic.claude-opus-4-6-v1"
-
-_account_lock = threading.Lock()
-_account_cursor = 0
 
 
 @dataclass(frozen=True)
@@ -39,15 +35,8 @@ def _configured_accounts() -> list[BedrockAccount]:
 
 
 def _ordered_accounts() -> list[BedrockAccount]:
-    """Return configured Bedrock accounts in round-robin order."""
-    global _account_cursor
-    accounts = _configured_accounts()
-    if len(accounts) <= 1:
-        return accounts
-    with _account_lock:
-        start = _account_cursor % len(accounts)
-        _account_cursor += 1
-    return accounts[start:] + accounts[:start]
+    """Return configured Bedrock accounts in strict failover order."""
+    return _configured_accounts()
 
 
 def _make_client(account: BedrockAccount) -> anthropic.AnthropicBedrock:
@@ -75,7 +64,7 @@ def call_claude(
 ) -> str:
     """
     Calls Claude on AWS Bedrock with max thinking budget.
-    Uses configured Bedrock accounts in round-robin order.
+    Uses configured Bedrock accounts in strict primary-first failover order.
     On rate limits, retries the same account once, then tries the next account.
     Falls back to CLAUDE_MODEL_FALLBACK if the primary model returns an error.
     """
