@@ -356,10 +356,16 @@ def _compute_tracking_path(
         if dt <= 0:
             continue
 
-        # Compute desired movement
+        # Compute desired movement from the current camera position.
         dx = target_x - curr_x
         dy = target_y - curr_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
+
+        # Preserve subject-switch detection semantics even when the camera path
+        # is smoothed and therefore intentionally lags behind the focus point.
+        focus_dx = target_x - points[i - 1].x
+        focus_dy = target_y - points[i - 1].y
+        focus_distance = (focus_dx ** 2 + focus_dy ** 2) ** 0.5
 
         # Motion threshold — ignore tiny movements (hysteresis)
         if distance < config.motion_threshold:
@@ -383,7 +389,7 @@ def _compute_tracking_path(
             and next_subject_id != ""
             and prev_subject_id != next_subject_id
         )
-        if is_subject_change or distance > config.subject_switch_threshold:
+        if is_subject_change or focus_distance > config.subject_switch_threshold:
             curr_x = target_x
             curr_y = target_y
             curr_subject_id = next_subject_id
@@ -395,7 +401,7 @@ def _compute_tracking_path(
             else:
                 logger.debug(
                     "[PathSolver] t=%.3fs: subject switch (dist=%.3f > %.2f), teleporting to (%.3f, %.3f)",
-                    points[i].time_s, distance, config.subject_switch_threshold, curr_x, curr_y,
+                    points[i].time_s, focus_distance, config.subject_switch_threshold, curr_x, curr_y,
                 )
         else:
             # Normal velocity-limited smooth tracking
@@ -404,8 +410,9 @@ def _compute_tracking_path(
                 scale = max_move / distance
                 dx *= scale
                 dy *= scale
-            curr_x += dx
-            curr_y += dy
+            smoothing = max(0.0, min(1.0, config.tracking_smoothing))
+            curr_x += dx * smoothing
+            curr_y += dy * smoothing
 
         # Clamp to valid range
         curr_x = max(0.0, min(1.0, curr_x))

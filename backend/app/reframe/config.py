@@ -74,6 +74,7 @@ class PathSolverConfig:
     median_filter_window: int = 5               # Median filter size for jitter removal
     motion_threshold: float = 0.005             # Ignore motion smaller than this (hysteresis)
     # At 1920px wide: 0.005 * 1920 = ~10px — catches subtle head nods in podcasts
+    tracking_smoothing: float = 0.25            # Same-subject low-pass factor for tracking paths
 
     # Subject switch detection — large jump in focus means directive changed persons
     # Path solver teleports (bypasses velocity limit) when jump > this threshold (normalized 0-1)
