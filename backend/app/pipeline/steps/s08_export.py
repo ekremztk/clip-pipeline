@@ -8,6 +8,7 @@ from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline
 from app.services.supabase_client import get_client
 from app.services.r2_client import upload_clip
 from app.director.events import director_events
+from app.pipeline.stock_analytics import get_clip_stock_fields, record_final_clip
 
 
 
@@ -193,12 +194,16 @@ def _export_single_clip(
             "is_successful": None,
             "quality_notes": clip.get("quality_notes"),
         }
+        stock_fields = get_clip_stock_fields(job_id, clip.get("candidate_id"))
+        if stock_fields:
+            clip_data.update({k: v for k, v in stock_fields.items() if v is not None})
         clip_data = {k: v for k, v in clip_data.items() if v is not None}
 
         try:
             result = supabase.table("clips").insert(clip_data).execute()
             if result.data:
                 clip_id = result.data[0].get("id")
+                record_final_clip(job_id, clip.get("candidate_id"), clip_id)
                 print(f"[S08] Clip {index+1} saved to DB (id: {clip_id})")
                 return result.data[0]
             else:

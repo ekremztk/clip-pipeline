@@ -66,16 +66,16 @@ Do not inflate. Most clips score 60–75. A score above 85 must be obviously out
 ## VERDICT RULES
 - **pass**: score ≥ 72, no fundamental issues
 - **fixable**: score 55–71, provide adjusted recommended_start/recommended_end
-- **omit**: score < 55, or issues that cannot be fixed by adjusting boundaries — DO NOT include in output
+- **omit**: score < 55, or issues that cannot be fixed by adjusting boundaries
 
 ## OVERLAP RULE
-If two candidates cover more than 50% of the same time range, keep only the higher-scoring one. Omit the other entirely.
+If two candidates cover more than 50% of the same time range, mark the weaker one as "omit" and explain the overlap briefly in omit_reason.
 
 ## CANDIDATES
 CANDIDATES_PLACEHOLDER
 
 ## OUTPUT SCHEMA
-Return ONLY a valid JSON array of pass and fixable candidates. Omitted candidates are not included.
+Return ONLY a valid JSON array with one item for every candidate you evaluated, including omitted candidates.
 
 [
   {
@@ -84,8 +84,9 @@ Return ONLY a valid JSON array of pass and fixable candidates. Omitted candidate
     "recommended_end": float,
     "hook_text": "exact first words the viewer hears",
     "score": integer,
-    "quality_verdict": "pass" | "fixable",
-    "quality_notes": "max 12 words: what was changed and why, or empty string if pass",
+    "quality_verdict": "pass" | "fixable" | "omit",
+    "quality_notes": "max 12 words: what was changed and why, or empty string if pass/omit",
+    "omit_reason": "max 14 words explaining why omitted, or empty string if pass/fixable",
     "content_type": "confirmed or corrected type",
     "clip_strategy_role": "launch" | "viral" | "engagement" | "fan_service",
     "posting_order": integer,

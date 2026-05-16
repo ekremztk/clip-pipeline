@@ -520,6 +520,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     _debug_dump(job_id, "s05_unified_discovery", candidates)
+                    try:
+                        from app.pipeline.stock_analytics import record_s05_candidates
+                        record_s05_candidates(job_id, candidates, source_duration_s=video_duration_s)
+                    except Exception as analytics_err:
+                        print(f"[StockAnalytics] S05 hook failed: {analytics_err}")
                     print(f"[Orchestrator] S05 returned {len(candidates)} candidates")
                     duration_ms_s05 = int((time.time() - step_start_time) * 1000)
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
@@ -585,6 +590,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             channel_dna=channel_dna,
                         )
                     _debug_dump(job_id, "s07_precision_cut", cut_results)
+                    try:
+                        from app.pipeline.stock_analytics import record_s07_cuts
+                        record_s07_cuts(job_id, cut_results)
+                    except Exception as analytics_err:
+                        print(f"[StockAnalytics] S07 hook failed: {analytics_err}")
                     print(f"[Orchestrator] S07 returned {len(cut_results)} clips with boundaries")
                     duration_ms_s07 = int((time.time() - step_start_time) * 1000)
                     director_events.emit_sync(
@@ -650,6 +660,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     error_message=f"Step {step_name} failed: {error_msg}"
                 )
                 try:
+                    from app.pipeline.stock_analytics import record_source_failed
+                    record_source_failed(job_id, step_name, error_msg)
+                except Exception as analytics_err:
+                    print(f"[StockAnalytics] Failure hook failed: {analytics_err}")
+                try:
                     director_events.emit_sync(
                         module="module_1", event="pipeline_error",
                         payload={"job_id": job_id, "step": step_name, "error": error_msg},
@@ -682,6 +697,11 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             current_step_number=10,
             clip_count=clip_count
         )
+        try:
+            from app.pipeline.stock_analytics import record_source_completed
+            record_source_completed(job_id, clip_count)
+        except Exception as analytics_err:
+            print(f"[StockAnalytics] Completion hook failed: {analytics_err}")
         director_events.emit_sync(
             module="module_1", event="pipeline_completed",
             payload={"job_id": job_id, "clip_count": clip_count,

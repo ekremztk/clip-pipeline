@@ -36,6 +36,10 @@ interface Clip {
     video_captioned_path?: string | null;
     reframe_metadata?: any | null;
     caption_metadata?: any | null;
+    stock_review_status?: "unreviewed" | "selected" | "rejected" | "posted";
+    stock_review_note?: string | null;
+    stock_batch_id?: string | null;
+    main_person?: string | null;
 }
 
 interface TranscriptWord {
@@ -164,9 +168,10 @@ interface ClipModalProps {
     onReject: (id: string) => void;
     onPublish: (id: string) => void;
     onDownload: (id: string) => void;
+    onStockReview: (id: string, status: "unreviewed" | "selected" | "rejected" | "posted", note: string) => Promise<void>;
 }
 
-function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish, onDownload }: ClipModalProps) {
+function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish, onDownload, onStockReview }: ClipModalProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const transcriptContainerRef = useRef<HTMLDivElement>(null);
     const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -175,7 +180,15 @@ function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish,
     const [transcriptLoading, setTranscriptLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(0);
     const [userScrolling, setUserScrolling] = useState(false);
+    const [stockReviewStatus, setStockReviewStatus] = useState<"unreviewed" | "selected" | "rejected" | "posted">(clip.stock_review_status || "unreviewed");
+    const [stockReviewNote, setStockReviewNote] = useState(clip.stock_review_note || "");
+    const [stockReviewSaving, setStockReviewSaving] = useState(false);
     const userScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        setStockReviewStatus(clip.stock_review_status || "unreviewed");
+        setStockReviewNote(clip.stock_review_note || "");
+    }, [clip.id, clip.stock_review_status, clip.stock_review_note]);
 
     // Fetch transcript
     useEffect(() => {
@@ -227,6 +240,18 @@ function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish,
     const handleTimeUpdate = useCallback(() => {
         if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
     }, []);
+
+    const saveStockReview = useCallback(async (status = stockReviewStatus, note = stockReviewNote) => {
+        setStockReviewSaving(true);
+        try {
+            await onStockReview(clip.id, status, note);
+            setStockReviewStatus(status);
+        } catch {
+            // Toast is handled by the parent action.
+        } finally {
+            setStockReviewSaving(false);
+        }
+    }, [clip.id, onStockReview, stockReviewNote, stockReviewStatus]);
 
     // Close on Escape
     useEffect(() => {
@@ -497,6 +522,49 @@ function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish,
                             </div>
                         )}
 
+                        {(clip.stock_batch_id || clip.main_person) && (
+                            <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }}>
+                                <div className="flex items-center justify-between gap-3 mb-3">
+                                    <p className="text-[9px] uppercase tracking-widest" style={{ color: '#ababab' }}>Stock Review</p>
+                                    {stockReviewSaving && <span className="text-[10px]" style={{ color: '#ababab' }}>Saving...</span>}
+                                </div>
+                                <div className="grid grid-cols-4 gap-1.5 mb-2.5">
+                                    {(["unreviewed", "selected", "rejected", "posted"] as const).map(status => (
+                                        <button
+                                            key={status}
+                                            onClick={() => saveStockReview(status, stockReviewNote)}
+                                            className="py-1.5 rounded-lg text-[10px] font-medium capitalize transition-colors"
+                                            style={{
+                                                background: stockReviewStatus === status ? '#faf9f5' : '#111110',
+                                                color: stockReviewStatus === status ? '#141413' : '#ababab',
+                                                border: '1px solid rgba(250,249,245,0.08)',
+                                            }}
+                                        >
+                                            {status}
+                                        </button>
+                                    ))}
+                                </div>
+                                <textarea
+                                    value={stockReviewNote}
+                                    onChange={e => setStockReviewNote(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            saveStockReview(stockReviewStatus, stockReviewNote);
+                                        }
+                                    }}
+                                    placeholder="Why selected or rejected?"
+                                    rows={2}
+                                    className="w-full resize-none rounded-xl px-3 py-2 text-xs outline-none"
+                                    style={{
+                                        background: '#111110',
+                                        color: '#faf9f5',
+                                        border: '1px solid rgba(250,249,245,0.08)',
+                                    }}
+                                />
+                            </div>
+                        )}
+
                         {/* Meta Row */}
                         <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(250,249,245,0.06)' }}>
                             <div className="flex gap-3">
@@ -710,6 +778,31 @@ function ProjectsContent() {
                 toast.success(newVal ? 'Clip marked as published.' : 'Clip unpublished.');
             } else { toast.error('Failed to update clip.'); }
         } catch { toast.error('Failed to update clip.'); }
+    };
+
+    const handleStockReview = async (
+        id: string,
+        status: "unreviewed" | "selected" | "rejected" | "posted",
+        note: string,
+    ) => {
+        try {
+            const res = await authFetch(`/clips/${id}/stock-review`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status, note }),
+            });
+            if (!res.ok) {
+                throw new Error('request failed');
+            }
+            const updatedClip = await res.json();
+            const updated = clips.map(c => c.id === id ? { ...c, ...updatedClip } : c);
+            setClips(updated);
+            if (selectedClip?.id === id) setSelectedClip({ ...selectedClip, ...updatedClip });
+            toast.success('Review saved.');
+        } catch {
+            toast.error('Failed to save review.');
+            throw new Error('review save failed');
+        }
     };
 
     const handleDownload = (id: string) => {
@@ -1044,6 +1137,7 @@ function ProjectsContent() {
                     onReject={handleReject}
                     onPublish={handlePublish}
                     onDownload={handleDownload}
+                    onStockReview={handleStockReview}
                 />
             )}
 

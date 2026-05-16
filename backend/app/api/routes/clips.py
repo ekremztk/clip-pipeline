@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Body, Depends
 from app.services.supabase_client import get_client
 from app.middleware.auth import get_current_user
 from typing import Optional, Any
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/clips", tags=["clips"])
 
@@ -187,6 +188,44 @@ async def unpublish_clip(clip_id: str, current_user: dict = Depends(get_current_
         raise
     except Exception as e:
         print(f"[ClipsRoute] Error unpublishing clip {clip_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.patch("/{clip_id}/stock-review")
+async def update_stock_review(
+    clip_id: str,
+    status: Optional[str] = Body(default=None, embed=True),
+    note: Optional[str] = Body(default=None, embed=True),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        print(f"[ClipsRoute] Updating stock review for clip {clip_id}")
+        supabase = get_client()
+        _verify_clip_owner(clip_id, current_user["id"], supabase)
+
+        allowed_statuses = {"unreviewed", "selected", "rejected", "posted"}
+        update_data: dict[str, Any] = {
+            "stock_reviewed_at": datetime.now(timezone.utc).isoformat(),
+            "stock_review_updated_by": current_user["id"],
+        }
+        if status is not None:
+            normalized_status = status.strip().lower()
+            if normalized_status not in allowed_statuses:
+                raise HTTPException(status_code=400, detail="Invalid stock review status")
+            update_data["stock_review_status"] = normalized_status
+            if normalized_status == "posted":
+                update_data["is_published"] = True
+        if note is not None:
+            update_data["stock_review_note"] = note
+
+        response = supabase.table("clips").update(update_data).eq("id", clip_id).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Clip not found")
+        return response.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ClipsRoute] Error updating stock review for clip {clip_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

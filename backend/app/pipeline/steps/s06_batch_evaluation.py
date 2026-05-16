@@ -5,6 +5,7 @@ from typing import Optional
 from app.config import settings
 from app.pipeline.json_parser import parse_json_list_response
 from app.pipeline.prompts.batch_evaluation import SYSTEM_PROMPT, EVALUATION_PROMPT
+from app.pipeline.stock_analytics import record_s06_evaluation
 from app.pipeline.steps.s05_unified_discovery import build_channel_context
 from app.services.claude_client import call_claude
 
@@ -479,8 +480,7 @@ def run(
                 all_evaluated.extend(evaluated)
 
                 # Only retry if Claude returned ZERO results — that's a failure.
-                # If Claude returned ≥1 result, missing candidates were intentionally
-                # omitted (score < 55). Retrying them wastes tokens and produces 3x extra requests.
+                # Claude should now return pass/fixable/omit for every candidate.
                 if len(evaluated) == 0:
                     print(f"[S06] Batch {batch_num}: Claude returned 0 results — retrying candidates individually")
                     for item in batch:
@@ -499,9 +499,9 @@ def run(
                 else:
                     returned_ids = {str(item.get("candidate_id", "")) for item in evaluated}
                     sent_ids = {str(item.get("candidate_id", "")) for item in batch}
-                    omitted_ids = sent_ids - returned_ids
-                    if omitted_ids:
-                        print(f"[S06] Batch {batch_num}: {len(omitted_ids)} candidates intentionally omitted by Claude: {omitted_ids}")
+                    missing_ids = sent_ids - returned_ids
+                    if missing_ids:
+                        print(f"[S06] Batch {batch_num}: {len(missing_ids)} candidates missing from Claude output: {missing_ids}")
 
             except Exception as batch_err:
                 print(f"[S06] Batch {batch_num} failed: {batch_err}. Falling back to individual evaluation.")
@@ -530,8 +530,10 @@ def run(
             for c in flagged:
                 print(f"[S06]   Candidate {c.get('candidate_id')}: {c.get('hook_text', '')[:60]}")
 
-        # Safety filter — fails should not appear in output (Claude omits them), but guard anyway
+        # Production filter — only pass/fixable candidates continue to S07.
+        # Omitted candidates are still recorded by stock analytics.
         passed = []
+        omitted = []
         for clip in all_evaluated:
             verdict = clip.get("quality_verdict", "")
             if verdict in ("pass", "fixable"):
@@ -539,10 +541,14 @@ def run(
                 if verdict == "fixable" and notes:
                     print(f"[S06] Fixable candidate {clip.get('candidate_id', '?')}: {notes}")
                 passed.append(clip)
+            elif verdict == "omit":
+                omitted.append(clip)
+                reason = clip.get("omit_reason") or clip.get("quality_notes") or ""
+                print(f"[S06] Omitted candidate {clip.get('candidate_id', '?')}: {reason}")
             else:
                 print(f"[S06] Safety-filtered unexpected verdict for candidate {clip.get('candidate_id', '?')}: '{verdict}'")
 
-        print(f"[S06] Quality gate: {len(passed)} passed, {len(all_evaluated) - len(passed)} filtered")
+        print(f"[S06] Quality gate: {len(passed)} passed, {len(omitted)} omitted, {len(all_evaluated) - len(passed) - len(omitted)} filtered")
 
         # Clamp adjusted boundaries to video duration — prevents start > video_end
         video_duration = float(transcript_data.get("duration", 0.0)) if transcript_data else 0.0
@@ -555,6 +561,8 @@ def run(
                 clip_start = min(clip_start, video_duration)
                 if clip_end - clip_start < min_duration:
                     print(f"[S06] Dropping candidate {clip.get('candidate_id')}: {clip_end - clip_start:.1f}s after clamping to video bounds ({video_duration:.1f}s)")
+                    clip["quality_verdict"] = "omit"
+                    clip["omit_reason"] = "too short after video-bound clamp"
                     continue
                 clip["recommended_start"] = round(clip_start, 3)
                 clip["recommended_end"] = round(clip_end, 3)
@@ -563,6 +571,7 @@ def run(
 
         if not passed:
             print("[S06] No candidates passed quality gate.")
+            record_s06_evaluation(job_id, all_batch_data, all_evaluated, [])
             return []
 
         # Deduplicate overlapping clips — keeps highest-scoring clip when two
@@ -583,6 +592,7 @@ def run(
                 clip["posting_order"] = order  # normalize to sequential
 
         print(f"[S06] Final: {len(passed)} clips proceeding to S07")
+        record_s06_evaluation(job_id, all_batch_data, all_evaluated, passed)
 
         return passed
 
