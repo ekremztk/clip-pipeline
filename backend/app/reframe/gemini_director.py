@@ -49,7 +49,11 @@ def analyze_video(
     from app.services.gemini_client import analyze_video as gemini_analyze_video
     from app.config import settings
 
-    model = config.model or settings.GEMINI_MODEL_PRO_PREVIEW
+    primary_model = config.model or settings.GEMINI_MODEL_PRO_PREVIEW
+    fallback_model = settings.GEMINI_MODEL_PRO
+    models = [primary_model]
+    if fallback_model and fallback_model not in models:
+        models.append(fallback_model)
 
     prompt = _build_prompt(
         diarization_segments, shots, frames,
@@ -57,29 +61,46 @@ def analyze_video(
         config.content_type_hint,
     )
 
-    logger.info(
-        "[GeminiDirector] Sending video (%s), hint=%s, %.1fs, %d shots, %d diar segments",
-        model, config.content_type_hint, duration_s, len(shots), len(diarization_segments),
-    )
-
-    raw = gemini_analyze_video(video_path, prompt, model=model, json_mode=True)
-    logger.info("[GeminiDirector] Response: %d chars", len(raw))
-
-    plan = _parse_response(raw, duration_s)
-
-    logger.info(
-        "[GeminiDirector] Plan: type=%s, %d subjects, %d directives",
-        plan.content_type, len(plan.subjects), len(plan.directives),
-    )
-    for s in plan.subjects:
-        logger.info("[GeminiDirector]   Subject %s: track_ids=%s, desc='%s'", s.id, s.scene_track_ids, s.description)
-    for d in plan.directives:
+    last_error: Optional[Exception] = None
+    for idx, model in enumerate(models):
         logger.info(
-            "[GeminiDirector]   %.1f-%.1fs → subject=%s importance=%s reason='%s'",
-            d.start_s, d.end_s, d.subject_id, d.importance, d.reason,
+            "[GeminiDirector] Sending video (%s), hint=%s, %.1fs, %d shots, %d diar segments",
+            model, config.content_type_hint, duration_s, len(shots), len(diarization_segments),
         )
 
-    return plan
+        try:
+            raw = gemini_analyze_video(video_path, prompt, model=model, json_mode=True)
+            if not raw or raw.strip() == "{}":
+                raise ValueError("Gemini returned an empty response")
+            logger.info("[GeminiDirector] Response (%s): %d chars", model, len(raw))
+
+            plan = _parse_response(raw, duration_s)
+
+            logger.info(
+                "[GeminiDirector] Plan (%s): type=%s, %d subjects, %d directives",
+                model, plan.content_type, len(plan.subjects), len(plan.directives),
+            )
+            for s in plan.subjects:
+                logger.info("[GeminiDirector]   Subject %s: track_ids=%s, desc='%s'", s.id, s.scene_track_ids, s.description)
+            for d in plan.directives:
+                logger.info(
+                    "[GeminiDirector]   %.1f-%.1fs → subject=%s importance=%s reason='%s'",
+                    d.start_s, d.end_s, d.subject_id, d.importance, d.reason,
+                )
+
+            return plan
+        except Exception as e:
+            last_error = e
+            next_model = models[idx + 1] if idx + 1 < len(models) else None
+            if next_model:
+                logger.warning(
+                    "[GeminiDirector] Model %s failed: %s — trying fallback %s",
+                    model, e, next_model,
+                )
+                continue
+            raise
+
+    raise RuntimeError(f"Gemini director failed: {last_error}")
 
 
 def build_fallback_plan(
