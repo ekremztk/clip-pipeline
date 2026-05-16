@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import os
-import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -50,7 +49,7 @@ class StockStartBody(BaseModel):
     channel_id: str
     batch_id: Optional[str] = None
     limit: int = Field(default=1, ge=1, le=100)
-    concurrency: int = Field(default=1, ge=1, le=10)
+    concurrency: int = Field(default=5, ge=1, le=10)
     stagger_seconds: int = Field(default=0, ge=0, le=1800)
 
 
@@ -339,45 +338,52 @@ def run_stock_worker_staggered(
         return
 
     started = 0
-    active = []
     max_workers = min(concurrency, limit)
+    active: dict[Future, str] = {}
     print(
-        f"[StockWorker] Starting staggered channel={channel_id} batch={batch_id or '*'} "
-        f"limit={limit} concurrency={max_workers} stagger={stagger_seconds}s"
+        f"[StockWorker] Starting pool channel={channel_id} batch={batch_id or '*'} "
+        f"limit={limit} concurrency={max_workers}"
     )
+    if stagger_seconds > 0:
+        print("[StockWorker] stagger_seconds is ignored by pool mode; slots refill immediately")
+
+    def submit_next(executor: ThreadPoolExecutor) -> bool:
+        nonlocal started
+        if started >= limit:
+            return False
+        item = _claim_next_item(channel_id, user_id, batch_id)
+        if not item:
+            return False
+        started += 1
+        item_id = str(item["id"])
+        print(
+            f"[StockWorker] Slot start {started}/{limit}: item={item_id} "
+            f"title='{item['video_title']}' main_person='{item['main_person']}'"
+        )
+        future = executor.submit(_run_one_item, item)
+        active[future] = item_id
+        return True
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        while started < limit and len(active) < max_workers:
-            if started > 0 and stagger_seconds > 0:
-                print(f"[StockWorker] Stagger sleep {stagger_seconds}s before slot {started + 1}")
-                time.sleep(stagger_seconds)
-            active.append(executor.submit(_run_claimed_worker_slot, channel_id, user_id, batch_id, started + 1))
-            started += 1
+        while len(active) < max_workers and submit_next(executor):
+            pass
 
         completed = 0
         while active:
-            for future in as_completed(active):
-                active.remove(future)
+            done, _ = wait(active.keys(), return_when=FIRST_COMPLETED)
+            for future in done:
+                item_id = active.pop(future)
                 completed += 1
                 try:
-                    claimed = bool(future.result())
+                    future.result()
                 except Exception as exc:
-                    claimed = True
-                    print(f"[StockWorker] Slot failed unexpectedly: {exc}")
+                    print(f"[StockWorker] Slot item={item_id} failed unexpectedly: {exc}")
 
-                if not claimed:
-                    active.clear()
+            while len(active) < max_workers and started < limit:
+                if not submit_next(executor):
                     break
 
-                if started < limit:
-                    if stagger_seconds > 0:
-                        print(f"[StockWorker] Stagger sleep {stagger_seconds}s before slot {started + 1}")
-                        time.sleep(stagger_seconds)
-                    active.append(executor.submit(_run_claimed_worker_slot, channel_id, user_id, batch_id, started + 1))
-                    started += 1
-                break
-
-    print(f"[StockWorker] Staggered finished started={started} completed={completed}")
+    print(f"[StockWorker] Pool finished started={started} completed={completed}")
 
 
 @router.post("/enqueue")
