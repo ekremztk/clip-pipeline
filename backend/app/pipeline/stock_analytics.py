@@ -269,7 +269,12 @@ def get_clip_stock_fields(job_id: str, candidate_id: Any) -> dict:
         return {}
 
 
-def record_final_clip(job_id: str, candidate_id: Any, clip_id: Optional[str]) -> None:
+def record_final_clip(
+    job_id: str,
+    candidate_id: Any,
+    clip_id: Optional[str],
+    landscape_url: Optional[str] = None,
+) -> None:
     if not clip_id:
         return
     try:
@@ -279,12 +284,64 @@ def record_final_clip(job_id: str, candidate_id: Any, clip_id: Optional[str]) ->
         supabase = get_client()
         if not supabase:
             return
-        supabase.table("stock_clip_candidates").update({
+        payload = {
             "final_clip_id": clip_id,
+            "s08_completed": True,
+            "s08_export_status": "completed",
             "updated_at": _now(),
-        }).eq("job_id", job_id).eq("candidate_id", cid).execute()
+        }
+        if landscape_url:
+            payload["s08_landscape_url"] = landscape_url
+            payload["s08_completed_at"] = _now()
+        supabase.table("stock_clip_candidates").update(payload).eq("job_id", job_id).eq("candidate_id", cid).execute()
     except Exception as e:
         print(f"[StockAnalytics] Final clip link failed for job {job_id}: {e}")
+
+
+def record_candidate_stage(
+    clip_id: Optional[str],
+    stage: str,
+    status: str,
+    url: Optional[str] = None,
+    error_message: Optional[str] = None,
+) -> None:
+    if not clip_id:
+        return
+    stage_fields = {
+        "s09": ("s09_completed", "s09_reframe_status", "s09_reframed_url", "s09_completed_at", "s09_error_message"),
+        "s10": ("s10_completed", "s10_caption_status", "s10_captioned_url", "s10_completed_at", "s10_error_message"),
+    }
+    if stage not in stage_fields:
+        return
+    completed_bool_field, status_field, url_field, completed_field, error_field = stage_fields[stage]
+    try:
+        supabase = get_client()
+        if not supabase:
+            return
+        clip = (
+            supabase.table("clips")
+            .select("stock_candidate_id")
+            .eq("id", clip_id)
+            .limit(1)
+            .execute()
+        )
+        stock_candidate_id = (clip.data or [{}])[0].get("stock_candidate_id")
+        if not stock_candidate_id:
+            return
+        payload = {
+            completed_bool_field: status == "completed",
+            status_field: status,
+            "updated_at": _now(),
+        }
+        if url:
+            payload[url_field] = url
+        if status in {"completed", "failed", "skipped"}:
+            payload[completed_field] = _now()
+        if error_message:
+            payload[error_field] = error_message[:2000]
+        supabase.table("stock_clip_candidates").update(payload).eq("id", stock_candidate_id).execute()
+    except Exception as e:
+        print(f"[StockAnalytics] Candidate stage record failed for clip {clip_id}: {e}")
 
 
 def record_source_completed(job_id: str, final_clip_count: int) -> None:

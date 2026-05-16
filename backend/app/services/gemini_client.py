@@ -353,7 +353,14 @@ def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 
     print(f"[GeminiClient] Error: Timeout polling file {file_name} after {max_attempts} attempts.")
     raise RuntimeError(f"Timeout waiting for file {file_name} to become active")
 
-def analyze_video(video_path: str, prompt: str, model: Optional[str] = None, json_mode: bool = False) -> str:
+def analyze_video(
+    video_path: str,
+    prompt: str,
+    model: Optional[str] = None,
+    json_mode: bool = False,
+    response_schema: Any | None = None,
+    temperature: float | None = None,
+) -> str:
     """
     Analyzes a video file with Gemini.
     If < 20MB, uses inline bytes (fast, no upload needed).
@@ -361,15 +368,21 @@ def analyze_video(video_path: str, prompt: str, model: Optional[str] = None, jso
     Deletes uploaded GCS file in finally block.
     Uses _retry_logic for rate limit handling.
     json_mode=True sets response_mime_type="application/json" for cleaner output.
+    response_schema constrains structured outputs when the selected Gemini model supports it.
     """
     if model is None:
         model = settings.GEMINI_MODEL_PRO
     gcs_uri = None
     t0 = time.time()
 
-    video_config = types.GenerateContentConfig(
-        response_mime_type="application/json"
-    ) if json_mode else None
+    config_kwargs = {}
+    if json_mode:
+        config_kwargs["response_mime_type"] = "application/json"
+    if response_schema is not None:
+        config_kwargs["response_schema"] = response_schema
+    if temperature is not None:
+        config_kwargs["temperature"] = temperature
+    video_config = types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
 
     try:
         if not os.path.exists(video_path):

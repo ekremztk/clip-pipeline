@@ -13,6 +13,7 @@ import traceback
 import uuid
 
 from app.config import settings
+from app.pipeline.stock_analytics import record_candidate_stage
 from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
 from app.captions.core import transcribe_video
@@ -50,6 +51,7 @@ def run(
 
         if not reframed_url:
             print(f"[S10] Clip {index+1}: No video_reframed_path. Skipping captions.")
+            record_candidate_stage(clip_id, "s10", "skipped", error_message="No video_reframed_path")
             return index, clip
 
         local_hint = clip.get("local_reframed_path")
@@ -71,12 +73,14 @@ def run(
                     print(f"[S10] Clip {index+1} (id: {clip_id}) captioned: {captioned_url}")
                 except Exception as db_err:
                     print(f"[S10] DB update error for clip {index+1}: {db_err}")
+                record_candidate_stage(clip_id, "s10", "completed", url=captioned_url)
 
             return index, {**clip, "video_captioned_path": captioned_url, "caption_metadata": caption_meta}
 
         except Exception as e:
             print(f"[S10] Caption error for clip {index+1}: {e}")
             traceback.print_exc()
+            record_candidate_stage(clip_id, "s10", "failed", error_message=str(e))
             return index, clip
 
     for index, clip in enumerate(reframed_clips):

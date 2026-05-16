@@ -203,7 +203,7 @@ def _export_single_clip(
             result = supabase.table("clips").insert(clip_data).execute()
             if result.data:
                 clip_id = result.data[0].get("id")
-                record_final_clip(job_id, clip.get("candidate_id"), clip_id)
+                record_final_clip(job_id, clip.get("candidate_id"), clip_id, landscape_url=file_url)
                 print(f"[S08] Clip {index+1} saved to DB (id: {clip_id})")
                 return result.data[0]
             else:

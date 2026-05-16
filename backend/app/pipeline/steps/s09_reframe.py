@@ -15,6 +15,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.config import settings
+from app.pipeline.stock_analytics import record_candidate_stage
 from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
 
@@ -48,6 +49,7 @@ def run(
 
         if not landscape_url:
             print(f"[S09] Clip {index+1}: No video_landscape_path. Skipping reframe.")
+            record_candidate_stage(clip_id, "s09", "skipped", error_message="No video_landscape_path")
             return clip
 
         reframed_url = None
@@ -76,12 +78,14 @@ def run(
                     print(f"[S09] Clip {index+1} (id: {clip_id}) reframed: {reframed_url}")
                 except Exception as db_err:
                     print(f"[S09] DB update error for clip {index+1}: {db_err}")
+                record_candidate_stage(clip_id, "s09", "completed", url=reframed_url)
 
             return {**clip, "video_reframed_path": reframed_url, "reframe_metadata": reframe_meta, "local_reframed_path": reframe_meta.get("local_reframed_path")}
 
         except Exception as e:
             print(f"[S09] Reframe error for clip {index+1}: {e}")
             traceback.print_exc()
+            record_candidate_stage(clip_id, "s09", "failed", error_message=str(e))
             return clip
 
     with ThreadPoolExecutor(max_workers=2) as executor:
