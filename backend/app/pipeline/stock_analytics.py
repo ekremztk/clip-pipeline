@@ -75,7 +75,7 @@ def _ensure_source_run(job_id: str, source_duration_s: Optional[float] = None) -
 
         result = (
             supabase.table("stock_source_runs")
-            .upsert(payload, on_conflict="job_id")
+            .upsert(payload, on_conflict="queue_item_id")
             .execute()
         )
         return (result.data or [None])[0]
