@@ -101,11 +101,15 @@ def render_podcast_reframe(
     # FFmpeg's crop filter 't' variable IS the actual video PTS — no setpts needed.
     seg_x: list[tuple[float, float, str]] = []
     seg_y: list[tuple[float, float, str]] = []
+    crop_w, crop_h = _sanitize_crop_geometry(src_w, src_h, crop_w, crop_h)
+    x_high = max(0, src_w - crop_w)
+    y_high = max(0, src_h - crop_h)
+
     for seg in segments:
         ex = _build_crop_expression(seg["keyframes"], "offset_x", 0.0, fps)
         ey = _build_crop_expression(seg["keyframes"], "offset_y", 0.0, fps)
-        ex = _clamp_crop_expr(ex, 0, src_w - crop_w)
-        ey = _clamp_crop_expr(ey, 0, src_h - crop_h)
+        ex = _clamp_crop_expr(ex, 0, x_high)
+        ey = _clamp_crop_expr(ey, 0, y_high)
         seg_x.append((seg["start"], seg["end"], ex))
         seg_y.append((seg["start"], seg["end"], ey))
 
@@ -117,15 +121,19 @@ def render_podcast_reframe(
 
     logger.info("[Render] crop_x expr length: %d chars", len(crop_x_expr))
 
-    vf = (
-        f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr},"
-        f"scale={canvas_w}:{canvas_h}:flags=lanczos,setsar=1"
+    primary_vf = _build_podcast_filter(
+        crop_w=crop_w,
+        crop_h=crop_h,
+        crop_x_expr=crop_x_expr,
+        crop_y_expr=crop_y_expr,
+        canvas_w=canvas_w,
+        canvas_h=canvas_h,
     )
 
     cmd = ["ffmpeg", "-y"]
     if settings.FFMPEG_HWACCEL:
         cmd.extend(["-hwaccel", settings.FFMPEG_HWACCEL])
-    cmd.extend(["-i", video_path, "-vf", vf])
+    cmd.extend(["-i", video_path, "-vf", primary_vf])
     append_pipeline_video_encode_args(cmd)
     cmd.extend(["-movflags", "+faststart"])
     append_pipeline_audio_encode_args(cmd, has_audio=has_audio)
@@ -133,13 +141,89 @@ def render_podcast_reframe(
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
+        if _is_crop_config_error(result.stderr):
+            logger.warning(
+                "[Render] Primary crop failed; retrying with normalized input "
+                "(src=%dx%d crop=%dx%d output=%dx%d)",
+                src_w, src_h, crop_w, crop_h, canvas_w, canvas_h,
+            )
+            normalized_vf = _build_podcast_filter(
+                crop_w=crop_w,
+                crop_h=crop_h,
+                crop_x_expr=crop_x_expr,
+                crop_y_expr=crop_y_expr,
+                canvas_w=canvas_w,
+                canvas_h=canvas_h,
+                normalize_w=src_w,
+                normalize_h=src_h,
+            )
+            retry_cmd = cmd.copy()
+            retry_cmd[retry_cmd.index("-vf") + 1] = normalized_vf
+            retry_result = subprocess.run(retry_cmd, capture_output=True, text=True, timeout=600)
+            if retry_result.returncode == 0:
+                logger.info("[Render] Normalized fallback render complete: %s", output_path)
+                return output_path
+
+            raise RuntimeError(
+                f"FFmpeg single-pass render failed after normalized retry. "
+                f"src={src_w}x{src_h} crop={crop_w}x{crop_h} output={canvas_w}x{canvas_h} "
+                f"primary_stderr={result.stderr[-3000:]} "
+                f"retry_stderr={retry_result.stderr[-3000:]}"
+            )
+
         raise RuntimeError(
-            f"FFmpeg single-pass render failed.\n"
-            f"stderr={result.stderr[-800:]}"
+            f"FFmpeg single-pass render failed. "
+            f"src={src_w}x{src_h} crop={crop_w}x{crop_h} output={canvas_w}x{canvas_h} "
+            f"stderr={result.stderr[-3000:]}"
         )
 
     logger.info("[Render] Single-pass render complete: %s", output_path)
     return output_path
+
+
+def _sanitize_crop_geometry(src_w: int, src_h: int, crop_w: int, crop_h: int) -> tuple[int, int]:
+    """Keep crop dimensions valid for the frame size used by the renderer."""
+    safe_w = max(2, min(int(crop_w), int(src_w)))
+    safe_h = max(2, min(int(crop_h), int(src_h)))
+    if safe_w != crop_w or safe_h != crop_h:
+        logger.warning(
+            "[Render] Adjusted crop geometry from %dx%d to %dx%d for source %dx%d",
+            crop_w, crop_h, safe_w, safe_h, src_w, src_h,
+        )
+    return safe_w, safe_h
+
+
+def _build_podcast_filter(
+    *,
+    crop_w: int,
+    crop_h: int,
+    crop_x_expr: str,
+    crop_y_expr: str,
+    canvas_w: int,
+    canvas_h: int,
+    normalize_w: int | None = None,
+    normalize_h: int | None = None,
+) -> str:
+    """Build the podcast crop+scale filter chain."""
+    filters: list[str] = []
+    if normalize_w and normalize_h:
+        filters.append(f"scale={normalize_w}:{normalize_h}:flags=bilinear")
+        filters.append("setsar=1")
+    filters.append(f"crop={crop_w}:{crop_h}:{crop_x_expr}:{crop_y_expr}")
+    filters.append(f"scale={canvas_w}:{canvas_h}:flags=lanczos")
+    filters.append("setsar=1")
+    return ",".join(filters)
+
+
+def _is_crop_config_error(stderr: str) -> bool:
+    """Return True for FFmpeg crop filter initialization failures."""
+    markers = (
+        "Parsed_crop",
+        "Failed to configure input pad",
+        "Error reinitializing filters",
+        "Invalid too big or non positive size",
+    )
+    return any(marker in stderr for marker in markers)
 
 
 def _chain_segments(seg_exprs: list[tuple[float, float, str]], fps: float, start_pts_s: float = 0.0) -> str:
