@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
+import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -48,6 +50,8 @@ class StockStartBody(BaseModel):
     channel_id: str
     batch_id: Optional[str] = None
     limit: int = Field(default=1, ge=1, le=100)
+    concurrency: int = Field(default=1, ge=1, le=10)
+    stagger_seconds: int = Field(default=0, ge=0, le=1800)
 
 
 def _normalize_channel_id(channel_id: str) -> str:
@@ -309,6 +313,73 @@ def run_stock_worker(channel_id: str, user_id: str, batch_id: Optional[str], lim
     print(f"[StockWorker] Finished processed={processed}")
 
 
+def _run_claimed_worker_slot(channel_id: str, user_id: str, batch_id: Optional[str], slot: int) -> bool:
+    item = _claim_next_item(channel_id, user_id, batch_id)
+    if not item:
+        print(f"[StockWorker] Slot {slot}: no queued item left")
+        return False
+    print(
+        f"[StockWorker] Slot {slot}: claimed item={item['id']} title='{item['video_title']}' "
+        f"main_person='{item['main_person']}'"
+    )
+    _run_one_item(item)
+    return True
+
+
+def run_stock_worker_staggered(
+    channel_id: str,
+    user_id: str,
+    batch_id: Optional[str],
+    limit: int,
+    concurrency: int,
+    stagger_seconds: int,
+) -> None:
+    if concurrency <= 1:
+        run_stock_worker(channel_id, user_id, batch_id, limit)
+        return
+
+    started = 0
+    active = []
+    max_workers = min(concurrency, limit)
+    print(
+        f"[StockWorker] Starting staggered channel={channel_id} batch={batch_id or '*'} "
+        f"limit={limit} concurrency={max_workers} stagger={stagger_seconds}s"
+    )
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        while started < limit and len(active) < max_workers:
+            if started > 0 and stagger_seconds > 0:
+                print(f"[StockWorker] Stagger sleep {stagger_seconds}s before slot {started + 1}")
+                time.sleep(stagger_seconds)
+            active.append(executor.submit(_run_claimed_worker_slot, channel_id, user_id, batch_id, started + 1))
+            started += 1
+
+        completed = 0
+        while active:
+            for future in as_completed(active):
+                active.remove(future)
+                completed += 1
+                try:
+                    claimed = bool(future.result())
+                except Exception as exc:
+                    claimed = True
+                    print(f"[StockWorker] Slot failed unexpectedly: {exc}")
+
+                if not claimed:
+                    active.clear()
+                    break
+
+                if started < limit:
+                    if stagger_seconds > 0:
+                        print(f"[StockWorker] Stagger sleep {stagger_seconds}s before slot {started + 1}")
+                        time.sleep(stagger_seconds)
+                    active.append(executor.submit(_run_claimed_worker_slot, channel_id, user_id, batch_id, started + 1))
+                    started += 1
+                break
+
+    print(f"[StockWorker] Staggered finished started={started} completed={completed}")
+
+
 @router.post("/enqueue")
 async def enqueue_stock_items(body: StockEnqueueBody, current_user: dict = Depends(get_current_user)):
     channel_id = _normalize_channel_id(body.channel_id)
@@ -329,8 +400,24 @@ async def start_stock_worker(
 ):
     channel_id = _normalize_channel_id(body.channel_id)
     _ensure_channel_owner(channel_id, current_user["id"])
-    background_tasks.add_task(run_stock_worker, channel_id, current_user["id"], body.batch_id, body.limit)
-    return {"ok": True, "status": "started", "channel_id": channel_id, "batch_id": body.batch_id, "limit": body.limit}
+    background_tasks.add_task(
+        run_stock_worker_staggered,
+        channel_id,
+        current_user["id"],
+        body.batch_id,
+        body.limit,
+        body.concurrency,
+        body.stagger_seconds,
+    )
+    return {
+        "ok": True,
+        "status": "started",
+        "channel_id": channel_id,
+        "batch_id": body.batch_id,
+        "limit": body.limit,
+        "concurrency": body.concurrency,
+        "stagger_seconds": body.stagger_seconds,
+    }
 
 
 @router.get("/items")
