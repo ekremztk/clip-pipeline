@@ -68,6 +68,16 @@ class Settings:
     FFMPEG_ENCODE_PRESET: str = os.getenv("FFMPEG_ENCODE_PRESET", "slow")
     FFMPEG_HWACCEL: str = os.getenv("FFMPEG_HWACCEL", "")
 
+    # Provision / Last Editor render worker. This is intentionally separate
+    # from the S08-S09-S10 Modal app so the experimental final-edit pipeline can
+    # use a different Modal account, app, and cost envelope.
+    PROVISION_MODAL_ENABLED: bool = os.getenv("PROVISION_MODAL_ENABLED", "true").lower() in {"1", "true", "yes"}
+    PROVISION_MODAL_APP_NAME: str = os.getenv("PROVISION_MODAL_APP_NAME", "provision-renderer")
+    PROVISION_MODAL_FUNCTION_NAME: str = os.getenv("PROVISION_MODAL_FUNCTION_NAME", "render_variant")
+    PROVISION_MODAL_TOKEN_ID: str = os.getenv("PROVISION_MODAL_TOKEN_ID", "")
+    PROVISION_MODAL_TOKEN_SECRET: str = os.getenv("PROVISION_MODAL_TOKEN_SECRET", "")
+    PROVISION_RENDER_VIDEO_CODEC: str = os.getenv("PROVISION_RENDER_VIDEO_CODEC", "libx264")
+
     # Director Module
     RAILWAY_API_TOKEN: str = os.getenv("RAILWAY_API_TOKEN", "")
     RAILWAY_PROJECT_ID: str = os.getenv("RAILWAY_PROJECT_ID", "")

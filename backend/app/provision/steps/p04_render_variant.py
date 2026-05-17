@@ -166,7 +166,13 @@ def _upload_to_r2(local_path: str, key: str) -> str:
     return f"{settings.R2_PUBLIC_URL.rstrip('/')}/{key}"
 
 
-def run(input_path: str, plan: dict[str, Any], variant_id: str) -> dict[str, Any]:
+def run(
+    input_path: str,
+    plan: dict[str, Any],
+    variant_id: str,
+    *,
+    video_codec: str | None = None,
+) -> dict[str, Any]:
     """Render one provision variant from an edit plan and upload it to R2."""
     duration_s, fps, start_pts_s = _probe_video_info(input_path)
     segments = _segments_from_plan(plan, duration_s)
@@ -182,9 +188,8 @@ def run(input_path: str, plan: dict[str, Any], variant_id: str) -> dict[str, Any
     filter_complex = _build_single_pass_filter(snapped_segments)
 
     cmd = ["ffmpeg", "-y", "-i", input_path, "-filter_complex", filter_complex, "-map", "[outv]", "-map", "[outa]"]
-    # Provision currently runs on Railway CPU, so force libx264 while keeping the
-    # shared pipeline CRF/preset/audio contract.
-    append_pipeline_video_encode_args(cmd, codec="libx264")
+    selected_codec = video_codec or settings.PROVISION_RENDER_VIDEO_CODEC or "libx264"
+    append_pipeline_video_encode_args(cmd, codec=selected_codec)
     append_pipeline_audio_encode_args(cmd, has_audio=True)
     cmd.extend(["-movflags", "+faststart", "-avoid_negative_ts", "make_zero", output_path])
 

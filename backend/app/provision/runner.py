@@ -245,7 +245,21 @@ def _process_item(job: dict[str, Any], item: dict[str, Any]) -> None:
                         )
                         _update_job(cur, job_id, current_step="p04_render_variant", current_step_number=4, progress_pct=82)
 
-                render_result = p04_render_variant.run(input_path, plan, variant_id)
+                try:
+                    from app.provision.modal_dispatch import render_variant_remote
+
+                    render_result = render_variant_remote(
+                        input_video_url=item["input_video_url"],
+                        plan=plan,
+                        variant_id=variant_id,
+                    )
+                    if render_result.get("status") == "failed":
+                        raise RuntimeError(render_result.get("error") or "Provision Modal render failed")
+                    render_result.pop("status", None)
+                    print(f"[Provision] Modal rendered variant={variant_id} mode={variant_mode}")
+                except Exception as remote_exc:
+                    print(f"[Provision] Modal render fallback for variant={variant_id}: {remote_exc}")
+                    render_result = p04_render_variant.run(input_path, plan, variant_id)
 
                 with _db_connect() as conn:
                     with conn.cursor() as cur:
