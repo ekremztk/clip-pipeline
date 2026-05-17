@@ -125,7 +125,7 @@ def _fetch_clip_inputs(clip_ids: list[str], channel_id: str, user_id: str) -> li
                     j.user_id AS job_user_id
                 FROM clips c
                 LEFT JOIN jobs j ON j.id = c.job_id
-                WHERE c.id = ANY(%s)
+                WHERE c.id = ANY(%s::uuid[])
                 """,
                 (clip_ids,),
             )
