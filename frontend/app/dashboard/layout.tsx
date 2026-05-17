@@ -32,6 +32,7 @@ import {
     Key,
     ArrowLeft,
     AudioLines,
+    Sparkles,
 } from "lucide-react";
 
 type Channel = {
@@ -282,6 +283,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const modulesItems = [
         { href: "/dashboard",                label: "Dashboard",      icon: Home,         exact: true,  pro: false },
         { href: "/dashboard/content-finder", label: "Content Finder", icon: Search,       exact: false, pro: false },
+        { href: "/dashboard/provision",      label: "Provision",      icon: Sparkles,     exact: false, pro: false },
         { href: "https://edit.prognot.com",  label: "Editor",         icon: Scissors,     exact: false, pro: true,  external: true },
         ...(isAdmin ? [{ href: "/director",  label: "AI Director",    icon: Clapperboard, exact: false, pro: false }] : []),
     ];
@@ -653,4 +655,3 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </ChannelContext.Provider>
     );
 }
-
