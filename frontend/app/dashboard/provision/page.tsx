@@ -14,6 +14,7 @@ import {
     Sparkles,
     Upload,
 } from 'lucide-react';
+import Link from 'next/link';
 import { authFetch } from '@/lib/api';
 import { useChannel } from '@/app/dashboard/layout';
 
@@ -31,6 +32,7 @@ type ProvisionJob = {
     completed_item_count: number;
     selected_variant_count: number;
     created_at: string;
+    updated_at?: string;
 };
 
 type ProvisionItem = {
@@ -171,7 +173,7 @@ export default function ProvisionPage() {
         setLoadingJobs(true);
         setError(null);
         try {
-            const res = await authFetch(`/provision/jobs?channel_id=${encodeURIComponent(activeChannelId)}&limit=50`);
+            const res = await authFetch(`/provision/jobs?channel_id=${encodeURIComponent(activeChannelId)}&limit=2`);
             if (!res.ok) {
                 const body = await res.text().catch(() => '');
                 throw new Error(body || `HTTP ${res.status}`);
@@ -432,21 +434,30 @@ export default function ProvisionPage() {
                         <div className="mb-5 flex items-center justify-between gap-4">
                             <div>
                                 <h2 className="text-lg font-semibold" style={{ color: '#faf9f5' }}>
-                                    Provision Jobs
+                                    Recent Jobs
                                 </h2>
                                 <p className="mt-1 text-sm" style={{ color: '#737373' }}>
-                                    Manual last-editor runs for selected clips.
+                                    Latest last-editor runs. Open the full jobs view for review.
                                 </p>
                             </div>
-                            <button
-                                type="button"
-                                onClick={fetchJobs}
-                                className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors hover:bg-white/5"
-                                style={{ color: '#ababab', background: 'rgba(250,249,245,0.05)' }}
-                            >
-                                {loadingJobs ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
-                                Refresh
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    href="/dashboard/provision/jobs"
+                                    className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors hover:bg-white/5"
+                                    style={{ color: '#faf9f5', background: 'rgba(250,249,245,0.06)' }}
+                                >
+                                    View all
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={fetchJobs}
+                                    className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors hover:bg-white/5"
+                                    style={{ color: '#ababab', background: 'rgba(250,249,245,0.05)' }}
+                                >
+                                    {loadingJobs ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                                    Refresh
+                                </button>
+                            </div>
                         </div>
 
                         {jobs.length === 0 ? (
@@ -464,11 +475,15 @@ export default function ProvisionPage() {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {jobs.map(job => (
-                                    <button
+                                {jobs.slice(0, 2).map(job => (
+                                    <div
                                         key={job.id}
-                                        type="button"
+                                        role="button"
+                                        tabIndex={0}
                                         onClick={() => fetchJobDetail(job.id)}
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter' || event.key === ' ') fetchJobDetail(job.id);
+                                        }}
                                         className="w-full rounded-xl p-4 text-left transition-colors hover:bg-white/5"
                                         style={{
                                             background: selectedJobId === job.id ? 'rgba(250,249,245,0.075)' : 'rgba(250,249,245,0.035)',
@@ -481,7 +496,7 @@ export default function ProvisionPage() {
                                                     {job.name}
                                                 </p>
                                                 <p className="mt-1 text-xs" style={{ color: '#737373' }}>
-                                                    {formatDate(job.created_at)}
+                                                    Updated {formatDate(job.updated_at || job.created_at)}
                                                 </p>
                                             </div>
                                             <StatusPill label={job.status} />
@@ -516,8 +531,18 @@ export default function ProvisionPage() {
                                                     }}
                                                 />
                                             </div>
+                                            <div className="mt-3 flex justify-end">
+                                                <Link
+                                                    href={`/dashboard/provision/jobs/${job.id}`}
+                                                    onClick={(event) => event.stopPropagation()}
+                                                    className="text-xs font-semibold hover:underline"
+                                                    style={{ color: '#faf9f5' }}
+                                                >
+                                                    Open job
+                                                </Link>
+                                            </div>
                                         </div>
-                                    </button>
+                                    </div>
                                 ))}
                             </div>
                         )}

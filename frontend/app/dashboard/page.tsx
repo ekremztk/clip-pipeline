@@ -30,6 +30,7 @@ type ProvisionJob = {
     completed_item_count?: number;
     selected_variant_count?: number;
     created_at?: string;
+    updated_at?: string;
 };
 
 type Clip = {
@@ -1891,7 +1892,7 @@ export default function DashboardPage() {
                                 return (
                                     <Link
                                         key={job.id}
-                                        href="/dashboard/provision"
+                                        href={`/dashboard/provision/jobs/${job.id}`}
                                         className="rounded-2xl overflow-hidden transition-transform duration-200 hover:-translate-y-0.5"
                                         style={{ background: '#181817' }}
                                     >
@@ -1918,7 +1919,7 @@ export default function DashboardPage() {
                                                     {job.name || 'Provision run'}
                                                 </p>
                                                 <span className="text-xs" style={{ color: '#ababab' }}>
-                                                    {formatDate(job.created_at)}
+                                                    {formatDate(job.updated_at || job.created_at)}
                                                 </span>
                                             </div>
                                             <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: 'rgba(250,249,245,0.06)' }}>
