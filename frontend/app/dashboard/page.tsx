@@ -20,6 +20,18 @@ type Job = {
     created_at?: string;
 };
 
+type ProvisionJob = {
+    id: string;
+    name: string;
+    status: string;
+    current_step?: string;
+    progress_pct?: number;
+    item_count?: number;
+    completed_item_count?: number;
+    selected_variant_count?: number;
+    created_at?: string;
+};
+
 type Clip = {
     id: string;
     job_id: string;
@@ -40,6 +52,18 @@ const STEP_LABELS: Record<string, string> = {
     "s07_precision_cut": "Calculating Cut Points...",
     "s08_export": "Exporting & Uploading...",
     "finished": "Complete!",
+};
+
+const PROVISION_STEP_LABELS: Record<string, string> = {
+    "draft": "Ready",
+    "starting": "Starting...",
+    "p01_fetch_input": "Fetching input clip...",
+    "p02_audio_analysis": "Analyzing audio...",
+    "p03_edit_plan": "Planning edit variants...",
+    "p04_render_variant": "Rendering variants...",
+    "waiting": "Waiting...",
+    "completed": "Complete",
+    "failed": "Failed",
 };
 
 const DURATION_PRESETS = [
@@ -83,6 +107,11 @@ const MAX_CAPTION_WINDOW_START = Math.max(0, CAPTION_TEMPLATES.length - CAPTION_
 function getStepLabel(step: string | undefined): string {
     if (!step) return "Processing...";
     return STEP_LABELS[step] || step.replace(/_/g, " ").replace(/^s\d+\s?/, "");
+}
+
+function getProvisionStepLabel(step: string | undefined): string {
+    if (!step) return "Processing...";
+    return PROVISION_STEP_LABELS[step] || step.replace(/_/g, " ");
 }
 
 const formatDate = (dateStr?: string) => {
@@ -389,6 +418,7 @@ export default function DashboardPage() {
 
     // Jobs state
     const [jobs, setJobs] = useState<Job[]>([]);
+    const [provisionJobs, setProvisionJobs] = useState<ProvisionJob[]>([]);
     const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState(true);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -473,8 +503,13 @@ export default function DashboardPage() {
         Promise.all([
             authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`).then(r => r.ok ? r.json() : []),
             authFetch(`/clips?channel_id=${activeChannelId}&limit=200`).then(r => r.ok ? r.json() : []),
+            authFetch(`/provision/jobs?channel_id=${activeChannelId}&limit=20`).then(r => r.ok ? r.json() : []),
         ])
-            .then(([jobsData, clipsData]) => { setJobs(jobsData); setClips(clipsData); })
+            .then(([jobsData, clipsData, provisionJobsData]) => {
+                setJobs(jobsData);
+                setClips(clipsData);
+                setProvisionJobs(provisionJobsData);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, [activeChannelId, channelLoading]);
@@ -496,15 +531,20 @@ export default function DashboardPage() {
     useEffect(() => {
         if (!activeChannelId || channelLoading) return;
         const hasActive = jobs.some(j => ['processing', 'queued', 'running'].includes(j.status));
-        if (!hasActive) return;
+        const hasActiveProvision = provisionJobs.some(j => ['processing', 'queued'].includes(j.status));
+        if (!hasActive && !hasActiveProvision) return;
         const interval = setInterval(async () => {
             try {
-                const res = await authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`);
-                if (res.ok) setJobs(await res.json());
+                const [jobsRes, provisionRes] = await Promise.all([
+                    authFetch(`/jobs?channel_id=${activeChannelId}&limit=20`),
+                    authFetch(`/provision/jobs?channel_id=${activeChannelId}&limit=20`),
+                ]);
+                if (jobsRes.ok) setJobs(await jobsRes.json());
+                if (provisionRes.ok) setProvisionJobs(await provisionRes.json());
             } catch { /* silent */ }
         }, 4000);
         return () => clearInterval(interval);
-    }, [activeChannelId, channelLoading, jobs]);
+    }, [activeChannelId, channelLoading, jobs, provisionJobs]);
 
     // Timeline drag
     useEffect(() => {
@@ -955,6 +995,7 @@ export default function DashboardPage() {
     if (channelLoading) return <PageSkeleton />;
 
     const activeJobs = jobs.filter(j => ['processing', 'queued', 'running'].includes(j.status));
+    const activeProvisionJobs = provisionJobs.filter(j => ['processing', 'queued'].includes(j.status));
     const recentJobs = jobs.filter(j => !['processing', 'queued', 'running'].includes(j.status)).slice(0, 8);
 
     if (!activeChannelId && uploadPhase === 'idle') {
@@ -1831,6 +1872,66 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                     </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Active Provision ── */}
+                {activeProvisionJobs.length > 0 && (
+                    <div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <h2 className="text-base font-medium" style={{ color: '#faf9f5' }}>Active Provision</h2>
+                            <span className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {activeProvisionJobs.map((job) => {
+                                const progress = job.progress_pct ?? 0;
+                                return (
+                                    <Link
+                                        key={job.id}
+                                        href="/dashboard/provision"
+                                        className="rounded-2xl overflow-hidden transition-transform duration-200 hover:-translate-y-0.5"
+                                        style={{ background: '#181817' }}
+                                    >
+                                        <div
+                                            className="aspect-video flex items-center justify-center p-6"
+                                            style={{ background: '#1c1c1b' }}
+                                        >
+                                            <div className="text-center">
+                                                <div className="flex items-center justify-center gap-2 mb-3">
+                                                    <div className="w-2 h-2 rounded-full pulse-dot" style={{ background: '#faf9f5' }} />
+                                                    <span className="text-xs uppercase tracking-wider" style={{ color: '#ababab' }}>Last Editor</span>
+                                                </div>
+                                                <p className="text-sm" style={{ color: '#faf9f5' }}>
+                                                    {getProvisionStepLabel(job.current_step)}
+                                                    {progress > 0 && (
+                                                        <span className="ml-2" style={{ color: '#ababab' }}>({progress}%)</span>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="p-4" style={{ borderTop: '1px solid rgba(250,249,245,0.06)' }}>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-xs font-medium truncate" style={{ color: '#faf9f5' }}>
+                                                    {job.name || 'Provision run'}
+                                                </p>
+                                                <span className="text-xs" style={{ color: '#ababab' }}>
+                                                    {formatDate(job.created_at)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: 'rgba(250,249,245,0.06)' }}>
+                                                <div
+                                                    className="h-full rounded-full"
+                                                    style={{
+                                                        width: `${Math.max(0, Math.min(100, progress))}%`,
+                                                        background: '#faf9f5',
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </Link>
                                 );
                             })}
                         </div>

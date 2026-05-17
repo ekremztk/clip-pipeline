@@ -19,7 +19,6 @@ import {
     LogOut,
     HelpCircle,
     BookOpen,
-    Zap,
     Check,
     ChevronLeft,
     ChevronRight,
@@ -297,7 +296,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const bottomItems = [
         { href: "/dashboard/settings", label: "Settings",    icon: Settings,   exact: false },
-        { href: "#",                   label: "Subscription", icon: Zap,        exact: false },
         { href: "#",                   label: "Learn",        icon: BookOpen,   exact: false },
         { href: "#",                   label: "Help Center",  icon: HelpCircle, exact: false },
     ];
