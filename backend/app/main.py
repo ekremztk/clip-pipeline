@@ -194,6 +194,43 @@ async def _analysis_scheduler():
         await asyncio.sleep(300)  # check every 5 minutes
 
 
+def _seconds_until_interval_boundary(interval_seconds: int) -> float:
+    from datetime import datetime, timezone
+
+    interval = max(int(interval_seconds or 300), 60)
+    now = datetime.now(timezone.utc).timestamp()
+    remainder = now % interval
+    wait = interval - remainder
+    return wait if wait >= 1 else interval
+
+
+async def _admin_youtube_realtime_scheduler():
+    import asyncio
+    while True:
+        await asyncio.sleep(_seconds_until_interval_boundary(settings.ADMIN_YOUTUBE_REALTIME_SYNC_INTERVAL_SECONDS))
+        try:
+            from app.api.routes.admin import run_scheduled_youtube_realtime_sync
+            result = await run_scheduled_youtube_realtime_sync()
+            total = sum(1 for row in result.get("channels", []) if row.get("ok"))
+            print(f"[AdminYouTubeScheduler] realtime synced channels={total}")
+        except Exception as e:
+            print(f"[AdminYouTubeScheduler] realtime error: {e}")
+
+
+async def _admin_youtube_analytics_scheduler():
+    import asyncio
+    await asyncio.sleep(180)
+    while True:
+        try:
+            from app.api.routes.admin import run_scheduled_youtube_analytics_sync
+            result = await run_scheduled_youtube_analytics_sync()
+            total = sum(1 for row in result.get("channels", []) if row.get("ok"))
+            print(f"[AdminYouTubeScheduler] analytics synced channels={total}")
+        except Exception as e:
+            print(f"[AdminYouTubeScheduler] analytics error: {e}")
+        await asyncio.sleep(settings.ADMIN_YOUTUBE_ANALYTICS_SYNC_INTERVAL_SECONDS)
+
+
 def _run_daily_analysis():
     """Synchronous: trigger real AI analysis and proactive checks."""
     try:
@@ -260,6 +297,11 @@ async def lifespan(app: FastAPI):
     proactive_task = asyncio.create_task(_proactive_scheduler())
     daily_task = asyncio.create_task(_analysis_scheduler())
     r2_ttl_task = asyncio.create_task(_r2_ttl_scheduler())
+    optional_tasks = []
+    if settings.ADMIN_YOUTUBE_REALTIME_SYNC_ENABLED:
+        optional_tasks.append(asyncio.create_task(_admin_youtube_realtime_scheduler()))
+    if settings.ADMIN_YOUTUBE_ANALYTICS_SYNC_ENABLED:
+        optional_tasks.append(asyncio.create_task(_admin_youtube_analytics_scheduler()))
     yield
     # Cleanup Director connection pool
     try:
@@ -269,14 +311,14 @@ async def lifespan(app: FastAPI):
             print("[DB] Director connection pool closed.")
     except Exception:
         pass
-    for task in [startup_task, pulse_task, proactive_task, daily_task, r2_ttl_task]:
+    for task in [startup_task, pulse_task, proactive_task, daily_task, r2_ttl_task, *optional_tasks]:
         task.cancel()
         try:
             await task
         except asyncio.CancelledError:
             pass
 
-from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision
+from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin
 from app.api.websocket import progress
 from app.director.router import router as director_router
 from app.limiter import limiter
@@ -323,6 +365,7 @@ app.include_router(voice_library.router)
 app.include_router(stock_worker.router)
 app.include_router(stock_reviews.router)
 app.include_router(provision.router)
+app.include_router(admin.router)
 
 from app.api.routes import debug_reframe, debug_pipeline
 app.include_router(debug_reframe.router)

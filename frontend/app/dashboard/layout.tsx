@@ -130,6 +130,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     const profileRef = useRef<HTMLDivElement>(null);
@@ -224,6 +225,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         init();
     }, []);
 
+    useEffect(() => {
+        if (!user?.id) {
+            setIsAdmin(false);
+            return;
+        }
+
+        let cancelled = false;
+        authFetch('/admin/me')
+            .then((res) => {
+                if (!cancelled) setIsAdmin(res.ok);
+            })
+            .catch(() => {
+                if (!cancelled) setIsAdmin(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [user?.id]);
+
     const handleChannelChange = (channelId: string) => {
         const ch = channels.find((c) => c.id === channelId);
         if (ch && user) {
@@ -260,8 +281,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
     };
 
-    const isAdmin = user?.app_metadata?.role === 'admin';
-
     const userInitials = user?.user_metadata?.full_name
         ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
         : user?.email?.slice(0, 2).toUpperCase() ?? '??';
@@ -284,6 +303,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { href: "/dashboard/content-finder", label: "Content Finder", icon: Search,       exact: false, pro: false },
         { href: "/dashboard/provision",      label: "Provision",      icon: Sparkles,     exact: false, pro: false },
         { href: "https://edit.prognot.com",  label: "Editor",         icon: Scissors,     exact: false, pro: true,  external: true },
+        ...(isAdmin ? [{ href: "/admin",     label: "Admin",          icon: Shield,       exact: false, pro: false }] : []),
         ...(isAdmin ? [{ href: "/director",  label: "AI Director",    icon: Clapperboard, exact: false, pro: false }] : []),
     ];
 
