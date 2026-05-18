@@ -861,11 +861,12 @@ async def _sync_analytics_metrics(
     admin_user_id: str,
     days: int = 7,
     currency: str = "USD",
+    start_date_override: date | None = None,
 ) -> dict:
     await _sync_channel_snapshot(channel_id, admin_user_id)
     _, access_token = await _get_youtube_access_token(channel_id, admin_user_id)
     end_date = datetime.now(timezone.utc).date()
-    start_date = end_date - timedelta(days=max(1, min(days, 90)) - 1)
+    start_date = start_date_override or end_date - timedelta(days=max(1, min(days, 90)) - 1)
 
     base_metrics = [
         "views",
@@ -1382,15 +1383,20 @@ async def sync_youtube_realtime(
 async def sync_youtube_analytics(
     channel_id: str,
     days: int = Query(default=30, ge=1, le=90),
+    analytics_range: str | None = Query(default=None, alias="range", pattern="^(7d|30d|90d|all)$"),
     currency: str = Query(default="USD", min_length=3, max_length=3),
     admin_user: dict = Depends(require_admin),
 ):
     try:
+        start_date_override = date(2025, 1, 14) if analytics_range == "all" else None
+        if analytics_range in {"7d", "30d", "90d"}:
+            days = int(analytics_range[:-1])
         result = await _sync_analytics_metrics(
             channel_id,
             admin_user["id"],
             days=days,
             currency=currency.upper(),
+            start_date_override=start_date_override,
         )
         return {"ok": True, **result}
     except HTTPException:
@@ -1407,6 +1413,7 @@ async def sync_youtube_admin_data(
     analytics: bool = Query(default=True),
     max_videos: int = Query(default=500, ge=1, le=500),
     days: int = Query(default=30, ge=1, le=90),
+    analytics_range: str | None = Query(default=None, pattern="^(7d|30d|90d|all)$"),
     currency: str = Query(default="USD", min_length=3, max_length=3),
     realtime_strategy: str = Query(default="smart", pattern="^(recent|all|smart)$"),
     recent_always: int = Query(default=30, ge=1, le=100),
@@ -1442,11 +1449,15 @@ async def sync_youtube_admin_data(
                 calibration_hours=calibration_hours,
             )
         if analytics:
+            start_date_override = date(2025, 1, 14) if analytics_range == "all" else None
+            if analytics_range in {"7d", "30d", "90d"}:
+                days = int(analytics_range[:-1])
             item["analytics"] = await _sync_analytics_metrics(
                 channel["id"],
                 admin_user["id"],
                 days=days,
                 currency=currency.upper(),
+                start_date_override=start_date_override,
             )
         results.append(item)
 
@@ -1664,7 +1675,13 @@ async def youtube_channel_analytics(
 
 
 @router.get("/overview")
-async def admin_overview(admin_user: dict = Depends(require_admin)):
+async def admin_overview(
+    overview_range: str = Query(default="30d", alias="range", pattern="^(7d|30d|90d|all)$"),
+    admin_user: dict = Depends(require_admin),
+):
+    today = date.today()
+    range_days = {"7d": 7, "30d": 30, "90d": 90}
+    period_start = date(2025, 1, 14) if overview_range == "all" else today - timedelta(days=range_days[overview_range] - 1)
     try:
         with _db_connect() as conn:
             with conn.cursor() as cur:
@@ -1693,11 +1710,11 @@ async def admin_overview(admin_user: dict = Depends(require_admin)):
                     FROM admin_youtube_daily_metrics dm
                     JOIN admin_youtube_channels ch ON ch.id = dm.channel_id
                     WHERE ch.admin_user_id = %s::uuid
-                      AND dm.metric_date >= current_date - interval '30 days'
+                      AND dm.metric_date >= %s
                     GROUP BY dm.metric_date
                     ORDER BY dm.metric_date ASC
                     """,
-                    (admin_user["id"],),
+                    (admin_user["id"], period_start),
                 )
                 daily_rows = [dict(row) for row in cur.fetchall()]
 
@@ -1712,13 +1729,13 @@ async def admin_overview(admin_user: dict = Depends(require_admin)):
                         CASE WHEN COUNT(dm.id) > 0 THEN 'synced' ELSE 'not synced' END AS status
                     FROM admin_youtube_channels ch
                     LEFT JOIN admin_youtube_daily_metrics dm ON dm.channel_id = ch.id
-                        AND dm.metric_date >= current_date - interval '30 days'
+                        AND dm.metric_date >= %s
                     WHERE ch.admin_user_id = %s::uuid
                       AND ch.status = 'connected'
                     GROUP BY ch.id, ch.title
                     ORDER BY revenue DESC
                     """,
-                    (admin_user["id"],),
+                    (period_start, admin_user["id"]),
                 )
                 source_rows = [dict(row) for row in cur.fetchall()]
 
@@ -1728,6 +1745,9 @@ async def admin_overview(admin_user: dict = Depends(require_admin)):
         total_revenue = channel_revenue + api_revenue
 
         return {
+            "range": overview_range,
+            "period_start": period_start.isoformat(),
+            "period_end": today.isoformat(),
             "finance": {
                 "total_revenue": total_revenue,
                 "total_expenses": total_expenses,

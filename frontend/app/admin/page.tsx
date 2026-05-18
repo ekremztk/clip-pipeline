@@ -7,6 +7,9 @@ import { authFetch } from "@/lib/api";
 import { Button, MetricCard, PageHeader, ProgressBar, SectionCard, SectionHeader, SimpleTable } from "./_components/admin-ui";
 
 type OverviewData = {
+    range?: RevenueRange;
+    period_start?: string;
+    period_end?: string;
     finance: {
         total_revenue: number;
         total_expenses: number;
@@ -25,6 +28,8 @@ type OverviewData = {
     };
     recent_activity: Array<{ title: string; detail: string; time: string }>;
 };
+
+type RevenueRange = "7d" | "30d" | "90d" | "all";
 
 type YouTubeChannel = {
     subscriber_count: number | null;
@@ -48,6 +53,9 @@ type RealtimeData = {
 };
 
 const emptyOverview: OverviewData = {
+    range: "30d",
+    period_start: undefined,
+    period_end: undefined,
     finance: {
         total_revenue: 0,
         total_expenses: 0,
@@ -66,6 +74,15 @@ const emptyOverview: OverviewData = {
     },
     recent_activity: [],
 };
+
+const revenueRangeOptions: Array<{ key: RevenueRange; label: string; description: string; fallbackDays: number | "all" }> = [
+    { key: "7d", label: "7d", description: "Last 7 days", fallbackDays: 7 },
+    { key: "30d", label: "30d", description: "Last 30 days", fallbackDays: 30 },
+    { key: "90d", label: "90d", description: "Last 90 days", fallbackDays: 90 },
+    { key: "all", label: "All", description: "All time", fallbackDays: "all" },
+];
+
+const allTimeStart = new Date(2025, 0, 14);
 
 const emptyRealtime: RealtimeData = {
     hours: 48,
@@ -159,8 +176,12 @@ function parseLocalDate(value: string) {
     return new Date(value);
 }
 
-function formatAxisDate(date: Date) {
-    return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
+function formatAxisDate(date: Date, includeYear = false) {
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        ...(includeYear ? { year: "numeric" } : {}),
+    }).format(date);
 }
 
 function formatTooltipDate(date: Date) {
@@ -187,11 +208,10 @@ function niceCeil(value: number) {
     return nice * magnitude;
 }
 
-function buildDailyRevenueSeries(daily: OverviewData["finance"]["daily"]) {
+function buildDailyRevenueSeries(daily: OverviewData["finance"]["daily"], range: RevenueRange) {
     const rows = [...daily]
         .filter((row) => row.date)
         .sort((a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime())
-        .slice(-30)
         .map((row) => ({
             date: parseLocalDate(row.date),
             value: row.net || 0,
@@ -201,9 +221,19 @@ function buildDailyRevenueSeries(daily: OverviewData["finance"]["daily"]) {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return Array.from({ length: 30 }, (_, index) => {
+    const option = revenueRangeOptions.find((item) => item.key === range) || revenueRangeOptions[1];
+    const fallbackLength =
+        option.fallbackDays === "all"
+            ? Math.max(Math.round((today.getTime() - allTimeStart.getTime()) / 86_400_000) + 1, 1)
+            : option.fallbackDays;
+    return Array.from({ length: fallbackLength }, (_, index) => {
         const date = new Date(today);
-        date.setDate(today.getDate() - (29 - index));
+        if (option.fallbackDays === "all") {
+            date.setTime(allTimeStart.getTime());
+            date.setDate(allTimeStart.getDate() + index);
+        } else {
+            date.setDate(today.getDate() - (fallbackLength - 1 - index));
+        }
         return { date, value: 0 };
     });
 }
@@ -228,8 +258,13 @@ function buildRevenueChart(series: Array<{ date: Date; value: number }>) {
     const baselineY = padding.top + (1 - (0 - yMin) / range) * plotHeight;
     const areaPath = `${path} L${padding.left + plotWidth} ${baselineY.toFixed(1)} L${padding.left} ${baselineY.toFixed(1)} Z`;
     const ticks = Array.from({ length: 4 }, (_, index) => yMin + ((yMax - yMin) / 3) * index);
+    const labelCount = series.length <= 10 ? series.length : 6;
     const labelIndexes = Array.from(
-        new Set([0, 5, 9, 14, 18, 23, series.length - 1].filter((index) => index >= 0 && index < series.length)),
+        new Set(
+            Array.from({ length: labelCount }, (_, index) =>
+                labelCount <= 1 ? 0 : Math.round((index / (labelCount - 1)) * (series.length - 1)),
+            ),
+        ),
     );
     return { width, height, padding, plotWidth, plotHeight, yMin, yMax, range, coords, path, areaPath, ticks, labelIndexes };
 }
@@ -250,9 +285,11 @@ function overviewFromChannels(channels: YouTubeChannel[]): OverviewData {
 export default function AdminOverviewPage() {
     const [data, setData] = useState<OverviewData>(emptyOverview);
     const [realtime, setRealtime] = useState<RealtimeData>(emptyRealtime);
+    const [revenueRange, setRevenueRange] = useState<RevenueRange>("30d");
     const [hoveredRevenueIndex, setHoveredRevenueIndex] = useState<number | null>(null);
     const [hoveredRealtimeIndex, setHoveredRealtimeIndex] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
+    const selectedRevenueRange = revenueRangeOptions.find((item) => item.key === revenueRange) || revenueRangeOptions[1];
 
     useEffect(() => {
         let cancelled = false;
@@ -269,7 +306,9 @@ export default function AdminOverviewPage() {
         }
         async function loadOverview() {
             try {
-                const res = await authFetch("/admin/overview");
+                setLoading(true);
+                setHoveredRevenueIndex(null);
+                const res = await authFetch(`/admin/overview?range=${revenueRange}`);
                 if (!res.ok) throw new Error(await res.text());
                 const payload = await res.json();
                 if (!cancelled) setData(payload);
@@ -293,7 +332,7 @@ export default function AdminOverviewPage() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [revenueRange]);
 
     const metrics = useMemo(() => {
         const daily = data.finance.daily;
@@ -306,7 +345,7 @@ export default function AdminOverviewPage() {
             {
                 label: "Revenue",
                 value: money(data.finance.total_revenue),
-                delta: daily.length ? "Last 30 days synced" : "No revenue data synced",
+                delta: daily.length ? `${selectedRevenueRange.description} synced` : "No revenue data synced",
                 color: "#16a34a",
                 icon: CircleDollarSign,
                 spark: revenueSpark,
@@ -336,9 +375,9 @@ export default function AdminOverviewPage() {
                 spark: channelSpark,
             },
         ];
-    }, [data]);
+    }, [data, selectedRevenueRange.description]);
 
-    const revenueSeries = buildDailyRevenueSeries(data.finance.daily);
+    const revenueSeries = buildDailyRevenueSeries(data.finance.daily, revenueRange);
     const revenueChart = buildRevenueChart(revenueSeries);
     const hoveredRevenue = hoveredRevenueIndex === null ? null : revenueChart.coords[hoveredRevenueIndex];
     const realtimeBars = buildHourlyBars(realtime.hourly, realtime.hours);
@@ -354,7 +393,7 @@ export default function AdminOverviewPage() {
                     <>
                         <Button variant="secondary">
                             <Clock3 size={16} />
-                            Last 30 days
+                            {selectedRevenueRange.description}
                         </Button>
                         <Button>Export report</Button>
                     </>
@@ -377,13 +416,14 @@ export default function AdminOverviewPage() {
                             </p>
                         </div>
                         <div className="flex gap-1 text-xs">
-                            {["7d", "30d", "90d"].map((range, index) => (
+                            {revenueRangeOptions.map((range) => (
                                 <button
-                                    key={range}
+                                    key={range.key}
                                     type="button"
-                                    className={`h-8 rounded-md px-3 transition-colors ${index === 1 ? "bg-[#171717] text-white" : "bg-[#f5f5f5] text-[#737373] hover:bg-[#eeeeee]"}`}
+                                    onClick={() => setRevenueRange(range.key)}
+                                    className={`h-8 rounded-md px-3 transition-colors ${revenueRange === range.key ? "bg-[#171717] text-white" : "bg-[#f5f5f5] text-[#737373] hover:bg-[#eeeeee]"}`}
                                 >
-                                    {range}
+                                    {range.label}
                                 </button>
                             ))}
                         </div>
@@ -420,10 +460,10 @@ export default function AdminOverviewPage() {
                                                   : "translateX(-50%)",
                                     }}
                                 >
-                                    {formatAxisDate(point.date)}
-                                </div>
-                            );
-                        })}
+                                        {formatAxisDate(point.date, revenueRange === "all")}
+                                    </div>
+                                );
+                            })}
                         {hoveredRevenue ? (
                             <div
                                 className="pointer-events-none absolute z-20 min-w-[220px] rounded-xl border border-[#d4d4d4] bg-white px-4 py-3 shadow-xl"
