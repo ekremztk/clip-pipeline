@@ -26,7 +26,7 @@ mkdir -p "$UPLOAD_DIR"
 echo "[start.sh] UPLOAD_DIR=$UPLOAD_DIR"
 
 # ── Validate required env vars ────────────────────────────────────────────────
-REQUIRED_VARS=(SUPABASE_URL SUPABASE_SERVICE_KEY GEMINI_API_KEY GCP_PROJECT GCP_CREDENTIALS_JSON)
+REQUIRED_VARS=(SUPABASE_URL SUPABASE_SERVICE_KEY GCP_PROJECT GCP_CREDENTIALS_JSON)
 MISSING=()
 for VAR in "${REQUIRED_VARS[@]}"; do
     if [ -z "${!VAR:-}" ]; then

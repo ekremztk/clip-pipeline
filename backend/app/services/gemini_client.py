@@ -6,7 +6,6 @@ import threading
 from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
-from google.genai.errors import APIError
 from app.config import settings
 
 # ── Per-step token accumulator (thread-local, used by orchestrator) ──────────
@@ -97,21 +96,6 @@ def _trace_generation(
         print(f"[GeminiClient] Langfuse trace failed (non-critical): {e}")
 
 _gemini_client: Optional[genai.Client] = None
-_developer_client: Optional[genai.Client] = None
-
-def get_developer_client() -> genai.Client:
-    """Returns a Gemini Developer client for file uploads (since files.upload is not supported in Vertex AI)."""
-    global _developer_client
-    if _developer_client is None:
-        try:
-            if not settings.GEMINI_API_KEY:
-                raise ValueError("GEMINI_API_KEY is not set. Developer client requires an API key for file uploads.")
-            _developer_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            print("[GeminiClient] Developer client initialized.")
-        except Exception as e:
-            print(f"[GeminiClient] Error initializing Developer client: {e}")
-            raise
-    return _developer_client
 
 def _normalize_private_key(creds_info: dict) -> dict:
     """
@@ -327,32 +311,6 @@ def _get_gcs_client():
     return storage.Client(project=settings.GCP_PROJECT, credentials=creds)
 
 
-def _poll_file_active(client: genai.Client, file_name: str, max_attempts: int = 30, delay: int = 3):
-    """Polls a file until its state becomes ACTIVE."""
-    print(f"[GeminiClient] Polling file {file_name} for ACTIVE state...")
-    for attempt in range(max_attempts):
-        try:
-            file_info = client.files.get(name=file_name)
-            state = file_info.state.name if hasattr(file_info.state, "name") else str(file_info.state)
-            
-            if state == "ACTIVE":
-                print(f"[GeminiClient] File {file_name} is ACTIVE.")
-                return True
-            elif state == "FAILED":
-                print(f"[GeminiClient] Error: File {file_name} processing failed.")
-                raise RuntimeError(f"File processing failed for {file_name}")
-                
-            print(f"[GeminiClient] File state is {state}. Waiting {delay}s... ({attempt + 1}/{max_attempts})")
-            time.sleep(delay)
-        except Exception as e:
-            print(f"[GeminiClient] Error polling file {file_name}: {e}")
-            if "not found" in str(e).lower():
-                raise
-            time.sleep(delay)
-            
-    print(f"[GeminiClient] Error: Timeout polling file {file_name} after {max_attempts} attempts.")
-    raise RuntimeError(f"Timeout waiting for file {file_name} to become active")
-
 def analyze_video(
     video_path: str,
     prompt: str,
@@ -365,6 +323,7 @@ def analyze_video(
     Analyzes a video file with Gemini.
     If < 20MB, uses inline bytes (fast, no upload needed).
     If >= 20MB, uploads to GCS and uses gs:// URI, then generates.
+    Never uses a non-Vertex fallback.
     Deletes uploaded GCS file in finally block.
     Uses _retry_logic for rate limit handling.
     json_mode=True sets response_mime_type="application/json" for cleaner output.
@@ -468,45 +427,8 @@ def analyze_video(
                                             "duration_ms": int((time.time() - t0) * 1000)})
                 return out
             except Exception as gcs_err:
-                if gcs_uri:
-                    raise  # GCS uploaded but generation failed — let outer except handle
-                print(f"[GeminiClient] GCS upload failed ({gcs_err}). Falling back to File API...")
-
-            # Fallback: Gemini File API via developer client (no extra credentials needed)
-            uploaded_file_name = None
-            dev_client_ref = None
-            try:
-                dev_client_ref = get_developer_client()
-                response_file = dev_client_ref.files.upload(
-                    file=video_path, config={"mime_type": "video/mp4"}
-                )
-                uploaded_file_name = response_file.name
-                print(f"[GeminiClient] Uploaded to File API: {uploaded_file_name}")
-                _poll_file_active(dev_client_ref, uploaded_file_name)
-
-                file_video_part = types.Part.from_uri(
-                    file_uri=response_file.uri, mime_type="video/mp4"
-                )
-                file_response = dev_client_ref.models.generate_content(
-                    model=model,
-                    contents=[file_video_part, prompt],
-                    config=video_config,
-                )
-                out = str(file_response.text) if file_response.text else "{}"
-                _trace_generation("analyze_video", model, prompt, out,
-                                  metadata={"file_size_mb": round(file_size_mb, 1), "mode": "file_api",
-                                            "duration_ms": int((time.time() - t0) * 1000)})
-                return out
-            except Exception as file_err:
-                print(f"[GeminiClient] File API fallback also failed: {file_err}")
-                return "{}"
-            finally:
-                if uploaded_file_name and dev_client_ref:
-                    try:
-                        dev_client_ref.files.delete(name=uploaded_file_name)
-                        print(f"[GeminiClient] Deleted File API video: {uploaded_file_name}")
-                    except Exception:
-                        pass
+                print(f"[GeminiClient] GCS video path failed; non-Vertex fallback is disabled: {gcs_err}")
+                raise
 
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")

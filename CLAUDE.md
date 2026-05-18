@@ -81,7 +81,7 @@ No test suite exists. No linter is configured for `frontend/` or `backend/`.
 # Deploy (run from monorepo root):
 modal deploy modal_app.py
 
-# Secrets stored in Modal as 'gpu-pipeline-secrets' — do NOT add GEMINI_API_KEY,
+# Secrets stored in Modal as 'gpu-pipeline-secrets'.
 # Vertex AI auth uses GCP_CREDENTIALS_JSON (service account JSON).
 # After ANY change to backend/app/pipeline/steps/s08*, s09*, s10*,
 # backend/app/captions/, or backend/app/reframe/ → must redeploy Modal.
@@ -414,7 +414,10 @@ The editor generates a UUID client-side for each media asset. This UUID must be 
 
 ### Railway
 ```
-GEMINI_API_KEY=
+GCP_PROJECT=
+GCP_LOCATION=
+GCP_CREDENTIALS_JSON=
+GCS_BUCKET_NAME=
 DEEPGRAM_API_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_KEY=

@@ -10,7 +10,6 @@ Railway never sends video bytes — the GPU server downloads from clip_url itsel
 Required env vars:
     SUPABASE_URL            Supabase project URL
     SUPABASE_SERVICE_KEY    Supabase service role key
-    GEMINI_API_KEY          Gemini Developer API key
     GCP_PROJECT             GCP project ID (for Vertex AI / GCS)
     GCP_CREDENTIALS_JSON    GCP service account JSON (single-line, \\n escaped)
     GPU_SECRET              Shared secret checked via X-Gpu-Secret header (optional)

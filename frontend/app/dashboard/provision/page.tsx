@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import {
     CheckCircle2,
     Clock3,
+    Download,
     FileVideo,
     Gauge,
     ListChecks,
@@ -17,6 +18,7 @@ import {
 import Link from 'next/link';
 import { authFetch } from '@/lib/api';
 import { useChannel } from '@/app/dashboard/layout';
+import { downloadProvisionVariant } from './download';
 
 type EditMode = 'conservative' | 'tight' | 'aggressive' | 'loop';
 
@@ -330,6 +332,15 @@ export default function ProvisionPage() {
         }
     };
 
+    const handleDownloadVariant = async (variantId: string) => {
+        setError(null);
+        try {
+            await downloadProvisionVariant(variantId);
+        } catch (err: any) {
+            setError(err?.message || 'Failed to download variant');
+        }
+    };
+
     const toggleMode = (mode: EditMode) => {
         setSelectedModes(prev => {
             if (!prev.includes(mode)) {
@@ -344,6 +355,8 @@ export default function ProvisionPage() {
         acc[variant.provision_item_id].push(variant);
         return acc;
     }, {});
+    const latestRunItem = jobDetail?.items[jobDetail.items.length - 1] ?? null;
+    const visibleRunItems = latestRunItem ? [latestRunItem] : [];
 
     return (
         <main className="h-full overflow-y-auto px-6 pb-12 pt-4" style={{ background: '#141413' }}>
@@ -714,7 +727,20 @@ export default function ProvisionPage() {
                                         </p>
                                     </div>
                                 ) : (
-                                    jobDetail.items.map(item => {
+                                    <>
+                                        <div className="flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: 'rgba(250,249,245,0.025)', border: '1px solid rgba(250,249,245,0.06)' }}>
+                                            <span className="text-xs" style={{ color: '#737373' }}>
+                                                Showing latest clip only · {jobDetail.items.length} clips in this run
+                                            </span>
+                                            <Link
+                                                href={`/dashboard/provision/jobs/${jobDetail.id}`}
+                                                className="shrink-0 text-xs font-semibold hover:underline"
+                                                style={{ color: '#faf9f5' }}
+                                            >
+                                                Open full run
+                                            </Link>
+                                        </div>
+                                        {visibleRunItems.map(item => {
                                         const variants = variantsByItem[item.id] ?? [];
                                         return (
                                             <div
@@ -763,15 +789,26 @@ export default function ProvisionPage() {
                                                                     {typeof variant.score === 'number' ? ` · score ${variant.score}` : ''}
                                                                 </span>
                                                                 {variant.output_video_url && (
-                                                                    <a
-                                                                        href={variant.output_video_url}
-                                                                        target="_blank"
-                                                                        rel="noreferrer"
-                                                                        className="text-xs font-semibold hover:underline"
-                                                                        style={{ color: '#faf9f5' }}
-                                                                    >
-                                                                        Open
-                                                                    </a>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleDownloadVariant(variant.id)}
+                                                                            className="inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                                                                            style={{ color: '#faf9f5' }}
+                                                                        >
+                                                                            <Download size={12} />
+                                                                            Download
+                                                                        </button>
+                                                                        <a
+                                                                            href={variant.output_video_url}
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                            className="text-xs font-semibold hover:underline"
+                                                                            style={{ color: '#ababab' }}
+                                                                        >
+                                                                            Open
+                                                                        </a>
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                             <div className="mt-3 flex flex-wrap gap-2">
@@ -796,7 +833,8 @@ export default function ProvisionPage() {
                                                 </div>
                                             </div>
                                         );
-                                    })
+                                    })}
+                                    </>
                                 )}
                             </div>
                         </div>

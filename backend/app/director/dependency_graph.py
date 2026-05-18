@@ -133,7 +133,7 @@ def _get_recommendation(component: str) -> str:
     recs = {
         "r2_storage": "Check Cloudflare R2 status page. Verify R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY env vars.",
         "deepgram": "Check Deepgram status page and API key balance. Pipeline will retry 3x automatically.",
-        "gemini_pro": "Check Google AI Studio quotas. Rate limit retries are built-in (30s, 30s, 60s). If persistent, check GEMINI_API_KEY.",
+        "gemini_pro": "Check Vertex AI quotas and GCP credentials. Rate limit retries are built-in (30s, 30s, 60s).",
         "gemini_flash": "Same as gemini_pro but lower priority. Non-critical tasks will queue.",
         "supabase": "Check Supabase dashboard. Verify DATABASE_URL uses port 6543 (pooler). Check connection limits.",
         "channel_dna": "Channel DNA is in Supabase. If missing, Director can regenerate with update_channel_dna tool.",

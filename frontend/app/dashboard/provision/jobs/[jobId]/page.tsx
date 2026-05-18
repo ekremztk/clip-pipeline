@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, ExternalLink, Loader2, Play, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, Loader2, Play, RefreshCw, Sparkles } from "lucide-react";
 import { authFetch } from "@/lib/api";
+import { downloadProvisionVariant } from "../../download";
 import {
     formatDate,
     formatDuration,
@@ -95,6 +96,15 @@ export default function ProvisionJobDetailPage() {
             setError(err?.message || "Failed to update variant review");
         } finally {
             setReviewingVariantId(null);
+        }
+    };
+
+    const handleDownloadVariant = async (variantId: string) => {
+        setError(null);
+        try {
+            await downloadProvisionVariant(variantId);
+        } catch (err: any) {
+            setError(err?.message || "Failed to download variant");
         }
     };
 
@@ -275,18 +285,31 @@ export default function ProvisionJobDetailPage() {
                                                                 <span style={{ color: "#737373" }}>{variant.progress_pct ?? 0}%</span>
                                                             </div>
                                                             <ProgressBar value={variant.progress_pct} />
-                                                            <div className="flex items-center justify-between text-xs">
+                                                            <div className="flex items-center justify-between gap-3 text-xs">
                                                                 <span className="capitalize" style={{ color: "#ababab" }}>
                                                                     {readableStatus(variant.review_status)}
                                                                     {typeof variant.score === "number" ? ` · ${variant.score}` : ""}
                                                                 </span>
-                                                                <Link
-                                                                    href={`/dashboard/provision/jobs/${job.id}/${variant.id}`}
-                                                                    className="font-semibold hover:underline"
-                                                                    style={{ color: "#faf9f5" }}
-                                                                >
-                                                                    Details
-                                                                </Link>
+                                                                <div className="flex shrink-0 items-center gap-3">
+                                                                    {variant.output_video_url && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleDownloadVariant(variant.id)}
+                                                                            className="inline-flex items-center gap-1 font-semibold hover:underline"
+                                                                            style={{ color: "#faf9f5" }}
+                                                                        >
+                                                                            <Download size={12} />
+                                                                            Download
+                                                                        </button>
+                                                                    )}
+                                                                    <Link
+                                                                        href={`/dashboard/provision/jobs/${job.id}/${variant.id}`}
+                                                                        className="font-semibold hover:underline"
+                                                                        style={{ color: "#faf9f5" }}
+                                                                    >
+                                                                        Details
+                                                                    </Link>
+                                                                </div>
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-1.5">
                                                                 {(["selected", "manual_fix", "rejected"] as const).map(status => (

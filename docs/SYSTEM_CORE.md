@@ -326,9 +326,8 @@ GET  /feedback/clips/{channel_id}         → kanal performans özeti
 ```python
 Singleton pattern
 
-İki client türü:
-  1. VertexAI client (primary): GCP credentials
-  2. Developer client (fallback): API key ile
+Tek client türü:
+  1. Vertex AI client: GCP credentials
 
 Metotlar:
   generate(prompt, system, model) → str
@@ -497,7 +496,6 @@ class Settings(BaseSettings):
     GEMINI_MODEL_FLASH = "gemini-2.5-flash"         # Diğerleri
 
     # API Anahtarları
-    GEMINI_API_KEY: str
     DEEPGRAM_API_KEY: str
 
     # Supabase
@@ -558,7 +556,10 @@ prompt = prompt.replace("GUEST_NAME", guest_name)
 
 ### Railway
 ```
-GEMINI_API_KEY=
+GCP_PROJECT=
+GCP_LOCATION=
+GCP_CREDENTIALS_JSON=
+GCS_BUCKET_NAME=
 DEEPGRAM_API_KEY=
 SUPABASE_URL=          # port 6543 içermeli
 SUPABASE_SERVICE_KEY=

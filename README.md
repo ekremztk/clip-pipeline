@@ -13,9 +13,12 @@ cd backend
 pip install -r requirements.txt
 ```
 
-`.env` dosyasını aç, API key'lerini yaz:
+`.env` dosyasını aç, Vertex AI ve servis değişkenlerini yaz:
 ```
-GEMINI_API_KEY=buraya_gemini_key_yaz
+GCP_PROJECT=google_cloud_project_id
+GCP_LOCATION=global
+GCP_CREDENTIALS_JSON=service_account_json
+GCS_BUCKET_NAME=clip-pipeline-audio
 OPENAI_API_KEY=buraya_openai_key_yaz
 ```
 

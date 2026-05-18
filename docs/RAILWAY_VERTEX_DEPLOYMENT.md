@@ -1,6 +1,6 @@
 # Railway & Vertex AI Deployment Guide
 
-Bu belgede, Gemini Developer API'den Google Cloud Vertex AI'a geçiş yaparken Railway üzerinde Service Account JSON dosyasının nasıl ekleneceği adım adım açıklanmıştır.
+Bu belgede, Google Cloud Vertex AI için Railway üzerinde Service Account JSON dosyasının nasıl ekleneceği adım adım açıklanmıştır.
 
 ## Neden Çevresel Değişken (Env Var)?
 
@@ -17,7 +17,7 @@ Railway projenizin `Variables` (Ortam Değişkenleri) sayfasına giderek aşağ�
 
 2. **`GCP_PROJECT`**:
    - Google Cloud proje kimliğiniz (Project ID). Örneğin: `my-clip-pipeline-project`.
-   - Sistemin Vertex AI'ı kullanabilmesi için bu değişkenin tanımlı olması şarttır. Aksi takdirde, kod otomatik olarak eski `GEMINI_API_KEY` yöntemine düşer (fallback).
+   - Sistemin Vertex AI'ı kullanabilmesi için bu değişkenin tanımlı olması şarttır. Vertex dışı fallback yoktur.
 
 3. **`GCS_BUCKET_NAME`** (Önemli):
    - Vertex AI tarafında büyük ses/video dosyaları (örneğin 20MB+) için Google Cloud Storage kullanılması gerekir.

@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { authFetch } from "@/lib/api";
+import { downloadProvisionVariant } from "../../../download";
 import {
     formatDate,
     formatDuration,
@@ -81,6 +82,16 @@ export default function ProvisionVariantPage() {
             setError(err?.message || "Failed to update review");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleDownloadVariant = async () => {
+        if (!variant) return;
+        setError(null);
+        try {
+            await downloadProvisionVariant(variant.id);
+        } catch (err: any) {
+            setError(err?.message || "Failed to download variant");
         }
     };
 
@@ -195,16 +206,27 @@ export default function ProvisionVariantPage() {
                             </div>
 
                             {variant.output_video_url && (
-                                <a
-                                    href={variant.output_video_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="mt-4 inline-flex items-center gap-2 text-xs font-semibold hover:underline"
-                                    style={{ color: "#faf9f5" }}
-                                >
-                                    Open output file
-                                    <ExternalLink size={12} />
-                                </a>
+                                <div className="mt-4 flex flex-wrap items-center gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleDownloadVariant}
+                                        className="inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                                        style={{ color: "#faf9f5" }}
+                                    >
+                                        Download output file
+                                        <Download size={12} />
+                                    </button>
+                                    <a
+                                        href={variant.output_video_url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                                        style={{ color: "#ababab" }}
+                                    >
+                                        Open output file
+                                        <ExternalLink size={12} />
+                                    </a>
+                                </div>
                             )}
                         </section>
 
@@ -248,4 +270,3 @@ export default function ProvisionVariantPage() {
         </main>
     );
 }
-

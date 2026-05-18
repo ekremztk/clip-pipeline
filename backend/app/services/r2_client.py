@@ -1,4 +1,8 @@
 import os
+import re
+import unicodedata
+from urllib.parse import quote
+
 import boto3
 from botocore.exceptions import ClientError
 from app.config import settings
@@ -85,6 +89,52 @@ def generate_presigned_get(key: str, expires_in: int = 3600) -> str:
         Params={"Bucket": settings.R2_BUCKET_NAME, "Key": key},
         ExpiresIn=expires_in,
     )
+
+
+def generate_presigned_download(key: str, filename: str, expires_in: int = 3600) -> str:
+    """Presigned GET URL with a browser download filename."""
+    s3 = get_r2_client()
+    safe_filename = _safe_download_filename(filename)
+    ascii_fallback = _ascii_download_filename(safe_filename)
+    disposition = (
+        f"attachment; filename=\"{ascii_fallback}\"; "
+        f"filename*=UTF-8''{quote(safe_filename, safe='')}"
+    )
+    return s3.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": settings.R2_BUCKET_NAME,
+            "Key": key,
+            "ResponseContentDisposition": disposition,
+        },
+        ExpiresIn=expires_in,
+    )
+
+
+def _safe_download_filename(filename: str) -> str:
+    value = re.sub(r"[\x00-\x1f<>:\"/\\|?*]+", "", filename or "").strip(" .")
+    value = re.sub(r"\s+", " ", value)
+    if not value:
+        value = "download.mp4"
+    if not value.lower().endswith(".mp4"):
+        value = f"{value}.mp4"
+    stem, ext = os.path.splitext(value)
+    if len(stem) > 140:
+        stem = stem[:140].rstrip(" .")
+    return f"{stem}{ext}"
+
+
+def _ascii_download_filename(filename: str) -> str:
+    stem, ext = os.path.splitext(filename)
+    ascii_stem = (
+        unicodedata.normalize("NFKD", stem)
+        .encode("ascii", "ignore")
+        .decode("ascii")
+    )
+    ascii_stem = re.sub(r"[^A-Za-z0-9._ -]+", "", ascii_stem).strip(" .")
+    if not ascii_stem:
+        ascii_stem = "download"
+    return f"{ascii_stem}{ext or '.mp4'}"
 
 
 def object_exists(key: str) -> bool:

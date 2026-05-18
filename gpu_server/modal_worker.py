@@ -17,7 +17,6 @@ Invoke remotely (from Railway or anywhere):
 Required Modal secret (create once via `modal secret create prognot-reframe-secrets`):
     SUPABASE_URL
     SUPABASE_SERVICE_KEY
-    GEMINI_API_KEY
     GCP_CREDENTIALS_JSON   single-line JSON of GCP service account (store as-is from the .json file)
     GCP_PROJECT            GCP project ID
     GCP_LOCATION           Vertex AI region (e.g. us-central1)

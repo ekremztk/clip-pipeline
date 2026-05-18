@@ -2,14 +2,17 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any, Optional
+from urllib.parse import unquote, urlparse
 
 import psycopg2
 from psycopg2.extras import Json, RealDictCursor, execute_values
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from app.config import settings
 from app.middleware.auth import get_current_user
 from app.provision.runner import run_provision_job
+from app.services.r2_client import generate_presigned_download
 from app.services.supabase_client import get_client, get_db_url
 
 
@@ -189,6 +192,25 @@ def _update_job_counts(cur, job_id: str) -> None:
         """,
         (job_id, job_id),
     )
+
+
+def _r2_key_from_public_url(url: str) -> str:
+    if not url:
+        raise HTTPException(status_code=400, detail="Variant has no output URL")
+    public_base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+    if public_base and url.startswith(f"{public_base}/"):
+        return unquote(url[len(public_base) + 1 :])
+    parsed = urlparse(url)
+    key = unquote(parsed.path.lstrip("/"))
+    if not key:
+        raise HTTPException(status_code=400, detail="Could not determine R2 object key")
+    return key
+
+
+def _variant_download_filename(row: dict) -> str:
+    title = (row.get("input_title") or f"provision-{row['id']}").strip()
+    mode = (row.get("variant_mode") or "variant").strip()
+    return f"{title} - {mode}.mp4"
 
 
 def _insert_items(cur, job: dict, inputs: list[dict]) -> int:
@@ -477,3 +499,39 @@ async def review_provision_variant(
             _update_job_counts(cur, str(variant["provision_job_id"]))
 
     return dict(variant)
+
+
+@router.get("/variants/{variant_id}/download")
+async def get_provision_variant_download(
+    variant_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    with _db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT
+                    v.id,
+                    v.output_video_url,
+                    v.variant_mode,
+                    v.status,
+                    i.input_title
+                FROM provision_variants v
+                JOIN provision_items i ON i.id = v.provision_item_id
+                WHERE v.id = %s
+                  AND v.user_id = %s
+                LIMIT 1
+                """,
+                (variant_id, current_user["id"]),
+            )
+            row = cur.fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Provision variant not found")
+    if row.get("status") != "completed" or not row.get("output_video_url"):
+        raise HTTPException(status_code=400, detail="Provision variant is not ready")
+
+    filename = _variant_download_filename(dict(row))
+    r2_key = _r2_key_from_public_url(row["output_video_url"])
+    download_url = generate_presigned_download(r2_key, filename, expires_in=900)
+    return {"download_url": download_url, "filename": filename}

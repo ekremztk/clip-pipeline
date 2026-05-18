@@ -3,9 +3,8 @@ channel_hunter.py — Kanal Bazlı Viral Shorts DNA Toplayıcı (V1.3)
 ===================================================================
 Kullanım: python3 channel_hunter.py
 
-Düzeltme: Gemini Files API upload + ACTIVE bekleme sorunu çözüldü.
-Artık ses dosyası inline bytes olarak gönderiliyor (küçük dosyalar için ideal).
-Büyük dosyalar (>20MB) için Files API fallback kullanılır.
+Vertex AI only. Non-Vertex fallback is disabled.
+Small audio files are sent inline; large audio files are uploaded to GCS.
 """
 
 import os
@@ -25,12 +24,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- AYARLAR ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
 
 GCP_PROJECT = os.getenv("GCP_PROJECT")
 GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
 GCP_CREDENTIALS_JSON = os.getenv("GCP_CREDENTIALS_JSON")
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "clip-pipeline-audio")
 
 if GCP_CREDENTIALS_JSON:
     fd, path = tempfile.mkstemp(suffix=".json")
@@ -38,10 +37,7 @@ if GCP_CREDENTIALS_JSON:
         f.write(GCP_CREDENTIALS_JSON)
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
 
-if GCP_PROJECT:
-    client = genai.Client(vertexai=True, project=GCP_PROJECT, location=GCP_LOCATION)
-else:
-    client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(vertexai=True, project=GCP_PROJECT, location=GCP_LOCATION) if GCP_PROJECT else None
 
 MIN_VIEWS = 300_000
 MAX_VIDEOS = 50
@@ -215,7 +211,7 @@ def analyze_viral_dna(audio_path: str, video_title: str, view_count: int) -> dic
     """
     Gemini ile Shorts viral DNA analizi.
     Küçük dosyalar (<20MB) inline bytes ile gönderilir — ACTIVE bekleme yok.
-    Büyük dosyalar Files API ile yüklenir.
+    Büyük dosyalar GCS üzerinden Vertex AI'a gönderilir.
     """
     file_size = os.path.getsize(audio_path)
     mime_type = get_audio_mime(audio_path)
@@ -266,21 +262,28 @@ def analyze_viral_dna(audio_path: str, video_title: str, view_count: int) -> dic
                     config=json_config
                 )
             else:
-                # ── FILES API (büyük dosyalar) ──
-                print(f"  📤 Büyük dosya ({file_size // 1024 // 1024}MB), Files API kullanılıyor...")
-                audio_file = client.files.upload(file=audio_path)
-                time.sleep(8)  # Büyük dosya için daha uzun bekleme
-                
-                response = client.models.generate_content(
-                    model="gemini-3.1-pro-preview",
-                    contents=[audio_file, prompt],
-                    config=json_config
-                )
-                
+                print(f"  Large audio file ({file_size // 1024 // 1024}MB), uploading to GCS...")
+                from google.cloud import storage
+
+                storage_client = storage.Client(project=GCP_PROJECT)
+                bucket = storage_client.bucket(GCS_BUCKET_NAME)
+                blob_name = f"channel_hunter/audio_{int(time.time())}_{Path(audio_path).name}"
+                blob = bucket.blob(blob_name)
+                gcs_uri = f"gs://{GCS_BUCKET_NAME}/{blob_name}"
+
                 try:
-                    client.files.delete(name=audio_file.name)
-                except:
-                    pass
+                    blob.upload_from_filename(audio_path)
+                    audio_part = types.Part.from_uri(file_uri=gcs_uri, mime_type=mime_type)
+                    response = client.models.generate_content(
+                        model="gemini-3.1-pro-preview",
+                        contents=[audio_part, prompt],
+                        config=json_config
+                    )
+                finally:
+                    try:
+                        blob.delete(timeout=10)
+                    except Exception:
+                        pass
             
             # Cevabı parse et
             raw = response.text.strip()
@@ -480,8 +483,8 @@ if __name__ == "__main__":
     print("║   Inline Bytes | ACTIVE Sorunu Yok | Shorts Only       ║")
     print("╚══════════════════════════════════════════════════════════╝\n")
     
-    if not GEMINI_API_KEY:
-        print("[!] GEMINI_API_KEY yok."); sys.exit(1)
+    if not GCP_PROJECT:
+        print("[!] GCP_PROJECT is missing."); sys.exit(1)
     
     db_ok = DATABASE_URL or (os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_SERVICE_KEY"))
     if not db_ok:
