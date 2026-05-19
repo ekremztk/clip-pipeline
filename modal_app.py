@@ -103,7 +103,7 @@ app = modal.App(MODAL_GPU_APP_NAME, image=gpu_image)
 
 
 @app.function(
-    gpu=["L40S", "A10G"],
+    gpu="L40S",
     memory=16384,
     cpu=4,
     timeout=2400,

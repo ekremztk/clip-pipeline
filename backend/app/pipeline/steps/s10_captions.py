@@ -84,7 +84,7 @@ def run(
             record_candidate_stage(clip_id, "s10", "failed", error_message=str(e))
             return index, clip
 
-    max_workers = min(2, max(1, len(reframed_clips)))
+    max_workers = min(3, max(1, len(reframed_clips)))
     print(f"[S10] Caption worker pool: max_workers={max_workers}")
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
