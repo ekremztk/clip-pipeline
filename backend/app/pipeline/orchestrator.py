@@ -215,7 +215,10 @@ def _dispatch_to_modal(
     print(f"[Orchestrator] Source video URL: {source_video_url[:80]}...")
 
     try:
-        fn = _modal.Function.from_name("gpu-pipeline", "process_clips")
+        fn = _modal.Function.from_name(
+            settings.MODAL_GPU_APP_NAME,
+            settings.MODAL_GPU_PROCESS_FUNCTION_NAME,
+        )
         result = fn.remote(
             job_id=job_id,
             channel_id=channel_id,

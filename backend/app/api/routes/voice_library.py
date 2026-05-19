@@ -81,7 +81,7 @@ async def _compute_embedding_via_modal(audio_bytes: bytes, filename: str) -> dic
         raise RuntimeError("modal package not installed in backend")
 
     try:
-        fn = modal.Function.from_name("gpu-pipeline", "compute_voice_embedding")
+        fn = modal.Function.from_name(settings.MODAL_GPU_APP_NAME, settings.MODAL_GPU_VOICE_FUNCTION_NAME)
     except Exception as e:
         raise RuntimeError(f"Modal function not deployed: {e}")
 

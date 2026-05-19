@@ -6,6 +6,9 @@ Called by Railway orchestrator after S07 completes.
 import os
 import modal
 
+MODAL_GPU_APP_NAME = os.getenv("MODAL_GPU_APP_NAME", "gpu-pipeline")
+MODAL_GPU_SECRET_NAME = os.getenv("MODAL_GPU_SECRET_NAME", "gpu-pipeline-secrets")
+
 # --- Image ---
 gpu_image = (
     modal.Image.from_registry(
@@ -96,7 +99,7 @@ gpu_image = (
     )
 )
 
-app = modal.App("gpu-pipeline", image=gpu_image)
+app = modal.App(MODAL_GPU_APP_NAME, image=gpu_image)
 
 
 @app.function(
@@ -105,7 +108,7 @@ app = modal.App("gpu-pipeline", image=gpu_image)
     cpu=4,
     timeout=900,
     scaledown_window=10,
-    secrets=[modal.Secret.from_name("gpu-pipeline-secrets")],
+    secrets=[modal.Secret.from_name(MODAL_GPU_SECRET_NAME)],
 )
 def process_clips(
     job_id: str,
@@ -268,7 +271,7 @@ def process_clips(
     cpu=2,
     timeout=300,
     scaledown_window=10,
-    secrets=[modal.Secret.from_name("gpu-pipeline-secrets")],
+    secrets=[modal.Secret.from_name(MODAL_GPU_SECRET_NAME)],
 )
 def compute_voice_embedding(audio_bytes: bytes, filename: str) -> dict:
     """

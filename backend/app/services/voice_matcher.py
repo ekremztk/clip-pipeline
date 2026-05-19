@@ -14,6 +14,8 @@ import subprocess
 import tempfile
 from typing import Optional
 
+from app.config import settings
+
 SEGMENT_MIN_SEC = 3.0
 SEGMENT_MAX_SEC = 9.0
 CONFIDENCE_THRESHOLD = 0.70
@@ -58,7 +60,7 @@ def _embed_via_modal(audio_bytes: bytes, filename: str = "segment.wav") -> Optio
     """Call Modal compute_voice_embedding. Returns 192-dim list or None on failure."""
     try:
         import modal
-        fn = modal.Function.from_name("gpu-pipeline", "compute_voice_embedding")
+        fn = modal.Function.from_name(settings.MODAL_GPU_APP_NAME, settings.MODAL_GPU_VOICE_FUNCTION_NAME)
         result = fn.remote(audio_bytes, filename)
         if not isinstance(result, dict) or "error" in result:
             return None

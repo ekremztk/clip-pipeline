@@ -66,6 +66,9 @@ class Settings:
     FFMPEG_VIDEO_CODEC: str = os.getenv("FFMPEG_VIDEO_CODEC", "libx264")
     FFMPEG_ENCODE_PRESET: str = os.getenv("FFMPEG_ENCODE_PRESET", "slow")
     FFMPEG_HWACCEL: str = os.getenv("FFMPEG_HWACCEL", "")
+    MODAL_GPU_APP_NAME: str = os.getenv("MODAL_GPU_APP_NAME", "gpu-pipeline")
+    MODAL_GPU_PROCESS_FUNCTION_NAME: str = os.getenv("MODAL_GPU_PROCESS_FUNCTION_NAME", "process_clips")
+    MODAL_GPU_VOICE_FUNCTION_NAME: str = os.getenv("MODAL_GPU_VOICE_FUNCTION_NAME", "compute_voice_embedding")
 
     # Provision / Last Editor render worker. This is intentionally separate
     # from the S08-S09-S10 Modal app so the experimental final-edit pipeline can
