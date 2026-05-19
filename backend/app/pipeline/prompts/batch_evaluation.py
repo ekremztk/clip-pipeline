@@ -18,7 +18,9 @@ If an explicit metadata subject is provided, suggested_title and suggested_descr
 ## DURATION RULE
 Every clip must satisfy: MIN_DURATION_PLACEHOLDER ≤ (recommended_end - recommended_start) ≤ MAX_DURATION_PLACEHOLDER seconds.
 
-When a clip exceeds the limit, find the nearest natural sentence boundary within the limit — the point where a complete thought lands. Never cut mid-sentence. Never pad with filler. If the best natural boundary is shorter than the limit, use that shorter duration. Cohesion beats length.
+The maximum duration is a hard cap, not a target. Do not extend or preserve extra story just because the cap allows it. Use the shortest complete standalone version that preserves the hook, payoff, and necessary setup.
+
+When a candidate exceeds the limit, do not squeeze a long story into the cap. Only return pass/fixable if there is a clean standalone subclip inside the limit with a natural start and landing. Otherwise mark it omit. Never cut mid-sentence. Never pad with filler.
 
 ## HOW TO READ THE TRANSCRIPT
 Each candidate has three sections:

@@ -247,8 +247,8 @@ def _validate_and_repair_candidates(
         if dur < min_duration:
             print(f"[S05-Validate] Dropped candidate {cid}: duration {dur:.1f}s < min {min_duration}s")
             continue
-        if dur > max_duration * 1.5:
-            print(f"[S05-Validate] Dropped candidate {cid}: duration {dur:.1f}s >> max {max_duration}s")
+        if dur > max_duration:
+            print(f"[S05-Validate] Dropped candidate {cid}: duration {dur:.1f}s > max {max_duration}s")
             continue
 
         if not c.get("hook_text", "").strip():
@@ -325,10 +325,6 @@ def run(
             else channel_dna.get("duration_range", {}).get("max", settings.MAX_CLIP_DURATION)
         )
 
-        # When user targets short clips (≤60s), allow discovery up to 120s so a great
-        # moment isn't missed just because it slightly exceeds the target length.
-        discovery_max = 120 if max_duration <= 60 else max_duration
-
         # Soft guidance — Claude can return fewer if content is weak
         if video_duration_s < 300:       # < 5 min
             max_candidates = 4
@@ -339,7 +335,6 @@ def run(
 
         print(
             f"[S05] Duration: {min_duration}s–{max_duration}s "
-            f"(discovery window: {discovery_max}s), "
             f"soft candidate guidance: {max_candidates}"
         )
 
@@ -362,7 +357,7 @@ def run(
         prompt = prompt.replace("CHANNEL_CONTEXT_PLACEHOLDER", channel_context)
         prompt = prompt.replace("LABELED_TRANSCRIPT_PLACEHOLDER", labeled_transcript)
         prompt = prompt.replace("MIN_DURATION_PLACEHOLDER", str(min_duration))
-        prompt = prompt.replace("MAX_DURATION_PLACEHOLDER", str(discovery_max))
+        prompt = prompt.replace("MAX_DURATION_PLACEHOLDER", str(max_duration))
 
         print(
             f"[S05] Prompt flags — target_guest={bool(target_guest)}, "
@@ -393,7 +388,7 @@ def run(
 
         # 5. Validate and repair
         valid_candidates = _validate_and_repair_candidates(
-            raw_candidates, video_duration_s, min_duration, discovery_max,
+            raw_candidates, video_duration_s, min_duration, max_duration,
             scene_ranges=scene_ranges if scene_filter_active else None,
         )
         print(f"[S05] {len(valid_candidates)} candidates after validation")

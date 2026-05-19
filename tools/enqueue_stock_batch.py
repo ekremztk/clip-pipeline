@@ -152,7 +152,7 @@ def main() -> None:
     parser.add_argument("--caption-template", default="clean")
     parser.add_argument("--reframe-content-type", default="podcast")
     parser.add_argument("--min-duration", type=int, default=12)
-    parser.add_argument("--max-duration", type=int, default=55)
+    parser.add_argument("--max-duration", type=int, default=59)
     parser.add_argument("--priority", type=int, default=100)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--clear-queued", action="store_true")

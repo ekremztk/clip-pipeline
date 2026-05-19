@@ -32,6 +32,7 @@ class ShadowSpec:
 @dataclass(frozen=True)
 class LayoutSpec:
     max_words_per_page: int
+    max_words_per_line: int
     max_width_ratio: float
     transform_x: float
     transform_y: float
@@ -85,7 +86,7 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
         source="CapCut draft 0514 / Word Highlight II",
         font=FontSpec(
             family="Montserrat",
-            capcut_size=15.0,
+            capcut_size=14.0,
             weight=700,
             uppercase=True,
             paths=MONTSERRAT_BOLD_PATHS,
@@ -106,6 +107,7 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
         ),
         layout=LayoutSpec(
             max_words_per_page=5,
+            max_words_per_line=3,
             max_width_ratio=0.82,
             transform_x=0.0,
             transform_y=-0.18229166666666666,

@@ -13,6 +13,7 @@ SCENE_BOUNDARY_BLOCK_PLACEHOLDER
 ## CONSTRAINTS
 - Video duration: VIDEO_DURATION_PLACEHOLDER seconds
 - Clip duration: MIN_DURATION_PLACEHOLDER – MAX_DURATION_PLACEHOLDER seconds
+- The maximum duration is a hard cap, not a target. Select the shortest complete standalone moment that works.
 - Target: up to MAX_CANDIDATES_PLACEHOLDER candidates. Return fewer if the content doesn't justify more.
 - No two clips may share more than 20% of their duration
 

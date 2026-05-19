@@ -34,7 +34,7 @@ class StockQueueItem(BaseModel):
     caption_template: str = "clean"
     reframe_content_type: str = "podcast"
     clip_duration_min: int = 10
-    clip_duration_max: int = 60
+    clip_duration_max: int = 59
     priority: int = 100
 
 

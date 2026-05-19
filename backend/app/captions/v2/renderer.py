@@ -291,12 +291,13 @@ def _layout_page(
     space_width = _word_gap_px(font_size_px, template)
     lines: list[list[dict[str, Any]]] = [[]]
     current_width = 0.0
+    max_words_per_line = max(1, template.layout.max_words_per_line)
 
     for word_idx, word in enumerate(page.words):
         text = _caption_text(word.text, template)
         width = _measure_text(draw, text, font, letter_spacing_px, layout_stroke_px)
         add_width = width if not lines[-1] else space_width + width
-        if lines[-1] and current_width + add_width > max_width:
+        if lines[-1] and (len(lines[-1]) >= max_words_per_line or current_width + add_width > max_width):
             lines.append([])
             current_width = 0.0
             add_width = width
