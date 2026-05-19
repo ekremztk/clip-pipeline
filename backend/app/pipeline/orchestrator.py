@@ -422,7 +422,15 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     _debug_dump(job_id, "s02_transcribe", transcript_data)
                 elif step_number == 3:
                     from app.pipeline.steps import s03_speaker_id
-                    speaker_data = s03_speaker_id.run(transcript_data, job_id, video_title, audio_path=audio_path)
+                    speaker_audio_path = audio_path if target_guest else None
+                    if audio_path and not target_guest:
+                        print("[S03] Voice matching skipped — no target_guest provided")
+                    speaker_data = s03_speaker_id.run(
+                        transcript_data,
+                        job_id,
+                        video_title,
+                        audio_path=speaker_audio_path,
+                    )
 
                     supabase = get_client()
                     transcript_raw = transcript_data.get("raw_response", {}) if isinstance(transcript_data, dict) else {}
