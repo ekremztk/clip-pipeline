@@ -37,6 +37,7 @@ class LayoutSpec:
     transform_y: float
     line_spacing: float
     letter_spacing: float
+    word_gap_ratio: float
     align: str
 
 
@@ -98,9 +99,9 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
         ),
         shadow=ShadowSpec(
             color="#000000",
-            alpha=0.35,
-            smoothing=0.32,
-            distance=5.0,
+            alpha=0.58,
+            smoothing=0.22,
+            distance=7.0,
             angle=45.0,
         ),
         layout=LayoutSpec(
@@ -110,6 +111,7 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
             transform_y=-0.18229166666666666,
             line_spacing=0.02,
             letter_spacing=0.0,
+            word_gap_ratio=0.22,
             align="center",
         ),
         karaoke=KaraokeSpec(

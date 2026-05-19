@@ -287,13 +287,14 @@ def _layout_page(
 ) -> list[list[dict[str, Any]]]:
     max_width = video.width * template.layout.max_width_ratio
     letter_spacing_px = font_size_px * template.layout.letter_spacing
-    space_width = _measure_text(draw, " ", font, letter_spacing_px, stroke_px)
+    layout_stroke_px = 0
+    space_width = _word_gap_px(font_size_px, template)
     lines: list[list[dict[str, Any]]] = [[]]
     current_width = 0.0
 
     for word_idx, word in enumerate(page.words):
         text = _caption_text(word.text, template)
-        width = _measure_text(draw, text, font, letter_spacing_px, stroke_px)
+        width = _measure_text(draw, text, font, letter_spacing_px, layout_stroke_px)
         add_width = width if not lines[-1] else space_width + width
         if lines[-1] and current_width + add_width > max_width:
             lines.append([])
@@ -354,7 +355,7 @@ def _draw_page(
     center_x = (video.width / 2) + (template.layout.transform_x * video.width)
     base_bbox = draw.textbbox((0, 0), "Ag", font=font, stroke_width=stroke_px)
     base_text_height = base_bbox[3] - base_bbox[1]
-    space_width = _measure_text(draw, " ", font, letter_spacing_px, stroke_px)
+    space_width = _word_gap_px(font_size_px, template)
 
     if shadow:
         offset_x, offset_y = _shadow_offset(template.shadow.distance, template.shadow.angle)
@@ -375,7 +376,7 @@ def _draw_page(
             scaled_stroke_px = max(0, int(round(stroke_px * scale)))
             scaled_letter_spacing_px = letter_spacing_px * scale
             text = item.get("text") or _caption_text(item["word"].text, template)
-            width = _measure_text(draw, text, scaled_font, scaled_letter_spacing_px, scaled_stroke_px)
+            width = _measure_text(draw, text, scaled_font, scaled_letter_spacing_px, 0)
             text_bbox = draw.textbbox((0, 0), "Ag", font=scaled_font, stroke_width=scaled_stroke_px)
             text_height = text_bbox[3] - text_bbox[1]
             entries.append(
@@ -593,6 +594,10 @@ def _measure_text(
         bbox = draw.textbbox((0, 0), char, font=font, stroke_width=stroke_px)
         width += (bbox[2] - bbox[0]) + letter_spacing_px
     return max(0.0, width - letter_spacing_px)
+
+
+def _word_gap_px(font_size_px: int, template: CaptionV2Template) -> float:
+    return max(0.0, font_size_px * template.layout.word_gap_ratio)
 
 
 def _capcut_font_size_to_px(capcut_size: float, output_width: int) -> int:
