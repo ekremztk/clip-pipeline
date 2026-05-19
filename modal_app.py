@@ -106,7 +106,7 @@ app = modal.App(MODAL_GPU_APP_NAME, image=gpu_image)
     gpu=["L40S", "A10G"],
     memory=16384,
     cpu=4,
-    timeout=900,
+    timeout=2400,
     scaledown_window=10,
     secrets=[modal.Secret.from_name(MODAL_GPU_SECRET_NAME)],
 )

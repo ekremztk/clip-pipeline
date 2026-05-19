@@ -11,6 +11,7 @@ import os
 import subprocess
 import traceback
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.config import settings
 from app.pipeline.stock_analytics import record_candidate_stage
@@ -83,14 +84,22 @@ def run(
             record_candidate_stage(clip_id, "s10", "failed", error_message=str(e))
             return index, clip
 
-    for index, clip in enumerate(reframed_clips):
-        try:
-            result_idx, result_clip = _process_clip(index, clip)
-            captioned_clips.append((result_idx, result_clip))
-        except Exception as e:
-            print(f"[S10] Caption error for clip {index+1}: {e}")
-            traceback.print_exc()
-            captioned_clips.append((index, clip))
+    max_workers = min(2, max(1, len(reframed_clips)))
+    print(f"[S10] Caption worker pool: max_workers={max_workers}")
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(_process_clip, index, clip): (index, clip)
+            for index, clip in enumerate(reframed_clips)
+        }
+        for future in as_completed(futures):
+            index, clip = futures[future]
+            try:
+                result_idx, result_clip = future.result()
+                captioned_clips.append((result_idx, result_clip))
+            except Exception as e:
+                print(f"[S10] Caption error for clip {index+1}: {e}")
+                traceback.print_exc()
+                captioned_clips.append((index, clip))
 
     captioned_clips.sort(key=lambda x: x[0])
     captioned_clips = [clip for _, clip in captioned_clips]
