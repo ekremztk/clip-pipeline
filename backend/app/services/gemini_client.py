@@ -311,6 +311,15 @@ def _get_gcs_client():
     return storage.Client(project=settings.GCP_PROJECT, credentials=creds)
 
 
+def _video_model_candidates(primary_model: str) -> list[str]:
+    """Return the ordered model list for video analysis."""
+    models = [primary_model]
+    fallback_model = getattr(settings, "GEMINI_MODEL_VIDEO_FALLBACK", "")
+    if primary_model == settings.GEMINI_MODEL_VIDEO and fallback_model and fallback_model not in models:
+        models.append(fallback_model)
+    return models
+
+
 def analyze_video(
     video_path: str,
     prompt: str,
@@ -331,6 +340,7 @@ def analyze_video(
     """
     if model is None:
         model = settings.GEMINI_MODEL_PRO
+    models = _video_model_candidates(model)
     gcs_uri = None
     t0 = time.time()
 
@@ -350,8 +360,6 @@ def analyze_video(
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
         client = get_gemini_client()
 
-        _last_video_response: list = []
-
         if file_size_mb < 20:
             print(f"[GeminiClient] Video size {file_size_mb:.1f}MB < 20MB. Using inline bytes.")
             with open(video_path, "rb") as f:
@@ -359,30 +367,60 @@ def analyze_video(
 
             video_part = types.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
 
-            def do_generate_inline() -> str:
-                response = client.models.generate_content(
-                    model=model,
-                    contents=[video_part, prompt],
-                    config=video_config,
-                )
-                _last_video_response.clear()
-                _last_video_response.append(response)
-                return str(response.text)
+            last_error: Exception | None = None
+            for idx, current_model in enumerate(models):
+                _last_video_response: list = []
 
-            result = _retry_logic(do_generate_inline)
-            out = str(result) if result else "{}"
-            in_tok = out_tok = None
-            if _last_video_response:
-                u = getattr(_last_video_response[0], "usage_metadata", None)
-                if u:
-                    in_tok = getattr(u, "prompt_token_count", None)
-                    out_tok = getattr(u, "candidates_token_count", None)
-            _accumulate_tokens(in_tok, out_tok, model)
-            _trace_generation("analyze_video", model, prompt, out,
-                              input_tokens=in_tok, output_tokens=out_tok,
-                              metadata={"file_size_mb": round(file_size_mb, 1), "mode": "inline",
-                                        "duration_ms": int((time.time() - t0) * 1000)})
-            return out
+                def do_generate_inline() -> str:
+                    response = client.models.generate_content(
+                        model=current_model,
+                        contents=[video_part, prompt],
+                        config=video_config,
+                    )
+                    _last_video_response.clear()
+                    _last_video_response.append(response)
+                    return str(response.text)
+
+                try:
+                    result = _retry_logic(do_generate_inline)
+                    out = str(result) if result else "{}"
+                    in_tok = out_tok = None
+                    if _last_video_response:
+                        u = getattr(_last_video_response[0], "usage_metadata", None)
+                        if u:
+                            in_tok = getattr(u, "prompt_token_count", None)
+                            out_tok = getattr(u, "candidates_token_count", None)
+                    _accumulate_tokens(in_tok, out_tok, current_model)
+                    _trace_generation(
+                        "analyze_video",
+                        current_model,
+                        prompt,
+                        out,
+                        input_tokens=in_tok,
+                        output_tokens=out_tok,
+                        metadata={
+                            "file_size_mb": round(file_size_mb, 1),
+                            "mode": "inline",
+                            "duration_ms": int((time.time() - t0) * 1000),
+                            "model_attempt": idx + 1,
+                            "fallback_used": idx > 0,
+                        },
+                    )
+                    return out
+                except Exception as model_err:
+                    last_error = model_err
+                    if idx < len(models) - 1:
+                        print(
+                            f"[GeminiClient] Model {current_model} failed: {model_err} — "
+                            f"trying fallback {models[idx + 1]}"
+                        )
+                        continue
+                    raise
+
+            if last_error:
+                raise last_error
+
+            return "{}"
 
         else:
             # Primary: GCS upload (requires credentials)
@@ -402,30 +440,60 @@ def analyze_video(
 
                 video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
 
-                def do_generate_uploaded() -> str:
-                    response = client.models.generate_content(
-                        model=model,
-                        contents=[video_part, prompt],
-                        config=video_config,
-                    )
-                    _last_video_response.clear()
-                    _last_video_response.append(response)
-                    return str(response.text)
+                last_error: Exception | None = None
+                for idx, current_model in enumerate(models):
+                    _last_video_response: list = []
 
-                result = _retry_logic(do_generate_uploaded)
-                out = str(result) if result else "{}"
-                in_tok = out_tok = None
-                if _last_video_response:
-                    u = getattr(_last_video_response[0], "usage_metadata", None)
-                    if u:
-                        in_tok = getattr(u, "prompt_token_count", None)
-                        out_tok = getattr(u, "candidates_token_count", None)
-                _accumulate_tokens(in_tok, out_tok, model)
-                _trace_generation("analyze_video", model, prompt, out,
-                                  input_tokens=in_tok, output_tokens=out_tok,
-                                  metadata={"file_size_mb": round(file_size_mb, 1), "mode": "gcs",
-                                            "duration_ms": int((time.time() - t0) * 1000)})
-                return out
+                    def do_generate_uploaded() -> str:
+                        response = client.models.generate_content(
+                            model=current_model,
+                            contents=[video_part, prompt],
+                            config=video_config,
+                        )
+                        _last_video_response.clear()
+                        _last_video_response.append(response)
+                        return str(response.text)
+
+                    try:
+                        result = _retry_logic(do_generate_uploaded)
+                        out = str(result) if result else "{}"
+                        in_tok = out_tok = None
+                        if _last_video_response:
+                            u = getattr(_last_video_response[0], "usage_metadata", None)
+                            if u:
+                                in_tok = getattr(u, "prompt_token_count", None)
+                                out_tok = getattr(u, "candidates_token_count", None)
+                        _accumulate_tokens(in_tok, out_tok, current_model)
+                        _trace_generation(
+                            "analyze_video",
+                            current_model,
+                            prompt,
+                            out,
+                            input_tokens=in_tok,
+                            output_tokens=out_tok,
+                            metadata={
+                                "file_size_mb": round(file_size_mb, 1),
+                                "mode": "gcs",
+                                "duration_ms": int((time.time() - t0) * 1000),
+                                "model_attempt": idx + 1,
+                                "fallback_used": idx > 0,
+                            },
+                        )
+                        return out
+                    except Exception as model_err:
+                        last_error = model_err
+                        if idx < len(models) - 1:
+                            print(
+                                f"[GeminiClient] Model {current_model} failed: {model_err} — "
+                                f"trying fallback {models[idx + 1]}"
+                            )
+                            continue
+                        raise
+
+                if last_error:
+                    raise last_error
+
+                return "{}"
             except Exception as gcs_err:
                 print(f"[GeminiClient] GCS video path failed; non-Vertex fallback is disabled: {gcs_err}")
                 raise

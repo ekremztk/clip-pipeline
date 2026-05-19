@@ -8,10 +8,11 @@ class Settings:
     GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
     GCS_BUCKET_NAME: str = os.getenv("GCS_BUCKET_NAME", "clip-pipeline-audio")
     # Vertex AI model names — override via env var if Vertex releases a new version string
-    GEMINI_MODEL_VIDEO: str = os.getenv("GEMINI_MODEL_VIDEO", "gemini-3.1-pro-preview")
+    GEMINI_MODEL_VIDEO: str = os.getenv("GEMINI_MODEL_VIDEO", "gemini-3.5-flash")
+    GEMINI_MODEL_VIDEO_FALLBACK: str = os.getenv("GEMINI_MODEL_VIDEO_FALLBACK", "gemini-3.1-pro-preview")
     GEMINI_MODEL_PRO: str = os.getenv("GEMINI_MODEL_PRO", "gemini-2.5-pro")
     GEMINI_MODEL_PRO_PREVIEW: str = os.getenv("GEMINI_MODEL_PRO_PREVIEW", "gemini-3.1-pro-preview")
-    GEMINI_MODEL_FLASH: str = os.getenv("GEMINI_MODEL_FLASH", "gemini-2.5-flash")
+    GEMINI_MODEL_FLASH: str = os.getenv("GEMINI_MODEL_FLASH", "gemini-3.5-flash")
     # Claude (AWS Bedrock)
     AWS_BEDROCK_ACCESS_KEY: str = os.getenv("AWS_BEDROCK_ACCESS_KEY", "")
     AWS_BEDROCK_SECRET_KEY: str = os.getenv("AWS_BEDROCK_SECRET_KEY", "")
