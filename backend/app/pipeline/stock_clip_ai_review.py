@@ -203,18 +203,27 @@ def _build_review_prompt(clip: dict[str, Any]) -> str:
     if len(transcript) > 5000:
         transcript = transcript[:5000] + "\n[TRUNCATED]"
 
+    channel_dna = clip.get("channel_dna") if isinstance(clip.get("channel_dna"), dict) else {}
+    channel_context = json.dumps(channel_dna, ensure_ascii=False, indent=2)
+    if len(channel_context) > 5000:
+        channel_context = channel_context[:5000] + "\n[TRUNCATED]"
+
     return f"""
-You are the second-stage quality judge for Speedy Cast Clip, a YouTube Shorts channel that publishes English male celebrity podcast and talk-show clips.
+You are the second-stage quality judge for a YouTube Shorts channel.
 
 Evaluate this final S10 captioned MP4 using the actual video and audio first. Use the transcript only as support for exact wording and boundary checks.
 
+Channel instructions:
+{channel_context or "(none provided)"}
+
 Audience assumption:
-- The viewer may recognize the main celebrity from films, TV, comedy, or interviews.
+- The viewer may recognize the main person from films, TV, music, comedy, sports, podcasts, or interviews.
 - The viewer has not watched the source episode.
 - The clip must still make sense as a standalone short.
 
-Channel preference:
-- Funny stories, awkward moments, surprising admissions, strong celebrity dynamics, clear setup/payoff, and easy lowercase title format.
+General preference:
+- Apply the channel instructions first.
+- Prefer clear setup/payoff, visible reactions, emotional effect, strong pacing, and title/description fit.
 - Avoid low-energy filler, inside references, context-dependent fragments, weak openings, or clips that only look polished but do not create an emotional effect.
 
 Main person: {clip.get("main_person") or ""}
@@ -342,7 +351,8 @@ def _claim_next_clip_review(
                     scc.s06_quality_verdict,
                     scc.s06_quality_notes,
                     scc.s10_caption_status,
-                    ssr.source_title
+                    ssr.source_title,
+                    ch.channel_dna
                 FROM clips c
                 LEFT JOIN stock_clip_ai_reviews r
                     ON r.clip_id = c.id AND r.reviewer = %s
@@ -350,6 +360,8 @@ def _claim_next_clip_review(
                     ON scc.id = c.stock_candidate_id
                 LEFT JOIN stock_source_runs ssr
                     ON ssr.id = c.stock_source_run_id
+                LEFT JOIN channels ch
+                    ON ch.id = c.channel_id
                 WHERE c.channel_id = %s
                   AND c.user_id = %s
                   {batch_filter}

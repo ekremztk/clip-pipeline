@@ -132,6 +132,8 @@ def _cleanup_pipeline_r2(
     - source_videos/{job_id}/* → Modal input, always deletable
     - {job_id}/* (S08 landscape) → deletable ONLY if S10 produced a captioned URL
       for every clip; if some S10 failed, keep S08 as fallback.
+    - upscale/{job_id}/* → S08.5 landscape intermediates, deletable if S10
+      produced a captioned URL for every clip
     - reframe/*, gaming-reframe/* → deletable if corresponding S10 succeeded
     """
     from app.services.r2_client import delete_prefix, delete_url
@@ -164,6 +166,11 @@ def _cleanup_pipeline_r2(
             print(f"[Cleanup] Removed {n} landscape (S08) objects for {job_id}")
         except Exception as e:
             print(f"[Cleanup] {job_id}/ delete error: {e}")
+        try:
+            n = delete_prefix(f"upscale/{job_id}/")
+            print(f"[Cleanup] Removed {n} upscaled landscape (S08.5) objects for {job_id}")
+        except Exception as e:
+            print(f"[Cleanup] upscale/{job_id}/ delete error: {e}")
 
     # Reframe intermediates — delete per-clip where captioned exists
     for c in reframed_clips or []:
@@ -236,12 +243,17 @@ def _run_local_fallback(
     video_path: str, cut_results: list, transcript_data: dict | None,
     reframe_content_type: str, caption_template: str,
 ) -> dict:
-    """CPU fallback — runs S08+S09+S10 locally on Railway if Modal fails."""
-    from app.pipeline.steps import s08_export, s09_reframe, s10_captions
+    """CPU fallback — runs S08+S08.5+S09+S10 locally on Railway if Modal fails."""
+    from app.pipeline.steps import s08_export, s08_5_upscale, s09_reframe, s10_captions
     exported_clips = s08_export.run(
         cut_results=cut_results, job_id=job_id, channel_id=channel_id,
         video_path=video_path, video_title=video_title,
         user_id=user_id, transcript_data=transcript_data,
+    )
+    exported_clips = s08_5_upscale.run(
+        exported_clips=exported_clips,
+        job_id=job_id,
+        channel_id=channel_id,
     )
     reframed_clips = s09_reframe.run(
         exported_clips=exported_clips, job_id=job_id,

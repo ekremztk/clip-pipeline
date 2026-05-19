@@ -200,6 +200,20 @@ def process_clips(
         if not exported_clips:
             return {"status": "failed", "error": "S08 exported 0 clips", "clips": []}
 
+        # S08.5: Upscale short landscape clips only when S08 produced sub-1080p output.
+        print("[Modal] S08.5 starting...")
+        from app.pipeline.steps import s08_5_upscale
+        exported_clips = s08_5_upscale.run(
+            exported_clips=exported_clips,
+            job_id=job_id,
+            channel_id=channel_id,
+        )
+        upscaled_count = sum(1 for c in exported_clips if c.get("s08_5_upscaled"))
+        print(f"[Modal] S08.5 done: {upscaled_count}/{len(exported_clips)} clips upscaled")
+
+        if not exported_clips:
+            return {"status": "failed", "error": "S08.5 passed 0 clips", "clips": []}
+
         # S09: Reframe
         print("[Modal] S09 starting...")
         from app.pipeline.steps import s09_reframe

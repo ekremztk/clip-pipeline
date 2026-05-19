@@ -24,6 +24,7 @@ from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline
 from app.captions.v2.templates import CaptionV2Template, get_v2_template
 
 logger = logging.getLogger(__name__)
+FontCache = dict[int, ImageFont.ImageFont]
 
 
 @dataclass
@@ -171,6 +172,7 @@ def _render_overlay_video(
     font_size_px = _capcut_font_size_to_px(template.font.capcut_size, video.width)
     stroke_px = max(0, int(round(font_size_px * template.stroke.width_ratio)))
     font = _load_font(template.font.paths, font_size_px)
+    font_cache: FontCache = {font_size_px: font}
 
     sample_img = Image.new("RGBA", (video.width, video.height), (0, 0, 0, 0))
     sample_draw = ImageDraw.Draw(sample_img)
@@ -211,7 +213,7 @@ def _render_overlay_video(
         assert proc.stdin is not None
         for frame_idx in range(frame_count):
             t = frame_idx / fps
-            frame = _render_frame(t, pages, video, template, font, font_size_px, stroke_px)
+            frame = _render_frame(t, pages, video, template, font, font_cache, font_size_px, stroke_px)
             proc.stdin.write(frame.tobytes("raw", "RGBA"))
         proc.stdin.close()
         stderr = proc.stderr.read().decode("utf-8", errors="replace") if proc.stderr else ""
@@ -230,6 +232,7 @@ def _render_frame(
     video: VideoInfo,
     template: CaptionV2Template,
     font: ImageFont.FreeTypeFont,
+    font_cache: FontCache,
     font_size_px: int,
     stroke_px: int,
 ) -> Image.Image:
@@ -245,9 +248,11 @@ def _render_frame(
         video=video,
         template=template,
         font=font,
+        font_cache=font_cache,
         font_size_px=font_size_px,
         stroke_px=stroke_px,
         active_idx=active_idx,
+        t=t,
         shadow=True,
     )
     if shadow_layer is not None:
@@ -261,9 +266,11 @@ def _render_frame(
         video=video,
         template=template,
         font=font,
+        font_cache=font_cache,
         font_size_px=font_size_px,
         stroke_px=stroke_px,
         active_idx=active_idx,
+        t=t,
         shadow=False,
     )
     return Image.alpha_composite(img, text_layer)
@@ -285,13 +292,14 @@ def _layout_page(
     current_width = 0.0
 
     for word_idx, word in enumerate(page.words):
-        width = _measure_text(draw, word.text, font, letter_spacing_px, stroke_px)
+        text = _caption_text(word.text, template)
+        width = _measure_text(draw, text, font, letter_spacing_px, stroke_px)
         add_width = width if not lines[-1] else space_width + width
         if lines[-1] and current_width + add_width > max_width:
             lines.append([])
             current_width = 0.0
             add_width = width
-        lines[-1].append({"word": word, "word_idx": word_idx, "width": width})
+        lines[-1].append({"word": word, "word_idx": word_idx, "text": text, "width": width})
         current_width += add_width
 
     lines = [line for line in lines if line]
@@ -329,9 +337,11 @@ def _draw_page(
     video: VideoInfo,
     template: CaptionV2Template,
     font: ImageFont.FreeTypeFont,
+    font_cache: FontCache,
     font_size_px: int,
     stroke_px: int,
     active_idx: int,
+    t: float,
     shadow: bool,
 ) -> Image.Image | None:
     if not page.layout:
@@ -340,6 +350,11 @@ def _draw_page(
     layer = Image.new("RGBA", (video.width, video.height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
     letter_spacing_px = font_size_px * template.layout.letter_spacing
+    max_width = video.width * template.layout.max_width_ratio
+    center_x = (video.width / 2) + (template.layout.transform_x * video.width)
+    base_bbox = draw.textbbox((0, 0), "Ag", font=font, stroke_width=stroke_px)
+    base_text_height = base_bbox[3] - base_bbox[1]
+    space_width = _measure_text(draw, " ", font, letter_spacing_px, stroke_px)
 
     if shadow:
         offset_x, offset_y = _shadow_offset(template.shadow.distance, template.shadow.angle)
@@ -351,9 +366,41 @@ def _draw_page(
         stroke_fill = _hex_to_rgba(template.stroke.color, template.stroke.alpha)
 
     for line in page.layout:
+        entries: list[dict[str, Any]] = []
         for item in line:
-            word = item["word"]
             word_idx = item["word_idx"]
+            scale = _word_scale(page, word_idx, active_idx, t, template)
+            scaled_font_size = max(1, int(round(font_size_px * scale)))
+            scaled_font = _font_for_size(template, scaled_font_size, font_cache)
+            scaled_stroke_px = max(0, int(round(stroke_px * scale)))
+            scaled_letter_spacing_px = letter_spacing_px * scale
+            text = item.get("text") or _caption_text(item["word"].text, template)
+            width = _measure_text(draw, text, scaled_font, scaled_letter_spacing_px, scaled_stroke_px)
+            text_bbox = draw.textbbox((0, 0), "Ag", font=scaled_font, stroke_width=scaled_stroke_px)
+            text_height = text_bbox[3] - text_bbox[1]
+            entries.append(
+                {
+                    "text": text,
+                    "word_idx": word_idx,
+                    "font": scaled_font,
+                    "stroke_px": scaled_stroke_px,
+                    "letter_spacing_px": scaled_letter_spacing_px,
+                    "width": width,
+                    "height": text_height,
+                    "base_y": item["y"],
+                }
+            )
+
+        line_width = sum(entry["width"] for entry in entries) + space_width * max(0, len(entries) - 1)
+        if template.layout.align == "center":
+            cursor_x = center_x - (line_width / 2)
+        elif template.layout.align == "right":
+            cursor_x = center_x + (max_width / 2) - line_width
+        else:
+            cursor_x = center_x - (max_width / 2)
+
+        for entry in entries:
+            word_idx = entry["word_idx"]
             if shadow:
                 fill = _hex_to_rgba(template.shadow.color, template.shadow.alpha)
             elif word_idx == active_idx:
@@ -363,18 +410,68 @@ def _draw_page(
             else:
                 fill = _hex_to_rgba(template.karaoke.inactive_color, template.fill_alpha)
 
+            cursor_y = entry["base_y"] + ((base_text_height - entry["height"]) / 2)
             _draw_text(
                 draw=draw,
-                position=(item["x"] + offset_x, item["y"] + offset_y),
-                text=word.text,
-                font=font,
+                position=(cursor_x + offset_x, cursor_y + offset_y),
+                text=entry["text"],
+                font=entry["font"],
                 fill=fill,
-                stroke_width=stroke_px,
+                stroke_width=entry["stroke_px"],
                 stroke_fill=stroke_fill,
-                letter_spacing_px=letter_spacing_px,
+                letter_spacing_px=entry["letter_spacing_px"],
             )
+            cursor_x += entry["width"] + space_width
 
     return layer
+
+
+def _caption_text(text: str, template: CaptionV2Template) -> str:
+    value = text.strip()
+    if template.font.uppercase:
+        value = value.upper()
+    return value
+
+
+def _font_for_size(template: CaptionV2Template, size: int, font_cache: FontCache) -> ImageFont.ImageFont:
+    if size not in font_cache:
+        font_cache[size] = _load_font(template.font.paths, size)
+    return font_cache[size]
+
+
+def _word_scale(page: CaptionPage, word_idx: int, active_idx: int, t: float, template: CaptionV2Template) -> float:
+    if word_idx != active_idx:
+        return 1.0
+
+    word = page.words[word_idx]
+    elapsed = max(0.0, t - word.start)
+    peak = max(1.0, template.karaoke.active_scale)
+    if peak <= 1.001:
+        return 1.0
+
+    pop_in = max(0.001, template.karaoke.pop_in_duration)
+    pop_out = max(0.001, template.karaoke.pop_out_duration)
+    if elapsed < pop_in:
+        progress = elapsed / pop_in
+        return 1.0 + ((peak - 1.0) * _ease_out_cubic(progress))
+
+    if elapsed < pop_in + pop_out:
+        progress = (elapsed - pop_in) / pop_out
+        return 1.0 + ((peak - 1.0) * (1.0 - _ease_in_out_cubic(progress)))
+
+    return 1.0
+
+
+def _ease_out_cubic(progress: float) -> float:
+    p = max(0.0, min(1.0, progress))
+    return 1.0 - ((1.0 - p) ** 3)
+
+
+def _ease_in_out_cubic(progress: float) -> float:
+    p = max(0.0, min(1.0, progress))
+    if p < 0.5:
+        return 4.0 * p * p * p
+    return 1.0 - ((-2.0 * p + 2.0) ** 3) / 2.0
 
 
 def _compose_overlay(

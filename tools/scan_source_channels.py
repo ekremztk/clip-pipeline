@@ -14,8 +14,8 @@ import yt_dlp
 DEFAULT_POOL_PREFIX = "speedy_cast"
 DEFAULT_MIN_DURATION_SECONDS = 180
 DEFAULT_MAX_DURATION_SECONDS = 1200
-DEFAULT_PRIORITY_A_LIMIT_PER_CHANNEL = 15
-DEFAULT_PRIORITY_B_LIMIT_PER_CHANNEL = 5
+DEFAULT_LIMIT_PER_GUEST_CHANNEL = 10
+DEFAULT_MATCH_MODE = "guest-like"
 
 GUEST_ALIASES = {
     "Dwayne Johnson": ["The Rock"],
@@ -144,11 +144,53 @@ def aliases_for_guest(guest_name):
     return [guest_name, *GUEST_ALIASES.get(guest_name, [])]
 
 
-def match_guest_in_title(title, guest_name):
+def _topic_only_alias_context(title, alias):
+    normalized = re.sub(r"\s+", " ", title or "").strip()
+    alias_pattern = re.escape(alias).replace(r"\ ", r"\s+")
+    topic_patterns = [
+        rf"\bby\s+{alias_pattern}\b",
+        rf"\bwith\s+{alias_pattern}\b",
+        rf"\bon\s+{alias_pattern}(?:'s)?\b",
+        rf"\babout\s+{alias_pattern}\b",
+        rf"\bfor\s+{alias_pattern}\b",
+        rf"\bfrom\s+{alias_pattern}\b",
+        rf"\bbefore\s+{alias_pattern}\b",
+        rf"\bafter\s+{alias_pattern}\b",
+    ]
+    return any(re.search(pattern, normalized, re.IGNORECASE) for pattern in topic_patterns)
+
+
+def _guest_like_alias_context(title, alias):
+    normalized = re.sub(r"\s+", " ", title or "").strip()
+    alias_pattern = re.escape(alias).replace(r"\ ", r"\s+")
+    prefix_pattern = re.compile(
+        rf"^(?:why\s+)?{alias_pattern}(?:\b|'s\b)",
+        re.IGNORECASE,
+    )
+    if prefix_pattern.search(normalized):
+        return True
+
+    list_pattern = re.compile(
+        rf"^[^:|]{{0,90}}\b(?:and\s+)?{alias_pattern}\s+"
+        r"(?:talk|talks|play|plays|share|shares|reveal|reveals|explain|explains|react|reacts)\b",
+        re.IGNORECASE,
+    )
+    if list_pattern.search(normalized):
+        return True
+
+    return False
+
+
+def match_guest_in_title(title, guest_name, match_mode=DEFAULT_MATCH_MODE):
     for alias in aliases_for_guest(guest_name):
         escaped = re.escape(alias).replace(r"\ ", r"\s+")
         pattern = re.compile(rf"(?<![a-z0-9]){escaped}(?![a-z0-9])", re.IGNORECASE)
-        if pattern.search(title):
+        if pattern.search(title or ""):
+            if match_mode == "guest-like":
+                if _topic_only_alias_context(title, alias):
+                    continue
+                if not _guest_like_alias_context(title, alias):
+                    continue
             return alias
     return None
 
@@ -177,14 +219,6 @@ def get_existing_guest_channel_counts(pool_prefix):
     return counts
 
 
-def guest_priority(guest):
-    return "A" if int(guest.get("score") or 0) >= 100 else "B"
-
-
-def guest_channel_limit(guest, priority_a_limit, priority_b_limit):
-    return priority_a_limit if guest_priority(guest) == "A" else priority_b_limit
-
-
 def should_keep_duration(duration, min_duration, max_duration):
     return min_duration <= duration <= max_duration
 
@@ -200,8 +234,10 @@ def main():
     )
     parser.add_argument("--min-duration", type=int, default=DEFAULT_MIN_DURATION_SECONDS)
     parser.add_argument("--max-duration", type=int, default=DEFAULT_MAX_DURATION_SECONDS)
-    parser.add_argument("--priority-a-limit-per-channel", type=int, default=DEFAULT_PRIORITY_A_LIMIT_PER_CHANNEL)
-    parser.add_argument("--priority-b-limit-per-channel", type=int, default=DEFAULT_PRIORITY_B_LIMIT_PER_CHANNEL)
+    parser.add_argument("--limit-per-guest-channel", type=int, default=DEFAULT_LIMIT_PER_GUEST_CHANNEL)
+    parser.add_argument("--match-mode", choices=["guest-like", "loose"], default=DEFAULT_MATCH_MODE)
+    parser.add_argument("--priority-a-limit-per-channel", type=int, default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--priority-b-limit-per-channel", type=int, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--sleep", type=float, default=1.0)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -217,10 +253,8 @@ def main():
     print(f"Source channels: {[c['handle'] for c in channels]}")
     print(f"Flat scan cap: {args.max_videos_per_channel if args.max_videos_per_channel > 0 else 'all'}")
     print(f"Duration filter: {args.min_duration}s-{args.max_duration}s")
-    print(
-        "Per guest/channel limits: "
-        f"A={args.priority_a_limit_per_channel}, B={args.priority_b_limit_per_channel}"
-    )
+    print(f"Per guest/channel limit: top {args.limit_per_guest_channel} by views")
+    print(f"Match mode: {args.match_mode}")
     print(f"Already in DB: {len(existing_ids)} videos")
     print("---")
 
@@ -242,40 +276,30 @@ def main():
             if video["video_id"] in existing_ids:
                 continue
             for guest_name, guest in guest_map.items():
-                matched_alias = match_guest_in_title(video["title"], guest_name)
+                matched_alias = match_guest_in_title(video["title"], guest_name, args.match_mode)
                 if matched_alias:
                     matched_videos.append({
                         **video,
                         "guest_name": guest_name,
                         "guest_id": guest["id"],
                         "matched_alias": matched_alias,
-                        "guest_priority": guest_priority(guest),
+                        "guest_score": int(guest.get("score") or 0),
                     })
                     break
 
         print(f"  Title matches: {len(matched_videos)}")
 
-        # Phase 2: fetch full details only for matches
-        matches = 0
+        # Phase 2: fetch full details only for matches, then keep top videos by views.
+        detailed_matches = []
         skipped_no_details = 0
         skipped_by_duration = 0
-        skipped_by_guest_limit = 0
-        written_by_guest = {
+        existing_by_guest = {
             guest["id"]: existing_guest_channel_counts.get((guest["id"], handle), 0)
             for guest in guests
         }
         for index, mv in enumerate(matched_videos, start=1):
             if index == 1 or index % 10 == 0:
                 print(f"  Fetching details: {index}/{len(matched_videos)}")
-            guest = guest_map[mv["guest_name"]]
-            guest_limit = guest_channel_limit(
-                guest,
-                args.priority_a_limit_per_channel,
-                args.priority_b_limit_per_channel,
-            )
-            if written_by_guest.get(mv["guest_id"], 0) >= guest_limit:
-                skipped_by_guest_limit += 1
-                continue
 
             details = fetch_video_details(mv["video_id"])
             if not details:
@@ -286,16 +310,34 @@ def main():
                 skipped_by_duration += 1
                 continue
 
+            detailed_matches.append({
+                **mv,
+                **details,
+            })
+
+            if args.sleep:
+                time.sleep(args.sleep)
+
+        detailed_matches.sort(key=lambda item: int(item.get("view_count") or 0), reverse=True)
+
+        matches = 0
+        skipped_by_guest_limit = 0
+        written_by_guest = dict(existing_by_guest)
+        for mv in detailed_matches:
+            if written_by_guest.get(mv["guest_id"], 0) >= args.limit_per_guest_channel:
+                skipped_by_guest_limit += 1
+                continue
+
             row = {
                 "guest_id": mv["guest_id"],
                 "video_id": mv["video_id"],
                 "title": mv["title"],
                 "source_channel": channel_name,
                 "source_handle": handle,
-                "view_count": details["view_count"],
-                "duration_seconds": details["duration"],
-                "upload_date": format_upload_date(details["upload_date"]),
-                "thumbnail_url": details.get("thumbnail"),
+                "view_count": mv["view_count"],
+                "duration_seconds": mv["duration"],
+                "upload_date": format_upload_date(mv["upload_date"]),
+                "thumbnail_url": mv.get("thumbnail"),
             }
 
             try:
@@ -308,18 +350,14 @@ def main():
                 mode = "dry" if args.dry_run else "db"
                 print(
                     f"    + [{mode}] {mv['guest_name']} "
-                    f"({mv['matched_alias']}) | {details['duration']}s | "
-                    f"{details['view_count']:,} views | {mv['title'][:70]}"
+                    f"({mv['matched_alias']}) | {mv['duration']}s | "
+                    f"{mv['view_count']:,} views | {mv['title'][:70]}"
                 )
             except Exception as e:
                 if "duplicate" in str(e).lower():
                     pass
                 else:
                     print(f"    ERROR: {e}")
-
-            if args.sleep:
-                time.sleep(args.sleep)
-
         total_inserted += matches
         print(f"  Inserted: {matches}")
         if skipped_by_guest_limit:

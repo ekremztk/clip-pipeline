@@ -129,6 +129,23 @@ def _load_variants(item_id: str) -> list[dict[str, Any]]:
             return [dict(row) for row in cur.fetchall()]
 
 
+def _load_channel_dna(channel_id: str) -> dict[str, Any]:
+    with _db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT channel_dna
+                FROM channels
+                WHERE id = %s
+                LIMIT 1
+                """,
+                (channel_id,),
+            )
+            row = cur.fetchone()
+    value = (row or {}).get("channel_dna")
+    return value if isinstance(value, dict) else {}
+
+
 def _mark_job_failed(job_id: str, error: str) -> None:
     with _db_connect() as conn:
         with conn.cursor() as cur:
@@ -193,6 +210,10 @@ def _process_item(job: dict[str, Any], item: dict[str, Any]) -> None:
                 _update_job(cur, job_id, current_step="p03_edit_plan", current_step_number=3, progress_pct=60)
 
         variants = _load_variants(item_id)
+        item_for_prompt = {
+            **item,
+            "channel_dna": _load_channel_dna(str(item["channel_id"])),
+        }
         planned_count = 0
         for index, variant in enumerate(variants, start=1):
             variant_id = str(variant["id"])
@@ -213,7 +234,7 @@ def _process_item(job: dict[str, Any], item: dict[str, Any]) -> None:
 
                 plan = p03_edit_plan.run(
                     video_path=input_path,
-                    item=item,
+                    item=item_for_prompt,
                     variant_mode=variant_mode,
                     transcript_text=transcript_text,
                     words=words,

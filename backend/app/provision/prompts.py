@@ -71,12 +71,19 @@ def build_edit_plan_prompt(
 ) -> str:
     timed_words_json = json.dumps(timed_words, ensure_ascii=False)
     audio_json = json.dumps(audio_analysis, ensure_ascii=False)
+    channel_dna = item.get("channel_dna") if isinstance(item.get("channel_dna"), dict) else {}
+    channel_context = json.dumps(channel_dna, ensure_ascii=False, indent=2)
+    if len(channel_context) > 5000:
+        channel_context = channel_context[:5000] + "\n[TRUNCATED]"
 
     return f"""
-You are the Last Editor for Speedy Cast Clip, a YouTube Shorts channel built around English male celebrity talk-show and podcast clips.
+You are the Last Editor for a YouTube Shorts channel.
 
 Task:
 Create an edit plan for the already-captioned MP4. The plan must improve the final Shorts version without changing the story or cutting the payoff.
+
+Channel instructions:
+{channel_context or "(none provided)"}
 
 Variant mode:
 {variant_mode}
@@ -88,6 +95,7 @@ Mode behavior:
 - loop: favor a clean punchline ending and replayable final beat.
 
 Hard rules:
+- Apply the channel instructions first when judging what should stay, what should be removed, and what makes the clip publishable.
 - Do not remove context needed to understand who or what is being discussed.
 - Do not cut laughter if it is the payoff or creates the loop effect.
 - Do not rely on the transcript alone for half-word detection. ASR often omits clipped syllables or partial words, so a bad half-word start/end may not appear in the transcript.

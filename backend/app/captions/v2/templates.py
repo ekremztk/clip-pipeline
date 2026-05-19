@@ -9,6 +9,7 @@ class FontSpec:
     family: str
     capcut_size: float
     weight: int
+    uppercase: bool
     paths: tuple[str, ...]
 
 
@@ -45,6 +46,9 @@ class KaraokeSpec:
     inactive_color: str
     read_color: str
     animation_duration: float
+    active_scale: float
+    pop_in_duration: float
+    pop_out_duration: float
     merge_keyword_style: bool
 
 
@@ -82,24 +86,25 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
             family="Montserrat",
             capcut_size=15.0,
             weight=700,
+            uppercase=True,
             paths=MONTSERRAT_BOLD_PATHS,
         ),
         fill_color="#FFFFFF",
         fill_alpha=1.0,
         stroke=StrokeSpec(
             color="#000000",
-            width_ratio=0.07999999821186066,
+            width_ratio=0.073,
             alpha=1.0,
         ),
         shadow=ShadowSpec(
             color="#000000",
-            alpha=0.24685639142990112,
-            smoothing=0.45000001788139343,
+            alpha=0.35,
+            smoothing=0.32,
             distance=5.0,
-            angle=-45.0,
+            angle=45.0,
         ),
         layout=LayoutSpec(
-            max_words_per_page=3,
+            max_words_per_page=5,
             max_width_ratio=0.82,
             transform_x=0.0,
             transform_y=-0.18229166666666666,
@@ -111,7 +116,10 @@ V2_TEMPLATES: dict[str, CaptionV2Template] = {
             active_color="#FFFF00",
             inactive_color="#FFFFFF",
             read_color="#FFFFFF",
-            animation_duration=0.8,
+            animation_duration=0.24,
+            active_scale=1.14,
+            pop_in_duration=0.08,
+            pop_out_duration=0.16,
             merge_keyword_style=False,
         ),
     ),
