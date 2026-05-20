@@ -169,6 +169,15 @@ def _as_int(value: Any) -> Optional[int]:
         return None
 
 
+def _as_quality_score(value: Any) -> Optional[int]:
+    score = _as_int(value)
+    if score is None:
+        return None
+    if 0 <= score <= 10:
+        score *= 10
+    return max(0, min(100, score))
+
+
 def _as_bool(value: Any) -> Optional[bool]:
     if isinstance(value, bool):
         return value
@@ -225,6 +234,8 @@ General preference:
 - Apply the channel instructions first.
 - Prefer clear setup/payoff, visible reactions, emotional effect, strong pacing, and title/description fit.
 - Avoid low-energy filler, inside references, context-dependent fragments, weak openings, or clips that only look polished but do not create an emotional effect.
+- Every score field except risk_score must be an integer from 0 to 100. Do not use a 0-10 scale.
+- risk_score is also an integer from 0 to 100, where 0 means no risk and 100 means severe publishing risk.
 
 Main person: {clip.get("main_person") or ""}
 Source title: {clip.get("source_title") or clip.get("video_title") or ""}
@@ -438,22 +449,22 @@ def _review_to_payload(review: dict[str, Any], raw: dict[str, Any], usage: dict[
     return {
         "status": "completed",
         "model": review["model"],
-        "gemini_score": _as_int(raw.get("gemini_score")),
-        "viral_score": _as_int(raw.get("viral_score")),
-        "channel_fit_score": _as_int(raw.get("channel_fit_score")),
-        "publish_priority_score": _as_int(raw.get("publish_priority_score")),
-        "hook_score": _as_int(raw.get("hook_score")),
-        "retention_score": _as_int(raw.get("retention_score")),
-        "opening_score": _as_int(opening.get("score")),
-        "ending_score": _as_int(ending.get("score")),
-        "boundary_score": _as_int(boundaries.get("score")),
-        "clip_integrity_score": _as_int(integrity.get("score")),
-        "context_clarity_score": _as_int(integrity.get("score")),
-        "visual_reaction_score": _as_int(raw.get("visual_reaction_score")),
-        "audio_energy_score": _as_int(raw.get("audio_energy_score")),
-        "titleability_score": _as_int(raw.get("titleability_score")),
-        "thumbnail_score": _as_int(raw.get("thumbnail_score")),
-        "loop_score": _as_int(raw.get("loop_score")),
+        "gemini_score": _as_quality_score(raw.get("gemini_score")),
+        "viral_score": _as_quality_score(raw.get("viral_score")),
+        "channel_fit_score": _as_quality_score(raw.get("channel_fit_score")),
+        "publish_priority_score": _as_quality_score(raw.get("publish_priority_score")),
+        "hook_score": _as_quality_score(raw.get("hook_score")),
+        "retention_score": _as_quality_score(raw.get("retention_score")),
+        "opening_score": _as_quality_score(opening.get("score")),
+        "ending_score": _as_quality_score(ending.get("score")),
+        "boundary_score": _as_quality_score(boundaries.get("score")),
+        "clip_integrity_score": _as_quality_score(integrity.get("score")),
+        "context_clarity_score": _as_quality_score(integrity.get("score")),
+        "visual_reaction_score": _as_quality_score(raw.get("visual_reaction_score")),
+        "audio_energy_score": _as_quality_score(raw.get("audio_energy_score")),
+        "titleability_score": _as_quality_score(raw.get("titleability_score")),
+        "thumbnail_score": _as_quality_score(raw.get("thumbnail_score")),
+        "loop_score": _as_quality_score(raw.get("loop_score")),
         "risk_score": _as_int(raw.get("risk_score")),
         "has_half_word_start": _as_bool(opening.get("has_half_word")),
         "has_half_word_end": _as_bool(ending.get("has_half_word")),
