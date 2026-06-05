@@ -28,12 +28,12 @@ interface PageInfo {
 }
 
 const PAGE_TYPES = [
-  { type: 'learn', label: 'Öğren', description: 'Konuyu öğren ve anla', icon: GraduationCap, color: '#171717' },
-  { type: 'practice', label: 'Çalış', description: 'Aktif pratik yap', icon: PenLine, color: '#171717' },
-  { type: 'test', label: 'Test', description: 'Kendini sınava sok', icon: ClipboardCheck, color: '#171717' },
-  { type: 'cards', label: 'Kartlar', description: 'Aralıklı tekrar kartları', icon: Layers, color: '#171717' },
-  { type: 'vocabulary', label: 'Kelimeler', description: 'Günlük kelime dağarcığı', icon: BookA, color: '#171717' },
-  { type: 'tasks', label: 'Görevler', description: 'Günlük görev listesi', icon: ListTodo, color: '#171717' },
+  { type: 'learn', label: 'Lernen', description: 'Thema verstehen', icon: GraduationCap, color: '#171717' },
+  { type: 'practice', label: 'Üben', description: 'Aktiv üben', icon: PenLine, color: '#171717' },
+  { type: 'test', label: 'Test', description: 'Dich selbst prüfen', icon: ClipboardCheck, color: '#171717' },
+  { type: 'cards', label: 'Karten', description: 'Wiederholungskarten', icon: Layers, color: '#171717' },
+  { type: 'vocabulary', label: 'Wörter', description: 'Wortschatz', icon: BookA, color: '#171717' },
+  { type: 'tasks', label: 'Aufgaben', description: 'Tägliche Aufgaben', icon: ListTodo, color: '#171717' },
 ]
 
 export default function TopicPage() {
@@ -57,8 +57,8 @@ export default function TopicPage() {
     load()
   }, [topicId])
 
-  if (loading) return <div className="text-sm text-[#a3a3a3]">Loading...</div>
-  if (!topic) return <div className="text-sm text-[#737373]">Topic not found</div>
+  if (loading) return <div className="text-sm text-[#a3a3a3]">Laden...</div>
+  if (!topic) return <div className="text-sm text-[#737373]">Thema nicht gefunden</div>
 
   function getPageProgress(type: string): { progress: number; completed: boolean } {
     const page = pages.find(p => p.page_type === type)
@@ -73,7 +73,7 @@ export default function TopicPage() {
         className="flex items-center gap-2 text-sm text-[#737373] hover:text-[#171717] mb-4 transition-colors"
       >
         <ArrowLeft size={14} />
-        Back to module
+        Zurück
       </Link>
 
       <div className="mb-8">
@@ -97,7 +97,7 @@ export default function TopicPage() {
                   <Icon size={18} className="text-[#171717]" />
                 </div>
                 {completed && (
-                  <span className="text-xs bg-[#171717] text-white px-2 py-0.5 rounded-full">Done</span>
+                  <span className="text-xs bg-[#171717] text-white px-2 py-0.5 rounded-full">Fertig</span>
                 )}
               </div>
               <p className="font-medium text-[#171717] text-sm">{label}</p>

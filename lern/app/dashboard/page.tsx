@@ -49,18 +49,18 @@ export default function DashboardPage() {
   const activeModule = modules.find(m => m.status === 'active')
 
   if (loading) {
-    return <div className="text-sm text-[#a3a3a3]">Loading...</div>
+    return <div className="text-sm text-[#a3a3a3]">Laden...</div>
   }
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold tracking-tight text-[#171717] mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-[#171717] mb-6">Übersicht</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Link href="/review" className="bg-white border border-[#e5e5e5] rounded-lg p-4 hover:bg-[#fafafa] transition-colors">
           <div className="flex items-center gap-3 mb-2">
             <RotateCcw size={16} className="text-[#737373]" />
-            <span className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Due Cards</span>
+            <span className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Fällige Karten</span>
           </div>
           <p className="text-2xl font-bold text-[#171717]">{stats.dueCards}</p>
         </Link>
@@ -68,7 +68,7 @@ export default function DashboardPage() {
         <div className="bg-white border border-[#e5e5e5] rounded-lg p-4">
           <div className="flex items-center gap-3 mb-2">
             <ListChecks size={16} className="text-[#737373]" />
-            <span className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Pending Tasks</span>
+            <span className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Offene Aufgaben</span>
           </div>
           <p className="text-2xl font-bold text-[#171717]">{stats.pendingTasks}</p>
         </div>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
         <div className="bg-white border border-[#e5e5e5] rounded-lg p-4">
           <div className="flex items-center gap-3 mb-2">
             <BookOpen size={16} className="text-[#737373]" />
-            <span className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Topics</span>
+            <span className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Themen</span>
           </div>
           <p className="text-2xl font-bold text-[#171717]">
             {stats.topicsCompleted}<span className="text-[#a3a3a3] text-lg font-normal">/{stats.topicsTotal}</span>
@@ -86,7 +86,7 @@ export default function DashboardPage() {
 
       {activeModule && (
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-[#171717] mb-3">Active Module</h2>
+          <h2 className="text-sm font-semibold text-[#171717] mb-3">Aktives Modul</h2>
           <Link
             href={`/dashboard/${activeModule.slug}`}
             className="flex items-center justify-between bg-white border border-[#e5e5e5] rounded-lg p-5 hover:bg-[#fafafa] transition-colors"
@@ -103,7 +103,7 @@ export default function DashboardPage() {
       )}
 
       <div>
-        <h2 className="text-sm font-semibold text-[#171717] mb-3">All Modules</h2>
+        <h2 className="text-sm font-semibold text-[#171717] mb-3">Alle Module</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {modules.map(m => (
             <Link
@@ -118,7 +118,9 @@ export default function DashboardPage() {
               } hover:bg-[#f5f5f5]`}
             >
               <p className="font-bold text-[#171717]">{m.title}</p>
-              <p className="text-xs text-[#a3a3a3] mt-1 capitalize">{m.status}</p>
+              <p className="text-xs text-[#a3a3a3] mt-1 capitalize">
+                {m.status === 'active' ? 'Aktiv' : m.status === 'completed' ? 'Fertig' : 'Gesperrt'}
+              </p>
             </Link>
           ))}
         </div>

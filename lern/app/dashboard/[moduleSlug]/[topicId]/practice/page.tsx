@@ -144,7 +144,7 @@ export default function PracticePage() {
               {exercise.options.map((opt, i) => (
                 <button
                   key={i}
-                  onClick={() => { setUserAnswer(opt); }}
+                  onClick={() => { setUserAnswer(opt); const correct = checkAnswer(opt, exercise.answer); setShowResult(correct ? 'correct' : 'wrong'); setScore(s => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 })); }}
                   disabled={!!showResult}
                   className={`w-full text-left px-4 py-2 border rounded-md text-sm transition-colors ${
                     showResult && opt === exercise.answer ? 'border-green-300 bg-green-50' :

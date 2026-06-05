@@ -56,7 +56,7 @@ export default function TasksPage() {
     setTasks(tasks.map(t => t.id === id ? { ...t, is_completed: !currentState } : t))
   }
 
-  if (loading) return <div className="text-sm text-[#a3a3a3]">Loading...</div>
+  if (loading) return <div className="text-sm text-[#a3a3a3]">Laden...</div>
 
   return (
     <div className="max-w-2xl">
@@ -65,15 +65,14 @@ export default function TasksPage() {
         className="flex items-center gap-2 text-sm text-[#737373] hover:text-[#171717] mb-4 transition-colors"
       >
         <ArrowLeft size={14} />
-        Back to topic
+        Zurück
       </Link>
 
-      <h1 className="text-2xl font-bold tracking-tight text-[#171717] mb-6">Görevler</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-[#171717] mb-6">Aufgaben</h1>
 
       {tasks.length === 0 ? (
         <div className="border border-dashed border-[#e5e5e5] rounded-lg p-8 text-center">
-          <p className="text-sm text-[#a3a3a3]">No tasks yet</p>
-          <p className="text-xs text-[#a3a3a3] mt-1">Tasks will be assigned based on your progress</p>
+          <p className="text-sm text-[#a3a3a3]">Noch keine Aufgaben</p>
         </div>
       ) : (
         <div className="space-y-2">

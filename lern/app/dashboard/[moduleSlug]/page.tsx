@@ -52,11 +52,11 @@ export default function ModulePage() {
   }, [moduleSlug])
 
   if (loading) {
-    return <div className="text-sm text-[#a3a3a3]">Loading...</div>
+    return <div className="text-sm text-[#a3a3a3]">Laden...</div>
   }
 
   if (!module_) {
-    return <div className="text-sm text-[#737373]">Module not found</div>
+    return <div className="text-sm text-[#737373]">Modul nicht gefunden</div>
   }
 
   const completedCount = topics.filter(t => t.status === 'completed').length
@@ -66,7 +66,7 @@ export default function ModulePage() {
     <div className="max-w-3xl">
       <Link href="/dashboard" className="flex items-center gap-2 text-sm text-[#737373] hover:text-[#171717] mb-4 transition-colors">
         <ArrowLeft size={14} />
-        Back
+        Zurück
       </Link>
 
       <div className="mb-6">
@@ -79,7 +79,7 @@ export default function ModulePage() {
       {topics.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-between text-xs text-[#a3a3a3] mb-2">
-            <span>{completedCount} of {topics.length} topics completed</span>
+            <span>{completedCount} von {topics.length} Themen abgeschlossen</span>
             <span>{Math.round(progressPercent)}%</span>
           </div>
           <div className="h-2 bg-[#f5f5f5] rounded-full overflow-hidden border border-[#e5e5e5]">
@@ -93,8 +93,8 @@ export default function ModulePage() {
 
       {topics.length === 0 ? (
         <div className="border border-dashed border-[#e5e5e5] rounded-lg p-8 text-center">
-          <p className="text-sm text-[#a3a3a3]">No topics yet</p>
-          <p className="text-xs text-[#a3a3a3] mt-1">Topics will be added as you progress through the course</p>
+          <p className="text-sm text-[#a3a3a3]">Noch keine Themen</p>
+          <p className="text-xs text-[#a3a3a3] mt-1">Themen werden mit dem Kursfortschritt hinzugefügt</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -123,7 +123,7 @@ export default function ModulePage() {
                 topic.status === 'in_progress' ? 'bg-[#f5f5f5] text-[#737373]' :
                 'text-[#a3a3a3]'
               }`}>
-                {topic.status === 'completed' ? 'Done' : topic.status === 'in_progress' ? 'In progress' : ''}
+                {topic.status === 'completed' ? 'Fertig' : topic.status === 'in_progress' ? 'In Bearbeitung' : ''}
               </span>
             </Link>
           ))}

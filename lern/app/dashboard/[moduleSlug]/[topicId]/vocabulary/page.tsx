@@ -37,7 +37,7 @@ export default function VocabularyPage() {
     load()
   }, [topicId])
 
-  if (loading) return <div className="text-sm text-[#a3a3a3]">Loading...</div>
+  if (loading) return <div className="text-sm text-[#a3a3a3]">Laden...</div>
 
   return (
     <div className="max-w-2xl">
@@ -46,23 +46,22 @@ export default function VocabularyPage() {
         className="flex items-center gap-2 text-sm text-[#737373] hover:text-[#171717] mb-4 transition-colors"
       >
         <ArrowLeft size={14} />
-        Back to topic
+        Zurück
       </Link>
 
-      <h1 className="text-2xl font-bold tracking-tight text-[#171717] mb-6">Kelimeler</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-[#171717] mb-6">Wörter</h1>
 
       {vocab.length === 0 ? (
         <div className="border border-dashed border-[#e5e5e5] rounded-lg p-8 text-center">
-          <p className="text-sm text-[#a3a3a3]">No vocabulary yet</p>
-          <p className="text-xs text-[#a3a3a3] mt-1">Words will be added as you learn new topics</p>
+          <p className="text-sm text-[#a3a3a3]">Noch keine Wörter</p>
         </div>
       ) : (
         <div className="border border-[#e5e5e5] rounded-lg overflow-hidden">
           <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-px bg-[#f5f5f5] px-4 py-2 text-xs font-medium text-[#737373] uppercase tracking-wide">
-            <span>Type</span>
-            <span>Word</span>
-            <span>Translation</span>
-            <span>Mastery</span>
+            <span>Typ</span>
+            <span>Wort</span>
+            <span>Übersetzung</span>
+            <span></span>
           </div>
           {vocab.map(v => (
             <div key={v.id} className="grid grid-cols-[auto_1fr_1fr_auto] gap-px px-4 py-3 border-t border-[#e5e5e5] items-center">

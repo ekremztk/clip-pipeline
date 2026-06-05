@@ -54,7 +54,7 @@ export function Sidebar() {
               }`}
             >
               <LayoutDashboard size={16} />
-              Dashboard
+              Übersicht
             </Link>
           </li>
 
@@ -64,7 +64,7 @@ export function Sidebar() {
               className="flex items-center gap-2 px-3 py-1 text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider w-full"
             >
               {modulesOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-              Modules
+              Module
             </button>
             {modulesOpen && (
               <ul className="mt-1 space-y-0.5">
@@ -97,7 +97,7 @@ export function Sidebar() {
               }`}
             >
               <RotateCcw size={16} />
-              Review
+              Wiederholen
             </Link>
           </li>
 
@@ -111,7 +111,7 @@ export function Sidebar() {
               }`}
             >
               <Library size={16} />
-              Kelimelerim
+              Meine Wörter
             </Link>
           </li>
         </ul>
