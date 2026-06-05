@@ -11,6 +11,7 @@ interface Card {
   front: string
   back: string
   example_sentence: string | null
+  distractors: string[] | null
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -22,13 +23,16 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-function generateOptions(cards: Card[], currentIndex: number): string[] {
-  const correct = cards[currentIndex].back
-  const others = cards
-    .filter((_, i) => i !== currentIndex)
+function generateOptions(card: Card, allCards: Card[]): string[] {
+  const correct = card.back
+  if (card.distractors && card.distractors.length >= 3) {
+    return shuffle([correct, ...card.distractors.slice(0, 3)])
+  }
+  const others = allCards
+    .filter(c => c.id !== card.id)
     .map(c => c.back)
-  const distractors = shuffle(others).slice(0, 3)
-  return shuffle([correct, ...distractors])
+  const fallback = shuffle(others).slice(0, 3)
+  return shuffle([correct, ...fallback])
 }
 
 export default function ReviewPage() {
@@ -42,7 +46,7 @@ export default function ReviewPage() {
     async function load() {
       const { data } = await supabase
         .from('lern_cards')
-        .select('id, front, back, example_sentence')
+        .select('id, front, back, example_sentence, distractors')
         .lte('due_at', new Date().toISOString())
         .neq('state', 'new')
         .order('due_at')
@@ -54,7 +58,7 @@ export default function ReviewPage() {
 
   const options = useMemo(() => {
     if (cards.length < 4 || currentIndex >= cards.length) return []
-    return generateOptions(cards, currentIndex)
+    return generateOptions(cards[currentIndex], cards)
   }, [cards, currentIndex])
 
   function handleSelect(option: string) {
