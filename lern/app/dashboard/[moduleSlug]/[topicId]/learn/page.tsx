@@ -5,11 +5,13 @@ import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { ArrowLeft, ChevronRight, Eye } from 'lucide-react'
+import { useLang } from '@/lib/language-context'
 
 interface ContentBlock {
   type: 'heading' | 'text' | 'example' | 'table' | 'tip' | 'rule' | 'conjugation' | 'translate'
   content: string
   translation?: string
+  translation_ru?: string
   items?: string[]
   rows?: string[][]
   columns?: string[]
@@ -81,7 +83,10 @@ export default function LearnPage() {
 }
 
 function TranslateToggle({ translation }: { translation: string }) {
+  const { lang } = useLang()
   const [show, setShow] = useState(false)
+  const label = lang === 'ru' ? 'перевод' : 'çeviri'
+  const hide  = lang === 'ru' ? 'скрыть'  : 'gizle'
   return (
     <span className="inline-flex items-center gap-1 ml-2">
       <button
@@ -89,14 +94,20 @@ function TranslateToggle({ translation }: { translation: string }) {
         className="inline-flex items-center gap-1 text-xs text-[#a3a3a3] hover:text-[#737373] transition-colors"
       >
         <Eye size={11} />
-        {show ? 'gizle' : 'çeviri'}
+        {show ? hide : label}
       </button>
       {show && <span className="text-xs text-[#a3a3a3] italic ml-1">({translation})</span>}
     </span>
   )
 }
 
+function useTranslation(block: ContentBlock): string | undefined {
+  const { lang } = useLang()
+  return lang === 'ru' ? (block.translation_ru || block.translation) : block.translation
+}
+
 function ContentRenderer({ block }: { block: ContentBlock }) {
+  const translation = useTranslation(block)
   switch (block.type) {
     case 'heading':
       return <h2 className="text-lg font-semibold text-[#171717] mt-8 mb-2">{block.content}</h2>
@@ -105,7 +116,7 @@ function ContentRenderer({ block }: { block: ContentBlock }) {
       return (
         <div>
           <p className="text-sm text-[#525252] leading-relaxed">{block.content}</p>
-          {block.translation && <TranslateToggle translation={block.translation} />}
+          {translation && <TranslateToggle translation={translation} />}
         </div>
       )
 
@@ -113,7 +124,7 @@ function ContentRenderer({ block }: { block: ContentBlock }) {
       return (
         <div className="bg-[#f8faf8] border border-[#d4edda] rounded-lg p-5">
           <p className="text-sm font-medium text-[#171717] mb-2">{block.content}</p>
-          {block.translation && <TranslateToggle translation={block.translation} />}
+          {translation && <TranslateToggle translation={translation} />}
           {block.items && (
             <ul className="mt-3 space-y-2">
               {block.items.map((item, i) => (
@@ -179,7 +190,7 @@ function ContentRenderer({ block }: { block: ContentBlock }) {
           <span className="text-base">💡</span>
           <div>
             <p className="text-sm text-[#525252]">{block.content}</p>
-            {block.translation && <TranslateToggle translation={block.translation} />}
+            {translation && <TranslateToggle translation={translation} />}
           </div>
         </div>
       )
@@ -190,13 +201,13 @@ function ContentRenderer({ block }: { block: ContentBlock }) {
           <span className="text-base">📐</span>
           <div>
             <p className="text-sm font-medium text-[#171717]">{block.content}</p>
-            {block.translation && <TranslateToggle translation={block.translation} />}
+            {translation && <TranslateToggle translation={translation} />}
           </div>
         </div>
       )
 
     case 'translate':
-      return <TranslateBlock content={block.content} translation={block.translation || ''} />
+      return <TranslateBlock content={block.content} translation={translation || ''} />
 
     default:
       return null
@@ -204,7 +215,10 @@ function ContentRenderer({ block }: { block: ContentBlock }) {
 }
 
 function TranslateBlock({ content, translation }: { content: string; translation: string }) {
+  const { lang } = useLang()
   const [show, setShow] = useState(false)
+  const showLabel = lang === 'ru' ? 'Übersetzung anzeigen' : 'Übersetzung anzeigen'
+  const hideLabel = lang === 'ru' ? 'Übersetzung ausblenden' : 'Übersetzung ausblenden'
   return (
     <div className="bg-[#fafafa] border border-[#e5e5e5] rounded-lg p-4">
       <p className="text-sm text-[#525252]">{content}</p>
@@ -213,7 +227,7 @@ function TranslateBlock({ content, translation }: { content: string; translation
         className="mt-2 flex items-center gap-1 text-xs text-[#a3a3a3] hover:text-[#737373] transition-colors"
       >
         <Eye size={11} />
-        {show ? 'Übersetzung ausblenden' : 'Übersetzung anzeigen'}
+        {show ? hideLabel : showLabel}
       </button>
       {show && <p className="mt-2 text-xs text-[#a3a3a3] italic border-t border-[#e5e5e5] pt-2">{translation}</p>}
     </div>
