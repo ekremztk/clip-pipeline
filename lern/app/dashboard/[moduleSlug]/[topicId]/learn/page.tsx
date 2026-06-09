@@ -84,7 +84,7 @@ export default function LearnPage() {
 
 function TranslateToggle({ translation }: { translation: string }) {
   const { lang } = useLang()
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(true)
   const label = lang === 'ru' ? 'перевод' : 'çeviri'
   const hide  = lang === 'ru' ? 'скрыть'  : 'gizle'
   return (
@@ -216,7 +216,7 @@ function ContentRenderer({ block }: { block: ContentBlock }) {
 
 function TranslateBlock({ content, translation }: { content: string; translation: string }) {
   const { lang } = useLang()
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(true)
   const showLabel = lang === 'ru' ? 'Übersetzung anzeigen' : 'Übersetzung anzeigen'
   const hideLabel = lang === 'ru' ? 'Übersetzung ausblenden' : 'Übersetzung ausblenden'
   return (
