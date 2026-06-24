@@ -1156,7 +1156,7 @@ export default function DashboardPage() {
                                                     type="text"
                                                     value={youtubeUrl}
                                                     onChange={e => { setYoutubeUrl(e.target.value); }}
-                                                    onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) handleYoutubeUrl(youtubeUrl); }}
+                                                    onKeyDown={e => { if (e.key === 'Enter' && youtubeUrl) toast.error('This feature is currently unavailable.'); }}
                                                     onFocus={() => setInputFocused(true)}
                                                     onBlur={() => { if (!youtubeUrl) setInputFocused(false); }}
                                                     placeholder="Paste a YouTube, Twitch or Vimeo URL..."
@@ -1192,8 +1192,8 @@ export default function DashboardPage() {
                                                     />
                                                 )}
                                                 <button
-                                                    onClick={() => youtubeUrl && handleYoutubeUrl(youtubeUrl)}
-                                                    disabled={!youtubeUrl || youtubeFetching}
+                                                    onClick={() => { toast.error('This feature is currently unavailable.'); }}
+                                                    disabled={youtubeFetching}
                                                     className="relative px-6 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 whitespace-nowrap"
                                                     style={{
                                                         background: '#faf9f5',
