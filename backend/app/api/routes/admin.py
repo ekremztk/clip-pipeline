@@ -1780,3 +1780,272 @@ async def admin_overview(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Could not load admin overview",
         ) from exc
+
+
+# ─── CLIENT CREDIT MANAGEMENT ──────────────────────────────────────────────────
+
+
+@router.get("/clients")
+async def list_clients(admin_user: dict = Depends(require_admin)):
+    """List all client accounts with their balances and status."""
+    try:
+        with _db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        ca.user_id::text,
+                        ca.display_name,
+                        ca.created_at,
+                        ca.notes,
+                        uc.balance,
+                        uc.is_locked,
+                        uc.locked_reason,
+                        uc.consecutive_failures,
+                        uc.max_concurrent_jobs,
+                        uc.storage_cap_bytes,
+                        uc.clip_retention_days,
+                        au.email
+                    FROM client_accounts ca
+                    LEFT JOIN user_credits uc ON uc.user_id = ca.user_id
+                    LEFT JOIN auth.users au ON au.id = ca.user_id
+                    ORDER BY ca.created_at DESC
+                """)
+                rows = cur.fetchall()
+        return {"clients": [dict(r) for r in rows]}
+    except Exception as exc:
+        print(f"[Admin] list_clients error: {exc}")
+        raise HTTPException(status_code=503, detail="Could not load clients") from exc
+
+
+@router.get("/clients/{user_id}/transactions")
+async def client_transactions(
+    user_id: str,
+    admin_user: dict = Depends(require_admin),
+):
+    """Get credit transaction history for a specific client."""
+    from app.services.credits import get_transactions
+    txns = get_transactions(user_id, limit=100, offset=0)
+    return {"transactions": txns}
+
+
+from pydantic import BaseModel as _BM
+
+
+class _TopupBody(_BM):
+    user_id: str
+    amount: int
+    note: str = ""
+
+
+@router.post("/clients/topup")
+async def admin_topup_client(
+    body: _TopupBody,
+    admin_user: dict = Depends(require_admin),
+):
+    """Add credits to a client account."""
+    from app.services.credits import topup_credits
+    if body.amount < 1 or body.amount > 10000:
+        raise HTTPException(status_code=400, detail="Amount must be between 1 and 10000")
+    result = topup_credits(body.user_id, body.amount, admin_user["id"], body.note)
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail="Client credit account not found")
+    return {"success": True, "new_balance": result["new_balance"]}
+
+
+class _LockBody(_BM):
+    user_id: str
+    reason: str = ""
+
+
+@router.post("/clients/lock")
+async def lock_client(body: _LockBody, admin_user: dict = Depends(require_admin)):
+    """Lock a client account."""
+    try:
+        with _db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE user_credits SET is_locked = TRUE, locked_reason = %s, updated_at = now()
+                    WHERE user_id = %s::uuid
+                    """,
+                    (body.reason or "Locked by admin", body.user_id),
+                )
+                conn.commit()
+        return {"success": True}
+    except Exception as exc:
+        print(f"[Admin] lock_client error: {exc}")
+        raise HTTPException(status_code=503, detail="Lock failed") from exc
+
+
+@router.post("/clients/unlock")
+async def unlock_client(body: _LockBody, admin_user: dict = Depends(require_admin)):
+    """Unlock a client account and reset consecutive failures."""
+    try:
+        with _db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE user_credits
+                    SET is_locked = FALSE, locked_reason = NULL, consecutive_failures = 0, updated_at = now()
+                    WHERE user_id = %s::uuid
+                    """,
+                    (body.user_id,),
+                )
+                conn.commit()
+        return {"success": True}
+    except Exception as exc:
+        print(f"[Admin] unlock_client error: {exc}")
+        raise HTTPException(status_code=503, detail="Unlock failed") from exc
+
+
+@router.get("/credit-requests")
+async def list_credit_requests(
+    status_filter: str = "pending",
+    admin_user: dict = Depends(require_admin),
+):
+    """List credit requests, optionally filtered by status."""
+    try:
+        with _db_connect() as conn:
+            with conn.cursor() as cur:
+                if status_filter == "all":
+                    cur.execute("""
+                        SELECT cr.id::text, cr.user_id::text, cr.amount_requested,
+                               cr.status, cr.admin_note, cr.created_at, cr.resolved_at,
+                               au.email
+                        FROM credit_requests cr
+                        LEFT JOIN auth.users au ON au.id = cr.user_id
+                        ORDER BY cr.created_at DESC
+                        LIMIT 100
+                    """)
+                else:
+                    cur.execute("""
+                        SELECT cr.id::text, cr.user_id::text, cr.amount_requested,
+                               cr.status, cr.admin_note, cr.created_at, cr.resolved_at,
+                               au.email
+                        FROM credit_requests cr
+                        LEFT JOIN auth.users au ON au.id = cr.user_id
+                        WHERE cr.status = %s
+                        ORDER BY cr.created_at DESC
+                        LIMIT 100
+                    """, (status_filter,))
+                rows = cur.fetchall()
+        return {"requests": [dict(r) for r in rows]}
+    except Exception as exc:
+        print(f"[Admin] list_credit_requests error: {exc}")
+        raise HTTPException(status_code=503, detail="Could not load credit requests") from exc
+
+
+class _RequestDecisionBody(_BM):
+    request_id: str
+    action: str  # "approve" or "reject"
+    note: str = ""
+
+
+@router.post("/credit-requests/decide")
+async def decide_credit_request(
+    body: _RequestDecisionBody,
+    admin_user: dict = Depends(require_admin),
+):
+    """Approve or reject a credit request."""
+    if body.action not in ("approve", "reject"):
+        raise HTTPException(status_code=400, detail="Action must be 'approve' or 'reject'")
+
+    try:
+        with _db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT user_id::text, amount_requested, status
+                    FROM credit_requests WHERE id = %s::uuid
+                    """,
+                    (body.request_id,),
+                )
+                req = cur.fetchone()
+                if not req:
+                    raise HTTPException(status_code=404, detail="Request not found")
+                if req["status"] != "pending":
+                    raise HTTPException(status_code=409, detail=f"Request already {req['status']}")
+
+                cur.execute(
+                    """
+                    UPDATE credit_requests
+                    SET status = %s, admin_note = %s, resolved_at = now(), resolved_by = %s::uuid
+                    WHERE id = %s::uuid
+                    """,
+                    (
+                        "approved" if body.action == "approve" else "rejected",
+                        body.note,
+                        admin_user["id"],
+                        body.request_id,
+                    ),
+                )
+                conn.commit()
+
+        if body.action == "approve":
+            from app.services.credits import topup_credits
+            topup_credits(req["user_id"], req["amount_requested"], admin_user["id"], f"Approved request #{body.request_id}")
+
+        return {"success": True, "action": body.action, "amount": req["amount_requested"]}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"[Admin] decide_credit_request error: {exc}")
+        raise HTTPException(status_code=503, detail="Decision failed") from exc
+
+
+class _CreateClientBody(_BM):
+    email: str
+    display_name: str = ""
+    initial_credits: int = 0
+    notes: str = ""
+
+
+@router.post("/clients/create")
+async def create_client_account(
+    body: _CreateClientBody,
+    admin_user: dict = Depends(require_admin),
+):
+    """Register an existing Supabase auth user as a client with credits."""
+    try:
+        with _db_connect() as conn:
+            with conn.cursor() as cur:
+                # Find user by email
+                cur.execute(
+                    "SELECT id::text FROM auth.users WHERE email = %s LIMIT 1",
+                    (body.email,),
+                )
+                user_row = cur.fetchone()
+                if not user_row:
+                    raise HTTPException(status_code=404, detail=f"No auth user found with email {body.email}")
+
+                target_user_id = user_row["id"]
+
+                # Check not already a client
+                cur.execute(
+                    "SELECT 1 FROM client_accounts WHERE user_id = %s::uuid",
+                    (target_user_id,),
+                )
+                if cur.fetchone():
+                    raise HTTPException(status_code=409, detail="User is already a client")
+
+                # Insert client_accounts (trigger auto-creates user_credits)
+                cur.execute(
+                    """
+                    INSERT INTO client_accounts (user_id, display_name, created_by, notes)
+                    VALUES (%s::uuid, %s, %s::uuid, %s)
+                    """,
+                    (target_user_id, body.display_name or body.email, admin_user["id"], body.notes),
+                )
+                conn.commit()
+
+        # Topup initial credits if specified
+        if body.initial_credits > 0:
+            from app.services.credits import topup_credits
+            topup_credits(target_user_id, body.initial_credits, admin_user["id"], "Initial balance on account creation")
+
+        return {"success": True, "user_id": target_user_id, "initial_credits": body.initial_credits}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"[Admin] create_client error: {exc}")
+        raise HTTPException(status_code=503, detail="Client creation failed") from exc

@@ -52,6 +52,7 @@ export const navGroups: NavGroup[] = [
         items: [
             { label: "Channels", href: "/admin/channels", icon: Tv },
             { label: "Customers", href: "/admin/customers", icon: Users },
+            { label: "Credits", href: "/admin/credits", icon: WalletCards },
             { label: "Billing", href: "/admin/billing", icon: CreditCard },
             { label: "Calendar", href: "/admin/calendar", icon: CalendarDays },
         ],

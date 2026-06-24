@@ -32,6 +32,7 @@ import {
     ArrowLeft,
     AudioLines,
     Sparkles,
+    Film,
 } from "lucide-react";
 
 type Channel = {
@@ -131,6 +132,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [user, setUser] = useState<any>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+    const [creditBalance, setCreditBalance] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const profileRef = useRef<HTMLDivElement>(null);
@@ -228,6 +231,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     useEffect(() => {
         if (!user?.id) {
             setIsAdmin(false);
+            setIsClient(false);
+            setCreditBalance(null);
             return;
         }
 
@@ -238,6 +243,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             })
             .catch(() => {
                 if (!cancelled) setIsAdmin(false);
+            });
+
+        authFetch('/credits/balance')
+            .then(async (res) => {
+                if (!cancelled && res.ok) {
+                    const data = await res.json();
+                    setIsClient(true);
+                    setCreditBalance(data.balance);
+                } else if (!cancelled) {
+                    setIsClient(false);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setIsClient(false);
             });
 
         return () => {
@@ -300,9 +319,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const modulesItems = [
         { href: "/dashboard",                label: "Dashboard",      icon: Home,         exact: true,  pro: false },
-        { href: "/dashboard/content-finder", label: "Content Finder", icon: Search,       exact: false, pro: false },
-        { href: "/dashboard/provision",      label: "Provision",      icon: Sparkles,     exact: false, pro: false },
-        { href: "https://edit.prognot.com",  label: "Editor",         icon: Scissors,     exact: false, pro: true,  external: true },
+        ...(!isClient ? [{ href: "/dashboard/content-finder", label: "Content Finder", icon: Search,       exact: false, pro: false }] : []),
+        ...(!isClient ? [{ href: "/dashboard/provision",      label: "Provision",      icon: Sparkles,     exact: false, pro: false }] : []),
+        ...(!isClient ? [{ href: "/dashboard/studio",         label: "Studio",         icon: Film,         exact: false, pro: false }] : []),
+        ...(!isClient ? [{ href: "https://edit.prognot.com",  label: "Editor",         icon: Scissors,     exact: false, pro: true,  external: true }] : []),
         ...(isAdmin ? [{ href: "/admin",     label: "Admin",          icon: Shield,       exact: false, pro: false }] : []),
         ...(isAdmin ? [{ href: "/director",  label: "AI Director",    icon: Clapperboard, exact: false, pro: false }] : []),
     ];
@@ -619,26 +639,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                                 <span className="text-sm font-medium">{ch.display_name || ch.name || ch.id}</span>
                                             </button>
                                         ))}
-                                        <Link
-                                            href="/dashboard/settings"
-                                            onClick={() => setProfileOpen(false)}
-                                            className="flex items-center gap-2 w-full px-3 py-2.5 mt-1 rounded-xl transition-colors text-sm font-medium hover:bg-white/5"
-                                            style={{ color: "#ababab" }}
-                                        >
-                                            <div className="w-4 flex items-center justify-center"><Plus size={14} /></div>
-                                            Add new channel
-                                        </Link>
+                                        {!isClient && (
+                                            <Link
+                                                href="/dashboard/settings"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="flex items-center gap-2 w-full px-3 py-2.5 mt-1 rounded-xl transition-colors text-sm font-medium hover:bg-white/5"
+                                                style={{ color: "#ababab" }}
+                                            >
+                                                <div className="w-4 flex items-center justify-center"><Plus size={14} /></div>
+                                                Add new channel
+                                            </Link>
+                                        )}
                                     </div>
 
                                     {/* Actions */}
                                     <div className="p-2">
-                                        <button
-                                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-colors text-sm font-medium hover:bg-white/5 hover:!text-[#faf9f5] text-left"
-                                            style={{ color: "#ababab" }}
-                                        >
-                                            <CreditCard size={16} />
-                                            <span className="flex-1 text-left">Billing & Credits</span>
-                                        </button>
+                                        {isClient && creditBalance !== null && (
+                                            <div
+                                                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium"
+                                                style={{ color: creditBalance <= 10 ? "#f59e0b" : "#faf9f5" }}
+                                            >
+                                                <CreditCard size={16} />
+                                                <span className="flex-1 text-left">{creditBalance} credits</span>
+                                            </div>
+                                        )}
+                                        {!isClient && (
+                                            <button
+                                                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-colors text-sm font-medium hover:bg-white/5 hover:!text-[#faf9f5] text-left"
+                                                style={{ color: "#ababab" }}
+                                            >
+                                                <CreditCard size={16} />
+                                                <span className="flex-1 text-left">Billing & Credits</span>
+                                            </button>
+                                        )}
                                         <Link
                                             href="/dashboard/settings"
                                             onClick={() => setProfileOpen(false)}

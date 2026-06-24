@@ -706,6 +706,26 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                              "error_message": error_msg},
                     channel_id=channel_id,
                 )
+                # --- CREDIT REFUND ON STEP FAILURE ---
+                try:
+                    from app.middleware.roles import is_client_user
+                    from app.services.credits import refund_credits
+                    from app.services.supabase_client import get_client as _sb
+                    _job_row = _sb().table("jobs").select("user_id, credit_reserved").eq("id", job_id).execute()
+                    if _job_row.data:
+                        _uid = _job_row.data[0]["user_id"]
+                        _reserved = _job_row.data[0].get("credit_reserved", 0)
+                        if is_client_user(_uid) and _reserved > 0:
+                            _refund_result = refund_credits(_uid, job_id, _reserved)
+                            print(f"[Credits] Refunded {_reserved} credits for job {job_id} (step {step_name} failed)")
+                            if _refund_result.get("is_locked"):
+                                from app.director.notifier import notify_custom
+                                notify_custom(
+                                    "Client Account Locked",
+                                    f"Client {_uid} auto-locked after {_refund_result['consecutive_failures']} consecutive failures."
+                                )
+                except Exception as _ce:
+                    print(f"[Credits] Step-failure refund error: {_ce}")
                 return  # Return early on any step failure
 
         # After all steps complete
@@ -720,6 +740,30 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             current_step_number=10,
             clip_count=clip_count
         )
+        # --- CREDIT CONFIRM/REFUND ---
+        try:
+            from app.middleware.roles import is_client_user
+            from app.services.credits import confirm_credits, refund_credits
+            from app.services.supabase_client import get_client as _sb
+            _job_row = _sb().table("jobs").select("user_id, credit_reserved").eq("id", job_id).execute()
+            if _job_row.data:
+                _uid = _job_row.data[0]["user_id"]
+                _reserved = _job_row.data[0].get("credit_reserved", 0)
+                if is_client_user(_uid) and _reserved > 0:
+                    if clip_count >= 1:
+                        confirm_credits(_uid, job_id)
+                        print(f"[Credits] Confirmed {_reserved} credits for job {job_id}")
+                    else:
+                        _refund_result = refund_credits(_uid, job_id, _reserved)
+                        print(f"[Credits] Refunded {_reserved} credits for job {job_id} (0 clips)")
+                        if _refund_result.get("is_locked"):
+                            from app.director.notifier import notify_custom
+                            notify_custom(
+                                "Client Account Locked",
+                                f"Client {_uid} auto-locked after {_refund_result['consecutive_failures']} consecutive failures."
+                            )
+        except Exception as _ce:
+            print(f"[Credits] Post-pipeline credit hook error: {_ce}")
         try:
             from app.pipeline.stock_analytics import record_source_completed
             record_source_completed(job_id, clip_count)
@@ -760,6 +804,26 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             status=JobStatus.FAILED.value,
             error_message=f"Pipeline critical failure: {error_msg}"
         )
+        # --- CREDIT REFUND ON CRITICAL FAILURE ---
+        try:
+            from app.middleware.roles import is_client_user
+            from app.services.credits import refund_credits
+            from app.services.supabase_client import get_client as _sb
+            _job_row = _sb().table("jobs").select("user_id, credit_reserved").eq("id", job_id).execute()
+            if _job_row.data:
+                _uid = _job_row.data[0]["user_id"]
+                _reserved = _job_row.data[0].get("credit_reserved", 0)
+                if is_client_user(_uid) and _reserved > 0:
+                    _refund_result = refund_credits(_uid, job_id, _reserved)
+                    print(f"[Credits] Refunded {_reserved} credits for job {job_id} (critical failure)")
+                    if _refund_result.get("is_locked"):
+                        from app.director.notifier import notify_custom
+                        notify_custom(
+                            "Client Account Locked",
+                            f"Client {_uid} auto-locked after {_refund_result['consecutive_failures']} consecutive failures."
+                        )
+        except Exception as _ce:
+            print(f"[Credits] Critical-failure refund error: {_ce}")
     finally:
         for path in [audio_path, video_path]:
             if path and os.path.exists(path):

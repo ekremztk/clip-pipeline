@@ -287,6 +287,67 @@ def _run_weekly_digest():
         print(f"[WeeklyDigest] error: {e}")
 
 
+async def _marketplace_scheduler():
+    """Poll marketplace searches every 10 minutes."""
+    import asyncio
+    await asyncio.sleep(60)
+    while True:
+        try:
+            from app.marketplace.scheduler import run_marketplace_scheduler
+            await run_marketplace_scheduler()
+        except Exception as e:
+            print(f"[Marketplace] scheduler error: {e}")
+        await asyncio.sleep(600)
+
+
+async def _client_clip_retention_scheduler():
+    """Daily: delete client clips older than their retention period (default 30 days)."""
+    import asyncio
+    from datetime import datetime, timezone, timedelta
+    await asyncio.sleep(300)  # wait 5 min after startup
+    while True:
+        try:
+            from app.services.supabase_client import get_client as _get_sb
+            from app.services.r2_client import get_r2_client
+            sb = _get_sb()
+
+            expired_clips = sb.rpc("get_expired_client_clips", {}).execute()
+
+            if not expired_clips.data:
+                await asyncio.sleep(86400)
+                continue
+
+            s3 = get_r2_client()
+            bucket = settings.R2_BUCKET_NAME
+            deleted_count = 0
+
+            for clip in expired_clips.data:
+                clip_id = clip["id"]
+                paths_to_delete = []
+                for key in ("video_captioned_path", "video_reframed_path", "file_url"):
+                    val = clip.get(key)
+                    if val and val.startswith(("captions/", "reframe/", "upscale/")):
+                        paths_to_delete.append(val)
+
+                for path in paths_to_delete:
+                    try:
+                        s3.delete_object(Bucket=bucket, Key=path)
+                    except Exception:
+                        pass
+
+                try:
+                    sb.table("clips").delete().eq("id", clip_id).execute()
+                    deleted_count += 1
+                except Exception as _e:
+                    print(f"[ClipRetention] delete clip {clip_id} error: {_e}")
+
+            if deleted_count:
+                print(f"[ClipRetention] Deleted {deleted_count} expired client clips")
+        except Exception as e:
+            print(f"[ClipRetention] scheduler error: {e}")
+        await asyncio.sleep(86400)  # once a day
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     import asyncio
@@ -302,6 +363,8 @@ async def lifespan(app: FastAPI):
         optional_tasks.append(asyncio.create_task(_admin_youtube_realtime_scheduler()))
     if settings.ADMIN_YOUTUBE_ANALYTICS_SYNC_ENABLED:
         optional_tasks.append(asyncio.create_task(_admin_youtube_analytics_scheduler()))
+    optional_tasks.append(asyncio.create_task(_marketplace_scheduler()))
+    optional_tasks.append(asyncio.create_task(_client_clip_retention_scheduler()))
     yield
     # Cleanup Director connection pool
     try:
@@ -318,7 +381,7 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
 
-from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant
+from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits
 from app.api.websocket import progress
 from app.director.router import router as director_router
 from app.limiter import limiter
@@ -327,11 +390,12 @@ from app.limiter import limiter
 _ALLOWED_ORIGINS = [
     "https://clip.prognot.com",
     "https://edit.prognot.com",
+    "https://sell.prognot.com",
     "https://prognot.com",
     "https://www.prognot.com",
 ]
 if settings.ENVIRONMENT == "development":
-    _ALLOWED_ORIGINS += ["http://localhost:3000", "http://localhost:3001"]
+    _ALLOWED_ORIGINS += ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
 
 app = FastAPI(
     title="Prognot Clip Pipeline",
@@ -367,6 +431,9 @@ app.include_router(stock_reviews.router)
 app.include_router(provision.router)
 app.include_router(admin.router)
 app.include_router(davinci_assistant.router)
+app.include_router(studio.router)
+app.include_router(marketplace.router)
+app.include_router(client_credits.router)
 
 from app.api.routes import debug_reframe, debug_pipeline
 app.include_router(debug_reframe.router)

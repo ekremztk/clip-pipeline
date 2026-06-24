@@ -95,6 +95,9 @@ async def get_channel(channel_id: str, current_user: dict = Depends(get_current_
 
 @router.post("")
 async def create_channel(channel: ChannelCreate, current_user: dict = Depends(get_current_user)):
+    from app.middleware.roles import is_client_user
+    if is_client_user(current_user["id"]):
+        raise HTTPException(status_code=403, detail="Channel creation is disabled for client accounts. Contact your administrator.")
     try:
         supabase = get_client()
         data = {

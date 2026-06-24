@@ -524,6 +524,22 @@ async def _fetch_upload_and_run_pipeline(
                     print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
 
         get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
+
+        # --- CLIENT CREDIT RESERVATION (after trim, before pipeline) ---
+        from app.middleware.roles import is_client_user
+        from app.services.credits import calculate_credits_needed, reserve_credits
+        if is_client_user(user_id):
+            final_duration = get_video_duration(video_path)
+            if final_duration < 60.0:
+                update_job(job_id, status=JobStatus.FAILED.value, error_message="Video must be at least 60 seconds after trimming.")
+                return
+            credits_needed = calculate_credits_needed(final_duration)
+            reserved = reserve_credits(user_id, job_id, credits_needed)
+            if not reserved:
+                update_job(job_id, status=JobStatus.FAILED.value, error_message="Insufficient credits to process this video.")
+                return
+            get_client().table("jobs").update({"credit_reserved": credits_needed}).eq("id", job_id).execute()
+
         # Run sync pipeline in a worker thread so the event loop stays free.
         # Without this, Modal's sync calls block the loop, print buffers stall,
         # and Modal itself warns about blocking interfaces inside async context.
@@ -615,6 +631,22 @@ async def _download_and_run_pipeline(
                     print(f"[JobsRoute] Trim failed, using full video: {result.stderr}")
 
         get_client().table("jobs").update({"video_path": video_path}).eq("id", job_id).execute()
+
+        # --- CLIENT CREDIT RESERVATION (after trim, before pipeline) ---
+        from app.middleware.roles import is_client_user
+        from app.services.credits import calculate_credits_needed, reserve_credits
+        if is_client_user(user_id):
+            final_duration = get_video_duration(video_path)
+            if final_duration < 60.0:
+                update_job(job_id, status=JobStatus.FAILED.value, error_message="Video must be at least 60 seconds after trimming.")
+                return
+            credits_needed = calculate_credits_needed(final_duration)
+            reserved = reserve_credits(user_id, job_id, credits_needed)
+            if not reserved:
+                update_job(job_id, status=JobStatus.FAILED.value, error_message="Insufficient credits to process this video.")
+                return
+            get_client().table("jobs").update({"credit_reserved": credits_needed}).eq("id", job_id).execute()
+
         # Run sync pipeline in a worker thread so the event loop stays free.
         import asyncio
         await asyncio.to_thread(
@@ -796,6 +828,23 @@ async def create_job(
         if not channel_check.data:
             raise HTTPException(status_code=404, detail="Channel not found")
 
+        # --- CLIENT CREDIT PRE-CHECK ---
+        from app.middleware.roles import is_client_user
+        from app.services.credits import get_balance, check_concurrent_jobs
+        _is_client = is_client_user(current_user["id"])
+        if _is_client:
+            credit_info = get_balance(current_user["id"])
+            if not credit_info:
+                raise HTTPException(status_code=403, detail="Client account not configured. Contact administrator.")
+            if credit_info.get("is_locked"):
+                raise HTTPException(status_code=403, detail="Account locked due to repeated failures. Contact administrator.")
+            if credit_info.get("balance", 0) <= 0:
+                raise HTTPException(status_code=402, detail="Insufficient credits. Request more credits to continue.")
+            active_jobs = check_concurrent_jobs(current_user["id"])
+            max_jobs = credit_info.get("max_concurrent_jobs", 2)
+            if active_jobs >= max_jobs:
+                raise HTTPException(status_code=429, detail=f"Maximum {max_jobs} concurrent jobs allowed. Wait for current jobs to complete.")
+
         # Insert job into Supabase
         # Log new clip settings for future pipeline use
         if clip_duration_min is not None or clip_duration_max is not None:
@@ -861,6 +910,18 @@ async def create_job(
                 trim_end_seconds,
             )
         else:
+            # For local uploads, video is already trimmed — reserve credits now
+            if _is_client:
+                from app.services.credits import calculate_credits_needed, reserve_credits
+                final_duration = get_video_duration(video_path)
+                if final_duration < 60.0:
+                    raise HTTPException(status_code=400, detail="Video must be at least 60 seconds after trimming.")
+                credits_needed = calculate_credits_needed(final_duration)
+                reserved = reserve_credits(current_user["id"], job_id, credits_needed)
+                if not reserved:
+                    raise HTTPException(status_code=402, detail="Insufficient credits to process this video.")
+                supabase.table("jobs").update({"credit_reserved": credits_needed}).eq("id", job_id).execute()
+
             background_tasks.add_task(
                 run_pipeline,
                 job_id,

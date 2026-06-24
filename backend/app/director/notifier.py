@@ -106,3 +106,35 @@ def notify_custom(title: str, body: str) -> dict:
     """Send a custom notification."""
     msg = f"📌 *{title}*\n{body}"
     return send_telegram(msg)
+
+
+def notify_client_locked(email: str, consecutive_failures: int) -> dict:
+    """Client account auto-locked after repeated failures."""
+    msg = (
+        f"🔒 *Client Account Locked*\n"
+        f"Email: `{email}`\n"
+        f"Consecutive failures: {consecutive_failures}\n"
+        f"Action required: review jobs and unlock if appropriate."
+    )
+    return send_telegram(msg)
+
+
+def notify_credit_request(email: str, amount: int) -> dict:
+    """New credit purchase request from a client."""
+    msg = (
+        f"💳 *Credit Request*\n"
+        f"Client: `{email}`\n"
+        f"Amount: {amount} credits\n"
+        f"Go to Admin > Credits to approve/reject."
+    )
+    return send_telegram(msg)
+
+
+def notify_low_balance(email: str, balance: int) -> dict:
+    """Client balance dropped below threshold."""
+    msg = (
+        f"⚠️ *Low Credit Balance*\n"
+        f"Client: `{email}`\n"
+        f"Remaining: {balance} credits"
+    )
+    return send_telegram(msg)
