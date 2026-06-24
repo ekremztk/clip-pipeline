@@ -38,3 +38,14 @@ opencut/apps/web/.next/
 opencut/apps/web/.env.local
 opencut/node_modules/
 opencut/apps/web/node_modules/
+
+# Sell
+sell/node_modules/
+sell/.next/
+sell/.env.local
+
+# Lern
+lern/node_modules/
+lern/.next/
+lern/.env.local
+gcp-key.json
