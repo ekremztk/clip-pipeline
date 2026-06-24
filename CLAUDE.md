@@ -4,15 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## PENDING WORK (next session — remind user at start)
-
-- **R2→Railway download bottleneck**: After a multi-GB upload to R2, `POST /jobs` still downloads the full file to Railway disk before S01 can start. This is slow enough that users hit retry → backend 404s because `video_uploads.consumed=true` was flipped by the first attempt. Two possible fixes: (a) feed S01 ffmpeg a presigned R2 GET URL directly (range-reads, no local copy) — minimally invasive; (b) move pre-S08 steps to Modal. Go with (a) unless there is a specific reason not to. Also consider not flipping `consumed=true` until after the R2 download completes (or moving the whole fetch+trim to a background task) so retries stay valid.
-- **R2 CORS `ExposeHeaders: ["ETag"]`** — required for multipart upload. Browser reads the part ETag from each PUT response, sends them to `/jobs/mpu/complete`. Without this header exposed, complete fails with "missing ETag" after every part succeeded. Cloudflare dashboard → R2 → bucket → Settings → CORS → add `"ExposeHeaders": ["ETag"]` to the existing rule. Also ensure `AllowedHeaders` covers `Content-Type` and the `AllowedMethods` includes `PUT` for both origins.
-- **Optional follow-up**: tus.io protocol for resumable uploads (page reload continues from where it left off). Only if the user wants resumability — multipart alone addresses the speed issue.
-- **Unpushed commits on main**: `91d8431` (voice-library async fix). `6e3c662` (upload finalization fix) already pushed. Ask user before pushing `91d8431`.
-
----
-
 ## REPO STRUCTURE
 
 This is a **monorepo with two separate web applications**:
@@ -21,14 +12,24 @@ This is a **monorepo with two separate web applications**:
 |-----------|-----|-----|-------|
 | `frontend/` | Prognot Studio (clip pipeline UI) | clip.prognot.com | Next.js 16, npm, Supabase Auth |
 | `opencut/apps/web/` | Video Editor | edit.prognot.com | Next.js 16, Bun, Turbopack, Supabase Auth |
+| `lern/` | Language Learning App | lern.prognot.com | Next.js 16, npm, Supabase SSR |
 | `backend/` | API server | Railway | FastAPI, Python 3.11 |
 | `landing/` | Marketing page | prognot.com | Static HTML |
 
-The two frontends are **completely independent** — separate `node_modules`, separate env files, separate deploys.
+The frontends are **completely independent** — separate `node_modules`, separate env files, separate deploys.
 
 ---
 
 ## DEVELOPMENT COMMANDS
+
+### Lern App (lern.prognot.com)
+```bash
+cd lern
+npm install
+npm run dev       # dev server on :3001
+npm run build     # production build
+```
+Deploy: `cd lern && vercel --prod` (NOT auto-deploy from git — manual only)
 
 ### Backend (FastAPI + Python 3.11)
 ```bash
@@ -289,6 +290,23 @@ S10 Captions V2 (fresh Deepgram Nova-2 transcription of the
 S08+S09+S10 run as a single Modal function call (`process_clips` in `modal_app.py`).
 CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Railway CPU.
 
+### Hook Voiceover System (Reused Content Protection)
+**Purpose:** 5-7 second TTS hook at clip start to protect against YouTube "reused content" YPP rejection.
+
+**How it works:**
+1. S07 precision cut starts 5-7s earlier than the clip's actual moment
+2. Claude generates a 1-sentence hook based on clip content (niche-specific tone)
+3. Google Cloud TTS synthesizes the hook (fixed voice profile per channel)
+4. Pipeline: first 5-7s original audio MUTED → TTS hook overlay → then normal clip continues
+
+**Why:** YouTube reused content = channel-level YPP rejection by human reviewers. Adding narration (even 5-7s) signals "original commentary" = strongest scalable protection. Inspired by JokeWRLD (753K subs) which uses same technique.
+
+**Status:** Concept approved (2026-05-05). Not yet implemented. First test: Unhinged Pods channel.
+
+**TTS Provider:** Google Cloud TTS or Vertex AI-native TTS only. ElevenLabs as backup.
+
+**Per-channel voice:** Each channel gets its own fixed voice profile for brand consistency.
+
 ### Pipeline prompts (backend/app/pipeline/prompts/)
 | File | Used by | Model | Purpose |
 |------|---------|-------|---------|
@@ -308,7 +326,7 @@ CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Ra
 |---------------|-------|------------|
 | S02 Transcribe | Deepgram **Nova-3** | hardcoded in `services/deepgram_client.py` |
 | S03 Speaker guest-name heuristic | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
-| S05 Unified Discovery (TEXT transcript, NOT video) | **Claude** `us.anthropic.claude-opus-4-7` | `settings.CLAUDE_MODEL` |
+| S05 Unified Discovery (TEXT transcript, NOT video) | **Claude** `us.anthropic.claude-opus-4-6-v1` (AWS Bedrock) | `settings.CLAUDE_MODEL` |
 | S06 Batch Evaluation | **Claude** (same `CLAUDE_MODEL`) | `settings.CLAUDE_MODEL` |
 | S09 Reframe — director | `gemini-2.5-pro` (multimodal video + context) | `settings.GEMINI_MODEL_PRO` |
 | S10 Captions — transcription | Deepgram **Nova-2** (fresh call per clip) | hardcoded in `captions/core.py` |
@@ -317,7 +335,7 @@ CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Ra
 | Onboarding DNA + clip summary + failure analysis | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
 | Embeddings (vector(768)) | Gemini `text-embedding-004` | via `services/gemini_client.py` |
 
-- Defaults in `config.py`: `CLAUDE_MODEL = "us.anthropic.claude-opus-4-7"`, `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-2.5-flash"`, `GEMINI_MODEL_VIDEO = "gemini-3.1-pro-preview"` (kept for future use, not currently read by any step)
+- Defaults in `config.py`: `CLAUDE_MODEL = "us.anthropic.claude-opus-4-6-v1"` (AWS Bedrock, single provider — Azure Foundry removed), `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-3.5-flash"`, `GEMINI_MODEL_VIDEO = "gemini-3.5-flash"` (kept for future use)
 - Override any model via env var without code changes
 - S05 & S06 use `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
 - S05 receives `video_path` / `audio_path` parameters but does NOT use them — it's pure text-in-text-out on the labeled transcript
@@ -453,3 +471,63 @@ FREESOUND_API_KEY=             # freesound.org API key (real key required — pl
 ```
 
 ---
+
+## LERN APP — CONTENT CREATION RULES
+
+### Language & Approach
+- **All UI and content in German** (simple A1-A2 level, NOT C1)
+- Turkish only behind a "çeviri" toggle button — never visible by default
+- Teach through LOGIC and PATTERNS, not memorization
+- Rich examples, comparisons, pattern recognition
+
+### Öğren (Learn) Page
+- Block types: `heading`, `text`, `example`, `table`, `conjugation`, `tip`, `rule`, `translate`
+- Every text/example/tip/rule block gets a `translation` field (Turkish, shown via toggle)
+- Flow: introduce concept → give rule → show with examples → exceptions/tips
+- Must be comprehensive — not brief, explain deeply with many examples
+
+### Üben (Practice) Page — Difficulty Progression
+- Questions 1-5: Easy (simple fill_blank with clear hint)
+- Questions 6-10: Easy-Medium (fill_blank without hint, W-Wort blanks)
+- Questions 11-15: Medium (harder fill_blank, basic translate)
+- Questions 16-20: Hard (full sentence translate, tricky choose questions)
+- Choose options must be CLOSE to each other (same category)
+- Every exercise gets a `hint` field (in German)
+
+### Test Page
+- Different questions from Üben but same topics
+- Mixed difficulty
+- Mix of fill_blank + choose + translate
+- Points: easy=1, translation=2
+
+### Karten (Cards) — Smart Distractors
+- Every card MUST have `distractors` array (exactly 3 items)
+- Distractors must be from the SAME CATEGORY:
+  - Verb conjugation → other person conjugations (komme/kommst/kommt/kommen)
+  - W-word → other W-words (Wo/Woher/Wie/Welche/Was)
+  - sein → other sein forms (bin/bist/ist/sind)
+  - Greetings → other greetings
+- NEVER put absurd distractors from unrelated categories
+- Card front: German question format (fill blank, choose W-word, etc.)
+- Card back: correct answer
+- example_sentence: short rule reminder
+
+### Wörter (Vocabulary)
+- Fields: word, article (der/die/das), plural, translation (Turkish), example_sentence (German)
+- word_type: noun/verb/adjective/adverb/preposition/conjunction/other
+- Most frequent words first
+
+### Aufgaben (Tasks)
+- Written in German
+- task_type: listen/watch/speak/write/review/shadow
+- Practical, doable tasks (10 min max)
+- Mixed types
+
+### DB Tables
+All tables prefixed with `lern_`: `lern_modules`, `lern_topics`, `lern_pages`, `lern_cards` (has `distractors text[]`), `lern_vocabulary`, `lern_tasks`
+
+### Deploy
+```bash
+cd lern && vercel --prod
+```
+NOT connected to GitHub auto-deploy. Must deploy manually after changes.
