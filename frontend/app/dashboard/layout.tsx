@@ -319,10 +319,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const modulesItems = [
         { href: "/dashboard",                label: "Dashboard",      icon: Home,         exact: true,  pro: false },
-        ...(!isClient ? [{ href: "/dashboard/content-finder", label: "Content Finder", icon: Search,       exact: false, pro: false }] : []),
-        ...(!isClient ? [{ href: "/dashboard/provision",      label: "Provision",      icon: Sparkles,     exact: false, pro: false }] : []),
-        ...(!isClient ? [{ href: "/dashboard/studio",         label: "Studio",         icon: Film,         exact: false, pro: false }] : []),
-        ...(!isClient ? [{ href: "https://edit.prognot.com",  label: "Editor",         icon: Scissors,     exact: false, pro: true,  external: true }] : []),
+        { href: "/dashboard/content-finder", label: "Content Finder", icon: Search,       exact: false, pro: false },
+        { href: "/dashboard/provision",      label: "Provision",      icon: Sparkles,     exact: false, pro: false },
+        { href: "/dashboard/studio",         label: "Studio",         icon: Film,         exact: false, pro: false },
+        { href: "https://edit.prognot.com",  label: "Editor",         icon: Scissors,     exact: false, pro: true,  external: true },
         ...(isAdmin ? [{ href: "/admin",     label: "Admin",          icon: Shield,       exact: false, pro: false }] : []),
         ...(isAdmin ? [{ href: "/director",  label: "AI Director",    icon: Clapperboard, exact: false, pro: false }] : []),
     ];
@@ -508,6 +508,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         className="h-16 flex items-center justify-end px-6 flex-shrink-0 gap-4"
                         style={{ background: "#141413" }}
                     >
+                        {/* Credit Bar (client only) */}
+                        {isClient && creditBalance !== null && (
+                            <div className="flex items-center gap-3 mr-2">
+                                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(250,249,245,0.04)", border: "1px solid rgba(250,249,245,0.08)" }}>
+                                    <CreditCard size={14} style={{ color: creditBalance <= 10 ? "#f59e0b" : "#ababab" }} />
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(250,249,245,0.08)" }}>
+                                            <div
+                                                className="h-full rounded-full transition-all duration-500"
+                                                style={{
+                                                    width: `${Math.min(100, (creditBalance / 100) * 100)}%`,
+                                                    background: creditBalance <= 10 ? "#f59e0b" : creditBalance <= 30 ? "#fb923c" : "#22c55e",
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="text-xs font-semibold tabular-nums" style={{ color: creditBalance <= 10 ? "#f59e0b" : "#faf9f5" }}>
+                                            {creditBalance}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Notification Bell */}
                         <div className="relative" ref={notifRef}>
                             <button
@@ -639,7 +662,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                                 <span className="text-sm font-medium">{ch.display_name || ch.name || ch.id}</span>
                                             </button>
                                         ))}
-                                        {!isClient && (
+                                        {isClient ? (
+                                            <button
+                                                onClick={() => alert("Access denied. Please contact your administrator to create a new channel.")}
+                                                className="flex items-center gap-2 w-full px-3 py-2.5 mt-1 rounded-xl transition-colors text-sm font-medium hover:bg-white/5 text-left"
+                                                style={{ color: "#ababab" }}
+                                            >
+                                                <div className="w-4 flex items-center justify-center"><Plus size={14} /></div>
+                                                Add new channel
+                                            </button>
+                                        ) : (
                                             <Link
                                                 href="/dashboard/settings"
                                                 onClick={() => setProfileOpen(false)}
