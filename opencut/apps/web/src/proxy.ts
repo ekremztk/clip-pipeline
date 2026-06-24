@@ -44,6 +44,19 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.redirect(loginUrl);
 	}
 
+	// Block client accounts from accessing the editor
+	const { data } = await supabase
+		.from("client_accounts")
+		.select("user_id")
+		.eq("user_id", user.id)
+		.limit(1);
+	if (data && data.length > 0) {
+		return new NextResponse(
+			'<html><body style="background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h1 style="font-size:1.5rem;margin-bottom:0.5rem">Access Denied</h1><p style="color:#888">You do not have permission to access the editor. Please contact your administrator.</p></div></body></html>',
+			{ status: 403, headers: { "Content-Type": "text/html" } },
+		);
+	}
+
 	return response;
 }
 
