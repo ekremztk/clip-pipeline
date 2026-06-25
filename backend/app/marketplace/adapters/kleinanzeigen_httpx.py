@@ -99,7 +99,12 @@ def _build_url(config: SearchConfig) -> str:
         min_p = int(config.min_price) if config.min_price else ""
         max_p = int(config.max_price) if config.max_price else ""
         price_segment = f"preis:{min_p}:{max_p}/"
-    return f"https://www.kleinanzeigen.de/s-{price_segment}{slug}/k0"
+
+    suffix = "k0"
+    if config.location:
+        suffix += f"l{config.location}r{config.radius_km}"
+
+    return f"https://www.kleinanzeigen.de/s-{price_segment}{slug}/{suffix}"
 
 
 def _parse_listings_from_html(html: str) -> list[Listing]:

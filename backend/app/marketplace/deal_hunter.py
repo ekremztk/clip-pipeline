@@ -31,66 +31,82 @@ DEAL_SEARCHES = [
     {"query": "iPhone 14 Pro", "min_price": 200, "max_price": 350},
 ]
 
+LOCATION_PLZ = "79336"
+LOCATION_RADIUS_KM = 50
+
 USER_ID = "3ebacaef-8982-4e34-a13a-4b50cdf0cc40"
 
-ANALYSIS_PROMPT = """You are an expert deal-hunting AI for used iPhones on Kleinanzeigen (Germany).
-You analyze listings to determine if they are good buying opportunities.
+ANALYSIS_PROMPT = """Sen Kleinanzeigen'den (Almanya) ikinci el iPhone fırsatları bulan uzman bir AI analistsin.
+Tüm analizlerini TÜRKÇE yaz.
 
-LISTING DATA:
-- Title: {title}
-- Price: {price}€
-- Description: {description}
-- Location: {location}
-- Seller: {seller_name}
-- Seller since: {seller_since}
-- Number of photos: {num_photos}
+İLAN BİLGİLERİ:
+- Başlık: {title}
+- Fiyat: {price}€
+- Açıklama: {description}
+- Konum: {location}
+- Satıcı: {seller_name}
+- Üyelik: {seller_since}
+- Fotoğraf sayısı: {num_photos}
 
-TASK: Analyze this listing thoroughly. Extract every possible signal from the data.
+GÖREV: Bu ilanı detaylıca analiz et. Her sinyali değerlendir.
 
-Return ONLY valid JSON with this exact structure:
+SADECE geçerli JSON döndür, bu yapıda:
 {{
-  "model": "iPhone 14" or "iPhone 14 Pro" or "iPhone 14 Pro Max" or "iPhone 14 Plus",
-  "storage": "128GB" or "256GB" or "512GB" or null,
-  "color": "color name or null",
-  "battery_pct": number or null,
-  "tier": "A" or "B" or "C" or "D" or "E",
-  "tier_reason": "short explanation",
-  "condition_notes": "physical condition summary from description/photos",
+  "model": "iPhone 14" veya "iPhone 14 Pro" veya "iPhone 14 Pro Max",
+  "storage": "128GB" veya "256GB" veya "512GB" veya null,
+  "color": "renk adı veya null",
+  "battery_pct": sayı veya null,
+  "tier": "A" veya "B" veya "C" veya "D" veya "E",
+  "tier_reason": "kısa açıklama (Türkçe)",
+  "condition_notes": "fiziksel durum özeti (Türkçe)",
+  "description_tr": "ilan açıklamasının Türkçe çevirisi (özet değil, tam çeviri)",
   "has_box": true/false/null,
   "has_charger": true/false/null,
   "has_receipt": true/false/null,
   "flags": ["flag1", "flag2"],
   "seller_analysis": {{
-    "effort_level": "low" or "medium" or "high",
-    "urgency": "none" or "low" or "medium" or "high",
+    "effort_level": "düşük" veya "orta" veya "yüksek",
+    "urgency": "yok" veya "düşük" veya "orta" veya "yüksek",
     "trust_score": 1-10,
-    "reasoning": "Why is this priced this way? What signals do you see about the seller?"
+    "reasoning": "Türkçe: Bu fiyat neden bu seviyede? Satıcı hakkında ne sinyaller var?"
   }},
   "price_assessment": {{
     "is_underpriced": true/false,
-    "why_cheap": "explanation of why seller is selling cheap",
-    "risk_factors": ["risk1", "risk2"]
+    "why_cheap": "Türkçe: Neden ucuza satıyor?",
+    "risk_factors": ["risk1 (Türkçe)", "risk2 (Türkçe)"],
+    "negotiation_tip": "Türkçe: Pazarlık tavsiyesi — ne kadar indirim istenebilir, nasıl yaklaşılmalı"
   }},
+  "verdict": "Türkçe: 2-3 cümle net karar — bu alınır mı alınmaz mı, neden?",
+  "suggested_offer": sayı veya null,
   "confidence": 0.0-1.0,
   "reject": false,
   "reject_reason": null
 }}
 
-If this is NOT an iPhone 14/14 Pro (e.g. accessory, case, repair, wrong model), set "reject": true and "reject_reason": "explanation".
+REJECT KURALLARI — şunları REDDET (reject: true):
+- iPhone 14 Plus (sadece iPhone 14 ve iPhone 14 Pro arıyoruz)
+- Aksesuar, kılıf, tamir ilanı, yanlış model
+- Parça satışı (defolu, ekranı kırık satış amaçlı değilse)
 
-TIER RULES:
-- A: Like new, box, receipt, battery 90%+, no scratches
-- B: Good condition, battery 85%+, no visible damage, may miss box/accessories
-- C: Working, visible wear/scratches, battery 80%+
-- D: Significant damage or battery below 80%, still functional
-- E: iCloud locked, broken screen, water damage, scam, parts only
+TIER KURALLARI:
+- A: Sıfır gibi, kutusu var, faturası var, batarya %90+, çizik yok
+- B: İyi durumda, batarya %85+, görünür hasar yok, kutu/aksesuar eksik olabilir
+- C: Çalışıyor, görünür kullanım izleri/çizikler, batarya %80+
+- D: Belirgin hasar veya batarya %80 altı, hala fonksiyonel
+- E: iCloud kilitli, ekran kırık, su hasarı, dolandırıcılık, parça
 
-SELLER PSYCHOLOGY SIGNALS:
-- Low effort (short/no description, few bad photos) = often doesn't know market value = OPPORTUNITY
-- Urgency signals (ASAP, schnell, dringend, heute noch) = willing to accept lower price
-- Abholung only = local seller, often more negotiable
-- Very new account + too good price = potential scam
-- Long-time seller with many ratings = trustworthy but knows value
+SATICI PSİKOLOJİ SİNYALLERİ:
+- Düşük emek (kısa/yok açıklama, az kötü fotoğraf) = piyasa bilmiyor = FIRSAT
+- Aciliyet sinyalleri (ASAP, schnell, dringend, heute noch) = düşük fiyat kabul eder
+- Sadece Abholung = lokal satıcı, pazarlığa daha açık
+- Çok yeni hesap + çok iyi fiyat = potansiyel dolandırıcılık
+- Eski üye + çok satış = güvenilir ama fiyat bilir
+
+PAZARLIK TAVSİYESİ:
+- suggested_offer: Gerçekçi bir teklif rakamı ver (ilan fiyatından ne kadar aşağı inilebilir)
+- Düşük emekli satıcıya %15-25 indirim dene
+- Acil satışa %10-20 indirim dene
+- Yüksek emekli + uzun süredir aktif = max %5-10
 
 FLAGS: no_box, no_charger, with_box, with_receipt, low_battery, screen_scratches,
 cracked_back, cracked_screen, dent_or_bend, water_damage, face_id_broken,
@@ -117,23 +133,41 @@ async def fetch_listing_detail(url: str, client: httpx.AsyncClient, headers: dic
             description = re.sub(r'\s+', ' ', description)
 
         images = []
-        img_matches = re.findall(
-            r'(https://img\.kleinanzeigen\.de/api/v1/prod-ads/images/[^"\']+)',
-            html
-        )
         seen = set()
-        for img_url in img_matches:
-            clean = img_url.split("?")[0]
-            if clean not in seen:
-                seen.add(clean)
-                images.append(clean + "?rule=$_57.JPG")
-        if not images:
-            img_matches = re.findall(r'data-imgsrc="([^"]+)"', html)
+
+        gallery_match = re.search(
+            r'id="viewad-image".*?(?=id="viewad-(?!image)|class="similarads|id="vap-belen|$)',
+            html, re.DOTALL
+        )
+        gallery_html = gallery_match.group(0) if gallery_match else ""
+
+        if gallery_html:
+            img_matches = re.findall(
+                r'(https://img\.kleinanzeigen\.de/api/v1/prod-ads/images/[^"\'>\s]+)',
+                gallery_html
+            )
             for img_url in img_matches:
                 clean = img_url.split("?")[0]
                 if clean not in seen:
                     seen.add(clean)
                     images.append(clean + "?rule=$_57.JPG")
+
+        if not images:
+            img_matches = re.findall(
+                r'data-imgsrc="(https://img\.kleinanzeigen\.de/api/v1/prod-ads/images/[^"]+)"',
+                html
+            )
+            for img_url in img_matches:
+                clean = img_url.split("?")[0]
+                if clean not in seen:
+                    seen.add(clean)
+                    images.append(clean + "?rule=$_57.JPG")
+
+        if len(images) > 1:
+            ad_id_match = re.search(r'/prod-ads/images/([^/]+)/', images[0])
+            if ad_id_match:
+                ad_id = ad_id_match.group(1)
+                images = [img for img in images if ad_id in img]
 
         seller_name = ""
         seller_match = re.search(
@@ -209,7 +243,7 @@ async def analyze_listing(
 
 
 def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -> dict:
-    """Query marketplace_price_data for sell price estimates."""
+    """Query marketplace_price_data for sell price estimates with distribution bands."""
     supabase = get_client()
 
     adjacent_tiers = {
@@ -222,7 +256,7 @@ def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -
     tiers_to_check = adjacent_tiers.get(tier, [tier])
 
     try:
-        query = supabase.table("marketplace_price_data").select("sold_price, tier")
+        query = supabase.table("marketplace_price_data").select("sold_price, tier, sold_date")
         query = query.eq("brand", "Apple")
 
         if "Pro Max" in model_parsed:
@@ -238,26 +272,50 @@ def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -
 
         query = query.in_("tier", tiers_to_check)
         query = query.order("sold_date", desc=True)
-        query = query.limit(30)
+        query = query.limit(50)
 
         result = query.execute()
         data = result.data if result.data else []
 
         if len(data) < 3:
-            return {"min_sell": None, "realistic_sell": None, "max_sell": None, "sample_size": len(data)}
+            return {
+                "min_sell": None, "realistic_sell": None, "max_sell": None,
+                "sample_size": len(data), "bands": None,
+            }
 
         prices = sorted([float(d["sold_price"]) for d in data])
         n = len(prices)
 
+        p10 = round(prices[int(n * 0.10)], 0)
+        p25 = round(prices[int(n * 0.25)], 0)
+        p50 = round(prices[n // 2], 0)
+        p75 = round(prices[int(n * 0.75)], 0)
+        p90 = round(prices[int(n * 0.90)], 0)
+
+        band_low = sum(1 for p in prices if p <= p25) / n * 100
+        band_mid = sum(1 for p in prices if p25 < p <= p75) / n * 100
+        band_high = sum(1 for p in prices if p > p75) / n * 100
+
         return {
-            "min_sell": round(prices[int(n * 0.1)], 0),
-            "realistic_sell": round(prices[n // 2], 0),
-            "max_sell": round(prices[int(n * 0.85)], 0),
+            "min_sell": p10,
+            "realistic_sell": p50,
+            "max_sell": p90,
             "sample_size": n,
+            "bands": {
+                "low_range": f"{p10:.0f}-{p25:.0f}€",
+                "low_pct": round(band_low),
+                "mid_range": f"{p25:.0f}-{p75:.0f}€",
+                "mid_pct": round(band_mid),
+                "high_range": f"{p75:.0f}-{p90:.0f}€",
+                "high_pct": round(band_high),
+                "p25": p25,
+                "p50": p50,
+                "p75": p75,
+            },
         }
     except Exception as e:
         print(f"[DealHunter] Price estimation error: {e}")
-        return {"min_sell": None, "realistic_sell": None, "max_sell": None, "sample_size": 0}
+        return {"min_sell": None, "realistic_sell": None, "max_sell": None, "sample_size": 0, "bands": None}
 
 
 async def run_deal_hunter():
@@ -275,6 +333,8 @@ async def run_deal_hunter():
             query=search_cfg["query"],
             min_price=search_cfg["min_price"],
             max_price=search_cfg["max_price"],
+            location=LOCATION_PLZ,
+            radius_km=LOCATION_RADIUS_KM,
         )
 
         print(f"[DealHunter] Searching: {search_cfg['query']} ({search_cfg['min_price']}-{search_cfg['max_price']}€)")
@@ -361,11 +421,15 @@ async def run_deal_hunter():
                         "sell_price": realistic_sell,
                         "ai_analysis": {
                             "condition_notes": analysis.get("condition_notes", ""),
+                            "description_tr": analysis.get("description_tr", ""),
+                            "verdict": analysis.get("verdict", ""),
+                            "suggested_offer": analysis.get("suggested_offer"),
                             "has_box": analysis.get("has_box"),
                             "has_charger": analysis.get("has_charger"),
                             "has_receipt": analysis.get("has_receipt"),
                             "flags": analysis.get("flags", []),
                             "price_assessment": analysis.get("price_assessment", {}),
+                            "price_bands": sell_estimate.get("bands"),
                         },
                         "seller_analysis": analysis.get("seller_analysis", {}),
                         "estimated_min_sell": sell_estimate.get("min_sell"),
