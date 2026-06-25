@@ -96,6 +96,40 @@ async def list_deals(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/deals/hunt")
+async def trigger_deal_hunt(
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user),
+):
+    """Manually trigger a deal hunt run."""
+    background_tasks.add_task(_run_deal_hunt)
+    return {"started": True}
+
+
+@router.post("/deals/{deal_id}/action")
+async def deal_action(
+    deal_id: str,
+    request: UpdateDealRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """Update deal status (interested, skipped, contacted, bought)."""
+    try:
+        supabase = get_client()
+        update_data = {k: v for k, v in request.model_dump().items() if v is not None}
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No fields to update")
+
+        res = supabase.table("marketplace_deals").update(update_data).eq(
+            "id", deal_id
+        ).eq("user_id", current_user["id"]).execute()
+
+        return {"deal": res.data[0] if res.data else None}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/deals/{deal_id}")
 async def get_deal(deal_id: str, current_user: dict = Depends(get_current_user)):
     try:
@@ -260,3 +294,9 @@ def _run_valuation(query: str, brand: str, series: str, pages: int):
             await parse_and_save(items, brand, series)
 
     asyncio.run(run())
+
+
+def _run_deal_hunt():
+    import asyncio
+    from app.marketplace.deal_hunter import run_deal_hunter
+    asyncio.run(run_deal_hunter())

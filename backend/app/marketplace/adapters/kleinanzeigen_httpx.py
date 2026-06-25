@@ -93,21 +93,13 @@ def _parse_price(text: str) -> Optional[float]:
 
 
 def _build_url(config: SearchConfig) -> str:
-    base = "https://www.kleinanzeigen.de/s-suchanfrage.html"
-    params = [f"keywords={config.query}"]
-    if config.location:
-        params.append(f"locationStr={config.location}")
-    if config.radius_km:
-        params.append(f"radius={config.radius_km}")
-    if config.min_price is not None:
-        params.append(f"minPrice={int(config.min_price)}")
-    if config.max_price is not None:
-        params.append(f"maxPrice={int(config.max_price)}")
-    if config.category_id:
-        params.append(f"categoryId={config.category_id}")
-    params.append("sortingField=SORTING_DATE")
-    params.append("adType=OFFER")
-    return f"{base}?{'&'.join(params)}"
+    slug = config.query.lower().replace(" ", "-")
+    price_segment = ""
+    if config.min_price is not None or config.max_price is not None:
+        min_p = int(config.min_price) if config.min_price else ""
+        max_p = int(config.max_price) if config.max_price else ""
+        price_segment = f"preis:{min_p}:{max_p}/"
+    return f"https://www.kleinanzeigen.de/s-{price_segment}{slug}/k0"
 
 
 def _parse_listings_from_html(html: str) -> list[Listing]:

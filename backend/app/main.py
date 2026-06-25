@@ -300,6 +300,19 @@ async def _marketplace_scheduler():
         await asyncio.sleep(600)
 
 
+async def _deal_hunter_scheduler():
+    """Hunt for iPhone deals on Kleinanzeigen every 10 minutes."""
+    import asyncio
+    await asyncio.sleep(90)
+    while True:
+        try:
+            from app.marketplace.scheduler import run_deal_hunter_scheduler
+            await run_deal_hunter_scheduler()
+        except Exception as e:
+            print(f"[DealHunter] scheduler error: {e}")
+        await asyncio.sleep(600)
+
+
 async def _client_clip_retention_scheduler():
     """Daily: delete client clips older than their retention period (default 30 days)."""
     import asyncio
@@ -364,6 +377,7 @@ async def lifespan(app: FastAPI):
     if settings.ADMIN_YOUTUBE_ANALYTICS_SYNC_ENABLED:
         optional_tasks.append(asyncio.create_task(_admin_youtube_analytics_scheduler()))
     optional_tasks.append(asyncio.create_task(_marketplace_scheduler()))
+    optional_tasks.append(asyncio.create_task(_deal_hunter_scheduler()))
     optional_tasks.append(asyncio.create_task(_client_clip_retention_scheduler()))
     yield
     # Cleanup Director connection pool

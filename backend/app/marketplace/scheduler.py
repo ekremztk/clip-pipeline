@@ -40,3 +40,12 @@ async def run_marketplace_scheduler():
             print(f"[MarketplaceScheduler] Error running search '{config.query}': {e}")
 
         await asyncio.sleep(180)
+
+
+async def run_deal_hunter_scheduler():
+    """Run deal hunter for iPhone 14/14 Pro every 10 minutes."""
+    from .deal_hunter import run_deal_hunter
+    try:
+        await run_deal_hunter()
+    except Exception as e:
+        print(f"[DealHunterScheduler] Error: {e}")
