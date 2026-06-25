@@ -126,14 +126,14 @@ async def fetch_listing_detail(url: str, client: httpx.AsyncClient, headers: dic
             clean = img_url.split("?")[0]
             if clean not in seen:
                 seen.add(clean)
-                images.append(clean)
+                images.append(clean + "?rule=$_57.JPG")
         if not images:
             img_matches = re.findall(r'data-imgsrc="([^"]+)"', html)
             for img_url in img_matches:
                 clean = img_url.split("?")[0]
                 if clean not in seen:
                     seen.add(clean)
-                    images.append(clean)
+                    images.append(clean + "?rule=$_57.JPG")
 
         seller_name = ""
         seller_match = re.search(
