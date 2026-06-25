@@ -3,17 +3,19 @@ Deal Hunter — Kleinanzeigen'den iPhone 14/14 Pro fırsatları otomatik bulur v
 
 Flow:
   1. Kleinanzeigen'den ilan listesi çek (fiyat filtreli)
-  2. Daha önce görülmüş ilanları atla (external_id check)
-  3. Her yeni ilan için detay sayfası çek (açıklama, fotoğraflar, satıcı bilgisi)
-  4. Gemini Flash ile multimodal analiz (fotoğraf + text)
-  5. eBay sold data ile satış fiyatı tahmini
-  6. marketplace_deals tablosuna kaydet
+  2. PLZ mesafe filtresi (50km) ile uzak ilanları at
+  3. Daha önce görülmüş ilanları atla (external_id check)
+  4. Her yeni ilan için detay sayfası çek (açıklama, fotoğraflar, satıcı bilgisi)
+  5. ÖNCE eBay satış verisini çek → AI'a gerçek piyasa fiyatlarıyla birlikte gönder
+  6. Gemini Flash ile analiz (eBay datası + ilan bilgisi)
+  7. marketplace_deals tablosuna kaydet
 """
 
 import re
 import json
 import random
 import asyncio
+from math import radians, sin, cos, sqrt, atan2
 from typing import Optional
 
 import httpx
@@ -33,6 +35,12 @@ DEAL_SEARCHES = [
 
 LOCATION_PLZ = "79336"
 LOCATION_RADIUS_KM = 50
+HERBOLZHEIM_LAT = 48.2195
+HERBOLZHEIM_LON = 7.7747
+
+# Known PLZ → (lat, lon) for 2-digit prefix regions near Freiburg
+# Used for fast pre-filtering before haversine check
+NEARBY_PLZ_PREFIXES = {"77", "78", "79", "76", "68"}
 
 USER_ID = "3ebacaef-8982-4e34-a13a-4b50cdf0cc40"
 
@@ -48,6 +56,12 @@ Tüm analizlerini TÜRKÇE yaz.
 - Üyelik: {seller_since}
 - Fotoğraf sayısı: {num_photos}
 
+GERÇEK PİYASA VERİSİ (eBay.de'de SATILMIŞ ürünler — bu verilere GÜVENİLİR):
+{ebay_data}
+
+ÖNEMLİ: Fiyat değerlendirmesi yaparken SADECE yukarıdaki eBay satış verisini kullan.
+Kafandan fiyat uydurmak YASAK. eBay verisi yoksa "veri yetersiz" de.
+
 GÖREV: Bu ilanı detaylıca analiz et. Her sinyali değerlendir.
 
 SADECE geçerli JSON döndür, bu yapıda:
@@ -56,7 +70,7 @@ SADECE geçerli JSON döndür, bu yapıda:
   "storage": "128GB" veya "256GB" veya "512GB" veya null,
   "color": "renk adı veya null",
   "battery_pct": sayı veya null,
-  "tier": "A" veya "B" veya "C" veya "D" veya "E",
+  "tier": "S+" veya "S-" veya "B" veya "C" veya "D" veya "E",
   "tier_reason": "kısa açıklama (Türkçe)",
   "condition_notes": "fiziksel durum özeti (Türkçe)",
   "description_tr": "ilan açıklamasının Türkçe çevirisi (özet değil, tam çeviri)",
@@ -76,7 +90,7 @@ SADECE geçerli JSON döndür, bu yapıda:
     "risk_factors": ["risk1 (Türkçe)", "risk2 (Türkçe)"],
     "negotiation_tip": "Türkçe: Pazarlık tavsiyesi — ne kadar indirim istenebilir, nasıl yaklaşılmalı"
   }},
-  "verdict": "Türkçe: 2-3 cümle net karar — bu alınır mı alınmaz mı, neden?",
+  "verdict": "Türkçe: 2-3 cümle net karar — bu alınır mı alınmaz mı, neden? eBay verisine göre kar mı zarar mı?",
   "suggested_offer": sayı veya null,
   "confidence": 0.0-1.0,
   "reject": false,
@@ -87,12 +101,15 @@ REJECT KURALLARI — şunları REDDET (reject: true):
 - iPhone 14 Plus (sadece iPhone 14 ve iPhone 14 Pro arıyoruz)
 - Aksesuar, kılıf, tamir ilanı, yanlış model
 - Parça satışı (defolu, ekranı kırık satış amaçlı değilse)
+- "SUCHE" / "Kaufe" ilanları (alım ilanı, satış değil)
+- Takas ilanları (sadece takas, satış fiyatı yok)
 
-TIER KURALLARI:
-- A: Sıfır gibi, kutusu var, faturası var, batarya %90+, çizik yok
-- B: İyi durumda, batarya %85+, görünür hasar yok, kutu/aksesuar eksik olabilir
-- C: Çalışıyor, görünür kullanım izleri/çizikler, batarya %80+
-- D: Belirgin hasar veya batarya %80 altı, hala fonksiyonel
+TIER KURALLARI (eBay tier sistemiyle aynı):
+- S+: Mükemmel durumda, kutulu, faturalı, batarya %90+, çizik yok
+- S-: İyi durumda ama küçük eksikler (kutu yok, hafif kullanım izi)
+- B: Orta durumda, batarya %85+, görünür kullanım izleri ama sorunsuz
+- C: Çalışıyor ama belirgin yıpranma, batarya %80+
+- D: Hasarlı veya batarya %80 altı, hala fonksiyonel
 - E: iCloud kilitli, ekran kırık, su hasarı, dolandırıcılık, parça
 
 SATICI PSİKOLOJİ SİNYALLERİ:
@@ -103,7 +120,7 @@ SATICI PSİKOLOJİ SİNYALLERİ:
 - Eski üye + çok satış = güvenilir ama fiyat bilir
 
 PAZARLIK TAVSİYESİ:
-- suggested_offer: Gerçekçi bir teklif rakamı ver (ilan fiyatından ne kadar aşağı inilebilir)
+- suggested_offer: eBay verisine göre gerçekçi bir teklif rakamı ver
 - Düşük emekli satıcıya %15-25 indirim dene
 - Acil satışa %10-20 indirim dene
 - Yüksek emekli + uzun süredir aktif = max %5-10
@@ -111,6 +128,102 @@ PAZARLIK TAVSİYESİ:
 FLAGS: no_box, no_charger, with_box, with_receipt, low_battery, screen_scratches,
 cracked_back, cracked_screen, dent_or_bend, water_damage, face_id_broken,
 icloud_locked, possible_scam, like_new, heavy_use, insufficient_info"""
+
+
+def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    R = 6371
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    return R * 2 * atan2(sqrt(a), sqrt(1 - a))
+
+
+# German PLZ center coordinates (first 2 digits → approx center)
+PLZ_COORDS: dict[str, tuple[float, float]] = {
+    "01": (51.05, 13.74), "02": (51.15, 14.97), "03": (51.75, 12.24), "04": (51.34, 12.38),
+    "06": (51.48, 11.97), "07": (50.93, 11.59), "08": (50.72, 12.49), "09": (50.83, 12.92),
+    "10": (52.52, 13.41), "12": (52.48, 13.43), "13": (52.57, 13.38), "14": (52.39, 13.07),
+    "15": (52.34, 14.04), "16": (52.76, 13.29), "17": (53.63, 11.41), "18": (54.09, 12.14),
+    "19": (53.63, 11.41), "20": (53.55, 9.99), "21": (53.47, 9.77), "22": (53.57, 10.02),
+    "23": (53.87, 10.69), "24": (54.32, 10.14), "25": (53.87, 9.48), "26": (53.14, 8.22),
+    "27": (53.08, 8.80), "28": (53.08, 8.80), "29": (52.97, 10.57), "30": (52.37, 9.74),
+    "31": (52.15, 9.95), "32": (52.02, 8.53), "33": (51.93, 8.53), "34": (51.32, 9.50),
+    "35": (50.58, 8.67), "36": (50.67, 9.94), "37": (51.53, 9.94), "38": (52.27, 10.52),
+    "39": (52.13, 11.63), "40": (51.23, 6.78), "41": (51.19, 6.44), "42": (51.26, 7.15),
+    "44": (51.51, 7.47), "45": (51.45, 7.01), "46": (51.66, 6.63), "47": (51.43, 6.76),
+    "48": (51.96, 7.63), "49": (52.28, 8.05), "50": (50.94, 6.96), "51": (50.93, 7.10),
+    "52": (50.78, 6.08), "53": (50.73, 7.10), "54": (49.75, 6.64), "55": (49.99, 8.27),
+    "56": (50.36, 7.60), "57": (50.87, 8.02), "58": (51.37, 7.46), "59": (51.67, 7.82),
+    "60": (50.11, 8.68), "61": (50.22, 8.62), "63": (50.00, 8.98), "64": (49.87, 8.65),
+    "65": (50.08, 8.24), "66": (49.24, 7.00), "67": (49.44, 8.44), "68": (49.49, 8.47),
+    "69": (49.41, 8.69), "70": (48.78, 9.18), "71": (48.69, 9.13), "72": (48.52, 9.06),
+    "73": (48.81, 9.48), "74": (49.14, 9.22), "75": (48.89, 8.70), "76": (49.01, 8.40),
+    "77": (48.47, 7.94), "78": (47.83, 8.83), "79": (47.99, 7.85), "80": (48.14, 11.58),
+    "81": (48.11, 11.60), "82": (48.08, 11.49), "83": (47.85, 12.13), "84": (48.46, 12.18),
+    "85": (48.35, 11.79), "86": (48.37, 10.90), "87": (47.73, 10.32), "88": (47.72, 9.59),
+    "89": (48.40, 9.99), "90": (49.45, 11.08), "91": (49.47, 10.99), "92": (49.23, 12.10),
+    "93": (49.02, 12.10), "94": (48.57, 13.43), "95": (50.09, 11.97), "96": (50.09, 11.05),
+    "97": (49.79, 9.94), "98": (50.68, 10.93), "99": (50.98, 11.03),
+}
+
+
+def _is_within_radius(location_text: str, max_km: float = 50.0) -> bool:
+    """Check if a listing location is within max_km of Herbolzheim."""
+    if not location_text:
+        return False
+    plz_match = re.search(r'\b(\d{5})\b', location_text)
+    if not plz_match:
+        return False
+    plz = plz_match.group(1)
+    prefix = plz[:2]
+    coords = PLZ_COORDS.get(prefix)
+    if not coords:
+        return False
+    dist = _haversine(HERBOLZHEIM_LAT, HERBOLZHEIM_LON, coords[0], coords[1])
+    return dist <= max_km
+
+
+def get_ebay_price_context(model_keyword: str) -> str:
+    """Fetch eBay sold data from DB and format as text for AI prompt."""
+    supabase = get_client()
+    try:
+        query = supabase.table("marketplace_price_data").select("model, storage, tier, sold_price")
+        query = query.eq("brand", "Apple")
+
+        if "Pro" in model_keyword:
+            query = query.ilike("model", "%14 Pro%")
+            query = query.not_.ilike("model", "%Pro Max%")
+        else:
+            query = query.ilike("model", "%14%")
+            query = query.not_.ilike("model", "%Pro%")
+            query = query.not_.ilike("model", "%Plus%")
+
+        query = query.order("sold_date", desc=True).limit(80)
+        result = query.execute()
+        data = result.data if result.data else []
+
+        if not data:
+            return "eBay satış verisi bulunamadı."
+
+        # Group by storage + tier
+        groups: dict[str, list[float]] = {}
+        for row in data:
+            key = f"{row.get('storage', '?')} / Tier {row.get('tier', '?')}"
+            groups.setdefault(key, []).append(float(row["sold_price"]))
+
+        lines = []
+        for key, prices in sorted(groups.items()):
+            prices.sort()
+            n = len(prices)
+            avg = sum(prices) / n
+            min_p = prices[0]
+            max_p = prices[-1]
+            lines.append(f"  {key}: {n} satış, min {min_p:.0f}€, ort {avg:.0f}€, max {max_p:.0f}€")
+
+        return "\n".join(lines)
+    except Exception as e:
+        print(f"[DealHunter] eBay context fetch error: {e}")
+        return "eBay verisi çekilemedi."
 
 
 async def fetch_listing_detail(url: str, client: httpx.AsyncClient, headers: dict) -> Optional[dict]:
@@ -205,8 +318,9 @@ async def analyze_listing(
     seller_name: str,
     seller_since: str,
     images: list[str],
+    ebay_context: str,
 ) -> Optional[dict]:
-    """Run Gemini Flash analysis on a single listing."""
+    """Run Gemini Flash analysis on a single listing with real eBay price data."""
     from app.services.gemini_client import get_gemini_client
 
     client = get_gemini_client()
@@ -214,17 +328,16 @@ async def analyze_listing(
     prompt = ANALYSIS_PROMPT.format(
         title=title,
         price=price,
-        description=description or "(no description)",
-        location=location or "unknown",
-        seller_name=seller_name or "unknown",
-        seller_since=seller_since or "unknown",
+        description=description or "(açıklama yok)",
+        location=location or "bilinmiyor",
+        seller_name=seller_name or "bilinmiyor",
+        seller_since=seller_since or "bilinmiyor",
         num_photos=len(images),
+        ebay_data=ebay_context,
     )
 
     if images:
-        prompt += f"\n\nIMAGE URLs (for context — assess photo quality/effort from count and description):\n"
-        for i, img in enumerate(images[:5], 1):
-            prompt += f"  {i}. {img}\n"
+        prompt += f"\n\nFOTOĞRAF SAYISI: {len(images)} adet (kalite/emek değerlendirmesi için)\n"
 
     try:
         response = client.models.generate_content(
@@ -246,14 +359,16 @@ def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -
     """Query marketplace_price_data for sell price estimates with distribution bands."""
     supabase = get_client()
 
+    # Map our tiers to DB tiers (DB uses S+, S-, B, C, D, E)
     adjacent_tiers = {
-        "A": ["A", "B"],
-        "B": ["B", "A", "C"],
+        "S+": ["S+", "S-"],
+        "S-": ["S-", "S+", "B"],
+        "B": ["B", "S-", "C"],
         "C": ["C", "B", "D"],
-        "D": ["D", "C"],
+        "D": ["D", "C", "E"],
         "E": ["E", "D"],
     }
-    tiers_to_check = adjacent_tiers.get(tier, [tier])
+    tiers_to_check = adjacent_tiers.get(tier, [tier, "S-", "S+"])
 
     try:
         query = supabase.table("marketplace_price_data").select("sold_price, tier, sold_date")
@@ -263,9 +378,11 @@ def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -
             query = query.ilike("model", "%14 Pro Max%")
         elif "Pro" in model_parsed:
             query = query.ilike("model", "%14 Pro%")
+            query = query.not_.ilike("model", "%Pro Max%")
         else:
             query = query.ilike("model", "%14%")
             query = query.not_.ilike("model", "%Pro%")
+            query = query.not_.ilike("model", "%Plus%")
 
         if storage:
             query = query.eq("storage", storage)
@@ -276,6 +393,24 @@ def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -
 
         result = query.execute()
         data = result.data if result.data else []
+
+        if len(data) < 3:
+            # Fallback: try without storage filter
+            query2 = supabase.table("marketplace_price_data").select("sold_price, tier, sold_date")
+            query2 = query2.eq("brand", "Apple")
+            if "Pro Max" in model_parsed:
+                query2 = query2.ilike("model", "%14 Pro Max%")
+            elif "Pro" in model_parsed:
+                query2 = query2.ilike("model", "%14 Pro%")
+                query2 = query2.not_.ilike("model", "%Pro Max%")
+            else:
+                query2 = query2.ilike("model", "%14%")
+                query2 = query2.not_.ilike("model", "%Pro%")
+                query2 = query2.not_.ilike("model", "%Plus%")
+            query2 = query2.in_("tier", tiers_to_check)
+            query2 = query2.order("sold_date", desc=True).limit(50)
+            result2 = query2.execute()
+            data = result2.data if result2.data else []
 
         if len(data) < 3:
             return {
@@ -319,7 +454,7 @@ def estimate_sell_prices(model_parsed: str, storage: Optional[str], tier: str) -
 
 
 async def run_deal_hunter():
-    """Main deal hunter loop — scrape Klein, analyze, save."""
+    """Main deal hunter loop — scrape Klein, filter by distance, analyze with eBay data, save."""
     supabase = get_client()
     adapter = KleinanzeigenHTTPXAdapter()
     headers = random.choice(HEADER_SETS).copy()
@@ -344,18 +479,26 @@ async def run_deal_hunter():
             print(f"[DealHunter] No listings found for '{search_cfg['query']}'")
             continue
 
-        print(f"[DealHunter] Found {len(listings)} listings for '{search_cfg['query']}'")
+        # Distance filter — Klein doesn't filter server-side
+        nearby_listings = [l for l in listings if _is_within_radius(l.location or "", LOCATION_RADIUS_KM)]
+        print(f"[DealHunter] Found {len(listings)} total, {len(nearby_listings)} within {LOCATION_RADIUS_KM}km of Herbolzheim")
+
+        if not nearby_listings:
+            continue
 
         existing_res = supabase.table("marketplace_listings").select("external_id").eq(
             "platform", "kleinanzeigen"
         ).execute()
         existing_ids = {r["external_id"] for r in (existing_res.data or [])}
 
-        new_listings = [l for l in listings if l.external_id not in existing_ids]
-        print(f"[DealHunter] {len(new_listings)} new listings (skipping {len(listings) - len(new_listings)} seen)")
+        new_listings = [l for l in nearby_listings if l.external_id not in existing_ids]
+        print(f"[DealHunter] {len(new_listings)} new listings (skipping {len(nearby_listings) - len(new_listings)} seen)")
 
         if not new_listings:
             continue
+
+        # Pre-fetch eBay context once per search query (not per listing)
+        ebay_context = get_ebay_price_context(search_cfg["query"])
 
         async with httpx.AsyncClient(follow_redirects=True, timeout=20.0) as client:
             for listing in new_listings:
@@ -373,6 +516,7 @@ async def run_deal_hunter():
                     seller_name=detail["seller_name"],
                     seller_since=detail["seller_since"],
                     images=detail["images"],
+                    ebay_context=ebay_context,
                 )
 
                 if not analysis:
@@ -384,7 +528,7 @@ async def run_deal_hunter():
 
                 model_parsed = analysis.get("model", "iPhone 14")
                 storage_parsed = analysis.get("storage")
-                tier = analysis.get("tier", "C")
+                tier = analysis.get("tier", "S-")
 
                 sell_estimate = estimate_sell_prices(model_parsed, storage_parsed, tier)
 
