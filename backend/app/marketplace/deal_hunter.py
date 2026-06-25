@@ -173,13 +173,9 @@ async def analyze_listing(
     images: list[str],
 ) -> Optional[dict]:
     """Run Gemini Flash analysis on a single listing."""
-    from google import genai
+    from app.services.gemini_client import get_gemini_client
 
-    client = genai.Client(
-        vertexai=True,
-        project=settings.GCP_PROJECT,
-        location=settings.GCP_LOCATION,
-    )
+    client = get_gemini_client()
 
     prompt = ANALYSIS_PROMPT.format(
         title=title,
