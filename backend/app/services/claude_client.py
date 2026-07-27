@@ -1,9 +1,18 @@
+import os
 import time
 
 import anthropic
 from app.config import settings
 
 BEDROCK_MODEL = "us.anthropic.claude-opus-4-6-v1"
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-5")
+
+
+def _make_anthropic_client() -> anthropic.Anthropic | None:
+    """First-party Anthropic API. Returns None unless ANTHROPIC_API_KEY is set,
+    so an unconfigured deploy falls through to Bedrock unchanged."""
+    key = os.getenv("ANTHROPIC_API_KEY")
+    return anthropic.Anthropic(api_key=key) if key else None
 
 
 def _make_bedrock_client() -> anthropic.AnthropicBedrock | None:
@@ -22,27 +31,83 @@ def call_claude(
     max_tokens: int = 16000,
     extra_system_blocks: list | None = None,
 ) -> str:
+    # Both current callers (S05, S06) pass their own system prompt; this is the
+    # fallback for any future caller.
     system_text = (
         system
-        or "You are a ruthless viral clip quality analyst. "
+        or "You are a professional short-form video editor working on clips cut from "
+           "long-form talk shows and interviews. "
            "Return only valid JSON. Never wrap output in markdown code blocks."
     )
 
-    system_blocks = [
-        {
-            "type": "text",
-            "text": system_text,
-            "cache_control": {"type": "ephemeral"},
-        }
-    ]
+    system_blocks = [{"type": "text", "text": system_text}]
     if extra_system_blocks:
         system_blocks.extend(extra_system_blocks)
+
+    # Caching is a prefix match, so the breakpoint belongs on the LAST system
+    # block — that caches the system prompt *and* the full transcript S06
+    # resends on every batch. On the first block it only covered ~30 tokens,
+    # under the minimum cacheable prefix, so nothing was ever cached.
+    system_blocks[-1] = {**system_blocks[-1], "cache_control": {"type": "ephemeral"}}
 
     messages = [{"role": "user", "content": content}]
 
     last_error = ""
 
-    # --- AWS Bedrock (primary and only provider) ---
+    # --- Anthropic API (used only when ANTHROPIC_API_KEY is set) ---
+    # Opus 5 rejects budget_tokens and thinks by default, so max_tokens must
+    # cover thinking + text together — hence the doubled ceiling.
+    anthropic_client = _make_anthropic_client()
+    if anthropic_client:
+        for attempt in range(3):
+            try:
+                print(
+                    f"[ClaudeClient] Calling model={ANTHROPIC_MODEL} "
+                    f"provider=anthropic attempt={attempt + 1}/3"
+                )
+                response = anthropic_client.messages.create(
+                    model=ANTHROPIC_MODEL,
+                    max_tokens=max(max_tokens * 2, 32000),
+                    system=system_blocks,
+                    thinking={"type": "adaptive"},
+                    output_config={"effort": "high"},
+                    messages=messages,
+                    timeout=900.0,
+                )
+
+                usage = response.usage
+                print(
+                    f"[ClaudeClient] Tokens — in: {usage.input_tokens}, "
+                    f"out: {usage.output_tokens}, "
+                    f"cache_read: {getattr(usage, 'cache_read_input_tokens', 0) or 0}"
+                )
+
+                if response.stop_reason == "refusal":
+                    last_error = f"refusal model={ANTHROPIC_MODEL}"
+                    print("[ClaudeClient] Refusal; falling through to Bedrock")
+                    break
+
+                for block in response.content:
+                    if block.type == "text":
+                        return block.text
+
+                print("[ClaudeClient] Warning: no text block in response")
+                return ""
+
+            except anthropic.RateLimitError:
+                last_error = f"rate_limit model={ANTHROPIC_MODEL} provider=anthropic"
+                if attempt < 2:
+                    delay = 60 if attempt == 0 else 120
+                    print(f"[ClaudeClient] Rate limit; sleeping {delay}s")
+                    time.sleep(delay)
+                    continue
+                break
+            except Exception as e:
+                last_error = f"error model={ANTHROPIC_MODEL} provider=anthropic: {e}"
+                print(f"[ClaudeClient] Anthropic error attempt={attempt + 1}/3: {e}")
+                break
+
+    # --- AWS Bedrock (default provider, and fallback if the above fails) ---
     bedrock_client = _make_bedrock_client()
     if bedrock_client:
         for attempt in range(3):

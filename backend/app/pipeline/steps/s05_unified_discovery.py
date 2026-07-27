@@ -108,6 +108,12 @@ def build_channel_context(channel_dna: dict, channel_id: str) -> str:
     if sacred:
         lines.append(f"\nHIGH-VALUE TOPICS (audience cares deeply): {', '.join(sacred)}")
 
+    # 10b. Free-form note from the channel owner — anything the structured
+    # fields above can't express (measured findings, standing caveats).
+    selection_note = channel_dna.get("selection_note", "")
+    if selection_note:
+        lines.append(f"\nWHAT THIS CHANNEL HAS LEARNED: {selection_note}")
+
     # 11. YouTube title/description style
     title_style = channel_dna.get("title_style", "")
     if title_style:
