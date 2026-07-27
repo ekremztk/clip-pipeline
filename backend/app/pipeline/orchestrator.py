@@ -391,6 +391,16 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                 print(f"[Orchestrator] channel_dna loaded ({len(channel_dna)} keys)")
         except Exception as e:
             print(f"[Orchestrator] Warning: Could not fetch channel_dna early: {e}")
+
+        # The first-party Anthropic key is billed to the platform owner, so only
+        # admin-owned jobs may use it. Client jobs run on Bedrock (free credits).
+        from app.services.claude_client import is_premium_user
+        allow_premium = is_premium_user(user_id)
+        print(
+            f"[Orchestrator] Claude provider for this job: "
+            f"{'anthropic (admin)' if allow_premium else 'bedrock'}"
+        )
+
         evaluated_clips = []
         cut_results = []
         exported_clips = []
@@ -540,6 +550,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             if scene_filter_result
                             else None
                         ),
+                        allow_premium=allow_premium,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     _debug_dump(job_id, "s05_unified_discovery", candidates)
@@ -579,6 +590,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             clip_duration_max=clip_duration_max,
                             video_title=video_title,
                             metadata_subject_name=metadata_subject_name,
+                            allow_premium=allow_premium,
                         )
                     _debug_dump(job_id, "s06_batch_evaluation", evaluated_clips)
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")

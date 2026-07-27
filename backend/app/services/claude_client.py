@@ -15,6 +15,36 @@ def _make_anthropic_client() -> anthropic.Anthropic | None:
     return anthropic.Anthropic(api_key=key) if key else None
 
 
+_premium_user_cache: dict[str, bool] = {}
+
+
+def is_premium_user(user_id: str | None) -> bool:
+    """
+    True only for accounts in admin_users. The first-party Anthropic key is
+    billed to the platform owner, so client jobs must never reach it — they
+    run on Bedrock, which is covered by free credits.
+
+    Fails closed: any lookup error returns False and the job uses Bedrock.
+    """
+    if not user_id:
+        return False
+    uid = str(user_id)
+    if uid in _premium_user_cache:
+        return _premium_user_cache[uid]
+
+    allowed = False
+    try:
+        from app.services.supabase_client import get_client
+
+        res = get_client().table("admin_users").select("user_id").eq("user_id", uid).execute()
+        allowed = bool(res.data)
+    except Exception as e:
+        print(f"[ClaudeClient] admin lookup failed for {uid}, using Bedrock: {e}")
+
+    _premium_user_cache[uid] = allowed
+    return allowed
+
+
 def _make_bedrock_client() -> anthropic.AnthropicBedrock | None:
     if settings.AWS_BEDROCK_ACCESS_KEY and settings.AWS_BEDROCK_SECRET_KEY:
         return anthropic.AnthropicBedrock(
@@ -30,7 +60,13 @@ def call_claude(
     system: str | None = None,
     max_tokens: int = 16000,
     extra_system_blocks: list | None = None,
+    allow_premium: bool = False,
 ) -> str:
+    """
+    allow_premium gates the first-party Anthropic model. It defaults to False so
+    any caller that does not explicitly opt in — including every client job —
+    runs on Bedrock.
+    """
     # Both current callers (S05, S06) pass their own system prompt; this is the
     # fallback for any future caller.
     system_text = (
@@ -57,7 +93,7 @@ def call_claude(
     # --- Anthropic API (used only when ANTHROPIC_API_KEY is set) ---
     # Opus 5 rejects budget_tokens and thinks by default, so max_tokens must
     # cover thinking + text together — hence the doubled ceiling.
-    anthropic_client = _make_anthropic_client()
+    anthropic_client = _make_anthropic_client() if allow_premium else None
     if anthropic_client:
         for attempt in range(3):
             try:

@@ -268,6 +268,7 @@ def _evaluate_batch_with_claude(
     full_transcript_block: Optional[list] = None,
     video_title: str = "",
     metadata_subject_name: Optional[str] = None,
+    allow_premium: bool = False,
 ) -> list:
     """
     Evaluates a batch of candidates with Claude using transcript only.
@@ -284,7 +285,12 @@ def _evaluate_batch_with_claude(
         video_title=video_title,
         metadata_subject_name=metadata_subject_name,
     )
-    raw = call_claude(content, system=SYSTEM_PROMPT, extra_system_blocks=full_transcript_block)
+    raw = call_claude(
+        content,
+        system=SYSTEM_PROMPT,
+        extra_system_blocks=full_transcript_block,
+        allow_premium=allow_premium,
+    )
     return _parse_claude_json(raw)
 
 
@@ -296,6 +302,7 @@ def _evaluate_single_with_claude(
     full_transcript_block: Optional[list] = None,
     video_title: str = "",
     metadata_subject_name: Optional[str] = None,
+    allow_premium: bool = False,
 ) -> Optional[dict]:
     try:
         results = _evaluate_batch_with_claude(
@@ -306,6 +313,7 @@ def _evaluate_single_with_claude(
             full_transcript_block,
             video_title=video_title,
             metadata_subject_name=metadata_subject_name,
+            allow_premium=allow_premium,
         )
         return results[0] if results else None
     except Exception as e:
@@ -373,6 +381,7 @@ def run(
     clip_duration_max: Optional[int] = None,
     video_title: str = "",
     metadata_subject_name: Optional[str] = None,
+    allow_premium: bool = False,
 ) -> list:
     """
     S06: Batch Evaluation (Claude Sonnet)
@@ -475,6 +484,7 @@ def run(
                     full_transcript_block,
                     video_title=video_title,
                     metadata_subject_name=metadata_subject_name,
+                    allow_premium=allow_premium,
                 )
 
                 all_evaluated.extend(evaluated)
@@ -492,6 +502,7 @@ def run(
                             full_transcript_block,
                             video_title=video_title,
                             metadata_subject_name=metadata_subject_name,
+                    allow_premium=allow_premium,
                         )
                         if retry:
                             all_evaluated.append(retry)
@@ -515,6 +526,7 @@ def run(
                             full_transcript_block,
                             video_title=video_title,
                             metadata_subject_name=metadata_subject_name,
+                    allow_premium=allow_premium,
                         )
                         if single:
                             all_evaluated.append(single)
