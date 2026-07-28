@@ -7,11 +7,23 @@ Used by:
 """
 import os
 import subprocess
+import time
 from typing import Optional
 
 import httpx
 
 from app.config import settings
+
+# Deepgram uploads occasionally stall mid-request: the socket goes quiet and the
+# write phase blocks until it hits its ceiling. A single failure used to leave
+# the clip permanently uncaptioned, so retry the transient cases.
+_MAX_ATTEMPTS = 3
+_RETRY_BACKOFF_SECONDS = (2, 8)
+
+# One scalar timeout applies to all four phases at once, which meant a dead
+# connection was waited on for the full read budget. Split them so a stalled
+# upload fails fast enough to leave room for a retry.
+_DEEPGRAM_TIMEOUT = httpx.Timeout(connect=10.0, write=60.0, read=180.0, pool=10.0)
 
 
 def convert_to_wav(input_path: str, output_path: str) -> None:
@@ -51,15 +63,40 @@ def transcribe_with_deepgram(wav_path: str, language: Optional[str] = None) -> d
     else:
         params["detect_language"] = "true"
 
-    response = httpx.post(
-        "https://api.deepgram.com/v1/listen",
-        headers=headers,
-        params=params,
-        content=audio_data,
-        timeout=120.0,
-    )
-    response.raise_for_status()
-    return response.json()
+    last_error: Exception | None = None
+
+    for attempt in range(_MAX_ATTEMPTS):
+        try:
+            response = httpx.post(
+                "https://api.deepgram.com/v1/listen",
+                headers=headers,
+                params=params,
+                content=audio_data,
+                timeout=_DEEPGRAM_TIMEOUT,
+            )
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.TransportError as e:
+            # Timeout, stalled connection, or dropped socket — worth another try.
+            last_error = e
+        except httpx.HTTPStatusError as e:
+            # 4xx means a bad key or a malformed request; retrying cannot help.
+            if e.response.status_code < 500:
+                raise
+            last_error = e
+
+        if attempt < _MAX_ATTEMPTS - 1:
+            delay = _RETRY_BACKOFF_SECONDS[attempt]
+            print(
+                f"[Captions] Deepgram attempt {attempt + 1}/{_MAX_ATTEMPTS} failed "
+                f"({type(last_error).__name__}); retrying in {delay}s"
+            )
+            time.sleep(delay)
+
+    raise RuntimeError(
+        f"Deepgram transcription failed after {_MAX_ATTEMPTS} attempts: {last_error}"
+    ) from last_error
 
 
 def build_word_list(words: list) -> list[dict]:
