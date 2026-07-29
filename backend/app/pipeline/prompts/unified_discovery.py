@@ -37,8 +37,10 @@ this specific audience rewards — when a moment is strong for reasons not liste
 take it and say why in `reason`.
 
 - A complete personal story with a setup and a payoff
+- A memory from childhood, school, or the years before the speaker was known — a scene from the past that lands somewhere
 - Confessions, admissions, and things the speaker probably shouldn't have said
 - Self-deprecation — the speaker is the fool in their own story
+- The speaker being teased, wound up or taken apart by someone else, and how they handle it
 - Emotional peaks: laughter, shock, delight, genuine embarrassment
 - A small, ordinary opinion delivered with unexpected conviction
 - Rapid back-and-forth where the timing itself is the joke
