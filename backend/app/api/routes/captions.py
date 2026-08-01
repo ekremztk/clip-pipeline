@@ -16,7 +16,7 @@ async def generate_captions(
 ):
     """
     Accepts audio/video blob from the editor (WAV or WebM).
-    Converts to 16kHz WAV, transcribes with Deepgram nova-2,
+    Converts to 16kHz WAV, transcribes with Deepgram nova-3,
     returns word-level timestamps + segments.
     """
     tmp_input = None

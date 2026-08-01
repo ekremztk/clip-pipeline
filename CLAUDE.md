@@ -261,7 +261,7 @@ Entry: `render_captions(video_path, output_path, words, segments, template_key)`
 
 Templates in `renderer.py` (8 total): `clean` (Pillow), `hormozi`, `outline`, `pill`, `neon`, `cinematic`, `bold_pop`, `fire`. Each template config: font, fontsize, colors, karaoke flag, `words_per_group`, `max_lines`, `max_chars_per_line`.
 
-Word timestamps in S10 are produced by a **fresh** Deepgram Nova-2 call on the reframed clip (`captions/core.py::transcribe_video`) — S02's word list is NOT reused. This is intentional: the reframed clip duration may differ from the source cut window, and Nova-2 re-aligns timestamps on the final rendered audio.
+Word timestamps in S10 are produced by a **fresh** Deepgram Nova-3 call on the reframed clip (`captions/core.py::transcribe_video`) — S02's word list is NOT reused. This is intentional: the reframed clip duration may differ from the source cut window, and the fresh call re-aligns timestamps on the final rendered audio. The model must stay in sync with S02 (`services/deepgram_client.py`) — the words this call returns are burned into the video, so a weaker model here produces captions that contradict the transcript the pipeline already has. This step ran on Nova-2 until 2026-08-02, which is how a clip whose source transcript read "Eddie's old" shipped with a caption reading "it is old".
 
 ---
 
@@ -284,7 +284,7 @@ S08 Export (FFmpeg cut+encode, ThreadPool×3, R2 upload,
 S09 Reframe V5 (podcast: YOLOv8l-face + Gemini director →
     keyframes → single-pass crop expression; gaming: YOLO
     webcam detect → vstack), ThreadPool×2                   — Modal A10G GPU
-S10 Captions V2 (fresh Deepgram Nova-2 transcription of the
+S10 Captions V2 (fresh Deepgram Nova-3 transcription of the
     reframed clip → Pillow PNG overlays OR ASS libass burn) — Modal A10G GPU
 ```
 S08+S09+S10 run as a single Modal function call (`process_clips` in `modal_app.py`).
@@ -329,7 +329,7 @@ CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Ra
 | S05 Unified Discovery (TEXT transcript, NOT video) | **Claude** `us.anthropic.claude-opus-4-6-v1` (AWS Bedrock) | `settings.CLAUDE_MODEL` |
 | S06 Batch Evaluation | **Claude** (same `CLAUDE_MODEL`) | `settings.CLAUDE_MODEL` |
 | S09 Reframe — director | `gemini-2.5-pro` (multimodal video + context) | `settings.GEMINI_MODEL_PRO` |
-| S10 Captions — transcription | Deepgram **Nova-2** (fresh call per clip) | hardcoded in `captions/core.py` |
+| S10 Captions — transcription | Deepgram **Nova-3** (fresh call per clip) | hardcoded in `captions/core.py` |
 | Director agent (tool calling) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
 | Director chat (simple queries) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
 | Onboarding DNA + clip summary + failure analysis | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |

@@ -42,7 +42,7 @@ def convert_to_wav(input_path: str, output_path: str) -> None:
 
 
 def transcribe_with_deepgram(wav_path: str, language: Optional[str] = None) -> dict:
-    """Send WAV file to Deepgram nova-2 and return raw JSON response."""
+    """Send WAV file to Deepgram nova-3 and return raw JSON response."""
     with open(wav_path, "rb") as f:
         audio_data = f.read()
 
@@ -52,7 +52,11 @@ def transcribe_with_deepgram(wav_path: str, language: Optional[str] = None) -> d
     }
 
     params = {
-        "model": "nova-2",
+        # Matches S02 (services/deepgram_client.py). This call re-transcribes the
+        # already-cut clip to re-align word timings against the rendered audio, but
+        # the words it returns are what gets burned into the video — on nova-2 they
+        # could come back worse than the nova-3 transcript the pipeline already had.
+        "model": "nova-3",
         "punctuate": "true",
         "words": "true",
         "smart_format": "true",
@@ -162,7 +166,7 @@ def transcribe_video(
     Full transcription pipeline for a local video file.
 
     1. FFmpeg: extract mono 16kHz WAV
-    2. Deepgram nova-2: transcribe with word timestamps
+    2. Deepgram nova-3: transcribe with word timestamps
     3. Build word list + segments
 
     Returns:
