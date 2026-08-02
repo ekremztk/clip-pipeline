@@ -67,6 +67,77 @@ def _words_to_natural_text(w_list: list) -> str:
     return "\n".join(sentences)
 
 
+def _merge_verdicts_onto_candidates(evaluated: list, candidates: list) -> list:
+    """
+    Attach each verdict to the candidate it judged.
+
+    Claude returns verdicts, not clips. Its response carries no
+    recommended_start/recommended_end at all — boundaries are named only as
+    utterance ids, and only when the verdict is `repair` — so treating a
+    response object as the clip itself left every approved clip with a 0.0s
+    window, and the video-bound clamp downstream then dropped all of them.
+    """
+    by_id = {str(c.get("candidate_id")): c for c in candidates or []}
+    merged = []
+
+    for ev in evaluated or []:
+        if not isinstance(ev, dict):
+            continue
+        cid = str(ev.get("candidate_id", "")).strip()
+        original = by_id.get(cid)
+        if original is None:
+            print(f"[S06] Discarding verdict for unknown candidate {cid or '(missing id)'}")
+            continue
+
+        clip = {**original, **ev}
+        # A verdict may not move a boundary. The repair path below is the only
+        # way boundaries change, and it writes them from resolved utterance ids.
+        clip["recommended_start"] = original.get("recommended_start")
+        clip["recommended_end"] = original.get("recommended_end")
+        clip["start_utterance_id"] = original.get("start_utterance_id")
+        clip["end_utterance_id"] = original.get("end_utterance_id")
+
+        _normalise_evaluation_fields(clip)
+        merged.append(clip)
+
+    return merged
+
+
+def _normalise_evaluation_fields(clip: dict) -> None:
+    """
+    Keep the pre-rewrite field names populated alongside the new ones.
+
+    The evaluation prompt now returns `verdict`, `hallucination_flag` and a
+    per-dimension `scores` object; stock_analytics and S08 still read
+    `quality_verdict`, `s05_hallucination_flag` and a flat `score`. Writing both
+    shapes here keeps one source of truth without a migration in three files.
+    """
+    verdict = str(clip.get("verdict") or clip.get("quality_verdict") or "").strip().lower()
+    if verdict:
+        clip["verdict"] = verdict
+        clip["quality_verdict"] = verdict
+
+    scores = clip.get("scores")
+    if isinstance(scores, dict) and clip.get("score") is None:
+        values = []
+        for v in scores.values():
+            try:
+                values.append(float(v))
+            except (TypeError, ValueError):
+                continue
+        if values:
+            clip["score"] = int(round(sum(values) / len(values)))
+
+    if clip.get("hallucination_flag") and not clip.get("s05_hallucination_flag"):
+        clip["s05_hallucination_flag"] = True
+
+
+def _mark_omitted(clip: dict, reason: str) -> None:
+    clip["verdict"] = "omit"
+    clip["quality_verdict"] = "omit"
+    clip["omit_reason"] = reason
+
+
 def _apply_repair(clip: dict, utterance_index: dict, words: list) -> bool:
     """
     Resolve a repair verdict's new boundaries and write them onto the clip.
@@ -604,6 +675,8 @@ def run(
 
         print(f"[S06] Claude evaluated {len(all_evaluated)} total candidates")
 
+        all_evaluated = _merge_verdicts_onto_candidates(all_evaluated, candidates)
+
         # Log hallucination flags from inspector role
         flagged = [c for c in all_evaluated if c.get("s05_hallucination_flag")]
         if flagged:
@@ -625,8 +698,7 @@ def run(
             notes = clip.get("quality_notes", "")
 
             if clip.get("hallucination_flag") or clip.get("s05_hallucination_flag"):
-                clip["verdict"] = "omit"
-                clip["omit_reason"] = "hook_text not found in transcript"
+                _mark_omitted(clip, "hook_text not found in transcript")
                 omitted.append(clip)
                 print(f"[S06] Omitted candidate {cid}: hallucinated hook_text")
                 continue
@@ -640,8 +712,7 @@ def run(
                     print(f"[S06] Repaired candidate {cid}: {notes}")
                     passed.append(clip)
                 else:
-                    clip["verdict"] = "omit"
-                    clip["omit_reason"] = "repair verdict without a usable boundary change"
+                    _mark_omitted(clip, "repair verdict without a usable boundary change")
                     omitted.append(clip)
                     print(f"[S06] Omitted candidate {cid}: asked for repair but moved nothing")
 
@@ -666,8 +737,7 @@ def run(
                 clip_start = min(clip_start, video_duration)
                 if clip_end - clip_start < min_duration:
                     print(f"[S06] Dropping candidate {clip.get('candidate_id')}: {clip_end - clip_start:.1f}s after clamping to video bounds ({video_duration:.1f}s)")
-                    clip["verdict"] = "omit"
-                    clip["omit_reason"] = "too short after video-bound clamp"
+                    _mark_omitted(clip, "too short after video-bound clamp")
                     continue
                 clip["recommended_start"] = round(clip_start, 3)
                 clip["recommended_end"] = round(clip_end, 3)
