@@ -17,6 +17,35 @@ def _make_anthropic_client() -> anthropic.Anthropic | None:
 
 _premium_user_cache: dict[str, bool] = {}
 
+# Per-step token accounting. The orchestrator used to read Gemini's accumulator
+# around the S05 call, which has run on Claude since April — so every audited
+# run recorded 0 input and 0 output tokens and the cost of the two most
+# expensive steps was invisible.
+_token_accumulator: dict = {}
+
+
+def reset_claude_tokens() -> None:
+    _token_accumulator.clear()
+
+
+def get_claude_tokens() -> dict:
+    """Totals since the last reset. Empty dict when no Claude call was made."""
+    return dict(_token_accumulator) if _token_accumulator else {}
+
+
+def _record_usage(model: str, provider: str, usage) -> None:
+    acc = _token_accumulator
+    acc["model"] = model
+    acc["provider"] = provider
+    acc["calls"] = acc.get("calls", 0) + 1
+    for field, key in (
+        ("input_tokens", "input_tokens"),
+        ("output_tokens", "output_tokens"),
+        ("cache_read_input_tokens", "cache_read_tokens"),
+        ("cache_creation_input_tokens", "cache_write_tokens"),
+    ):
+        acc[key] = acc.get(key, 0) + (getattr(usage, field, 0) or 0)
+
 
 def is_premium_user(user_id: str | None) -> bool:
     """
@@ -112,6 +141,7 @@ def call_claude(
                 )
 
                 usage = response.usage
+                _record_usage(ANTHROPIC_MODEL, "anthropic", usage)
                 print(
                     f"[ClaudeClient] Tokens — in: {usage.input_tokens}, "
                     f"out: {usage.output_tokens}, "
@@ -162,6 +192,7 @@ def call_claude(
                 )
 
                 usage = response.usage
+                _record_usage(BEDROCK_MODEL, "bedrock", usage)
                 cache_read = getattr(usage, "cache_read_input_tokens", 0) or 0
                 cache_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
                 if cache_read or cache_write:

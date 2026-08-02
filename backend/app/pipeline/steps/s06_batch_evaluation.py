@@ -14,9 +14,12 @@ from app.services.claude_client import call_claude
 
 def _words_to_natural_text(w_list: list) -> str:
     """
-    Converts a list of Deepgram word objects into natural readable text.
-    Uses sentence boundaries (punctuation) for line breaks with timestamps.
-    Each sentence gets a [MM:SS.ss] timestamp from its first word.
+    Render Deepgram word objects as readable lines, one per sentence.
+
+    Each line carries the speaker id as well as the timestamp. Without it these
+    snippets were an undifferentiated wall of text, so the model could not tell a
+    host question from a guest answer and had to re-derive that by matching the
+    snippet back against the labeled transcript in its system context.
     """
     if not w_list:
         return ""
@@ -24,36 +27,85 @@ def _words_to_natural_text(w_list: list) -> str:
     sentences = []
     current_sentence = []
     sentence_start_ts = None
+    sentence_speaker = None
+
+    def flush():
+        if not current_sentence or sentence_start_ts is None:
+            return
+        ts = sentence_start_ts
+        label = f"SPEAKER_{chr(ord('A') + sentence_speaker)}" if isinstance(sentence_speaker, int) and 0 <= sentence_speaker < 26 else "SPEAKER_?"
+        sentences.append(
+            f"[{int(ts // 60):02d}:{ts % 60:05.2f}] {label}: {' '.join(current_sentence)}"
+        )
 
     for w in w_list:
-        word_text = w.get("punctuated_word", w.get("word", ""))
+        word_text = w.get("punctuated_word") or w.get("word") or ""
         if not word_text:
             continue
 
-        if sentence_start_ts is None:
-            sentence_start_ts = w.get("start", 0)
-
-        current_sentence.append(word_text)
-
-        # Break on sentence-ending punctuation
-        if word_text and word_text[-1] in ".!?":
-            ts = sentence_start_ts
-            minutes = int(ts // 60)
-            seconds = ts % 60
-            line = f"[{minutes:02d}:{seconds:05.2f}] {' '.join(current_sentence)}"
-            sentences.append(line)
+        speaker = w.get("speaker")
+        # A speaker change starts a new line even mid-sentence — Deepgram often
+        # runs an interjection into the previous speaker's sentence.
+        if current_sentence and speaker != sentence_speaker:
+            flush()
             current_sentence = []
             sentence_start_ts = None
 
-    # Flush remaining words
-    if current_sentence and sentence_start_ts is not None:
-        ts = sentence_start_ts
-        minutes = int(ts // 60)
-        seconds = ts % 60
-        line = f"[{minutes:02d}:{seconds:05.2f}] {' '.join(current_sentence)}"
-        sentences.append(line)
+        if sentence_start_ts is None:
+            sentence_start_ts = w.get("start", 0)
+            sentence_speaker = speaker
+
+        current_sentence.append(word_text)
+
+        if word_text[-1] in ".!?":
+            flush()
+            current_sentence = []
+            sentence_start_ts = None
+
+    flush()
 
     return "\n".join(sentences)
+
+
+def _apply_repair(clip: dict, utterance_index: dict, words: list) -> bool:
+    """
+    Resolve a repair verdict's new boundaries and write them onto the clip.
+
+    Returns False — meaning "this is not a repair" — when the model named no
+    boundaries, named ids that do not exist, or named the same window it was
+    already given. Only a real, resolvable, different window counts.
+    """
+    from app.pipeline.steps.s05_unified_discovery import refine_boundary_by_text
+
+    start_id = str(clip.get("repair_start_utterance_id") or "").strip()
+    end_id = str(clip.get("repair_end_utterance_id") or "").strip()
+    start_span = utterance_index.get(start_id)
+    end_span = utterance_index.get(end_id)
+    if not start_span or not end_span:
+        return False
+
+    new_start, new_end = start_span[0], end_span[1]
+
+    refined = refine_boundary_by_text(words, start_span, clip.get("hook_text", ""), "start")
+    if refined is not None and start_span[0] <= refined < start_span[1]:
+        new_start = refined
+    refined = refine_boundary_by_text(words, end_span, clip.get("end_text", ""), "end")
+    if refined is not None and end_span[0] < refined <= end_span[1]:
+        new_end = refined
+
+    if new_end <= new_start:
+        return False
+
+    old_start = float(clip.get("recommended_start") or 0.0)
+    old_end = float(clip.get("recommended_end") or 0.0)
+    if abs(new_start - old_start) < 0.25 and abs(new_end - old_end) < 0.25:
+        return False
+
+    clip["recommended_start"] = new_start
+    clip["recommended_end"] = new_end
+    clip["start_utterance_id"] = start_id
+    clip["end_utterance_id"] = end_id
+    return True
 
 
 def _extract_context_segments(
@@ -136,7 +188,9 @@ def _extract_transcript_segment(
                     return segment
 
         # Fallback: use labeled_transcript lines within time window
-        pattern = re.compile(r'\[(\d+):(\d+\.?\d*)\]')
+        # S04 lines are "[U0042 03:21.85-03:28.97] SPEAKER_A: …". The optional
+        # id prefix keeps this working if it is ever handed a bare timestamp.
+        pattern = re.compile(r'\[(?:U\d+(?:-U\d+)?\s+)?(\d+):(\d+\.?\d*)')
         segment_lines = []
         for line in labeled_transcript.split("\n"):
             match = pattern.search(line)
@@ -216,16 +270,22 @@ def _build_claude_content(
             transcript_block = item.get("transcript_segment", "")
 
         meta = {
-            "candidate_id":       cid,
-            "recommended_start":  item.get("recommended_start"),
-            "recommended_end":    item.get("recommended_end"),
-            "hook_text":          item.get("hook_text"),
-            "end_text":           item.get("end_text"),
-            "reason":             item.get("reason"),
-            "primary_signal":     item.get("primary_signal"),
-            "loop_potential":     item.get("loop_potential"),
-            "content_type":       item.get("content_type"),
-            "estimated_duration": item.get("estimated_duration"),
+            "candidate_id":          cid,
+            # Utterance ids, so a repair can be named in the same terms S05 used.
+            "start_utterance_id":    item.get("start_utterance_id"),
+            "end_utterance_id":      item.get("end_utterance_id"),
+            "recommended_start":     item.get("recommended_start"),
+            "recommended_end":       item.get("recommended_end"),
+            "hook_text":             item.get("hook_text"),
+            "end_text":              item.get("end_text"),
+            "reason":                item.get("reason"),
+            # S05's own read on what a stranger needs. It used to be generated
+            # and then dropped before it reached the model that checks exactly
+            # that, which is the one place it was worth having.
+            "standalone_note":       item.get("standalone_note"),
+            "primary_signal":        item.get("primary_signal"),
+            "loop_potential":        item.get("loop_potential"),
+            "content_type":          item.get("content_type"),
         }
         candidates_text_parts.append(
             f"CANDIDATE {cid}:\n{json.dumps(meta, indent=2)}\n\nTRANSCRIPT:\n{transcript_block}"
@@ -414,6 +474,12 @@ def run(
         return []
 
     try:
+        from app.pipeline.steps.s05_unified_discovery import build_utterance_index
+
+        # Same index S05 used, so a repair resolves to exactly the same seconds.
+        utterance_index = build_utterance_index(transcript_data or {})
+        words = (transcript_data or {}).get("words") or []
+
         channel_context = build_channel_context(channel_dna, channel_id)
 
         # Build a cached system block with the full labeled transcript — Claude uses it
@@ -452,11 +518,14 @@ def run(
                 "candidate_id":       candidate.get("candidate_id"),
                 "timestamp":          candidate.get("timestamp", "00:00"),
                 "hook_text":          candidate.get("hook_text", ""),
+                "end_text":           candidate.get("end_text", ""),
                 "reason":             candidate.get("reason", ""),
+                "standalone_note":    candidate.get("standalone_note", ""),
                 "primary_signal":     candidate.get("primary_signal", ""),
+                "loop_potential":     candidate.get("loop_potential", ""),
                 "content_type":       candidate.get("content_type", ""),
-                "estimated_duration": candidate.get("estimated_duration"),
-                "needs_context":      candidate.get("needs_context"),
+                "start_utterance_id": candidate.get("start_utterance_id"),
+                "end_utterance_id":   candidate.get("end_utterance_id"),
                 "recommended_start":  candidate.get("recommended_start", 0),
                 "recommended_end":    candidate.get("recommended_end", 0),
                 "transcript_segment": segment,
@@ -542,23 +611,47 @@ def run(
             for c in flagged:
                 print(f"[S06]   Candidate {c.get('candidate_id')}: {c.get('hook_text', '')[:60]}")
 
-        # Production filter — only pass/fixable candidates continue to S07.
-        # Omitted candidates are still recorded by stock analytics.
+        # Production filter. `repair` only survives if it actually repaired
+        # something: the model must name new boundaries, they must resolve, and
+        # they must differ from what it was given. The previous version let the
+        # whole 55-71 band through untouched, so a verdict that meant "this has a
+        # problem" was read by the code as "approved" — two of the four clips in
+        # the Sofia job shipped that way.
         passed = []
         omitted = []
         for clip in all_evaluated:
-            verdict = clip.get("quality_verdict", "")
-            if verdict in ("pass", "fixable"):
-                notes = clip.get("quality_notes", "")
-                if verdict == "fixable" and notes:
-                    print(f"[S06] Fixable candidate {clip.get('candidate_id', '?')}: {notes}")
+            cid = clip.get("candidate_id", "?")
+            verdict = (clip.get("verdict") or clip.get("quality_verdict") or "").lower()
+            notes = clip.get("quality_notes", "")
+
+            if clip.get("hallucination_flag") or clip.get("s05_hallucination_flag"):
+                clip["verdict"] = "omit"
+                clip["omit_reason"] = "hook_text not found in transcript"
+                omitted.append(clip)
+                print(f"[S06] Omitted candidate {cid}: hallucinated hook_text")
+                continue
+
+            if verdict == "pass":
                 passed.append(clip)
+
+            elif verdict in ("repair", "fixable"):
+                repaired = _apply_repair(clip, utterance_index, words)
+                if repaired:
+                    print(f"[S06] Repaired candidate {cid}: {notes}")
+                    passed.append(clip)
+                else:
+                    clip["verdict"] = "omit"
+                    clip["omit_reason"] = "repair verdict without a usable boundary change"
+                    omitted.append(clip)
+                    print(f"[S06] Omitted candidate {cid}: asked for repair but moved nothing")
+
             elif verdict == "omit":
                 omitted.append(clip)
-                reason = clip.get("omit_reason") or clip.get("quality_notes") or ""
-                print(f"[S06] Omitted candidate {clip.get('candidate_id', '?')}: {reason}")
+                reason = clip.get("omit_reason") or notes or ""
+                print(f"[S06] Omitted candidate {cid}: {reason}")
+
             else:
-                print(f"[S06] Safety-filtered unexpected verdict for candidate {clip.get('candidate_id', '?')}: '{verdict}'")
+                print(f"[S06] Safety-filtered unexpected verdict for candidate {cid}: '{verdict}'")
 
         print(f"[S06] Quality gate: {len(passed)} passed, {len(omitted)} omitted, {len(all_evaluated) - len(passed) - len(omitted)} filtered")
 
@@ -573,7 +666,7 @@ def run(
                 clip_start = min(clip_start, video_duration)
                 if clip_end - clip_start < min_duration:
                     print(f"[S06] Dropping candidate {clip.get('candidate_id')}: {clip_end - clip_start:.1f}s after clamping to video bounds ({video_duration:.1f}s)")
-                    clip["quality_verdict"] = "omit"
+                    clip["verdict"] = "omit"
                     clip["omit_reason"] = "too short after video-bound clamp"
                     continue
                 clip["recommended_start"] = round(clip_start, 3)
@@ -609,7 +702,10 @@ def run(
         return passed
 
     except Exception as e:
+        # Raise rather than return []. "Nothing passed the quality bar" and
+        # "the evaluation crashed" are different outcomes and used to look
+        # identical from the outside — both ended as a completed job with no clips.
         print(f"[S06] Critical error: {e}")
         import traceback
         traceback.print_exc()
-        return []
+        raise RuntimeError(f"S06 evaluation failed: {e}") from e

@@ -26,7 +26,7 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
                 return w_start
             # End mode: if we're inside a non-sentence-ending word, prefer
             # the end of the last sentence-ending word before this word.
-            text = word.get("word", word.get("punctuated_word", "")).strip()
+            text = (word.get("punctuated_word") or word.get("word") or "").strip()
             is_sentence_end = text and text[-1] in sentence_enders
             if not is_sentence_end:
                 # Look back for a sentence-ending word within 2s
@@ -36,7 +36,7 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
                         continue
                     if w_start - p_end > 2.0:
                         break
-                    p_text = prev.get("word", prev.get("punctuated_word", "")).strip()
+                    p_text = (prev.get("punctuated_word") or prev.get("word") or "").strip()
                     if p_text and p_text[-1] in sentence_enders:
                         return p_end
                 # No sentence end nearby — snap to start of this word (cut before it)
@@ -70,7 +70,7 @@ def snap_to_word_boundary(target_sec: float, words: list, mode: str) -> float:
             # bleeding into the next sentence. Sentence-ending words get a
             # 0.6x bonus to prefer clean cuts at punctuation boundaries.
             penalty = 3.0 if diff > 0 else 1.0
-            text = word.get("word", word.get("punctuated_word", "")).strip()
+            text = (word.get("punctuated_word") or word.get("word") or "").strip()
             is_sentence_end = text and text[-1] in sentence_enders
             bonus = 0.6 if is_sentence_end else 1.0
             score = abs_diff * penalty * bonus
@@ -97,7 +97,7 @@ def _find_sentence_end_before(hard_limit: float, clip_start: float, words: list,
             break
         if w_end < search_start:
             continue
-        text = w.get("word", w.get("punctuated_word", "")).strip()
+        text = (w.get("punctuated_word") or w.get("word") or "").strip()
         if text and text[-1] in sentence_enders:
             if (w_end - clip_start) >= min_dur:
                 best = w_end

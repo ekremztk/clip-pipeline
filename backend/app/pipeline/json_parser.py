@@ -39,6 +39,35 @@ def parse_json_list_response(raw: str, *, log_prefix: str = "[JSON]") -> list[di
         return []
 
 
+def parse_json_object_response(raw: str, *, log_prefix: str = "[JSON]") -> dict[str, Any]:
+    """Extract the first valid JSON object from an LLM response.
+
+    Used where a step needs more than one field back — S05 returns its coverage
+    map alongside its candidates. A bare list is wrapped under ``candidates`` so
+    a model that ignores the object shape still parses.
+    """
+    if not raw:
+        return {}
+
+    cleaned = _strip_markdown_fence(raw.strip())
+    cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", cleaned)
+
+    decoder = json.JSONDecoder()
+    for start in _json_start_positions(cleaned):
+        try:
+            value, _ = decoder.raw_decode(cleaned[start:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, dict):
+            return value
+        if isinstance(value, list):
+            return {"candidates": [item for item in value if isinstance(item, dict)]}
+
+    print(f"{log_prefix} No JSON object found")
+    print(f"{log_prefix} Raw snippet: {cleaned[:400]}")
+    return {}
+
+
 def _strip_markdown_fence(text: str) -> str:
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text, count=1)

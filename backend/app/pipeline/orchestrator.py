@@ -28,6 +28,24 @@ def _debug_dump(job_id: str, step: str, data: object) -> None:
         print(f"[DEBUG] Could not write {step}: {e}")
 
 
+def _persist_step_output(job_id: str, column: str, payload: object) -> None:
+    """
+    Write a step's decisions onto the job row.
+
+    S05/S06/S07 results used to live only in process memory and in a /tmp dump
+    that was off by default and gone after any restart, so "which step broke this
+    clip" could only ever be answered by inference. Never fatal: failing to
+    record a decision must not kill the job that produced it.
+    """
+    try:
+        from app.services.supabase_client import get_client
+        get_client().table("jobs").update(
+            {column: json.loads(json.dumps(payload, default=str))}
+        ).eq("id", job_id).execute()
+    except Exception as e:
+        print(f"[Orchestrator] Could not persist {column}: {e}")
+
+
 def _fmt_ts(sec: float) -> str:
     m = int(sec // 60)
     s = sec % 60
@@ -483,7 +501,8 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
 
                     # Always build the full labeled transcript (needed for debug report)
                     labeled_transcript_full = s04_labeled_transcript.run(
-                        transcript_data, predicted_map, target_guest
+                        transcript_data, predicted_map, target_guest,
+                        video_title=video_title,
                     )
 
                     # If scene filter is active, build a second, filtered version for S05
@@ -492,6 +511,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         labeled_transcript = s04_labeled_transcript.run(
                             transcript_data, predicted_map, target_guest,
                             scene_ranges=scene_ranges,
+                            video_title=video_title,
                         )
                     else:
                         labeled_transcript = labeled_transcript_full
@@ -525,7 +545,12 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             print(f"[SceneFilter] debug report error (non-critical): {_re}")
                 elif step_number == 5:
                     from app.pipeline.steps import s05_unified_discovery
-                    from app.services.gemini_client import reset_token_accumulator, get_accumulated_token_usage
+                    # S05 runs on Claude. This read Gemini's accumulator, which
+                    # Claude never touches, so every audited run recorded 0 tokens.
+                    from app.services.claude_client import (
+                        reset_claude_tokens as reset_token_accumulator,
+                        get_claude_tokens as get_accumulated_token_usage,
+                    )
                     # channel_dna already fetched at pipeline start
                     # Get video duration from transcript_data (Deepgram provides this)
                     video_duration_s = transcript_data.get("duration", 0.0) if transcript_data else 0.0
@@ -537,6 +562,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                         channel_id=channel_id,
                         video_duration_s=video_duration_s,
                         job_id=job_id,
+                        transcript_data=transcript_data,
                         audio_path=audio_path,
                         clip_duration_min=clip_duration_min,
                         clip_duration_max=clip_duration_max,
@@ -554,6 +580,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     _debug_dump(job_id, "s05_unified_discovery", candidates)
+                    _persist_step_output(job_id, "s05_output", {"candidates": candidates})
                     try:
                         from app.pipeline.stock_analytics import record_s05_candidates
                         record_s05_candidates(job_id, candidates, source_duration_s=video_duration_s)
@@ -575,6 +602,12 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
 
                 elif step_number == 6:
                     from app.pipeline.steps import s06_batch_evaluation
+                    from app.services.claude_client import (
+                        reset_claude_tokens as reset_token_accumulator,
+                        get_claude_tokens as get_accumulated_token_usage,
+                    )
+                    # Reset so S06's audited cost is its own, not S05's carried over.
+                    reset_token_accumulator()
                     if not candidates:
                         print("[Orchestrator] No candidates from S05. Skipping evaluation.")
                     else:
@@ -593,10 +626,12 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             allow_premium=allow_premium,
                         )
                     _debug_dump(job_id, "s06_batch_evaluation", evaluated_clips)
+                    _persist_step_output(job_id, "s06_output", {"approved": evaluated_clips})
                     print(f"[Orchestrator] S06 returned {len(evaluated_clips)} approved clips (fails already dropped)")
                     duration_ms_s06 = int((time.time() - step_start_time) * 1000)
+                    s06_token_usage = get_accumulated_token_usage()
                     log_step(job_id, step_number, step_name, StepStatus.COMPLETED.value,
-                             duration_ms=duration_ms_s06)
+                             duration_ms=duration_ms_s06, token_usage=s06_token_usage)
                     pass_count = len(evaluated_clips)
                     avg_score = round(
                         sum(float(c.get("score", 0) or 0) for c in evaluated_clips) / max(len(evaluated_clips), 1), 2
@@ -611,7 +646,21 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     continue  # log_step already called above
 
                 elif step_number == 7:
-                    from app.pipeline.steps import s07_precision_cut
+                    from app.pipeline.steps import s06_5_metadata, s07_precision_cut
+
+                    # Titles and descriptions, for approved clips only. Kept out
+                    # of the quality gate so that call spends its attention on
+                    # whether the clip works, not on writing copy for it.
+                    if evaluated_clips:
+                        evaluated_clips = s06_5_metadata.run(
+                            evaluated_clips,
+                            channel_dna=channel_dna,
+                            job_id=job_id,
+                            video_title=video_title,
+                            main_person=metadata_subject_name,
+                            allow_premium=allow_premium,
+                        )
+
                     if not evaluated_clips:
                         print("[Orchestrator] No evaluated clips. Skipping precision cut.")
                     else:
@@ -625,6 +674,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             channel_dna=channel_dna,
                         )
                     _debug_dump(job_id, "s07_precision_cut", cut_results)
+                    _persist_step_output(job_id, "s07_output", {"clips": cut_results})
                     try:
                         from app.pipeline.stock_analytics import record_s07_cuts
                         record_s07_cuts(job_id, cut_results)
