@@ -580,7 +580,10 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     _debug_dump(job_id, "s05_unified_discovery", candidates)
-                    _persist_step_output(job_id, "s05_output", {"candidates": candidates})
+                    _persist_step_output(job_id, "s05_output", {
+                        "candidates": candidates,
+                        **s05_unified_discovery.get_discovery_report(),
+                    })
                     try:
                         from app.pipeline.stock_analytics import record_s05_candidates
                         record_s05_candidates(job_id, candidates, source_duration_s=video_duration_s)

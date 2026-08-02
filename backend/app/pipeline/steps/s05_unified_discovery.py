@@ -322,6 +322,27 @@ def _parse_claude_json(raw_text: str) -> dict:
     return parse_json_object_response(raw_text, log_prefix="[S05]")
 
 
+# What discovery saw, kept for the orchestrator to persist next to the
+# candidates. The timeline map is the only record of which parts of the episode
+# were read at all, so a run that returns nothing is otherwise indistinguishable
+# from a run that read nothing.
+_last_report: dict = {}
+
+
+def get_discovery_report() -> dict:
+    return dict(_last_report)
+
+
+def _record_report(timeline_map: list, coverage: dict, raw_count: int) -> None:
+    _last_report.clear()
+    _last_report.update({
+        "timeline_map": timeline_map,
+        "covered_pct": coverage.get("covered_pct"),
+        "gaps": coverage.get("gaps"),
+        "raw_candidate_count": raw_count,
+    })
+
+
 def build_utterance_index(transcript_data: dict) -> dict:
     """
     Map every `U####` id to its (start, end) seconds.
@@ -455,6 +476,7 @@ def run(
     required — without it there is nothing to resolve and the step returns [].
     """
     print(f"[S05] Starting unified discovery for job {job_id}")
+    _last_report.clear()  # never let one job's coverage be filed under the next
 
     try:
         # 0. Index the utterances the model's ids will resolve against.
@@ -519,11 +541,11 @@ def run(
             f"scene_filter={scene_filter_active}"
         )
 
-        # 4. Single Claude call — no chunking, full context
-        print(
-            f"[S05] Calling Claude ({settings.CLAUDE_MODEL}) — "
-            f"transcript: {len(labeled_transcript)} chars"
-        )
+        # 4. Single Claude call — no chunking, full context.
+        # The model name is left to call_claude, which is the only place that
+        # knows which provider the job resolved to. Printing settings.CLAUDE_MODEL
+        # here named Bedrock's model on admin jobs that actually ran on Opus 5.
+        print(f"[S05] Calling Claude — transcript: {len(labeled_transcript)} chars")
         content = [{"type": "text", "text": prompt}]
         raw_response = call_claude(
             content=content,
@@ -541,6 +563,7 @@ def run(
 
         # 5. Coverage audit — did discovery actually read to the end?
         coverage = audit_timeline_coverage(timeline_map, utterance_index)
+        _record_report(timeline_map, coverage, len(raw_candidates))
         print(
             f"[S05] Timeline map: {len(timeline_map)} region(s), "
             f"{coverage['covered_pct']}% of the episode covered"

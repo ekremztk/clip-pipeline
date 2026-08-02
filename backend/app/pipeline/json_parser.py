@@ -53,7 +53,15 @@ def parse_json_object_response(raw: str, *, log_prefix: str = "[JSON]") -> dict[
     cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", cleaned)
 
     decoder = json.JSONDecoder()
-    for start in _json_start_positions(cleaned):
+    # Document order, not brackets-first: the outermost JSON value always starts
+    # before anything nested inside it, so the first position that decodes is the
+    # whole response. The list parser scans '[' first because a bare array is its
+    # expected shape; here the wrapper object is, and its first '[' belongs to
+    # whichever array comes first inside it. S05 returns
+    # {"timeline_map": [...], "candidates": [...]} — brackets-first decoded
+    # timeline_map, wrapped it as if it were the candidate list, and every
+    # "candidate" was then dropped for having no start_utterance_id.
+    for start in _json_start_positions(cleaned, document_order=True):
         try:
             value, _ = decoder.raw_decode(cleaned[start:])
         except json.JSONDecodeError:
@@ -76,8 +84,10 @@ def _strip_markdown_fence(text: str) -> str:
     return text.strip()
 
 
-def _json_start_positions(text: str) -> list[int]:
+def _json_start_positions(text: str, *, document_order: bool = False) -> list[int]:
     positions = [idx for idx, char in enumerate(text) if char in "[{"]
+    if document_order:
+        return positions
     bracket_positions = [idx for idx in positions if text[idx] == "["]
     object_positions = [idx for idx in positions if text[idx] == "{"]
     return bracket_positions + object_positions
