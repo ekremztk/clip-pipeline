@@ -373,13 +373,21 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
             channel_id=channel_id,
         )
 
-        # Fetch job + channel metadata (reframe + caption settings)
-        job_row = get_client().table("jobs").select("reframe_content_type, caption_template").eq("id", job_id).execute()
+        # Fetch job + channel metadata (reframe + caption settings, per-step model)
+        job_row = get_client().table("jobs").select(
+            "reframe_content_type, caption_template, s05_model, s06_model"
+        ).eq("id", job_id).execute()
         reframe_content_type = "podcast"
         caption_template = "clean"
+        # Admin-only per-step override, already whitelisted by the jobs route.
+        # None means "no preference" and leaves the legacy provider choice alone.
+        s05_model = None
+        s06_model = None
         if job_row.data:
             reframe_content_type = job_row.data[0].get("reframe_content_type") or "podcast"
             caption_template = job_row.data[0].get("caption_template") or "clean"
+            s05_model = job_row.data[0].get("s05_model")
+            s06_model = job_row.data[0].get("s06_model")
 
         steps = [
             (1,  "s01_audio_extract",      5),
@@ -414,9 +422,16 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
         # admin-owned jobs may use it. Client jobs run on Bedrock (free credits).
         from app.services.claude_client import is_premium_user
         allow_premium = is_premium_user(user_id)
+
+        # Per step, because S05 and S06 can now be pinned to different models.
+        def _provider(choice: str | None) -> str:
+            if not allow_premium:
+                return "bedrock (client)"
+            return "bedrock (pinned)" if choice == "opus-4-6" else "anthropic (admin)"
+
         print(
-            f"[Orchestrator] Claude provider for this job: "
-            f"{'anthropic (admin)' if allow_premium else 'bedrock'}"
+            f"[Orchestrator] Claude provider — S05: {_provider(s05_model)}, "
+            f"S06 + S06.5: {_provider(s06_model)}"
         )
 
         evaluated_clips = []
@@ -577,6 +592,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             else None
                         ),
                         allow_premium=allow_premium,
+                        model_choice=s05_model,
                     )
                     s05_token_usage = get_accumulated_token_usage()
                     _debug_dump(job_id, "s05_unified_discovery", candidates)
@@ -627,6 +643,7 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             video_title=video_title,
                             metadata_subject_name=metadata_subject_name,
                             allow_premium=allow_premium,
+                            model_choice=s06_model,
                         )
                     _debug_dump(job_id, "s06_batch_evaluation", evaluated_clips)
                     _persist_step_output(job_id, "s06_output", {"approved": evaluated_clips})
@@ -662,6 +679,9 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
                             video_title=video_title,
                             main_person=metadata_subject_name,
                             allow_premium=allow_premium,
+                            # Metadata is S06's writing arm — same model, so a
+                            # cheap-S06 measurement isn't polluted by a pricey title.
+                            model_choice=s06_model,
                         )
 
                     if not evaluated_clips:

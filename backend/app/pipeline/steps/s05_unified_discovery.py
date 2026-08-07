@@ -463,6 +463,7 @@ def run(
     scene_filter_active: bool = False,
     scene_ranges: Optional[list] = None,
     allow_premium: bool = False,
+    model_choice: Optional[str] = None,
 ) -> list:
     """
     S05: Unified Discovery — one Claude call over the full transcript.
@@ -555,6 +556,7 @@ def run(
             ),
             max_tokens=16000,
             allow_premium=allow_premium,
+            model_choice=model_choice,
         )
 
         payload = _parse_claude_json(raw_response)

@@ -705,6 +705,8 @@ async def create_job(
     auto_hook: Optional[str] = Form(None),
     reframe_content_type: Optional[str] = Form(None),
     caption_template: Optional[str] = Form(None),
+    s05_model: Optional[str] = Form(None),
+    s06_model: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user)
 ):
     channel_id = channel_id.replace("-", "_")
@@ -850,6 +852,18 @@ async def create_job(
         if clip_duration_min is not None or clip_duration_max is not None:
             print(f"[JobsRoute] Clip duration: {clip_duration_min}–{clip_duration_max}s, aspect: {aspect_ratio}, genre: {genre}, auto_hook: {auto_hook}")
 
+        # Per-step Claude model is an admin measurement tool. The selector is
+        # hidden for clients, but the UI is not the gate — a hand-rolled POST
+        # would otherwise let a client account bill the platform's Anthropic
+        # key. Unknown values are dropped rather than rejected so an outdated
+        # client just gets the default behaviour.
+        from app.middleware.roles import is_admin_user
+        _ALLOWED_MODELS = ("opus-5", "opus-4-6")
+        if not is_admin_user(current_user["id"]):
+            s05_model = s06_model = None
+        s05_model = s05_model if s05_model in _ALLOWED_MODELS else None
+        s06_model = s06_model if s06_model in _ALLOWED_MODELS else None
+
         job_data = {
             "id": job_id,
             "channel_id": channel_id,
@@ -871,7 +885,11 @@ async def create_job(
             job_data["reframe_content_type"] = reframe_content_type
         if caption_template:
             job_data["caption_template"] = caption_template
-        
+        if s05_model:
+            job_data["s05_model"] = s05_model
+        if s06_model:
+            job_data["s06_model"] = s06_model
+
         response = supabase.table("jobs").insert(job_data).execute()
         if not response.data:
             raise HTTPException(status_code=500, detail="Failed to create job in database.")

@@ -88,6 +88,7 @@ def run(
     video_title: str = "",
     main_person: Optional[str] = None,
     allow_premium: bool = False,
+    model_choice: Optional[str] = None,
 ) -> list:
     """
     Attach suggested_title / suggested_description to every clip.
@@ -126,6 +127,7 @@ def run(
             system=SYSTEM_PROMPT,
             max_tokens=4000,
             allow_premium=allow_premium,
+            model_choice=model_choice,
         )
         results = parse_json_list_response(raw, log_prefix="[S06.5]")
         by_id = {str(r.get("candidate_id")): r for r in results if isinstance(r, dict)}

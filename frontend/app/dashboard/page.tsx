@@ -415,7 +415,7 @@ function PageSkeleton() {
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { channels, activeChannelId, isLoading: channelLoading, refreshChannels } = useChannel();
+    const { channels, activeChannelId, isLoading: channelLoading, refreshChannels, isAdmin } = useChannel();
 
     // Jobs state
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -444,6 +444,10 @@ export default function DashboardPage() {
     const [aspectRatio, setAspectRatio] = useState('9:16');
     const [genre, setGenre] = useState('');
     const [autoHook, setAutoHook] = useState(true);
+    // Admin-only. Opus 5 goes to the Anthropic API, Opus 4.6 to Bedrock —
+    // per step, so one job can run discovery and evaluation on different models.
+    const [s05Model, setS05Model] = useState('opus-5');
+    const [s06Model, setS06Model] = useState('opus-5');
     const [startTime, setStartTime] = useState(0);
     const [endTime, setEndTime] = useState(0);
 
@@ -925,6 +929,10 @@ export default function DashboardPage() {
         if (genre) fd.append('genre', genre);
         fd.append('auto_hook', autoHook ? 'true' : 'false');
         fd.append('caption_template', CAPTION_TEMPLATES[captionTemplateIdx].key);
+        if (isAdmin) {
+            fd.append('s05_model', s05Model);
+            fd.append('s06_model', s06Model);
+        }
 
         try {
             const res = await authFetch('/jobs', { method: 'POST', body: fd });
@@ -1531,6 +1539,39 @@ export default function DashboardPage() {
                                             }}
                                         />
                                     </div>
+
+                                    {/* Per-step model — admin only. Clients have no
+                                        Opus 5 access, so the row never renders for them. */}
+                                    {isAdmin && (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {([
+                                                ['S05 Model', s05Model, setS05Model],
+                                                ['S06 Model', s06Model, setS06Model],
+                                            ] as const).map(([label, value, setValue]) => (
+                                                <div key={label}>
+                                                    <label
+                                                        className="block text-[10px] uppercase tracking-widest mb-1.5"
+                                                        style={{ color: '#ababab' }}
+                                                    >
+                                                        {label}
+                                                    </label>
+                                                    <select
+                                                        value={value}
+                                                        onChange={e => setValue(e.target.value)}
+                                                        className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors appearance-none"
+                                                        style={{
+                                                            background: 'rgba(250,249,245,0.03)',
+                                                            color: '#faf9f5',
+                                                            border: '1px solid rgba(250,249,245,0.08)',
+                                                        }}
+                                                    >
+                                                        <option value="opus-5" style={{ background: '#181817' }}>Opus 5</option>
+                                                        <option value="opus-4-6" style={{ background: '#181817' }}>Opus 4.6</option>
+                                                    </select>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
 
                                     {/* Auto Hook */}
                                     <div className="flex items-center justify-between py-1">

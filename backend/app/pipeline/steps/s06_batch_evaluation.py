@@ -400,6 +400,7 @@ def _evaluate_batch_with_claude(
     video_title: str = "",
     metadata_subject_name: Optional[str] = None,
     allow_premium: bool = False,
+    model_choice: Optional[str] = None,
 ) -> list:
     """
     Evaluates a batch of candidates with Claude using transcript only.
@@ -421,6 +422,7 @@ def _evaluate_batch_with_claude(
         system=SYSTEM_PROMPT,
         extra_system_blocks=full_transcript_block,
         allow_premium=allow_premium,
+        model_choice=model_choice,
     )
     return _parse_claude_json(raw)
 
@@ -434,6 +436,7 @@ def _evaluate_single_with_claude(
     video_title: str = "",
     metadata_subject_name: Optional[str] = None,
     allow_premium: bool = False,
+    model_choice: Optional[str] = None,
 ) -> Optional[dict]:
     try:
         results = _evaluate_batch_with_claude(
@@ -445,6 +448,7 @@ def _evaluate_single_with_claude(
             video_title=video_title,
             metadata_subject_name=metadata_subject_name,
             allow_premium=allow_premium,
+            model_choice=model_choice,
         )
         return results[0] if results else None
     except Exception as e:
@@ -513,6 +517,7 @@ def run(
     video_title: str = "",
     metadata_subject_name: Optional[str] = None,
     allow_premium: bool = False,
+    model_choice: Optional[str] = None,
 ) -> list:
     """
     S06: Batch Evaluation (Claude Sonnet)
@@ -625,6 +630,7 @@ def run(
                     video_title=video_title,
                     metadata_subject_name=metadata_subject_name,
                     allow_premium=allow_premium,
+                    model_choice=model_choice,
                 )
 
                 all_evaluated.extend(evaluated)
@@ -642,7 +648,8 @@ def run(
                             full_transcript_block,
                             video_title=video_title,
                             metadata_subject_name=metadata_subject_name,
-                    allow_premium=allow_premium,
+                            allow_premium=allow_premium,
+                            model_choice=model_choice,
                         )
                         if retry:
                             all_evaluated.append(retry)
@@ -666,7 +673,8 @@ def run(
                             full_transcript_block,
                             video_title=video_title,
                             metadata_subject_name=metadata_subject_name,
-                    allow_premium=allow_premium,
+                            allow_premium=allow_premium,
+                            model_choice=model_choice,
                         )
                         if single:
                             all_evaluated.append(single)

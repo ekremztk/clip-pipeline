@@ -90,11 +90,17 @@ def call_claude(
     max_tokens: int = 16000,
     extra_system_blocks: list | None = None,
     allow_premium: bool = False,
+    model_choice: str | None = None,
 ) -> str:
     """
     allow_premium gates the first-party Anthropic model. It defaults to False so
     any caller that does not explicitly opt in — including every client job —
     runs on Bedrock.
+
+    model_choice is the per-step admin override: "opus-5" pins this call to the
+    Anthropic API, "opus-4-6" pins it to Bedrock, None keeps the old behaviour.
+    It narrows what allow_premium permits and never widens it — a client job
+    carrying "opus-5" still lands on Bedrock, because allow_premium is False.
     """
     # Both current callers (S05, S06) pass their own system prompt; this is the
     # fallback for any future caller.
@@ -122,7 +128,8 @@ def call_claude(
     # --- Anthropic API (used only when ANTHROPIC_API_KEY is set) ---
     # Opus 5 rejects budget_tokens and thinks by default, so max_tokens must
     # cover thinking + text together — hence the doubled ceiling.
-    anthropic_client = _make_anthropic_client() if allow_premium else None
+    use_anthropic = allow_premium and model_choice != "opus-4-6"
+    anthropic_client = _make_anthropic_client() if use_anthropic else None
     if anthropic_client:
         for attempt in range(3):
             try:

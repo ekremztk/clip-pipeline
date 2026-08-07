@@ -47,12 +47,16 @@ export const ChannelContext = createContext<{
     setActiveChannelId: (id: string) => void;
     isLoading: boolean;
     refreshChannels: () => Promise<void>;
+    /** From /admin/me, which the layout already calls for the nav. Starts false,
+     *  so admin-only controls stay hidden until the check actually comes back. */
+    isAdmin: boolean;
 }>({
     channels: [],
     activeChannelId: "",
     setActiveChannelId: () => {},
     isLoading: true,
     refreshChannels: async () => {},
+    isAdmin: false,
 });
 
 export const useChannel = () => useContext(ChannelContext);
@@ -404,6 +408,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             setActiveChannelId: handleChannelChange,
             isLoading,
             refreshChannels,
+            isAdmin,
         }}>
             <div
                 className="flex h-screen w-screen overflow-hidden"
