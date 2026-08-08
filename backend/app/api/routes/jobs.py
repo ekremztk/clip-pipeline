@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime, timezone
 from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Depends, Request, Body
 from pydantic import BaseModel
 from app.services.supabase_client import get_client
@@ -1042,6 +1043,35 @@ async def get_job(job_id: str, current_user: dict = Depends(get_current_user)):
         raise
     except Exception as e:
         print(f"[JobsRoute] Error in GET /jobs/{job_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.patch("/{job_id}/reviewed")
+async def set_job_reviewed(
+    job_id: str,
+    reviewed: bool = Body(default=True, embed=True),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Marks a job as gone through — its clips have been looked at and the good
+    ones picked, so it needs no second pass. A single boolean rather than the
+    tri-state the clips routes use: a project is either reviewed or it is not.
+    """
+    try:
+        supabase = get_client()
+
+        check = supabase.table("jobs").select("id").eq("id", job_id).eq("user_id", current_user["id"]).execute()
+        if not check.data:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+        reviewed_at = datetime.now(timezone.utc).isoformat() if reviewed else None
+        supabase.table("jobs").update({"reviewed_at": reviewed_at}).eq("id", job_id).execute()
+
+        return {"job_id": job_id, "reviewed_at": reviewed_at}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[JobsRoute] Error setting reviewed on {job_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

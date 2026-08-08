@@ -617,6 +617,29 @@ export default function ProjectsPage() {
     );
 }
 
+/**
+ * Scalloped verified-style disc. The path is a 24-point ring alternating
+ * between two radii — at this size the straight segments read as scallops.
+ */
+function ReviewedBadge({ size = 20 }: { size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+            <path
+                d="M12.00 0.00L14.61 2.24L18.00 1.61L19.14 4.86L22.39 6.00L21.76 9.39L24.00 12.00L21.76 14.61L22.39 18.00L19.14 19.14L18.00 22.39L14.61 21.76L12.00 24.00L9.39 21.76L6.00 22.39L4.86 19.14L1.61 18.00L2.24 14.61L0.00 12.00L2.24 9.39L1.61 6.00L4.86 4.86L6.00 1.61L9.39 2.24Z"
+                fill="#1355F0"
+            />
+            <path
+                d="M6.9 12.3l3.3 3.3 6.9-6.9"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+}
+
 function ProjectsContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -704,6 +727,33 @@ function ProjectsContent() {
     }, [router]);
 
     // Actions
+    const handleToggleReviewed = async (jobId: string) => {
+        const job = jobs.find(j => j.id === jobId);
+        if (!job) return;
+        const next = !job.reviewed_at;
+        // Flip locally first — the badge should answer the click, not the network.
+        setJobs(prev => prev.map(j =>
+            j.id === jobId ? { ...j, reviewed_at: next ? new Date().toISOString() : null } : j
+        ));
+        try {
+            const res = await authFetch(`/jobs/${jobId}/reviewed`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reviewed: next }),
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            setJobs(prev => prev.map(j =>
+                j.id === jobId ? { ...j, reviewed_at: data.reviewed_at } : j
+            ));
+        } catch {
+            setJobs(prev => prev.map(j =>
+                j.id === jobId ? { ...j, reviewed_at: job.reviewed_at ?? null } : j
+            ));
+            toast.error('Failed to update project.');
+        }
+    };
+
     const handleDeleteProject = async (jobId: string) => {
         try {
             const res = await authFetch(`/jobs/${jobId}`, { method: "DELETE" });
@@ -990,8 +1040,29 @@ function ProjectsContent() {
                                                 <Play size={20} style={{ color: 'rgba(250,249,245,0.15)' }} className="group-hover:opacity-60 transition-opacity" />
                                             )}
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                                            {/* More button — overlay on thumbnail */}
-                                            <div className="absolute top-2.5 right-2.5" style={{ zIndex: 9999 }}>
+
+                                            {/* Reviewed badge — stays visible without hover, since its
+                                                whole job is to be readable while scanning the grid. */}
+                                            {job.reviewed_at && (
+                                                <div className="absolute top-2.5 left-2.5" style={{ zIndex: 20 }}>
+                                                    <ReviewedBadge size={20} />
+                                                </div>
+                                            )}
+
+                                            {/* Review toggle + more menu — overlay on thumbnail */}
+                                            <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5" style={{ zIndex: 9999 }}>
+                                                <button
+                                                    title={job.reviewed_at ? 'Mark as not reviewed' : 'Mark as reviewed'}
+                                                    className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    style={{
+                                                        background: 'rgba(0,0,0,0.6)',
+                                                        color: job.reviewed_at ? '#1355F0' : '#ababab',
+                                                    }}
+                                                    onClick={e => { e.stopPropagation(); setOpenMenuId(null); handleToggleReviewed(job.id); }}
+                                                >
+                                                    <Check size={14} strokeWidth={3} />
+                                                </button>
+                                                <div className="relative">
                                                 <button
                                                     className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                                     style={{ background: 'rgba(0,0,0,0.6)', color: '#ababab' }}
@@ -1025,6 +1096,7 @@ function ProjectsContent() {
                                                     >
                                                         Delete
                                                     </button>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>
