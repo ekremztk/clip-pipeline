@@ -183,17 +183,30 @@ def call_claude(
     # --- AWS Bedrock (default provider, and fallback if the above fails) ---
     bedrock_client = _make_bedrock_client()
     if bedrock_client:
+        # Thinking and text share max_tokens, so the budget cannot exceed it.
+        # It was pinned at 10000 while callers pass their own ceiling: S05 and
+        # S06 ask for 16000 and are fine, S06.5 asks for 4000 and every call was
+        # rejected outright. Scale the budget to the caller instead, and drop
+        # thinking altogether when there is not enough room for the minimum.
+        thinking_budget = min(10000, int(max_tokens * 0.7))
+        thinking_arg = (
+            {"type": "enabled", "budget_tokens": thinking_budget}
+            if thinking_budget >= 1024
+            else {"type": "disabled"}
+        )
         for attempt in range(3):
             try:
                 print(
                     f"[ClaudeClient] Calling model={BEDROCK_MODEL} "
-                    f"provider=bedrock attempt={attempt + 1}/3"
+                    f"provider=bedrock attempt={attempt + 1}/3 "
+                    f"max_tokens={max_tokens} thinking={thinking_arg['type']}"
+                    + (f" budget={thinking_budget}" if thinking_budget >= 1024 else "")
                 )
                 response = bedrock_client.messages.create(
                     model=BEDROCK_MODEL,
                     max_tokens=max_tokens,
                     system=system_blocks,
-                    thinking={"type": "enabled", "budget_tokens": 10000},
+                    thinking=thinking_arg,
                     messages=messages,
                     timeout=600.0,
                 )
