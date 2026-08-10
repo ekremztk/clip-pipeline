@@ -194,6 +194,7 @@ def render_captions(
     words: list[dict],
     segments: list[dict],
     template_key: str = "clean",
+    watermark_path: str | None = None,
 ) -> str:
     """
     Burn captions onto video.
@@ -206,14 +207,22 @@ def render_captions(
         words: Word-level timestamps from Deepgram [{word, start, end, ...}]
         segments: Sentence segments (kept for API compatibility, unused internally)
         template_key: One of the pipelineKey values
+        watermark_path: Local PNG resolved from the job's channel by S10, or
+            None. Chosen upstream on purpose — this layer must not be able to
+            pick a channel's mark, only to burn the one it was handed. Only the
+            frame-based engines honour it; the Pillow and ASS paths ignore it.
 
     Returns: output_path
     """
     if is_v3_template(template_key):
-        return render_captions_v3(video_path, output_path, words, segments, template_key)
+        return render_captions_v3(
+            video_path, output_path, words, segments, template_key, watermark_path
+        )
 
     if is_v2_template(template_key):
-        return render_captions_v2(video_path, output_path, words, segments, template_key)
+        return render_captions_v2(
+            video_path, output_path, words, segments, template_key, watermark_path
+        )
 
     if template_key in PILLOW_TEMPLATES:
         from app.captions.renderer_pillow import render_captions as render_pillow

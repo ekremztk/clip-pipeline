@@ -20,6 +20,7 @@ from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
 from app.captions.core import transcribe_video
 from app.captions.renderer import render_captions
+from app.captions.watermark import fetch_watermark, resolve_channel_watermark_key
 from app.ffmpeg_encode import describe_pipeline_encode_profile
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,17 @@ def run(
     supabase = get_client()
     captioned_clips = []
 
+    # The channel owns the watermark. Never the caption template — that is a
+    # style, and the default one is shared with client accounts, so deriving the
+    # mark from it stamped our channel onto their videos. Resolved once per job;
+    # a channel with no key set, which is every channel by default, yields None
+    # and an unmarked clip. Every failure inside these two calls also yields
+    # None, so the only way to mark a clip is for someone to have said so.
+    watermark_path = fetch_watermark(
+        resolve_channel_watermark_key(channel_id), str(settings.UPLOAD_DIR)
+    )
+    print(f"[S10] Watermark for channel {channel_id}: {watermark_path or 'none'}")
+
     def _process_clip(index: int, clip: dict) -> tuple[int, dict]:
         clip_id = clip.get("id")
         reframed_url = clip.get("video_reframed_path")
@@ -64,6 +76,7 @@ def run(
                 clip_index=index,
                 template_key=caption_template,
                 local_path_hint=local_hint,
+                watermark_path=watermark_path,
             )
 
             if clip_id and captioned_url:
@@ -85,29 +98,36 @@ def run(
             record_candidate_stage(clip_id, "s10", "failed", error_message=str(e))
             return index, clip
 
-    max_workers = min(3, max(1, len(reframed_clips)))
-    print(f"[S10] Caption worker pool: max_workers={max_workers}")
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {
-            executor.submit(_process_clip, index, clip): (index, clip)
-            for index, clip in enumerate(reframed_clips)
-        }
-        for future in as_completed(futures):
-            index, clip = futures[future]
+    try:
+        max_workers = min(3, max(1, len(reframed_clips)))
+        print(f"[S10] Caption worker pool: max_workers={max_workers}")
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(_process_clip, index, clip): (index, clip)
+                for index, clip in enumerate(reframed_clips)
+            }
+            for future in as_completed(futures):
+                index, clip = futures[future]
+                try:
+                    result_idx, result_clip = future.result()
+                    captioned_clips.append((result_idx, result_clip))
+                except Exception as e:
+                    print(f"[S10] Caption error for clip {index+1}: {e}")
+                    traceback.print_exc()
+                    captioned_clips.append((index, clip))
+
+        captioned_clips.sort(key=lambda x: x[0])
+        captioned_clips = [clip for _, clip in captioned_clips]
+
+        successful = sum(1 for c in captioned_clips if c.get("video_captioned_path"))
+        print(f"[S10] Captions complete. {successful}/{len(reframed_clips)} clips captioned.")
+        return captioned_clips
+    finally:
+        if watermark_path and os.path.exists(watermark_path):
             try:
-                result_idx, result_clip = future.result()
-                captioned_clips.append((result_idx, result_clip))
-            except Exception as e:
-                print(f"[S10] Caption error for clip {index+1}: {e}")
-                traceback.print_exc()
-                captioned_clips.append((index, clip))
-
-    captioned_clips.sort(key=lambda x: x[0])
-    captioned_clips = [clip for _, clip in captioned_clips]
-
-    successful = sum(1 for c in captioned_clips if c.get("video_captioned_path"))
-    print(f"[S10] Captions complete. {successful}/{len(reframed_clips)} clips captioned.")
-    return captioned_clips
+                os.remove(watermark_path)
+            except Exception:
+                pass
 
 
 def _caption_clip(
@@ -115,6 +135,7 @@ def _caption_clip(
     clip_index: int,
     template_key: str,
     local_path_hint: str | None = None,
+    watermark_path: str | None = None,
 ) -> tuple[str, dict]:
     """
     Transcribe a clip and burn captions:
@@ -164,6 +185,7 @@ def _caption_clip(
             words=words,
             segments=segments,
             template_key=template_key,
+            watermark_path=watermark_path,
         )
         output_stats = _probe_caption_output(output_path)
         if output_stats:

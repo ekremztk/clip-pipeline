@@ -22,7 +22,7 @@ from app.config import settings
 from app.captions.davinci_fingerprint import frame_duration_s, has_audio_stream, probe_video_rate
 from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline_video_encode_args
 from app.captions.v2.templates import CaptionV2Template, get_v2_template
-from app.captions.watermark import load_watermark
+from app.captions.watermark import load_watermark_layer
 
 logger = logging.getLogger(__name__)
 FontCache = dict[int, ImageFont.ImageFont]
@@ -57,6 +57,7 @@ def render_captions_v2(
     words: list[dict],
     segments: list[dict],
     template_key: str,
+    watermark_path: str | None = None,
 ) -> str:
     """Render a Caption Template V2 template onto a video."""
     del segments
@@ -83,7 +84,7 @@ def render_captions_v2(
     overlay_path = os.path.join(out_dir, f"caption_overlay_{uuid.uuid4().hex}.mov")
 
     try:
-        _render_overlay_video(overlay_path, pages, video, template)
+        _render_overlay_video(overlay_path, pages, video, template, watermark_path)
         _compose_overlay(video_path, overlay_path, output_path, video)
         logger.info(
             "[CaptionV2] Rendered %d pages (%s) -> %s",
@@ -169,6 +170,7 @@ def _render_overlay_video(
     pages: list[CaptionPage],
     video: VideoInfo,
     template: CaptionV2Template,
+    watermark_path: str | None = None,
 ) -> None:
     font_size_px = _capcut_font_size_to_px(template.font.capcut_size, video.width)
     stroke_px = max(0, int(round(font_size_px * template.stroke.width_ratio)))
@@ -179,6 +181,10 @@ def _render_overlay_video(
     sample_draw = ImageDraw.Draw(sample_img)
     for page in pages:
         page.layout = _layout_page(page, sample_draw, font, font_size_px, stroke_px, video, template)
+
+    # Resolved once for the whole clip: the decision was made in S10 and this
+    # is only the file it handed over.
+    mark = load_watermark_layer(watermark_path, video.width, video.height)
 
     fps_num = video.rate.numerator if video.rate.numerator > 0 else 30
     fps_den = video.rate.denominator if video.rate.denominator > 0 else 1
@@ -214,7 +220,9 @@ def _render_overlay_video(
         assert proc.stdin is not None
         for frame_idx in range(frame_count):
             t = frame_idx / fps
-            frame = _render_frame(t, pages, video, template, font, font_cache, font_size_px, stroke_px)
+            frame = _render_frame(
+                t, pages, video, template, font, font_cache, font_size_px, stroke_px, mark
+            )
             proc.stdin.write(frame.tobytes("raw", "RGBA"))
         proc.stdin.close()
         stderr = proc.stderr.read().decode("utf-8", errors="replace") if proc.stderr else ""
@@ -236,12 +244,12 @@ def _render_frame(
     font_cache: FontCache,
     font_size_px: int,
     stroke_px: int,
+    mark: Image.Image | None = None,
 ) -> Image.Image:
     img = Image.new("RGBA", (video.width, video.height), (0, 0, 0, 0))
 
     # Goes down first so captions sit over it, and before the early return so
     # the mark still shows across the gaps where nobody is speaking.
-    mark = load_watermark(template.key, video.width, video.height)
     if mark is not None:
         img = Image.alpha_composite(img, mark)
 
