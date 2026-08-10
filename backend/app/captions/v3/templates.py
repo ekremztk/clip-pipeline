@@ -22,6 +22,11 @@ class FontSpec:
     weight: int
     uppercase: bool
     paths: tuple[str, ...]
+    # Anton ships one weight and no bold cut, so extra weight has to be drawn
+    # rather than selected. Expressed as a fraction of the font size and drawn
+    # in the glyph's own colour — this thickens the letter rather than ringing
+    # it, which is why it does not read as the stroke this style dropped.
+    faux_bold_ratio: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -38,6 +43,11 @@ class ShadowSpec:
     smoothing: float
     distance: float
     angle: float
+    # Widens the silhouette before it is blurred, as a fraction of the font
+    # size. This is how the shadow gets thicker: blurring harder only spreads
+    # the same amount of ink thinner, which reads as fainter rather than
+    # heavier.
+    dilate_ratio: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -55,9 +65,12 @@ class LayoutSpec:
     # max_chars_per_page, so the caption reads at a steady width instead of
     # alternating between a two-word page and a six-word one.
     max_chars_per_page: int = 24
-    # Single-line guarantee: a page that still measures wider than the frame
-    # allows is shrunk rather than wrapped.
-    single_line: bool = True
+    # Hard ceiling on lines. A page wraps freely up to this many; only a page
+    # that would still exceed it gets shrunk. Forcing one line and shrinking
+    # everything else made the caption change size on most pages, which reads
+    # as the text breathing — wrapping the rare wide page is the quieter
+    # failure.
+    max_lines: int = 2
     min_shrink_scale: float = 0.72
 
 
@@ -105,9 +118,9 @@ V3_TEMPLATES: dict[str, CaptionV3Template] = {
         source="TheYellow Cast — forked from CapCut Word Highlight II",
         font=FontSpec(
             family="Anton",
-            # 12.96 * 1080 / 200 = 70 px, against V2's 76 px. Anton is a
+            # 11.11 * 1080 / 200 = 60 px, against V2's 76 px. Anton is a
             # condensed face, so it reads smaller than Montserrat at equal px.
-            capcut_size=12.963,
+            capcut_size=11.1111,
             weight=400,
             uppercase=True,
             paths=ANTON_PATHS,
@@ -121,11 +134,14 @@ V3_TEMPLATES: dict[str, CaptionV3Template] = {
         ),
         shadow=ShadowSpec(
             color="#000000",
-            # Carries the whole burden now that the stroke is gone: darker,
-            # further out, and nearly hard-edged rather than a soft halo.
-            alpha=0.85,
-            smoothing=0.06,
-            distance=9.0,
+            # Offset down-right, part transparent, edge slightly softened. At
+            # full opacity the shadow stops reading as shadow and becomes a
+            # second solid colour behind the text; the softened edge is what
+            # keeps the lowered opacity from looking like a thin grey line.
+            # 8px against the 60px face, proportional to the 9px used at 70px.
+            alpha=0.65,
+            smoothing=0.15,
+            distance=8.0,
             angle=45.0,
         ),
         layout=LayoutSpec(
@@ -134,13 +150,16 @@ V3_TEMPLATES: dict[str, CaptionV3Template] = {
             max_words_per_line=99,
             max_width_ratio=0.86,
             transform_x=0.0,
-            transform_y=0.0,
+            # -250/1920: the block sits 250 px below centre, at y=1210.
+            transform_y=-0.1302083,
             line_spacing=0.02,
-            letter_spacing=0.0,
-            word_gap_ratio=0.24,
+            # Slightly negative: Anton's default fit reads loose at this size,
+            # and the tighter set is what gives the line its block-like feel.
+            letter_spacing=-0.015,
+            word_gap_ratio=0.20,
             align="center",
             max_chars_per_page=24,
-            single_line=True,
+            max_lines=2,
             min_shrink_scale=0.72,
         ),
         karaoke=KaraokeSpec(

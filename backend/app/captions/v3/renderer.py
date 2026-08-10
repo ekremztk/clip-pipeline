@@ -339,37 +339,18 @@ def _layout_page(
 ) -> list[list[dict[str, Any]]]:
     max_width = video.width * template.layout.max_width_ratio
 
-    if getattr(template.layout, "single_line", False):
-        # One line, always. When the words do not fit, the page gets a smaller
-        # font instead of a second line — wrapping is what V2 does and is
-        # exactly the behaviour this style is meant to drop.
-        font_size_px, stroke_px, font = _fit_single_line(
-            page, draw, font, font_size_px, stroke_px, max_width, template, font_cache
-        )
-
+    # Wrapping is free up to the line ceiling; only a page that would break past
+    # it is shrunk. The reverse — one line always, shrink everything that does
+    # not fit — changed the caption size on most pages and read as the text
+    # breathing.
+    font_size_px, stroke_px, font = _fit_lines(
+        page, draw, font, font_size_px, stroke_px, max_width, template, font_cache
+    )
     page.font_size_px = font_size_px
     page.stroke_px = stroke_px
 
-    letter_spacing_px = font_size_px * template.layout.letter_spacing
-    layout_stroke_px = 0
+    lines = _wrap_words(page, draw, font, font_size_px, max_width, template)
     space_width = _word_gap_px(font_size_px, template)
-    lines: list[list[dict[str, Any]]] = [[]]
-    current_width = 0.0
-    max_words_per_line = max(1, template.layout.max_words_per_line)
-    allow_wrap = not getattr(template.layout, "single_line", False)
-
-    for word_idx, word in enumerate(page.words):
-        text = _caption_text(word.text, template)
-        width = _measure_text(draw, text, font, letter_spacing_px, layout_stroke_px)
-        add_width = width if not lines[-1] else space_width + width
-        if allow_wrap and lines[-1] and (len(lines[-1]) >= max_words_per_line or current_width + add_width > max_width):
-            lines.append([])
-            current_width = 0.0
-            add_width = width
-        lines[-1].append({"word": word, "word_idx": word_idx, "text": text, "width": width})
-        current_width += add_width
-
-    lines = [line for line in lines if line]
     bbox = draw.textbbox((0, 0), "Ag", font=font, stroke_width=stroke_px)
     text_height = bbox[3] - bbox[1]
     line_height = text_height + (font_size_px * template.layout.line_spacing)
@@ -426,6 +407,9 @@ def _draw_page(
     # the bbox's top gap grows with the font size too.
     base_mid_y = (base_bbox[1] + base_bbox[3]) / 2
     space_width = _word_gap_px(font_size_px, template)
+    bold_px = _faux_bold_px(font_size_px, template)
+    # The shadow pass grows the silhouette; the text pass adds glyph weight.
+    extra_px = _shadow_dilate_px(font_size_px, template) if shadow else bold_px
 
     if shadow:
         offset_x, offset_y = _shadow_offset(template.shadow.distance, template.shadow.angle)
@@ -443,10 +427,14 @@ def _draw_page(
             scale = _word_scale(page, word_idx, active_idx, t, template)
             scaled_font_size = max(1, int(round(font_size_px * scale)))
             scaled_font = _font_for_size(template, scaled_font_size, font_cache)
-            scaled_stroke_px = max(0, int(round(stroke_px * scale)))
+            # Width always follows the text layer's weight, never the shadow's.
+            # Advancing the cursor by a dilated shadow's width would spread the
+            # shadow words further apart than the letters they sit behind.
+            scaled_stroke_px = max(0, int(round((stroke_px + bold_px) * scale)))
+            scaled_draw_stroke_px = max(0, int(round((stroke_px + extra_px) * scale)))
             scaled_letter_spacing_px = letter_spacing_px * scale
             text = item.get("text") or _caption_text(item["word"].text, template)
-            width = _measure_text(draw, text, scaled_font, scaled_letter_spacing_px, 0)
+            width = _measure_text(draw, text, scaled_font, scaled_letter_spacing_px, scaled_stroke_px)
             text_bbox = draw.textbbox((0, 0), "Ag", font=scaled_font, stroke_width=scaled_stroke_px)
             text_height = text_bbox[3] - text_bbox[1]
             entries.append(
@@ -454,7 +442,8 @@ def _draw_page(
                     "text": text,
                     "word_idx": word_idx,
                     "font": scaled_font,
-                    "stroke_px": scaled_stroke_px,
+                    "stroke_px": scaled_draw_stroke_px,
+                    "advance_px": scaled_stroke_px,
                     "letter_spacing_px": scaled_letter_spacing_px,
                     "width": width,
                     "height": text_height,
@@ -482,6 +471,11 @@ def _draw_page(
             else:
                 fill = _hex_to_rgba(template.karaoke.inactive_color, template.fill_alpha)
 
+            # Faux bold is weight, not an outline, so it has to be drawn in the
+            # glyph's own colour. Painting it with the stroke colour instead is
+            # exactly what would turn it back into the ring this style dropped.
+            entry_stroke_fill = fill if (bold_px and not shadow) else stroke_fill
+
             cursor_y = entry["base_y"] + (base_mid_y - entry["mid_y"])
             _draw_text(
                 draw=draw,
@@ -490,15 +484,51 @@ def _draw_page(
                 font=entry["font"],
                 fill=fill,
                 stroke_width=entry["stroke_px"],
-                stroke_fill=stroke_fill,
+                stroke_fill=entry_stroke_fill,
                 letter_spacing_px=entry["letter_spacing_px"],
+                advance_stroke_width=entry["advance_px"],
             )
             cursor_x += entry["width"] + space_width
 
     return layer
 
 
-def _fit_single_line(
+def _wrap_words(
+    page: CaptionPage,
+    draw: ImageDraw.ImageDraw,
+    font: ImageFont.FreeTypeFont,
+    font_size_px: int,
+    max_width: float,
+    template: CaptionV3Template,
+) -> list[list[dict[str, Any]]]:
+    """Break this page's words into lines that each fit inside max_width."""
+    letter_spacing_px = font_size_px * template.layout.letter_spacing
+    space_width = _word_gap_px(font_size_px, template)
+    max_words_per_line = max(1, template.layout.max_words_per_line)
+    # Faux bold widens the drawn glyph, so it has to be measured here too or a
+    # line that was computed to fit would render past the edge.
+    bold_px = _faux_bold_px(font_size_px, template)
+
+    lines: list[list[dict[str, Any]]] = [[]]
+    current_width = 0.0
+
+    for word_idx, word in enumerate(page.words):
+        text = _caption_text(word.text, template)
+        width = _measure_text(draw, text, font, letter_spacing_px, bold_px)
+        add_width = width if not lines[-1] else space_width + width
+        if lines[-1] and (
+            len(lines[-1]) >= max_words_per_line or current_width + add_width > max_width
+        ):
+            lines.append([])
+            current_width = 0.0
+            add_width = width
+        lines[-1].append({"word": word, "word_idx": word_idx, "text": text, "width": width})
+        current_width += add_width
+
+    return [line for line in lines if line]
+
+
+def _fit_lines(
     page: CaptionPage,
     draw: ImageDraw.ImageDraw,
     font: ImageFont.FreeTypeFont,
@@ -508,34 +538,26 @@ def _fit_single_line(
     template: CaptionV3Template,
     font_cache: FontCache | None,
 ) -> tuple[int, int, ImageFont.FreeTypeFont]:
-    """Return the largest font size at which this page fits on one line."""
+    """Largest size at which this page wraps into at most `max_lines` lines."""
+    max_lines = max(1, getattr(template.layout, "max_lines", 2))
 
-    def measure_at(f: ImageFont.FreeTypeFont, size: int) -> float:
-        letter_spacing_px = size * template.layout.letter_spacing
-        gap = _word_gap_px(size, template)
-        total = 0.0
-        for idx, word in enumerate(page.words):
-            total += _measure_text(draw, _caption_text(word.text, template), f, letter_spacing_px, 0)
-            if idx:
-                total += gap
-        return total
-
-    width = measure_at(font, font_size_px)
-    if width <= 0 or width <= max_width:
+    if len(_wrap_words(page, draw, font, font_size_px, max_width, template)) <= max_lines:
         return font_size_px, stroke_px, font
 
-    floor = max(0.05, getattr(template.layout, "min_shrink_scale", 0.72))
-    scale = max(floor, max_width / width)
-    new_size = max(1, int(round(font_size_px * scale)))
-    if new_size >= font_size_px:
-        return font_size_px, stroke_px, font
+    def sized(size: int) -> ImageFont.FreeTypeFont:
+        if font_cache is not None:
+            return _font_for_size(template, size, font_cache)
+        return _load_font(template.font.paths, size)
 
-    new_stroke = max(0, int(round(stroke_px * scale)))
-    if font_cache is not None:
-        new_font = _font_for_size(template, new_size, font_cache)
-    else:
-        new_font = _load_font(template.font.paths, new_size)
-    return new_size, new_stroke, new_font
+    floor_size = max(1, int(font_size_px * max(0.05, template.layout.min_shrink_scale)))
+    for size in range(font_size_px - 1, floor_size - 1, -1):
+        candidate = sized(size)
+        if len(_wrap_words(page, draw, candidate, size, max_width, template)) <= max_lines:
+            return size, max(0, int(round(stroke_px * size / font_size_px))), candidate
+
+    # Nothing inside the allowed range fits. Take the floor and let it wrap
+    # further rather than rendering text too small to read.
+    return floor_size, max(0, int(round(stroke_px * floor_size / font_size_px))), sized(floor_size)
 
 
 def _caption_text(text: str, template: CaptionV3Template) -> str:
@@ -661,7 +683,20 @@ def _draw_text(
     stroke_width: int,
     stroke_fill: tuple[int, int, int, int],
     letter_spacing_px: float,
+    advance_stroke_width: int | None = None,
 ) -> None:
+    """Draw text, optionally letter-spaced.
+
+    `advance_stroke_width` is what the per-character step is measured with, and
+    it must be the text layer's width even while the shadow layer draws fatter.
+    Stepping by the drawn width instead makes every extra pixel of shadow push
+    the next character further right, and the error accumulates: the shadow
+    ends up detached from the last letter of a word and reads as an extruded
+    3D edge rather than something sitting behind the text.
+    """
+    if advance_stroke_width is None:
+        advance_stroke_width = stroke_width
+
     if abs(letter_spacing_px) < 0.01:
         draw.text(
             position,
@@ -683,7 +718,7 @@ def _draw_text(
             stroke_width=stroke_width,
             stroke_fill=stroke_fill,
         )
-        bbox = draw.textbbox((0, 0), char, font=font, stroke_width=stroke_width)
+        bbox = draw.textbbox((0, 0), char, font=font, stroke_width=advance_stroke_width)
         x += (bbox[2] - bbox[0]) + letter_spacing_px
 
 
@@ -705,6 +740,18 @@ def _measure_text(
         bbox = draw.textbbox((0, 0), char, font=font, stroke_width=stroke_px)
         width += (bbox[2] - bbox[0]) + letter_spacing_px
     return max(0.0, width - letter_spacing_px)
+
+
+def _faux_bold_px(font_size_px: int, template: CaptionV3Template) -> int:
+    """Extra glyph weight drawn in the letter's own colour, in pixels."""
+    ratio = getattr(template.font, "faux_bold_ratio", 0.0) or 0.0
+    return max(0, int(round(font_size_px * ratio)))
+
+
+def _shadow_dilate_px(font_size_px: int, template: CaptionV3Template) -> int:
+    """How far the shadow silhouette is grown before blurring, in pixels."""
+    ratio = getattr(template.shadow, "dilate_ratio", 0.0) or 0.0
+    return max(0, int(round(font_size_px * ratio)))
 
 
 def _word_gap_px(font_size_px: int, template: CaptionV3Template) -> float:
