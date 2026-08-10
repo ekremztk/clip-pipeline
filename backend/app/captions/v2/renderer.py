@@ -22,6 +22,7 @@ from app.config import settings
 from app.captions.davinci_fingerprint import frame_duration_s, has_audio_stream, probe_video_rate
 from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline_video_encode_args
 from app.captions.v2.templates import CaptionV2Template, get_v2_template
+from app.captions.watermark import load_watermark
 
 logger = logging.getLogger(__name__)
 FontCache = dict[int, ImageFont.ImageFont]
@@ -237,6 +238,13 @@ def _render_frame(
     stroke_px: int,
 ) -> Image.Image:
     img = Image.new("RGBA", (video.width, video.height), (0, 0, 0, 0))
+
+    # Goes down first so captions sit over it, and before the early return so
+    # the mark still shows across the gaps where nobody is speaking.
+    mark = load_watermark(template.key, video.width, video.height)
+    if mark is not None:
+        img = Image.alpha_composite(img, mark)
+
     page = _page_at_time(pages, t)
     if page is None or not page.layout:
         return img
