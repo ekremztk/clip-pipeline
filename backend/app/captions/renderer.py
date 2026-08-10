@@ -16,6 +16,8 @@ from app.captions.davinci_fingerprint import has_audio_stream
 from app.ffmpeg_encode import append_pipeline_audio_encode_args, append_pipeline_video_encode_args
 from app.captions.v2.renderer import render_captions_v2
 from app.captions.v2.templates import is_v2_template
+from app.captions.v3.renderer import render_captions_v3
+from app.captions.v3.templates import is_v3_template
 
 logger = logging.getLogger(__name__)
 
@@ -207,6 +209,9 @@ def render_captions(
 
     Returns: output_path
     """
+    if is_v3_template(template_key):
+        return render_captions_v3(video_path, output_path, words, segments, template_key)
+
     if is_v2_template(template_key):
         return render_captions_v2(video_path, output_path, words, segments, template_key)
 
