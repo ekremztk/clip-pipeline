@@ -21,9 +21,9 @@ def build_channel_context(channel_dna: dict, channel_id: str) -> str:
     dozen structured fields on every call meant nobody could read the result, and
     the DNA editor silently dropped any field it did not know about.
 
-    Only `duration_range` and `keyterms` still need to be structured, because
-    code reads them (S05/S06/S07 limits, and S02's Deepgram hints). Everything
-    else belongs in prose.
+    Only `keyterms` still needs to be structured, because code reads it (S02's
+    Deepgram hints). Everything else belongs in prose. Duration used to live
+    here too and no longer does — it comes from the job.
 
     The field-by-field rendering below stays as the fallback for channels that
     have not been migrated.
@@ -97,19 +97,10 @@ def build_channel_context(channel_dna: dict, channel_id: str) -> str:
             humor_line += " Humor is NOT a priority for this channel — do not force funny moments."
         lines.append(humor_line)
 
-    # 7. Duration preference
-    duration_range = channel_dna.get("duration_range", {})
-    avg_dur = channel_dna.get("avg_successful_duration")
-    if duration_range or avg_dur:
-        dur_line = "\nDURATION PREFERENCE:"
-        if avg_dur:
-            dur_line += f" Average successful clip is {avg_dur}s."
-        if duration_range:
-            dur_min = duration_range.get("min", "")
-            dur_max = duration_range.get("max", "")
-            if dur_min and dur_max:
-                dur_line += f" Sweet spot: {dur_min}-{dur_max}s."
-        lines.append(dur_line)
+    # Duration deliberately says nothing here. The operator picks a range when
+    # starting the job and it is already stated as a hard limit further up the
+    # prompt; a second, softer duration sentence sourced from the DNA only gave
+    # the model two numbers to reconcile.
 
     # 8. Speaker preference
     speaker_pref = channel_dna.get("speaker_preference", "")
@@ -491,16 +482,14 @@ def run(
         channel_context = build_channel_context(channel_dna, channel_id)
         print(f"[S05] Channel context built ({len(channel_context)} chars)")
 
-        # 2. Duration limits — job-level override > channel DNA > config defaults
+        # 2. Duration limits — the job's own selection, or the config default.
+        # Channel DNA no longer participates: it was a second place to set the
+        # same number, invisible from the form the operator actually uses.
         min_duration = int(
-            clip_duration_min
-            if clip_duration_min is not None
-            else channel_dna.get("duration_range", {}).get("min", settings.MIN_CLIP_DURATION)
+            clip_duration_min if clip_duration_min is not None else settings.MIN_CLIP_DURATION
         )
         max_duration = int(
-            clip_duration_max
-            if clip_duration_max is not None
-            else channel_dna.get("duration_range", {}).get("max", settings.MAX_CLIP_DURATION)
+            clip_duration_max if clip_duration_max is not None else settings.MAX_CLIP_DURATION
         )
 
         # Soft guidance — Claude can return fewer if content is weak

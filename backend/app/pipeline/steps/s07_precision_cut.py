@@ -157,27 +157,16 @@ def run(evaluated_clips: list, transcript_data: dict, video_path: str, job_id: s
     except Exception as e:
         print(f"[S07] Warning: Could not get video duration: {e}")
 
-    # Duration priority: job_override > channel_dna.duration_range > settings defaults
-    dna_dur_range = (channel_dna or {}).get("duration_range", {}) if channel_dna else {}
-    dna_min = dna_dur_range.get("min") if dna_dur_range else None
-    dna_max = dna_dur_range.get("max") if dna_dur_range else None
-
+    # Duration priority: the job's own selection, else the settings default.
+    # Channel DNA is not consulted — see S05 for why.
     if clip_duration_max is not None:
         max_dur = int(clip_duration_max)
         dur_source = "job_override"
-    elif dna_max is not None:
-        max_dur = int(dna_max)
-        dur_source = "channel_dna"
     else:
         max_dur = settings.MAX_CLIP_DURATION
         dur_source = "settings_default"
 
-    if clip_duration_min is not None:
-        min_dur = int(clip_duration_min)
-    elif dna_min is not None:
-        min_dur = int(dna_min)
-    else:
-        min_dur = settings.MIN_CLIP_DURATION
+    min_dur = int(clip_duration_min) if clip_duration_min is not None else settings.MIN_CLIP_DURATION
 
     print(f"[S07] Duration limits: {min_dur}s–{max_dur}s (source={dur_source})")
 

@@ -529,16 +529,13 @@ def run(
 
     video_path is accepted for backward compatibility but not used.
     """
-    # Resolve effective duration limits: job-level > channel DNA > config
+    # Resolve effective duration limits: the job's selection, else the config
+    # default. Channel DNA is not consulted — see S05 for why.
     min_duration = int(
-        clip_duration_min
-        if clip_duration_min is not None
-        else channel_dna.get("duration_range", {}).get("min", settings.MIN_CLIP_DURATION)
+        clip_duration_min if clip_duration_min is not None else settings.MIN_CLIP_DURATION
     )
     max_duration = int(
-        clip_duration_max
-        if clip_duration_max is not None
-        else channel_dna.get("duration_range", {}).get("max", settings.MAX_CLIP_DURATION)
+        clip_duration_max if clip_duration_max is not None else settings.MAX_CLIP_DURATION
     )
     print(f"[S06] Duration limits: {min_duration}s–{max_duration}s (job_override={'yes' if clip_duration_min is not None else 'no'})")
     print(f"[S06] Starting Claude evaluation for job {job_id}: {len(candidates)} candidates")

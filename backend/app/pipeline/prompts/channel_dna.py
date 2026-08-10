@@ -29,8 +29,6 @@ Output: valid JSON only, no markdown.
 Schema:
 {
   "best_content_types": ["type1", "type2"],
-  "avg_successful_duration": int,
-  "duration_range": {"min": int, "max": int},
   "hook_style": "one of the 5 types above",
   "speaker_preference": "guest_dominant" | "host_led" | "balanced",
   "tone": "serious" | "funny" | "mixed" | "intense",
