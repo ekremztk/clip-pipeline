@@ -2,7 +2,8 @@
 Step 10: Auto Captions
 For each reframed 9:16 clip: transcribe with Deepgram → burn captions via FFmpeg.
 
-Uses the caption template from channel_dna (defaults to "clean").
+The caption template comes from the job row, not from channel_dna — it is a
+form field on POST /jobs that the orchestrator reads back (defaults to "clean").
 Result: video_captioned_path updated on each clip row.
 """
 import logging

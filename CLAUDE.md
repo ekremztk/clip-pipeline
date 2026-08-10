@@ -251,15 +251,29 @@ Key files: `pipeline.py` (orchestrator), `render.py` (MP4 renderer), `gaming_pip
 
 YOLO model: `yolov8l-face.pt` (large face-specific). Loader probes `/root/yolov8l-face.pt` → `/app/models/yolov8l-face.pt` → HuggingFace fallback download. `settings.YOLOV8_MODEL_PATH` in `config.py` currently defaults to `yolov8n-pose.pt` but the reframe face tracker does not read that env var — it hardcodes the `yolov8l-face.pt` search paths.
 
-### Captions V2 (`backend/app/captions/`)
-4 files: `renderer.py` (entry + dispatcher), `renderer_pillow.py` (Pillow path), `core.py` (Deepgram transcription), `__init__.py`.
+### Captions (`backend/app/captions/`)
+`renderer.py` (dispatcher + legacy ASS path), `renderer_pillow.py` (Pillow path), `core.py` (Deepgram transcription), `watermark.py` (per-channel mark), `v2/` and `v3/` (frame-based engines), `assets/` (fonts + watermark PNGs), `finalizer.py`, `davinci_fingerprint.py`.
 
-Entry: `render_captions(video_path, output_path, words, segments, template_key)` in `renderer.py`. Two render paths, chosen by template key:
+Entry: `render_captions(video_path, output_path, words, segments, template_key)` in `renderer.py`, which dispatches in this order: V3 → V2 → Pillow (`clean`) → legacy ASS.
 
-- **Pillow path** (template `clean`): render each subtitle group as transparent 1080×1920 PNG, then composite onto video via FFmpeg `overlay` filters. `MAX_OVERLAYS_PER_PASS = 8` → multi-pass encode when a clip has many overlays (default multi-pass). Plan `scalable-stargazing-beaver.md` proposes a single-pass mode + `prepend_vf` to merge reframe+caption into one encode — NOT implemented yet.
-- **ASS path** (all other templates): build `.ass` file, burn via `ffmpeg -vf ass=…` in one FFmpeg call.
+**Only three template keys are reachable from the product.** They are listed in the hardcoded `CAPTION_TEMPLATES` array in `frontend/app/dashboard/page.tsx` (~line 80), which is what populates the caption picker on the job-start form:
 
-Templates in `renderer.py` (8 total): `clean` (Pillow), `hormozi`, `outline`, `pill`, `neon`, `cinematic`, `bold_pop`, `fire`. Each template config: font, fontsize, colors, karaoke flag, `words_per_group`, `max_lines`, `max_chars_per_line`.
+| Key | Engine | Used by |
+|---|---|---|
+| `capcut_word_highlight_ii` | V2 | OtherSide Cast — **default** |
+| `yellow_center` | V3 | TheYellow Cast |
+| `clean` | Pillow | legacy |
+
+A template that is not in that array cannot be requested by any job. Adding a backend template is therefore two edits, not one.
+
+- **V2 / V3 (frame-based)**: render a transparent RGBA frame per video frame with Pillow, pipe to a qtrle `.mov` overlay, then composite onto the source in **one** FFmpeg pass. Karaoke: active word recoloured and pop-scaled around its own centre.
+- **V3 is a deliberate fork of V2**, copied verbatim then rebuilt — V2 drives a live monetised channel and must not move when V3 is tuned. Differences: Anton 70px (vs Montserrat Bold 76px), no stroke (shadow alone), single line centred at `height/2`, pages packed by a 24-character budget rather than a fixed word count, overflow shrinks the page instead of wrapping.
+- **Pillow path** (`clean` only): one transparent PNG per subtitle group, composited via FFmpeg `overlay` filters. `MAX_OVERLAYS_PER_PASS = 8` → multi-pass encode when a clip has many overlays.
+- **Legacy ASS path**: `TEMPLATE_CONFIGS` in `renderer.py` still holds 8 configs (`clean`, `hormozi`, `outline`, `pill`, `neon`, `cinematic`, `bold_pop`, `fire`). Seven of them are **dead** — reachable only by hand-posting a key that no UI offers. Do not cite this list as "the available templates".
+
+**Watermark** (`watermark.py`): a full-frame RGBA PNG composited into the V2/V3 overlay before the caption layer, so it costs no extra encode and persists through frames with no caption. Mapped by template key in `WATERMARK_ASSETS`; assets live in `captions/assets/`. The Pillow and ASS paths get no watermark.
+
+**Template selection is NOT read from channel DNA.** `caption_template` is a form field on `POST /jobs`, stored on the `jobs` row, read by the orchestrator (defaults to `clean`), and passed to S10. The docstring claiming otherwise was stale and has been corrected.
 
 Word timestamps in S10 are produced by a **fresh** Deepgram Nova-3 call on the reframed clip (`captions/core.py::transcribe_video`) — S02's word list is NOT reused. This is intentional: the reframed clip duration may differ from the source cut window, and the fresh call re-aligns timestamps on the final rendered audio. The model must stay in sync with S02 (`services/deepgram_client.py`) — the words this call returns are burned into the video, so a weaker model here produces captions that contradict the transcript the pipeline already has. This step ran on Nova-2 until 2026-08-02, which is how a clip whose source transcript read "Eddie's old" shipped with a caption reading "it is old".
 
@@ -284,8 +298,9 @@ S08 Export (FFmpeg cut+encode, ThreadPool×3, R2 upload,
 S09 Reframe V5 (podcast: YOLOv8l-face + Gemini director →
     keyframes → single-pass crop expression; gaming: YOLO
     webcam detect → vstack), ThreadPool×2                   — Modal A10G GPU
-S10 Captions V2 (fresh Deepgram Nova-3 transcription of the
-    reframed clip → Pillow PNG overlays OR ASS libass burn) — Modal A10G GPU
+S10 Captions (fresh Deepgram Nova-3 transcription of the
+    reframed clip → V2/V3 frame overlay + channel watermark,
+    one FFmpeg pass)                                        — Modal A10G GPU
 ```
 S08+S09+S10 run as a single Modal function call (`process_clips` in `modal_app.py`).
 CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Railway CPU.
