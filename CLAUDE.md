@@ -271,7 +271,14 @@ A template that is not in that array cannot be requested by any job. Adding a ba
 - **Pillow path** (`clean` only): one transparent PNG per subtitle group, composited via FFmpeg `overlay` filters. `MAX_OVERLAYS_PER_PASS = 8` → multi-pass encode when a clip has many overlays.
 - **Legacy ASS path**: `TEMPLATE_CONFIGS` in `renderer.py` still holds 8 configs (`clean`, `hormozi`, `outline`, `pill`, `neon`, `cinematic`, `bold_pop`, `fire`). Seven of them are **dead** — reachable only by hand-posting a key that no UI offers. Do not cite this list as "the available templates".
 
-**Watermark** (`watermark.py`): a full-frame RGBA PNG composited into the V2/V3 overlay before the caption layer, so it costs no extra encode and persists through frames with no caption. Mapped by template key in `WATERMARK_ASSETS`; assets live in `captions/assets/`. The Pillow and ASS paths get no watermark.
+**Watermark** (`watermark.py`): a full-frame RGBA PNG composited into the V2/V3 overlay before the caption layer, so it costs no extra encode and persists through frames with no caption. The Pillow and ASS paths get no watermark.
+
+**The watermark is owned by the channel, never by the caption template.** The key lives in `channels.watermark_r2_key` (R2 object key, nullable), S10 resolves it from its `channel_id`, downloads it once per job, and hands the local path to the renderer. The renderers do no lookup — they burn the path they are given or nothing — which is what keeps them from ever picking a mark for a channel they know nothing about.
+
+- **NULL is the default and the safe direction.** A channel is marked only when someone deliberately sets the key. Every failure path in the resolver (no row, no key, DB unreachable, bad download) returns None and produces an unmarked clip.
+- **Never key it off the template.** A template is a style and the default one is shared with client accounts; an earlier version did this and stamped our OtherSide Cast mark onto client videos.
+- Assets are in R2 under `watermarks/`, not bundled in the repo — a bundled asset would make every new channel require a `modal deploy`.
+- To mark a new channel: upload the PNG to R2, then `update channels set watermark_r2_key = '...' where id = '...'`. No code change, no deploy.
 
 **Template selection is NOT read from channel DNA.** `caption_template` is a form field on `POST /jobs`, stored on the `jobs` row, read by the orchestrator (defaults to `clean`), and passed to S10. The docstring claiming otherwise was stale and has been corrected.
 
