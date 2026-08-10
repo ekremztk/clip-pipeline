@@ -19,11 +19,12 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-# template key -> asset file name
-WATERMARK_ASSETS: dict[str, str] = {
-    "capcut_word_highlight_ii": "theotherside_logodamgasi.png",
-    "yellow_center": "theyellowcast_logodamgasi.png",
-}
+# DISABLED. Keying the mark by caption template was wrong: the template is a
+# style, not an identity, and the default style is shared with client channels
+# — so every client clip was getting our channel's mark burned into it. Emptied
+# rather than adjusted, because no correct mapping can be built from a style.
+# Replaced by a per-channel lookup; see the channel_id path in S10.
+WATERMARK_ASSETS: dict[str, str] = {}
 
 _ASSET_DIRS = (
     "/app/app/captions/assets",
