@@ -163,7 +163,7 @@ V3_TEMPLATES: dict[str, CaptionV3Template] = {
             min_shrink_scale=0.72,
         ),
         karaoke=KaraokeSpec(
-            active_color="#F5D14E",
+            active_color="#FFC800",
             inactive_color="#FFFFFF",
             read_color="#FFFFFF",
             animation_duration=0.24,
