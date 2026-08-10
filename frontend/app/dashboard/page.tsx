@@ -96,6 +96,22 @@ const CAPTION_TEMPLATES = [
         highlightColor: '#ffff00',
         phase2Animation: 'ct-fade',
     },
+    {
+        // TheYellow Cast. Rendered by the V3 engine: Anton, no stroke, one
+        // centred line. Anton is not loaded in the browser, so the preview
+        // below approximates it with a condensed-looking weight.
+        key: 'yellow_center', label: 'Yellow Center',
+        textStyle: {
+            color: '#ffffff',
+            fontSize: 17,
+            fontWeight: 800,
+            lineHeight: 1.15,
+            letterSpacing: '-0.01em',
+            textShadow: '2px 2px 0 rgba(0,0,0,0.85)',
+        } as React.CSSProperties,
+        highlightColor: '#f5d14e',
+        phase2Animation: 'ct-fade',
+    },
 ];
 const DEFAULT_CAPTION_TEMPLATE_KEY = 'capcut_word_highlight_ii';
 const DEFAULT_CAPTION_TEMPLATE_INDEX = Math.max(
