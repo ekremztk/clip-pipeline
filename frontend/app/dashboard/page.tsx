@@ -70,11 +70,10 @@ const PROVISION_STEP_LABELS: Record<string, string> = {
 const DURATION_PRESETS = [
     { label: '<30s',   min: 5,   max: 30  },
     { label: '<60s',   min: 10,  max: 60  },
+    { label: '10-90s', min: 10,  max: 90  },
     { label: '30-60s', min: 30,  max: 60  },
     { label: '45-60s', min: 45,  max: 60  },
     { label: '1m-3m',  min: 60,  max: 180 },
-    { label: '1m-5m',  min: 60,  max: 300 },
-    { label: '5m-15m', min: 300, max: 900 },
 ];
 
 const CAPTION_TEMPLATES = [
