@@ -47,8 +47,8 @@ Score each dimension 0-100 on its own. Do not average them into a single number 
 
 ## VERDICT
 
-- **pass** — publishable as it stands. Every dimension is adequate and standalone is genuinely satisfied.
-- **repair** — the moment is worth having but the boundaries are wrong: setup missing, payoff cut off, or dead air on the end. You MUST supply repair_start_utterance_id and repair_end_utterance_id, and the repaired window must be genuinely publishable. If you cannot name boundaries that fix it, the verdict is omit.
+- **pass** — you would not move either boundary. If naming a different start or end utterance would raise any dimension, the verdict is repair, not a pass with a low score.
+- **repair** — the moment is worth having but the boundaries are wrong. Four ways that happens: setup missing, payoff cut off, dead air on the end, or the clip opening before the moment actually starts. That last one is the easiest to miss — a candidate that spends its first seconds on preamble, throat-clearing or a half-finished thought is a repair, and the fix is to move the start forward to the utterance where the moment begins. You MUST supply repair_start_utterance_id and repair_end_utterance_id, and the repaired window must be genuinely publishable. If you cannot name boundaries that fix it, the verdict is omit.
 - **omit** — not worth producing, or broken in a way boundaries cannot fix.
 
 A verdict of repair that does not actually move a boundary will be treated as omit, so do not use it to mean "publish this anyway with reservations".
