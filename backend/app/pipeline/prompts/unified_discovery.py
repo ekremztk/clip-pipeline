@@ -22,15 +22,13 @@ SCENE_BOUNDARY_BLOCK_PLACEHOLDER
 ## CONSTRAINTS
 - Video duration: VIDEO_DURATION_PLACEHOLDER seconds
 - Clip duration: MIN_DURATION_PLACEHOLDER – MAX_DURATION_PLACEHOLDER seconds
-- The maximum duration is a hard cap, not a target. Select the shortest complete standalone moment that works.
+- The maximum duration is a hard cap. Inside it, include everything the moment needs: the setup that makes it legible and the reaction that completes it. When two boundaries are both defensible, take the wider one — a clip can be trimmed afterwards, but nothing can be added back.
 - Target: up to MAX_CANDIDATES_PLACEHOLDER candidates. Return fewer if the content doesn't justify more.
 - No two clips may overlap by more than half of the shorter clip's duration.
 - If a moment is stronger than the maximum duration allows, take the best self-contained window inside it. Do not emit the remainder as a second candidate — a leftover tail is never a clip.
 
 ## PART 1 — TIMELINE MAP
-Before selecting anything, list every topic, story or segment the episode moves through, in order. This is a map of the whole recording, not a shortlist: it must run from the first utterance to the last with no gaps, including stretches you would never clip from.
-
-One entry per topic. A single story that runs three minutes is one entry. Rapid topic changes make short entries.
+Before selecting anything, list every topic the episode moves through, in order, from the first utterance to the last with no gaps — including stretches you would never clip from. One entry per topic.
 
 ## PART 2 — CANDIDATES
 
@@ -42,32 +40,26 @@ If a strong moment begins on filler ("so," "yeah," "I mean," "you know"), move t
 
 **Body:** The middle must sustain tension. Reject clips where the speaker spends 10+ seconds restating the same point with no new information.
 
-**End:** Stop at the first clean landing — the utterance where the core idea fully resolves. Do not continue into elaboration, examples, or follow-up questions after the point has landed. A strong ending could stand alone as a quote.
-
-**Loop potential:** Prefer clips that end in a way that makes the viewer want to immediately replay — a strong statement, an unresolved tension, or a punchline. Clips that trail off are weak.
+**End:** Land on the beat that completes the moment. Often that beat is the other person's reaction — a punchline answered, a comeback, the laugh line the story was built for. Cutting one utterance early to save two seconds throws away the reason the clip exists. Stop before elaboration or a new question; when unsure, take the later boundary.
 
 **Standalone:** A viewer with zero context must understand the clip completely. If the moment requires earlier setup, either include that setup within the duration limit or skip the moment entirely. Watch for pronouns and references whose subject is named only in an earlier utterance — if "he" or "it" is never identified inside the clip, the point is invisible.
 
 ## SIGNALS TO SELECT FROM
-These are starting points, not a checklist. The channel instructions above tell you what
-this specific audience rewards — when a moment is strong for reasons not listed here,
-take it and say why in `reason`.
+Where the channel instructions above are specific, they take precedence over this list.
+Use it where they are silent, and take anything strong for a reason nobody wrote
+down — say why in `reason`.
 
 - A complete personal story with a setup and a payoff
-- A memory from childhood, school, or the years before the speaker was known — a scene from the past that lands somewhere
-- Confessions, admissions, and things the speaker probably shouldn't have said
-- Self-deprecation — the speaker is the fool in their own story
-- The speaker being teased, wound up or taken apart by someone else, and how they handle it
-- Emotional peaks: laughter, shock, delight, genuine embarrassment
-- A small, ordinary opinion delivered with unexpected conviction
-- Rapid back-and-forth where the timing itself is the joke
-- Bold claims, sharp insights, or a single line that lands a complex idea
-- A surprising fact or number stated confidently
+- Something the speaker probably shouldn't have said
+- Self-deprecation, or the speaker being teased and handling it
+- An emotional peak: laughter, shock, genuine embarrassment
+- A small ordinary opinion delivered with unexpected conviction
+- A single line that lands a big idea, or a surprising fact stated flatly
 
-A moment can sit inside a promotional stretch and still be worth taking. Reject the anecdote that exists only to sell something; keep the personal story that happens to be told while promoting.
+A moment inside a promotional stretch still counts. Reject the anecdote that exists only to sell something; keep the personal story told while promoting.
 
 ## DIVERSITY
-Where the content genuinely supports it, spread selections across different regions of the episode, different content types, and different energy levels. Do not force diversity at the expense of quality — a great clip beats a mediocre clip chosen for balance. Equally, do not stop looking once you have a few candidates from the opening minutes.
+Cover the whole episode — do not stop looking once you have a few candidates from the opening minutes. But never take a mediocre clip for the sake of balance.
 
 ## TRANSCRIPT
 LABELED_TRANSCRIPT_PLACEHOLDER

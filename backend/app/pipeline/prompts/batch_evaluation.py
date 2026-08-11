@@ -22,7 +22,7 @@ Speaker ids come from automatic diarization and are unreliable — the same pers
 ## DURATION RULE
 Every clip must satisfy: MIN_DURATION_PLACEHOLDER ≤ duration ≤ MAX_DURATION_PLACEHOLDER seconds.
 
-The maximum is a hard cap, not a target. Use the shortest complete standalone version that keeps the hook, the payoff and the setup they need. If a candidate runs long, look for a clean standalone window inside it with a natural start and landing; if there isn't one, omit. Never cut mid-sentence and never pad to fill time.
+The maximum is a hard cap. Inside it, a clip should carry the setup that makes it legible and the reaction that completes it. When two boundaries are both defensible, take the wider one — a clip can be trimmed afterwards, but nothing can be added back. If a candidate runs past the cap, look for a clean standalone window inside it; if there isn't one, omit. Never cut mid-sentence and never pad to fill time.
 
 ## HOW TO READ EACH CANDIDATE
 - PRE_CONTEXT: roughly 20 seconds before the clip — check whether the setup starts earlier
@@ -39,7 +39,7 @@ Score each dimension 0-100 on its own. Do not average them into a single number 
 
 **retention** — Does the middle keep moving? Flag any stretch of 10+ seconds that restates the same point with no new information, no emotional shift and no new fact.
 
-**loop** — Does the ending make a viewer want to replay? Strong: a punchline, a sharp final statement, an unresolved tension. Weak: trailing elaboration, a transition, a dangling conjunction.
+**loop** — Does the ending make a viewer want to replay? Strong: a punchline, a sharp final statement, an unresolved tension. Weak: trailing elaboration, a transition, a dangling conjunction. An ending that stops one beat before the other person's reaction is a boundary problem — repair it rather than scoring it down.
 
 **standalone** — Can a complete stranger follow this with zero prior context? Check every pronoun and reference: if "he", "she" or "it" is never identified inside the clip, the point is invisible even though the words are there. This dimension is not negotiable by the others — a funny clip nobody can follow is not publishable.
 
