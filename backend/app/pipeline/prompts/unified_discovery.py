@@ -22,7 +22,7 @@ SCENE_BOUNDARY_BLOCK_PLACEHOLDER
 ## CONSTRAINTS
 - Video duration: VIDEO_DURATION_PLACEHOLDER seconds
 - Clip duration: MIN_DURATION_PLACEHOLDER – MAX_DURATION_PLACEHOLDER seconds
-- The maximum duration is a hard cap. Inside it, include everything the moment needs: the setup that makes it legible and the reaction that completes it. When two boundaries are both defensible, take the wider one — a clip can be trimmed afterwards, but nothing can be added back.
+- The maximum duration is a hard cap. A clip needs the setup that makes it legible and the reaction that completes it. The two ends are not symmetric. At the END, when two landings are both defensible, take the later one — a clip can be trimmed afterwards, but nothing can be added back. At the START the opposite holds: every second before the hook is a second the viewer can leave. Begin at the first line that grabs, and reach further back only when the clip is unreadable without it.
 - Target: up to MAX_CANDIDATES_PLACEHOLDER candidates. Return fewer if the content doesn't justify more.
 - No two clips may overlap by more than half of the shorter clip's duration.
 - If a moment is stronger than the maximum duration allows, take the best self-contained window inside it. Do not emit the remainder as a second candidate — a leftover tail is never a clip.

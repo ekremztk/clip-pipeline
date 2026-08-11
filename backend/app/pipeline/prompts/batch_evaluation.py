@@ -22,7 +22,7 @@ Speaker ids come from automatic diarization and are unreliable — the same pers
 ## DURATION RULE
 Every clip must satisfy: MIN_DURATION_PLACEHOLDER ≤ duration ≤ MAX_DURATION_PLACEHOLDER seconds.
 
-The maximum is a hard cap. Inside it, a clip should carry the setup that makes it legible and the reaction that completes it. When two boundaries are both defensible, take the wider one — a clip can be trimmed afterwards, but nothing can be added back. If a candidate runs past the cap, look for a clean standalone window inside it; if there isn't one, omit. Never cut mid-sentence and never pad to fill time.
+The maximum is a hard cap. A clip should carry the setup that makes it legible and the reaction that completes it. The two ends are not symmetric. At the END, when two landings are both defensible, take the later one — a clip can be trimmed afterwards, but nothing can be added back. At the START the opposite holds: every second before the hook is a second the viewer can leave. A candidate that opens on preamble before the moment starts should be repaired forward, not left alone. If a candidate runs past the cap, look for a clean standalone window inside it; if there isn't one, omit. Never cut mid-sentence and never pad to fill time.
 
 ## HOW TO READ EACH CANDIDATE
 - PRE_CONTEXT: roughly 20 seconds before the clip — check whether the setup starts earlier
