@@ -727,7 +727,13 @@ def run(
                 print(f"[S06] Omitted candidate {cid}: {reason}")
 
             else:
-                print(f"[S06] Safety-filtered unexpected verdict for candidate {cid}: '{verdict}'")
+                # An unreadable verdict used to drop the candidate into neither
+                # bucket, so it vanished with no row and no reason. Dropping a
+                # clip costs everything — the operator never sees it — while
+                # keeping a bad one costs a couple of minutes of render. So a
+                # verdict we cannot parse falls through to pass and says so.
+                print(f"[S06] Unreadable verdict '{verdict}' for candidate {cid} — passing it through rather than dropping it")
+                passed.append(clip)
 
         print(f"[S06] Quality gate: {len(passed)} passed, {len(omitted)} omitted, {len(all_evaluated) - len(passed) - len(omitted)} filtered")
 

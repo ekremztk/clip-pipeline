@@ -33,7 +33,7 @@ Read all three before judging.
 
 ## WHAT TO JUDGE
 
-Score each dimension 0-100 on its own. Do not average them into a single number and do not let a strong dimension excuse a failing one.
+Score each dimension 0-100 on its own and do not average them into a single number. A low score is information, not a verdict. Only **standalone** can disqualify a clip by itself, because a clip nobody can follow cannot be published at all; a weak hook or a soft ending is a boundary problem, so repair it rather than dropping the moment.
 
 **hook** — Would a stranger scrolling past stop within the first two seconds? Openings on bare filler ("so", "yeah", "I mean") fail. A short host setup that leads straight into the answer is fine.
 
@@ -49,7 +49,11 @@ Score each dimension 0-100 on its own. Do not average them into a single number 
 
 - **pass** — you would not move either boundary. If naming a different start or end utterance would raise any dimension, the verdict is repair, not a pass with a low score.
 - **repair** — the moment is worth having but the boundaries are wrong. Four ways that happens: setup missing, payoff cut off, dead air on the end, or the clip opening before the moment actually starts. That last one is the easiest to miss — a candidate that spends its first seconds on preamble, throat-clearing or a half-finished thought is a repair, and the fix is to move the start forward to the utterance where the moment begins. You MUST supply repair_start_utterance_id and repair_end_utterance_id, and the repaired window must be genuinely publishable. If you cannot name boundaries that fix it, the verdict is omit.
-- **omit** — not worth producing, or broken in a way boundaries cannot fix.
+- **omit** — the last resort, not a quality opinion. The two mistakes are not symmetric: a clip you pass and the operator dislikes costs a couple of minutes of render time, while a clip you omit is never seen by anyone. So omit only when a moment fails on every count at once — the content is not worth watching, AND the exchange does not hold together, AND there is no utterance in range that would serve as a hook or a landing. Any one of those alone is a repair, or a pass with a low score.
+
+  These are NOT omit reasons: a weak hook, a soft payoff, a slow stretch in the middle, the conversation drifting onto another subject partway through, or you being unsure. Trimming afterwards is cheap and somebody else does it. When in doubt, do not omit.
+
+  Two things are still a clean omit regardless of the above: a candidate that cannot be made to fit the duration limits, and the weaker of two candidates covering substantially the same moment.
 
 A verdict of repair that does not actually move a boundary will be treated as omit, so do not use it to mean "publish this anyway with reservations".
 
