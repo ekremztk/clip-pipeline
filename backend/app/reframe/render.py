@@ -252,12 +252,22 @@ def _chain_segments(seg_exprs: list[tuple[float, float, str]], fps: float, start
         return "0"
     if len(seg_exprs) == 1:
         return seg_exprs[0][2]
-    result = seg_exprs[-1][2]
-    for i in range(len(seg_exprs) - 2, -1, -1):
-        cut_time = seg_exprs[i][1]  # end of this segment = start of next (raw PTS)
-        cut_frame = round((cut_time - start_pts_s) * fps)
-        result = f"if(lt(n\\,{cut_frame})\\,{seg_exprs[i][2]}\\,{result})"
-    return result
+
+    # Bisected for the same reason as _build_crop_expression: segment depth and
+    # chain depth add up against FFmpeg's 98-level parser limit, so a chain here
+    # would eat into the budget the per-segment expressions need.
+    def bisect(lo: int, hi: int) -> str:
+        if lo == hi:
+            return seg_exprs[lo][2]
+        mid = (lo + hi) // 2
+        # end of segment mid = start of the next one (raw PTS)
+        cut_frame = round((seg_exprs[mid][1] - start_pts_s) * fps)
+        return (
+            f"if(lt(n\\,{cut_frame})\\,"
+            f"{bisect(lo, mid)}\\,{bisect(mid + 1, hi)})"
+        )
+
+    return bisect(0, len(seg_exprs) - 1)
 
 
 def _build_segments(
@@ -372,13 +382,25 @@ def _build_crop_expression(
     if len(parts) == 1:
         return parts[0][2]
 
-    # Chain: if(lt(t,t2), expr1, if(lt(t,t3), expr2, ..., exprN))
-    result = parts[-1][2]  # Last interval as default
-    for i in range(len(parts) - 2, -1, -1):
-        t_end = parts[i][1]
-        result = f"if(lt(t,{t_end:.4f}),{parts[i][2]},{result})"
+    # Select the interval by bisecting on t rather than walking a right-leaning
+    # chain of if(lt(t,...)). The two forms describe the same piecewise function
+    # and the same value at every t; they differ only in how deeply the if()s
+    # nest. FFmpeg's expression parser gives up at 98 levels and returns EINVAL,
+    # which surfaces as an opaque "Failed to configure input pad on Parsed_crop"
+    # with no mention of depth. One uninterrupted shot with a moving subject
+    # reaches that in about 31 seconds, so the chain form did not merely degrade
+    # those renders — it lost the clip. Bisecting takes the depth from n to
+    # log2(n): 300 intervals go from 299 levels to 9.
+    def bisect(lo: int, hi: int) -> str:
+        if lo == hi:
+            return parts[lo][2]
+        mid = (lo + hi) // 2
+        return (
+            f"if(lt(t,{parts[mid][1]:.4f}),"
+            f"{bisect(lo, mid)},{bisect(mid + 1, hi)})"
+        )
 
-    return result
+    return bisect(0, len(parts) - 1)
 
 
 def _dedupe_keyframes(keyframes: list[ReframeKeyframe]) -> list[ReframeKeyframe]:
