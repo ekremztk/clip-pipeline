@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,6 +12,28 @@ from app.director.events import director_events
 from app.pipeline.stock_analytics import get_clip_stock_fields, record_final_clip
 
 
+
+
+_UNSAFE_IN_FILENAME = re.compile(r"[^a-z0-9]+")
+
+
+def _filename_slug(value: str, limit: int = 48) -> str:
+    """
+    Reduce a content type to something safe to name a file with.
+
+    content_type is written by the model in whatever shape the channel's DNA
+    invites, so it arrives as free text — one channel yields `family_story`,
+    another `innuendo / host starts and refuses to finish`. A slash in that
+    string reads as a path separator, so FFmpeg looks for a directory nobody
+    created and reports "No such file or directory"; that took out all seven
+    clips of a job at once. Long values are a quieter version of the same
+    problem, since the name also becomes an R2 key.
+
+    Only the name on disk is reduced. The stored content_type keeps the model's
+    own wording, which is what the channel's analytics read.
+    """
+    slug = _UNSAFE_IN_FILENAME.sub("_", (value or "").lower()).strip("_")
+    return slug[:limit].rstrip("_") or "clip"
 
 
 def _sanity_check_word_boundary(final_start: float, final_end: float, words: list, clip_index: int) -> tuple[float, float]:
@@ -108,7 +131,7 @@ def _export_single_clip(
             print(f"[S08] Clip {index+1}: Invalid duration ({final_duration}s). Skipping.")
             return None
 
-        output_filename = f"clip_{index:02d}_{content_type}.mp4"
+        output_filename = f"clip_{index:02d}_{_filename_slug(content_type)}.mp4"
         output_path = os.path.join(job_output_dir, output_filename)
 
         stitch_setup = clip.get("stitch_setup") or {}
