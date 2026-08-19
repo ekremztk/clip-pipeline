@@ -1076,31 +1076,13 @@ async def set_job_reviewed(
 
 
 @router.get("")
-async def list_jobs(
-    channel_id: str,
-    limit: int = 20,
-    before: Optional[str] = None,
-    current_user: dict = Depends(get_current_user),
-):
-    """
-    One page of a channel's jobs, newest first.
-
-    Paging is keyed on created_at rather than an offset because the projects
-    page re-fetches every 4 seconds while a job runs, and a job started (or
-    deleted) mid-scroll shifts every offset below it — the reader then sees the
-    same project twice, or never sees one at all. A cursor names a position in
-    the ordering itself, so rows appearing above it move nothing.
-    """
+async def list_jobs(channel_id: str, limit: int = 20, current_user: dict = Depends(get_current_user)):
     channel_id = channel_id.replace("-", "_")
     try:
         supabase = get_client()
-
-        query = supabase.table("jobs").select("*").eq("channel_id", channel_id).eq("user_id", current_user["id"])
-        if before:
-            query = query.lt("created_at", before)
-
-        jobs_response = query.order("created_at", desc=True).limit(limit).execute()
-
+        
+        jobs_response = supabase.table("jobs").select("*").eq("channel_id", channel_id).eq("user_id", current_user["id"]).order("created_at", desc=True).limit(limit).execute()
+        
         return jobs_response.data if jobs_response.data else []
         
     except Exception as e:

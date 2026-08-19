@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
 import {
     Download, Check, X, Play, FileVideo, MoreHorizontal, ArrowLeft,
     Upload, Scissors, FolderOpen, ChevronRight,
@@ -49,10 +49,6 @@ interface TranscriptWord {
 }
 
 type FilterType = "all" | "successful" | "failed" | "published";
-
-// Jobs fetched per scroll. The archive runs to hundreds of projects and the
-// page used to ask for a flat 50, which silently hid everything older.
-const PAGE_SIZE = 30;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -661,189 +657,51 @@ function ProjectsContent() {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [deleteClipId, setDeleteClipId] = useState<string | null>(null);
-    const [hasMore, setHasMore] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const loadingMoreRef = useRef(false);
-    const sentinelRef = useRef<HTMLDivElement | null>(null);
-    const pageRef = useRef<HTMLDivElement | null>(null);
-    const scrollElRef = useRef<HTMLElement | null>(null);
-    const gridScrollTop = useRef(0);
-    // Read inside loadMore so the cursor can never disagree with the list it
-    // came from, the way a separate cursor state would after a merge.
-    const jobsRef = useRef<any[]>([]);
-    // Deep-linked ids already requested, so a failed fetch is not retried forever.
-    const fetchedJobRef = useRef<Set<string>>(new Set());
+    const urlRestoredRef = useRef(false);
 
-    // Fetch one page of jobs plus exactly those jobs' clips. Every card reads
-    // its thumbnail and clip count out of `clips`, so the two have to be
-    // requested together — a channel-wide clip limit would leave the older
-    // cards blank as soon as the reader scrolled past it.
-    const fetchPage = async (before?: string) => {
-        const jobsRes = await authFetch(
-            `/jobs?channel_id=${activeChannelId}&limit=${PAGE_SIZE}` +
-            (before ? `&before=${encodeURIComponent(before)}` : "")
-        );
-        if (!jobsRes.ok) throw new Error(`jobs ${jobsRes.status}`);
-        const pageJobs: any[] = await jobsRes.json();
-
-        let pageClips: Clip[] = [];
-        if (pageJobs.length) {
-            const ids = pageJobs.map(j => j.id).join(",");
-            const clipsRes = await authFetch(`/clips?job_ids=${encodeURIComponent(ids)}`);
-            if (clipsRes.ok) pageClips = await clipsRes.json();
-        }
-        // A short page means the cursor reached the end of the channel.
-        return { pageJobs, pageClips, more: pageJobs.length === PAGE_SIZE };
-    };
-
-    const fetchData = async () => {
-        setLoading(true);
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
-            const { pageJobs, pageClips, more } = await fetchPage();
-            setJobs(pageJobs);
-            setClips(pageClips);
-            setHasMore(more);
+            const [jobsRes, clipsRes] = await Promise.all([
+                authFetch(`/jobs?channel_id=${activeChannelId}&limit=50`),
+                authFetch(`/clips?channel_id=${activeChannelId}&limit=200`),
+            ]);
+            if (jobsRes.ok) setJobs(await jobsRes.json());
+            if (clipsRes.ok) setClips(await clipsRes.json());
         } catch (err) { console.error(err); }
-        finally { setLoading(false); }
+        finally { if (!silent) setLoading(false); }
     };
-
-    const loadMore = useCallback(async () => {
-        // A ref rather than the state flag: two intersection callbacks can fire
-        // before React commits the re-render, and both would fetch the same page.
-        if (loadingMoreRef.current || !hasMore || !activeChannelId) return;
-        loadingMoreRef.current = true;
-        setLoadingMore(true);
-        try {
-            const cursor = jobsRef.current[jobsRef.current.length - 1]?.created_at;
-            if (!cursor) { setHasMore(false); return; }
-            const { pageJobs, pageClips, more } = await fetchPage(cursor);
-            // Computed against the ref rather than inside the updater: React
-            // may run an updater late or twice, so a count assigned in there
-            // cannot be read back reliably on the next line.
-            const known = new Set(jobsRef.current.map(j => j.id));
-            const freshJobs = pageJobs.filter(j => !known.has(j.id));
-            if (freshJobs.length) {
-                setJobs(prev => [...prev, ...freshJobs]);
-                setClips(prev => {
-                    const seen = new Set(prev.map(c => c.id));
-                    return [...prev, ...pageClips.filter(c => !seen.has(c.id))];
-                });
-            }
-            // A full page that adds nothing new means the server ignored the
-            // cursor — an older backend that does not know `before` would
-            // otherwise hand back page one forever while the sentinel kept
-            // asking for more.
-            setHasMore(more && freshJobs.length > 0);
-        } catch (err) { console.error(err); }
-        finally { loadingMoreRef.current = false; setLoadingMore(false); }
-    }, [hasMore, activeChannelId]);
 
     useEffect(() => {
         if (channelLoading) return;
-        if (activeChannelId) { setHasMore(true); fetchData(); }
-        else { setJobs([]); setClips([]); setHasMore(false); setLoading(false); }
+        if (activeChannelId) { urlRestoredRef.current = false; fetchData(); }
+        else { setJobs([]); setClips([]); setLoading(false); }
     }, [activeChannelId, channelLoading]);
 
-    // Auto-refresh while jobs are active. Only the first page is re-fetched and
-    // merged by id — replacing the whole list would throw a reader who had
-    // scrolled to page four back up to page one every four seconds. Running
-    // jobs are always the newest rows, so the first page covers them.
+    // Auto-refresh while jobs are active
     useEffect(() => {
         if (!activeChannelId) return;
         const hasActive = jobs.some(j => ["processing", "queued", "running"].includes(j.status));
         if (!hasActive) return;
-        const interval = setInterval(async () => {
-            try {
-                const { pageJobs, pageClips } = await fetchPage();
-                setJobs(prev => {
-                    const fresh = new Map(pageJobs.map(j => [j.id, j]));
-                    const updated = prev.map(j => fresh.get(j.id) ?? j);
-                    const known = new Set(prev.map(j => j.id));
-                    const added = pageJobs.filter(j => !known.has(j.id));
-                    return added.length ? [...added, ...updated] : updated;
-                });
-                setClips(prev => {
-                    const fresh = new Map(pageClips.map(c => [c.id, c]));
-                    const updated = prev.map(c => fresh.get(c.id) ?? c);
-                    const known = new Set(prev.map(c => c.id));
-                    return [...updated, ...pageClips.filter(c => !known.has(c.id))];
-                });
-            } catch (err) { console.error(err); }
-        }, 4000);
+        const interval = setInterval(() => fetchData(true), 4000);
         return () => clearInterval(interval);
     }, [activeChannelId, jobs]);
 
-    useEffect(() => { jobsRef.current = jobs; }, [jobs]);
-
-    // The URL is the single source of truth for what is open. This used to run
-    // once on mount behind a ref, which meant the browser's own back button (or
-    // a two-finger swipe) changed the address without changing the view.
+    // Restore state from URL params after data loads
     useEffect(() => {
-        if (loading) return;
-
-        if (!jobIdParam) { setSelectedJob(null); setSelectedClip(null); return; }
-
-        if (selectedJob?.id !== jobIdParam) {
+        if (urlRestoredRef.current || loading || !jobs.length) return;
+        urlRestoredRef.current = true;
+        if (jobIdParam) {
             const job = jobs.find(j => j.id === jobIdParam);
-            if (job) setSelectedJob(job);
-            else if (!fetchedJobRef.current.has(jobIdParam)) {
-                // A link into a project older than the pages loaded so far.
-                // GET /jobs/{id} already returns the job with its clips and
-                // enforces ownership, so no page-walking is needed.
-                fetchedJobRef.current.add(jobIdParam);
-                authFetch(`/jobs/${jobIdParam}`)
-                    .then(r => r.ok ? r.json() : null)
-                    .then(data => {
-                        if (!data?.job) return;
-                        setJobs(prev => prev.some(j => j.id === data.job.id) ? prev : [...prev, data.job]);
-                        setClips(prev => {
-                            const seen = new Set(prev.map(c => c.id));
-                            return [...prev, ...(data.clips || []).filter((c: Clip) => !seen.has(c.id))];
-                        });
-                        setSelectedJob(data.job);
-                    })
-                    .catch(err => console.error(err));
+            if (job) {
+                setSelectedJob(job);
+                if (clipIdParam) {
+                    const clip = clips.find(c => c.id === clipIdParam);
+                    if (clip) setSelectedClip(clip);
+                }
             }
         }
-
-        setSelectedClip(clipIdParam ? (clips.find(c => c.id === clipIdParam) ?? null) : null);
-    }, [loading, jobs, clips, jobIdParam, clipIdParam, selectedJob]);
-
-    // Remember where the reader was in the grid so that leaving a project puts
-    // them back on the card they clicked. With the archive paged in, being
-    // dropped at the top costs re-scrolling *and* re-fetching every page below.
-    useEffect(() => {
-        scrollElRef.current = pageRef.current?.closest("main") ?? null;
-    }, []);
-
-    useEffect(() => {
-        const el = scrollElRef.current;
-        if (!el || selectedJob) return;
-        const onScroll = () => { gridScrollTop.current = el.scrollTop; };
-        el.addEventListener("scroll", onScroll, { passive: true });
-        return () => el.removeEventListener("scroll", onScroll);
-    }, [selectedJob]);
-
-    // Layout effect, not a plain one: restoring after paint would show the top
-    // of the grid for a frame and then jump.
-    useLayoutEffect(() => {
-        if (selectedJob || loading) return;
-        const el = scrollElRef.current;
-        if (el && gridScrollTop.current) el.scrollTop = gridScrollTop.current;
-    }, [selectedJob, loading]);
-
-    // Load the next page as the sentinel nears the viewport. rootMargin fires
-    // it early so the next batch is usually there before the reader arrives.
-    useEffect(() => {
-        const node = sentinelRef.current;
-        if (!node || !hasMore || selectedJob || loading) return;
-        const obs = new IntersectionObserver(
-            entries => { if (entries[0]?.isIntersecting) loadMore(); },
-            { rootMargin: "600px" }
-        );
-        obs.observe(node);
-        return () => obs.disconnect();
-    }, [hasMore, selectedJob, loading, loadMore]);
+    }, [loading, jobs, clips, jobIdParam, clipIdParam]);
 
     // Navigation helpers
     const selectJob = useCallback((job: any) => {
@@ -1046,7 +904,7 @@ function ProjectsContent() {
     }
 
     return (
-        <div ref={pageRef} className="min-h-screen p-6 pb-24" style={{ background: '#141413', color: '#faf9f5' }}>
+        <div className="min-h-screen p-6 pb-24" style={{ background: '#141413', color: '#faf9f5' }}>
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
@@ -1145,7 +1003,7 @@ function ProjectsContent() {
                     )}
 
                     {/* Completed Projects */}
-                    {filteredProjects.length === 0 && !hasMore ? (
+                    {filteredProjects.length === 0 ? (
                         <div
                             className="flex flex-col items-center justify-center py-20 rounded-2xl"
                             style={{ background: '#181817' }}
@@ -1253,25 +1111,6 @@ function ProjectsContent() {
                                     </div>
                                 );
                             })}
-                        </div>
-                    )}
-
-                    {/* Infinite-scroll sentinel + next-page placeholders. */}
-                    {hasMore && (
-                        <div ref={sentinelRef} className="mt-4">
-                            {loadingMore && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {[...Array(4)].map((_, i) => (
-                                        <div key={i} className="rounded-2xl overflow-hidden" style={{ background: '#181817' }}>
-                                            <div className="aspect-video shimmer-load" style={{ background: 'rgba(250,249,245,0.06)' }} />
-                                            <div className="p-4 space-y-2">
-                                                <div className="h-3 rounded w-3/4 animate-pulse" style={{ background: 'rgba(250,249,245,0.06)' }} />
-                                                <div className="h-2 rounded w-1/2 animate-pulse" style={{ background: 'rgba(250,249,245,0.04)' }} />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>
