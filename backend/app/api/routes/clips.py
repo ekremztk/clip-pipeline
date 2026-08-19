@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body, Depends
 from app.services.supabase_client import get_client
 from app.middleware.auth import get_current_user
+import uuid
 from typing import Optional, Any
 from datetime import datetime, timezone
 
@@ -21,9 +22,14 @@ def _verify_clip_owner(clip_id: str, user_id: str, supabase) -> dict:
     return clip
 
 
+# Bounds one request; the projects page sends 30 at a time.
+MAX_JOB_IDS = 100
+
+
 @router.get("")
 async def get_clips(
     job_id: Optional[str] = None,
+    job_ids: Optional[str] = None,
     channel_id: Optional[str] = None,
     limit: int = 20,
     current_user: dict = Depends(get_current_user)
@@ -32,12 +38,44 @@ async def get_clips(
         channel_id = channel_id.replace("-", "_")
 
     try:
-        print(f"[ClipsRoute] Fetching clips (job_id={job_id}, channel_id={channel_id}, limit={limit})")
+        print(f"[ClipsRoute] Fetching clips (job_id={job_id}, job_ids={job_ids}, channel_id={channel_id}, limit={limit})")
         supabase = get_client()
 
         query = supabase.table("clips").select("*")
 
-        if job_id:
+        if job_ids:
+            # The projects page loads one page of jobs at a time and needs
+            # exactly those jobs' clips — a channel-wide limit would either
+            # overfetch or, once the reader scrolls far enough, silently stop
+            # covering the jobs on screen and leave their cards blank.
+            # Postgres rejects a malformed uuid with an error rather than an
+            # empty match, so anything that is not one is dropped here — a junk
+            # query string should come back empty, not as a 500.
+            requested = []
+            for raw in job_ids.split(",")[:MAX_JOB_IDS]:
+                raw = raw.strip()
+                if not raw:
+                    continue
+                try:
+                    uuid.UUID(raw)
+                except ValueError:
+                    continue
+                requested.append(raw)
+            if not requested:
+                return []
+            # Query only the ids this user actually owns, never the ids asked
+            # for: an id belonging to someone else must return nothing rather
+            # than an error, so probing cannot distinguish "not yours" from
+            # "does not exist".
+            owned = (
+                supabase.table("jobs").select("id")
+                .in_("id", requested).eq("user_id", current_user["id"]).execute()
+            )
+            owned_ids = [j["id"] for j in (owned.data or [])]
+            if not owned_ids:
+                return []
+            response = query.in_("job_id", owned_ids).order("posting_order").execute()
+        elif job_id:
             # Verify job belongs to user
             job_check = supabase.table("jobs").select("id").eq("id", job_id).eq("user_id", current_user["id"]).execute()
             if not job_check.data:
