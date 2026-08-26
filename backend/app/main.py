@@ -371,6 +371,8 @@ async def lifespan(app: FastAPI):
     proactive_task = asyncio.create_task(_proactive_scheduler())
     daily_task = asyncio.create_task(_analysis_scheduler())
     r2_ttl_task = asyncio.create_task(_r2_ttl_scheduler())
+    from app.pipeline.batch_dispatcher import batch_dispatcher_loop
+    batch_task = asyncio.create_task(batch_dispatcher_loop())
     optional_tasks = []
     if settings.ADMIN_YOUTUBE_REALTIME_SYNC_ENABLED:
         optional_tasks.append(asyncio.create_task(_admin_youtube_realtime_scheduler()))
@@ -388,14 +390,14 @@ async def lifespan(app: FastAPI):
             print("[DB] Director connection pool closed.")
     except Exception:
         pass
-    for task in [startup_task, pulse_task, proactive_task, daily_task, r2_ttl_task, *optional_tasks]:
+    for task in [startup_task, pulse_task, proactive_task, daily_task, r2_ttl_task, batch_task, *optional_tasks]:
         task.cancel()
         try:
             await task
         except asyncio.CancelledError:
             pass
 
-from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits
+from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits, batches
 from app.api.websocket import progress
 from app.director.router import router as director_router
 from app.limiter import limiter
@@ -431,6 +433,7 @@ app.add_middleware(
 settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 app.include_router(jobs.router)
+app.include_router(batches.router)
 app.include_router(clips.router)
 app.include_router(downloads.router)
 app.include_router(channels.router)

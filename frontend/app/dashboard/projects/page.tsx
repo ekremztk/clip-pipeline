@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
 import {
     Download, Check, X, Play, FileVideo, MoreHorizontal, ArrowLeft,
-    Upload, Scissors, FolderOpen, ChevronRight,
+    Upload, Scissors, FolderOpen, ChevronRight, Layers, Plus,
 } from "lucide-react";
+import BatchCreateModal from "./BatchCreateModal";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useChannel } from "../layout";
@@ -48,7 +49,22 @@ interface TranscriptWord {
     end: number;
 }
 
-type FilterType = "all" | "successful" | "failed" | "published";
+// The old pills filtered projects by their clips' review state — a filter
+// nobody used, on a page whose job is to list work. These name what you are
+// looking at instead.
+type ScopeTab = "all" | "jobs" | "batches";
+
+interface BatchRow {
+    id: string;
+    name: string | null;
+    status: string;
+    created_at: string;
+    max_parallel: number;
+    job_count: number;
+    completed_count: number;
+    failed_count: number;
+    queued_count: number;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -643,7 +659,7 @@ function ReviewedBadge({ size = 20 }: { size?: number }) {
 function ProjectsContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { channels, activeChannelId, isLoading: channelLoading } = useChannel();
+    const { channels, activeChannelId, isLoading: channelLoading, isAdmin } = useChannel();
 
     const jobIdParam = searchParams.get("job");
     const clipIdParam = searchParams.get("clip");
@@ -651,7 +667,9 @@ function ProjectsContent() {
     const [jobs, setJobs] = useState<any[]>([]);
     const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<FilterType>("all");
+    const [scope, setScope] = useState<ScopeTab>("all");
+    const [batches, setBatches] = useState<BatchRow[]>([]);
+    const [showBatchModal, setShowBatchModal] = useState(false);
     const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -662,12 +680,15 @@ function ProjectsContent() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const [jobsRes, clipsRes] = await Promise.all([
+            const [jobsRes, clipsRes, batchesRes] = await Promise.all([
                 authFetch(`/jobs?channel_id=${activeChannelId}&limit=50`),
                 authFetch(`/clips?channel_id=${activeChannelId}&limit=200`),
+                authFetch(`/batches?channel_id=${activeChannelId}&limit=30`),
             ]);
             if (jobsRes.ok) setJobs(await jobsRes.json());
             if (clipsRes.ok) setClips(await clipsRes.json());
+            // Batches are admin-only server-side; a 403 here just means no list.
+            if (batchesRes.ok) setBatches(await batchesRes.json());
         } catch (err) { console.error(err); }
         finally { if (!silent) setLoading(false); }
     };
@@ -681,11 +702,12 @@ function ProjectsContent() {
     // Auto-refresh while jobs are active
     useEffect(() => {
         if (!activeChannelId) return;
-        const hasActive = jobs.some(j => ["processing", "queued", "running"].includes(j.status));
+        const hasActive = jobs.some(j => ["processing", "queued", "running"].includes(j.status))
+            || batches.some(b => b.status === "running");
         if (!hasActive) return;
         const interval = setInterval(() => fetchData(true), 4000);
         return () => clearInterval(interval);
-    }, [activeChannelId, jobs]);
+    }, [activeChannelId, jobs, batches]);
 
     // Restore state from URL params after data loads
     useEffect(() => {
@@ -864,23 +886,15 @@ function ProjectsContent() {
     const activeJobs = jobs.filter(j => ["processing", "queued", "running"].includes(j.status));
     const completedJobs = jobs.filter(j => ["completed", "failed", "error"].includes(j.status));
 
-    const filteredProjects = completedJobs.filter(job => {
-        const jobClips = clips.filter(c => c.job_id === job.id);
-        if (filter === "all") return true;
-        if (filter === "successful") return jobClips.some(c => c.is_successful === true);
-        if (filter === "failed") return jobClips.some(c => c.is_successful === false);
-        if (filter === "published") return jobClips.some(c => c.is_published === true);
-        return true;
-    });
+    // A batch's jobs live on their own page; showing them here too would list
+    // the same work twice under two different parents.
+    const standaloneJobs = completedJobs.filter(j => !j.batch_id);
+    const filteredProjects = scope === "batches" ? [] : standaloneJobs;
 
     const projectClips = selectedJob ? clips.filter(c => c.job_id === selectedJob.id) : [];
-    const filteredProjectClips = projectClips.filter(clip => {
-        if (filter === "all") return true;
-        if (filter === "successful") return clip.is_successful === true;
-        if (filter === "failed") return clip.is_successful === false;
-        if (filter === "published") return clip.is_published === true;
-        return true;
-    });
+    // The scope tabs say which kind of thing to list, not which clips to keep,
+    // so inside a project every clip is shown.
+    const filteredProjectClips = projectClips;
 
     // No channel
     if (!channelLoading && !loading && !activeChannelId) {
@@ -932,25 +946,37 @@ function ProjectsContent() {
                     )}
                 </div>
 
-                {/* Filter Tabs */}
-                <div
-                    className="flex items-center p-1 rounded-xl gap-1"
-                    style={{ background: 'rgba(250,249,245,0.03)' }}
-                >
-                    {(["all", "successful", "failed", "published"] as FilterType[]).map(f => (
-                        <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className="px-4 py-2 rounded-lg text-sm capitalize font-medium transition-all"
-                            style={{
-                                background: filter === f ? 'rgba(250,249,245,0.08)' : 'transparent',
-                                color: filter === f ? '#faf9f5' : 'rgba(250,249,245,0.4)',
-                            }}
+                {!selectedJob && (
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="flex items-center p-1 rounded-xl gap-1"
+                            style={{ background: 'rgba(250,249,245,0.03)' }}
                         >
-                            {f.charAt(0).toUpperCase() + f.slice(1)}
-                        </button>
-                    ))}
-                </div>
+                            {(["all", "jobs", "batches"] as ScopeTab[]).map(t => (
+                                <button
+                                    key={t}
+                                    onClick={() => setScope(t)}
+                                    className="px-4 py-2 rounded-lg text-sm font-medium uppercase tracking-wide transition-all"
+                                    style={{
+                                        background: scope === t ? 'rgba(250,249,245,0.08)' : 'transparent',
+                                        color: scope === t ? '#faf9f5' : 'rgba(250,249,245,0.4)',
+                                    }}
+                                >
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+                        {isAdmin && (
+                            <button
+                                onClick={() => setShowBatchModal(true)}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                                style={{ background: '#faf9f5', color: '#141413' }}
+                            >
+                                <Plus className="w-4 h-4" /> Create batch
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Content */}
@@ -969,8 +995,58 @@ function ProjectsContent() {
             ) : !selectedJob ? (
                 /* ── Projects grid ── */
                 <div>
+                    {/* Batches — a batch is a parent of jobs, so it gets its own row
+                        above the projects rather than a card among them. */}
+                    {scope !== "jobs" && batches.length > 0 && (
+                        <div className="mb-8">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Layers className="w-4 h-4" style={{ color: '#ababab' }} />
+                                <h2 className="text-sm font-medium" style={{ color: '#ababab' }}>Batches</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {batches.map(b => {
+                                    const done = b.completed_count + b.failed_count;
+                                    const pct = b.job_count ? Math.round((done / b.job_count) * 100) : 0;
+                                    return (
+                                        <button
+                                            key={b.id}
+                                            onClick={() => router.push(`/dashboard/projects/batchs/${b.id}`)}
+                                            className="text-left rounded-2xl p-4 transition-all hover:-translate-y-1 duration-300"
+                                            style={{ background: '#181817' }}
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium truncate" style={{ color: '#faf9f5' }}>
+                                                    {b.name || 'Untitled batch'}
+                                                </span>
+                                                <span
+                                                    className="text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap"
+                                                    style={{
+                                                        background: b.status === 'running' ? 'rgba(95,159,111,0.15)' : 'rgba(250,249,245,0.06)',
+                                                        color: b.status === 'running' ? '#8fd4a0' : '#ababab',
+                                                    }}
+                                                >
+                                                    {b.status}
+                                                </span>
+                                            </div>
+                                            <div className="h-1 rounded-full overflow-hidden mb-2" style={{ background: '#2a2a28' }}>
+                                                <div className="h-full rounded-full transition-all"
+                                                    style={{ width: `${pct}%`, background: '#faf9f5' }} />
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-[10px]" style={{ color: '#ababab' }}>
+                                                <span>{done}/{b.job_count} done</span>
+                                                {b.failed_count > 0 && <><span>·</span><span style={{ color: '#e07a5f' }}>{b.failed_count} failed</span></>}
+                                                <span>·</span>
+                                                <span>{formatDate(b.created_at)}</span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Active Jobs */}
-                    {activeJobs.length > 0 && (
+                    {scope !== "batches" && activeJobs.length > 0 && (
                         <div className="mb-8">
                             <div className="flex items-center gap-2 mb-4">
                                 <h2 className="text-sm font-medium" style={{ color: '#ababab' }}>Active Jobs</h2>
@@ -1003,7 +1079,7 @@ function ProjectsContent() {
                     )}
 
                     {/* Completed Projects */}
-                    {filteredProjects.length === 0 ? (
+                    {scope === "batches" ? null : filteredProjects.length === 0 ? (
                         <div
                             className="flex flex-col items-center justify-center py-20 rounded-2xl"
                             style={{ background: '#181817' }}
@@ -1271,6 +1347,19 @@ function ProjectsContent() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showBatchModal && activeChannelId && (
+                <BatchCreateModal
+                    channelId={activeChannelId}
+                    isAdmin={isAdmin}
+                    onClose={() => setShowBatchModal(false)}
+                    onCreated={(batchId) => {
+                        setShowBatchModal(false);
+                        fetchData(true);
+                        router.push(`/dashboard/projects/batchs/${batchId}`);
+                    }}
+                />
             )}
         </div>
     );
