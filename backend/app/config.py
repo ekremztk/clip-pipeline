@@ -87,6 +87,12 @@ class Settings:
     )
     ADMIN_TOKEN_ENCRYPTION_KEY: str = os.getenv("ADMIN_TOKEN_ENCRYPTION_KEY", "")
     ADMIN_YOUTUBE_REALTIME_SYNC_ENABLED: bool = os.getenv("ADMIN_YOUTUBE_REALTIME_SYNC_ENABLED", "false").lower() in {"1", "true", "yes"}
+
+    # The batch dispatcher claims queued jobs and runs them on whatever machine
+    # it is on. A laptop started against the production database would take work
+    # off Railway and fail it there, since the uploaded sources are not local.
+    # Set BATCH_DISPATCHER_ENABLED=false for any local or throwaway process.
+    BATCH_DISPATCHER_ENABLED: bool = os.getenv("BATCH_DISPATCHER_ENABLED", "true").lower() in {"1", "true", "yes"}
     ADMIN_YOUTUBE_REALTIME_SYNC_INTERVAL_SECONDS: int = int(os.getenv("ADMIN_YOUTUBE_REALTIME_SYNC_INTERVAL_SECONDS", "300"))
     ADMIN_YOUTUBE_REALTIME_MAX_VIDEOS: int = int(os.getenv("ADMIN_YOUTUBE_REALTIME_MAX_VIDEOS", "500"))
     ADMIN_YOUTUBE_REALTIME_RECENT_ALWAYS: int = int(os.getenv("ADMIN_YOUTUBE_REALTIME_RECENT_ALWAYS", "30"))

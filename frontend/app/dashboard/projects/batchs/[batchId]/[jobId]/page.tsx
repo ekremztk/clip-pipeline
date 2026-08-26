@@ -1,22 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Play, FileVideo } from "lucide-react";
+import { ArrowLeft, FileVideo, Play } from "lucide-react";
 import { authFetch } from "@/lib/api";
-
-interface Clip {
-    id: string;
-    hook_text: string | null;
-    suggested_title: string | null;
-    duration_s: number | null;
-    standalone_score: number | null;
-    file_url: string | null;
-    video_captioned_path?: string | null;
-    video_reframed_path?: string | null;
-}
-
-const bestUrl = (c: Clip) => c.video_captioned_path || c.video_reframed_path || c.file_url || null;
+import { toast } from "@/lib/toast";
+import { ClipModal, getBestUrl, getScoreHex, formatDuration } from "../../../ClipModal";
+import type { Clip } from "../../../ClipModal";
 
 export default function BatchJobClipsPage() {
     const params = useParams();
@@ -26,25 +16,82 @@ export default function BatchJobClipsPage() {
 
     const [clips, setClips] = useState<Clip[]>([]);
     const [title, setTitle] = useState("");
+    const [targetGuest, setTargetGuest] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
 
-    useEffect(() => {
+    const load = useCallback(async () => {
         if (!jobId) return;
-        (async () => {
-            try {
-                // This endpoint already returns the job with its clips and checks
-                // ownership, so the page needs one request rather than two.
-                const res = await authFetch(`/jobs/${jobId}`);
-                if (res.ok) {
-                    const body = await res.json();
-                    setTitle(body.job?.video_title || "");
-                    setClips(body.clips || []);
-                }
-            } finally {
-                setLoading(false);
+        try {
+            // Returns the job with its clips and enforces ownership, so this is
+            // one request rather than two.
+            const res = await authFetch(`/jobs/${jobId}`);
+            if (res.ok) {
+                const body = await res.json();
+                setTitle(body.job?.video_title || "");
+                setTargetGuest(body.job?.target_guest ?? null);
+                setClips(body.clips || []);
             }
-        })();
+        } finally {
+            setLoading(false);
+        }
     }, [jobId]);
+
+    useEffect(() => { load(); }, [load]);
+
+    /** Keep the open modal pointing at the same clip after a list refresh. */
+    const syncSelected = (updated: Clip[]) => {
+        setClips(updated);
+        setSelectedClip(prev => (prev ? updated.find(c => c.id === prev.id) ?? prev : prev));
+    };
+
+    const patchClip = async (id: string, body: Record<string, unknown>, okMsg: string) => {
+        const res = await authFetch(`/clips/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        if (res.ok) {
+            syncSelected(clips.map(c => (c.id === id ? { ...c, ...body } as Clip : c)));
+            toast.success(okMsg);
+        } else {
+            toast.error("Could not update clip.");
+        }
+    };
+
+    const handleApprove = (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        patchClip(id, { is_successful: clip?.is_successful === true ? null : true }, "Clip approved.");
+    };
+    const handleReject = (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        patchClip(id, { is_successful: clip?.is_successful === false ? null : false }, "Clip rejected.");
+    };
+    const handlePublish = (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        patchClip(id, { is_published: !clip?.is_published }, "Marked as published.");
+    };
+    const handleDownload = (id: string) => {
+        const clip = clips.find(c => c.id === id);
+        const url = clip ? getBestUrl(clip) : null;
+        if (url) window.open(url, "_blank");
+    };
+    const handleStockReview = async (
+        id: string,
+        status: "unreviewed" | "selected" | "rejected" | "posted",
+        note: string,
+    ) => {
+        const res = await authFetch(`/clips/${id}/stock-review`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stock_review_status: status, stock_review_note: note }),
+        });
+        if (res.ok) {
+            syncSelected(clips.map(c => (c.id === id ? { ...c, stock_review_status: status, stock_review_note: note } : c)));
+        } else {
+            toast.error("Could not save review.");
+        }
+    };
 
     return (
         <div className="min-h-screen p-6 pb-24" style={{ background: "#141413", color: "#faf9f5" }}>
@@ -58,7 +105,7 @@ export default function BatchJobClipsPage() {
             <p className="text-xs mb-8" style={{ color: "#ababab" }}>{clips.length} clips</p>
 
             {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {[...Array(5)].map((_, i) => (
                         <div key={i} className="rounded-2xl overflow-hidden" style={{ background: "#181817" }}>
                             <div className="aspect-[9/16] shimmer-load" style={{ background: "rgba(250,249,245,0.06)" }} />
@@ -71,29 +118,37 @@ export default function BatchJobClipsPage() {
                     <p className="text-sm" style={{ color: "#ababab" }}>No clips for this source.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {clips.map(clip => {
-                        const url = bestUrl(clip);
+                        const url = getBestUrl(clip);
+                        const score = clip.standalone_score ?? 0;
                         return (
-                            <div key={clip.id} className="rounded-2xl overflow-hidden flex flex-col transition-all hover:-translate-y-1 duration-300"
-                                style={{ background: "#181817" }}>
+                            <div
+                                key={clip.id}
+                                onClick={() => setSelectedClip(clip)}
+                                className="rounded-2xl overflow-hidden cursor-pointer transition-all group flex flex-col hover:-translate-y-1 duration-300"
+                                style={{ background: "#181817" }}
+                            >
                                 <div className="relative aspect-[9/16] flex items-center justify-center" style={{ background: "#1c1c1b" }}>
                                     {url ? (
                                         <video src={url} className="w-full h-full object-cover" preload="metadata" muted />
                                     ) : (
                                         <FileVideo className="w-8 h-8" style={{ color: "rgba(250,249,245,0.15)" }} />
                                     )}
-                                    {url && (
-                                        <a href={url} target="_blank" rel="noreferrer"
-                                            className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-                                            style={{ background: "rgba(0,0,0,0.4)" }}>
-                                            <Play className="w-8 h-8" style={{ color: "#faf9f5" }} />
-                                        </a>
-                                    )}
-                                    {clip.standalone_score != null && (
-                                        <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded"
-                                            style={{ background: "rgba(0,0,0,0.6)", color: "#faf9f5" }}>
-                                            {clip.standalone_score}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        style={{ background: "rgba(0,0,0,0.35)" }}>
+                                        <Play className="w-8 h-8" style={{ color: "#faf9f5" }} />
+                                    </div>
+                                    {/* Colour is what makes a score readable at a glance —
+                                        a plain number has to be read before it means anything. */}
+                                    <span className="absolute top-2 right-2 text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                                        style={{ background: "rgba(0,0,0,0.65)", color: getScoreHex(score) }}>
+                                        {score}
+                                    </span>
+                                    {clip.duration_s != null && (
+                                        <span className="absolute bottom-2 left-2 text-[10px] px-1.5 py-0.5 rounded"
+                                            style={{ background: "rgba(0,0,0,0.65)", color: "#faf9f5" }}>
+                                            {formatDuration(clip.duration_s)}
                                         </span>
                                     )}
                                 </div>
@@ -101,16 +156,24 @@ export default function BatchJobClipsPage() {
                                     <p className="text-xs line-clamp-2" style={{ color: "#faf9f5" }}>
                                         {clip.suggested_title || clip.hook_text || "Untitled"}
                                     </p>
-                                    {clip.duration_s != null && (
-                                        <p className="text-[10px] mt-1" style={{ color: "#6f6f6b" }}>
-                                            {Math.round(clip.duration_s)}s
-                                        </p>
-                                    )}
                                 </div>
                             </div>
                         );
                     })}
                 </div>
+            )}
+
+            {selectedClip && (
+                <ClipModal
+                    clip={selectedClip}
+                    targetGuest={targetGuest}
+                    onClose={() => setSelectedClip(null)}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onPublish={handlePublish}
+                    onDownload={handleDownload}
+                    onStockReview={handleStockReview}
+                />
             )}
         </div>
     );

@@ -371,8 +371,12 @@ async def lifespan(app: FastAPI):
     proactive_task = asyncio.create_task(_proactive_scheduler())
     daily_task = asyncio.create_task(_analysis_scheduler())
     r2_ttl_task = asyncio.create_task(_r2_ttl_scheduler())
-    from app.pipeline.batch_dispatcher import batch_dispatcher_loop
-    batch_task = asyncio.create_task(batch_dispatcher_loop())
+    if settings.BATCH_DISPATCHER_ENABLED:
+        from app.pipeline.batch_dispatcher import batch_dispatcher_loop
+        batch_task = asyncio.create_task(batch_dispatcher_loop())
+    else:
+        print("[BatchDispatcher] disabled by BATCH_DISPATCHER_ENABLED")
+        batch_task = asyncio.create_task(asyncio.sleep(0))
     optional_tasks = []
     if settings.ADMIN_YOUTUBE_REALTIME_SYNC_ENABLED:
         optional_tasks.append(asyncio.create_task(_admin_youtube_realtime_scheduler()))

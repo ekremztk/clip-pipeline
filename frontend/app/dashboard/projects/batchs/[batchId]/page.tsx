@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Layers, Loader2, Check, X as XIcon, Clock } from "lucide-react";
+import { ArrowLeft, Layers, Loader2, Check, X as XIcon, Clock, FileVideo } from "lucide-react";
 import { authFetch } from "@/lib/api";
 import { toast } from "@/lib/toast";
 
@@ -16,6 +16,7 @@ interface Job {
     batch_position: number | null;
     error_message: string | null;
     created_at: string;
+    thumb_url?: string | null;
 }
 
 interface Batch {
@@ -168,9 +169,19 @@ export default function BatchDetailPage() {
                                 className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${openable ? "cursor-pointer hover:bg-white/[0.02]" : ""}`}
                                 style={{ background: "#181817" }}
                             >
-                                <span className="text-xs w-6 text-center" style={{ color: "#6f6f6b" }}>
+                                <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#6f6f6b" }}>
                                     {(job.batch_position ?? 0) + 1}
                                 </span>
+                                {/* One frame of the source. Seven rows of similar
+                                    filenames are indistinguishable without it. */}
+                                <div className="w-16 h-9 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"
+                                    style={{ background: "#1c1c1b" }}>
+                                    {job.thumb_url ? (
+                                        <video src={job.thumb_url} className="w-full h-full object-cover" preload="metadata" muted />
+                                    ) : (
+                                        <FileVideo className="w-3.5 h-3.5" style={{ color: "rgba(250,249,245,0.15)" }} />
+                                    )}
+                                </div>
                                 <StatusIcon status={job.status} />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm truncate" style={{ color: "#faf9f5" }}>{job.video_title || "Untitled"}</p>

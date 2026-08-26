@@ -194,7 +194,28 @@ async def get_batch(batch_id: str, current_user: dict = Depends(get_current_user
         supabase.table("jobs").select("*")
         .eq("batch_id", batch_id).order("batch_position").execute()
     )
-    return {"batch": b.data[0], "jobs": jobs.data or []}
+    rows = jobs.data or []
+
+    # One frame per row, so the list reads as "which source is which" rather
+    # than a column of near-identical filenames. Fetched here in one query
+    # instead of one request per row from the browser.
+    if rows:
+        clips = (
+            supabase.table("clips")
+            .select("job_id,posting_order,video_captioned_path,video_reframed_path,file_url")
+            .in_("job_id", [j["id"] for j in rows])
+            .order("posting_order")
+            .execute()
+        )
+        first_by_job: dict = {}
+        for c in clips.data or []:
+            url = c.get("video_captioned_path") or c.get("video_reframed_path") or c.get("file_url")
+            if url and c["job_id"] not in first_by_job:
+                first_by_job[c["job_id"]] = url
+        for j in rows:
+            j["thumb_url"] = first_by_job.get(j["id"])
+
+    return {"batch": b.data[0], "jobs": rows}
 
 
 @router.delete("/{batch_id}")

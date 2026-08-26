@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
-import { X, Upload, Check, AlertCircle, Loader2 } from "lucide-react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { X, Upload, Check, AlertCircle, Loader2, Settings2 } from "lucide-react";
 import { authFetch } from "@/lib/api";
 import { uploadFileMultipart } from "@/lib/batchUpload";
 import { toast } from "@/lib/toast";
@@ -39,6 +39,7 @@ interface SourceDraft {
     captionTemplate: string;
     s05Model: string;
     s06Model: string;
+    previewUrl: string;
     progress: number;
     state: UploadState;
     uploadId?: string;
@@ -67,6 +68,13 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
         setSources(prev => prev.map((s, i) => (i === idx ? { ...s, ...updates } : s)));
     }, []);
 
+    // Object URLs are held by the document until revoked, and each one pins the
+    // whole video file in memory. Ten multi-GB sources would stay pinned for the
+    // rest of the session otherwise.
+    const previewsRef = useRef<string[]>([]);
+    previewsRef.current = sources.map(s => s.previewUrl);
+    useEffect(() => () => { previewsRef.current.forEach(URL.revokeObjectURL); }, []);
+
     const handleFiles = (files: FileList | null) => {
         if (!files?.length) return;
         const picked = Array.from(files).slice(0, MAX_SOURCES - sources.length);
@@ -85,6 +93,9 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                 captionTemplate: CAPTION_TEMPLATES[0].key,
                 s05Model: "opus-5",
                 s06Model: "opus-5",
+                // Local object URL, so the operator can see which source they are
+                // configuring. Ten filenames off the same show look identical.
+                previewUrl: URL.createObjectURL(file),
                 progress: 0,
                 state: "uploading",
             });
@@ -197,37 +208,67 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                     </div>
                 ) : (
                     <>
-                        {/* Step circles — Source 1..N then Settings */}
-                        <div className="px-6 py-4 overflow-x-auto" style={{ borderBottom: "1px solid #262624" }}>
-                            <div className="flex items-center gap-1 min-w-max">
-                                {sources.map((s, i) => (
-                                    <React.Fragment key={i}>
-                                        {i > 0 && <div className="w-6 h-px" style={{ background: "#2a2a28" }} />}
-                                        <button onClick={() => setStep(i)} className="flex flex-col items-center gap-1.5 px-1">
-                                            <div
-                                                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold"
-                                                style={{
-                                                    background: step === i ? "#faf9f5" : s.state === "done" ? "#2f6f3f" : s.state === "error" ? "#7f2f2f" : "#2a2a28",
-                                                    color: step === i ? "#141413" : "#faf9f5",
-                                                }}
+                        {/* Step rail.
+                            The connectors grow, the steps do not, so the row fills
+                            the dialog whatever the source count is — two sources
+                            stretch across it instead of huddling on the left, and
+                            ten compress the gaps rather than overflowing. */}
+                        <div className="px-6 py-5" style={{ borderBottom: "1px solid #262624" }}>
+                            <div className="flex items-center w-full">
+                                {sources.map((s, i) => {
+                                    const active = step === i;
+                                    const bg = active ? "#faf9f5"
+                                        : s.state === "done" ? "rgba(95,159,111,0.25)"
+                                        : s.state === "error" ? "rgba(224,122,95,0.25)"
+                                        : "#232321";
+                                    return (
+                                        <React.Fragment key={i}>
+                                            {i > 0 && <div className="flex-1 h-px min-w-[12px]" style={{ background: "#2a2a28" }} />}
+                                            <button
+                                                onClick={() => setStep(i)}
+                                                className="flex flex-col items-center gap-2 flex-shrink-0 group"
+                                                style={{ width: 64 }}
+                                                title={s.title || s.file.name}
                                             >
-                                                {s.state === "done" ? <Check className="w-3 h-3" /> : s.state === "error" ? <AlertCircle className="w-3 h-3" /> : i + 1}
-                                            </div>
-                                            <span className="text-[10px] whitespace-nowrap" style={{ color: step === i ? "#faf9f5" : "#6f6f6b" }}>
-                                                Source {i + 1}
-                                            </span>
-                                        </button>
-                                    </React.Fragment>
-                                ))}
-                                <div className="w-6 h-px" style={{ background: "#2a2a28" }} />
-                                <button onClick={() => setStep(settingsStep)} className="flex flex-col items-center gap-1.5 px-1">
+                                                <div
+                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold transition-colors"
+                                                    style={{
+                                                        background: bg,
+                                                        color: active ? "#141413" : "#faf9f5",
+                                                        border: active ? "none" : "1px solid #2f2f2c",
+                                                    }}
+                                                >
+                                                    {s.state === "done" ? <Check className="w-3.5 h-3.5" style={{ color: active ? "#141413" : "#8fd4a0" }} />
+                                                        : s.state === "error" ? <AlertCircle className="w-3.5 h-3.5" style={{ color: active ? "#141413" : "#e07a5f" }} />
+                                                        : i + 1}
+                                                </div>
+                                                <span className="text-[10px] leading-none whitespace-nowrap transition-colors"
+                                                    style={{ color: active ? "#faf9f5" : "#6f6f6b" }}>
+                                                    Source {i + 1}
+                                                </span>
+                                            </button>
+                                        </React.Fragment>
+                                    );
+                                })}
+                                <div className="flex-1 h-px min-w-[12px]" style={{ background: "#2a2a28" }} />
+                                <button
+                                    onClick={() => setStep(settingsStep)}
+                                    className="flex flex-col items-center gap-2 flex-shrink-0"
+                                    style={{ width: 64 }}
+                                >
                                     <div
-                                        className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold"
-                                        style={{ background: onSettings ? "#faf9f5" : "#2a2a28", color: onSettings ? "#141413" : "#faf9f5" }}
+                                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                                        style={{
+                                            background: onSettings ? "#faf9f5" : "#232321",
+                                            border: onSettings ? "none" : "1px solid #2f2f2c",
+                                        }}
                                     >
-                                        ⚙
+                                        <Settings2 className="w-3.5 h-3.5" style={{ color: onSettings ? "#141413" : "#ababab" }} />
                                     </div>
-                                    <span className="text-[10px] whitespace-nowrap" style={{ color: onSettings ? "#faf9f5" : "#6f6f6b" }}>Settings</span>
+                                    <span className="text-[10px] leading-none whitespace-nowrap"
+                                        style={{ color: onSettings ? "#faf9f5" : "#6f6f6b" }}>
+                                        Settings
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -264,8 +305,11 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                     </div>
                                 </div>
                             ) : current ? (
-                                <div className="space-y-4 max-w-md">
+                                <div className="space-y-4">
                                     <div className="flex items-center gap-3 mb-1">
+                                        <div className="w-20 h-11 rounded-md overflow-hidden flex-shrink-0" style={{ background: "#1c1c1b" }}>
+                                            <video src={current.previewUrl} className="w-full h-full object-cover" preload="metadata" muted />
+                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs truncate" style={{ color: "#6f6f6b" }}>{current.file.name}</p>
                                             <div className="h-1 rounded-full mt-1.5 overflow-hidden" style={{ background: "#2a2a28" }}>
@@ -304,7 +348,7 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                 onChange={e => patch(step, { targetGuest: e.target.value })} placeholder="Optional" />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         <div>
                                             <label className={labelCls} style={labelStyle}>Clip duration</label>
                                             <select className={inputCls} style={inputStyle} value={current.durationPreset}
@@ -319,9 +363,8 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                 {CAPTION_TEMPLATES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
                                             </select>
                                         </div>
-                                    </div>
                                     {isAdmin && (
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <>
                                             <div>
                                                 <label className={labelCls} style={labelStyle}>S05 model</label>
                                                 <select className={inputCls} style={inputStyle} value={current.s05Model}
@@ -338,22 +381,25 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                     <option value="opus-4-6">Opus 4.6</option>
                                                 </select>
                                             </div>
-                                        </div>
+                                        </>
                                     )}
+                                    </div>
 
                                     <button
                                         onClick={() => {
-                                            // The "reuse details" move: everything except the title,
-                                            // which belongs to its own file.
-                                            const { durationPreset, captionTemplate, s05Model, s06Model, mainPerson, targetGuest } = current;
+                                            // Settings only. Title, main person and target guest
+                                            // describe the video in front of you, not how it should
+                                            // be cut — copying those across would overwrite seven
+                                            // other videos' identities with this one's.
+                                            const { durationPreset, captionTemplate, s05Model, s06Model } = current;
                                             setSources(prev => prev.map((s, i) => i === step ? s
-                                                : { ...s, durationPreset, captionTemplate, s05Model, s06Model, mainPerson, targetGuest }));
-                                            toast.success("Applied to all sources");
+                                                : { ...s, durationPreset, captionTemplate, s05Model, s06Model }));
+                                            toast.success("Duration, caption and models applied to all sources");
                                         }}
                                         className="text-xs underline"
                                         style={{ color: "#ababab" }}
                                     >
-                                        Apply these settings to all sources
+                                        Apply duration, caption and models to all sources
                                     </button>
                                 </div>
                             ) : null}
