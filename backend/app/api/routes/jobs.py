@@ -10,6 +10,7 @@ from app.models.schemas import JobResponse
 from app.models.enums import JobStatus
 from app.config import settings
 from app.limiter import limiter
+from app.utils.person_name import normalize_person_name
 import uuid
 import shutil
 import os
@@ -715,7 +716,7 @@ async def create_job(
         job_id = str(uuid.uuid4())
         r2_upload_row: Optional[dict] = None
         r2_upload_ext: Optional[str] = None
-        metadata_subject_name = metadata_subject_name.strip() if metadata_subject_name and metadata_subject_name.strip() else None
+        metadata_subject_name = normalize_person_name(metadata_subject_name)
 
         if youtube_url:
             # Validate it's a real YouTube URL
@@ -871,6 +872,11 @@ async def create_job(
             "user_id": current_user["id"],
             "video_title": title,
             "target_guest": target_guest,
+            # Persisted, not just passed down to the background task. The Cast
+            # Library groups clips by this name, and S08 reads it off the row —
+            # a value that lives only in memory for the run's duration leaves
+            # every clip of a single-source job with no person attached.
+            "metadata_subject_name": metadata_subject_name,
             "status": JobStatus.QUEUED.value,
             "current_step": "queued",
             "progress_pct": 0,
@@ -1117,10 +1123,14 @@ async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)
                 ]:
                     if url:
                         delete_url(url)
-            # Also remove any leftover prefixes for this job.
+            # Also remove any leftover prefixes for this job. Thumbnails live
+            # under their own prefix precisely so the pipeline's landscape
+            # cleanup cannot reach them, which also means they outlive the job
+            # unless they are named here.
             delete_prefix(f"{job_id}/")
             delete_prefix(f"source_videos/{job_id}/")
             delete_prefix(f"gaming-reframe/{job_id}/")
+            delete_prefix(f"thumbnails/{job_id}/")
         except Exception as _e:
             print(f"[JobsRoute] R2 cascade warning: {_e}")
 

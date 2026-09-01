@@ -10,6 +10,8 @@ from app.services.supabase_client import get_client
 from app.services.r2_client import upload_clip
 from app.director.events import director_events
 from app.pipeline.stock_analytics import get_clip_stock_fields, record_final_clip
+from app.services.thumbnails import make_thumbnail, WIDE_WIDTH
+from app.utils.person_name import normalize_person_name
 
 
 
@@ -112,6 +114,7 @@ def _stitch_segments(setup_path: str, main_path: str, output_path: str, job_outp
 def _export_single_clip(
     index: int, clip: dict, job_id: str, channel_id: str, video_path: str,
     user_id: str | None, words: list, job_output_dir: str, total_clips: int,
+    main_person: str | None = None,
 ) -> Optional[dict]:
     """Export a single clip: FFmpeg cut → R2 upload → Supabase insert. Returns clip dict or None."""
     supabase = get_client()
@@ -196,6 +199,17 @@ def _export_single_clip(
         if not r2_uploaded:
             return None
 
+        # Poster frame off the local cut, before the file is cleaned up. This is
+        # the 16:9 source, so it is the cover the Cast Library shows for a
+        # person; the 9:16 card thumbnail comes later, in S10, once captions are
+        # burned in. A failure here returns None and costs nothing but a card
+        # falling back to its placeholder.
+        thumbnail_wide_path = make_thumbnail(
+            output_path,
+            f"thumbnails/{job_id}/{index}_wide.jpg",
+            width=WIDE_WIDTH,
+        )
+
         clip_data = {
             "job_id": job_id,
             "channel_id": channel_id,
@@ -214,8 +228,14 @@ def _export_single_clip(
             "suggested_description": clip.get("suggested_description"),
             "video_landscape_path": file_url,
             "file_url": file_url,
+            "thumbnail_wide_path": thumbnail_wide_path,
             "is_successful": None,
             "quality_notes": clip.get("quality_notes"),
+            # Who the clip is about, copied down from the job. Denormalised on
+            # purpose: the Cast Library groups, filters and sorts on clips
+            # alone, and a join per query cannot use one index. The stock
+            # pipeline overwrites this below when it knows better.
+            "main_person": main_person,
         }
         stock_fields = get_clip_stock_fields(job_id, clip.get("candidate_id"))
         if stock_fields:
@@ -265,6 +285,19 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
 
     words = transcript_data.get("words", []) if transcript_data else []
 
+    # Read off the job row rather than taking it as an argument: this step also
+    # runs inside Modal, where the only thing carried across is the job id.
+    main_person = None
+    try:
+        job_row = (
+            get_client().table("jobs")
+            .select("metadata_subject_name").eq("id", job_id).execute()
+        )
+        if job_row.data:
+            main_person = normalize_person_name(job_row.data[0].get("metadata_subject_name"))
+    except Exception as e:
+        print(f"[S08] Could not read main person for job {job_id}: {e}")
+
     job_output_dir = os.path.join(settings.OUTPUT_DIR, job_id)
     os.makedirs(job_output_dir, exist_ok=True)
 
@@ -274,7 +307,7 @@ def run(cut_results: list, job_id: str, channel_id: str, video_path: str,
             executor.submit(
                 _export_single_clip,
                 index, clip, job_id, channel_id, video_path,
-                user_id, words, job_output_dir, total,
+                user_id, words, job_output_dir, total, main_person,
             ): index
             for index, clip in enumerate(cut_results)
         }

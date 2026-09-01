@@ -19,6 +19,7 @@ from app.middleware.auth import get_current_user
 from app.middleware.roles import is_admin_user
 from app.models.enums import JobStatus
 from app.services.supabase_client import get_client
+from app.utils.person_name import normalize_person_name
 
 router = APIRouter(prefix="/batches", tags=["batches"])
 
@@ -112,7 +113,7 @@ async def create_batch(request: Request, body: BatchCreateBody, current_user: di
             "user_id": user_id,
             "video_title": src.title,
             "target_guest": src.target_guest,
-            "metadata_subject_name": src.metadata_subject_name,
+            "metadata_subject_name": normalize_person_name(src.metadata_subject_name),
             "status": JobStatus.QUEUED.value,
             "current_step": "queued",
             "progress_pct": 0,

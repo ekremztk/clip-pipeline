@@ -18,6 +18,7 @@ from app.config import settings
 from app.pipeline.stock_analytics import record_candidate_stage
 from app.services.supabase_client import get_client
 from app.services.r2_client import get_r2_client
+from app.services.thumbnails import make_thumbnail, VERTICAL_WIDTH
 from app.captions.core import transcribe_video
 from app.captions.renderer import render_captions
 from app.captions.watermark import fetch_watermark, resolve_channel_watermark_key
@@ -71,20 +72,24 @@ def run(
         local_hint = clip.get("local_reframed_path")
 
         try:
-            captioned_url, caption_meta = _caption_clip(
+            captioned_url, caption_meta, thumb_url = _caption_clip(
                 clip_url=reframed_url,
                 clip_index=index,
                 template_key=caption_template,
                 local_path_hint=local_hint,
                 watermark_path=watermark_path,
+                job_id=job_id,
             )
 
             if clip_id and captioned_url:
                 try:
-                    supabase.table("clips").update({
+                    caption_update = {
                         "video_captioned_path": captioned_url,
                         "caption_metadata": caption_meta,
-                    }).eq("id", str(clip_id)).execute()
+                    }
+                    if thumb_url:
+                        caption_update["thumbnail_path"] = thumb_url
+                    supabase.table("clips").update(caption_update).eq("id", str(clip_id)).execute()
                     print(f"[S10] Clip {index+1} (id: {clip_id}) captioned: {captioned_url}")
                 except Exception as db_err:
                     print(f"[S10] DB update error for clip {index+1}: {db_err}")
@@ -136,15 +141,16 @@ def _caption_clip(
     template_key: str,
     local_path_hint: str | None = None,
     watermark_path: str | None = None,
-) -> tuple[str, dict]:
+    job_id: str | None = None,
+) -> tuple[str, dict, str | None]:
     """
     Transcribe a clip and burn captions:
     1. Use local path from S09 if available, otherwise download from R2
     2. Deepgram transcription → words + segments
     3. render_captions() → captioned MP4
-    4. Upload to R2
+    4. Upload to R2, and grab a poster frame off the same local file
 
-    Returns (captioned_r2_url, caption_metadata)
+    Returns (captioned_r2_url, caption_metadata, thumbnail_url_or_None)
     """
     import requests
 
@@ -204,6 +210,15 @@ def _caption_clip(
         # Upload to R2
         r2_url = _upload_to_r2(output_path, f"captions/{uuid.uuid4().hex}.mp4")
 
+        # Poster frame for the clip card, taken from the finished vertical video
+        # so the thumbnail shows the clip as it will actually play, captions and
+        # all. Best-effort — a card without one still works.
+        thumb_url = make_thumbnail(
+            output_path,
+            f"thumbnails/{job_id or 'orphan'}/{clip_index}_vertical.jpg",
+            width=VERTICAL_WIDTH,
+        )
+
         caption_meta = {
             "template": template_key,
             "word_count": len(words),
@@ -215,7 +230,7 @@ def _caption_clip(
             "output_stats": output_stats,
         }
 
-        return r2_url, caption_meta
+        return r2_url, caption_meta, thumb_url
 
     finally:
         for path in [local_path, output_path]:
