@@ -32,6 +32,7 @@ def run(
     job_id: str,
     channel_id: str,
     caption_template: str = "clean",
+    min_output_bitrate: int | None = None,
 ) -> list:
     """
     Step 10: Auto Captions — transcribes and burns captions onto each reframed clip.
@@ -79,6 +80,7 @@ def run(
                 local_path_hint=local_hint,
                 watermark_path=watermark_path,
                 job_id=job_id,
+                min_output_bitrate=min_output_bitrate,
             )
 
             if clip_id and captioned_url:
@@ -95,7 +97,14 @@ def run(
                     print(f"[S10] DB update error for clip {index+1}: {db_err}")
                 record_candidate_stage(clip_id, "s10", "completed", url=captioned_url)
 
-            return index, {**clip, "video_captioned_path": captioned_url, "caption_metadata": caption_meta}
+            return index, {
+                **clip,
+                "video_captioned_path": captioned_url,
+                "caption_metadata": caption_meta,
+                # Returned as well as written, so a caller with no clip row —
+                # the standalone captions endpoint — can still get at it.
+                "thumbnail_path": thumb_url,
+            }
 
         except Exception as e:
             print(f"[S10] Caption error for clip {index+1}: {e}")
@@ -142,6 +151,7 @@ def _caption_clip(
     local_path_hint: str | None = None,
     watermark_path: str | None = None,
     job_id: str | None = None,
+    min_output_bitrate: int | None = None,
 ) -> tuple[str, dict, str | None]:
     """
     Transcribe a clip and burn captions:
@@ -199,7 +209,16 @@ def _caption_clip(
                 f"[S10] Clip {clip_index+1}: output size={output_stats.get('size_mb', 0):.1f}MB, "
                 f"video_bitrate={output_stats.get('video_bitrate_mbps', 0):.2f}Mbps"
             )
-            min_bitrate = int(os.getenv("FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
+            # A pipeline clip arrives as a fresh reframe, so an output this
+            # thin means the encode went wrong and the guard should stop it.
+            # A caller handing us their own file owns its quality, and a
+            # already-compressed input legitimately re-encodes small — so that
+            # path passes 0 and gets the measured bitrate back to judge for
+            # itself.
+            min_bitrate = (
+                min_output_bitrate if min_output_bitrate is not None
+                else int(os.getenv("FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
+            )
             video_bitrate = output_stats.get("video_bitrate_bps")
             if video_bitrate and video_bitrate < min_bitrate:
                 raise RuntimeError(
@@ -228,6 +247,7 @@ def _caption_clip(
             "words": words,   # full word list stored for "Open in Editor" replay
             "finalizer": finalizer_meta,
             "output_stats": output_stats,
+            "video_bitrate_bps": (output_stats or {}).get("video_bitrate_bps"),
         }
 
         return r2_url, caption_meta, thumb_url

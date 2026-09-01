@@ -93,7 +93,7 @@ async def _r2_ttl_scheduler():
     from datetime import datetime, timezone, timedelta
     from app.services.r2_client import get_r2_client
 
-    TTL_PREFIXES = ["debug/", "gaming-debug/", "reframe-uploads/", "upload_sources/"]
+    TTL_PREFIXES = ["debug/", "gaming-debug/", "reframe-uploads/", "upload_sources/", "api/"]
     TTL_HOURS = 24
 
     await asyncio.sleep(180)  # wait 3 min after startup
@@ -401,7 +401,7 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
 
-from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits, batches, cast
+from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits, batches, cast, public_api
 from app.api.websocket import progress
 from app.director.router import router as director_router
 from app.limiter import limiter
@@ -440,6 +440,7 @@ app.include_router(jobs.router)
 app.include_router(batches.router)
 app.include_router(clips.router)
 app.include_router(cast.router)
+app.include_router(public_api.router)
 app.include_router(downloads.router)
 app.include_router(channels.router)
 app.include_router(feedback.router)

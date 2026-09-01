@@ -348,3 +348,66 @@ def compute_voice_embedding(audio_bytes: bytes, filename: str) -> dict:
                     os.remove(p)
             except Exception:
                 pass
+
+
+@app.function(
+    gpu="L40S",
+    memory=8192,
+    cpu=4,
+    timeout=900,
+    scaledown_window=10,
+    secrets=[modal.Secret.from_name(MODAL_GPU_SECRET_NAME)],
+)
+def caption_clip(
+    video_url: str,
+    request_id: str,
+    template_key: str = "clean",
+    channel_id: str | None = None,
+) -> dict:
+    """
+    Burn captions onto one already-vertical clip and return its URL.
+
+    The standalone counterpart to what S10 does inside a pipeline run: you have
+    a 9:16 cut from somewhere else and want this channel's caption style and
+    watermark on it, without a job, a source video or the nine steps before it.
+
+    S10 needs no transcript handed to it — it transcribes the clip it is given,
+    which is what makes this step isolatable at all. The clip dict deliberately
+    carries no "id", so S10 writes nothing to the clips table: an API call is
+    not a pipeline run and must not leave rows behind.
+    """
+    import sys
+    sys.path.insert(0, "/app")
+
+    from app.pipeline.steps import s10_captions
+
+    results = s10_captions.run(
+        reframed_clips=[{"video_reframed_path": video_url}],
+        # No job exists, but the id still names R2 keys, so it has to be
+        # unique or two calls would overwrite each other's output. The caller
+        # passes one per request, under an "api/" prefix that keeps API output
+        # separable from pipeline output in the bucket.
+        job_id=f"api/{request_id}",
+        channel_id=channel_id or "",
+        caption_template=template_key,
+        # The caller's file, the caller's quality. The pipeline's 5 Mbps floor
+        # exists to catch a broken encode of a fresh reframe; an input that was
+        # already compressed once legitimately re-encodes below it, and failing
+        # the request over that would be us judging their source. The measured
+        # bitrate goes back in the response instead.
+        min_output_bitrate=0,
+    )
+
+    if not results or not results[0].get("video_captioned_path"):
+        raise RuntimeError("Captioning produced no output")
+
+    out = results[0]
+    meta = out.get("caption_metadata") or {}
+    return {
+        "captioned_url": out["video_captioned_path"],
+        "word_count": meta.get("word_count"),
+        "language": meta.get("language"),
+        "template": meta.get("template"),
+        "thumbnail_url": out.get("thumbnail_path"),
+        "video_bitrate_bps": meta.get("video_bitrate_bps"),
+    }
