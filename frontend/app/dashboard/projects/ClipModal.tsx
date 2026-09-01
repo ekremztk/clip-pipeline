@@ -38,9 +38,11 @@ export interface Clip {
     video_landscape_path?: string | null;
     video_reframed_path?: string | null;
     video_captioned_path?: string | null;
+    thumbnail_path?: string | null;
+    thumbnail_wide_path?: string | null;
     reframe_metadata?: any | null;
     caption_metadata?: any | null;
-    stock_review_status?: "unreviewed" | "selected" | "rejected" | "posted";
+    stock_review_status?: "unreviewed" | "maybe" | "rejected" | "posted";
     stock_review_note?: string | null;
     stock_batch_id?: string | null;
     main_person?: string | null;
@@ -139,7 +141,7 @@ interface ClipModalProps {
     onReject: (id: string) => void;
     onPublish: (id: string) => void;
     onDownload: (id: string) => void;
-    onStockReview: (id: string, status: "unreviewed" | "selected" | "rejected" | "posted", note: string) => Promise<void>;
+    onStockReview: (id: string, status: "unreviewed" | "maybe" | "rejected" | "posted", note: string) => Promise<void>;
 }
 
 export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish, onDownload, onStockReview }: ClipModalProps) {
@@ -151,7 +153,7 @@ export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onP
     const [transcriptLoading, setTranscriptLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(0);
     const [userScrolling, setUserScrolling] = useState(false);
-    const [stockReviewStatus, setStockReviewStatus] = useState<"unreviewed" | "selected" | "rejected" | "posted">(clip.stock_review_status || "unreviewed");
+    const [stockReviewStatus, setStockReviewStatus] = useState<"unreviewed" | "maybe" | "rejected" | "posted">(clip.stock_review_status || "unreviewed");
     const [stockReviewNote, setStockReviewNote] = useState(clip.stock_review_note || "");
     const [stockReviewSaving, setStockReviewSaving] = useState(false);
     const userScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -500,7 +502,7 @@ export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onP
                                     {stockReviewSaving && <span className="text-[10px]" style={{ color: '#ababab' }}>Saving...</span>}
                                 </div>
                                 <div className="grid grid-cols-4 gap-1.5 mb-2.5">
-                                    {(["unreviewed", "selected", "rejected", "posted"] as const).map(status => (
+                                    {(["unreviewed", "maybe", "rejected", "posted"] as const).map(status => (
                                         <button
                                             key={status}
                                             onClick={() => saveStockReview(status, stockReviewNote)}
@@ -524,7 +526,7 @@ export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onP
                                             saveStockReview(stockReviewStatus, stockReviewNote);
                                         }
                                     }}
-                                    placeholder="Why selected or rejected?"
+                                    placeholder="Why kept or rejected?"
                                     rows={2}
                                     className="w-full resize-none rounded-xl px-3 py-2 text-xs outline-none"
                                     style={{

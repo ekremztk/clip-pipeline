@@ -203,7 +203,11 @@ async def update_stock_review(
         supabase = get_client()
         _verify_clip_owner(clip_id, current_user["id"], supabase)
 
-        allowed_statuses = {"unreviewed", "selected", "rejected", "posted"}
+        # Three marks the operator actually makes on a clip, plus the absence of
+        # one. "selected" used to sit between maybe and posted and nobody ever
+        # used it as anything other than posted; it is gone from the column's
+        # check constraint too.
+        allowed_statuses = {"unreviewed", "maybe", "rejected", "posted"}
         update_data: dict[str, Any] = {
             "stock_reviewed_at": datetime.now(timezone.utc).isoformat(),
             "stock_review_updated_by": current_user["id"],

@@ -200,15 +200,21 @@ def _export_single_clip(
             return None
 
         # Poster frame off the local cut, before the file is cleaned up. This is
-        # the 16:9 source, so it is the cover the Cast Library shows for a
-        # person; the 9:16 card thumbnail comes later, in S10, once captions are
-        # burned in. A failure here returns None and costs nothing but a card
-        # falling back to its placeholder.
-        thumbnail_wide_path = make_thumbnail(
-            output_path,
-            f"thumbnails/{job_id}/{index}_wide.jpg",
-            width=WIDE_WIDTH,
-        )
+        # the 16:9 source, so it is the cover a job card and a Cast Library
+        # person card show; the 9:16 card thumbnail comes later, in S10, once
+        # captions are burned in.
+        #
+        # Only the first clip needs one. Both consumers want a single cover per
+        # job, so a frame per clip would be one image used and the rest dead
+        # weight in R2. A failure here returns None and costs nothing but a card
+        # falling back to the vertical thumbnail.
+        thumbnail_wide_path = None
+        if index == 0:
+            thumbnail_wide_path = make_thumbnail(
+                output_path,
+                f"thumbnails/{job_id}/cover_wide.jpg",
+                width=WIDE_WIDTH,
+            )
 
         clip_data = {
             "job_id": job_id,

@@ -300,7 +300,7 @@ function ProjectsContent() {
 
     const handleStockReview = async (
         id: string,
-        status: "unreviewed" | "selected" | "rejected" | "posted",
+        status: "unreviewed" | "maybe" | "rejected" | "posted",
         note: string,
     ) => {
         try {

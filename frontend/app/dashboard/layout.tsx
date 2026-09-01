@@ -33,6 +33,7 @@ import {
     AudioLines,
     Sparkles,
     Film,
+    Users,
 } from "lucide-react";
 
 type Channel = {
@@ -335,6 +336,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { href: "/dashboard/projects",      label: "Projects",      icon: FolderOpen, exact: false },
         { href: "/dashboard/performance",   label: "Analytics",     icon: BarChart3,  exact: false },
         { href: "/dashboard/channel-dna",   label: "Channel DNA",   icon: Dna,        exact: false },
+        { href: "/dashboard/cast",          label: "Cast Library",  icon: Users,      exact: false },
         { href: "/dashboard/voice-library", label: "Voice Library", icon: AudioLines, exact: false },
     ];
 

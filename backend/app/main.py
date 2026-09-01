@@ -401,7 +401,7 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
 
-from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits, batches
+from app.api.routes import jobs, clips, downloads, channels, feedback, captions, proxy, youtube_metadata, reframe, voice_library, stock_worker, stock_reviews, provision, admin, davinci_assistant, studio, marketplace, client_credits, batches, cast
 from app.api.websocket import progress
 from app.director.router import router as director_router
 from app.limiter import limiter
@@ -439,6 +439,7 @@ settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 app.include_router(jobs.router)
 app.include_router(batches.router)
 app.include_router(clips.router)
+app.include_router(cast.router)
 app.include_router(downloads.router)
 app.include_router(channels.router)
 app.include_router(feedback.router)
