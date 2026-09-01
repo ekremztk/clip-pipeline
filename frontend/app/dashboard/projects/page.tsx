@@ -71,6 +71,18 @@ const formatDate = (dateStr?: string) => {
 
 // ─── Main Page (wrapped in Suspense for useSearchParams) ──────────────────────
 
+/**
+ * A job's cover frame. Only the first clip of a job carries a landscape
+ * thumbnail, and clips cut before thumbnails existed have none at all — their
+ * 16:9 source was deleted from R2 once captions succeeded — so fall back to a
+ * vertical frame, which the card crops to its middle band.
+ */
+function jobCover(jobClips: Clip[]): string | null {
+    return jobClips.find(c => c.thumbnail_wide_path)?.thumbnail_wide_path
+        ?? jobClips.find(c => c.thumbnail_path)?.thumbnail_path
+        ?? null;
+}
+
 export default function ProjectsPage() {
     return (
         <Suspense fallback={<div className="min-h-screen bg-black" />}>
@@ -551,10 +563,15 @@ function ProjectsContent() {
                                             style={{ background: '#1c1c1b' }}
                                         >
                                             {firstClip && getBestUrl(firstClip) ? (
+                                                /* The poster carries the card and `preload="none"` means no
+                                                   video bytes move until someone hovers — a grid of these
+                                                   used to pull a few hundred kilobytes per card just to
+                                                   paint one frame, six at a time, with the rest queued. */
                                                 <video
                                                     src={getBestUrl(firstClip)!}
+                                                    poster={jobCover(jobClips) ?? undefined}
                                                     className="w-full h-full object-cover"
-                                                    muted loop playsInline preload="metadata"
+                                                    muted loop playsInline preload="none"
                                                     onMouseEnter={e => e.currentTarget.play()}
                                                     onMouseLeave={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
                                                 />
@@ -661,7 +678,20 @@ function ProjectsContent() {
                                             className="relative aspect-[9/16] overflow-hidden flex items-center justify-center"
                                             style={{ background: '#1c1c1b' }}
                                         >
-                                            {getBestUrl(clip) ? (
+                                            {/* A card never played, so it never needed a video element:
+                                                the poster frame is the whole point and it is ~25 kB
+                                                against a few hundred for a video's header and first
+                                                frames. Older clips have no thumbnail and keep the
+                                                video, which is also what makes them the slow ones. */}
+                                            {clip.thumbnail_path ? (
+                                                <img
+                                                    src={clip.thumbnail_path}
+                                                    alt=""
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : getBestUrl(clip) ? (
                                                 <video src={getBestUrl(clip)!} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                                             ) : (
                                                 <Play size={20} style={{ color: 'rgba(250,249,245,0.15)' }} />

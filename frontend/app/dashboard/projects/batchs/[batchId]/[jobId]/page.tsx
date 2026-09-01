@@ -130,7 +130,17 @@ export default function BatchJobClipsPage() {
                                 style={{ background: "#181817" }}
                             >
                                 <div className="relative aspect-[9/16] flex items-center justify-center" style={{ background: "#1c1c1b" }}>
-                                    {url ? (
+                                    {/* Poster frame where one exists; clips cut before thumbnails
+                                        shipped fall back to the video, which is the slow path. */}
+                                    {clip.thumbnail_path ? (
+                                        <img
+                                            src={clip.thumbnail_path}
+                                            alt=""
+                                            loading="lazy"
+                                            decoding="async"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : url ? (
                                         <video src={url} className="w-full h-full object-cover" preload="metadata" muted />
                                     ) : (
                                         <FileVideo className="w-8 h-8" style={{ color: "rgba(250,249,245,0.15)" }} />

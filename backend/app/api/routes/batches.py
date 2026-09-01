@@ -203,14 +203,22 @@ async def get_batch(batch_id: str, current_user: dict = Depends(get_current_user
     if rows:
         clips = (
             supabase.table("clips")
-            .select("job_id,posting_order,video_captioned_path,video_reframed_path,file_url")
+            .select("job_id,posting_order,thumbnail_wide_path,thumbnail_path,"
+                    "video_captioned_path,video_reframed_path,file_url")
             .in_("job_id", [j["id"] for j in rows])
             .order("posting_order")
             .execute()
         )
         first_by_job: dict = {}
         for c in clips.data or []:
-            url = c.get("video_captioned_path") or c.get("video_reframed_path") or c.get("file_url")
+            # A poster frame where the pipeline made one — around 25 kB against
+            # a few hundred for a video element's header and first frames. Clips
+            # cut before thumbnails shipped still hand back a video URL.
+            url = (
+                c.get("thumbnail_wide_path") or c.get("thumbnail_path")
+                or c.get("video_captioned_path") or c.get("video_reframed_path")
+                or c.get("file_url")
+            )
             if url and c["job_id"] not in first_by_job:
                 first_by_job[c["job_id"]] = url
         for j in rows:

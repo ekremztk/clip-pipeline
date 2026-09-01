@@ -176,8 +176,20 @@ export default function BatchDetailPage() {
                                     filenames are indistinguishable without it. */}
                                 <div className="w-16 h-9 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"
                                     style={{ background: "#1c1c1b" }}>
+                                    {/* The server hands back a poster frame when the pipeline made
+                                        one and a video URL otherwise, so the tag follows the file. */}
                                     {job.thumb_url ? (
-                                        <video src={job.thumb_url} className="w-full h-full object-cover" preload="metadata" muted />
+                                        job.thumb_url.endsWith(".jpg") ? (
+                                            <img
+                                                src={job.thumb_url}
+                                                alt=""
+                                                loading="lazy"
+                                                decoding="async"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <video src={job.thumb_url} className="w-full h-full object-cover" preload="metadata" muted />
+                                        )
                                     ) : (
                                         <FileVideo className="w-3.5 h-3.5" style={{ color: "rgba(250,249,245,0.15)" }} />
                                     )}
