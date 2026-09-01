@@ -351,7 +351,12 @@ def compute_voice_embedding(audio_bytes: bytes, filename: str) -> dict:
 
 
 @app.function(
-    gpu="L40S",
+    # A T4, not the L40S that process_clips needs. Captioning is a Deepgram
+    # call, Pillow drawing one frame at a time, and a single nvenc encode —
+    # none of which needs a large card. Asking for one only lengthens the wait
+    # for a free GPU, which is where the time actually went: startup measured
+    # 2-4s while one request sat in the queue for five and a half minutes.
+    gpu="T4",
     memory=8192,
     cpu=4,
     timeout=900,
