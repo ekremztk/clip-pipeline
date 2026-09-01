@@ -32,7 +32,6 @@ def run(
     job_id: str,
     channel_id: str,
     caption_template: str = "clean",
-    min_output_bitrate: int | None = None,
 ) -> list:
     """
     Step 10: Auto Captions — transcribes and burns captions onto each reframed clip.
@@ -80,7 +79,6 @@ def run(
                 local_path_hint=local_hint,
                 watermark_path=watermark_path,
                 job_id=job_id,
-                min_output_bitrate=min_output_bitrate,
             )
 
             if clip_id and captioned_url:
@@ -151,7 +149,6 @@ def _caption_clip(
     local_path_hint: str | None = None,
     watermark_path: str | None = None,
     job_id: str | None = None,
-    min_output_bitrate: int | None = None,
 ) -> tuple[str, dict, str | None]:
     """
     Transcribe a clip and burn captions:
@@ -209,20 +206,24 @@ def _caption_clip(
                 f"[S10] Clip {clip_index+1}: output size={output_stats.get('size_mb', 0):.1f}MB, "
                 f"video_bitrate={output_stats.get('video_bitrate_mbps', 0):.2f}Mbps"
             )
-            # A pipeline clip arrives as a fresh reframe, so an output this
-            # thin means the encode went wrong and the guard should stop it.
-            # A caller handing us their own file owns its quality, and a
-            # already-compressed input legitimately re-encodes small — so that
-            # path passes 0 and gets the measured bitrate back to judge for
-            # itself.
-            min_bitrate = (
-                min_output_bitrate if min_output_bitrate is not None
-                else int(os.getenv("FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
-            )
+            # Catch an encode that collapsed, by comparing against what came
+            # in rather than a fixed floor. A pipeline clip arrives as a fresh
+            # ~10 Mbps reframe, so 0.3 Mbps out means something broke — that is
+            # exactly how a misconfigured codec was caught. But a caller's own
+            # file may honestly be thin, and a fixed floor would reject them for
+            # their source rather than for anything we did. Falling to that
+            # floor only when the input cannot be measured.
             video_bitrate = output_stats.get("video_bitrate_bps")
+            input_bitrate = (_probe_caption_output(local_path) or {}).get("video_bitrate_bps")
+            if input_bitrate:
+                min_bitrate = int(input_bitrate * 0.5)
+                reason = f"less than half the input's {input_bitrate}bps"
+            else:
+                min_bitrate = int(os.getenv("FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE", "5000000"))
+                reason = f"below the {min_bitrate}bps floor"
             if video_bitrate and video_bitrate < min_bitrate:
                 raise RuntimeError(
-                    f"S10 output bitrate too low: {video_bitrate}bps < {min_bitrate}bps"
+                    f"S10 output bitrate collapsed: {video_bitrate}bps is {reason}"
                 )
         finalizer_meta = _finalize_caption_output(output_path)
 

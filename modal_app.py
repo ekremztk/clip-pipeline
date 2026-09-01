@@ -102,6 +102,30 @@ gpu_image = (
 app = modal.App(MODAL_GPU_APP_NAME, image=gpu_image)
 
 
+def _configure_pipeline_encode() -> None:
+    """
+    Pin the encode profile every step renders with.
+
+    The secret still carries FFMPEG_VIDEO_CODEC=hevc_nvenc from an old metadata
+    experiment, so anything that reads the environment as it finds it encodes
+    HEVC — and HEVC here comes out around 0.3 Mbps against h264's 10, because
+    the shared args pass `-rc vbr -cq` with no `-b:v 0` and the encoder falls
+    back to a low target bitrate instead of treating cq as the quality it asks
+    for. Every entry point must call this before running a step; the captions
+    endpoint did not, and shipped a clip at a thirtieth of the right bitrate.
+    """
+    pipeline_codec = os.environ.get("FFMPEG_PIPELINE_VIDEO_CODEC", "h264_nvenc")
+    if pipeline_codec == "hevc_nvenc" and os.environ.get("ALLOW_HEVC_PIPELINE", "").lower() not in {"1", "true", "yes"}:
+        pipeline_codec = "h264_nvenc"
+    os.environ["FFMPEG_VIDEO_CODEC"] = pipeline_codec
+    os.environ["FFMPEG_ENCODE_PRESET"] = os.environ.get("FFMPEG_PIPELINE_ENCODE_PRESET", "p4")
+    os.environ["FFMPEG_HWACCEL"] = os.environ.get("FFMPEG_PIPELINE_HWACCEL", "cuda")
+    os.environ["FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE"] = os.environ.get(
+        "FFMPEG_PIPELINE_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE",
+        "5000000",
+    )
+
+
 @app.function(
     gpu="L40S",
     memory=16384,
@@ -136,19 +160,7 @@ def process_clips(
 
     sys.path.insert(0, "/app")
 
-    # Keep S08/S09/S10 on the same encode profile. h264_nvenc is the production
-    # default. Old HEVC metadata experiments must not silently take over the
-    # pipeline unless explicitly re-enabled.
-    pipeline_codec = os.environ.get("FFMPEG_PIPELINE_VIDEO_CODEC", "h264_nvenc")
-    if pipeline_codec == "hevc_nvenc" and os.environ.get("ALLOW_HEVC_PIPELINE", "").lower() not in {"1", "true", "yes"}:
-        pipeline_codec = "h264_nvenc"
-    os.environ["FFMPEG_VIDEO_CODEC"] = pipeline_codec
-    os.environ["FFMPEG_ENCODE_PRESET"] = os.environ.get("FFMPEG_PIPELINE_ENCODE_PRESET", "p4")
-    os.environ["FFMPEG_HWACCEL"] = os.environ.get("FFMPEG_PIPELINE_HWACCEL", "cuda")
-    os.environ["FFMPEG_MIN_ACCEPTABLE_VIDEO_BITRATE"] = os.environ.get(
-        "FFMPEG_PIPELINE_FINAL_MIN_ACCEPTABLE_VIDEO_BITRATE",
-        "5000000",
-    )
+    _configure_pipeline_encode()
 
     # Write GCP credentials to a temp file so all google-auth code paths
     # (including implicit ADC fallback) find credentials without needing
@@ -384,6 +396,8 @@ def caption_clip(
     import sys
     sys.path.insert(0, "/app")
 
+    _configure_pipeline_encode()
+
     from app.pipeline.steps import s10_captions
 
     results = s10_captions.run(
@@ -395,12 +409,6 @@ def caption_clip(
         job_id=f"api/{request_id}",
         channel_id=channel_id or "",
         caption_template=template_key,
-        # The caller's file, the caller's quality. The pipeline's 5 Mbps floor
-        # exists to catch a broken encode of a fresh reframe; an input that was
-        # already compressed once legitimately re-encodes below it, and failing
-        # the request over that would be us judging their source. The measured
-        # bitrate goes back in the response instead.
-        min_output_bitrate=0,
     )
 
     if not results or not results[0].get("video_captioned_path"):
