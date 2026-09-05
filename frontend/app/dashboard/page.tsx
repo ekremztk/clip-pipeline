@@ -1582,6 +1582,7 @@ export default function DashboardPage() {
                                                     >
                                                         <option value="opus-5" style={{ background: '#181817' }}>Opus 5</option>
                                                         <option value="opus-4-6" style={{ background: '#181817' }}>Opus 4.6</option>
+                                                        <option value="gpt-6-astra" style={{ background: '#181817' }}>GPT-6 Astra</option>
                                                     </select>
                                                 </div>
                                             ))}

@@ -371,6 +371,7 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                     onChange={e => patch(step, { s05Model: e.target.value })}>
                                                     <option value="opus-5">Opus 5</option>
                                                     <option value="opus-4-6">Opus 4.6</option>
+                                                    <option value="gpt-6-astra">GPT-6 Astra</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -379,6 +380,7 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                     onChange={e => patch(step, { s06Model: e.target.value })}>
                                                     <option value="opus-5">Opus 5</option>
                                                     <option value="opus-4-6">Opus 4.6</option>
+                                                    <option value="gpt-6-astra">GPT-6 Astra</option>
                                                 </select>
                                             </div>
                                         </>

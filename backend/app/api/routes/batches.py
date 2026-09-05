@@ -18,6 +18,7 @@ from app.limiter import limiter
 from app.middleware.auth import get_current_user
 from app.middleware.roles import is_admin_user
 from app.models.enums import JobStatus
+from app.services.claude_client import GPT_CHOICE
 from app.services.supabase_client import get_client
 from app.utils.person_name import normalize_person_name
 
@@ -30,7 +31,7 @@ MAX_SOURCES = 10
 # refuses to honour a number it did not store.
 MAX_PARALLEL = 3
 
-_ALLOWED_MODELS = ("opus-5", "opus-4-6")
+_ALLOWED_MODELS = ("opus-5", "opus-4-6", GPT_CHOICE)
 _ALLOWED_VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 
 

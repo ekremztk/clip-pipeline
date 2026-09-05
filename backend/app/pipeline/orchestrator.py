@@ -420,14 +420,18 @@ def run_pipeline(job_id: str, video_path: str, video_title: str,
 
         # The first-party Anthropic key is billed to the platform owner, so only
         # admin-owned jobs may use it. Client jobs run on Bedrock (free credits).
-        from app.services.claude_client import is_premium_user
+        from app.services.claude_client import GPT_CHOICE, is_premium_user
         allow_premium = is_premium_user(user_id)
 
         # Per step, because S05 and S06 can now be pinned to different models.
         def _provider(choice: str | None) -> str:
             if not allow_premium:
                 return "bedrock (client)"
-            return "bedrock (pinned)" if choice == "opus-4-6" else "anthropic (admin)"
+            if choice == "opus-4-6":
+                return "bedrock (pinned)"
+            if choice == GPT_CHOICE:
+                return "openai (pinned, no fallback)"
+            return "anthropic (admin)"
 
         print(
             f"[Orchestrator] Claude provider — S05: {_provider(s05_model)}, "

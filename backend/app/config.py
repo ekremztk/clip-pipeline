@@ -18,6 +18,12 @@ class Settings:
     AWS_BEDROCK_SECRET_KEY: str = os.getenv("AWS_BEDROCK_SECRET_KEY", "")
     AWS_BEDROCK_REGION: str = os.getenv("AWS_BEDROCK_REGION", "us-east-1")
     CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "us.anthropic.claude-opus-4-6-v1")
+    # GPT — first-party OpenAI API, admin-only third option for S05/S06.
+    # Added to compare selection quality against Claude, not to save money.
+    # Unset key = option unavailable; the step raises rather than falling back.
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-6-astra")
+    OPENAI_REASONING_EFFORT: str = os.getenv("OPENAI_REASONING_EFFORT", "medium")
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
     # Separate key with Member role for usage/billing API (usage:read scope)
     # Falls back to DEEPGRAM_API_KEY if not set (will still 403 if key lacks permissions)

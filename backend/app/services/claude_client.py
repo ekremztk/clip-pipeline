@@ -1,3 +1,4 @@
+import hashlib
 import os
 import time
 
@@ -6,6 +7,10 @@ from app.config import settings
 
 BEDROCK_MODEL = "us.anthropic.claude-opus-4-6-v1"
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-5")
+
+# The value the UI and jobs route use to pin a step to OpenAI. Kept in the
+# dashed style of the Claude choices ("opus-4-6") so the allowlists read alike.
+GPT_CHOICE = "gpt-6-astra"
 
 
 def _make_anthropic_client() -> anthropic.Anthropic | None:
@@ -74,6 +79,144 @@ def is_premium_user(user_id: str | None) -> bool:
     return allowed
 
 
+def _blocks_to_text(blocks: list) -> str:
+    """Flattens Anthropic content blocks into one string. Every caller passes
+    text-only blocks; anything else is skipped rather than crashing the run."""
+    parts = []
+    for block in blocks or []:
+        if isinstance(block, dict) and block.get("type") == "text":
+            text = block.get("text") or ""
+            if text:
+                parts.append(text)
+    return "\n\n".join(parts)
+
+
+def _record_openai_usage(model: str, usage) -> None:
+    """OpenAI reports the same two totals under the same names but nests the
+    cache counters, so the Anthropic recorder would silently log zero for them.
+    Writes the same accumulator keys the audit log already reads, plus
+    reasoning_tokens — at medium effort that is most of the output bill and it
+    is the number this experiment exists to compare."""
+    acc = _token_accumulator
+    acc["model"] = model
+    acc["provider"] = "openai"
+    acc["calls"] = acc.get("calls", 0) + 1
+    in_details = getattr(usage, "input_tokens_details", None)
+    out_details = getattr(usage, "output_tokens_details", None)
+    for key, value in (
+        ("input_tokens", getattr(usage, "input_tokens", 0)),
+        ("output_tokens", getattr(usage, "output_tokens", 0)),
+        ("cache_read_tokens", getattr(in_details, "cached_tokens", 0)),
+        ("cache_write_tokens", getattr(in_details, "cache_write_tokens", 0)),
+        ("reasoning_tokens", getattr(out_details, "reasoning_tokens", 0)),
+    ):
+        acc[key] = acc.get(key, 0) + (value or 0)
+
+
+def _call_openai(system_blocks: list, content: list, max_tokens: int) -> str:
+    """
+    Admin-only third option for S05/S06, pinned by model_choice == GPT_CHOICE.
+
+    Deliberately has NO fallback to Bedrock. The point of this path is to judge
+    GPT's clip selection against Claude's, and a silent fallback would hand back
+    Bedrock's picks under GPT's name — the comparison would be worthless and the
+    audit row would disagree with what the operator thinks they measured. A
+    missing key or an exhausted retry raises instead.
+
+    The prompt is not adapted for GPT: same system text, same user content, same
+    downstream JSON parser. Only the model changes, which is what makes the two
+    runs comparable.
+    """
+    import openai
+
+    if not settings.OPENAI_API_KEY:
+        raise RuntimeError(
+            f"model_choice={GPT_CHOICE} was selected but OPENAI_API_KEY is not set. "
+            "Refusing to silently run this step on another provider."
+        )
+
+    client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+    model = settings.OPENAI_MODEL
+
+    # system_blocks arrives as [system_prompt, *extra_system_blocks]; S06 puts the
+    # full labeled transcript in the extras and resends it on every batch. Joining
+    # them in order into `instructions` keeps that transcript at the front of the
+    # prompt, which is where OpenAI's automatic prefix caching can reach it — the
+    # same reason the Anthropic path puts its cache breakpoint on the last block.
+    instructions = _blocks_to_text(system_blocks)
+    user_input = _blocks_to_text(content)
+
+    # A stable key routes S06's batches to the same cached prefix. Derived from
+    # the instructions so it needs no new plumbing through the call signature.
+    cache_key = "prognot-" + hashlib.sha256(instructions.encode()).hexdigest()[:16]
+
+    # Reasoning tokens are drawn from this ceiling, exactly like thinking tokens
+    # on the Claude paths. S06.5 asks for 4000, which medium effort can spend on
+    # reasoning alone and return an empty message — so give the same headroom the
+    # Anthropic path gives.
+    budget = max(max_tokens * 2, 32000)
+
+    last_error = ""
+    for attempt in range(3):
+        try:
+            print(
+                f"[ClaudeClient] Calling model={model} provider=openai "
+                f"effort={settings.OPENAI_REASONING_EFFORT} "
+                f"max_output={budget} attempt={attempt + 1}/3"
+            )
+            response = client.responses.create(
+                model=model,
+                instructions=instructions,
+                input=user_input,
+                max_output_tokens=budget,
+                reasoning={"effort": settings.OPENAI_REASONING_EFFORT},
+                prompt_cache_key=cache_key,
+                timeout=900.0,
+            )
+
+            usage = response.usage
+            if usage:
+                _record_openai_usage(model, usage)
+                in_details = getattr(usage, "input_tokens_details", None)
+                out_details = getattr(usage, "output_tokens_details", None)
+                print(
+                    f"[ClaudeClient] Tokens — in: {usage.input_tokens}, "
+                    f"out: {usage.output_tokens}, "
+                    f"reasoning: {getattr(out_details, 'reasoning_tokens', 0) or 0}, "
+                    f"cache_read: {getattr(in_details, 'cached_tokens', 0) or 0}"
+                )
+
+            # Truncation returns whatever was written so far, which for these
+            # callers is half a JSON object. Say so, rather than letting the
+            # parser report a malformed response and hide the real cause.
+            if response.status == "incomplete":
+                reason = getattr(response.incomplete_details, "reason", "unknown")
+                raise RuntimeError(f"response incomplete (reason={reason}, budget={budget})")
+
+            text = response.output_text or ""
+            if not text.strip():
+                raise RuntimeError("empty response text")
+            return text
+
+        except openai.RateLimitError:
+            last_error = f"rate_limit model={model} provider=openai"
+            if attempt < 2:
+                delay = 60 if attempt == 0 else 120
+                print(f"[ClaudeClient] Rate limit provider=openai; sleeping {delay}s")
+                time.sleep(delay)
+                continue
+            break
+        except Exception as e:
+            last_error = f"error model={model} provider=openai: {e}"
+            print(f"[ClaudeClient] OpenAI error attempt={attempt + 1}/3: {e}")
+            if attempt < 2:
+                time.sleep(5)
+                continue
+            break
+
+    raise RuntimeError(f"OpenAI call failed after bounded retries: {last_error}")
+
+
 def _make_bedrock_client() -> anthropic.AnthropicBedrock | None:
     if settings.AWS_BEDROCK_ACCESS_KEY and settings.AWS_BEDROCK_SECRET_KEY:
         return anthropic.AnthropicBedrock(
@@ -98,9 +241,11 @@ def call_claude(
     runs on Bedrock.
 
     model_choice is the per-step admin override: "opus-5" pins this call to the
-    Anthropic API, "opus-4-6" pins it to Bedrock, None keeps the old behaviour.
-    It narrows what allow_premium permits and never widens it — a client job
-    carrying "opus-5" still lands on Bedrock, because allow_premium is False.
+    Anthropic API, "opus-4-6" pins it to Bedrock, GPT_CHOICE pins it to OpenAI,
+    None keeps the old behaviour. It narrows what allow_premium permits and never
+    widens it — a client job carrying "opus-5" still lands on Bedrock, because
+    allow_premium is False, and the same gate keeps client jobs off the OpenAI
+    key, which is billed to the platform owner just as the Anthropic one is.
     """
     # Both current callers (S05, S06) pass their own system prompt; this is the
     # fallback for any future caller.
@@ -122,6 +267,12 @@ def call_claude(
     system_blocks[-1] = {**system_blocks[-1], "cache_control": {"type": "ephemeral"}}
 
     messages = [{"role": "user", "content": content}]
+
+    # --- OpenAI (admin-only, explicitly pinned, no fallback) ---
+    # Sits ahead of the Claude branches and returns or raises, so a GPT-pinned
+    # step can never quietly complete on Bedrock. See _call_openai for why.
+    if allow_premium and model_choice == GPT_CHOICE:
+        return _call_openai(system_blocks, content, max_tokens)
 
     last_error = ""
 
