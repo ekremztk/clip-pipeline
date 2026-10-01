@@ -78,7 +78,7 @@ export default function BatchJobClipsPage() {
     };
     const handleStockReview = async (
         id: string,
-        status: "unreviewed" | "maybe" | "rejected" | "posted",
+        status: "unreviewed" | "candidate" | "maybe" | "rejected" | "posted",
         note: string,
     ) => {
         const res = await authFetch(`/clips/${id}/stock-review`, {

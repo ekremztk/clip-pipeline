@@ -15,7 +15,7 @@ import {
 } from "../../projects/ReviewMark";
 
 type Published = "all" | "unpublished" | "published";
-type Mark = "all" | "unreviewed" | "maybe" | "rejected" | "posted";
+type Mark = "all" | "unreviewed" | "candidate" | "maybe" | "rejected" | "posted";
 type Sort = "newest" | "oldest" | "score";
 
 const PUBLISHED_OPTS: { v: Published; label: string }[] = [
@@ -27,6 +27,7 @@ const MARK_OPTS: { v: Mark; label: string }[] = [
     { v: "all", label: "Any mark" },
     { v: "unreviewed", label: "Unmarked" },
     { v: "posted", label: "Green" },
+    { v: "candidate", label: "Yellow" },
     { v: "rejected", label: "Red" },
     { v: "maybe", label: "Blue" },
 ];

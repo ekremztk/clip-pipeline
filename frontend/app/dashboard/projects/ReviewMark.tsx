@@ -3,30 +3,33 @@
 import { Check } from "lucide-react";
 
 /**
- * The three marks an operator leaves on a clip after looking at it.
+ * The four marks an operator leaves on a clip after looking at it.
  *
  * A job card already carries a blue scalloped tick meaning "I went through
  * this". A clip needs to say more than that, because going through a clip ends
- * in one of three places: it went out, it was thrown away, or it was good
- * enough to keep but not today. So the same badge, three colours.
+ * in one of four places: it went out, it was thrown away, it is a strong pick
+ * for an upcoming slot, or it was good enough to keep but not today. So the
+ * same badge, four colours.
  */
 
-export type ReviewMark = "unreviewed" | "maybe" | "rejected" | "posted";
+export type ReviewMark = "unreviewed" | "candidate" | "maybe" | "rejected" | "posted";
 
 export const MARK_COLORS: Record<Exclude<ReviewMark, "unreviewed">, string> = {
     posted: "#16C264",   // green — picked and published
+    candidate: "#F5B70A", // yellow — strong pick, use before the blue ones
     rejected: "#F0333B", // red — looked at, dropped
     maybe: "#1355F0",    // blue — looked at, undecided, come back to it
 };
 
 export const MARK_LABELS: Record<Exclude<ReviewMark, "unreviewed">, string> = {
     posted: "Published",
+    candidate: "Candidate",
     rejected: "Rejected",
     maybe: "Not sure yet",
 };
 
 /** Order the pickers render in: the outcome you want most, first. */
-export const MARK_ORDER: Exclude<ReviewMark, "unreviewed">[] = ["posted", "rejected", "maybe"];
+export const MARK_ORDER: Exclude<ReviewMark, "unreviewed">[] = ["posted", "candidate", "maybe", "rejected"];
 
 /**
  * Scalloped verified-style disc — the same 24-point ring the job card uses, so
@@ -52,7 +55,7 @@ export function ReviewBadge({ mark, size = 20 }: { mark: Exclude<ReviewMark, "un
 }
 
 /**
- * Three buttons revealed on hover, matching the job card's tick control.
+ * One button per mark, revealed on hover, matching the job card's tick control.
  * Clicking the mark a clip already carries clears it, so a mis-click costs one
  * more click rather than a trip into the clip.
  */

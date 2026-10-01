@@ -42,7 +42,7 @@ export interface Clip {
     thumbnail_wide_path?: string | null;
     reframe_metadata?: any | null;
     caption_metadata?: any | null;
-    stock_review_status?: "unreviewed" | "maybe" | "rejected" | "posted";
+    stock_review_status?: "unreviewed" | "candidate" | "maybe" | "rejected" | "posted";
     stock_review_note?: string | null;
     stock_batch_id?: string | null;
     main_person?: string | null;
@@ -141,7 +141,7 @@ interface ClipModalProps {
     onReject: (id: string) => void;
     onPublish: (id: string) => void;
     onDownload: (id: string) => void;
-    onStockReview: (id: string, status: "unreviewed" | "maybe" | "rejected" | "posted", note: string) => Promise<void>;
+    onStockReview: (id: string, status: "unreviewed" | "candidate" | "maybe" | "rejected" | "posted", note: string) => Promise<void>;
 }
 
 export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onPublish, onDownload, onStockReview }: ClipModalProps) {
@@ -153,7 +153,7 @@ export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onP
     const [transcriptLoading, setTranscriptLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(0);
     const [userScrolling, setUserScrolling] = useState(false);
-    const [stockReviewStatus, setStockReviewStatus] = useState<"unreviewed" | "maybe" | "rejected" | "posted">(clip.stock_review_status || "unreviewed");
+    const [stockReviewStatus, setStockReviewStatus] = useState<"unreviewed" | "candidate" | "maybe" | "rejected" | "posted">(clip.stock_review_status || "unreviewed");
     const [stockReviewNote, setStockReviewNote] = useState(clip.stock_review_note || "");
     const [stockReviewSaving, setStockReviewSaving] = useState(false);
     const userScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -501,8 +501,8 @@ export function ClipModal({ clip, targetGuest, onClose, onApprove, onReject, onP
                                     <p className="text-[9px] uppercase tracking-widest" style={{ color: '#ababab' }}>Stock Review</p>
                                     {stockReviewSaving && <span className="text-[10px]" style={{ color: '#ababab' }}>Saving...</span>}
                                 </div>
-                                <div className="grid grid-cols-4 gap-1.5 mb-2.5">
-                                    {(["unreviewed", "maybe", "rejected", "posted"] as const).map(status => (
+                                <div className="grid grid-cols-5 gap-1.5 mb-2.5">
+                                    {(["unreviewed", "candidate", "maybe", "rejected", "posted"] as const).map(status => (
                                         <button
                                             key={status}
                                             onClick={() => saveStockReview(status, stockReviewNote)}

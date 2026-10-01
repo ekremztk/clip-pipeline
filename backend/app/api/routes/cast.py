@@ -37,7 +37,7 @@ _CLIP_FIELDS = (
 )
 
 _PUBLISHED = {"all", "published", "unpublished"}
-_MARKS = {"all", "unreviewed", "maybe", "rejected", "posted"}
+_MARKS = {"all", "unreviewed", "candidate", "maybe", "rejected", "posted"}
 _SORTS = {"newest", "oldest", "score"}
 
 
