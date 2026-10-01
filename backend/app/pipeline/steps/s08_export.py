@@ -71,6 +71,25 @@ def _sanity_check_word_boundary(final_start: float, final_end: float, words: lis
     return final_start, final_end
 
 
+def _clip_transcript(words: list, spans: list) -> Optional[str]:
+    """Spoken text of the clip, rebuilt from the job's word timestamps.
+
+    spans are the (start, end) source windows that end up in the file, in
+    playback order — one for a plain cut, setup + main for a stitched one.
+    """
+    try:
+        text = " ".join(
+            (w.get("punctuated_word") or w.get("word") or "").strip()
+            for start, end in spans
+            for w in words
+            if start <= float(w.get("start", -1)) < end
+        ).strip()
+        return text or None
+    except Exception as e:
+        print(f"[S08] Transcript rebuild error: {e}")
+        return None
+
+
 def _encode_segment(video_path: str, start: float, duration: float, output_path: str) -> None:
     """Encodes a video segment with normalized parameters for concat compatibility."""
     cmd = ["ffmpeg", "-y"]
@@ -139,6 +158,7 @@ def _export_single_clip(
 
         stitch_setup = clip.get("stitch_setup") or {}
         requires_stitch = bool(clip.get("requires_stitch") and stitch_setup)
+        spans = [(final_start, final_end)]
 
         if requires_stitch:
             setup_start = float(stitch_setup.get("setup_start", 0))
@@ -151,6 +171,7 @@ def _export_single_clip(
                     _encode_segment(video_path, setup_start, setup_duration, setup_path)
                     _encode_segment(video_path, final_start, final_duration, main_path)
                     _stitch_segments(setup_path, main_path, output_path, job_output_dir)
+                    spans = [(setup_start, setup_end), (final_start, final_end)]
                     print(f"[S08] Clip {index+1}: Stitched setup ({setup_start:.1f}–{setup_end:.1f}s) + main ({final_start:.2f}–{final_end:.2f}s)")
                 finally:
                     for p in [setup_path, main_path]:
@@ -225,6 +246,7 @@ def _export_single_clip(
             "end_time": float(clip.get("final_end", 0.0)),
             "duration_s": float(final_duration),
             "hook_text": clip.get("hook_text"),
+            "transcript": _clip_transcript(words, spans),
             "content_type": content_type,
             "standalone_score": clip.get("score"),
             "standalone_result": clip.get("quality_verdict"),
