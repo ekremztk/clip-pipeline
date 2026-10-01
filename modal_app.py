@@ -94,7 +94,8 @@ gpu_image = (
         'python -c "from speechbrain.inference.speaker import EncoderClassifier; EncoderClassifier.from_hparams(source=\'speechbrain/spkrec-ecapa-voxceleb\', savedir=\'/app/models/ecapa\')"',
     )
     .add_local_dir(
-        "/Users/ekrem/prognot/backend/app",
+        # Relative to this file so the deploy works from any checkout.
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend", "app"),
         remote_path="/app/app",
     )
 )
