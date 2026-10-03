@@ -1,9 +1,15 @@
 """
 Step 8.5: Landscape upscale gate.
 
-S08 exports short 16:9 clips. Before S09 reframe, this step upgrades only
-sub-1080p landscape clips to 1920x1080 so the existing reframe path keeps its
+S08 exports short landscape clips. Before S09 reframe, this step brings any
+clip shorter than 1080 px up to 1080 px tall so the reframe path keeps its
 stable 1080p assumptions without upscaling the full source video.
+
+The frame keeps its own shape. Old talk-show sources are often narrower than
+16:9 (e.g. 1440x1080 4:3); S09 crops a 9:16 window out of whatever width there
+is, so forcing them to 1920 wide only stretched the people in them. Clips with
+non-square pixels (an SAR tag other than 1:1) are converted to square pixels at
+their display shape, because S09's crop math assumes square pixels.
 """
 from __future__ import annotations
 
@@ -22,7 +28,6 @@ from app.services.r2_client import get_r2_client
 from app.services.supabase_client import get_client
 
 
-TARGET_WIDTH = 1920
 TARGET_HEIGHT = 1080
 
 
@@ -52,7 +57,7 @@ def _probe_video(path: str) -> dict:
         "-select_streams",
         "v:0",
         "-show_entries",
-        "stream=width,height,avg_frame_rate",
+        "stream=width,height,avg_frame_rate,sample_aspect_ratio",
         "-of",
         "json",
         path,
@@ -66,18 +71,36 @@ def _probe_video(path: str) -> dict:
         "width": int(stream.get("width") or 0),
         "height": int(stream.get("height") or 0),
         "avg_frame_rate": stream.get("avg_frame_rate"),
+        "sar": _parse_sar(stream.get("sample_aspect_ratio")),
     }
 
 
+def _parse_sar(value) -> float:
+    """'4:3' -> 1.333; missing, '0:1' or 'N/A' mean square pixels (1.0)."""
+    try:
+        num, den = str(value or "1:1").split(":")
+        num, den = float(num), float(den)
+        return num / den if num > 0 and den > 0 else 1.0
+    except Exception:
+        return 1.0
+
+
+def _display_width(metadata: dict) -> int:
+    return round(int(metadata.get("width") or 0) * float(metadata.get("sar") or 1.0))
+
+
 def _needs_upscale(metadata: dict) -> bool:
-    width = int(metadata.get("width") or 0)
     height = int(metadata.get("height") or 0)
-    return width < TARGET_WIDTH or height < TARGET_HEIGHT
+    square = abs(float(metadata.get("sar") or 1.0) - 1.0) < 0.01
+    return height < TARGET_HEIGHT or not square
 
 
 def _upscale_clip(input_path: str, output_path: str) -> None:
+    # 1) square pixels at the display shape, 2) at least 1080 tall with the
+    # width following the height (-2 keeps it even for the encoder).
     filter_graph = (
-        f"scale={TARGET_WIDTH}:{TARGET_HEIGHT}:flags=lanczos,"
+        "scale=trunc(iw*sar/2)*2:ih,setsar=1,"
+        f"scale=-2:'max(ih,{TARGET_HEIGHT})':flags=lanczos,"
         "unsharp=5:5:0.45:3:3:0.25,"
         "setsar=1"
     )
@@ -158,12 +181,20 @@ def _process_clip(index: int, clip: dict, job_id: str) -> dict | None:
             str(settings.UPLOAD_DIR),
             f"s08_5_upscaled_{uuid.uuid4().hex}.mp4",
         )
-        print(f"[S08.5] Clip {index+1}: {width}x{height} → {TARGET_WIDTH}x{TARGET_HEIGHT} upscale starting.")
+        print(f"[S08.5] Clip {index+1}: {width}x{height} (SAR {metadata['sar']:.3f}) upscale starting.")
         _upscale_clip(local_path, output_path)
         upscaled_meta = _probe_video(output_path)
-        if upscaled_meta["width"] != TARGET_WIDTH or upscaled_meta["height"] != TARGET_HEIGHT:
+        out_w, out_h = upscaled_meta["width"], upscaled_meta["height"]
+        src_aspect = _display_width(metadata) / max(height, 1)
+        if (
+            out_h < TARGET_HEIGHT
+            or out_w % 2
+            or abs(upscaled_meta["sar"] - 1.0) > 0.01
+            or abs(out_w / out_h - src_aspect) > 0.02
+        ):
             raise RuntimeError(
-                f"Upscale output dimensions invalid: {upscaled_meta['width']}x{upscaled_meta['height']}"
+                f"Upscale output invalid: {out_w}x{out_h} SAR {upscaled_meta['sar']:.3f} "
+                f"(source display aspect {src_aspect:.3f})"
             )
 
         upscaled_url = _upload_to_r2(output_path, job_id, index)
@@ -177,8 +208,8 @@ def _process_clip(index: int, clip: dict, job_id: str) -> dict | None:
             "s08_5_upscaled": True,
             "s08_5_source_width": width,
             "s08_5_source_height": height,
-            "s08_5_target_width": TARGET_WIDTH,
-            "s08_5_target_height": TARGET_HEIGHT,
+            "s08_5_target_width": out_w,
+            "s08_5_target_height": out_h,
         }
 
     except subprocess.CalledProcessError as exc:
