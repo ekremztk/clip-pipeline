@@ -7,12 +7,25 @@ class Settings:
     GCP_LOCATION: str = os.getenv("GCP_LOCATION", "global")
     GCP_CREDENTIALS_JSON: str = os.getenv("GCP_CREDENTIALS_JSON", "")
     GCS_BUCKET_NAME: str = os.getenv("GCS_BUCKET_NAME", "clip-pipeline-audio")
-    # Vertex AI model names — override via env var if Vertex releases a new version string
-    GEMINI_MODEL_VIDEO: str = os.getenv("GEMINI_MODEL_VIDEO", "gemini-3.5-flash")
-    GEMINI_MODEL_VIDEO_FALLBACK: str = os.getenv("GEMINI_MODEL_VIDEO_FALLBACK", "gemini-3.1-pro-preview")
-    GEMINI_MODEL_PRO: str = os.getenv("GEMINI_MODEL_PRO", "gemini-2.5-pro")
-    GEMINI_MODEL_PRO_PREVIEW: str = os.getenv("GEMINI_MODEL_PRO_PREVIEW", "gemini-3.1-pro-preview")
-    GEMINI_MODEL_FLASH: str = os.getenv("GEMINI_MODEL_FLASH", "gemini-3.5-flash")
+    # Gemini runs on the Gemini Developer API (GEMINI_API_KEY). The Vertex AI
+    # path is kept but only used when GEMINI_PROVIDER=vertex — there is no
+    # automatic fallback between the two, so an API outage fails loudly instead
+    # of quietly moving traffic to another account.
+    GEMINI_PROVIDER: str = os.getenv("GEMINI_PROVIDER", "api")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    # One model for every role. The per-role names stay because callers read
+    # them, but they all resolve to GEMINI_MODEL and ignore their old env vars,
+    # so a stale override on Railway or Modal cannot bring a retired model back.
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+    GEMINI_MODEL_VIDEO: str = GEMINI_MODEL
+    GEMINI_MODEL_VIDEO_FALLBACK: str = ""
+    GEMINI_MODEL_PRO: str = GEMINI_MODEL
+    GEMINI_MODEL_PRO_PREVIEW: str = GEMINI_MODEL
+    GEMINI_MODEL_FLASH: str = GEMINI_MODEL
+    # Embeddings are a separate model family. Output is pinned to 768 dims to
+    # match the vector(768) columns.
+    GEMINI_EMBEDDING_MODEL: str = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
+    GEMINI_EMBEDDING_DIMS: int = 768
     # Claude — AWS Bedrock (single provider)
     AWS_BEDROCK_ACCESS_KEY: str = os.getenv("AWS_BEDROCK_ACCESS_KEY", "")
     AWS_BEDROCK_SECRET_KEY: str = os.getenv("AWS_BEDROCK_SECRET_KEY", "")

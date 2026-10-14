@@ -347,17 +347,18 @@ CPU fallback: if Modal dispatch fails, orchestrator runs S08–S10 locally on Ra
 | Step / Module | Model | Config key |
 |---------------|-------|------------|
 | S02 Transcribe | Deepgram **Nova-3** | hardcoded in `services/deepgram_client.py` |
-| S03 Speaker guest-name heuristic | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
+| S03 Speaker guest-name heuristic | `gemini-3.8-flash` | `settings.GEMINI_MODEL_FLASH` |
 | S05 Unified Discovery (TEXT transcript, NOT video) | **Claude** `us.anthropic.claude-opus-4-6-v1` (AWS Bedrock) | `settings.CLAUDE_MODEL` |
 | S06 Batch Evaluation | **Claude** (same `CLAUDE_MODEL`) | `settings.CLAUDE_MODEL` |
-| S09 Reframe — director | `gemini-2.5-pro` (multimodal video + context) | `settings.GEMINI_MODEL_PRO` |
+| S09 Reframe — director | `gemini-3.8-flash` (multimodal video + context) | `settings.GEMINI_MODEL_PRO` |
 | S10 Captions — transcription | Deepgram **Nova-3** (fresh call per clip) | hardcoded in `captions/core.py` |
-| Director agent (tool calling) | `gemini-2.5-pro` | `settings.GEMINI_MODEL_PRO` |
-| Director chat (simple queries) | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
-| Onboarding DNA + clip summary + failure analysis | `gemini-2.5-flash` | `settings.GEMINI_MODEL_FLASH` |
-| Embeddings (vector(768)) | Gemini `text-embedding-004` | via `services/gemini_client.py` |
+| Director agent (tool calling) | `gemini-3.8-flash` | `settings.GEMINI_MODEL_PRO` |
+| Director chat (simple queries) | `gemini-3.8-flash` | `settings.GEMINI_MODEL_FLASH` |
+| Onboarding DNA + clip summary + failure analysis | `gemini-3.8-flash` | `settings.GEMINI_MODEL_FLASH` |
+| Embeddings (vector(768)) | Gemini `gemini-embedding-001`, 768 dims | `settings.GEMINI_EMBEDDING_MODEL` |
 
-- Defaults in `config.py`: `CLAUDE_MODEL = "us.anthropic.claude-opus-4-6-v1"` (AWS Bedrock, single provider — Azure Foundry removed), `GEMINI_MODEL_PRO = "gemini-2.5-pro"`, `GEMINI_MODEL_FLASH = "gemini-3.5-flash"`, `GEMINI_MODEL_VIDEO = "gemini-3.5-flash"` (kept for future use)
+- Gemini: one model for every role, `GEMINI_MODEL = "gemini-3.8-flash"`, on the **Gemini Developer API** (`GEMINI_API_KEY`). The per-role names (`GEMINI_MODEL_PRO`, `_FLASH`, `_VIDEO`, `_PRO_PREVIEW`) all resolve to it and ignore their old env vars; there is no video fallback model. Vertex AI code stays but runs only with `GEMINI_PROVIDER=vertex` — never as an automatic fallback. Files ≥20 MB go through the Gemini Files API (GCS only on Vertex). On Modal the key comes from the `gemini-api` secret, attached after `gpu-pipeline-secrets` so it wins.
+- Claude: admin jobs run on the Anthropic API, default `ANTHROPIC_MODEL = "claude-opus-5-5"` (UI choice `opus-5-5`); `opus-4-6` pins Bedrock (`us.anthropic.claude-opus-4-6-v1`, also the client-job default); old jobs stored as `opus-5` still run `claude-opus-5`.
 - Override any model via env var without code changes
 - S05 & S06 use `app/services/claude_client.py` → `call_claude()` (Anthropic SDK, requires `ANTHROPIC_API_KEY`)
 - S05 receives `video_path` / `audio_path` parameters but does NOT use them — it's pure text-in-text-out on the labeled transcript

@@ -8,6 +8,7 @@ import modal
 
 MODAL_GPU_APP_NAME = os.getenv("MODAL_GPU_APP_NAME", "gpu-pipeline")
 MODAL_GPU_SECRET_NAME = os.getenv("MODAL_GPU_SECRET_NAME", "gpu-pipeline-secrets")
+GEMINI_SECRET_NAME = os.getenv("MODAL_GEMINI_SECRET_NAME", "gemini-api")
 
 # --- Image ---
 gpu_image = (
@@ -133,7 +134,10 @@ def _configure_pipeline_encode() -> None:
     cpu=4,
     timeout=2400,
     scaledown_window=10,
-    secrets=[modal.Secret.from_name(MODAL_GPU_SECRET_NAME)],
+    # gemini-api is listed last so its GEMINI_API_KEY wins over any older key
+    # still sitting in the shared secret. S09's director is the only Gemini
+    # caller on Modal.
+    secrets=[modal.Secret.from_name(MODAL_GPU_SECRET_NAME), modal.Secret.from_name(GEMINI_SECRET_NAME)],
 )
 def process_clips(
     job_id: str,

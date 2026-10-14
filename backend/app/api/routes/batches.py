@@ -31,7 +31,7 @@ MAX_SOURCES = 10
 # refuses to honour a number it did not store.
 MAX_PARALLEL = 3
 
-_ALLOWED_MODELS = ("opus-5", "opus-4-6", GPT_CHOICE)
+_ALLOWED_MODELS = ("opus-5-5", "opus-4-6", GPT_CHOICE)
 _ALLOWED_VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 
 

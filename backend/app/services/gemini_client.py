@@ -132,9 +132,27 @@ def _normalize_private_key(creds_info: dict) -> dict:
     return creds_info
 
 
+def _use_vertex() -> bool:
+    return (os.environ.get("GEMINI_PROVIDER") or settings.GEMINI_PROVIDER).strip().lower() == "vertex"
+
+
 def get_gemini_client() -> genai.Client:
-    """Lazy initialization of the Gemini client."""
+    """Lazy initialization of the Gemini client.
+
+    Gemini Developer API by default; Vertex AI only when GEMINI_PROVIDER=vertex.
+    Never falls back from one to the other.
+    """
     global _gemini_client
+    if _gemini_client is None and not _use_vertex():
+        try:
+            api_key = os.environ.get("GEMINI_API_KEY", "") or settings.GEMINI_API_KEY
+            if not api_key:
+                raise RuntimeError("GEMINI_API_KEY is not set and GEMINI_PROVIDER is not 'vertex'")
+            _gemini_client = genai.Client(api_key=api_key)
+            print("[GeminiClient] Gemini Developer API initialized")
+        except Exception as e:
+            print(f"[GeminiClient] Error initializing client: {e}")
+            raise
     if _gemini_client is None:
         try:
             # Read directly from os.environ — settings.GCP_CREDENTIALS_JSON is
@@ -311,6 +329,35 @@ def _get_gcs_client():
     return storage.Client(project=settings.GCP_PROJECT, credentials=creds)
 
 
+def _upload_media_file(client: genai.Client, path: str, mime_type: str):
+    """Upload a file to the Gemini Files API and wait until it can be used.
+
+    The Developer API equivalent of the GCS upload the Vertex path uses for
+    files over the inline limit. Files expire on their own after 48 hours; the
+    callers still delete them as soon as the request is done.
+    """
+    uploaded = client.files.upload(file=path, config={"mime_type": mime_type})
+    deadline = time.time() + 300
+    while True:
+        state = getattr(getattr(uploaded, "state", None), "name", str(getattr(uploaded, "state", "")))
+        if state == "ACTIVE" or state == "STATE_UNSPECIFIED" or not state:
+            return uploaded
+        if state == "FAILED":
+            raise RuntimeError(f"Gemini Files API could not process {os.path.basename(path)}")
+        if time.time() > deadline:
+            raise TimeoutError(f"Gemini Files API still processing {os.path.basename(path)} after 300s")
+        time.sleep(3)
+        uploaded = client.files.get(name=uploaded.name)
+
+
+def _delete_media_file(client: genai.Client, uploaded) -> None:
+    try:
+        client.files.delete(name=uploaded.name)
+        print(f"[GeminiClient] Deleted Files API upload {uploaded.name}")
+    except Exception as e:
+        print(f"[GeminiClient] Warning: Failed to delete Files API upload {getattr(uploaded, 'name', '?')}: {e}")
+
+
 def _video_model_candidates(primary_model: str) -> list[str]:
     """Return the ordered model list for video analysis."""
     models = [primary_model]
@@ -331,9 +378,9 @@ def analyze_video(
     """
     Analyzes a video file with Gemini.
     If < 20MB, uses inline bytes (fast, no upload needed).
-    If >= 20MB, uploads to GCS and uses gs:// URI, then generates.
-    Never uses a non-Vertex fallback.
-    Deletes uploaded GCS file in finally block.
+    If >= 20MB, uploads to the Gemini Files API (or GCS when GEMINI_PROVIDER=vertex)
+    and references the upload, then generates. No fallback between providers.
+    Deletes the upload in the finally block.
     Uses _retry_logic for rate limit handling.
     json_mode=True sets response_mime_type="application/json" for cleaner output.
     response_schema constrains structured outputs when the selected Gemini model supports it.
@@ -342,6 +389,7 @@ def analyze_video(
         model = settings.GEMINI_MODEL_PRO
     models = _video_model_candidates(model)
     gcs_uri = None
+    uploaded_file = None
     t0 = time.time()
 
     config_kwargs = {}
@@ -423,22 +471,32 @@ def analyze_video(
             return "{}"
 
         else:
-            # Primary: GCS upload (requires credentials)
+            # Over the inline limit: Files API on the Developer API, GCS on Vertex.
             try:
-                print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
-                import uuid
+                if _use_vertex():
+                    print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to GCS.")
+                    import uuid
 
-                storage_client = _get_gcs_client()
-                bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+                    storage_client = _get_gcs_client()
+                    bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
 
-                blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
-                blob = bucket.blob(blob_name)
-                blob.upload_from_filename(video_path)
+                    blob_name = f"video_{uuid.uuid4().hex}_{os.path.basename(video_path)}"
+                    blob = bucket.blob(blob_name)
+                    blob.upload_from_filename(video_path)
 
-                gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
-                print(f"[GeminiClient] Uploaded video to {gcs_uri}")
+                    gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
+                    print(f"[GeminiClient] Uploaded video to {gcs_uri}")
 
-                video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
+                    video_part = types.Part.from_uri(file_uri=gcs_uri, mime_type="video/mp4")
+                    upload_mode = "gcs"
+                else:
+                    print(f"[GeminiClient] Video size {file_size_mb:.1f}MB >= 20MB. Uploading to Gemini Files API.")
+                    uploaded_file = _upload_media_file(client, video_path, "video/mp4")
+                    video_part = types.Part.from_uri(
+                        file_uri=uploaded_file.uri,
+                        mime_type=uploaded_file.mime_type or "video/mp4",
+                    )
+                    upload_mode = "files_api"
 
                 last_error: Exception | None = None
                 for idx, current_model in enumerate(models):
@@ -473,7 +531,7 @@ def analyze_video(
                             output_tokens=out_tok,
                             metadata={
                                 "file_size_mb": round(file_size_mb, 1),
-                                "mode": "gcs",
+                                "mode": upload_mode,
                                 "duration_ms": int((time.time() - t0) * 1000),
                                 "model_attempt": idx + 1,
                                 "fallback_used": idx > 0,
@@ -494,14 +552,16 @@ def analyze_video(
                     raise last_error
 
                 return "{}"
-            except Exception as gcs_err:
-                print(f"[GeminiClient] GCS video path failed; non-Vertex fallback is disabled: {gcs_err}")
+            except Exception as upload_err:
+                print(f"[GeminiClient] Large-video path failed ({'gcs' if _use_vertex() else 'files_api'}); no fallback: {upload_err}")
                 raise
 
     except Exception as e:
         print(f"[GeminiClient] Error in analyze_video: {e}")
         return "{}"
     finally:
+        if uploaded_file is not None:
+            _delete_media_file(get_gemini_client(), uploaded_file)
         if gcs_uri:
             try:
                 storage_client = _get_gcs_client()
@@ -523,6 +583,7 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
     if model is None:
         model = settings.GEMINI_MODEL_FLASH
     gcs_uri = None
+    uploaded_file = None
     try:
         if not os.path.exists(audio_path):
             raise FileNotFoundError(f"Audio file not found: {audio_path}")
@@ -561,19 +622,6 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
             return str(result)
             
         else:
-            print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Uploading to GCS.")
-            import uuid
-
-            storage_client = _get_gcs_client()
-            bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
-            
-            blob_name = f"audio_{uuid.uuid4().hex}_{os.path.basename(audio_path)}"
-            blob = bucket.blob(blob_name)
-            blob.upload_from_filename(audio_path)
-            
-            gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
-            print(f"[GeminiClient] Uploaded audio to {gcs_uri}")
-            
             mime_type = "audio/mp3"
             ext = os.path.splitext(audio_path)[1].lower()
             if ext == ".m4a":
@@ -585,7 +633,27 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
             elif ext == ".mp4":
                 mime_type = "audio/mp4"
 
-            audio_part = types.Part.from_uri(file_uri=gcs_uri, mime_type=mime_type)
+            if _use_vertex():
+                print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Uploading to GCS.")
+                import uuid
+
+                storage_client = _get_gcs_client()
+                bucket = storage_client.bucket(settings.GCS_BUCKET_NAME)
+
+                blob_name = f"audio_{uuid.uuid4().hex}_{os.path.basename(audio_path)}"
+                blob = bucket.blob(blob_name)
+                blob.upload_from_filename(audio_path)
+
+                gcs_uri = f"gs://{settings.GCS_BUCKET_NAME}/{blob_name}"
+                print(f"[GeminiClient] Uploaded audio to {gcs_uri}")
+                audio_part = types.Part.from_uri(file_uri=gcs_uri, mime_type=mime_type)
+            else:
+                print(f"[GeminiClient] Audio size {file_size_mb:.2f}MB >= 20MB. Uploading to Gemini Files API.")
+                uploaded_file = _upload_media_file(client, audio_path, mime_type)
+                audio_part = types.Part.from_uri(
+                    file_uri=uploaded_file.uri,
+                    mime_type=uploaded_file.mime_type or mime_type,
+                )
             
             def do_generate_uploaded() -> str:
                 response = client.models.generate_content(
@@ -602,6 +670,8 @@ def analyze_audio(audio_path: str, prompt: str, model: Optional[str] = None) -> 
         print(f"[GeminiClient] Error in analyze_audio: {e}")
         raise RuntimeError(f"analyze_audio failed: {e}")
     finally:
+        if uploaded_file is not None:
+            _delete_media_file(get_gemini_client(), uploaded_file)
         if gcs_uri:
             try:
                 storage_client = _get_gcs_client()
@@ -623,8 +693,9 @@ def embed_content(text: str) -> list[float]:
         
         def do_embed() -> list[float]:
             result = client.models.embed_content(
-                model="text-embedding-004",
-                contents=text
+                model=settings.GEMINI_EMBEDDING_MODEL,
+                contents=text,
+                config=types.EmbedContentConfig(output_dimensionality=settings.GEMINI_EMBEDDING_DIMS),
             )
             return result.embeddings[0].values
             

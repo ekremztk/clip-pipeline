@@ -861,7 +861,7 @@ async def create_job(
         # client just gets the default behaviour.
         from app.middleware.roles import is_admin_user
         from app.services.claude_client import GPT_CHOICE
-        _ALLOWED_MODELS = ("opus-5", "opus-4-6", GPT_CHOICE)
+        _ALLOWED_MODELS = ("opus-5-5", "opus-4-6", GPT_CHOICE)
         if not is_admin_user(current_user["id"]):
             s05_model = s06_model = None
         s05_model = s05_model if s05_model in _ALLOWED_MODELS else None

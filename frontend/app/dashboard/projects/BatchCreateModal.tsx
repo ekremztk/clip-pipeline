@@ -91,8 +91,8 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                 targetGuest: "",
                 durationPreset: "<60s",
                 captionTemplate: CAPTION_TEMPLATES[0].key,
-                s05Model: "opus-5",
-                s06Model: "opus-5",
+                s05Model: "opus-5-5",
+                s06Model: "opus-5-5",
                 // Local object URL, so the operator can see which source they are
                 // configuring. Ten filenames off the same show look identical.
                 previewUrl: URL.createObjectURL(file),
@@ -369,7 +369,7 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                 <label className={labelCls} style={labelStyle}>S05 model</label>
                                                 <select className={inputCls} style={inputStyle} value={current.s05Model}
                                                     onChange={e => patch(step, { s05Model: e.target.value })}>
-                                                    <option value="opus-5">Opus 5</option>
+                                                    <option value="opus-5-5">Opus 5.5</option>
                                                     <option value="opus-4-6">Opus 4.6</option>
                                                     <option value="gpt-6-astra">GPT-6 Astra</option>
                                                 </select>
@@ -378,7 +378,7 @@ export default function BatchCreateModal({ channelId, isAdmin, onClose, onCreate
                                                 <label className={labelCls} style={labelStyle}>S06 model</label>
                                                 <select className={inputCls} style={inputStyle} value={current.s06Model}
                                                     onChange={e => patch(step, { s06Model: e.target.value })}>
-                                                    <option value="opus-5">Opus 5</option>
+                                                    <option value="opus-5-5">Opus 5.5</option>
                                                     <option value="opus-4-6">Opus 4.6</option>
                                                     <option value="gpt-6-astra">GPT-6 Astra</option>
                                                 </select>

@@ -459,10 +459,10 @@ export default function DashboardPage() {
     const [aspectRatio, setAspectRatio] = useState('9:16');
     const [genre, setGenre] = useState('');
     const [autoHook, setAutoHook] = useState(true);
-    // Admin-only. Opus 5 goes to the Anthropic API, Opus 4.6 to Bedrock —
+    // Admin-only. Opus 5.5 goes to the Anthropic API, Opus 4.6 to Bedrock —
     // per step, so one job can run discovery and evaluation on different models.
-    const [s05Model, setS05Model] = useState('opus-5');
-    const [s06Model, setS06Model] = useState('opus-5');
+    const [s05Model, setS05Model] = useState('opus-5-5');
+    const [s06Model, setS06Model] = useState('opus-5-5');
     const [startTime, setStartTime] = useState(0);
     const [endTime, setEndTime] = useState(0);
 
@@ -1556,7 +1556,7 @@ export default function DashboardPage() {
                                     </div>
 
                                     {/* Per-step model — admin only. Clients have no
-                                        Opus 5 access, so the row never renders for them. */}
+                                        Opus 5.5 access, so the row never renders for them. */}
                                     {isAdmin && (
                                         <div className="grid grid-cols-2 gap-3">
                                             {([
@@ -1580,7 +1580,7 @@ export default function DashboardPage() {
                                                             border: '1px solid rgba(250,249,245,0.08)',
                                                         }}
                                                     >
-                                                        <option value="opus-5" style={{ background: '#181817' }}>Opus 5</option>
+                                                        <option value="opus-5-5" style={{ background: '#181817' }}>Opus 5.5</option>
                                                         <option value="opus-4-6" style={{ background: '#181817' }}>Opus 4.6</option>
                                                         <option value="gpt-6-astra" style={{ background: '#181817' }}>GPT-6 Astra</option>
                                                     </select>

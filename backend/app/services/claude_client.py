@@ -6,7 +6,11 @@ import anthropic
 from app.config import settings
 
 BEDROCK_MODEL = "us.anthropic.claude-opus-4-6-v1"
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-5")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-5-5")
+# Choices stored on older jobs that named a specific first-party model. A job
+# that asked for Opus 5 keeps running on Opus 5 if it is ever re-run, so the
+# label on the row stays true; every other Anthropic choice uses ANTHROPIC_MODEL.
+_PINNED_ANTHROPIC_MODELS = {"opus-5": "claude-opus-5"}
 
 # The value the UI and jobs route use to pin a step to OpenAI. Kept in the
 # dashed style of the Claude choices ("opus-4-6") so the allowlists read alike.
@@ -240,10 +244,10 @@ def call_claude(
     any caller that does not explicitly opt in — including every client job —
     runs on Bedrock.
 
-    model_choice is the per-step admin override: "opus-5" pins this call to the
+    model_choice is the per-step admin override: "opus-5-5" pins this call to the
     Anthropic API, "opus-4-6" pins it to Bedrock, GPT_CHOICE pins it to OpenAI,
     None keeps the old behaviour. It narrows what allow_premium permits and never
-    widens it — a client job carrying "opus-5" still lands on Bedrock, because
+    widens it — a client job carrying "opus-5-5" still lands on Bedrock, because
     allow_premium is False, and the same gate keeps client jobs off the OpenAI
     key, which is billed to the platform owner just as the Anthropic one is.
     """
@@ -277,19 +281,21 @@ def call_claude(
     last_error = ""
 
     # --- Anthropic API (used only when ANTHROPIC_API_KEY is set) ---
-    # Opus 5 rejects budget_tokens and thinks by default, so max_tokens must
-    # cover thinking + text together — hence the doubled ceiling.
+    # Opus 5.5 always thinks and rejects budget_tokens, so max_tokens must
+    # cover thinking + text together — hence the doubled ceiling. Effort is set
+    # explicitly because Opus 5.5 defaults to medium, one step below Opus 5.
     use_anthropic = allow_premium and model_choice != "opus-4-6"
+    anthropic_model = _PINNED_ANTHROPIC_MODELS.get(model_choice or "", ANTHROPIC_MODEL)
     anthropic_client = _make_anthropic_client() if use_anthropic else None
     if anthropic_client:
         for attempt in range(3):
             try:
                 print(
-                    f"[ClaudeClient] Calling model={ANTHROPIC_MODEL} "
+                    f"[ClaudeClient] Calling model={anthropic_model} "
                     f"provider=anthropic attempt={attempt + 1}/3"
                 )
                 response = anthropic_client.messages.create(
-                    model=ANTHROPIC_MODEL,
+                    model=anthropic_model,
                     max_tokens=max(max_tokens * 2, 32000),
                     system=system_blocks,
                     thinking={"type": "adaptive"},
@@ -299,7 +305,7 @@ def call_claude(
                 )
 
                 usage = response.usage
-                _record_usage(ANTHROPIC_MODEL, "anthropic", usage)
+                _record_usage(anthropic_model, "anthropic", usage)
                 print(
                     f"[ClaudeClient] Tokens — in: {usage.input_tokens}, "
                     f"out: {usage.output_tokens}, "
@@ -307,7 +313,7 @@ def call_claude(
                 )
 
                 if response.stop_reason == "refusal":
-                    last_error = f"refusal model={ANTHROPIC_MODEL}"
+                    last_error = f"refusal model={anthropic_model}"
                     print("[ClaudeClient] Refusal; falling through to Bedrock")
                     break
 
@@ -319,7 +325,7 @@ def call_claude(
                 return ""
 
             except anthropic.RateLimitError:
-                last_error = f"rate_limit model={ANTHROPIC_MODEL} provider=anthropic"
+                last_error = f"rate_limit model={anthropic_model} provider=anthropic"
                 if attempt < 2:
                     delay = 60 if attempt == 0 else 120
                     print(f"[ClaudeClient] Rate limit; sleeping {delay}s")
@@ -327,7 +333,7 @@ def call_claude(
                     continue
                 break
             except Exception as e:
-                last_error = f"error model={ANTHROPIC_MODEL} provider=anthropic: {e}"
+                last_error = f"error model={anthropic_model} provider=anthropic: {e}"
                 print(f"[ClaudeClient] Anthropic error attempt={attempt + 1}/3: {e}")
                 break
 
